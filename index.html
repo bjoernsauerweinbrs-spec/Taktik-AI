@@ -3,33 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tactical Intelligence Pro - Björn Edition</title>
+    <title>Tactical Intelligence Board - Björn Edition</title>
     <style>
-        * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
-        body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: #050505; color: #fff; overflow: hidden; }
+        * { box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: #000; overflow: hidden; }
         
-        #nav { background: #111; padding: 12px; display: flex; justify-content: center; gap: 10px; border-bottom: 3px solid #2e7d32; flex-wrap: wrap; }
-        .btn { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 2px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 11px; }
-        .btn:hover { border-color: #00ff88; color: #00ff88; }
+        #nav { background: #1a1a1a; padding: 10px; display: flex; justify-content: center; gap: 10px; border-bottom: 2px solid #2e7d32; }
+        .btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
+        .btn:hover { background: #00ff88; color: #000; }
 
-        #pitch-area { flex: 2; position: relative; padding: 10px; display: flex; justify-content: center; background: #000; }
+        #pitch-wrapper { flex: 2; position: relative; background: #000; display: flex; justify-content: center; align-items: center; padding: 10px; }
         #pitch { 
-            width: 100%; height: 100%; background: #285123; border: 3px solid #fff; position: relative;
-            background-image: repeating-linear-gradient(0deg, #2d5a27, #2d5a27 10%, #285123 10%, #285123 20%);
+            width: 100%; height: 100%; max-width: 1000px; background: #2e7d32; border: 3px solid #fff; position: relative;
+            background-image: repeating-linear-gradient(0deg, #2e7d32, #2e7d32 10%, #29722d 10%, #29722d 20%);
         }
         
         .line { position: absolute; background: rgba(255,255,255,0.5); pointer-events: none; }
-        .center-circle { width: 100px; height: 100px; border: 2px solid #fff; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.4; }
+        .center-circle { width: 90px; height: 90px; border: 2px solid #fff; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.5; }
         .goal { position: absolute; border: 2px solid white; background: rgba(255,255,255,0.1); z-index: 5; }
-        .goal-std { width: 90px; height: 30px; left: 50%; transform: translateX(-50%); }
-        .goal-fun { width: 50px; height: 20px; }
+        .goal-std { width: 80px; height: 20px; left: 50%; transform: translateX(-50%); }
 
         .player { 
-            width: 32px; height: 32px; border-radius: 50%; position: absolute; 
+            width: 30px; height: 30px; border-radius: 50%; position: absolute; 
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 12px; cursor: grab; z-index: 50;
+            font-weight: bold; font-size: 11px; cursor: grab; z-index: 50;
             border: 2px solid #fff; transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
         }
         .red { background: #b71c1c; color: white; }
         .blue { background: #0d47a1; color: white; }
-        .ball { width: 20px; height: 20px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 0.8s ease-in-out; box-shadow: 0 0 1
+        .ball { width: 18px; height: 18px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 0.8s ease; box-shadow: 0 0 10px white; }
+
+        #chat { flex: 1; background: #fff; display: flex; flex-direction: column; border-top: 4px solid #111; }
+        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; color: #000; }
+        .msg { margin-bottom: 8px; padding: 8px; border-radius: 4px; border-left: 4px solid transparent; }
+        .ai { background: #f0f0f0; border-left-color: #2e7d32; font-style: italic; }
+        .user { background: #e3f2fd; border-right: 4px solid #1565c0; text-align: right; border-left: none; }
+
+        #input-row { padding: 10px; background: #eee; display: flex; gap: 10px; border-top: 1px solid #ccc; }
+        input { flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; outline: none; }
+        button.icon { background: none; border: none; font-size: 24px; cursor: pointer; }
+    </style>
+</head>
+<body onclick="forceVoiceInit()">
+
+<div id="nav">
+    <button class="btn" onclick="setMode('funino')">Funino (3v3)</button>
+    <button class="btn" onclick="setMode('11v11')">Pro Match (11v11)</button>
+    <button class="btn" style="color:#ff9800" onclick="runDrill()">DFB Übung</button>
+</div>
+
+<div id="pitch-wrapper">
+    <div id="pitch">
+        <div class="line" style="width: 100%; height: 2px; top: 50%;"></div>
+        <div class="center-circle"></div>
+        <div id="ball" class="player ball" style="top: 48%; left: 49%;"></div>
+        <div id="players-layer"></div>
+    </div>
+</div>
+
+<div id="chat">
+    <div id="log"></div>
+    <div id="input-row">
+        <input type="text" id="user-in" placeholder="Befehl (z.B. 'Ball rechts')...">
+        <button class="icon" onclick="startMic()">🎤</button>
+        <button class="icon" onclick="execute()">➤</button>
+    </div>
+</div>
+
+<script>
+    const layer = document.getElementById('players-layer');
+    const log = document.getElementById('log');
+    const input = document.getElementById('user-in');
+    const ball = document.getElementById('ball');
+
+    let coachVoice = null;
+    function forceVoiceInit() {
+        if (coachVoice) return;
+        const voices = window.speechSynthesis.getVoices();
+        coachVoice = voices.find(v => v.lang.startsWith('de') && (v.name.includes('Stefan') || v.name.includes('Markus') || v.name.includes('Yannick'))) || voices.find(v => v.lang.startsWith('de'));
+    }
+    window.speechSynthesis.onvoiceschanged = forceVoiceInit;
+
+    function speak(txt) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(txt);
+            if (coachVoice) msg.voice = coachVoice;
+            msg.pitch = 0.85; msg.rate = 0.95;
+            window.speechSynthesis.speak(msg);
+        }
+    }
+
+    function addLog(who, txt, isAi) {
+        const d = document.createElement('div');
+        d.className = 'msg ' + (isAi ? 'ai' : 'user');
+        d.innerHTML = `<b>${who}:</b> ${txt}`;
+        log.appendChild(d); log.scrollTop = log.scrollHeight;
+        if(isAi) speak(txt);
+    }
+
+    function createP(t, l, c, n) {
+        const p = document.createElement('div');
+        p.className = `player ${c}`;
+        p.style.top = t + "%"; p.style.left = l + "%";
+        p.setAttribute('data-base-l', l);
+        p.innerText = n;
+        layer.appendChild(p);
+    }
+
+    function shift(ballX) {
+        document.querySelectorAll('.red').forEach(p => {
+            let baseL = parseFloat(p.getAttribute('data-base-l'));
+            p.style.left = (baseL + (ballX - 50) * 0.35) + "%";
+        });
+    }
+
+    function setMode(mode) {
+        layer.innerHTML = "";
+        document.querySelectorAll('.goal').forEach(g => g.remove());
+        if(mode === 'funino') {
+            for(let i=0; i<3; i++) { createP(75, 25+i*25, 'red', i+1); createP(20, 25+i*25, 'blue', i+1); }
+            addLog("Co-Trainer", "Funino-Modus. Fokus auf Spielintelligenz.", true);
+        } else {
+            const h = [{t:90,l:47},{t:78,l:15},{t:80,l:35},{t:80,l:60},{t:78,l:80},{t:60,l:15},{t:62,l:35},{t:62,l:60},{t:60,l:80},{t:40,l:42},{t:40,l:53}];
+            const a = [{t:10,l:47},{t:22,l:20},{t:18,l:47},{t:22,l:75},{t:38,l:10},{t:42,l:35},{t:42,l:60},{t:38,l:85},{t:55,l:25},{t:58,l:47},{t:55,l:70}];
+            h.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
+            a.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
+            addLog("Co-Trainer", "Elf gegen Elf. 22 Akteure auf dem Platz. Analyse der Kettenverschiebung aktiv.", true);
+        }
+        initDrag();
+    }
+
+    function runDrill() {
+        layer.innerHTML = "";
+        createP(70, 30, 'red', 'A'); createP(70, 70, 'red', 'B'); createP(35, 50, 'red', 'C');
+        addLog("Co-Trainer", "DFB-Passübung G-Jugend. Der Ball wandert im Dreieck.", true);
+        setTimeout(() => { ball.style.left = "30%"; ball.style.top="70%"; shift(30); }, 500);
+        setTimeout(() => { ball.style.left = "70%"; ball.style.top="70%"; shift(70); }, 2500);
+        setTimeout(() => { ball.style.left = "50%"; ball.style.top="35%"; shift(50); }, 4500);
+    }
+
+    function execute() {
+        const val = input.value.toLowerCase();
+        if(!val) return;
+        addLog("Björn", input.value, false);
+        let r = "Das erfordert eine tiefergehende taktische Analyse. Als Ihr Assistent schlage ich vor, die Kompaktheit zu wahren.";
+        if(val.includes("ball") && val.includes("rechts")) {
+            ball.style.left = "85%"; ball.style.top = "50%"; shift(85);
+            r = "Ballverlagerung auf den rechten Flügel. Die Defensive rückt nun ballorientiert ein.";
+        }
+        setTimeout(() => addLog("Co-Trainer", r, true), 800);
+        input.value = "";
+    }
+
+    function initDrag() {
+        document.querySelectorAll('.player').forEach(p => {
+            let d = false;
+            p.onmousedown = p.ontouchstart = (e) => { d = true; p.style.transition = "none"; e.preventDefault(); };
+            window.onmousemove = window.ontouchmove = (e) => {
+                if(!d) return;
+                const r = document.getElementById('pitch').getBoundingClientRect();
+                const x = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) - r.left;
+                const
