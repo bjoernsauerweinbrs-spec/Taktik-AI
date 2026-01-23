@@ -1,364 +1,293 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tactical Intelligence Pro - Björn</title>
-    <style>
-        :root { 
-            --pitch-green-dark: #154d2b;
-            --pitch-green-light: #1f6b38;
-            --line-color: #ffffff;
-        }
-        * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; }
-        body { height: 100vh; display: flex; flex-direction: column; background: #000; overflow: hidden; color: #fff; }
-        
-        #api-bar { background: #111; padding: 6px; text-align: center; font-size: 11px; border-bottom: 1px solid #333; }
-        #nav { background: #1a1a1a; padding: 12px; display: flex; justify-content: center; gap: 10px; border-bottom: 3px solid #2e7d32; }
-        .btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
-        .btn:hover { background: #00ff88; color: #000; }
+// ===============================
+// Toni – KI-Co-Trainer Grundlogik
+// ===============================
 
-        #pitch-container { flex: 2; position: relative; display: flex; justify-content: center; align-items: center; padding: 10px; background: #000; }
-        #pitch { 
-            width: 100%; 
-            height: 100%; 
-            max-width: 1100px; 
-            border: 3px solid #fff; 
-            position: relative;
-            background: #000;
-            overflow: hidden;
-        }
+// Zustand der Session
+let toniHasIntroduced = false;
 
-        .field-svg {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-        }
+// Tonis Begrüßung beim Start der KI
+function toniIntro() {
+  if (toniHasIntroduced) return;
+  toniHasIntroduced = true;
+  return "Hey, ich bin Toni – der KI-Co-Trainer von Björn. Ich zeige dir, wie wir trainieren, basierend auf den Erfahrungen, die Björn unter anderem in Ghana, Brasilien und natürlich in Deutschland gesammelt hat. Wenn du bereit bist, stell mir einfach deine erste Frage.";
+}
 
-        .player { 
-            width: 32px; height: 32px; border-radius: 50%; position: absolute; 
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 12px; cursor: grab; z-index: 50;
-            border: 2px solid #fff; transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        .red { background: linear-gradient(135deg, #b71c1c, #7f0000); }
-        .blue { background: linear-gradient(135deg, #0d47a1, #002171); }
-        .ball { width: 20px; height: 20px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 1s ease-in-out; box-shadow: 0 0 15px #fff; }
+// Pool an Antworten auf: „Wer ist Björn?“
+const bjornAnswers = [
+  "Björn ist der Trainer, mit dem ich zusammenarbeite. Er hat Ende der Neunziger und Anfang der Zweitausender in der Regionalliga bei Borussia Fulda gespielt, später beim SC Neukirchen, Roland Rodenkirchen, dem VfL Eiterfeld, TSV Hilders und dem ESV Ronshausen. Er hat sogar seine eigene Fußballschule für Kinder und Jugendliche aufgebaut. 2006 wurde er von Edwin Burkamp von Borussia Dortmund zertifiziert – unterschrieben von Dr. Rainer Rauball und Michael Zorc. Sportlich geprägt wurde er unter anderem von Reinhold Wosab, Lutz Pfannenstiel, Udo Bös und Moppes Petz. Und er hat in prominenten Auswahlmannschaften gespielt, zum Beispiel für die Aktion Herzenssache des Innenministeriums Rheinland-Pfalz. Auf dieser Basis erkläre ich dir unser Training.",
+  "Björn ist ein ehemaliger Regionalligaspieler von Borussia Fulda, später aktiv bei mehreren Vereinen in Hessen. Er hatte eine eigene Fußballschule, wurde 2006 von Borussia Dortmund zertifiziert und hat in prominenten Auswahlteams gespielt. Seine Erfahrung aus Deutschland, Ghana und Brasilien bildet die Grundlage für unser Training.",
+  "Björn verfügt über eine breite sportliche Laufbahn: Regionalliga bei Borussia Fulda, Stationen beim SC Neukirchen, Roland Rodenkirchen, VfL Eiterfeld, TSV Hilders und ESV Ronshausen. Er leitete eine eigene Fußballschule und wurde 2006 von Edwin Burkamp (Borussia Dortmund) zertifiziert, mit Unterschriften von Dr. Rainer Rauball und Michael Zorc. Zusätzlich spielte er in prominenten Auswahlmannschaften wie der Herzenssache-Auswahl des Innenministeriums Rheinland-Pfalz. Seine Entwicklung wurde unter anderem von Reinhold Wosab, Lutz Pfannenstiel, Udo Bös und Moppes Petz begleitet.",
+  "Björn ist jemand, der den Fußball wirklich gelebt hat: Regionalliga bei Borussia Fulda, viele Stationen im hessischen Fußball, eine eigene Fußballschule und eine Zertifizierung von Borussia Dortmund im Jahr 2006. Er durfte mit prominenten Spielern und Trainern arbeiten und in Auswahlteams für soziale Projekte spielen. Seine Erfahrungen aus Deutschland, Ghana und Brasilien machen ihn zu einem Trainer, der nicht nur Technik vermittelt, sondern auch Herz, Kultur und Leidenschaft.",
+  "Björn? Das ist mein Chef. Regionalliga-Erfahrung, zig Vereine durchlaufen, eigene Fußballschule gehabt, 2006 von Borussia Dortmund zertifiziert – sogar mit Unterschrift von Rauball und Zorc. Er hat in prominenten Auswahlteams gespielt und von Leuten wie Reinhold Wosab, Lutz Pfannenstiel, Udo Bös oder Moppes Petz richtig was mitgenommen. Auf seinen Erfahrungen baue ich meine ganzen Erklärungen auf.",
+  "Björn ist der Typ, der Regionalliga gespielt hat, eine eigene Fußballschule hatte, von Dortmund zertifiziert wurde und in Auswahlteams gekickt hat. Ich bin nur die KI – er ist der, der’s wirklich erlebt hat.",
+  "Björn ist ein Trainer mit echter Profi-Erfahrung: Regionalliga, mehrere Vereine, eigene Fußballschule, BVB-Zertifizierung 2006, prominente Auswahlmannschaften und Einflüsse von ehemaligen Bundesliga- und Nationalspielern wie Reinhold Wosab, Lutz Pfannenstiel, Udo Bös und Moppes Petz. Sein Wissen ist die Grundlage meiner taktischen und technischen Erklärungen."
+];
 
-        #chat { height: 35%; background: #fff; color: #000; display: flex; flex-direction: column; }
-        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 15px; background: #f9f9f9; }
-        .msg { margin-bottom: 10px; padding: 10px; border-radius: 6px; line-height: 1.4; border-left: 5px solid transparent; }
-        .ai { background: #f0f0f0; border-left-color: #2e7d32; font-style: italic; }
-        .user { background: #e3f2fd; border-right: 5px solid #1565c0; text-align: right; border-left: none; }
+function toniWerIstBjoern() {
+  const idx = Math.floor(Math.random() * bjornAnswers.length);
+  return bjornAnswers[idx];
+}
 
-        #input-row { padding: 12px; background: #eee; display: flex; gap: 10px; border-top: 1px solid #ccc; }
-        input { flex: 1; padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; outline: none; }
-        button.send-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: #333; }
-    </style>
-</head>
-<body onclick="startAudio()">
+// ===============================
+// Taktik-Board – Grundstruktur
+// ===============================
 
-<div id="api-bar">
-    <span id="api-status">Modus: Taktik-Simulation</span> | 
-    <a href="#" style="color: #00ff88; text-decoration: none;" onclick="setKey()">[ KI-Key hinterlegen ]</a>
-</div>
+// Canvas-Setup (im HTML brauchst du ein <canvas id="tacticBoard"></canvas>)
+const canvas = document.getElementById("tacticBoard");
+const ctx = canvas ? canvas.getContext("2d") : null;
 
-<div id="nav">
-    <button class="btn" onclick="setMode('funino')">Funino (3v3)</button>
-    <button class="btn" onclick="setMode('11v11')">Match (11v11)</button>
-    <button class="btn" onclick="resetBall()">Anstoß / Reset</button>
-</div>
+// Spielfeld-Einstellungen
+const field = {
+  width: 800,
+  height: 500,
+  ourPerspective: true // true = wir schauen aus Sicht unseres Teams
+};
 
-<div id="pitch-container">
-    <div id="pitch">
-        <!-- SVG-Fußballfeld im TacticalPad-Stil -->
-        <svg class="field-svg" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet">
-            <!-- Hintergrund mit Streifen -->
-            <defs>
-                <linearGradient id="stripeGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#1f6b38"/>
-                    <stop offset="100%" stop-color="#154d2b"/>
-                </linearGradient>
-            </defs>
-            <rect x="0" y="0" width="120" height="80" fill="url(#stripeGrad)"/>
-            <!-- Längsstreifen -->
-            <g opacity="0.25">
-                <rect x="0" y="0" width="10" height="80" fill="#000"/>
-                <rect x="20" y="0" width="10" height="80" fill="#000"/>
-                <rect x="40" y="0" width="10" height="80" fill="#000"/>
-                <rect x="60" y="0" width="10" height="80" fill="#000"/>
-                <rect x="80" y="0" width="10" height="80" fill="#000"/>
-                <rect x="100" y="0" width="10" height="80" fill="#000"/>
-            </g>
+// Spieler-Objekte: Team A (4-4-2) und Team B (4-3-3)
+// Positionen sind Normalwerte (0–1) relativ zum Feld, später skaliert
 
-            <!-- Außenlinien -->
-            <rect x="2" y="2" width="116" height="76" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+const teamA = { // unser Team – 4-4-2
+  formation: "4-4-2",
+  color: "#00a000",
+  players: [
+    // Torwart
+    { x: 0.1, y: 0.5, role: "TW" },
+    // Viererkette
+    { x: 0.25, y: 0.2, role: "LV" },
+    { x: 0.25, y: 0.4, role: "LIV" },
+    { x: 0.25, y: 0.6, role: "RIV" },
+    { x: 0.25, y: 0.8, role: "RV" },
+    // Mittelfeldkette
+    { x: 0.45, y: 0.2, role: "LM" },
+    { x: 0.45, y: 0.4, role: "ZM" },
+    { x: 0.45, y: 0.6, role: "ZM" },
+    { x: 0.45, y: 0.8, role: "RM" },
+    // Zwei Stürmer
+    { x: 0.7, y: 0.4, role: "ST" },
+    { x: 0.7, y: 0.6, role: "ST" }
+  ]
+};
 
-            <!-- Mittellinie -->
-            <line x1="60" y1="2" x2="60" y2="78" stroke="#ffffff" stroke-width="0.8"/>
+const teamB = { // Gegner – 4-3-3
+  formation: "4-3-3",
+  color: "#d00000",
+  players: [
+    // Torwart
+    { x: 0.9, y: 0.5, role: "TW" },
+    // Viererkette
+    { x: 0.75, y: 0.2, role: "LV" },
+    { x: 0.75, y: 0.4, role: "LIV" },
+    { x: 0.75, y: 0.6, role: "RIV" },
+    { x: 0.75, y: 0.8, role: "RV" },
+    // Dreiermittelfeld
+    { x: 0.6, y: 0.3, role: "ZM" },
+    { x: 0.6, y: 0.5, role: "ZM" },
+    { x: 0.6, y: 0.7, role: "ZM" },
+    // Dreierangriff
+    { x: 0.45, y: 0.25, role: "LA" },
+    { x: 0.45, y: 0.5, role: "MS" },
+    { x: 0.45, y: 0.75, role: "RA" }
+  ]
+};
 
-            <!-- Mittelkreis -->
-            <circle cx="60" cy="40" r="9" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+// Ballposition (links, rechts, zentral) aus Sicht unseres Teams
+let ballSide = "left"; // "left" | "right" | "center"
+let phase = "defense"; // "defense" | "offense"
 
-            <!-- Anstoßpunkt -->
-            <circle cx="60" cy="40" r="0.7" fill="#ffffff"/>
+// ===============================
+// Zeichnen des Spielfelds & Spieler
+// ===============================
 
-            <!-- Strafräume -->
-            <!-- Oben -->
-            <rect x="32" y="2" width="56" height="16" fill="none" stroke="#ffffff" stroke-width="0.8"/>
-            <!-- Unten -->
-            <rect x="32" y="62" width="56" height="16" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+function drawField() {
+  if (!ctx) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            <!-- 5-Meter-Räume -->
-            <!-- Oben -->
-            <rect x="44" y="2" width="32" height="6" fill="none" stroke="#ffffff" stroke-width="0.8"/>
-            <!-- Unten -->
-            <rect x="44" y="72" width="32" height="6" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+  // Spielfeld
+  ctx.fillStyle = "#0b5f1a";
+  ctx.fillRect(0, 0, field.width, field.height);
 
-            <!-- Elfmeterpunkte -->
-            <!-- Oben -->
-            <circle cx="60" cy="14" r="0.7" fill="#ffffff"/>
-            <!-- Unten -->
-            <circle cx="60" cy="66" r="0.7" fill="#ffffff"/>
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2;
 
-            <!-- Tore -->
-            <!-- Oben -->
-            <rect x="50" y="0" width="20" height="2" fill="none" stroke="#ffffff" stroke-width="0.8"/>
-            <!-- Unten -->
-            <rect x="50" y="78" width="20" height="2" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+  // Außenlinien
+  ctx.strokeRect(10, 10, field.width - 20, field.height - 20);
 
-            <!-- Halbkreise Strafraum -->
-            <path d="M51 18 A9 9 0 0 0 69 18" fill="none" stroke="#ffffff" stroke-width="0.6" opacity="0.7"/>
-            <path d="M51 62 A9 9 0 0 1 69 62" fill="none" stroke="#ffffff" stroke-width="0.6" opacity="0.7"/>
+  // Mittellinie
+  ctx.beginPath();
+  ctx.moveTo(field.width / 2, 10);
+  ctx.lineTo(field.width / 2, field.height - 10);
+  ctx.stroke();
 
-            <!-- Funino-Mini-Feld (40% Höhe, mittig) -->
-            <g id="funino-group" opacity="0">
-                <!-- Funino-Feld: 40% von 80 = 32, zentriert: y=24, Höhe=32, Breite 80 (x=20..100) -->
-                <rect x="20" y="24" width="80" height="32" fill="none" stroke="#ffffff" stroke-width="0.8" stroke-dasharray="2,2"/>
+  // Mittelkreis
+  ctx.beginPath();
+  ctx.arc(field.width / 2, field.height / 2, 60, 0, Math.PI * 2);
+  ctx.stroke();
+}
 
-                <!-- Funino-Tore (15% der Breite = 12) -->
-                <!-- Oben links -->
-                <rect x="22" y="24" width="12" height="2.5" rx="1" ry="1" fill="none" stroke="#ffffff" stroke-width="0.8"/>
-                <!-- Oben rechts -->
-                <rect x="86" y="24" width="12" height="2.5" rx="1" ry="1" fill="none" stroke="#ffffff" stroke-width="0.8"/>
-                <!-- Unten links -->
-                <rect x="22" y="53.5" width="12" height="2.5" rx="1" ry="1" fill="none" stroke="#ffffff" stroke-width="0.8"/>
-                <!-- Unten rechts -->
-                <rect x="86" y="53.5" width="12" height="2.5" rx="1" ry="1" fill="none" stroke="#ffffff" stroke-width="0.8"/>
-            </g>
-        </svg>
+function drawPlayer(player, color) {
+  if (!ctx) return;
+  const x = 10 + player.x * (field.width - 20);
+  const y = 10 + player.y * (field.height - 20);
 
-        <!-- Ball -->
-        <div id="ball" class="player ball" style="top: 48%; left: 49%;"></div>
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, 10, 0, Math.PI * 2);
+  ctx.fill();
 
-        <!-- Ebene für Spieler -->
-        <div id="player-layer"></div>
-    </div>
-</div>
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "10px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(player.role, x, y - 15);
+}
 
-<div id="chat">
-    <div id="log"></div>
-    <div id="input-row">
-        <input type="text" id="user-input" placeholder="Frage oder Befehl (z.B. 'Simuliere Angriff')...">
-        <button class="send-btn" onclick="process()">➤</button>
-    </div>
-</div>
+function drawTeams() {
+  teamA.players.forEach(p => drawPlayer(p, teamA.color));
+  teamB.players.forEach(p => drawPlayer(p, teamB.color));
+}
 
-<script>
-    const layer = document.getElementById('player-layer');
-    const log = document.getElementById('log');
-    const input = document.getElementById('user-input');
-    const ball = document.getElementById('ball');
-    const funinoGroup = document.getElementById('funino-group');
+// ===============================
+// Verschieben der Viererkette – Defensiv
+// ===============================
 
-    let voice = null;
-    let apiKey = localStorage.getItem('tactical_key') || "";
+function shiftBackFour(team, side) {
+  // Wir gehen davon aus: Viererkette sind die Spieler 1–4 im Array
+  const backFour = team.players.slice(1, 5);
 
-    function setKey() {
-        const k = prompt("Gemini API Key einfügen:");
-        if(k) { localStorage.setItem('tactical_key', k); location.reload(); }
-    }
-    if(apiKey) document.getElementById('api-status').innerText = "KI-Power aktiv";
+  backFour.forEach((p, index) => {
+    // Grundverschiebung seitlich
+    let shift = 0;
+    if (side === "left") shift = -0.05;
+    if (side === "right") shift = 0.05;
 
-    function startAudio() {
-        if(voice) return;
-        const vs = window.speechSynthesis.getVoices();
-        voice = vs.find(v => v.lang.startsWith('de') && (v.name.includes('Stefan') || v.name.includes('Markus'))) || vs[0];
+    // ballnahe Seite etwas stärker, ballferne etwas weniger
+    if (side === "left") {
+      // LV und LIV stärker nach links
+      if (index === 0 || index === 1) p.y += shift * 1.2;
+      else p.y += shift * 0.6;
+    } else if (side === "right") {
+      // RV und RIV stärker nach rechts
+      if (index === 2 || index === 3) p.y += shift * 1.2;
+      else p.y += shift * 0.6;
     }
 
-    function addLog(who, t, isAi) {
-        const d = document.createElement('div');
-        d.className = 'msg ' + (isAi ? 'ai' : 'user');
-        d.innerHTML = `<b>${who}:</b> ${t}`;
-        log.appendChild(d); log.scrollTop = log.scrollHeight;
-        
-        if(isAi && window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-            const m = new SpeechSynthesisUtterance(t.replace(/\[.*?\]/g, ''));
-            if(voice) m.voice = voice;
-            m.pitch = 0.8; m.rate = 0.95;
-            window.speechSynthesis.speak(m);
-        }
+    // Begrenzung, damit sie nicht aus dem Feld rutschen
+    if (p.y < 0.1) p.y = 0.1;
+    if (p.y > 0.9) p.y = 0.9;
+  });
+}
+
+// ===============================
+// Offensivbewegungen – einfache Logik
+// ===============================
+
+function moveOffense(team, side) {
+  // Stürmer und Flügelspieler rücken in Richtung Ballseite und Tor
+  team.players.forEach(p => {
+    if (p.role === "ST" || p.role === "LA" || p.role === "RA" || p.role === "MS") {
+      // Richtung gegnerisches Tor
+      p.x += 0.03;
+
+      // Richtung Ballseite
+      if (side === "left") p.y -= 0.02;
+      if (side === "right") p.y += 0.02;
+
+      // Begrenzung
+      if (p.x > 0.9) p.x = 0.9;
+      if (p.y < 0.1) p.y = 0.1;
+      if (p.y > 0.9) p.y = 0.9;
     }
+  });
+}
 
-    function createP(t, l, c, n) {
-        const p = document.createElement('div');
-        p.className = `player ${c}`;
-        p.style.top = t + "%"; p.style.left = l + "%";
-        p.setAttribute('data-base-l', l);
-        p.innerText = n;
-        layer.appendChild(p);
+// ===============================
+// Board drehen (Perspektive wechseln)
+// ===============================
+
+function togglePerspective() {
+  field.ourPerspective = !field.ourPerspective;
+
+  function flipTeam(team) {
+    team.players.forEach(p => {
+      p.x = 1 - p.x;
+      p.y = 1 - p.y;
+    });
+  }
+
+  flipTeam(teamA);
+  flipTeam(teamB);
+}
+
+// ===============================
+// Haupt-Update-Funktion für das Board
+// ===============================
+
+function updateTacticBoard() {
+  if (!ctx) return;
+
+  drawField();
+  drawTeams();
+}
+
+// ===============================
+// Toni beantwortet taktische Fragen
+// ===============================
+
+function toniAnswer(question) {
+  const q = question.toLowerCase();
+
+  // Intro, falls noch nicht erfolgt
+  if (!toniHasIntroduced) {
+    return toniIntro();
+  }
+
+  // Wer ist Björn?
+  if (q.includes("wer ist björn") || q.includes("wer ist bjoern")) {
+    return toniWerIstBjoern();
+  }
+
+  // Defensiv: Viererkette verschieben
+  if (q.includes("viererkette") && q.includes("defensiv")) {
+    if (q.includes("linken seite") || q.includes("links")) {
+      ballSide = "left";
+      phase = "defense";
+      shiftBackFour(teamA, "left");
+      updateTacticBoard();
+      return "Wir sind im Defensivmodus. Der Gegner greift über unsere linke Seite an. Unsere Viererkette schiebt geschlossen nach links. Der ballnahe Außenverteidiger rückt raus, der Innenverteidiger sichert diagonal ab. Die beiden ballfernen Spieler rücken ein, um das Zentrum zu schließen. Auf dem Board siehst du, wie wir die Räume verkürzen und diagonale Passwege verhindern.";
     }
-
-    function shift(ballX) {
-        document.querySelectorAll('.red').forEach(p => {
-            let bL = parseFloat(p.getAttribute('data-base-l'));
-            p.style.left = (bL + (ballX - 49) * 0.35) + "%";
-        });
+    if (q.includes("rechten seite") || q.includes("rechts")) {
+      ballSide = "right";
+      phase = "defense";
+      shiftBackFour(teamA, "right");
+      updateTacticBoard();
+      return "Wir sind im Defensivmodus. Der Gegner greift über unsere rechte Seite an. Unsere Viererkette schiebt geschlossen nach rechts. Der ballnahe Außenverteidiger rückt raus, der Innenverteidiger sichert diagonal ab. Die ballfernen Spieler rücken ein, um das Zentrum dicht zu machen. Auf dem Board siehst du die Verschiebebewegung unserer Kette.";
     }
+  }
 
-    function setMode(m) {
-        layer.innerHTML = "";
-        if(m === 'funino') {
-            if(funinoGroup) funinoGroup.style.opacity = 1;
+  // Offensiv: Laufwege Stürmer
+  if (q.includes("offensive") || q.includes("angriff") || q.includes("stürmer") || q.includes("stuermer")) {
+    phase = "offense";
+    moveOffense(teamA, ballSide);
+    updateTacticBoard();
+    return "Wir sind jetzt in der Offensive. Unsere Stürmer und Flügelspieler rücken in Richtung gegnerisches Tor und orientieren sich zur Ballseite. Du siehst auf dem Board, wie sie in die Tiefe starten, Räume öffnen und Anspielstationen schaffen. So entstehen Überzahlsituationen und wir können den Gegner in seiner Hälfte festnageln.";
+  }
 
-            createP(65, 40, 'red', 1);
-            createP(62, 55, 'red', 2);
-            createP(60, 70, 'red', 3);
+  // Perspektive wechseln
+  if (q.includes("perspektive wechseln") || q.includes("bord drehen") || q.includes("board drehen")) {
+    togglePerspective();
+    updateTacticBoard();
+    return "Ich habe die Perspektive gedreht. Du siehst das Spielfeld jetzt aus der anderen Sicht. So kannst du sowohl unser Team als auch den Gegner aus unterschiedlichen Blickwinkeln analysieren.";
+  }
 
-            createP(35, 40, 'blue', 1);
-            createP(38, 55, 'blue', 2);
-            createP(40, 70, 'blue', 3);
+  // Standardantwort, falls nichts passt
+  return "Ich habe deine Frage verstanden, aber sie passt noch nicht zu einer meiner vordefinierten taktischen Situationen. Du kannst mich zum Beispiel fragen: 'Wie verschiebt sich die Viererkette, wenn der Gegner links angreift?' oder 'Wie sollen sich unsere Stürmer in der Offensive bewegen?'.";
+}
 
-            ball.style.top = "50%";
-            ball.style.left = "50%";
+// ===============================
+// Initialer Aufruf beim Laden der Seite
+// ===============================
 
-            addLog("Co-Trainer", "Funino-Modus (3v3, 4 Tore) aktiv. Lass uns Spielformen für die Kleinsten trainieren.", true);
-        } else {
-            if(funinoGroup) funinoGroup.style.opacity = 0;
-
-            const h = [
-                {t:90,l:47},{t:78,l:15},{t:80,l:35},{t:80,l:60},{t:78,l:80},
-                {t:62,l:15},{t:65,l:35},{t:65,l:60},{t:62,l:80},{t:42,l:40},{t:42,l:55}
-            ];
-            const a = [
-                {t:10,l:47},{t:25,l:20},{t:25,l:75},{t:45,l:15},{t:45,l:40},
-                {t:45,l:60},{t:45,l:85},{t:60,l:30},{t:60,l:50},{t:60,l:70}
-            ];
-            h.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
-            a.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
-
-            ball.style.top = "48%";
-            ball.style.left = "49%";
-
-            addLog("Co-Trainer", "11-gegen-11 Match-Modus aktiv. Was trainieren wir heute?", true);
-        }
-        initDrag();
-    }
-
-    function resetBall() { 
-        ball.style.left = "49%"; 
-        ball.style.top = "48%"; 
-        shift(49); 
-    }
-
-    async function process() {
-        const val = input.value; if(!val) return;
-        addLog("Trainer Björn", val, false);
-        input.value = "";
-        
-        let resp = "";
-        if(apiKey) {
-            try {
-                const r = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            contents: [
-                                {
-                                    parts: [
-                                        {
-                                            text: `Du bist ein Fußball-Co-Trainer für Björn. Antworte fachlich fundiert (Halbräume, Gegenpressing, Funino-Prinzipien). Du hast volle Kontrolle über das Board. Wenn du den Ball bewegen willst, schreibe am Ende [BALL:X:Y] (Werte 0-100). Wenn du alle roten Spieler nach vorne schieben willst, schreibe [MOVE:RED:UP]. Frage: ${val}`
-                                        }
-                                    ]
-                                }
-                            ]
-                        })
-                    }
-                );
-
-                const d = await r.json();
-                console.log("DEBUG KI-RAW:", d);
-
-                if (d.candidates && d.candidates.length > 0) {
-                    resp = d.candidates[0].content.parts[0].text;
-                } else if (d.promptFeedback) {
-                    resp = "Die KI hat die Anfrage blockiert: " + (d.promptFeedback.blockReason || "Unbekannter Grund");
-                } else if (d.error) {
-                    resp = "API-Fehler: " + d.error.message;
-                } else {
-                    resp = "Die KI hat keine verwertbare Antwort geliefert.";
-                }
-            } catch(e) { 
-                console.error("KI-Request-Fehler:", e);
-                resp = "Fehler: KI-Zentrale nicht erreichbar.";
-            }
-        } else {
-            resp = "Lokal-Modus: Bitte Key eingeben für KI-Visualisierung.";
-            if(val.toLowerCase().includes("rechts")) { 
-                ball.style.left = "85%"; 
-                shift(85); 
-                resp = "Ball auf den rechten Flügel verlagert."; 
-            }
-        }
-
-        const ballCmd = resp.match(/\[BALL:(\d+):(\d+)\]/);
-        if(ballCmd) { 
-            ball.style.left = ballCmd[1]+"%"; 
-            ball.style.top = ballCmd[2]+"%"; 
-            shift(ballCmd[1]); 
-        }
-        if(resp.includes("[MOVE:RED:UP]")) { 
-            document.querySelectorAll('.red').forEach(p => { 
-                let t = parseFloat(p.style.top); 
-                p.style.top = (t - 20) + "%"; 
-            }); 
-        }
-
-        addLog("Co-Trainer", resp, true);
-    }
-
-    function initDrag() {
-        document.querySelectorAll('.player').forEach(p => {
-            let d = false;
-            p.onmousedown = p.ontouchstart = (e) => { 
-                d = true; 
-                p.style.transition = "none"; 
-                e.preventDefault(); 
-            };
-            window.onmousemove = window.ontouchmove = (e) => {
-                if(!d) return;
-                const r = document.getElementById('pitch').getBoundingClientRect();
-                const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-                const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-                const x = clientX - r.left;
-                const y = clientY - r.top;
-                p.style.left = (x/r.width*100)-3 + "%"; 
-                p.style.top = (y/r.height*100)-3 + "%";
-            };
-            window.onmouseup = window.ontouchend = () => { 
-                d = false; 
-                p.style.transition = "all 1.5s ease"; 
-            };
-        });
-    }
-
-    input.onkeypress = (e) => { if(e.key === 'Enter') process(); };
-    window.onload = () => { setMode('11v11'); };
-</script>
-</body>
-</html>
+if (canvas) {
+  canvas.width = field.width;
+  canvas.height = field.height;
+  updateTacticBoard();
+}
