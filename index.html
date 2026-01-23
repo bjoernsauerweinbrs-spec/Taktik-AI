@@ -3,59 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tactical Intelligence Board - Björn Edition</title>
+    <title>Taktikboard Pro - Coach Björn</title>
     <style>
         :root { --pitch: #2d5a27; --stripe: #254d21; --line: rgba(255,255,255,0.7); }
         * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; }
         body { height: 100vh; display: flex; flex-direction: column; background: #000; overflow: hidden; color: #fff; }
-        #api-bar { background: #111; padding: 6px; text-align: center; font-size: 11px; border-bottom: 1px solid #333; cursor: pointer; }
-        #nav { background: #1a1a1a; padding: 10px; display: flex; justify-content: center; gap: 8px; border-bottom: 3px solid #2e7d32; }
-        .btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
-        #pitch-wrapper { flex: 2; position: relative; display: flex; justify-content: center; align-items: center; padding: 10px; background: #000; }
-        #pitch { width: 100%; height: 100%; max-width: 1100px; background: var(--pitch); border: 3px solid #fff; position: relative; background-image: repeating-linear-gradient(0deg, var(--pitch), var(--pitch) 10%, var(--stripe) 10%, var(--stripe) 20%); }
-        .mid-line { position: absolute; width: 100%; height: 2px; background: var(--line); top: 50%; left: 0; pointer-events: none; }
-        .center-circle { width: 100px; height: 100px; border: 2px solid var(--line); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
-        .goal { position: absolute; border: 2px solid white; background: rgba(255,255,255,0.2); z-index: 5; }
-        .goal-std { width: 90px; height: 25px; left: 50%; transform: translateX(-50%); }
-        .player { width: 32px; height: 32px; border-radius: 50%; position: absolute; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px; cursor: grab; z-index: 50; border: 2px solid #fff; transition: all 1s ease-in-out; }
-        .red { background: #b71c1c; color: white; }
-        .blue { background: #0d47a1; color: white; }
-        .ball { width: 18px; height: 18px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 0.7s ease; }
-        #chat { height: 35%; background: #fff; color: #000; display: flex; flex-direction: column; }
-        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; background: #f9f9f9; }
-        .msg { margin-bottom: 8px; padding: 10px; border-radius: 6px; border-left: 5px solid transparent; }
-        .ai { background: #f0f0f0; border-left-color: #2e7d32; }
-        #input-row { padding: 10px; background: #eee; display: flex; gap: 10px; }
-        input { flex: 1; padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; outline: none; }
-        .send-btn { background: #2e7d32; color: white; border: none; padding: 0 20px; border-radius: 4px; cursor: pointer; }
+        
+        #header { background: #111; padding: 10px; text-align: center; border-bottom: 1px solid #333; }
+        #api-link { color: #00ff88; cursor: pointer; text-decoration: underline; font-size: 12px; }
+        
+        #nav { background: #1a1a1a; padding: 10px; display: flex; justify-content: center; gap: 10px; }
+        .btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+
+        #pitch-area { flex: 1; position: relative; background: #000; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        #pitch { 
+            width: 95%; height: 95%; max-width: 1000px; background: var(--pitch); border: 3px solid #fff; position: relative;
+            background-image: repeating-linear-gradient(0deg, var(--pitch), var(--pitch) 10%, var(--stripe) 10%, var(--stripe) 20%);
+        }
+        .line-mid { position: absolute; width: 100%; height: 2px; background: var(--line); top: 50%; left: 0; }
+        .circle { width: 100px; height: 100px; border: 2px solid var(--line); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        
+        .goal { position: absolute; width: 80px; height: 20px; border: 2px solid #fff; background: rgba(255,255,255,0.1); left: 50%; transform: translateX(-50%); }
+        .goal-top { top: 0; }
+        .goal-bot { bottom: 0; }
+
+        .player { 
+            width: 30px; height: 30px; border-radius: 50%; position: absolute; 
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 12px; cursor: grab; z-index: 10;
+            border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.5); touch-action: none;
+        }
+        .red { background: #b71c1c; }
+        .blue { background: #0d47a1; }
+        .ball { width: 18px; height: 18px; background: #fff; border: 2px solid #000; border-radius: 50%; z-index: 20; transition: all 0.6s ease; }
+
+        #chat-area { height: 300px; background: #fff; color: #000; display: flex; flex-direction: column; }
+        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; background: #f4f4f4; }
+        .msg { margin-bottom: 10px; padding: 8px; border-radius: 4px; }
+        .msg-ai { background: #e8f5e9; border-left: 4px solid #2e7d32; }
+        .msg-user { background: #e3f2fd; border-right: 4px solid #1565c0; text-align: right; }
+
+        #input-box { padding: 10px; display: flex; gap: 10px; background: #ddd; }
+        #user-in { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        #send-btn { background: #2e7d32; color: #fff; border: none; padding: 0 20px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
-<body onclick="initAudio()">
-<div id="api-bar" onclick="askKey()">
-    <span id="api-status" style="color: #ff5252;">KI Inaktiv</span> | <span style="color: #00ff88;">[ Key hier eingeben ]</span>
+<body onclick="enableAudio()">
+
+<div id="header">
+    <span id="status" style="color:red">KI-Status: Inaktiv</span> | 
+    <span id="api-link" onclick="saveKey()">[ API-Key hier einfügen ]</span>
 </div>
-<div id="nav"><button class="btn" onclick="setMode('11v11')">11v11 Match</button><button class="btn" onclick="resetBall()">Ball Mitte</button></div>
-<div id="pitch-wrapper"><div id="pitch"><div class="mid-line"></div><div class="center-circle"></div><div id="ball" class="player ball" style="top: 48.5%; left: 49.2%;"></div><div id="p-layer"></div></div></div>
-<div id="chat"><div id="log"></div><div id="input-row"><input type="text" id="user-in" placeholder="Schreib deinem Co-Trainer..."><button class="send-btn" onclick="talk()">➤</button></div></div>
+
+<div id="nav">
+    <button class="btn" onclick="spawnPlayers()">11 gegen 11</button>
+    <button class="btn" onclick="resetBall()">Ball Mitte</button>
+</div>
+
+<div id="pitch-area">
+    <div id="pitch">
+        <div class="line-mid"></div>
+        <div class="circle"></div>
+        <div class="goal goal-top"></div>
+        <div class="goal goal-bot"></div>
+        <div id="ball" class="player ball" style="top:48%; left:49%;"></div>
+        <div id="players"></div>
+    </div>
+</div>
+
+<div id="chat-area">
+    <div id="log"></div>
+    <div id="input-box">
+        <input type="text" id="user-in" placeholder="Schreibe dem Co-Trainer...">
+        <button id="send-btn" onclick="sendMsg()">Senden</button>
+    </div>
+</div>
 
 <script>
-    const layer = document.getElementById('p-layer'), log = document.getElementById('log'), input = document.getElementById('user-in'), ball = document.getElementById('ball');
-    let voice = null, myKey = localStorage.getItem('bjorn_key')?.trim() || "";
+    const log = document.getElementById('log');
+    const input = document.getElementById('user-in');
+    const ball = document.getElementById('ball');
+    const playerLayer = document.getElementById('players');
+    let myKey = localStorage.getItem('bjorn_tactics_key') || "";
 
-    function askKey() {
-        const k = prompt("Bitte den Google API-Key einfügen:");
-        if(k) { localStorage.setItem('bjorn_key', k.trim()); location.reload(); }
-    }
-    if(myKey) { document.getElementById('api-status').innerText = "KI-Power: Bereit"; document.getElementById('api-status').style.color = "#00ff88"; }
-
-    function initAudio() { if(!voice) voice = window.speechSynthesis.getVoices().find(v => v.lang.startsWith('de')) || null; }
-    function addLog(who, t, isAi) {
-        const d = document.createElement('div'); d.className = 'msg ' + (isAi ? 'ai' : 'user');
-        d.innerHTML = `<b>${who}:</b> ${t}`; log.appendChild(d); log.scrollTop = log.scrollHeight;
-        if(isAi && window.speechSynthesis) { window.speechSynthesis.cancel(); const m = new SpeechSynthesisUtterance(t.replace(/\[.*?\]/g, '')); if(voice) m.voice = voice; window.speechSynthesis.speak(m); }
+    if(myKey) {
+        document.getElementById('status').innerText = "KI-Status: Bereit";
+        document.getElementById('status').style.color = "#00ff88";
     }
 
-    function createP(t, l, c, n) { const p = document.createElement('div'); p.className = `player ${c}`; p.style.top = t + "%"; p.style.left = l + "%"; p.innerText = n; layer.appendChild(p); }
-    function setMode(m) {
-        layer.innerHTML = ""; document.querySelectorAll('.goal').forEach(g => g.remove());
-        const g1 = document.createElement
+    function saveKey() {
+        const k = prompt("Bitte Google API-Key einfügen:");
+        if(k) { localStorage.setItem('bjorn_tactics_key', k.trim()); location.reload(); }
+    }
+
+    function enableAudio() { /* Aktiviert Sound für Mac */ }
+
+    function addMsg(who, text, isAi) {
+        const div = document.createElement('div');
+        div.className = 'msg ' + (isAi ? 'msg-ai' : 'msg-user');
+        div.innerHTML = `<strong>${who}:</strong> ${text}`;
+        log.appendChild(div);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function spawnPlayers() {
+        playerLayer.innerHTML = "";
+        // Rote (11 Spieler)
+        const reds = [{t:85,l:48},{t:75,l:15},{t:75,l:35},{t:75,l:60},{t:75,l:80},{t:55,l:20},{t:55,l:40},{t:55,l:60},{t:55,l:75},{t:35,l:40},{t:35,l:55}];
+        // Blaue (11 Spieler)
+        const blues = [{t:10,l:48},{t:20,l:20},{t:20,l:47},{t:20,l:75},{t:40,l:15},{t:40,l:40},{t:40,l:60},{t:40,l:80},{t:60,l:35},{t:60,l:60},{t:60,l:10}];
+        
+        reds.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
+        blues.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
+        initDrag();
+    }
+
+    function createP(t, l, c, n) {
+        const p = document.createElement('div');
+        p.className = 'player ' + c;
+        p.style.top = t + "%"; p.style.left = l + "%";
+        p.innerText = n;
+        playerLayer.appendChild(p);
+    }
+
+    function resetBall() { ball.style.top = "48%"; ball.style.left = "49%"; }
+
+    async function sendMsg() {
+        const txt = input.value;
+        if(!txt) return;
+        addMsg("Björn", txt, false);
+        input.value = "";
+
+        if(!myKey) {
+            addMsg("Co-Trainer", "Bitte füge oben deinen API-Key ein!", true);
+            return;
+        }
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${myKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: `Du bist ein Fußball-Co-Trainer. Antworte kurz. Wenn du den Ball bewegen willst, schreibe [BALL:X:Y]. Frage: ${txt}` }] }] })
+            });
+            const data = await response.json();
+            if(data.error) {
+                addMsg("Co-Trainer", "Fehler: " + data.error.message, true);
+            } else {
+                let aiTxt = data.candidates[0].content.parts[0].text;
+                const bM = aiTxt.match(/\[BALL:(\d+):(\d+)\]/);
+                if(bM) { ball.style.left = bM[1] + "%"; ball.style.top = bM[2] + "%"; }
+                addMsg("Co-Trainer", aiTxt, true);
+            }
+        } catch(e) {
+            addMsg("Co-Trainer", "Verbindung zur KI-Zentrale fehlgeschlagen.", true);
+        }
+    }
+
+    function initDrag() {
+        document.querySelectorAll('.player').forEach(p => {
+            let dragging = false;
+            p.onmousedown = p.ontouchstart = (e) => { dragging = true; p.style.transition = "none"; };
+            window.onmousemove = window.ontouchmove = (e) => {
+                if(!dragging) return;
+                const rect = document.getElementById('pitch').getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                p.style.left = (x/rect.width*100)-2 + "%"; p.style.top = (y/rect.height*100)-2 + "%";
+            };
+            window.onmouseup = window.ontouchend = () => dragging = false;
+        });
+    }
+
+    input.addEventListener("keypress", (e) => { if(e.key === 'Enter') sendMsg(); });
+    window.onload = spawnPlayers;
+</script>
+
+</body>
+</html>
