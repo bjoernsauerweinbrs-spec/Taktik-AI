@@ -1,163 +1,351 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <title>Taktikboard Fußball</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #222;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tactical Intelligence Pro - Björn</title>
+    <style>
+        :root { 
+            --pitch-green-dark: #154d2b;
+            --pitch-green-light: #1f6b38;
+            --line-color: #ffffff;
+        }
+        * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; }
+        body { height: 100vh; display: flex; flex-direction: column; background: #000; overflow: hidden; color: #fff; }
+        
+        #api-bar { background: #111; padding: 6px; text-align: center; font-size: 11px; border-bottom: 1px solid #333; }
+        #nav { background: #1a1a1a; padding: 12px; display: flex; justify-content: center; gap: 10px; border-bottom: 3px solid #2e7d32; }
+        .btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
+        .btn:hover { background: #00ff88; color: #000; }
 
-    h1 {
-      margin: 10px 0;
-    }
+        #pitch-container { flex: 2; position: relative; display: flex; justify-content: center; align-items: center; padding: 10px; background: #000; }
+        #pitch { 
+            width: 100%; 
+            height: 100%; 
+            max-width: 1100px; 
+            border: 3px solid #fff; 
+            position: relative;
+            background: #000;
+            overflow: hidden;
+        }
 
-    #controls {
-      margin-bottom: 10px;
-    }
+        .field-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
 
-    #field {
-      position: relative;
-      width: 900px;
-      height: 600px;
-      background: #2e7d32; /* Grün */
-      border: 4px solid #fff;
-      box-sizing: border-box;
-    }
+        .player { 
+            width: 32px; height: 32px; border-radius: 50%; position: absolute; 
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 12px; cursor: grab; z-index: 50;
+            border: 2px solid #fff; transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .red { background: linear-gradient(135deg, #b71c1c, #7f0000); }
+        .blue { background: linear-gradient(135deg, #0d47a1, #002171); }
+        .ball { width: 20px; height: 20px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 1s ease-in-out; box-shadow: 0 0 15px #fff; }
 
-    /* Linien auf dem Spielfeld */
-    .line {
-      position: absolute;
-      background: #fff;
-      opacity: 0.9;
-    }
+        #chat { height: 35%; background: #fff; color: #000; display: flex; flex-direction: column; }
+        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 15px; background: #f9f9f9; }
+        .msg { margin-bottom: 10px; padding: 10px; border-radius: 6px; line-height: 1.4; border-left: 5px solid transparent; }
+        .ai { background: #f0f0f0; border-left-color: #2e7d32; font-style: italic; }
+        .user { background: #e3f2fd; border-right: 5px solid #1565c0; text-align: right; border-left: none; }
 
-    /* Mittellinie */
-    #midline {
-      width: 4px;
-      height: 100%;
-      left: 50%;
-      top: 0;
-      transform: translateX(-50%);
-    }
-
-    /* Mittelkreis */
-    #center-circle {
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 3px solid #fff;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      box-sizing: border-box;
-    }
-
-    /* Strafräume (grob) */
-    .box {
-      width: 150px;
-      height: 300px;
-      top: 50%;
-      transform: translateY(-50%);
-      border: 3px solid #fff;
-      box-sizing: border-box;
-    }
-
-    #box-left {
-      left: 0;
-    }
-
-    #box-right {
-      right: 0;
-    }
-
-    /* Spieler */
-    .player {
-      position: absolute;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: grab;
-      user-select: none;
-    }
-
-    .teamA {
-      background: #1976d2; /* Blau */
-    }
-
-    .teamB {
-      background: #d32f2f; /* Rot */
-    }
-
-    #info {
-      margin-top: 10px;
-      font-size: 14px;
-      max-width: 900px;
-      text-align: center;
-    }
-  </style>
+        #input-row { padding: 12px; background: #eee; display: flex; gap: 10px; border-top: 1px solid #ccc; }
+        input { flex: 1; padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; outline: none; }
+        button.send-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: #333; }
+    </style>
 </head>
-<body>
-  <h1>Taktikboard – 11 gegen 11 (Basis)</h1>
+<body onclick="startAudio()">
 
-  <div id="controls">
-    <button id="resetBtn">Spieler zurücksetzen</button>
-  </div>
+<div id="api-bar">
+    <span id="api-status">Modus: Taktik-Simulation</span> | 
+    <a href="#" style="color: #00ff88; text-decoration: none;" onclick="setKey()">[ KI-Key hinterlegen ]</a>
+</div>
 
-  <div id="field">
-    <!-- Linien -->
-    <div id="midline" class="line"></div>
-    <div id="center-circle"></div>
-    <div id="box-left" class="box"></div>
-    <div id="box-right" class="box"></div>
-  </div>
+<div id="nav">
+    <button class="btn" onclick="setMode('funino')">Funino (3v3)</button>
+    <button class="btn" onclick="setMode('11v11')">Match (11v11)</button>
+    <button class="btn" onclick="resetBall()">Anstoß / Reset</button>
+</div>
 
-  <div id="info">
-    Ziehe die Spieler mit der Maus über das Feld.  
-    Dies ist nur die erste Version – später können wir Spielsysteme, Funinho und KI‑Vorschläge ergänzen.
-  </div>
+<div id="pitch-container">
+    <div id="pitch">
+        <!-- SVG-Fußballfeld im TacticalPad-Stil -->
+        <svg class="field-svg" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet">
+            <!-- Hintergrund mit Streifen -->
+            <defs>
+                <linearGradient id="stripeGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#1f6b38"/>
+                    <stop offset="100%" stop-color="#154d2b"/>
+                </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="120" height="80" fill="url(#stripeGrad)"/>
+            <!-- Längsstreifen -->
+            <g opacity="0.25">
+                <rect x="0" y="0" width="10" height="80" fill="#000"/>
+                <rect x="20" y="0" width="10" height="80" fill="#000"/>
+                <rect x="40" y="0" width="10" height="80" fill="#000"/>
+                <rect x="60" y="0" width="10" height="80" fill="#000"/>
+                <rect x="80" y="0" width="10" height="80" fill="#000"/>
+                <rect x="100" y="0" width="10" height="80" fill="#000"/>
+            </g>
 
-  <script>
-    // Grundaufstellung 11 vs 11 (sehr simpel, nur als Start)
-    const field = document.getElementById('field');
-    const resetBtn = document.getElementById('resetBtn');
+            <!-- Außenlinien -->
+            <rect x="2" y="2" width="116" height="76" fill="none" stroke="#ffffff" stroke-width="0.8"/>
 
-    // Startpositionen (x, y in Prozent vom Feld)
-    const initialPositions = {
-      teamA: [
-        { number: 1, x: 10, y: 50 },  // Torwart
-        { number: 2, x: 25, y: 20 },
-        { number: 3, x: 25, y: 40 },
-        { number: 4, x: 25, y: 60 },
-        { number: 5, x: 25, y: 80 },
-        { number: 6, x: 40, y: 30 },
-        { number: 7, x: 40, y: 50 },
-        { number: 8, x: 40, y: 70 },
-        { number: 9, x: 55, y: 35 },
-        { number: 10, x: 55, y: 55 },
-        { number: 11, x: 65, y: 45 }
-      ],
-      teamB: [
-        { number: 1, x: 90, y: 50 },  // Torwart
-        { number: 2, x: 75, y: 20 },
-        { number: 3, x: 75, y: 40 },
-        { number: 4, x: 75, y: 60 },
-        { number: 5, x: 75, y: 80 },
-        { number: 6, x: 60, y: 30 },
-        { number: 7, x: 60, y: 50 },
-        { number: 8, x: 60, y: 70 },
-        { number: 9, x: 45, y: 35 },
-        { number: 10, x: 45, y: 55 },
+            <!-- Mittellinie -->
+            <line x1="60" y1="2" x2="60" y2="78" stroke="#ffffff" stroke-width="0.8"/>
+
+            <!-- Mittelkreis -->
+            <circle cx="60" cy="40" r="9" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+
+            <!-- Anstoßpunkt -->
+            <circle cx="60" cy="40" r="0.7" fill="#ffffff"/>
+
+            <!-- Strafräume -->
+            <!-- Oben -->
+            <rect x="32" y="2" width="56" height="16" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+            <!-- Unten -->
+            <rect x="32" y="62" width="56" height="16" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+
+            <!-- 5-Meter-Räume -->
+            <!-- Oben -->
+            <rect x="44" y="2" width="32" height="6" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+            <!-- Unten -->
+            <rect x="44" y="72" width="32" height="6" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+
+            <!-- Elfmeterpunkte -->
+            <!-- Oben -->
+            <circle cx="60" cy="14" r="0.7" fill="#ffffff"/>
+            <!-- Unten -->
+            <circle cx="60" cy="66" r="0.7" fill="#ffffff"/>
+
+            <!-- Tore -->
+            <!-- Oben -->
+            <rect x="50" y="0" width="20" height="2" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+            <!-- Unten -->
+            <rect x="50" y="78" width="20" height="2" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+
+            <!-- Halbkreise Strafraum -->
+            <path d="M51 18 A9 9 0 0 0 69 18" fill="none" stroke="#ffffff" stroke-width="0.6" opacity="0.7"/>
+            <path d="M51 62 A9 9 0 0 1 69 62" fill="none" stroke="#ffffff" stroke-width="0.6" opacity="0.7"/>
+
+            <!-- Funino-Mini-Feld (40% Höhe, mittig) -->
+            <g id="funino-group" opacity="0">
+                <!-- Funino-Feld: 40% von 80 = 32, zentriert: y=24, Höhe=32, Breite 80 (x=20..100) -->
+                <rect x="20" y="24" width="80" height="32" fill="none" stroke="#ffffff" stroke-width="0.8" stroke-dasharray="2,2"/>
+
+                <!-- Funino-Tore (15% der Breite = 12) -->
+                <!-- Oben links -->
+                <rect x="22" y="24" width="12" height="2.5" rx="1" ry="1" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+                <!-- Oben rechts -->
+                <rect x="86" y="24" width="12" height="2.5" rx="1" ry="1" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+                <!-- Unten links -->
+                <rect x="22" y="53.5" width="12" height="2.5" rx="1" ry="1" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+                <!-- Unten rechts -->
+                <rect x="86" y="53.5" width="12" height="2.5" rx="1" ry="1" fill="none" stroke="#ffffff" stroke-width="0.8"/>
+            </g>
+        </svg>
+
+        <!-- Ball -->
+        <div id="ball" class="player ball" style="top: 48%; left: 49%;"></div>
+
+        <!-- Ebene für Spieler -->
+        <div id="player-layer"></div>
+    </div>
+</div>
+
+<div id="chat">
+    <div id="log"></div>
+    <div id="input-row">
+        <input type="text" id="user-input" placeholder="Frage oder Befehl (z.B. 'Simuliere Angriff')...">
+        <button class="send-btn" onclick="process()">➤</button>
+    </div>
+</div>
+
+<script>
+    const layer = document.getElementById('player-layer');
+    const log = document.getElementById('log');
+    const input = document.getElementById('user-input');
+    const ball = document.getElementById('ball');
+    const funinoGroup = document.getElementById('funino-group');
+
+    let voice = null;
+    let apiKey = localStorage.getItem('tactical_key') || "";
+
+    function setKey() {
+        const k = prompt("Gemini API Key einfügen:");
+        if(k) { localStorage.setItem('tactical_key', k); location.reload(); }
+    }
+    if(apiKey) document.getElementById('api-status').innerText = "KI-Power aktiv";
+
+    function startAudio() {
+        if(voice) return;
+        const vs = window.speechSynthesis.getVoices();
+        voice = vs.find(v => v.lang.startsWith('de') && (v.name.includes('Stefan') || v.name.includes('Markus'))) || vs[0];
+    }
+
+    function addLog(who, t, isAi) {
+        const d = document.createElement('div');
+        d.className = 'msg ' + (isAi ? 'ai' : 'user');
+        d.innerHTML = `<b>${who}:</b> ${t}`;
+        log.appendChild(d); log.scrollTop = log.scrollHeight;
+        
+        if(isAi && window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            const m = new SpeechSynthesisUtterance(t.replace(/\[.*?\]/g, ''));
+            if(voice) m.voice = voice;
+            m.pitch = 0.8; m.rate = 0.95;
+            window.speechSynthesis.speak(m);
+        }
+    }
+
+    function createP(t, l, c, n) {
+        const p = document.createElement('div');
+        p.className = `player ${c}`;
+        p.style.top = t + "%"; p.style.left = l + "%";
+        p.setAttribute('data-base-l', l);
+        p.innerText = n;
+        layer.appendChild(p);
+    }
+
+    function shift(ballX) {
+        document.querySelectorAll('.red').forEach(p => {
+            let bL = parseFloat(p.getAttribute('data-base-l'));
+            p.style.left = (bL + (ballX - 49) * 0.35) + "%";
+        });
+    }
+
+    function setMode(m) {
+        layer.innerHTML = "";
+        if(m === 'funino') {
+            // Funino-Feld sichtbar machen
+            if(funinoGroup) funinoGroup.style.opacity = 1;
+
+            // Funino: 3v3 im Mini-Feld (vertikal ca. 35%–65%, horizontal 35/50/65)
+            createP(65, 40, 'red', 1);
+            createP(62, 55, 'red', 2);
+            createP(60, 70, 'red', 3);
+
+            createP(35, 40, 'blue', 1);
+            createP(38, 55, 'blue', 2);
+            createP(40, 70, 'blue', 3);
+
+            // Ball in die Mitte des Mini-Feldes
+            ball.style.top = "50%";
+            ball.style.left = "50%";
+
+            addLog("Co-Trainer", "Funino-Modus (3v3, 4 Tore) aktiv. Lass uns Spielformen für die Kleinsten trainieren.", true);
+        } else {
+            // Funino-Feld ausblenden
+            if(funinoGroup) funinoGroup.style.opacity = 0;
+
+            // 11-gegen-11 Match-Modus
+            const h = [
+                {t:90,l:47},{t:78,l:15},{t:80,l:35},{t:80,l:60},{t:78,l:80},
+                {t:62,l:15},{t:65,l:35},{t:65,l:60},{t:62,l:80},{t:42,l:40},{t:42,l:55}
+            ];
+            const a = [
+                {t:10,l:47},{t:25,l:20},{t:25,l:75},{t:45,l:15},{t:45,l:40},
+                {t:45,l:60},{t:45,l:85},{t:60,l:30},{t:60,l:50},{t:60,l:70}
+            ];
+            h.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
+            a.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
+
+            // Ball auf Anstoßpunkt
+            ball.style.top = "48%";
+            ball.style.left = "49%";
+
+            addLog("Co-Trainer", "11-gegen-11 Match-Modus aktiv. Was trainieren wir heute?", true);
+        }
+        initDrag();
+    }
+
+    function resetBall() { 
+        ball.style.left = "49%"; 
+        ball.style.top = "48%"; 
+        shift(49); 
+    }
+
+    async function process() {
+        const val = input.value; if(!val) return;
+        addLog("Trainer Björn", val, false);
+        input.value = "";
+        
+        let resp = "";
+        if(apiKey) {
+            try {
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        contents: [{ 
+                            parts: [{ 
+                                text: `Du bist ein Fußball-Co-Trainer für Björn. Antworte fachlich fundiert (Halbräume, Gegenpressing, Funino-Prinzipien). Du hast volle Kontrolle über das Board. Wenn du den Ball bewegen willst, schreibe am Ende [BALL:X:Y] (Werte 0-100). Wenn du alle roten Spieler nach vorne schieben willst, schreibe [MOVE:RED:UP]. Frage: ${val}` 
+                            }] 
+                        }] 
+                    })
+                });
+                const d = await r.json(); 
+                resp = d.candidates?.[0]?.content?.parts?.[0]?.text || "Keine Antwort von der KI erhalten.";
+            } catch(e) { 
+                resp = "Fehler: KI-Zentrale nicht erreichbar."; 
+            }
+        } else {
+            resp = "Lokal-Modus: Bitte Key eingeben für KI-Visualisierung.";
+            if(val.toLowerCase().includes("rechts")) { 
+                ball.style.left = "85%"; 
+                shift(85); 
+                resp = "Ball auf den rechten Flügel verlagert."; 
+            }
+        }
+
+        // KI-KOMMANDOS PARSEN
+        const ballCmd = resp.match(/\[BALL:(\d+):(\d+)\]/);
+        if(ballCmd) { 
+            ball.style.left = ballCmd[1]+"%"; 
+            ball.style.top = ballCmd[2]+"%"; 
+            shift(ballCmd[1]); 
+        }
+        if(resp.includes("[MOVE:RED:UP]")) { 
+            document.querySelectorAll('.red').forEach(p => { 
+                let t = parseFloat(p.style.top); 
+                p.style.top = (t - 20) + "%"; 
+            }); 
+        }
+
+        addLog("Co-Trainer", resp, true);
+    }
+
+    function initDrag() {
+        document.querySelectorAll('.player').forEach(p => {
+            let d = false;
+            p.onmousedown = p.ontouchstart = (e) => { 
+                d = true; 
+                p.style.transition = "none"; 
+                e.preventDefault(); 
+            };
+            window.onmousemove = window.ontouchmove = (e) => {
+                if(!d) return;
+                const r = document.getElementById('pitch').getBoundingClientRect();
+                const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+                const x = clientX - r.left;
+                const y = clientY - r.top;
+                p.style.left = (x/r.width*100)-3 + "%"; 
+                p.style.top = (y/r.height*100)-3 + "%";
+            };
+            window.onmouseup = window.ontouchend = () => { 
+                d = false; 
+                p.style.transition = "all 1.5s ease"; 
+            };
+        });
+    }
+
+    input.onkeypress = (e) => { if(e.key === 'Enter') process(); };
+    window.onload = () => { setMode('11v11'); };
+</script>
+</body>
+</html>
