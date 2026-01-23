@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tactical AI Board - Björn Edition</title>
+    <title>Tactical Intelligence Board - Björn Edition</title>
     <style>
         :root { --pitch: #2d5a27; --stripe: #254d21; --line: rgba(255,255,255,0.7); }
         * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; }
@@ -25,6 +25,7 @@
         
         .goal { position: absolute; border: 2px solid white; background: rgba(255,255,255,0.2); z-index: 5; }
         .goal-std { width: 90px; height: 25px; left: 50%; transform: translateX(-50%); }
+        .goal-fun { width: 50px; height: 18px; }
 
         .player { 
             width: 32px; height: 32px; border-radius: 50%; position: absolute; 
@@ -56,6 +57,7 @@
 </div>
 
 <div id="nav">
+    <button class="btn" onclick="setMode('funino')">Funino</button>
     <button class="btn" onclick="setMode('11v11')">11v11 Match</button>
     <button class="btn" onclick="resetBall()">Ball Mitte</button>
 </div>
@@ -127,9 +129,9 @@
         layer.appendChild(p);
     }
 
-    function addGoal(t, l) {
+    function addGoal(t, l, type) {
         const g = document.createElement('div');
-        g.className = 'goal goal-std';
+        g.className = 'goal ' + type;
         g.style.top = t + "%"; g.style.left = l + "%";
         document.getElementById('pitch').appendChild(g);
     }
@@ -137,14 +139,21 @@
     function setMode(m) {
         layer.innerHTML = "";
         document.querySelectorAll('.goal').forEach(g => g.remove());
-        addGoal(0, 50); addGoal(97, 50);
         
-        const redTeam = [{t:88,l:48},{t:75,l:15},{t:78,l:35},{t:78,l:62},{t:75,l:82},{t:58,l:20},{t:62,l:40},{t:62,l:58},{t:58,l:78},{t:42,l:42},{t:42,l:54}];
-        const blueTeam = [{t:10,l:48},{t:22,l:20},{t:18,l:48},{t:22,l:78},{t:38,l:15},{t:42,l:38},{t:42,l:58},{t:38,l:82},{t:55,l:30},{t:55,l:68}];
-        
-        redTeam.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
-        blueTeam.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
-        
+        if(m === 'funino') {
+            addGoal(0, 20, 'goal-fun'); addGoal(0, 75, 'goal-fun');
+            addGoal(97, 20, 'goal-fun'); addGoal(97, 75, 'goal-fun');
+            for(let i=0; i<3; i++) { createP(75, 25+i*25, 'red', i+1); createP(20, 25+i*25, 'blue', i+1); }
+            addLog("Co-Trainer", "Funino-Modus: 3 gegen 3 auf 4 Minitore.", true);
+        } else {
+            addGoal(0, 50, 'goal-std'); 
+            addGoal(97, 50, 'goal-std');
+            const redTeam = [{t:88,l:48},{t:75,l:15},{t:78,l:35},{t:78,l:62},{t:75,l:82},{t:58,l:20},{t:62,l:40},{t:62,l:58},{t:58,l:78},{t:42,l:42},{t:42,l:54}];
+            const blueTeam = [{t:10,l:48},{t:22,l:20},{t:18,l:48},{t:22,l:78},{t:38,l:15},{t:42,l:38},{t:42,l:58},{t:38,l:82},{t:55,l:30},{t:55,l:68}];
+            redTeam.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
+            blueTeam.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
+            addLog("Co-Trainer", "11-gegen-11 Match-Modus bereit.", true);
+        }
         initDrag();
     }
 
@@ -160,12 +169,12 @@
         }
 
         try {
-            // WECHSEL AUF STABILE v1 VERSION
+            // FIX: Verwendung von v1 und explizitem Modellnamen
             const r = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${myKey}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: `Du bist ein Fußball-Co-Trainer. Antworte fachlich kurz. Steuere den Ball visuell mit [BALL:X:Y] am Ende der Antwort. Frage: ${val}` }] }]
+                    contents: [{ parts: [{ text: `Du bist ein Fußball-Co-Trainer. Antworte fachlich kurz. Nutze [BALL:X:Y] am Ende der Antwort zur Steuerung. Frage: ${val}` }] }]
                 })
             });
 
