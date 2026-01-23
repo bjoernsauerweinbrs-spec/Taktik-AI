@@ -3,153 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Co-Trainer Taktikboard</title>
+    <title>Gemini Taktik-Masterclass</title>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; height: 100vh; display: flex; flex-direction: column; background: #1a1a1a; overflow: hidden; }
+        * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: #0a0a0a; color: #fff; overflow: hidden; }
         
-        /* Menü für Spielform-Auswahl */
-        #menu { background: #333; padding: 10px; display: flex; justify-content: center; gap: 10px; border-bottom: 2px solid #555; }
-        .mode-btn { background: #444; color: white; border: 1px solid #777; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; }
-        .mode-btn:hover { background: #555; }
-
-        /* Spielfeld */
-        #pitch { flex: 2; background: #2e7d32; position: relative; border: 3px solid white; margin: 5px; overflow: hidden; }
-        .line { position: absolute; border: 1px solid rgba(255,255,255,0.5); }
-        .goal { width: 60px; height: 20px; border: 2px solid white; position: absolute; left: 50%; transform: translateX(-50%); }
-        .center-circle { width: 90px; height: 90px; border-radius: 50%; border: 2px solid white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-
-        /* Spieler */
-        .player { 
-            width: 32px; height: 32px; border-radius: 50%; position: absolute; 
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 11px; cursor: move; z-index: 10;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2px solid white;
-            touch-action: none; transition: top 0.5s, left 0.5s; /* Sanftes Einrücken */
+        /* Premium Spielfeld */
+        #pitch { 
+            flex: 2; background: #1b4d2e; position: relative; border: 5px solid rgba(255,255,255,0.8); margin: 10px; border-radius: 4px;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+            background-image: linear-gradient(90deg, transparent 49.5%, rgba(255,255,255,0.2) 49.5%, rgba(255,255,255,0.2) 50.5%, transparent 50.5%);
         }
-        .red { background: #d32f2f; color: white; }
-        .blue { background: #1976d2; color: white; }
-        .ball { width: 18px; height: 18px; background: white; border: 2px solid #000; z-index: 20; transition: none; }
+        .center-circle { width: 100px; height: 100px; border: 2px solid white; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.6; }
+        .goal { width: 80px; height: 30px; border: 2px solid white; position: absolute; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.1); }
 
-        /* Chat */
-        #chat { flex: 1; background: #f4f4f4; display: flex; flex-direction: column; }
-        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; color: #333; }
-        .msg { margin-bottom: 10px; }
-        #input-area { padding: 10px; display: flex; gap: 10px; background: #ddd; }
-        input { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ccc; outline: none; }
-        button { background: none; border: none; font-size: 24px; cursor: pointer; }
+        /* Spieler & Ball */
+        .player { 
+            width: 34px; height: 34px; border-radius: 50%; position: absolute; 
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 13px; cursor: grab; z-index: 10;
+            border: 2px solid #fff; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); touch-action: none;
+        }
+        .red { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 4px 15px rgba(255,75,43,0.4); }
+        .blue { background: linear-gradient(135deg, #4b6cb7, #182848); box-shadow: 0 4px 15px rgba(24,40,72,0.4); }
+        .ball { width: 20px; height: 20px; background: #fff; border: 2px solid #000; z-index: 20; border-radius: 50%; box-shadow: 0 0 10px white; }
+
+        /* Chat-Interface */
+        #chat { flex: 1; background: #111; display: flex; flex-direction: column; border-top: 2px solid #333; }
+        #log { flex: 1; overflow-y: auto; padding: 20px; font-size: 15px; }
+        .msg { margin-bottom: 12px; max-width: 85%; padding: 10px 15px; border-radius: 15px; line-height: 1.5; }
+        .ai { background: #1e1e1e; border-left: 5px solid #00ff88; align-self: flex-start; color: #00ff88; }
+        .user { background: #333; align-self: flex-end; color: #eee; margin-left: auto; border-right: 5px solid #007bff; }
+
+        #input-row { padding: 15px; display: flex; gap: 12px; background: #1a1a1a; }
+        input { flex: 1; padding: 12px 20px; border-radius: 30px; border: 1px solid #444; background: #222; color: white; outline: none; font-size: 16px; }
+        button { background: none; border: none; font-size: 28px; cursor: pointer; transition: transform 0.2s; }
+        button:hover { transform: scale(1.1); }
     </style>
 </head>
 <body>
 
-<div id="menu">
-    <button class="mode-btn" onclick="setupBoard('funino')">Funino (3v3)</button>
-    <button class="mode-btn" onclick="setupBoard('11v11')">Erwachsene (11v11)</button>
-</div>
-
 <div id="pitch">
     <div class="goal" style="top: 0;"></div>
-    <div class="line" style="width: 100%; top: 50%;"></div>
     <div class="center-circle"></div>
     <div class="goal" style="bottom: 0;"></div>
     <div id="ball" class="player ball" style="top: 48%; left: 48%;"></div>
-    <div id="players-container"></div>
-</div>
-
-<div id="chat">
-    <div id="log"><div><b>Co-Trainer:</b> Hallo Björn! Wähle oben eine Spielform aus, um die Spieler ordentlich aufzustellen.</div></div>
-    <div id="input-area">
-        <input type="text" id="user-in" placeholder="Taktische Frage stellen...">
-        <button id="mic">🎤</button>
-        <button id="send">➤</button>
-    </div>
-</div>
-
-<script>
-    const container = document.getElementById('players-container');
-    const log = document.getElementById('log');
-    const input = document.getElementById('user-in');
-
-    function setupBoard(mode) {
-        container.innerHTML = "";
-        if (mode === 'funino') {
-            // 3 Rote, 3 Blaue
-            const pos = [
-                {t:80, l:45, c:'red', n:'1'}, {t:65, l:20, c:'red', n:'2'}, {t:65, l:70, c:'red', n:'3'},
-                {t:15, l:45, c:'blue', n:'1'}, {t:30, l:20, c:'blue', n:'2'}, {t:30, l:70, c:'blue', n:'3'}
-            ];
-            pos.forEach(p => createPlayer(p.t, p.l, p.c, p.n));
-            addBotMsg("Funino-Modus aktiviert. Das Feld ist für 3 gegen 3 vorbereitet.");
-        } else {
-            // 11 Rote
-            for(let i=0; i<11; i++) createPlayer(70 + (i%3)*5, 10 + (i*8), 'red', i+1);
-            // 11 Blaue
-            for(let i=0; i<11; i++) createPlayer(10 + (i%3)*5, 10 + (i*8), 'blue', i+1);
-            addBotMsg("11 gegen 11 Modus. Alle Spieler sind auf dem Platz.");
-        }
-        initDrag();
-    }
-
-    function createPlayer(t, l, c, n) {
-        const div = document.createElement('div');
-        div.className = `player ${c}`;
-        div.style.top = t + "%";
-        div.style.left = l + "%";
-        div.innerText = n;
-        container.appendChild(div);
-    }
-
-    function initDrag() {
-        const draggables = document.querySelectorAll('.player');
-        draggables.forEach(p => {
-            let drag = false;
-            p.onmousedown = p.ontouchstart = (e) => { drag = true; p.style.transition = "none"; };
-            window.onmousemove = window.ontouchmove = (e) => {
-                if (!drag) return;
-                const r = document.getElementById('pitch').getBoundingClientRect();
-                const x = (e.clientX || e.touches[0].clientX) - r.left;
-                const y = (e.clientY || e.touches[0].clientY) - r.top;
-                p.style.left = (x/r.width*100)-4 + "%";
-                p.style.top = (y/r.height*100)-4 + "%";
-            };
-            window.onmouseup = window.ontouchend = () => drag = false;
-        });
-    }
-
-    function addBotMsg(text) {
-        const d = document.createElement('div');
-        d.innerHTML = `<b>Co-Trainer:</b> ${text}`;
-        log.appendChild(d);
-        log.scrollTop = log.scrollHeight;
-    }
-
-    document.getElementById('send').onclick = () => {
-        const val = input.value.toLowerCase();
-        if(!val) return;
-        const d = document.createElement('div');
-        d.innerHTML = `<b>Du:</b> ${input.value}`;
-        log.appendChild(d);
-        
-        // Professionellere Antwort-Logik
-        let reply = "Das ist ein interessanter Ansatz. Wie genau stellst du dir die Raumaufteilung dabei vor?";
-        if(val.includes("angriff")) reply = "Im Angriff sollten wir die Breite des Platzes nutzen, um die gegnerische Kette auseinanderzuziehen.";
-        if(val.includes("funino")) reply = "Bei Funino geht es vor allem um Spielintelligenz und schnelles Umschalten durch die vier Tore.";
-        if(val.includes("david")) reply = "Für David Luiz sollten wir eine Position wählen, in der er das Spiel vor sich hat und seine Übersicht nutzen kann.";
-        
-        setTimeout(() => addBotMsg(reply), 1000);
-        input.value = "";
-    };
-
-    // Mikrofon-Fix
-    const mic = document.getElementById('mic');
-    if ('webkitSpeechRecognition' in window) {
-        const rec = new webkitSpeechRecognition();
-        rec.lang = 'de-DE';
-        mic.onclick = () => { rec.start(); mic.style.color = 'red'; };
-        rec.onresult = (e) => { input.value = e.results[0][0].transcript; mic.style.color = 'black'; };
-    }
     
-    setupBoard('funino'); // Start mit Funino
-</script>
-</body>
-</html>
+    <div id="luiz" class="player red" style="top: 75%; left: 45
