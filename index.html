@@ -1,293 +1,62 @@
-// ===============================
-// Toni – KI-Co-Trainer Grundlogik
-// ===============================
-
-// Zustand der Session
-let toniHasIntroduced = false;
-
-// Tonis Begrüßung beim Start der KI
-function toniIntro() {
-  if (toniHasIntroduced) return;
-  toniHasIntroduced = true;
-  return "Hey, ich bin Toni – der KI-Co-Trainer von Björn. Ich zeige dir, wie wir trainieren, basierend auf den Erfahrungen, die Björn unter anderem in Ghana, Brasilien und natürlich in Deutschland gesammelt hat. Wenn du bereit bist, stell mir einfach deine erste Frage.";
-}
-
-// Pool an Antworten auf: „Wer ist Björn?“
-const bjornAnswers = [
-  "Björn ist der Trainer, mit dem ich zusammenarbeite. Er hat Ende der Neunziger und Anfang der Zweitausender in der Regionalliga bei Borussia Fulda gespielt, später beim SC Neukirchen, Roland Rodenkirchen, dem VfL Eiterfeld, TSV Hilders und dem ESV Ronshausen. Er hat sogar seine eigene Fußballschule für Kinder und Jugendliche aufgebaut. 2006 wurde er von Edwin Burkamp von Borussia Dortmund zertifiziert – unterschrieben von Dr. Rainer Rauball und Michael Zorc. Sportlich geprägt wurde er unter anderem von Reinhold Wosab, Lutz Pfannenstiel, Udo Bös und Moppes Petz. Und er hat in prominenten Auswahlmannschaften gespielt, zum Beispiel für die Aktion Herzenssache des Innenministeriums Rheinland-Pfalz. Auf dieser Basis erkläre ich dir unser Training.",
-  "Björn ist ein ehemaliger Regionalligaspieler von Borussia Fulda, später aktiv bei mehreren Vereinen in Hessen. Er hatte eine eigene Fußballschule, wurde 2006 von Borussia Dortmund zertifiziert und hat in prominenten Auswahlteams gespielt. Seine Erfahrung aus Deutschland, Ghana und Brasilien bildet die Grundlage für unser Training.",
-  "Björn verfügt über eine breite sportliche Laufbahn: Regionalliga bei Borussia Fulda, Stationen beim SC Neukirchen, Roland Rodenkirchen, VfL Eiterfeld, TSV Hilders und ESV Ronshausen. Er leitete eine eigene Fußballschule und wurde 2006 von Edwin Burkamp (Borussia Dortmund) zertifiziert, mit Unterschriften von Dr. Rainer Rauball und Michael Zorc. Zusätzlich spielte er in prominenten Auswahlmannschaften wie der Herzenssache-Auswahl des Innenministeriums Rheinland-Pfalz. Seine Entwicklung wurde unter anderem von Reinhold Wosab, Lutz Pfannenstiel, Udo Bös und Moppes Petz begleitet.",
-  "Björn ist jemand, der den Fußball wirklich gelebt hat: Regionalliga bei Borussia Fulda, viele Stationen im hessischen Fußball, eine eigene Fußballschule und eine Zertifizierung von Borussia Dortmund im Jahr 2006. Er durfte mit prominenten Spielern und Trainern arbeiten und in Auswahlteams für soziale Projekte spielen. Seine Erfahrungen aus Deutschland, Ghana und Brasilien machen ihn zu einem Trainer, der nicht nur Technik vermittelt, sondern auch Herz, Kultur und Leidenschaft.",
-  "Björn? Das ist mein Chef. Regionalliga-Erfahrung, zig Vereine durchlaufen, eigene Fußballschule gehabt, 2006 von Borussia Dortmund zertifiziert – sogar mit Unterschrift von Rauball und Zorc. Er hat in prominenten Auswahlteams gespielt und von Leuten wie Reinhold Wosab, Lutz Pfannenstiel, Udo Bös oder Moppes Petz richtig was mitgenommen. Auf seinen Erfahrungen baue ich meine ganzen Erklärungen auf.",
-  "Björn ist der Typ, der Regionalliga gespielt hat, eine eigene Fußballschule hatte, von Dortmund zertifiziert wurde und in Auswahlteams gekickt hat. Ich bin nur die KI – er ist der, der’s wirklich erlebt hat.",
-  "Björn ist ein Trainer mit echter Profi-Erfahrung: Regionalliga, mehrere Vereine, eigene Fußballschule, BVB-Zertifizierung 2006, prominente Auswahlmannschaften und Einflüsse von ehemaligen Bundesliga- und Nationalspielern wie Reinhold Wosab, Lutz Pfannenstiel, Udo Bös und Moppes Petz. Sein Wissen ist die Grundlage meiner taktischen und technischen Erklärungen."
-];
-
-function toniWerIstBjoern() {
-  const idx = Math.floor(Math.random() * bjornAnswers.length);
-  return bjornAnswers[idx];
-}
-
-// ===============================
-// Taktik-Board – Grundstruktur
-// ===============================
-
-// Canvas-Setup (im HTML brauchst du ein <canvas id="tacticBoard"></canvas>)
-const canvas = document.getElementById("tacticBoard");
-const ctx = canvas ? canvas.getContext("2d") : null;
-
-// Spielfeld-Einstellungen
-const field = {
-  width: 800,
-  height: 500,
-  ourPerspective: true // true = wir schauen aus Sicht unseres Teams
-};
-
-// Spieler-Objekte: Team A (4-4-2) und Team B (4-3-3)
-// Positionen sind Normalwerte (0–1) relativ zum Feld, später skaliert
-
-const teamA = { // unser Team – 4-4-2
-  formation: "4-4-2",
-  color: "#00a000",
-  players: [
-    // Torwart
-    { x: 0.1, y: 0.5, role: "TW" },
-    // Viererkette
-    { x: 0.25, y: 0.2, role: "LV" },
-    { x: 0.25, y: 0.4, role: "LIV" },
-    { x: 0.25, y: 0.6, role: "RIV" },
-    { x: 0.25, y: 0.8, role: "RV" },
-    // Mittelfeldkette
-    { x: 0.45, y: 0.2, role: "LM" },
-    { x: 0.45, y: 0.4, role: "ZM" },
-    { x: 0.45, y: 0.6, role: "ZM" },
-    { x: 0.45, y: 0.8, role: "RM" },
-    // Zwei Stürmer
-    { x: 0.7, y: 0.4, role: "ST" },
-    { x: 0.7, y: 0.6, role: "ST" }
-  ]
-};
-
-const teamB = { // Gegner – 4-3-3
-  formation: "4-3-3",
-  color: "#d00000",
-  players: [
-    // Torwart
-    { x: 0.9, y: 0.5, role: "TW" },
-    // Viererkette
-    { x: 0.75, y: 0.2, role: "LV" },
-    { x: 0.75, y: 0.4, role: "LIV" },
-    { x: 0.75, y: 0.6, role: "RIV" },
-    { x: 0.75, y: 0.8, role: "RV" },
-    // Dreiermittelfeld
-    { x: 0.6, y: 0.3, role: "ZM" },
-    { x: 0.6, y: 0.5, role: "ZM" },
-    { x: 0.6, y: 0.7, role: "ZM" },
-    // Dreierangriff
-    { x: 0.45, y: 0.25, role: "LA" },
-    { x: 0.45, y: 0.5, role: "MS" },
-    { x: 0.45, y: 0.75, role: "RA" }
-  ]
-};
-
-// Ballposition (links, rechts, zentral) aus Sicht unseres Teams
-let ballSide = "left"; // "left" | "right" | "center"
-let phase = "defense"; // "defense" | "offense"
-
-// ===============================
-// Zeichnen des Spielfelds & Spieler
-// ===============================
-
-function drawField() {
-  if (!ctx) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Spielfeld
-  ctx.fillStyle = "#0b5f1a";
-  ctx.fillRect(0, 0, field.width, field.height);
-
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 2;
-
-  // Außenlinien
-  ctx.strokeRect(10, 10, field.width - 20, field.height - 20);
-
-  // Mittellinie
-  ctx.beginPath();
-  ctx.moveTo(field.width / 2, 10);
-  ctx.lineTo(field.width / 2, field.height - 10);
-  ctx.stroke();
-
-  // Mittelkreis
-  ctx.beginPath();
-  ctx.arc(field.width / 2, field.height / 2, 60, 0, Math.PI * 2);
-  ctx.stroke();
-}
-
-function drawPlayer(player, color) {
-  if (!ctx) return;
-  const x = 10 + player.x * (field.width - 20);
-  const y = 10 + player.y * (field.height - 20);
-
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.arc(x, y, 10, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "10px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText(player.role, x, y - 15);
-}
-
-function drawTeams() {
-  teamA.players.forEach(p => drawPlayer(p, teamA.color));
-  teamB.players.forEach(p => drawPlayer(p, teamB.color));
-}
-
-// ===============================
-// Verschieben der Viererkette – Defensiv
-// ===============================
-
-function shiftBackFour(team, side) {
-  // Wir gehen davon aus: Viererkette sind die Spieler 1–4 im Array
-  const backFour = team.players.slice(1, 5);
-
-  backFour.forEach((p, index) => {
-    // Grundverschiebung seitlich
-    let shift = 0;
-    if (side === "left") shift = -0.05;
-    if (side === "right") shift = 0.05;
-
-    // ballnahe Seite etwas stärker, ballferne etwas weniger
-    if (side === "left") {
-      // LV und LIV stärker nach links
-      if (index === 0 || index === 1) p.y += shift * 1.2;
-      else p.y += shift * 0.6;
-    } else if (side === "right") {
-      // RV und RIV stärker nach rechts
-      if (index === 2 || index === 3) p.y += shift * 1.2;
-      else p.y += shift * 0.6;
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Taktik-AI – Toni Co-Trainer</title>
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 20px;
     }
-
-    // Begrenzung, damit sie nicht aus dem Feld rutschen
-    if (p.y < 0.1) p.y = 0.1;
-    if (p.y > 0.9) p.y = 0.9;
-  });
-}
-
-// ===============================
-// Offensivbewegungen – einfache Logik
-// ===============================
-
-function moveOffense(team, side) {
-  // Stürmer und Flügelspieler rücken in Richtung Ballseite und Tor
-  team.players.forEach(p => {
-    if (p.role === "ST" || p.role === "LA" || p.role === "RA" || p.role === "MS") {
-      // Richtung gegnerisches Tor
-      p.x += 0.03;
-
-      // Richtung Ballseite
-      if (side === "left") p.y -= 0.02;
-      if (side === "right") p.y += 0.02;
-
-      // Begrenzung
-      if (p.x > 0.9) p.x = 0.9;
-      if (p.y < 0.1) p.y = 0.1;
-      if (p.y > 0.9) p.y = 0.9;
+    #tacticBoard {
+      border: 1px solid #555;
+      background: #0b5f1a;
     }
-  });
-}
-
-// ===============================
-// Board drehen (Perspektive wechseln)
-// ===============================
-
-function togglePerspective() {
-  field.ourPerspective = !field.ourPerspective;
-
-  function flipTeam(team) {
-    team.players.forEach(p => {
-      p.x = 1 - p.x;
-      p.y = 1 - p.y;
-    });
-  }
-
-  flipTeam(teamA);
-  flipTeam(teamB);
-}
-
-// ===============================
-// Haupt-Update-Funktion für das Board
-// ===============================
-
-function updateTacticBoard() {
-  if (!ctx) return;
-
-  drawField();
-  drawTeams();
-}
-
-// ===============================
-// Toni beantwortet taktische Fragen
-// ===============================
-
-function toniAnswer(question) {
-  const q = question.toLowerCase();
-
-  // Intro, falls noch nicht erfolgt
-  if (!toniHasIntroduced) {
-    return toniIntro();
-  }
-
-  // Wer ist Björn?
-  if (q.includes("wer ist björn") || q.includes("wer ist bjoern")) {
-    return toniWerIstBjoern();
-  }
-
-  // Defensiv: Viererkette verschieben
-  if (q.includes("viererkette") && q.includes("defensiv")) {
-    if (q.includes("linken seite") || q.includes("links")) {
-      ballSide = "left";
-      phase = "defense";
-      shiftBackFour(teamA, "left");
-      updateTacticBoard();
-      return "Wir sind im Defensivmodus. Der Gegner greift über unsere linke Seite an. Unsere Viererkette schiebt geschlossen nach links. Der ballnahe Außenverteidiger rückt raus, der Innenverteidiger sichert diagonal ab. Die beiden ballfernen Spieler rücken ein, um das Zentrum zu schließen. Auf dem Board siehst du, wie wir die Räume verkürzen und diagonale Passwege verhindern.";
+    #chat {
+      width: 800px;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
-    if (q.includes("rechten seite") || q.includes("rechts")) {
-      ballSide = "right";
-      phase = "defense";
-      shiftBackFour(teamA, "right");
-      updateTacticBoard();
-      return "Wir sind im Defensivmodus. Der Gegner greift über unsere rechte Seite an. Unsere Viererkette schiebt geschlossen nach rechts. Der ballnahe Außenverteidiger rückt raus, der Innenverteidiger sichert diagonal ab. Die ballfernen Spieler rücken ein, um das Zentrum dicht zu machen. Auf dem Board siehst du die Verschiebebewegung unserer Kette.";
+    #question {
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
     }
-  }
+    #askBtn {
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #answer {
+      min-height: 60px;
+      padding: 8px;
+      background: #222;
+      border: 1px solid #444;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Taktik-AI – Toni, der KI-Co-Trainer</h1>
 
-  // Offensiv: Laufwege Stürmer
-  if (q.includes("offensive") || q.includes("angriff") || q.includes("stürmer") || q.includes("stuermer")) {
-    phase = "offense";
-    moveOffense(teamA, ballSide);
-    updateTacticBoard();
-    return "Wir sind jetzt in der Offensive. Unsere Stürmer und Flügelspieler rücken in Richtung gegnerisches Tor und orientieren sich zur Ballseite. Du siehst auf dem Board, wie sie in die Tiefe starten, Räume öffnen und Anspielstationen schaffen. So entstehen Überzahlsituationen und wir können den Gegner in seiner Hälfte festnageln.";
-  }
+  <canvas id="tacticBoard" width="800" height="500"></canvas>
 
-  // Perspektive wechseln
-  if (q.includes("perspektive wechseln") || q.includes("bord drehen") || q.includes("board drehen")) {
-    togglePerspective();
-    updateTacticBoard();
-    return "Ich habe die Perspektive gedreht. Du siehst das Spielfeld jetzt aus der anderen Sicht. So kannst du sowohl unser Team als auch den Gegner aus unterschiedlichen Blickwinkeln analysieren.";
-  }
+  <div id="chat">
+    <div>
+      <input id="question" type="text" placeholder="Frag Toni etwas, z.B.: Wie verschiebt sich die Viererkette, wenn der Gegner links angreift?" />
+      <button id="askBtn">Fragen</button>
+    </div>
+    <div id="answer"></div>
+  </div>
 
-  // Standardantwort, falls nichts passt
-  return "Ich habe deine Frage verstanden, aber sie passt noch nicht zu einer meiner vordefinierten taktischen Situationen. Du kannst mich zum Beispiel fragen: 'Wie verschiebt sich die Viererkette, wenn der Gegner links angreift?' oder 'Wie sollen sich unsere Stürmer in der Offensive bewegen?'.";
-}
-
-// ===============================
-// Initialer Aufruf beim Laden der Seite
-// ===============================
-
-if (canvas) {
-  canvas.width = field.width;
-  canvas.height = field.height;
-  updateTacticBoard();
-}
+  <script src="script.js"></script>
+</body>
+</html>
