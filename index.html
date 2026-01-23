@@ -3,36 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tactical AI Academy - Björn</title>
+    <title>Tactical AI Academy - Coach Björn</title>
     <style>
         :root { --pitch: #2d5a27; --stripe: #254d21; }
         * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; }
         body { height: 100vh; display: flex; flex-direction: column; background: #000; overflow: hidden; color: #fff; }
         
         #api-bar { background: #111; padding: 6px; text-align: center; font-size: 11px; border-bottom: 1px solid #333; }
-        #nav { background: #1a1a1a; padding: 12px; display: flex; justify-content: center; gap: 10px; border-bottom: 3px solid #2e7d32; }
-        .btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
+        #nav { background: #1a1a1a; padding: 10px; display: flex; justify-content: center; gap: 8px; border-bottom: 3px solid #2e7d32; }
+        .btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
         .btn:hover { background: #00ff88; color: #000; }
 
-        #pitch-container { flex: 2; position: relative; display: flex; justify-content: center; align-items: center; padding: 10px; background: #000; }
+        #pitch-wrapper { flex: 2; position: relative; display: flex; justify-content: center; align-items: center; padding: 10px; background: #000; }
         #pitch { 
-            width: 100%; height: 100%; max-width: 1100px; background: var(--pitch); border: 3px solid #fff; position: relative;
+            width: 100%; height: 100%; max-width: 1100px; background: var(--pitch); border: 2px solid #fff; position: relative;
             background-image: repeating-linear-gradient(0deg, var(--pitch), var(--pitch) 10%, var(--stripe) 10%, var(--stripe) 20%);
         }
+        .center-circle { width: 90px; height: 90px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
         .player { 
-            width: 32px; height: 32px; border-radius: 50%; position: absolute; 
+            width: 30px; height: 30px; border-radius: 50%; position: absolute; 
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 12px; cursor: grab; z-index: 50;
-            border: 2px solid #fff; transition: all 1s ease-in-out; touch-action: none;
+            font-weight: 900; font-size: 11px; cursor: grab; z-index: 50;
+            border: 2px solid #fff; transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
         }
         .red { background: #b71c1c; color: white; }
         .blue { background: #0d47a1; color: white; }
-        .ball { width: 18px; height: 18px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 0.7s ease; }
+        .ball { width: 18px; height: 18px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 0.8s ease; }
 
-        #chat { height: 35%; background: #fff; color: #000; display: flex; flex-direction: column; }
-        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; background: #f9f9f9; border-top: 1px solid #ddd; }
-        .msg { margin-bottom: 8px; padding: 8px; border-radius: 4px; border-left: 5px solid transparent; }
+        #chat { height: 38%; background: #fff; color: #000; display: flex; flex-direction: column; }
+        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; background: #f9f9f9; }
+        .msg { margin-bottom: 8px; padding: 10px; border-radius: 6px; border-left: 5px solid transparent; }
         .ai { background: #f0f0f0; border-left-color: #2e7d32; }
         .user { background: #e3f2fd; border-right: 5px solid #1565c0; text-align: right; border-left: none; }
 
@@ -41,11 +43,11 @@
         .send-btn { background: #2e7d32; color: white; border: none; padding: 0 20px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
-<body onclick="initVoice()">
+<body onclick="initAudio()">
 
 <div id="api-bar">
-    <span id="api-status" style="color: #ff5252;">KI Inaktiv (Kein Key)</span> | 
-    <a href="#" style="color: #00ff88; text-decoration: none;" onclick="setKey()">[ Key hinterlegen ]</a>
+    <span id="api-status" style="color: #ff5252;">KI Inaktiv</span> | 
+    <a href="#" style="color: #00ff88; text-decoration: none;" onclick="askKey()">[ Key hinterlegen ]</a>
 </div>
 
 <div id="nav">
@@ -54,44 +56,42 @@
     <button class="btn" onclick="resetBall()">Reset</button>
 </div>
 
-<div id="pitch-container">
+<div id="pitch-wrapper">
     <div id="pitch">
+        <div class="center-circle"></div>
         <div id="ball" class="player ball" style="top: 48%; left: 49%;"></div>
-        <div id="player-layer"></div>
+        <div id="p-layer"></div>
     </div>
 </div>
 
 <div id="chat">
     <div id="log"></div>
     <div id="input-row">
-        <input type="text" id="user-input" placeholder="Frage an den Co-Trainer...">
-        <button class="send-btn" onclick="process()">➤</button>
+        <input type="text" id="user-in" placeholder="Frage an Co-Trainer Björn...">
+        <button class="send-btn" onclick="talk()">➤</button>
     </div>
 </div>
 
 <script>
-    const layer = document.getElementById('player-layer');
+    const layer = document.getElementById('p-layer');
     const log = document.getElementById('log');
-    const input = document.getElementById('user-input');
+    const input = document.getElementById('user-in');
     const ball = document.getElementById('ball');
 
     let voice = null;
-    let apiKey = localStorage.getItem('tactical_key')?.trim() || "";
+    let myKey = localStorage.getItem('bjorn_key')?.trim() || "";
 
-    function setKey() {
-        const k = prompt("Bitte den Gemini API-Key hier einfügen:");
-        if(k) {
-            localStorage.setItem('tactical_key', k.trim());
-            location.reload();
-        }
+    function askKey() {
+        const k = prompt("Bitte den Google API-Key einfügen:");
+        if(k) { localStorage.setItem('bjorn_key', k.trim()); location.reload(); }
     }
 
-    if(apiKey) {
-        document.getElementById('api-status').innerText = "KI-Power: Aktiviert";
+    if(myKey) {
+        document.getElementById('api-status').innerText = "KI-Power: Aktiv";
         document.getElementById('api-status').style.color = "#00ff88";
     }
 
-    function initVoice() {
+    function initAudio() {
         if(voice) return;
         const vs = window.speechSynthesis.getVoices();
         voice = vs.find(v => v.lang.startsWith('de') && (v.name.includes('Stefan') || v.name.includes('Markus'))) || vs[0];
@@ -102,8 +102,8 @@
         d.className = 'msg ' + (isAi ? 'ai' : 'user');
         d.innerHTML = `<b>${who}:</b> ${t}`;
         log.appendChild(d); log.scrollTop = log.scrollHeight;
-        if(isAi) {
-            window.speechSynthesis?.cancel();
+        if(isAi && window.speechSynthesis) {
+            window.speechSynthesis.cancel();
             const m = new SpeechSynthesisUtterance(t.replace(/\[.*?\]/g, ''));
             if(voice) m.voice = voice;
             m.pitch = 0.8; m.rate = 0.95;
@@ -124,29 +124,45 @@
         if(m === 'funino') {
             for(let i=0; i<3; i++) { createP(75, 25+i*25, 'red', i+1); createP(20, 25+i*25, 'blue', i+1); }
         } else {
-            const h = [{t:90,l:47},{t:78,l:15},{t:80,l:35},{t:80,l:60},{t:78,l:80},{t:62,l:15},{t:65,l:35},{t:65,l:60},{t:62,l:80},{t:42,l:40},{t:42,l:55}];
-            const a = [{t:10,l:47},{t:25,l:20},{t:25,l:75},{t:45,l:15},{t:45,l:40},{t:45,l:60},{t:45,l:85},{t:60,l:30},{t:60,l:50},{t:60,l:70}];
+            const h = [{t:85,l:47},{t:75,l:15},{t:75,l:35},{t:75,l:60},{t:75,l:80},{t:55,l:20},{t:55,l:40},{t:55,l:60},{t:55,l:75},{t:35,l:40},{t:35,l:55}];
+            const a = [{t:10,l:47},{t:20,l:20},{t:20,l:47},{t:20,l:75},{t:40,l:15},{t:40,l:40},{t:40,l:60},{t:40,l:80},{t:60,l:35},{t:60,l:60}];
             h.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
             a.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
         }
         initDrag();
     }
 
-    async function process() {
+    async function talk() {
         const val = input.value; if(!val) return;
         addLog("Björn", val, false);
         input.value = "";
         
-        if(!apiKey) {
+        if(!myKey) {
             addLog("Co-Trainer", "Fehler: Kein Key hinterlegt. Bitte oben auf den Link klicken.", true);
             return;
         }
 
         try {
-            const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${myKey}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: `Du bist ein Co-Trainer. Antworte kurz. Steuerung: [BALL:X:Y]. Frage: ${val}` }] }]
+                    contents: [{ parts: [{ text: `Du bist ein Fußball-Co-Trainer für Chef Björn. Antworte fachlich. Du steuerst das Board mit: [BALL:X:Y] (0-100). Frage: ${val}` }] }]
                 })
             });
+
+            const d = await r.json();
+            if (d.error) {
+                addLog("Co-Trainer", "Google Fehler: " + d.error.message, true);
+            } else {
+                let resp = d.candidates[0].content.parts[0].text;
+                const bM = resp.match(/\[BALL:(\d+):(\d+)\]/);
+                if(bM) { ball.style.left = bM[1] + "%"; ball.style.top = bM[2] + "%"; }
+                addLog("Co-Trainer", resp, true);
+            }
+        } catch(e) {
+            addLog("Co-Trainer", "Verbindung zur KI-Zentrale fehlgeschlagen.", true);
+        }
+    }
+
+    function resetBall() { ball.style.left = "49%"; ball.style.top = "4
