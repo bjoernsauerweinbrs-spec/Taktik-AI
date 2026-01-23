@@ -2,133 +2,131 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Björn Taktikboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tactical Board - Coach Björn</title>
     <style>
-        body { margin: 0; background: #000; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #top-bar { background: #333; padding: 10px; display: flex; justify-content: center; gap: 10px; border-bottom: 2px solid #555; }
-        #pitch-container { flex: 1; position: relative; background: #111; display: flex; justify-content: center; align-items: center; }
-        #pitch { 
-            width: 90%; height: 85%; background: #2d5a27; border: 3px solid white; position: relative;
-            background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 100% 10%;
-        }
-        .mid-line { position: absolute; width: 100%; height: 2px; background: white; top: 50%; left: 0; }
-        .player { 
-            width: 32px; height: 32px; border-radius: 50%; position: absolute; 
-            display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;
-            border: 2px solid white; cursor: pointer; z-index: 10; touch-action: none;
-        }
-        .red { background: #d32f2f; }
-        .blue { background: #1976d2; }
-        #ball { width: 18px; height: 18px; background: white; border-radius: 50%; border: 2px solid black; z-index: 20; top: 48%; left: 49%; }
-        
-        #chat-section { height: 250px; background: #fff; display: flex; flex-direction: column; }
-        #log { flex: 1; overflow-y: auto; padding: 10px; color: black; font-size: 14px; background: #f0f0f0; }
-        #input-row { padding: 10px; display: flex; gap: 5px; background: #ddd; }
-        input { flex: 1; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px 20px; background: #2e7d32; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        :root { --pitch: #2d5a27; --stripe: #254d21; }
+        * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; }
+        body { height: 100vh; display: flex; flex-direction: column; background: #000; overflow: hidden; color: #fff; }
+        #header { background: #111; padding: 10px; text-align: center; border-bottom: 1px solid #333; font-size: 14px; }
+        #nav { background: #1a1a1a; padding: 10px; display: flex; justify-content: center; gap: 10px; border-bottom: 2px solid #2e7d32; }
+        .btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        #pitch-area { flex: 1; position: relative; background: #000; display: flex; justify-content: center; align-items: center; padding: 10px; }
+        #pitch { width: 100%; height: 100%; max-width: 1000px; background: var(--pitch); border: 3px solid #fff; position: relative; background-image: repeating-linear-gradient(0deg, var(--pitch), var(--pitch) 10%, var(--stripe) 10%, var(--stripe) 20%); }
+        .line-mid { position: absolute; width: 100%; height: 2px; background: rgba(255,255,255,0.7); top: 50%; left: 0; }
+        .circle { width: 100px; height: 100px; border: 2px solid rgba(255,255,255,0.7); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .goal { position: absolute; width: 80px; height: 25px; border: 2px solid white; background: rgba(255,255,255,0.1); left: 50%; transform: translateX(-50%); }
+        .player { width: 32px; height: 32px; border-radius: 50%; position: absolute; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.5); z-index: 10; cursor: move; touch-action: none; }
+        .red { background: #b71c1c; } .blue { background: #0d47a1; }
+        #ball { width: 18px; height: 18px; background: #fff; border: 2px solid #000; z-index: 20; transition: all 0.8s ease; }
+        #chat { height: 250px; background: #fff; color: #000; display: flex; flex-direction: column; }
+        #log { flex: 1; overflow-y: auto; padding: 15px; background: #f9f9f9; font-size: 14px; }
+        #input-row { padding: 10px; background: #eee; display: flex; gap: 10px; border-top: 1px solid #ccc; }
+        input { flex: 1; padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; }
+        button.send { background: #2e7d32; color: white; border: none; padding: 0 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="top-bar">
-    <button onclick="setupField('11v11')">11 vs 11</button>
-    <button onclick="setupField('funino')">Funino</button>
-    <button onclick="askKey()" style="background:#444">🔑 Key eingeben</button>
+<div id="header">
+    <span onclick="askKey()" style="color:#00ff88; cursor:pointer; text-decoration:underline">🔑 [ Hier klicken: API-Key eingeben ]</span>
 </div>
 
-<div id="pitch-container">
+<div id="nav">
+    <button class="btn" onclick="setMode('11v11')">11 vs 11</button>
+    <button class="btn" onclick="setMode('funino')">Funino</button>
+    <button class="btn" onclick="location.reload()">Reset</button>
+</div>
+
+<div id="pitch-area">
     <div id="pitch">
-        <div class="mid-line"></div>
-        <div id="ball" class="player"></div>
-        <div id="player-layer"></div>
+        <div class="line-mid"></div><div class="circle"></div>
+        <div class="goal" style="top:0"></div><div class="goal" style="bottom:0"></div>
+        <div id="ball" class="player" style="top:48%; left:49%;"></div>
+        <div id="players"></div>
     </div>
 </div>
 
-<div id="chat-section">
+<div id="chat">
     <div id="log"></div>
     <div id="input-row">
-        <input type="text" id="user-in" placeholder="Schreibe hier deine Taktik...">
-        <button onclick="send()">Senden</button>
+        <input type="text" id="user-in" placeholder="Schreibe deinem Co-Trainer...">
+        <button class="send" onclick="talk()">Senden</button>
     </div>
 </div>
 
 <script>
-    const pLayer = document.getElementById('player-layer');
-    const ball = document.getElementById('ball');
-    const log = document.getElementById('log');
-    const input = document.getElementById('user-in');
-    let apiKey = localStorage.getItem('bjorn_key_v19') || "";
+    const layer = document.getElementById('players'), ball = document.getElementById('ball'), log = document.getElementById('log'), input = document.getElementById('user-in');
+    let myKey = localStorage.getItem('bjorn_final_key')?.trim() || "";
 
     function askKey() {
         const k = prompt("Bitte Google API-Key einfügen:");
-        if(k) { localStorage.setItem('bjorn_key_v19', k.trim()); location.reload(); }
+        if(k) { localStorage.setItem('bjorn_final_key', k.trim()); location.reload(); }
     }
 
-    function addLog(who, msg) {
-        log.innerHTML += `<div><strong>${who}:</strong> ${msg}</div>`;
-        log.scrollTop = log.scrollHeight;
+    function addLog(who, msg, isAi) {
+        const div = document.createElement('div');
+        div.style.marginBottom = "8px";
+        div.innerHTML = `<strong>${who}:</strong> ${msg}`;
+        log.appendChild(div); log.scrollTop = log.scrollHeight;
     }
 
-    function createPlayer(t, l, color, num) {
+    function createP(t, l, c, n) {
         const p = document.createElement('div');
-        p.className = 'player ' + color;
-        p.style.top = t + "%"; p.style.left = l + "%";
-        p.innerText = num;
-        pLayer.appendChild(p);
-        drag(p);
+        p.className = 'player ' + c; p.style.top = t + "%"; p.style.left = l + "%";
+        p.innerText = n; layer.appendChild(p);
+        makeDraggable(p);
     }
 
-    function setupField(mode) {
-        pLayer.innerHTML = "";
-        if(mode === '11v11') {
-            for(let i=0; i<11; i++) {
-                createPlayer(70 + (i%3)*5, 10 + i*7, 'red', i+1);
-                createPlayer(20 + (i%3)*5, 10 + i*7, 'blue', i+1);
-            }
+    function setMode(m) {
+        layer.innerHTML = "";
+        if(m === '11v11') {
+            const reds = [{t:88,l:48},{t:75,l:15},{t:75,l:35},{t:75,l:60},{t:75,l:82},{t:55,l:20},{t:55,l:40},{t:55,l:60},{t:55,l:75},{t:35,l:40},{t:35,l:55}];
+            const blues = [{t:10,l:48},{t:20,l:20},{t:20,l:47},{t:20,l:75},{t:40,l:15},{t:40,l:40},{t:40,l:60},{t:40,l:80},{t:60,l:35},{t:60,l:60},{t:60,l:10}];
+            reds.forEach((p,i)=>createP(p.t,p.l,'red',i+1));
+            blues.forEach((p,i)=>createP(p.t,p.l,'blue',i+1));
         } else {
-            for(let i=0; i<3; i++) {
-                createPlayer(75, 20+i*30, 'red', i+1);
-                createPlayer(20, 20+i*30, 'blue', i+1);
-            }
+            for(let i=0; i<3; i++) { createP(75, 25+i*25, 'red', i+1); createP(20, 25+i*25, 'blue', i+1); }
         }
     }
 
-    async function send() {
+    async function talk() {
         const val = input.value; if(!val) return;
-        addLog("Björn", val); input.value = "";
-
-        if(!apiKey) { addLog("System", "Bitte oben den 🔑 Key eingeben!"); return; }
+        addLog("Björn", val, false); input.value = "";
+        if(!myKey) { addLog("System", "Bitte oben Key eingeben!", true); return; }
 
         try {
-            const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                method: "POST", headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({ contents: [{ parts: [{ text: `Du bist Fußball-Coach. Antworte kurz. Befehl: [BALL:X:Y]. Frage: ${val}` }] }] })
+            const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${myKey}`, {
+                method: "POST", headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ contents: [{ parts: [{ text: `Du bist Fußball-Trainer. Antworte kurz. Befehl: [BALL:X:Y]. Frage: ${val}` }] }] })
             });
             const d = await r.json();
-            const txt = d.candidates[0].content.parts[0].text;
-            addLog("Co-Trainer", txt);
-            const bM = txt.match(/\[BALL:(\d+):(\d+)\]/);
-            if(bM) { ball.style.left = bM[1]+"%"; ball.style.top = bM[2]+"%"; }
-        } catch(e) { addLog("System", "Verbindungsfehler. Ist der Key korrekt?"); }
+            if(d.error) { addLog("Co-Trainer", "Fehler: " + d.error.message, true); }
+            else {
+                const txt = d.candidates[0].content.parts[0].text;
+                addLog("Co-Trainer", txt, true);
+                const bM = txt.match(/\[BALL:(\d+):(\d+)\]/);
+                if(bM) { ball.style.left = bM[1]+"%"; ball.style.top = bM[2]+"%"; }
+            }
+        } catch(e) { addLog("Co-Trainer", "Verbindung fehlgeschlagen.", true); }
     }
 
-    function drag(el) {
-        let active = false;
-        el.onmousedown = el.ontouchstart = () => { active = true; };
+    function makeDraggable(el) {
+        let dragging = false;
+        el.onmousedown = el.ontouchstart = (e) => { dragging = true; e.preventDefault(); };
         window.onmousemove = window.ontouchmove = (e) => {
-            if(!active) return;
+            if(!dragging) return;
             const r = document.getElementById('pitch').getBoundingClientRect();
-            const x = (e.clientX || e.touches[0].clientX) - r.left;
-            const y = (e.clientY || e.touches[0].clientY) - r.top;
+            const x = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) - r.left;
+            const y = (e.clientY || (e.touches ? e.touches[0].clientY : 0)) - r.top;
             el.style.left = (x/r.width*100)-2 + "%"; el.style.top = (y/r.height*100)-2 + "%";
         };
-        window.onmouseup = window.ontouchend = () => { active = false; };
+        window.onmouseup = window.ontouchend = () => dragging = false;
     }
 
-    drag(ball);
-    input.onkeypress = (e) => { if(e.key === 'Enter') send(); };
-    setupField('11v11');
+    makeDraggable(ball);
+    input.onkeypress = (e) => { if(e.key === 'Enter') talk(); };
+    window.onload = () => setMode('11v11');
 </script>
 </body>
 </html>
