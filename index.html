@@ -86,3 +86,49 @@
             // Nach 4 Sekunden wieder entfernen
             setTimeout(() => { note.style.opacity = '0'; setTimeout(() => note.remove(), 500); }, 4000);
         }
+    }
+
+    // Drag & Drop für manuelle Verschiebung
+    document.querySelectorAll('.player').forEach(p => {
+        let dragging = false;
+        const startDrag = (e) => { dragging = true; e.preventDefault(); };
+        const doDrag = (e) => {
+            if (!dragging) return;
+            const b = document.getElementById('board').getBoundingClientRect();
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            p.style.left = ((clientX - b.left) / b.width * 100) + "%";
+            p.style.top = ((clientY - b.top) / b.height * 100) + "%";
+        };
+        const stopDrag = () => dragging = false;
+
+        p.addEventListener('mousedown', startDrag);
+        p.addEventListener('touchstart', startDrag);
+        window.addEventListener('mousemove', doDrag);
+        window.addEventListener('touchmove', doDrag);
+        window.addEventListener('mouseup', stopDrag);
+        window.addEventListener('touchend', stopDrag);
+    });
+
+    // Chat-Interaktion (Demo)
+    const send = document.getElementById('send');
+    send.onclick = () => {
+        const val = document.getElementById('input').value.toLowerCase();
+        if (!val) return;
+        
+        const b = document.createElement('div');
+        b.className = 'bubble user';
+        b.innerText = document.getElementById('input').value;
+        document.getElementById('msg-box').appendChild(b);
+        document.getElementById('input').value = "";
+
+        // Beispiel: Wenn du "Angriff" schreibst, bewegen sich die Spieler
+        if (val.includes("angriff")) {
+            setTimeout(() => coachMove('p1', 10, 45, "Stürmer stößt in die Spitze!"), 600);
+            setTimeout(() => coachMove('p2', 20, 30, "Außenbahn rückt nach"), 1200);
+        }
+    };
+</script>
+
+</body>
+</html>
