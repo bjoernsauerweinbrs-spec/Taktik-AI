@@ -3,60 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gemini Tactical Elite - Björns Academy</title>
+    <title>Tactical Intelligence Engine - Pro Coach</title>
     <style>
-        * { box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, sans-serif; }
-        body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: #000; color: #fff; overflow: hidden; }
+        * { box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: #080808; color: #fff; overflow: hidden; }
         
-        /* Dashboard */
-        #dashboard { background: #111; padding: 15px; display: flex; justify-content: center; gap: 15px; border-bottom: 2px solid #2e7d32; flex-wrap: wrap; }
-        .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 10px 18px; border-radius: 3px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; transition: 0.3s; }
-        .btn:hover { background: #00ff88; color: #000; }
-        .btn-drill { border-color: #ff9800; color: #ff9800; }
-        .btn-drill:hover { background: #ff9800; color: #000; }
+        #nav { background: #111; padding: 12px; display: flex; justify-content: center; gap: 15px; border-bottom: 3px solid #2e7d32; }
+        .btn { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px 20px; border-radius: 2px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+        .btn:hover { border-color: #00ff88; color: #00ff88; }
 
-        /* Spielfeld */
-        #pitch-container { flex: 2; position: relative; padding: 10px; display: flex; justify-content: center; }
+        #pitch-container { flex: 2; position: relative; padding: 10px; display: flex; justify-content: center; background: #000; }
         #pitch { 
-            width: 100%; height: 100%; background: #2e7d32; border: 3px solid #fff; position: relative;
-            background-image: repeating-linear-gradient(0deg, #2e7d32, #2e7d32 10%, #29722d 10%, #29722d 20%);
+            width: 100%; height: 100%; background: #2d5a27; border: 3px solid #fff; position: relative;
+            background-image: repeating-linear-gradient(0deg, #2d5a27, #2d5a27 10%, #285123 10%, #285123 20%);
         }
-        .line { position: absolute; background: rgba(255,255,255,0.6); pointer-events: none; }
+        
+        .line { position: absolute; background: rgba(255,255,255,0.5); pointer-events: none; }
         .center-circle { width: 100px; height: 100px; border: 2px solid #fff; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.4; }
-        .goal { position: absolute; border: 2px solid white; background: rgba(255,255,255,0.1); }
-        .goal-std { width: 90px; height: 25px; left: 50%; transform: translateX(-50%); }
-        .goal-fun { width: 50px; height: 18px; }
+        .goal { position: absolute; border: 2px solid white; background: rgba(255,255,255,0.05); }
+        .goal-std { width: 90px; height: 30px; left: 50%; transform: translateX(-50%); }
+        .goal-fun { width: 50px; height: 20px; }
 
-        /* Spieler & Ball */
         .player { 
-            width: 36px; height: 36px; border-radius: 50%; position: absolute; 
+            width: 34px; height: 34px; border-radius: 50%; position: absolute; 
             display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 14px; cursor: grab; z-index: 50;
+            font-weight: 900; font-size: 13px; cursor: grab; z-index: 50;
             border: 2px solid #fff; transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
         }
         .red { background: #b71c1c; color: white; }
         .blue { background: #0d47a1; color: white; }
-        .ball { width: 22px; height: 22px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 1s ease; box-shadow: 0 0 10px white; }
+        .ball { width: 22px; height: 22px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 1s ease-in-out; box-shadow: 0 0 10px white; }
 
-        /* Chat */
-        #chat { height: 35%; background: #fff; color: #000; display: flex; flex-direction: column; border-top: 4px solid #111; }
-        #log { flex: 1; overflow-y: auto; padding: 20px; font-size: 15px; }
-        .msg { margin-bottom: 12px; padding: 10px; border-radius: 4px; line-height: 1.5; border-left: 5px solid transparent; }
-        .ai { background: #f9f9f9; border-left-color: #2e7d32; font-style: italic; }
-        .user { background: #e3f2fd; border-right: 5px solid #1565c0; text-align: right; border-left: none; font-weight: bold; }
+        #chat { height: 35%; background: #ffffff; color: #000; display: flex; flex-direction: column; border-top: 5px solid #1a1a1a; }
+        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 15px; background: #fdfdfd; }
+        .msg { margin-bottom: 10px; padding: 10px 15px; border-radius: 5px; line-height: 1.5; border-left: 5px solid transparent; }
+        .ai { background: #f8f8f8; border-left-color: #2e7d32; font-style: italic; }
+        .user { background: #e3f2fd; border-right: 5px solid #1565c0; text-align: right; border-left: none; }
 
-        #input-area { padding: 15px; background: #eee; display: flex; gap: 15px; }
+        #input-area { padding: 15px; background: #f0f0f0; display: flex; gap: 15px; border-top: 1px solid #ddd; }
         input { flex: 1; padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; outline: none; }
-        button.action { background: none; border: none; font-size: 30px; cursor: pointer; color: #333; }
+        button.action { background: none; border: none; font-size: 28px; cursor: pointer; color: #333; }
     </style>
 </head>
 <body>
 
-<div id="dashboard">
+<div id="nav">
     <button class="btn" onclick="setMode('funino')">Funino (3v3)</button>
-    <button class="btn" onclick="setMode('11v11')">Senioren (11v11)</button>
-    <button class="btn btn-drill" onclick="runDrill('pass')">DFB: Pass-Dreieck</button>
-    <button class="btn btn-drill" onclick="runDrill('switch')">DFB: Umschalten</button>
+    <button class="btn" onclick="setMode('11v11')">Pro Taktik (11v11)</button>
+    <button class="btn" onclick="runDrill('pass')">DFB: G-Jugend Pass</button>
 </div>
 
 <div id="pitch-container">
@@ -71,7 +65,7 @@
 <div id="chat">
     <div id="log"></div>
     <div id="input-area">
-        <input type="text" id="user-input" placeholder="Analyse oder Trainingswunsch eingeben...">
+        <input type="text" id="user-input" placeholder="Taktische Analyse einleiten...">
         <button class="action" onclick="startMic()">🎤</button>
         <button class="action" onclick="execute()">➤</button>
     </div>
@@ -88,8 +82,9 @@
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             const voices = window.speechSynthesis.getVoices();
-            utterance.voice = voices.find(v => v.lang.startsWith('de') && (v.name.includes('Stefan') || v.name.includes('Markus'))) || voices.find(v => v.lang.startsWith('de'));
-            utterance.pitch = 0.8; utterance.rate = 0.95;
+            const maleVoice = voices.find(v => v.lang.startsWith('de') && (v.name.includes('Stefan') || v.name.includes('Markus'))) || voices.find(v => v.lang.startsWith('de'));
+            if (maleVoice) utterance.voice = maleVoice;
+            utterance.pitch = 0.82; utterance.rate = 0.92;
             window.speechSynthesis.speak(utterance);
         }
     }
@@ -103,105 +98,29 @@
         if (isAi) speak(text);
     }
 
-    function createP(t, l, c, n) {
-        const p = document.createElement('div');
-        p.className = `player ${c}`;
-        p.style.top = t + "%"; p.style.left = l + "%";
-        p.innerText = n;
-        layer.appendChild(p);
-        return p;
-    }
-
-    // --- DFB TRAININGS-LOGIK ---
-    function runDrill(type) {
-        layer.innerHTML = "";
-        if(type === 'pass') {
-            const p1 = createP(70, 30, 'red', 'A'); const p2 = createP(70, 70, 'red', 'B'); const p3 = createP(35, 50, 'red', 'C');
-            addLog("Co-Trainer", "Simulation DFB-Passdreieck für G-Jugend. Wir trainieren die offene Stellung und das Spiel in den Vorlauf.", true);
-            const cycle = () => {
-                setTimeout(() => { ball.style.top = "70%"; ball.style.left = "30%"; }, 500);
-                setTimeout(() => { ball.style.top = "70%"; ball.style.left = "70%"; }, 2000);
-                setTimeout(() => { ball.style.top = "35%"; ball.style.left = "50%"; }, 3500);
-            };
-            cycle();
-        } else if(type === 'switch') {
-            createP(80, 45, 'red', '4'); createP(50, 20, 'red', '7'); createP(50, 70, 'red', '11');
-            addLog("Co-Trainer", "Umschaltspiel Senioren. Fokus auf die schnelle horizontale Spielverlagerung nach Ballgewinn.", true);
-            setTimeout(() => { ball.style.left = "20%"; ball.style.top = "50%"; }, 1000);
-            setTimeout(() => { ball.style.left = "70%"; ball.style.top = "50%"; }, 3000);
-        }
-    }
-
-    function setMode(mode) {
-        layer.innerHTML = "";
-        document.querySelectorAll('.goal').forEach(g => g.remove());
-        if (mode === 'funino') {
-            [[0,18],[0,72],[96,18],[96,72]].forEach(p => addGoal(p[0], p[1], 'goal-fun'));
-            for(let i=0; i<3; i++) { createP(75, 25+i*25, 'red', i+1); createP(20, 25+i*25, 'blue', i+1); }
-            addLog("Co-Trainer", "Funino-Modus. Wir legen den Fokus auf die Raumwahrnehmung der Kinder.", true);
-        } else {
-            addGoal(0, 43, 'goal-std'); addGoal(96, 43, 'goal-std');
-            const h = [{t:90,l:47},{t:78,l:15},{t:80,l:38},{t:80,l:58},{t:78,l:80},{t:62,l:15},{t:64,l:38},{t:64,l:58},{t:62,l:80},{t:45,l:40},{t:45,l:55}];
-            h.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
-            addLog("Co-Trainer", "Match-Modus 11 gegen 11. Als Co-Trainer empfehle ich heute eine verstärkte Tiefenstaffelung.", true);
-        }
-        initDrag();
-    }
-
-    function addGoal(t, l, c) {
-        const g = document.createElement('div'); g.className = 'goal ' + c;
-        g.style.top = t + "%"; g.style.left = l + "%";
-        document.getElementById('pitch').appendChild(g);
-    }
-
-    function execute() {
-        const val = input.value.toLowerCase();
-        if(!val) return;
-        addLog("Björn", input.value, false);
+    // --- TAKTISCHE VERSCHIEBE-ENGINE ---
+    function shiftFormation(ballX) {
+        const redPlayers = document.querySelectorAll('.red');
+        const bluePlayers = document.querySelectorAll('.blue');
         
-        let r = "Das ist eine interessante taktische Überlegung. Als Ihr Co-Trainer empfehle ich, die Kompaktheit im Zentrum zu wahren.";
+        // Rot (Abwehr) schiebt ballorientiert ein
+        redPlayers.forEach(p => {
+            let baseL = parseFloat(p.getAttribute('data-base-l'));
+            let shiftStrength = 0.35; // 35% Verschiebung zum Ball
+            let newL = baseL + (ballX - 50) * shiftStrength;
+            p.style.left = newL + "%";
+        });
 
-        if(val.includes("was kannst du")) {
-            r = "Ich kann Spielsysteme wie 4-4-2 oder 3-4-3 simulieren, DFB-Trainingsübungen animieren und ballorientierte Verschiebebewegungen berechnen. Was ist unser nächster Schritt, Trainer?";
-        } else if(val.includes("übung") || val.includes("pass")) {
-            runDrill('pass'); return;
-        } else if(val.includes("ball") && val.includes("rechts")) {
-            ball.style.left = "85%"; ball.style.top = "50%";
-            r = "Ballverlagerung auf den rechten Flügel. Wir zwingen den Gegner zur horizontalen Verschiebung.";
-        } else if(val.includes("442") || val.includes("aufstellen")) {
-            setMode('11v11');
-            r = "System 4-4-2 ist stabilisiert. Die Kettenabstände sind nun optimal ausgerichtet.";
-        }
-
-        setTimeout(() => addLog("Co-Trainer", r, true), 800);
-        input.value = "";
-    }
-
-    function initDrag() {
-        document.querySelectorAll('.player').forEach(p => {
-            let drag = false;
-            p.onmousedown = p.ontouchstart = (e) => { drag = true; p.style.transition = "none"; e.preventDefault(); };
-            window.onmousemove = window.ontouchmove = (e) => {
-                if (!drag) return;
-                const r = document.getElementById('pitch').getBoundingClientRect();
-                const x = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) - r.left;
-                const y = (e.clientY || (e.touches ? e.touches[0].clientY : 0)) - r.top;
-                p.style.left = (x/r.width*100)-3 + "%"; p.style.top = (y/r.height*100)-3 + "%";
-            };
-            window.onmouseup = window.ontouchend = () => { drag = false; p.style.transition = "all 1.2s ease"; };
+        // Blau (Angriff) zieht das Feld breit
+        bluePlayers.forEach(p => {
+            let baseL = parseFloat(p.getAttribute('data-base-l'));
+            let spreadStrength = 0.15; // Zieht sich leicht auf
+            let newL = baseL + (ballX - 50) * spreadStrength;
+            p.style.left = newL + "%";
         });
     }
 
-    function startMic() {
-        if ('webkitSpeechRecognition' in window) {
-            const rec = new webkitSpeechRecognition(); rec.lang = 'de-DE';
-            rec.onresult = (e) => { input.value = e.results[0][0].transcript; execute(); };
-            rec.start();
-        }
-    }
-
-    input.onkeypress = (e) => { if(e.key === 'Enter') execute(); };
-    window.onload = () => { window.speechSynthesis.getVoices(); setMode('11v11'); };
-</script>
-</body>
-</html>
+    function createP(t, l, c, n) {
+        const p = document.createElement('div');
+        p.className = `player ${c}`;
+        p.style.top = t + "%"; p.style.left
