@@ -3,39 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tactical Intelligence Pro - Björn Edition</title>
+    <title>Tactical Intelligence Engine - Björn Pro</title>
     <style>
-        :root { --pitch-green: #2d5a27; --pitch-stripe: #285123; --line-white: rgba(255,255,255,0.6); }
-        * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
-        body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: #050505; color: #fff; overflow: hidden; }
+        :root { --pitch: #2d5a27; --line: rgba(255,255,255,0.7); }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: #000; color: #fff; overflow: hidden; }
         
-        /* Navigation & Status */
-        #nav { background: #111; padding: 12px; display: flex; justify-content: center; gap: 10px; border-bottom: 3px solid #2e7d32; flex-wrap: wrap; }
-        .btn { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px 18px; border-radius: 2px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 11px; transition: 0.3s; }
-        .btn:hover { border-color: #00ff88; color: #00ff88; box-shadow: 0 0 10px rgba(0,255,136,0.3); }
+        #nav { background: #111; padding: 10px; display: flex; justify-content: center; gap: 10px; border-bottom: 2px solid #2e7d32; }
+        .btn { background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; transition: 0.2s; }
+        .btn:hover { background: #00ff88; color: #000; }
+        
         #api-bar { background: #1a1a1a; padding: 5px; text-align: center; font-size: 10px; color: #888; border-bottom: 1px solid #333; }
 
-        /* Spielfeld-Container */
-        #pitch-area { flex: 2; position: relative; padding: 10px; display: flex; justify-content: center; background: #000; }
+        #pitch-wrapper { flex: 2; position: relative; background: #000; display: flex; justify-content: center; align-items: center; padding: 10px; }
         #pitch { 
-            width: 100%; height: 100%; background: var(--pitch-green); border: 3px solid #fff; position: relative;
-            background-image: repeating-linear-gradient(0deg, var(--pitch-green), var(--pitch-green) 10%, var(--pitch-stripe) 10%, var(--pitch-stripe) 20%);
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            width: 100%; height: 100%; max-width: 1000px; background: var(--pitch); border: 3px solid #fff; position: relative;
+            background-image: repeating-linear-gradient(0deg, var(--pitch), var(--pitch) 10%, #285123 10%, #285123 20%);
         }
-        .line { position: absolute; background: var(--line-white); pointer-events: none; }
-        .center-circle { width: 100px; height: 100px; border: 2px solid var(--line-white); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .goal { position: absolute; border: 2px solid white; background: rgba(255,255,255,0.1); z-index: 5; }
-        .goal-std { width: 90px; height: 25px; left: 50%; transform: translateX(-50%); }
-        .goal-fun { width: 50px; height: 20px; }
+        .line { position: absolute; background: var(--line); pointer-events: none; }
+        .center-circle { width: 100px; height: 100px; border: 2px solid var(--line); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-        /* Spieler & Ball */
         .player { 
-            width: 32px; height: 32px; border-radius: 50%; position: absolute; 
+            width: 30px; height: 30px; border-radius: 50%; position: absolute; 
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 12px; cursor: grab; z-index: 50;
-            border: 2px solid #fff; transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            font-weight: 900; font-size: 11px; cursor: grab; z-index: 50;
+            border: 2px solid #fff; transition: all 1s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
         }
-        .red { background: linear-gradient(135deg, #b71c1c, #7f0000); color: white; }
-        .blue { background: linear-gradient(135deg, #0d47a1, #002171); color: white; }
-        .ball { width: 20px; height: 20px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 0.
+        .red { background: #b71c1c; color: white; }
+        .blue { background: #0d47a1; color: white; }
+        .ball { width: 18px; height: 18px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 0.7s ease; box-shadow: 0 0 15px white; }
+
+        #chat { flex: 1; background: #fff; display: flex; flex-direction: column; border-top: 4px solid #111; }
+        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; color: #000; }
+        .msg { margin-bottom: 8px; padding: 10px; border-radius: 5px; line-height: 1.5; border-left: 5px solid transparent; }
+        .ai { background: #f0f0f0; border-left-color: #2e7d32; font-style: italic; }
+        .user { background: #e3f2fd; border-right: 5px solid #1565c0; text-align: right; border-left: none; }
+
+        #input-row { padding: 10px; background: #eee; display: flex; gap: 10px; border-top: 1px solid #ccc; }
+        input { flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; outline: none; }
+        button.icon { background: none; border: none; font-size: 26px; cursor: pointer; color: #333; }
+    </style>
+</head>
+<body onclick="initVoice()">
+
+<div id="api-bar">
+    <span id="api-status">Simulation aktiv</span> | 
+    <a href="#" style="color: #00ff88; text-decoration: none;" onclick="setKey()">[ API-Key ]</a>
+</div>
+
+<div id="nav">
+    <button class="btn" onclick="setBoard('funino')">Funino (3v3)</button>
+    <button class="btn" onclick="setBoard('11v11')">Match (11v11)</button>
+    <button class="btn" onclick="resetBall()">Ball Mitte</button>
+</div>
+
+<div id="pitch-wrapper">
+    <div id="pitch">
+        <div class="line" style="width: 100%; height: 2px; top: 50%;"></div>
+        <div class="center-circle"></div>
+        <div id="ball" class="player ball" style="top: 48%; left: 49%;"></div>
+        <div id="team-layer"></div>
+    </div>
+</div>
+
+<div id="chat">
+    <div id="log"></div>
+    <div id="input-row">
+        <input type="text" id="user-in" placeholder="Befehl oder Trainings-Frage...">
+        <button class="icon" onclick="startMic()">🎤</button>
+        <button class="icon" onclick="send()">➤</button>
+    </div>
+</div>
+
+<script>
+    const layer = document.getElementById('team-layer');
+    const log = document.getElementById('log');
+    const input = document.getElementById('user-in');
+    const ball = document.getElementById('ball');
+
+    let coachVoice = null;
+    let apiKey = localStorage.getItem('bt_key') || "";
+
+    function setKey() {
+        const k = prompt("Gemini API Key eingeben:");
+        if(k) { localStorage.setItem('bt_key', k); location.reload(); }
+    }
+    if(apiKey) document.getElementById('api-status').innerText = "KI-Power aktiv";
+
+    function initVoice() {
+        if(coachVoice) return;
+        const vs = window.speechSynthesis.getVoices();
+        coachVoice = vs.find(v => v.lang.startsWith('de') && (v.name.includes('Stefan') || v.name.includes('Markus'))) || vs[0];
+    }
+
+    function speak(t) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const m = new SpeechSynthesisUtterance(t);
+            if(coachVoice) m.voice = coachVoice;
+            m.pitch = 0.8; m.rate = 0.95;
+            window.speechSynthesis.speak(m);
+        }
+    }
+
+    function addLog(who, t, isAi) {
+        const d = document.createElement('div');
