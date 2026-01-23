@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tactical Intelligence Pro - Björn</title>
+    <title>Tactical Intelligence Board - Björn Edition</title>
     <style>
         :root { --pitch: #2d5a27; --stripe: #254d21; --line: rgba(255,255,255,0.7); }
         * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; }
@@ -16,41 +16,38 @@
 
         #pitch-wrapper { flex: 2; position: relative; display: flex; justify-content: center; align-items: center; padding: 10px; background: #000; }
         #pitch { 
-            width: 100%; height: 100%; max-width: 1100px; background: var(--pitch); border: 2px solid #fff; position: relative;
+            width: 100%; height: 100%; max-width: 1100px; background: var(--pitch); border: 3px solid #fff; position: relative;
             background-image: repeating-linear-gradient(0deg, var(--pitch), var(--pitch) 10%, var(--stripe) 10%, var(--stripe) 20%);
         }
         
-        /* Feld-Elemente */
+        /* Feld-Markierungen */
         .mid-line { position: absolute; width: 100%; height: 2px; background: var(--line); top: 50%; left: 0; pointer-events: none; }
-        .center-circle { width: 90px; height: 90px; border: 2px solid var(--line); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+        .center-circle { width: 100px; height: 100px; border: 2px solid var(--line); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
         
-        /* Tore: Exakt zentriert */
-        .goal { position: absolute; border: 2px solid white; background: rgba(255,255,255,0.1); z-index: 5; }
+        .goal { position: absolute; border: 2px solid white; background: rgba(255,255,255,0.2); z-index: 5; }
         .goal-std { width: 90px; height: 30px; left: 50%; transform: translateX(-50%); }
         .goal-fun { width: 50px; height: 18px; }
 
-        /* Akteure */
         .player { 
-            width: 30px; height: 30px; border-radius: 50%; position: absolute; 
+            width: 32px; height: 32px; border-radius: 50%; position: absolute; 
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 11px; cursor: grab; z-index: 50;
-            border: 2px solid #fff; transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
+            font-weight: 900; font-size: 12px; cursor: grab; z-index: 50;
+            border: 2px solid #fff; transition: all 1s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
             box-shadow: 0 4px 8px rgba(0,0,0,0.5);
         }
-        .red { background: #b71c1c; color: white; }
-        .blue { background: #0d47a1; color: white; }
-        .ball { width: 18px; height: 18px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 0.8s ease; box-shadow: 0 0 10px #fff; }
+        .red { background: linear-gradient(135deg, #b71c1c, #7f0000); color: white; }
+        .blue { background: linear-gradient(135deg, #0d47a1, #002171); color: white; }
+        .ball { width: 18px; height: 18px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 0.7s ease-in-out; box-shadow: 0 0 10px #fff; }
 
-        /* Chat */
         #chat { height: 38%; background: #fff; color: #000; display: flex; flex-direction: column; }
         #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; background: #f9f9f9; }
         .msg { margin-bottom: 8px; padding: 10px; border-radius: 6px; border-left: 5px solid transparent; }
-        .ai { background: #f0f0f0; border-left-color: #2e7d32; }
+        .ai { background: #f0f0f0; border-left-color: #2e7d32; font-style: italic; }
         .user { background: #e3f2fd; border-right: 5px solid #1565c0; text-align: right; border-left: none; }
 
-        #input-row { padding: 12px; background: #eee; display: flex; gap: 10px; }
+        #input-row { padding: 12px; background: #eee; display: flex; gap: 10px; border-top: 1px solid #ccc; }
         input { flex: 1; padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; outline: none; }
-        .send-btn { background: #2e7d32; color: white; border: none; padding: 0 20px; border-radius: 4px; cursor: pointer; }
+        .send-btn { background: #2e7d32; color: white; border: none; padding: 0 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body onclick="initAudio()">
@@ -61,7 +58,7 @@
 </div>
 
 <div id="nav">
-    <button class="btn" onclick="setMode('funino')">Funino</button>
+    <button class="btn" onclick="setMode('funino')">Funino (3v3)</button>
     <button class="btn" onclick="setMode('11v11')">11v11 Match</button>
     <button class="btn" onclick="resetBall()">Ball Mitte</button>
 </div>
@@ -70,7 +67,7 @@
     <div id="pitch">
         <div class="mid-line"></div>
         <div class="center-circle"></div>
-        <div id="ball" class="player ball" style="top: 48.2%; left: 49.2%;"></div>
+        <div id="ball" class="player ball" style="top: 48.5%; left: 49.2%;"></div>
         <div id="p-layer"></div>
     </div>
 </div>
@@ -78,7 +75,7 @@
 <div id="chat">
     <div id="log"></div>
     <div id="input-row">
-        <input type="text" id="user-in" placeholder="Anweisung an Co-Trainer Björn...">
+        <input type="text" id="user-in" placeholder="Taktik-Analyse oder Übung anfordern...">
         <button class="send-btn" onclick="talk()">➤</button>
     </div>
 </div>
@@ -142,24 +139,29 @@
 
     function setMode(m) {
         layer.innerHTML = "";
-        document.querySelectorAll('.goal').forEach(g => g.remove());
+        const oldGoals = document.querySelectorAll('.goal');
+        oldGoals.forEach(g => g.remove());
+
         if(m === 'funino') {
-            addGoal(0, 20, 'goal-fun'); addGoal(0, 75, 'goal-fun');
-            addGoal(97, 20, 'goal-fun'); addGoal(97, 75, 'goal-fun');
+            addGoal(0, 18, 'goal-fun'); addGoal(0, 72, 'goal-fun');
+            addGoal(96.5, 18, 'goal-fun'); addGoal(96.5, 72, 'goal-fun');
             for(let i=0; i<3; i++) { createP(75, 25+i*25, 'red', i+1); createP(20, 25+i*25, 'blue', i+1); }
             addLog("Co-Trainer", "Funino-Modus: 3 gegen 3 auf 4 Minitore.", true);
         } else {
-            addGoal(0, 42, 'goal-std'); addGoal(97, 42, 'goal-std');
-            const redT = [{t:85,l:47},{t:75,l:15},{t:75,l:35},{t:75,l:60},{t:75,l:82},{t:55,l:20},{t:55,l:40},{t:55,l:60},{t:55,l:75},{t:35,l:40},{t:35,l:55}];
-            const blueT = [{t:10,l:47},{t:20,l:20},{t:20,l:47},{t:20,l:75},{t:40,l:15},{t:40,l:40},{t:40,l:60},{t:40,l:80},{t:60,l:35},{t:60,l:60}];
-            redT.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
-            blueT.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
-            addLog("Co-Trainer", "11 gegen 11 Match-Modus bereit.", true);
+            // Tore exakt in der Mitte zentriert
+            addGoal(0, 50, 'goal-std'); 
+            addGoal(96.5, 50, 'goal-std');
+            const redTeam = [{t:88,l:48},{t:75,l:15},{t:78,l:35},{t:78,l:62},{t:75,l:82},{t:58,l:20},{t:62,l:40},{t:62,l:58},{t:58,l:78},{t:42,l:42},{t:42,l:54}];
+            const blueTeam = [{t:10,l:48},{t:22,l:20},{t:18,l:48},{t:22,l:78},{t:38,l:15},{t:42,l:38},{t:42,l:58},{t:38,l:82},{t:55,l:30},{t:55,l:68}];
+            redTeam.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
+            blueTeam.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
+            addLog("Co-Trainer", "11-gegen-11 Match-Modus bereit.", true);
         }
         initDrag();
     }
 
     async function talk() {
+        initAudio();
         const val = input.value; if(!val) return;
         addLog("Björn", val, false);
         input.value = "";
@@ -170,29 +172,34 @@
         }
 
         try {
-            const r = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${myKey}`, {
+            // Nutzt v1beta für maximale Modell-Kompatibilität
+            const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${myKey}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: `Du bist ein Fußball-Co-Trainer für Björn. Antworte fachlich kurz. Nutze [BALL:X:Y] zur Steuerung. Frage: ${val}` }] }]
+                    contents: [{ parts: [{ text: `Du bist ein Fußball-Co-Trainer für Björn. Antworte fachlich kurz. Steuere den Ball mit [BALL:X:Y] (X/Y von 0 bis 100). Frage: ${val}` }] }]
                 })
             });
 
             const d = await r.json();
             if (d.error) {
-                addLog("Co-Trainer", "Fehler: " + d.error.message, true);
+                addLog("Co-Trainer", "KI-Zentrale meldet: " + d.error.message, true);
             } else {
                 let resp = d.candidates[0].content.parts[0].text;
+                // Sucht nach Ball-Befehlen wie [BALL:85:50]
                 const bM = resp.match(/\[BALL:(\d+):(\d+)\]/);
-                if(bM) { ball.style.left = bM[1] + "%"; ball.style.top = bM[2] + "%"; }
+                if(bM) { 
+                    ball.style.left = bM[1] + "%"; 
+                    ball.style.top = bM[2] + "%"; 
+                }
                 addLog("Co-Trainer", resp, true);
             }
         } catch(e) {
-            addLog("Co-Trainer", "Verbindungsfehler zur KI-Zentrale.", true);
+            addLog("Co-Trainer", "Verbindungsfehler zur KI-Zentrale. Internetverbindung ok?", true);
         }
     }
 
-    function resetBall() { ball.style.left = "49.2%"; ball.style.top = "48.2%"; }
+    function resetBall() { ball.style.left = "49.2%"; ball.style.top = "48.5%"; }
 
     function initDrag() {
         document.querySelectorAll('.player').forEach(p => {
@@ -210,7 +217,7 @@
     }
 
     input.onkeypress = (e) => { if(e.key === 'Enter') talk(); };
-    window.onload = () => setMode('11v11');
+    window.onload = () => { setMode('11v11'); };
 </script>
 </body>
 </html>
