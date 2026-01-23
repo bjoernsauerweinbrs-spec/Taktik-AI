@@ -9,51 +9,43 @@
         * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; }
         body { height: 100vh; display: flex; flex-direction: column; background: #000; overflow: hidden; color: #fff; }
         
-        /* Header & API */
         #api-bar { background: #111; padding: 6px; text-align: center; font-size: 11px; border-bottom: 1px solid #333; }
         #nav { background: #1a1a1a; padding: 12px; display: flex; justify-content: center; gap: 10px; border-bottom: 3px solid #2e7d32; }
         .btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
         .btn:hover { background: #00ff88; color: #000; }
 
-        /* Spielfeld */
         #pitch-container { flex: 2; position: relative; display: flex; justify-content: center; align-items: center; padding: 10px; background: #000; }
         #pitch { 
             width: 100%; height: 100%; max-width: 1100px; background: var(--pitch); border: 3px solid #fff; position: relative;
             background-image: repeating-linear-gradient(0deg, var(--pitch), var(--pitch) 10%, var(--stripe) 10%, var(--stripe) 20%);
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
         .center-circle { width: 100px; height: 100px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .mid-line { position: absolute; width: 100%; height: 2px; background: rgba(255,255,255,0.5); top: 50%; }
 
-        /* Akteure */
         .player { 
-            width: 32px; height: 32px; border-radius: 50%; position: absolute; 
+            width: 30px; height: 30px; border-radius: 50%; position: absolute; 
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 12px; cursor: grab; z-index: 50;
+            font-weight: 900; font-size: 11px; cursor: grab; z-index: 50;
             border: 2px solid #fff; transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        .red { background: linear-gradient(135deg, #b71c1c, #7f0000); }
-        .blue { background: linear-gradient(135deg, #0d47a1, #002171); }
-        .ball { width: 20px; height: 20px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 0.8s ease-in-out; box-shadow: 0 0 15px #fff; }
+        .red { background: #b71c1c; }
+        .blue { background: #0d47a1; }
+        .ball { width: 18px; height: 18px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; transition: all 0.8s ease-in-out; }
 
-        /* Chat */
         #chat { height: 35%; background: #fff; color: #000; display: flex; flex-direction: column; }
         #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 15px; background: #f9f9f9; }
-        .msg { margin-bottom: 10px; padding: 10px; border-radius: 6px; line-height: 1.4; border-left: 5px solid transparent; }
-        .ai { background: #f0f0f0; border-left-color: #2e7d32; font-style: italic; }
+        .msg { margin-bottom: 10px; padding: 10px; border-radius: 6px; border-left: 5px solid transparent; }
+        .ai { background: #f0f0f0; border-left-color: #2e7d32; }
         .user { background: #e3f2fd; border-right: 5px solid #1565c0; text-align: right; border-left: none; }
 
-        #input-row { padding: 12px; background: #eee; display: flex; gap: 10px; border-top: 1px solid #ccc; }
+        #input-row { padding: 12px; background: #eee; display: flex; gap: 10px; }
         input { flex: 1; padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; outline: none; }
-        button.send-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: #333; }
     </style>
 </head>
 <body onclick="startAudio()">
 
 <div id="api-bar">
     <span id="api-status">Simulation lokal</span> | 
-    <a href="#" style="color: #00ff88; text-decoration: none;" onclick="setKey()">[ KI-Key hinterlegen ]</a>
+    <a href="#" style="color: #00ff88; text-decoration: none;" onclick="setKey()">[ API-Key neu eingeben ]</a>
 </div>
 
 <div id="nav">
@@ -64,7 +56,6 @@
 
 <div id="pitch-container">
     <div id="pitch">
-        <div class="mid-line"></div>
         <div class="center-circle"></div>
         <div id="ball" class="player ball" style="top: 48%; left: 49%;"></div>
         <div id="player-layer"></div>
@@ -75,7 +66,7 @@
     <div id="log"></div>
     <div id="input-row">
         <input type="text" id="user-input" placeholder="Anfrage an Co-Trainer Björn...">
-        <button class="send-btn" onclick="process()">➤</button>
+        <button style="padding:10px" onclick="process()">➤</button>
     </div>
 </div>
 
@@ -86,13 +77,13 @@
     const ball = document.getElementById('ball');
 
     let voice = null;
-    let apiKey = localStorage.getItem('tactical_key') || "";
+    let apiKey = localStorage.getItem('tactical_key')?.trim() || "";
 
     function setKey() {
         const k = prompt("Gemini API Key einfügen:");
-        if(k) { localStorage.setItem('tactical_key', k); location.reload(); }
+        if(k) { localStorage.setItem('tactical_key', k.trim()); location.reload(); }
     }
-    if(apiKey) document.getElementById('api-status').innerText = "KI-Power aktiv";
+    if(apiKey) document.getElementById('api-status').innerText = "KI-Power aktiv (Key gespeichert)";
 
     function startAudio() {
         if(voice) return;
@@ -100,27 +91,23 @@
         voice = vs.find(v => v.lang.startsWith('de') && (v.name.includes('Stefan') || v.name.includes('Markus'))) || vs[0];
     }
 
-    function speak(t) {
-        if (!window.speechSynthesis) return;
-        window.speechSynthesis.cancel();
-        const m = new SpeechSynthesisUtterance(t);
-        if(voice) m.voice = voice;
-        m.pitch = 0.8; m.rate = 0.95;
-        window.speechSynthesis.speak(m);
-    }
-
     function addLog(who, t, isAi) {
         const d = document.createElement('div');
         d.className = 'msg ' + (isAi ? 'ai' : 'user');
         d.innerHTML = `<b>${who}:</b> ${t}`;
         log.appendChild(d); log.scrollTop = log.scrollHeight;
-        if(isAi) speak(t.replace(/\[.*?\]/g, '')); // Kommandos nicht vorlesen
+        if(isAi && window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            const m = new SpeechSynthesisUtterance(t.replace(/\[.*?\]/g, ''));
+            if(voice) m.voice = voice;
+            m.pitch = 0.8; m.rate = 0.95;
+            window.speechSynthesis.speak(m);
+        }
     }
 
-    function createP(t, l, c, n, id) {
+    function createP(t, l, c, n) {
         const p = document.createElement('div');
         p.className = `player ${c}`;
-        if(id) p.id = id;
         p.style.top = t + "%"; p.style.left = l + "%";
         p.setAttribute('data-base-l', l);
         p.innerText = n;
@@ -138,13 +125,13 @@
         layer.innerHTML = "";
         if(m === 'funino') {
             for(let i=0; i<3; i++) { createP(75, 25+i*25, 'red', i+1); createP(20, 25+i*25, 'blue', i+1); }
-            addLog("Co-Trainer", "Funino-Modus. KI bereit für Trainings-Szenarien.", true);
+            addLog("Co-Trainer", "Funino-Formation steht.", true);
         } else {
             const h = [{t:90,l:47},{t:78,l:15},{t:80,l:35},{t:80,l:60},{t:78,l:80},{t:62,l:15},{t:65,l:35},{t:65,l:60},{t:62,l:80},{t:42,l:40},{t:42,l:55}];
             const a = [{t:10,l:47},{t:25,l:20},{t:25,l:75},{t:45,l:15},{t:45,l:40},{t:45,l:60},{t:45,l:85},{t:60,l:30},{t:60,l:50},{t:60,l:70}];
-            h.forEach((p, i) => createP(p.t, p.l, 'red', i+1, i===10?'leader':''));
+            h.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
             a.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
-            addLog("Co-Trainer", "11 gegen 11 hergestellt. Volle Teamstärke auf dem Platz.", true);
+            addLog("Co-Trainer", "11 gegen 11 Match-Modus aktiv.", true);
         }
         initDrag();
     }
@@ -153,30 +140,32 @@
 
     async function process() {
         const val = input.value; if(!val) return;
-        addLog("Trainer Björn", val, false);
+        addLog("Björn", val, false);
         input.value = "";
         
-        let resp = "";
-        if(apiKey) {
-            try {
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: `Du bist ein Co-Trainer. Björn ist dein Chef. Antworte fachlich (Gegenpressing, Halbraum). Du kannst das Board steuern, indem du am Ende deiner Antwort Codes einfügst: [BALL:RECHTS], [BALL:LINKS], [BALL:MITTE], [ATTACKE]. Frage: ${val}` }] }] })
-                });
-                const d = await r.json(); resp = d.candidates[0].content.parts[0].text;
-            } catch(e) { resp = "KI-Zentrale nicht erreichbar."; }
-        } else {
-            resp = "Lokal-Modus: Bitte Key hinterlegen für volle Analyse-Power.";
-            if(val.toLowerCase().includes("rechts")) { ball.style.left = "85%"; shift(85); resp = "Ball auf den rechten Flügel verlagert."; }
+        if(!apiKey) {
+            addLog("Co-Trainer", "Kein API-Key gefunden. Bitte oben eingeben.", true);
+            return;
         }
 
-        // KI-KOMMANDOS AUSFÜHREN
-        if(resp.includes("[BALL:RECHTS]")) { ball.style.left = "85%"; shift(85); }
-        if(resp.includes("[BALL:LINKS]")) { ball.style.left = "15%"; shift(15); }
-        if(resp.includes("[BALL:MITTE]")) resetBall();
-        if(resp.includes("[ATTACKE]")) { const l = document.getElementById('leader'); if(l) { l.style.top = "20%"; ball.style.top = "21%"; ball.style.left = l.style.left; } }
-
-        addLog("Co-Trainer", resp, true);
+        try {
+            const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: `Du bist ein Fußball-Co-Trainer. Björn ist der Chef. Antworte kurz und fachlich. Codes: [BALL:RECHTS], [BALL:LINKS]. Frage: ${val}` }] }] })
+            });
+            const d = await r.json();
+            
+            if (d.error) {
+                addLog("Co-Trainer", "Fehler von Google: " + d.error.message, true);
+            } else {
+                let resp = d.candidates[0].content.parts[0].text;
+                if(resp.includes("[BALL:RECHTS]")) { ball.style.left = "85%"; shift(85); }
+                if(resp.includes("[BALL:LINKS]")) { ball.style.left = "15%"; shift(15); }
+                addLog("Co-Trainer", resp, true);
+            }
+        } catch(e) { 
+            addLog("Co-Trainer", "Verbindung fehlgeschlagen. Internet ok?", true);
+        }
     }
 
     function initDrag() {
