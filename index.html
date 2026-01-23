@@ -1,1 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Taktikboard Fußball</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #222;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
+    h1 {
+      margin: 10px 0;
+    }
+
+    #controls {
+      margin-bottom: 10px;
+    }
+
+    #field {
+      position: relative;
+      width: 900px;
+      height: 600px;
+      background: #2e7d32; /* Grün */
+      border: 4px solid #fff;
+      box-sizing: border-box;
+    }
+
+    /* Linien auf dem Spielfeld */
+    .line {
+      position: absolute;
+      background: #fff;
+      opacity: 0.9;
+    }
+
+    /* Mittellinie */
+    #midline {
+      width: 4px;
+      height: 100%;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+    }
+
+    /* Mittelkreis */
+    #center-circle {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-sizing: border-box;
+    }
+
+    /* Strafräume (grob) */
+    .box {
+      width: 150px;
+      height: 300px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 3px solid #fff;
+      box-sizing: border-box;
+    }
+
+    #box-left {
+      left: 0;
+    }
+
+    #box-right {
+      right: 0;
+    }
+
+    /* Spieler */
+    .player {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .teamA {
+      background: #1976d2; /* Blau */
+    }
+
+    .teamB {
+      background: #d32f2f; /* Rot */
+    }
+
+    #info {
+      margin-top: 10px;
+      font-size: 14px;
+      max-width: 900px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Taktikboard – 11 gegen 11 (Basis)</h1>
+
+  <div id="controls">
+    <button id="resetBtn">Spieler zurücksetzen</button>
+  </div>
+
+  <div id="field">
+    <!-- Linien -->
+    <div id="midline" class="line"></div>
+    <div id="center-circle"></div>
+    <div id="box-left" class="box"></div>
+    <div id="box-right" class="box"></div>
+  </div>
+
+  <div id="info">
+    Ziehe die Spieler mit der Maus über das Feld.  
+    Dies ist nur die erste Version – später können wir Spielsysteme, Funinho und KI‑Vorschläge ergänzen.
+  </div>
+
+  <script>
+    // Grundaufstellung 11 vs 11 (sehr simpel, nur als Start)
+    const field = document.getElementById('field');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // Startpositionen (x, y in Prozent vom Feld)
+    const initialPositions = {
+      teamA: [
+        { number: 1, x: 10, y: 50 },  // Torwart
+        { number: 2, x: 25, y: 20 },
+        { number: 3, x: 25, y: 40 },
+        { number: 4, x: 25, y: 60 },
+        { number: 5, x: 25, y: 80 },
+        { number: 6, x: 40, y: 30 },
+        { number: 7, x: 40, y: 50 },
+        { number: 8, x: 40, y: 70 },
+        { number: 9, x: 55, y: 35 },
+        { number: 10, x: 55, y: 55 },
+        { number: 11, x: 65, y: 45 }
+      ],
+      teamB: [
+        { number: 1, x: 90, y: 50 },  // Torwart
+        { number: 2, x: 75, y: 20 },
+        { number: 3, x: 75, y: 40 },
+        { number: 4, x: 75, y: 60 },
+        { number: 5, x: 75, y: 80 },
+        { number: 6, x: 60, y: 30 },
+        { number: 7, x: 60, y: 50 },
+        { number: 8, x: 60, y: 70 },
+        { number: 9, x: 45, y: 35 },
+        { number: 10, x: 45, y: 55 },
