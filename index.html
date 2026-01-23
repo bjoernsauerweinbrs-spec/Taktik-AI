@@ -222,10 +222,8 @@
     function setMode(m) {
         layer.innerHTML = "";
         if(m === 'funino') {
-            // Funino-Feld sichtbar machen
             if(funinoGroup) funinoGroup.style.opacity = 1;
 
-            // Funino: 3v3 im Mini-Feld (vertikal ca. 35%–65%, horizontal 35/50/65)
             createP(65, 40, 'red', 1);
             createP(62, 55, 'red', 2);
             createP(60, 70, 'red', 3);
@@ -234,16 +232,13 @@
             createP(38, 55, 'blue', 2);
             createP(40, 70, 'blue', 3);
 
-            // Ball in die Mitte des Mini-Feldes
             ball.style.top = "50%";
             ball.style.left = "50%";
 
             addLog("Co-Trainer", "Funino-Modus (3v3, 4 Tore) aktiv. Lass uns Spielformen für die Kleinsten trainieren.", true);
         } else {
-            // Funino-Feld ausblenden
             if(funinoGroup) funinoGroup.style.opacity = 0;
 
-            // 11-gegen-11 Match-Modus
             const h = [
                 {t:90,l:47},{t:78,l:15},{t:80,l:35},{t:80,l:60},{t:78,l:80},
                 {t:62,l:15},{t:65,l:35},{t:65,l:60},{t:62,l:80},{t:42,l:40},{t:42,l:55}
@@ -255,7 +250,6 @@
             h.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
             a.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
 
-            // Ball auf Anstoßpunkt
             ball.style.top = "48%";
             ball.style.left = "49%";
 
@@ -278,20 +272,40 @@
         let resp = "";
         if(apiKey) {
             try {
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        contents: [{ 
-                            parts: [{ 
-                                text: `Du bist ein Fußball-Co-Trainer für Björn. Antworte fachlich fundiert (Halbräume, Gegenpressing, Funino-Prinzipien). Du hast volle Kontrolle über das Board. Wenn du den Ball bewegen willst, schreibe am Ende [BALL:X:Y] (Werte 0-100). Wenn du alle roten Spieler nach vorne schieben willst, schreibe [MOVE:RED:UP]. Frage: ${val}` 
-                            }] 
-                        }] 
-                    })
-                });
-                const d = await r.json(); 
-                resp = d.candidates?.[0]?.content?.parts?.[0]?.text || "Keine Antwort von der KI erhalten.";
+                const r = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            contents: [
+                                {
+                                    parts: [
+                                        {
+                                            text: `Du bist ein Fußball-Co-Trainer für Björn. Antworte fachlich fundiert (Halbräume, Gegenpressing, Funino-Prinzipien). Du hast volle Kontrolle über das Board. Wenn du den Ball bewegen willst, schreibe am Ende [BALL:X:Y] (Werte 0-100). Wenn du alle roten Spieler nach vorne schieben willst, schreibe [MOVE:RED:UP]. Frage: ${val}`
+                                        }
+                                    ]
+                                }
+                            ]
+                        })
+                    }
+                );
+
+                const d = await r.json();
+                console.log("DEBUG KI-RAW:", d);
+
+                if (d.candidates && d.candidates.length > 0) {
+                    resp = d.candidates[0].content.parts[0].text;
+                } else if (d.promptFeedback) {
+                    resp = "Die KI hat die Anfrage blockiert: " + (d.promptFeedback.blockReason || "Unbekannter Grund");
+                } else if (d.error) {
+                    resp = "API-Fehler: " + d.error.message;
+                } else {
+                    resp = "Die KI hat keine verwertbare Antwort geliefert.";
+                }
             } catch(e) { 
-                resp = "Fehler: KI-Zentrale nicht erreichbar."; 
+                console.error("KI-Request-Fehler:", e);
+                resp = "Fehler: KI-Zentrale nicht erreichbar.";
             }
         } else {
             resp = "Lokal-Modus: Bitte Key eingeben für KI-Visualisierung.";
@@ -302,7 +316,6 @@
             }
         }
 
-        // KI-KOMMANDOS PARSEN
         const ballCmd = resp.match(/\[BALL:(\d+):(\d+)\]/);
         if(ballCmd) { 
             ball.style.left = ballCmd[1]+"%"; 
