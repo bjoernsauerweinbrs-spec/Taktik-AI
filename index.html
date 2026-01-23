@@ -3,146 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gemini Tactical Elite - Voice Edition</title>
+    <title>Gemini Tactical Masterclass</title>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: #050505; color: white; overflow: hidden; }
+        * { box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: #000; color: #fff; overflow: hidden; }
         
-        #top-nav { background: #111; padding: 10px; display: flex; justify-content: center; gap: 15px; border-bottom: 2px solid #333; }
-        .btn-mode { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-mode:hover { background: #00ff88; color: #000; }
+        #header { background: #111; padding: 10px; display: flex; justify-content: center; gap: 10px; border-bottom: 2px solid #00ff88; }
+        .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn:hover { background: #00ff88; color: #000; }
 
+        #pitch-area { flex: 2; position: relative; padding: 10px; display: flex; justify-content: center; }
         #pitch { 
-            flex: 2; background: #235e31; position: relative; border: 4px solid white; margin: 10px; border-radius: 4px;
-            background-image: linear-gradient(rgba(255,255,255,0.1) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.1) 2px, transparent 2px);
-            background-size: 10% 10%; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            width: 100%; height: 100%; background: #2e7d32; border: 3px solid #fff; position: relative; border-radius: 4px;
+            background-image: repeating-linear-gradient(0deg, #2e7d32, #2e7d32 10%, #2a722d 10%, #2a722d 20%);
         }
         
-        .goal { position: absolute; border: 3px solid white; background: rgba(255,255,255,0.1); transition: 0.5s; }
-        .standard-goal-top { width: 80px; height: 25px; top: 0; left: 50%; transform: translateX(-50%); border-top: none; }
-        .standard-goal-bottom { width: 80px; height: 25px; bottom: 0; left: 50%; transform: translateX(-50%); border-bottom: none; }
-        .funino-goal { width: 50px; height: 20px; }
+        /* Markierungen */
+        .line { position: absolute; background: rgba(255,255,255,0.6); pointer-events: none; }
+        .center-circle { width: 100px; height: 100px; border: 2px solid #fff; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.5; }
+        
+        /* Tore */
+        .goal { position: absolute; border: 2px solid white; background: rgba(255,255,255,0.1); z-index: 5; }
+        .std-goal { width: 80px; height: 25px; left: 50%; transform: translateX(-50%); }
+        .fun-goal { width: 45px; height: 15px; }
 
+        /* Akteure */
         .player { 
             width: 34px; height: 34px; border-radius: 50%; position: absolute; 
             display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 12px; cursor: grab; z-index: 10;
-            border: 2px solid #fff; transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); touch-action: none;
+            font-weight: bold; font-size: 12px; cursor: move; z-index: 50;
+            border: 2px solid #fff; transition: all 1s cubic-bezier(0.4, 0, 0.2, 1); touch-action: none;
         }
-        .red { background: radial-gradient(circle, #ff416c, #ff4b2b); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .blue { background: radial-gradient(circle, #4b6cb7, #182848); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .ball { width: 20px; height: 20px; background: #fff; border: 2px solid #000; z-index: 20; border-radius: 50%; box-shadow: 0 0 15px white; transition: all 1s ease-in-out; }
+        .red { background: radial-gradient(circle, #f00, #900); }
+        .blue { background: radial-gradient(circle, #007bff, #003d7a); }
+        .ball { width: 20px; height: 20px; background: #fff; border: 2px solid #000; z-index: 60; border-radius: 50%; box-shadow: 0 0 10px #fff; }
 
-        #chat { flex: 1; background: #fff; color: #000; display: flex; flex-direction: column; border-top: 4px solid #00ff88; }
-        #msg-log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; }
-        .bubble { margin-bottom: 10px; padding: 10px; border-radius: 10px; line-height: 1.4; }
-        .ai { background: #e8f5e9; border-left: 5px solid #2e7d32; }
-        .user { background: #e3f2fd; border-right: 5px solid #1565c0; text-align: right; }
+        /* Chat */
+        #chat { height: 35%; background: #fff; color: #000; display: flex; flex-direction: column; border-top: 4px solid #00ff88; }
+        #log { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; }
+        .msg { margin-bottom: 10px; padding: 8px; border-radius: 8px; }
+        .ai { background: #f0f0f0; border-left: 5px solid #2e7d32; font-style: italic; }
+        .user { background: #e3f2fd; border-right: 5px solid #007bff; text-align: right; }
 
-        #input-area { padding: 10px; background: #eee; display: flex; gap: 10px; }
-        input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #ccc; font-size: 16px; outline: none; }
-        button { background: none; border: none; font-size: 28px; cursor: pointer; }
+        #input-row { padding: 10px; background: #ddd; display: flex; gap: 10px; }
+        input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #ccc; font-size: 16px; outline: none; }
+        button.icon { background: none; border: none; font-size: 26px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="top-nav">
-    <button class="btn-mode" onclick="setMode('funino')">Funino (3v3)</button>
-    <button class="btn-mode" onclick="setMode('11v11')">Pro (11v11)</button>
+<div id="header">
+    <button class="btn" onclick="setBoard('funino')">Funino (3v3)</button>
+    <button class="btn" onclick="setBoard('11v11')">Pro (11v11)</button>
 </div>
 
-<div id="pitch">
-    <div id="ball" class="player ball" style="top: 48%; left: 48%;"></div>
-    <div id="team-layer"></div>
+<div id="pitch-area">
+    <div id="pitch">
+        <div class="line" style="width: 100%; height: 2px; top: 50%;"></div>
+        <div class="center-circle"></div>
+        <div id="ball" class="player ball" style="top: 48%; left: 48%;"></div>
+        <div id="players-layer"></div>
+    </div>
 </div>
 
 <div id="chat">
-    <div id="msg-log"></div>
-    <div id="input-area">
-        <input type="text" id="chat-in" placeholder="Taktik-Befehl...">
-        <button id="mic">🎤</button>
-        <button id="send">➤</button>
+    <div id="log"></div>
+    <div id="input-row">
+        <input type="text" id="user-input" placeholder="Frag den Master...">
+        <button class="icon" onclick="startMic()">🎤</button>
+        <button class="icon" onclick="sendMsg()">➤</button>
     </div>
 </div>
 
 <script>
-    const teamLayer = document.getElementById('team-layer');
-    const log = document.getElementById('msg-log');
-    const input = document.getElementById('chat-in');
+    const layer = document.getElementById('players-layer');
+    const log = document.getElementById('log');
+    const input = document.getElementById('user-input');
     const ball = document.getElementById('ball');
 
-    // --- SPRACHAUSGABE FUNKTION ---
-    function tts(text) {
+    function speak(txt) {
         if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel(); // Stoppt laufende Ansagen
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'de-DE';
-            msg.pitch = 1.0;
-            msg.rate = 1.0;
-            window.speechSynthesis.speak(msg);
+            window.speechSynthesis.cancel();
+            const m = new SpeechSynthesisUtterance(txt); m.lang = 'de-DE'; m.rate = 1.0;
+            window.speechSynthesis.speak(m);
         }
     }
 
-    function addBotMsg(t) {
-        const d = document.createElement('div'); d.className = 'bubble ai';
-        d.innerHTML = `<b>Co-Trainer:</b> ${t}`;
+    function addLog(who, txt, isAi) {
+        const d = document.createElement('div');
+        d.className = 'msg ' + (isAi ? 'ai' : 'user');
+        d.innerHTML = `<b>${who}:</b> ${txt}`;
         log.appendChild(d); log.scrollTop = log.scrollHeight;
-        tts(t); // Text vorlesen
+        if(isAi) speak(txt);
     }
 
-    function setMode(mode) {
-        teamLayer.innerHTML = "";
-        const oldGoals = document.querySelectorAll('.goal');
-        oldGoals.forEach(g => g.remove());
-
-        if (mode === 'funino') {
-            [[0, 20], [0, 70], [95, 20], [95, 70]].forEach(p => addGoal(p[0], p[1], 'funino-goal'));
-            setupPlayers(3, 3);
-            addBotMsg("Funino-Modus. 3 gegen 3 auf 4 Tore. Schnelles Spiel, Björn. Versuch mitzuhalten.");
+    function setBoard(mode) {
+        layer.innerHTML = "";
+        document.querySelectorAll('.goal').forEach(g => g.remove());
+        
+        if(mode === 'funino') {
+            [[0,15],[0,75],[96,15],[96,75]].forEach(p => drawGoal(p[0], p[1], 'fun-goal'));
+            for(let i=0; i<3; i++) { createP(75, 20+i*30, 'red', i+1); createP(20, 20+i*30, 'blue', i+1); }
+            addLog("Gemini", "Funino-Modus. Vier Tore. Wer hier nicht trifft, sollte über Hallenhalma nachdenken.", true);
         } else {
-            addGoal(0, 42, 'standard-goal-top');
-            addGoal(95, 42, 'standard-goal-bottom');
-            setupPlayers(11, 11);
-            addBotMsg("11 gegen 11. Wir spielen 4-4-2 gegen ein 3-4-3. David Luiz ist bereit für die Masterclass.");
+            drawGoal(0, 42, 'std-goal'); drawGoal(96, 42, 'std-goal');
+            // Home 4-4-2
+            const h = [{t:90,l:47},{t:75,l:15},{t:78,l:35},{t:78,l:58},{t:75,l:80},{t:55,l:15},{t:58,l:35},{t:58,l:58},{t:55,l:80},{t:35,l:40},{t:35,l:55}];
+            // Away 3-4-3
+            const a = [{t:5,l:47},{t:20,l:25},{t:18,l:47},{t:20,l:70},{t:35,l:10},{t:38,l:35},{t:38,l:58},{t:35,l:85},{t:50,l:25},{t:53,l:47},{t:50,l:70}];
+            h.forEach((p, i) => createP(p.t, p.l, 'red', i+1, i===10?'luiz':''));
+            a.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
+            addLog("Gemini", "Elf gegen Elf. Wahre Taktik für wahre Kenner. David Luiz ist natürlich gesetzt.", true);
         }
+        initDrag();
     }
 
-    function addGoal(t, l, c) {
+    function drawGoal(t, l, c) {
         const g = document.createElement('div'); g.className = 'goal ' + c;
         g.style.top = t + "%"; g.style.left = l + "%";
         document.getElementById('pitch').appendChild(g);
     }
 
-    function setupPlayers(h, a) {
-        if (h === 11) {
-            // Home 4-4-2
-            const posH = [{t:90,l:47},{t:75,l:15},{t:80,l:35},{t:80,l:60},{t:75,l:80},{t:55,l:15},{t:60,l:35},{t:60,l:60},{t:55,l:80},{t:40,l:40},{t:40,l:55}];
-            // Away 3-4-3
-            const posA = [{t:5,l:47},{t:20,l:25},{t:15,l:47},{t:20,l:70},{t:35,l:10},{t:40,l:35},{t:40,l:60},{t:35,l:85},{t:55,l:25},{t:60,l:47},{t:55,l:70}];
-            posH.forEach((p, i) => createP(p.t, p.l, 'red', i+1, i===10?'luiz':''));
-            posA.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
-        } else {
-            for(let i=0; i<3; i++) { createP(80, 20+i*30, 'red', i+1); createP(20, 20+i*30, 'blue', i+1); }
-        }
-        initDrag();
-    }
-
     function createP(t, l, c, n, id) {
         const p = document.createElement('div'); p.className = `player ${c}`;
         if(id) p.id = id; p.style.top = t + "%"; p.style.left = l + "%"; p.innerText = n;
-        teamLayer.appendChild(p);
+        layer.appendChild(p);
     }
 
-    function process(cmd) {
-        cmd = cmd.toLowerCase();
-        let r = "Björn, ich habe 4 Millionen Szenarien berechnet. Keines davon beinhaltet diesen Befehl. Sei präziser!";
-        
-        if (cmd.includes("ball") && cmd.includes("rechts")) {
-            ball.style.left = "85%"; r = "Ball auf rechts. Ich hoffe, dein Flügelspieler hat heute seine schnellen Schuhe an.";
-        } else if (cmd.includes("umstellen") || cmd.includes("taktik")) {
-            document.querySelectorAll('.red').forEach(p => { p.style.left = (Math.random()*80+10) + "%"; p.style.top = (Math.random()*40+50) + "%"; });
-            r = "Ich habe die Aufstellung optimiert. Es ist jetzt perfekt, auch wenn du es vielleicht nicht verstehst.";
-        } else if (cmd.includes("david") || cmd.includes("vor")) {
-            const dl = document.getElementById('luiz') || document.querySelector('.red:last-child');
-            dl.style.top = "25%"; ball.style.top = "26%"; ball.style.left = dl.style.left;
-            r = "
+    function sendMsg() {
+        const val = input.value; if(!val) return;
+        addLog("Björn", val, false);
+        let r = "Das ist so kreativ wie ein Querpass beim Stand von 0:5. Versuch es nochmal!";
+        if(val.toLowerCase().includes("rechts")) { ball.style.left = "85%"; r = "Ball auf rechts. Breit stehen, groß denken."; }
+        else if(val.toLowerCase().includes("umstellen")) { 
+            document.querySelectorAll('.red').forEach(p => { p.style.left = (Math.random()*80+10)+"%"; p.style.top = (Math.random()*40+50)+"%"; });
+            r = "Taktik-Update läuft. Ich habe das System revolutioniert, während du noch tippst.";
+        }
+        setTimeout(() => addLog("Gemini", r, true), 600);
+        input.value = "";
+    }
+
+    function initDrag() {
+        document.querySelectorAll('.player').forEach(p => {
+            let drag = false;
+            p.onmousedown = p.ontouchstart = (e) => { drag = true; p.style.transition = "none"; e.preventDefault(); };
+            window.onmousemove = window.ontouchmove = (e) => {
+                if(!drag) return;
+                const r = document.getElementById('pitch').getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - r.left;
+                const y = (e.clientY || e.touches[0].clientY) - r.top;
+                p.style.left = (x/r.width*100)-3+"%"; p.style.top = (y/r.height*100)-3+"%";
+            };
+            window.onmouseup = window.ontouchend = () => { drag = false; p.style.transition = "all 1s ease"; };
+        });
+    }
+
+    function startMic() {
+        if('webkitSpeechRecognition' in window) {
+            const rec = new webkitSpeechRecognition(); rec.lang = 'de-DE';
+            rec.onresult = (e) => { input.value = e.results[0][0].transcript; sendMsg(); };
+            rec.start();
+        }
+    }
+
+    input.onkeypress = (e) => { if(e.key === 'Enter') sendMsg(); };
+    window.onload = () => setBoard('11v11');
+</script>
+</body>
+</html>
