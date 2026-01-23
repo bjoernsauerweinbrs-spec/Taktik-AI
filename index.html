@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tactical AI Academy - Coach Björn</title>
+    <title>Tactical Intelligence Board - Björn Edition</title>
     <style>
         :root { --pitch: #2d5a27; --stripe: #254d21; }
         * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; }
         body { height: 100vh; display: flex; flex-direction: column; background: #000; overflow: hidden; color: #fff; }
         
-        #api-bar { background: #111; padding: 6px; text-align: center; font-size: 11px; border-bottom: 1px solid #333; }
+        #api-bar { background: #111; padding: 6px; text-align: center; font-size: 11px; border-bottom: 1px solid #333; cursor: pointer; }
         #nav { background: #1a1a1a; padding: 10px; display: flex; justify-content: center; gap: 8px; border-bottom: 3px solid #2e7d32; }
         .btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
         .btn:hover { background: #00ff88; color: #000; }
@@ -20,12 +20,15 @@
             background-image: repeating-linear-gradient(0deg, var(--pitch), var(--pitch) 10%, var(--stripe) 10%, var(--stripe) 20%);
         }
         .center-circle { width: 90px; height: 90px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .goal { position: absolute; border: 2px solid white; background: rgba(255,255,255,0.1); z-index: 5; }
+        .goal-std { width: 90px; height: 25px; left: 50%; transform: translateX(-50%); }
+        .goal-fun { width: 50px; height: 18px; }
 
         .player { 
             width: 30px; height: 30px; border-radius: 50%; position: absolute; 
             display: flex; align-items: center; justify-content: center;
             font-weight: 900; font-size: 11px; cursor: grab; z-index: 50;
-            border: 2px solid #fff; transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
+            border: 2px solid #fff; transition: all 1s cubic-bezier(0.19, 1, 0.22, 1); touch-action: none;
             box-shadow: 0 4px 8px rgba(0,0,0,0.5);
         }
         .red { background: #b71c1c; color: white; }
@@ -43,23 +46,23 @@
         .send-btn { background: #2e7d32; color: white; border: none; padding: 0 20px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
-<body onclick="initAudio()">
+<body>
 
-<div id="api-bar">
-    <span id="api-status" style="color: #ff5252;">KI Inaktiv</span> | 
-    <a href="#" style="color: #00ff88; text-decoration: none;" onclick="askKey()">[ Key hinterlegen ]</a>
+<div id="api-bar" onclick="askKey()">
+    <span id="api-status" style="color: #ff5252;">KI Inaktiv (Kein Key hinterlegt)</span> | 
+    <span style="color: #00ff88;">[ Hier klicken zum Freischalten ]</span>
 </div>
 
 <div id="nav">
     <button class="btn" onclick="setMode('funino')">Funino</button>
-    <button class="btn" onclick="setMode('11v11')">11v11</button>
-    <button class="btn" onclick="resetBall()">Reset</button>
+    <button class="btn" onclick="setMode('11v11')">11v11 Match</button>
+    <button class="btn" onclick="resetBall()">Ball Mitte</button>
 </div>
 
 <div id="pitch-wrapper">
     <div id="pitch">
         <div class="center-circle"></div>
-        <div id="ball" class="player ball" style="top: 48%; left: 49%;"></div>
+        <div id="ball" class="player ball" style="top: 48%; left: 49.2%;"></div>
         <div id="p-layer"></div>
     </div>
 </div>
@@ -79,15 +82,19 @@
     const ball = document.getElementById('ball');
 
     let voice = null;
-    let myKey = localStorage.getItem('bjorn_key')?.trim() || "";
+    let myKey = localStorage.getItem('bjorn_key') ? localStorage.getItem('bjorn_key').trim() : "";
 
+    // API KEY FUNKTION
     function askKey() {
-        const k = prompt("Bitte den Google API-Key einfügen:");
-        if(k) { localStorage.setItem('bjorn_key', k.trim()); location.reload(); }
+        const k = prompt("Bitte den Google API-Key einfügen (ohne Leerzeichen):");
+        if(k && k.trim().length > 5) {
+            localStorage.setItem('bjorn_key', k.trim());
+            location.reload();
+        }
     }
 
     if(myKey) {
-        document.getElementById('api-status').innerText = "KI-Power: Aktiv";
+        document.getElementById('api-status').innerText = "KI-Power: Aktiviert";
         document.getElementById('api-status').style.color = "#00ff88";
     }
 
@@ -119,26 +126,41 @@
         layer.appendChild(p);
     }
 
+    function addGoal(t, l, type) {
+        const g = document.createElement('div');
+        g.className = 'goal ' + type;
+        g.style.top = t + "%"; g.style.left = l + "%";
+        document.getElementById('pitch').appendChild(g);
+    }
+
     function setMode(m) {
         layer.innerHTML = "";
+        document.querySelectorAll('.goal').forEach(g => g.remove());
+        
         if(m === 'funino') {
+            addGoal(0, 18, 'goal-fun'); addGoal(0, 72, 'goal-fun');
+            addGoal(96, 18, 'goal-fun'); addGoal(96, 72, 'goal-fun');
             for(let i=0; i<3; i++) { createP(75, 25+i*25, 'red', i+1); createP(20, 25+i*25, 'blue', i+1); }
+            addLog("Co-Trainer", "Funino-Feld aufgebaut. 3 gegen 3 auf 4 Tore.", true);
         } else {
-            const h = [{t:85,l:47},{t:75,l:15},{t:75,l:35},{t:75,l:60},{t:75,l:80},{t:55,l:20},{t:55,l:40},{t:55,l:60},{t:55,l:75},{t:35,l:40},{t:35,l:55}];
+            addGoal(0, 42, 'goal-std'); addGoal(96, 42, 'goal-std');
+            const h = [{t:85,l:47},{t:75,l:15},{t:75,l:35},{t:75,l:60},{t:75,l:82},{t:55,l:20},{t:55,l:40},{t:55,l:60},{t:55,l:75},{t:35,l:40},{t:35,l:55}];
             const a = [{t:10,l:47},{t:20,l:20},{t:20,l:47},{t:20,l:75},{t:40,l:15},{t:40,l:40},{t:40,l:60},{t:40,l:80},{t:60,l:35},{t:60,l:60}];
             h.forEach((p, i) => createP(p.t, p.l, 'red', i+1));
             a.forEach((p, i) => createP(p.t, p.l, 'blue', i+1));
+            addLog("Co-Trainer", "11 gegen 11 Match-Modus bereit.", true);
         }
         initDrag();
     }
 
     async function talk() {
+        initAudio();
         const val = input.value; if(!val) return;
         addLog("Björn", val, false);
         input.value = "";
         
         if(!myKey) {
-            addLog("Co-Trainer", "Fehler: Kein Key hinterlegt. Bitte oben auf den Link klicken.", true);
+            addLog("Co-Trainer", "Kein API-Key gefunden. Bitte oben klicken und Key eingeben.", true);
             return;
         }
 
@@ -147,13 +169,13 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: `Du bist ein Fußball-Co-Trainer für Chef Björn. Antworte fachlich. Du steuerst das Board mit: [BALL:X:Y] (0-100). Frage: ${val}` }] }]
+                    contents: [{ parts: [{ text: `Du bist ein Co-Trainer für Chef Björn. Antworte fachlich. Bewege den Ball mit [BALL:X:Y]. Frage: ${val}` }] }]
                 })
             });
 
             const d = await r.json();
             if (d.error) {
-                addLog("Co-Trainer", "Google Fehler: " + d.error.message, true);
+                addLog("Co-Trainer", "Problem: " + d.error.message, true);
             } else {
                 let resp = d.candidates[0].content.parts[0].text;
                 const bM = resp.match(/\[BALL:(\d+):(\d+)\]/);
@@ -161,8 +183,33 @@
                 addLog("Co-Trainer", resp, true);
             }
         } catch(e) {
-            addLog("Co-Trainer", "Verbindung zur KI-Zentrale fehlgeschlagen.", true);
+            addLog("Co-Trainer", "KI-Zentrale nicht erreichbar. Prüfe deine Internetverbindung.", true);
         }
     }
 
-    function resetBall() { ball.style.left = "49%"; ball.style.top = "4
+    function resetBall() { ball.style.left = "49.2%"; ball.style.top = "48%"; }
+
+    function initDrag() {
+        document.querySelectorAll('.player').forEach(p => {
+            let d = false;
+            p.onmousedown = p.ontouchstart = (e) => { d = true; p.style.transition = "none"; e.preventDefault(); };
+            window.onmousemove = window.ontouchmove = (e) => {
+                if(!d) return;
+                const r = document.getElementById('pitch').getBoundingClientRect();
+                const x = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) - r.left;
+                const y = (e.clientY || (e.touches ? e.touches[0].clientY : 0)) - r.top;
+                p.style.left = (x/r.width*100)-3 + "%"; p.style.top = (y/r.height*100)-3 + "%";
+            };
+            window.onmouseup = window.ontouchend = () => { d = false; p.style.transition = "all 1s ease"; };
+        });
+    }
+
+    input.onkeypress = (e) => { if(e.key === 'Enter') talk(); };
+    
+    // SOFORT-START
+    window.onload = () => {
+        setMode('11v11');
+    };
+</script>
+</body>
+</html>
