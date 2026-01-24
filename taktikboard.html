@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni - V45 ULTIMATE</title>
+    <title>Coach Toni - V45 OPENAI</title>
 
     <style>
         :root {
@@ -217,20 +217,26 @@
 
 <body>
 
+<!-- LOGIN -->
 <div id="login-overlay">
-    <div style="background: #1e1e1e; padding: 40px; border-radius: 20px; border: 2px solid var(--green); text-align: center;">
-        <h2 style="color: var(--green)">⚽ COACH TONI V45 FINAL</h2>
-        <input type="password" id="password" placeholder="Passwort" style="display:block; width:250px; margin:20px auto; padding:12px; border-radius:8px;">
-        <input type="text" id="user-key" placeholder="Google API-Key" style="display:block; width:250px; margin:20px auto; padding:12px; border-radius:8px;">
-        <button onclick="startToni()" style="background:var(--green); color:white; width:100%; padding:12px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">SYSTEM STARTEN</button>
+    <div style="background: #1e1e1e; padding: 40px; border-radius: 20px; border: 2px solid var(--green); text-align: center; max-width: 360px; width: 100%;">
+        <h2 style="color: var(--green); margin-top:0;">⚽ COACH TONI V45 – OPENAI</h2>
+        <p style="font-size:0.9rem; opacity:0.8;">Passwort & OpenAI‑API‑Key eingeben, dann startet Toni.</p>
+        <input type="password" id="password" placeholder="Passwort" style="display:block; width:100%; margin:15px auto; padding:12px; border-radius:8px; border:1px solid #444; background:#111; color:white;">
+        <input type="text" id="user-key" placeholder="OpenAI API-Key (sk-...)" style="display:block; width:100%; margin:15px auto; padding:12px; border-radius:8px; border:1px solid #444; background:#111; color:white;">
+        <button onclick="startToni()" style="background:var(--green); color:white; width:100%; padding:12px; font-weight:bold; border:none; border-radius:8px; cursor:pointer; margin-top:10px;">SYSTEM STARTEN</button>
     </div>
 </div>
 
+<!-- MAIN LAYOUT -->
 <div class="container">
+
+    <!-- CHAT -->
     <div id="chat-sidebar">
         <div class="header">TRAINER-KOMMANDO</div>
         <div id="chat-history"></div>
         <div id="status" style="font-size: 0.7rem; text-align: center; color: #777;">Ready</div>
+
         <div style="padding:15px; background:#111; display:flex; gap:8px; align-items:center;">
             <button id="mic-btn" onclick="toggleMic()" style="background:#444; border:none; padding:12px; border-radius:8px; cursor:pointer;">🎤</button>
             <input type="text" id="user-input" style="flex:1; background:#222; color:white; border:1px solid #444; padding:10px; border-radius:5px;" placeholder="Befehl...">
@@ -238,21 +244,25 @@
         </div>
     </div>
 
+    <!-- PITCH -->
     <div id="pitch-area">
         <div style="padding:10px; display:flex; gap:10px;">
             <button onclick="setFormation()">Feld Reset</button>
             <button onclick="loadVoice()">Stimme laden</button>
         </div>
+
         <div id="pitch">
             <div class="m-line"></div>
             <div class="m-circle"></div>
             <div class="m-box-16 l"></div>
             <div class="m-box-16 r"></div>
+
             <div id="ball" style="left:50%; top:50%;"></div>
             <div id="players-layer"></div>
         </div>
     </div>
 
+    <!-- WHITEBOARD -->
     <div id="whiteboard">
         <h3 style="margin:0">📋 Kaderliste</h3>
         <textarea id="player-list" oninput="saveAndSync()"></textarea>
@@ -260,14 +270,16 @@
 </div>
 
 <script>
-    let USER_KEY = "";
+    let OPENAI_KEY = "";
     let coachVoice = null;
     let recognition = null;
     let isLocked = false;
 
+    // Sprachaufnahme
     function toggleMic() {
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!Speech) return;
+
         if (!recognition) {
             recognition = new Speech();
             recognition.lang = 'de-DE';
@@ -281,9 +293,13 @@
         recognition.start();
     }
 
+    // Männerstimme laden (deutsch, Klopp-Vibe so gut es geht)
     function loadVoice() {
         const v = window.speechSynthesis.getVoices();
-        coachVoice = v.find(s => s.lang.startsWith('de') && (s.name.includes('Martin') || s.name.includes('Stefan')));
+        coachVoice = v.find(s =>
+            s.lang.startsWith('de') &&
+            (s.name.includes('Martin') || s.name.includes('Stefan') || s.name.includes('Hans') || s.name.includes('Male'))
+        );
         if (!coachVoice) coachVoice = v.find(s => s.lang.startsWith('de'));
     }
     window.speechSynthesis.onvoiceschanged = loadVoice;
@@ -292,19 +308,23 @@
         window.speechSynthesis.cancel();
         const m = new SpeechSynthesisUtterance(t);
         if (coachVoice) m.voice = coachVoice;
-        m.pitch = 0.55;
-        m.rate = 1.0;
+        m.pitch = 0.7;   // etwas tiefer
+        m.rate = 1.0;    // normal schnell
         window.speechSynthesis.speak(m);
     }
 
+    // Kaderliste speichern & Namen auf Trikots
     function saveAndSync() {
         const list = document.getElementById('player-list').value;
-        localStorage.setItem('toni_kader_V45', list);
+        localStorage.setItem('toni_kader_OPENAI', list);
+
         const lines = list.split('\n');
+
         for (let i = 1; i <= 15; i++) {
             const el = document.getElementById('home' + i);
             if (el) el.innerText = i;
         }
+
         lines.forEach(l => {
             const m = l.match(/^(\d+)\s*(.*)$/);
             if (m) {
@@ -316,17 +336,23 @@
         });
     }
 
+    // Grundformation
     function setFormation() {
         const layer = document.getElementById('players-layer');
         layer.innerHTML = "";
+
         const h = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,20], [45,40], [45,60], [45,80], [70,40], [70,60]];
         const a = [[93,50], [78,25], [78,50], [78,75], [58,15], [58,38], [58,62], [58,85], [35,20], [35,50], [35,80]];
+
         h.forEach((p, i) => createP('home', i+1, p[0], p[1], layer));
         a.forEach((p, i) => createP('away', i+1, p[0], p[1], layer));
+
         let initialList = "";
         for (let i = 1; i <= 15; i++) initialList += i + " \n";
-        const saved = localStorage.getItem('toni_kader_V45');
+
+        const saved = localStorage.getItem('toni_kader_OPENAI');
         document.getElementById('player-list').value = saved ? saved : initialList;
+
         saveAndSync();
     }
 
@@ -340,6 +366,7 @@
         l.appendChild(p);
     }
 
+    // Drag & Drop
     let activeItem = null;
 
     document.addEventListener('mousedown', (e) => {
@@ -351,6 +378,7 @@
 
     document.addEventListener('mousemove', (e) => {
         if (!activeItem) return;
+
         const r = document.getElementById('pitch').getBoundingClientRect();
         activeItem.style.left = Math.max(0, Math.min(96, ((e.clientX - r.left) / r.width) * 100)) + "%";
         activeItem.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
@@ -361,10 +389,11 @@
         activeItem = null;
     });
 
+    // Login / Start
     function startToni() {
         if (document.getElementById('password').value === "Trainer2026") {
-            USER_KEY = document.getElementById('user-key').value.trim();
-            localStorage.setItem('toni_key_V45', USER_KEY);
+            OPENAI_KEY = document.getElementById('user-key').value.trim();
+            localStorage.setItem('toni_openai_key', OPENAI_KEY);
             document.getElementById('login-overlay').style.display = 'none';
             setFormation();
             loadVoice();
@@ -372,15 +401,22 @@
     }
 
     window.onload = () => {
-        const k = localStorage.getItem('toni_key_V45');
+        const k = localStorage.getItem('toni_openai_key');
         if (k) document.getElementById('user-key').value = k;
     };
 
+    // Toni fragen (OpenAI)
     async function askToni() {
         if (isLocked) return;
+
         const input = document.getElementById('user-input');
         const text = input.value.trim();
         if (!text) return;
+
+        if (!OPENAI_KEY) {
+            addMsg("toni", "Björn, ohne OpenAI‑Key bin ich nur Deko. Trag oben einen gültigen Key ein.");
+            return;
+        }
 
         isLocked = true;
         document.getElementById('send-btn').disabled = true;
@@ -396,63 +432,85 @@
                 .map(el => `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}]`)
                 .join(', ');
 
-        const prompt =
-            `Du bist Toni, Co-Trainer von Manager Björn (BVB & international). ` +
-            `Arrogant, witzig, hochintelligent. ROT=home, BLAU=away. ` +
-            `Stand: ${state}. PFLICHT: MOVE[ID,X,Y] nutzen. Antworte kurz.`;
+        const systemPrompt =
+            "Du bist 'Toni', der Co‑Trainer von Manager Björn. " +
+            "Dein Charakter: männlich, deutsch, humorvoll, eine gesunde Arroganz, " +
+            "leicht in Richtung Jürgen Klopp – direkt, klar, aber immer loyal zum Chef. " +
+            "Du bist taktisch hochintelligent, denkst in Räumen, Pressinghöhen, Abständen und Dynamiken. " +
+            "ROT = home (Björn), BLAU = away (Gegner). " +
+            "Du kennst das aktuelle Spielfeld: " + state + ". " +
+            "WICHTIG: Wenn es um Verschieben, Pressing, Laufwege oder Positionswechsel geht, " +
+            "nutzt du das Format MOVE[ID,X,Y], z.B. MOVE[home6,45,62] oder MOVE[ball,60,48]. " +
+            "Du darfst mehrere MOVE‑Befehle in einer Antwort nutzen. " +
+            "Sprich kurz, pointiert, maximal 3–4 Sätze, gerne mit einem kleinen Spruch. " +
+            "Kein Englisch, nur Deutsch.";
 
         try {
             const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), 12000);
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-            const resp = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    signal: controller.signal,
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt + " Frage: " + text }] }]
-                    })
-                }
-            );
+            const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                signal: controller.signal,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + OPENAI_KEY
+                },
+                body: JSON.stringify({
+                    model: "gpt-4.1-mini",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: text }
+                    ]
+                })
+            });
 
-            clearTimeout(id);
+            clearTimeout(timeoutId);
+
+            if (!resp.ok) {
+                const errText = await resp.text();
+                addMsg("toni", "Björn, OpenAI meckert: " + errText);
+                isLocked = false;
+                document.getElementById('send-btn').disabled = false;
+                document.getElementById('status').innerText = "Fehler";
+                return;
+            }
+
             const data = await resp.json();
 
             isLocked = false;
             document.getElementById('send-btn').disabled = false;
             document.getElementById('status').innerText = "Ready";
 
-            if (data.candidates) {
-                let answer = data.candidates[0].content.parts[0].text;
-                let moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
-                const clean = answer.replace(/MOVE\[.*?\]/g, "");
-                addMsg("toni", clean);
-                speak(clean);
-                moves.forEach(m => {
-                    const id = m[1].replace('H','home').replace('A','away');
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.style.left = m[2] + "%";
-                        el.style.top = m[3] + "%";
-                    }
-                });
-            } else {
-                addMsg("toni", "Google verweigert die Aussage. Fehler: " + (data.error ? data.error.message : "Unbekannt"));
-            }
+            const answer = data.choices?.[0]?.message?.content || "Ich hab gerade einen Hänger, Chef.";
+            const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
+            const clean = answer.replace(/MOVE\[.*?\]/g, "").trim();
+
+            addMsg("toni", clean);
+            speak(clean);
+
+            moves.forEach(m => {
+                const id = m[1];
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.left = m[2] + "%";
+                    el.style.top = m[3] + "%";
+                }
+            });
+
         } catch (e) {
             isLocked = false;
             document.getElementById('send-btn').disabled = false;
-            addMsg("toni", "Hör mal Björn, die Leitung ist tot. Entweder Quota oder der Key hat Sendepause.");
+            document.getElementById('status').innerText = "Fehler";
+            addMsg("toni", "Hör mal Björn, die Leitung zu OpenAI ist gerade tot. Entweder Key, Netzwerk oder Limit.");
         }
     }
 
-    function addMsg(r, t) {
+    function addMsg(role, text) {
         const h = document.getElementById('chat-history');
         const d = document.createElement('div');
-        d.className = `msg ${r}`;
-        d.innerText = t;
+        d.className = `msg ${role}`;
+        d.innerText = text;
         h.appendChild(d);
         h.scrollTop = h.scrollHeight;
     }
