@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni - PRO Taktik V21</title>
+    <title>Coach Toni - PRO Taktik V22</title>
     <style>
         :root { --pitch-green: #28a745; --line-white: rgba(255,255,255,0.8); --home-team: #ff0000; --away-team: #007bff; }
         body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -14,60 +14,58 @@
         .header { background: #000; padding: 15px; text-align: center; font-weight: bold; border-bottom: 3px solid var(--pitch-green); color: #28a745; }
         #chat-history { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
         .msg { padding: 12px; border-radius: 12px; font-size: 0.95rem; line-height: 1.5; }
-        .user { align-self: flex-end; background: #007bff; color: white; }
-        .toni { align-self: flex-start; background: #333; color: #eee; border-left: 4px solid var(--pitch-green); }
+        .user { align-self: flex-end; background: #007bff; }
+        .toni { align-self: flex-start; background: #333; border-left: 4px solid var(--pitch-green); }
 
         /* Mitte: Taktikboard */
-        #pitch-area { background: #222; border-radius: 15px; display: flex; flex-direction: column; align-items: center; border: 1px solid #333; position: relative; }
-        #pitch { width: 95%; height: 82%; background: var(--pitch-green); border: 2px solid var(--line-white); position: relative; border-radius: 5px; margin-top: 10px; box-shadow: inset 0 0 100px rgba(0,0,0,0.2); }
+        #pitch-area { background: #222; border-radius: 15px; display: flex; flex-direction: column; align-items: center; border: 1px solid #333; }
+        #pitch { width: 95%; height: 85%; background: var(--pitch-green); border: 2px solid var(--line-white); position: relative; border-radius: 5px; margin-top: 10px; overflow: hidden; }
         
-        .player, #ball { position: absolute; cursor: grab; z-index: 10; transition: all 1s cubic-bezier(0.25, 0.1, 0.25, 1); }
-        .player { width: 26px; height: 26px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white; }
-        .home { background: var(--home-team); box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .away { background: var(--away-team); box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        #ball { width: 16px; height: 16px; background: white; border: 2px solid black; border-radius: 50%; z-index: 20; transition: all 0.6s ease-out; }
+        .player, #ball { position: absolute; cursor: grab; z-index: 10; transition: all 1.2s cubic-bezier(0.2, 0, 0.2, 1); }
+        .player { width: 28px; height: 28px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; }
+        .home { background: var(--home-team); box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        .away { background: var(--away-team); box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        #ball { width: 16px; height: 16px; background: white; border: 2px solid black; border-radius: 50%; z-index: 20; transition: all 0.7s ease-out; }
 
-        .goal { position: absolute; width: 8px; height: 60px; background: white; top: 50%; transform: translateY(-50%); border: 1px solid #333; }
+        .goal { position: absolute; width: 8px; height: 60px; background: white; top: 50%; transform: translateY(-50%); }
         .goal-left { left: -4px; } .goal-right { right: -4px; }
         .penalty-area { position: absolute; width: 16%; height: 40%; border: 2px solid var(--line-white); top: 30%; }
         .p-left { left: 0; border-left: none; } .p-right { right: 0; border-right: none; }
 
         /* Rechts: Weiße Tafel */
         #whiteboard { background: #fff; color: #333; border-radius: 15px; padding: 15px; border: 1px solid #ddd; }
-        #player-list { width: 100%; height: 90%; border: none; font-size: 1.1rem; outline: none; line-height: 1.6; font-family: 'Segoe UI', sans-serif; }
+        #player-list { width: 100%; height: 90%; border: none; font-size: 1.1rem; outline: none; line-height: 1.6; }
 
         .btn-panel { padding: 10px; display: flex; gap: 10px; }
-        button { background: #333; color: white; border: 1px solid #555; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
-        button:hover { background: #444; }
+        button { background: #333; color: white; border: 1px solid #555; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
         #login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
-    <div style="background: #1e1e1e; padding: 40px; border-radius: 20px; text-align: center; border: 2px solid var(--pitch-green);">
-        <h2 style="color: var(--pitch-green)">⚽ COACH TONI AI - V21</h2>
-        <p style="color: #888">Taktische Analyse-Zentrale</p>
-        <input type="password" id="password" placeholder="Passwort" style="display:block; width:100%; margin:15px 0; padding:12px; border-radius:8px; border:1px solid #333; background:#000; color:white;">
-        <input type="text" id="user-key" placeholder="Google API-Key" style="display:block; width:100%; margin:15px 0; padding:12px; border-radius:8px; border:1px solid #333; background:#000; color:white;">
-        <button onclick="startToni()" style="background:var(--pitch-green); color:white; width:100%; padding:12px; font-weight:bold; border:none; border-radius:8px;">ZENTRALE INITIALISIEREN</button>
+    <div style="background: #1e1e1e; padding: 40px; border-radius: 20px; border: 2px solid var(--pitch-green); text-align: center;">
+        <h2 style="color: var(--pitch-green)">⚽ COACH TONI AI - V22</h2>
+        <input type="password" id="password" placeholder="Passwort" style="display:block; width:220px; margin:15px auto; padding:12px; border-radius:8px;">
+        <input type="text" id="user-key" placeholder="Google API-Key" style="display:block; width:220px; margin:15px auto; padding:12px; border-radius:8px;">
+        <button onclick="startToni()" style="background:var(--pitch-green); color:white; width:100%; padding:12px; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">STARTEN</button>
     </div>
 </div>
 
 <div class="container">
     <div id="chat-sidebar">
-        <div class="header">ANALYSE-MODUS</div>
+        <div class="header">TAKTIK-BOARD</div>
         <div id="chat-history"></div>
         <div style="padding:15px; background:#111; display:flex; gap:5px">
-            <input type="text" id="user-input" style="flex:1; background:#222; color:white; border:1px solid #444; padding:10px; border-radius:5px;" placeholder="Taktische Frage stellen...">
-            <button onclick="askToni()" style="background:var(--pitch-green); border:none; font-weight:bold;">Senden</button>
+            <input type="text" id="user-input" style="flex:1; background:#222; color:white; border:1px solid #444; padding:10px; border-radius:5px;" placeholder="Toni eine Frage stellen...">
+            <button onclick="askToni()" style="background:var(--pitch-green); border:none; color:white; font-weight:bold; padding:0 15px; border-radius:5px;">OK</button>
         </div>
     </div>
 
     <div id="pitch-area">
         <div class="btn-panel">
-            <button onclick="setFormation()">Formation Reset</button>
-            <button onclick="toggleVoice()" id="voiceBtn">Stimme testen</button>
+            <button onclick="setFormation()">Reset Feld</button>
+            <button onclick="checkVoice()" id="voiceBtn">Stimme laden...</button>
         </div>
         <div id="pitch">
             <div class="penalty-area p-left"></div>
@@ -82,36 +80,33 @@
     </div>
 
     <div id="whiteboard">
-        <h3 style="margin:0">📋 Kader / Fokus</h3>
-        <textarea id="player-list" placeholder="1. Name..."></textarea>
+        <h3 style="margin:0">📋 Kaderliste</h3>
+        <textarea id="player-list" placeholder="Deine 15 Spieler hier..."></textarea>
     </div>
 </div>
 
 <script>
     let USER_KEY = "";
-    let voices = [];
-    let currentVoiceIndex = 0;
+    let martinVoice = null;
 
     // --- STIMMEN MANAGEMENT ---
-    function initVoices() {
-        voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('de'));
+    function checkVoice() {
+        const voices = window.speechSynthesis.getVoices();
+        // Wir suchen explizit nach MARTIN
+        martinVoice = voices.find(v => v.name.includes("Martin") && v.lang.startsWith("de"));
+        if (!martinVoice) martinVoice = voices.find(v => v.lang.startsWith("de") && v.name.includes("Male"));
+        if (!martinVoice) martinVoice = voices.find(v => v.lang.startsWith("de"));
+        
+        document.getElementById('voiceBtn').innerText = martinVoice ? "Stimme: " + martinVoice.name : "Stimme suchen...";
     }
-    window.speechSynthesis.onvoiceschanged = initVoices;
-
-    function toggleVoice() {
-        initVoices();
-        currentVoiceIndex = (currentVoiceIndex + 1) % voices.length;
-        const v = voices[currentVoiceIndex];
-        document.getElementById('voiceBtn').innerText = "Stimme: " + v.name;
-        speak("Dies ist ein Test der aktuellen Stimme.");
-    }
+    window.speechSynthesis.onvoiceschanged = checkVoice;
 
     function speak(text) {
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(text);
-        if (voices[currentVoiceIndex]) msg.voice = voices[currentVoiceIndex];
-        msg.pitch = 0.6; 
-        msg.rate = 0.9;
+        if (martinVoice) msg.voice = martinVoice;
+        msg.pitch = 0.85; 
+        msg.rate = 1.0;
         window.speechSynthesis.speak(msg);
     }
 
@@ -132,25 +127,23 @@
         activeItem.style.top = Math.max(0, Math.min(95, y)) + "%";
     });
     document.addEventListener('mouseup', () => {
-        if (activeItem) activeItem.style.transition = "all 1s cubic-bezier(0.25, 0.1, 0.25, 1)";
+        if (activeItem) activeItem.style.transition = "all 1.2s cubic-bezier(0.2, 0, 0.2, 1)";
         activeItem = null;
     });
 
-    // --- LOGIK ---
     function startToni() {
-        const key = document.getElementById('user-key').value.trim();
         if (document.getElementById('password').value === "Trainer2026") {
-            USER_KEY = key;
+            USER_KEY = document.getElementById('user-key').value.trim();
             document.getElementById('login-overlay').style.display = 'none';
             setFormation();
-            speak("System bereit. Taktik-Modus aktiviert.");
+            checkVoice();
+            speak("Servus Coach! Martin ist am Mikrofon. Das Board steht auf 4-4-2. Schieb den Ball wohin du willst.");
         }
     }
 
     function setFormation() {
         const layer = document.getElementById('players-layer');
         layer.innerHTML = "";
-        // 4-4-2 vs 3-4-3 Startaufstellung
         const home = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,20], [45,40], [45,60], [45,80], [72,40], [72,60]];
         home.forEach((p, i) => createPlayer('home', i+1, p[0], p[1]));
         const away = [[93,50], [78,25], [78,50], [78,75], [58,15], [58,38], [58,62], [58,85], [35,20], [35,50], [35,80]];
@@ -159,9 +152,8 @@
 
     function createPlayer(team, nr, x, y) {
         const p = document.createElement('div');
-        p.className = `player ${team}`;
-        p.id = team + nr; p.innerText = nr;
-        p.style.left = x + "%"; p.style.top = y + "%";
+        p.className = `player ${team}`; p.id = team + nr;
+        p.innerText = nr; p.style.left = x + "%"; p.style.top = y + "%";
         document.getElementById('players-layer').appendChild(p);
     }
 
@@ -172,17 +164,17 @@
         addMsg("user", text);
         input.value = "";
 
-        // Wir lesen die ECHTEN aktuellen Koordinaten aus:
-        let currentState = "AKTUELLE POSITIONEN: ";
+        let state = "";
         document.querySelectorAll('.player, #ball').forEach(el => {
-            currentState += `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}], `;
+            state += `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}], `;
         });
 
-        const prompt = `Du bist Toni, ein Master-Coach auf Pro-Lizenz Niveau. 
-        BASIS FÜR DEINE ANALYSE (IST-ZUSTAND): ${currentState}.
-        ANWEISUNG: Analysiere von diesen Koordinaten aus. Erkläre Bewegungen extrem präzise (Halbräume, Tiefenstaffelung).
-        BEWEGUNG: Schreibe am Ende deiner Antwort IMMER: MOVE[ID,X,Y; ID2,X2,Y2].
-        Keine Tabellen. Nutze Fachbegriffe.
+        const prompt = `Du bist Toni, ein Fußballlehrer. Antworte nur in Fußball-Fachbegriffen.
+        VERBOTEN: Uhrzeiten (halb zwölf), Schach-Koordinaten, Tabellen.
+        NUTZE: "Verschieben", "Einrücken", "Kompaktheit", "Halbraum".
+        IST-ZUSTAND: ${state}.
+        BEWEGUNG: Jede Antwort MUSS am Ende MOVE[ID,X,Y; ID2,X2,Y2] enthalten. 
+        Bewege die Spieler passend zu deiner Erklärung.
         Frage: ${text}`;
 
         try {
