@@ -6,6 +6,7 @@ async function askToni() {
         addMsg("user", text);
         input.value = "";
 
+        // Wir rufen Google direkt auf
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`;
         
         try {
@@ -13,20 +14,20 @@ async function askToni() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: `Du bist Toni, ein Fußballtrainer. Antworte kurz: ${text}` }] }]
+                    contents: [{ parts: [{ text: `Du bist Toni, ein Fußballtrainer für Kinder. Antworte kurz: ${text}` }] }]
                 })
             });
 
             const data = await response.json();
             
-            // HIER IST DIE NEUE DIAGNOSE:
+            // DIAGNOSE-MODUS:
             if (data.error) {
-                // Toni verrät uns jetzt den echten Grund von Google!
-                addMsg("toni", "Google sagt: " + data.error.message + " (Fehler-Code: " + data.error.status + ")");
+                // Das hier sagt uns jetzt, was wirklich los ist!
+                addMsg("toni", "Google-Fehler: " + data.error.message + " (" + data.error.status + ")");
             } else if (data.candidates && data.candidates[0].content.parts[0].text) {
                 addMsg("toni", data.candidates[0].content.parts[0].text);
             }
         } catch (e) {
-            addMsg("toni", "Verbindung zum Google-Server konnte nicht aufgebaut werden.");
+            addMsg("toni", "Technischer Fehler: Verbindung zum Server fehlgeschlagen.");
         }
     }
