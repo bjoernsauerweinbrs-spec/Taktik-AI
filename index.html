@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni AI - V4</title>
+    <title>Coach Toni AI - V5</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         #app { background: white; width: 95%; max-width: 500px; height: 90vh; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; }
@@ -15,13 +15,14 @@
         .msg { padding: 10px; border-radius: 10px; max-width: 80%; line-height: 1.4; }
         .user { align-self: flex-end; background: #007bff; color: white; }
         .toni { align-self: flex-start; background: #eee; color: #333; }
-        .error-text { color: red; font-size: 0.8rem; text-align: center; font-weight: bold; margin-bottom: 5px; }
+        #debug-info { font-size: 0.65rem; color: #999; text-align: center; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="header">⚽ COACH TONI - V4 (FINAL-CHECK)</div>
+    <div class="header">⚽ COACH TONI - V5 (DIAGNOSE)</div>
+    <div id="debug-info">System-Check läuft...</div>
     
     <div id="login-screen">
         <h2 style="text-align:center">Trainer Login</h2>
@@ -33,7 +34,6 @@
 
     <div id="chat-screen" style="display:none">
         <div id="chat-history"></div>
-        <div id="error-display" class="error-text"></div>
         <div style="display:flex; gap:5px">
             <input type="text" id="user-input" style="flex:1" placeholder="Frag Toni...">
             <button onclick="askToni()">Senden</button>
@@ -53,70 +53,56 @@
             USER_KEY = key;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('chat-screen').style.display = 'flex';
-            addMsg("toni", `Servus ${user}! Ich bin Toni. V4 ist bereit. Was trainieren wir?`);
+            addMsg("toni", `Servus ${user}! V5 ist live. Ich teste jetzt verschiedene Leitungen zu Google...`);
         } else {
-            alert("Daten prüfen! Passwort ist Trainer2026");
+            alert("Daten prüfen! Passwort: Trainer2026");
         }
     }
 
     async function askToni() {
         const input = document.getElementById('user-input');
-        const errDiv = document.getElementById('error-display');
         const text = input.value.trim();
         if (!text) return;
 
         addMsg("user", text);
         input.value = "";
-        errDiv.innerText = "";
-
-        // Dieser Link ist jetzt exakt nach Google-Vorgabe für 1.5 Flash
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`;
         
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: `Du bist Toni, ein Fußballtrainer. Antworte kurz: ${text}` }] }]
-                })
-            });
+        // Wir probieren nacheinander diese 3 Varianten
+        const models = [
+            "v1beta/models/gemini-1.5-flash-latest",
+            "v1/models/gemini-1.5-flash",
+            "v1beta/models/gemini-pro"
+        ];
 
-            const data = await response.json();
+        let success = false;
+
+        for (let path of models) {
+            document.getElementById('debug-info').innerText = "Versuche: " + path;
+            const url = `https://generativelanguage.googleapis.com/${path}:generateContent?key=${USER_KEY}`;
             
-            if (data.error) {
-                // Wenn es wieder 404 ist, probieren wir automatisch v1
-                if (data.error.code === 404) {
-                    errDiv.innerText = "Modell-Suche... versuche Alternative...";
-                    tryV1(text);
-                } else {
-                    errDiv.innerText = "Google-Fehler: " + data.error.message;
-                }
-            } else if (data.candidates && data.candidates[0].content.parts[0].text) {
-                addMsg("toni", data.candidates[0].content.parts[0].text);
-            }
-        } catch (e) {
-            addMsg("toni", "Verbindung fehlgeschlagen.");
-        }
-    }
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "Antworte ganz kurz: " + text }] }] })
+                });
 
-    // Sicherheits-Funktion: Falls v1beta nicht geht, springt v1 ein
-    async function tryV1(text) {
-        const urlV1 = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`;
-        try {
-            const response = await fetch(urlV1, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
-            });
-            const data = await response.json();
-            if (data.candidates) {
-                addMsg("toni", data.candidates[0].content.parts[0].text);
-                document.getElementById('error-display').innerText = "";
-            } else {
-                document.getElementById('error-display').innerText = "Google findet das Modell in keiner Version.";
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    addMsg("toni", data.candidates[0].content.parts[0].text);
+                    document.getElementById('debug-info').innerText = "Verbindung stabil über: " + path;
+                    success = true;
+                    break; // Erfolg! Wir hören auf zu suchen.
+                }
+            } catch (e) {
+                console.log("Pfad fehlgeschlagen: " + path);
             }
-        } catch (e) {
-            console.log("Beide Versionen fehlgeschlagen");
+        }
+
+        if (!success) {
+            addMsg("toni", "Leider haben alle 3 Versuche nicht geklappt. Google lehnt die Anfrage ab.");
+            document.getElementById('debug-info').innerText = "FEHLER: Keine API-Verbindung möglich.";
         }
     }
 
