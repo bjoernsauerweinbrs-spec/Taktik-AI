@@ -131,37 +131,50 @@
     }
 
     function setFormation() {
-        const layer = document.getElementById('players-layer'); layer.innerHTML = "";
+        const layer = document.getElementById('players-layer'); 
+        layer.innerHTML = "";
+
         const h = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,20], [45,40], [45,60], [45,80], [70,40], [70,60]];
         const a = [[93,50], [78,25], [78,50], [78,75], [58,15], [58,38], [58,62], [58,85], [35,20], [35,50], [35,80]];
+
         h.forEach((p, i) => createP('home', i+1, p[0], p[1], layer));
         a.forEach((p, i) => createP('away', i+1, p[0], p[1], layer));
         
         let initialList = "";
         for(let i=1; i<=15; i++) initialList += i + " \n";
+
         const saved = localStorage.getItem('toni_kader_V45');
         document.getElementById('player-list').value = saved ? saved : initialList;
+
         saveAndSync();
     }
 
     function createP(t, n, x, y, l) {
         const p = document.createElement('div');
-        p.className = `player ${t}`; p.id = t + n; p.innerText = n;
-        p.style.left = x + "%"; p.style.top = y + "%"; l.appendChild(p);
+        p.className = `player ${t}`;
+        p.id = t + n;
+        p.innerText = n;
+        p.style.left = x + "%";
+        p.style.top = y + "%";
+        l.appendChild(p);
     }
 
     let activeItem = null;
+
     document.addEventListener('mousedown', (e) => {
         if (e.target.classList.contains('player') || e.target.id === 'ball') {
-            activeItem = e.target; activeItem.style.transition = "none";
+            activeItem = e.target;
+            activeItem.style.transition = "none";
         }
     });
+
     document.addEventListener('mousemove', (e) => {
         if (!activeItem) return;
         const r = document.getElementById('pitch').getBoundingClientRect();
         activeItem.style.left = Math.max(0, Math.min(96, ((e.clientX - r.left) / r.width) * 100)) + "%";
         activeItem.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
     });
+
     document.addEventListener('mouseup', () => {
         if (activeItem) activeItem.style.transition = "all 1.2s ease-in-out";
         activeItem = null;
@@ -184,46 +197,72 @@
 
     async function askToni() {
         if (isLocked) return;
+
         const input = document.getElementById('user-input');
-        const text = input.value.trim(); if (!text) return;
+        const text = input.value.trim();
+        if (!text) return;
         
-        isLocked = true; document.getElementById('send-btn').disabled = true;
-        addMsg("user", text); input.value = "";
+        isLocked = true;
+        document.getElementById('send-btn').disabled = true;
+        addMsg("user", text);
+        input.value = "";
         document.getElementById('status').innerText = "Analyse läuft...";
 
-        const state = "Kader: " + document.getElementById('player-list').value.replace(/\n/g, ', ') + ". Positionen: " + [...document.querySelectorAll('.player, #ball')].map(el => `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}]`).join(', ');
+        const state = "Kader: " + document.getElementById('player-list').value.replace(/\n/g, ', ') + 
+                      ". Positionen: " + 
+                      [...document.querySelectorAll('.player, #ball')]
+                      .map(el => `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}]`)
+                      .join(', ');
+
         const prompt = `Du bist Toni, Co-Trainer von Manager Björn (BVB & international). Arrogant, witzig, hochintelligent. ROT=home, BLAU=away. Stand: ${state}. PFLICHT: MOVE[ID,X,Y] nutzen. Antworte kurz.`;
 
         try {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), 12000);
 
-            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                signal: controller.signal,
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt + " Frage: " + text }] }] })
-            });
+            const resp = await fetch(
+                `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    signal: controller.signal,
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt + " Frage: " + text }] }]
+                    })
+                }
+            );
+
             clearTimeout(id);
             const data = await resp.json();
             
-            isLocked = false; document.getElementById('send-btn').disabled = false;
+            isLocked = false;
+            document.getElementById('send-btn').disabled = false;
             document.getElementById('status').innerText = "Ready";
 
             if (data.candidates) {
                 let answer = data.candidates[0].content.parts[0].text;
+
                 let moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
+
                 addMsg("toni", answer.replace(/MOVE\[.*?\]/g, ""));
                 speak(answer.replace(/MOVE\[.*?\]/g, ""));
+
                 moves.forEach(m => {
                     const id = m[1].replace('H','home').replace('A','away');
                     const el = document.getElementById(id);
-                    if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
+                    if (el) {
+                        el.style.left = m[2] + "%";
+                        el.style.top = m[3] + "%";
+                    }
                 });
+
             } else {
                 addMsg("toni", "Google verweigert die Aussage. Fehler: " + (data.error ? data.error.message : "Unbekannt"));
             }
+
         } catch (e) { 
-            isLocked = false; document.getElementById('send-btn').disabled = false;
+            isLocked = false;
+            document.getElementById('send-btn').disabled = false;
             addMsg("toni", "Hör mal Björn, die Leitung ist tot. Entweder Quota oder der Key hat Sendepause."); 
         }
     }
@@ -231,8 +270,10 @@
     function addMsg(r, t) {
         const h = document.getElementById('chat-history');
         const d = document.createElement('div');
-        d.className = `msg ${r}`; d.innerText = t;
-        h.appendChild(d); h.scrollTop = h.scrollHeight;
+        d.className = `msg ${r}`;
+        d.innerText = t;
+        h.appendChild(d);
+        h.scrollTop = h.scrollHeight;
     }
 </script>
 
