@@ -4,79 +4,272 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coach Toni - V45 ULTIMATE</title>
+
+    <!-- MODERNER STYLEBLOCK -->
     <style>
-        :root { --p-green: #28a745; --l-white: rgba(255,255,255,0.95); --red: #ff0000; --blue: #007bff; }
-        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        .container { display: grid; grid-template-columns: 350px 1fr 300px; width: 100%; gap: 10px; padding: 10px; box-sizing: border-box; }
+        :root {
+            --green: #2ecc71;
+            --green-dark: #27ae60;
+            --bg-dark: #0f0f0f;
+            --bg-panel: #1a1a1a;
+            --bg-panel-light: #222;
+            --line: rgba(255,255,255,0.15);
+            --text-light: rgba(255,255,255,0.85);
+            --red: #e74c3c;
+            --blue: #3498db;
+        }
 
-        #chat-sidebar { background: #1e1e1e; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #333; }
-        .header { background: #000; padding: 15px; text-align: center; font-weight: bold; border-bottom: 3px solid var(--p-green); color: var(--p-green); }
-        #chat-history { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 12px; border-radius: 12px; font-size: 0.9rem; line-height: 1.4; max-width: 90%; }
-        .user { align-self: flex-end; background: #007bff; }
-        .toni { align-self: flex-start; background: #333; border-left: 4px solid var(--p-green); }
+        body {
+            margin: 0;
+            font-family: "Inter", "Segoe UI", sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-        #pitch-area { background: #222; border-radius: 15px; display: flex; flex-direction: column; align-items: center; border: 1px solid #333; position: relative; }
-        #pitch { width: 95%; height: 85%; background: var(--p-green); border: 2px solid var(--l-white); position: relative; border-radius: 5px; margin-top: 10px; overflow: hidden; }
-        .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--l-white); }
-        .m-circle { position: absolute; left: 50%; top: 50%; width: 100px; height: 100px; border: 2px solid var(--l-white); border-radius: 50%; transform: translate(-50%, -50%); }
-        .m-box-16 { position: absolute; width: 16%; height: 44%; border: 2px solid var(--l-white); top: 28%; }
-        .l { left: 0; border-left: none; } .r { right: 0; border-right: none; }
+        .container {
+            display: grid;
+            grid-template-columns: 360px 1fr 320px;
+            gap: 14px;
+            padding: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
 
-        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 1.2s cubic-bezier(0.2, 0.7, 0.3, 1); }
-        .player { width: 36px; height: 36px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; text-align: center; }
-        .home { background-color: var(--red) !important; } .away { background-color: var(--blue) !important; }
-        #ball { width: 18px; height: 18px; background: white; border: 2px solid black; border-radius: 50%; z-index: 110; }
+        #chat-sidebar {
+            background: var(--bg-panel);
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--line);
+            box-shadow: 0 0 25px rgba(0,0,0,0.4);
+        }
 
-        #whiteboard { background: #fff; color: #000; border-radius: 15px; padding: 15px; border: 1px solid #ddd; display: flex; flex-direction: column; }
-        #player-list { flex: 1; border: none; font-size: 1.1rem; outline: none; line-height: 1.6; font-family: monospace; font-weight: bold; color: black !important; }
+        .header {
+            padding: 18px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--green);
+            border-bottom: 2px solid var(--green);
+            background: #000;
+            border-radius: 18px 18px 0 0;
+        }
 
-        #login-overlay { position: fixed; inset: 0; background: #000; z-index: 4000; display: flex; align-items: center; justify-content: center; }
-        .mic-active { background: #ff0000 !important; box-shadow: 0 0 15px red; }
+        #chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .msg {
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            max-width: 90%;
+            backdrop-filter: blur(4px);
+        }
+
+        .user {
+            align-self: flex-end;
+            background: var(--blue);
+            color: white;
+        }
+
+        .toni {
+            align-self: flex-start;
+            background: var(--bg-panel-light);
+            border-left: 4px solid var(--green);
+        }
+
+        #pitch-area {
+            background: var(--bg-panel);
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 10px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.4);
+        }
+
+        #pitch {
+            width: 95%;
+            height: 85%;
+            background: #1f7a1f;
+            border: 2px solid white;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+        }
+
+        .m-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: white;
+            opacity: 0.8;
+        }
+
+        .m-circle {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 120px;
+            height: 120px;
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.8;
+        }
+
+        .m-box-16 {
+            position: absolute;
+            width: 18%;
+            height: 46%;
+            border: 2px solid white;
+            top: 27%;
+            opacity: 0.8;
+        }
+
+        .l { left: 0; border-left: none; }
+        .r { right: 0; border-right: none; }
+
+        .player, #ball {
+            position: absolute;
+            cursor: grab;
+            z-index: 100;
+            transition: all 0.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+        }
+
+        .player {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 11px;
+            color: white;
+            box-shadow: 0 0 12px rgba(0,0,0,0.6);
+        }
+
+        .home { background: var(--red); }
+        .away { background: var(--blue); }
+
+        #ball {
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            border: 2px solid black;
+            box-shadow: 0 0 10px rgba(0,0,0,0.6);
+        }
+
+        #whiteboard {
+            background: white;
+            color: black;
+            border-radius: 18px;
+            padding: 18px;
+            border: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 25px rgba(0,0,0,0.4);
+        }
+
+        #player-list {
+            flex: 1;
+            border: none;
+            font-size: 1.1rem;
+            outline: none;
+            line-height: 1.6;
+            font-family: monospace;
+            font-weight: bold;
+            color: black;
+        }
+
+        #login-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 4000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mic-active {
+            background: red !important;
+            box-shadow: 0 0 15px red;
+        }
     </style>
 </head>
+
 <body>
 
+<!-- LOGIN -->
 <div id="login-overlay">
-    <div style="background: #1e1e1e; padding: 40px; border-radius: 20px; border: 2px solid var(--p-green); text-align: center;">
-        <h2 style="color: var(--p-green)">⚽ COACH TONI V45 FINAL</h2>
+    <div style="background: #1e1e1e; padding: 40px; border-radius: 20px; border: 2px solid var(--green); text-align: center;">
+        <h2 style="color: var(--green)">⚽ COACH TONI V45 FINAL</h2>
         <input type="password" id="password" placeholder="Passwort" style="display:block; width:250px; margin:20px auto; padding:12px; border-radius:8px;">
         <input type="text" id="user-key" placeholder="Google API-Key" style="display:block; width:250px; margin:20px auto; padding:12px; border-radius:8px;">
-        <button onclick="startToni()" style="background:var(--p-green); color:white; width:100%; padding:12px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">SYSTEM STARTEN</button>
+        <button onclick="startToni()" style="background:var(--green); color:white; width:100%; padding:12px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">SYSTEM STARTEN</button>
     </div>
 </div>
 
+<!-- MAIN LAYOUT -->
 <div class="container">
+
+    <!-- CHAT -->
     <div id="chat-sidebar">
         <div class="header">TRAINER-KOMMANDO</div>
         <div id="chat-history"></div>
-        <div id="status" style="font-size: 0.7rem; text-align: center; color: #555;">Ready</div>
+        <div id="status" style="font-size: 0.7rem; text-align: center; color: #777;">Ready</div>
+
         <div style="padding:15px; background:#111; display:flex; gap:8px; align-items:center;">
             <button id="mic-btn" onclick="toggleMic()" style="background:#444; border:none; padding:12px; border-radius:8px; cursor:pointer;">🎤</button>
             <input type="text" id="user-input" style="flex:1; background:#222; color:white; border:1px solid #444; padding:10px; border-radius:5px;" placeholder="Befehl...">
-            <button id="send-btn" onclick="askToni()" style="background:var(--p-green); border:none; color:white; font-weight:bold; padding:10px; border-radius:5px; cursor:pointer;">OK</button>
+            <button id="send-btn" onclick="askToni()" style="background:var(--green); border:none; color:white; font-weight:bold; padding:10px; border-radius:5px; cursor:pointer;">OK</button>
         </div>
     </div>
 
+    <!-- PITCH -->
     <div id="pitch-area">
         <div style="padding:10px; display:flex; gap:10px;">
             <button onclick="setFormation()">Feld Reset</button>
             <button onclick="loadVoice()">Stimme laden</button>
         </div>
+
         <div id="pitch">
-            <div class="m-line"></div><div class="m-circle"></div>
-            <div class="m-box-16 l"></div><div class="m-box-16 r"></div>
+            <div class="m-line"></div>
+            <div class="m-circle"></div>
+            <div class="m-box-16 l"></div>
+            <div class="m-box-16 r"></div>
+
             <div id="ball" style="left:50%; top:50%;"></div>
             <div id="players-layer"></div>
         </div>
     </div>
 
+    <!-- WHITEBOARD -->
     <div id="whiteboard">
         <h3 style="margin:0">📋 Kaderliste</h3>
         <textarea id="player-list" oninput="saveAndSync()"></textarea>
     </div>
 </div>
 
+<!-- SCRIPT -->
 <script>
     let USER_KEY = "";
     let coachVoice = null;
@@ -86,12 +279,16 @@
     function toggleMic() {
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!Speech) return;
+
         if (!recognition) {
             recognition = new Speech();
             recognition.lang = 'de-DE';
             recognition.onstart = () => document.getElementById('mic-btn').classList.add('mic-active');
             recognition.onend = () => document.getElementById('mic-btn').classList.remove('mic-active');
-            recognition.onresult = (e) => { document.getElementById('user-input').value = e.results[0][0].transcript; askToni(); };
+            recognition.onresult = (e) => {
+                document.getElementById('user-input').value = e.results[0][0].transcript;
+                askToni();
+            };
         }
         recognition.start();
     }
@@ -107,18 +304,22 @@
         window.speechSynthesis.cancel();
         const m = new SpeechSynthesisUtterance(t);
         if (coachVoice) m.voice = coachVoice;
-        m.pitch = 0.55; m.rate = 1.0;
+        m.pitch = 0.55;
+        m.rate = 1.0;
         window.speechSynthesis.speak(m);
     }
 
     function saveAndSync() {
         const list = document.getElementById('player-list').value;
         localStorage.setItem('toni_kader_V45', list);
+
         const lines = list.split('\n');
-        for(let i=1; i<=15; i++) {
+
+        for (let i = 1; i <= 15; i++) {
             const el = document.getElementById('home' + i);
             if (el) el.innerText = i;
         }
+
         lines.forEach(l => {
             const m = l.match(/^(\d+)\s*(.*)$/);
             if (m) {
@@ -131,7 +332,7 @@
     }
 
     function setFormation() {
-        const layer = document.getElementById('players-layer'); 
+        const layer = document.getElementById('players-layer');
         layer.innerHTML = "";
 
         const h = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,20], [45,40], [45,60], [45,80], [70,40], [70,60]];
@@ -139,9 +340,9 @@
 
         h.forEach((p, i) => createP('home', i+1, p[0], p[1], layer));
         a.forEach((p, i) => createP('away', i+1, p[0], p[1], layer));
-        
+
         let initialList = "";
-        for(let i=1; i<=15; i++) initialList += i + " \n";
+        for (let i = 1; i <= 15; i++) initialList += i + " \n";
 
         const saved = localStorage.getItem('toni_kader_V45');
         document.getElementById('player-list').value = saved ? saved : initialList;
@@ -170,6 +371,7 @@
 
     document.addEventListener('mousemove', (e) => {
         if (!activeItem) return;
+
         const r = document.getElementById('pitch').getBoundingClientRect();
         activeItem.style.left = Math.max(0, Math.min(96, ((e.clientX - r.left) / r.width) * 100)) + "%";
         activeItem.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
@@ -201,27 +403,32 @@
         const input = document.getElementById('user-input');
         const text = input.value.trim();
         if (!text) return;
-        
+
         isLocked = true;
         document.getElementById('send-btn').disabled = true;
         addMsg("user", text);
         input.value = "";
         document.getElementById('status').innerText = "Analyse läuft...";
 
-        const state = "Kader: " + document.getElementById('player-list').value.replace(/\n/g, ', ') + 
-                      ". Positionen: " + 
-                      [...document.querySelectorAll('.player, #ball')]
-                      .map(el => `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}]`)
-                      .join(', ');
+        const state =
+            "Kader: " +
+            document.getElementById('player-list').value.replace(/\n/g, ', ') +
+            ". Positionen: " +
+            [...document.querySelectorAll('.player, #ball')]
+                .map(el => `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}]`)
+                .join(', ');
 
-        const prompt = `Du bist Toni, Co-Trainer von Manager Björn (BVB & international). Arrogant, witzig, hochintelligent. ROT=home, BLAU=away. Stand: ${state}. PFLICHT: MOVE[ID,X,Y] nutzen. Antworte kurz.`;
+        const prompt =
+            `Du bist Toni, Co-Trainer von Manager Björn (BVB & international). ` +
+            `Arrogant, witzig, hochintelligent. ROT=home, BLAU=away. ` +
+            `Stand: ${state}. PFLICHT: MOVE[ID,X,Y] nutzen. Antworte kurz.`;
 
         try {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), 12000);
 
             const resp = await fetch(
-                `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -234,7 +441,7 @@
 
             clearTimeout(id);
             const data = await resp.json();
-            
+
             isLocked = false;
             document.getElementById('send-btn').disabled = false;
             document.getElementById('status').innerText = "Ready";
@@ -247,35 +454,4 @@
                 addMsg("toni", answer.replace(/MOVE\[.*?\]/g, ""));
                 speak(answer.replace(/MOVE\[.*?\]/g, ""));
 
-                moves.forEach(m => {
-                    const id = m[1].replace('H','home').replace('A','away');
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.style.left = m[2] + "%";
-                        el.style.top = m[3] + "%";
-                    }
-                });
-
-            } else {
-                addMsg("toni", "Google verweigert die Aussage. Fehler: " + (data.error ? data.error.message : "Unbekannt"));
-            }
-
-        } catch (e) { 
-            isLocked = false;
-            document.getElementById('send-btn').disabled = false;
-            addMsg("toni", "Hör mal Björn, die Leitung ist tot. Entweder Quota oder der Key hat Sendepause."); 
-        }
-    }
-
-    function addMsg(r, t) {
-        const h = document.getElementById('chat-history');
-        const d = document.createElement('div');
-        d.className = `msg ${r}`;
-        d.innerText = t;
-        h.appendChild(d);
-        h.scrollTop = h.scrollHeight;
-    }
-</script>
-
-</body>
-</html>
+                moves.forEach(m =>
