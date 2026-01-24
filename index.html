@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trainer Toni - Echte Fußball-KI</title>
-    <script type="importmap">
-      { "imports": { "@google/generative-ai": "https://esm.run/@google/generative-ai" } }
-    </script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
         #app { background: white; width: 100%; max-width: 500px; height: 90vh; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
@@ -14,13 +11,11 @@
         #login-screen, #chat-screen { flex: 1; display: flex; flex-direction: column; padding: 20px; }
         input { padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; outline: none; }
         button { background: #4CAF50; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #45a049; }
-        #chat-history { flex: 1; overflow-y: auto; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
+        #chat-history { flex: 1; overflow-y: auto; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
         .msg { padding: 12px 16px; border-radius: 15px; max-width: 85%; line-height: 1.5; font-size: 0.95rem; }
-        .user { align-self: flex-end; background: #007bff; color: white; border-bottom-right-radius: 2px; }
-        .toni { align-self: flex-start; background: #e9e9eb; color: #333; border-bottom-left-radius: 2px; }
-        .info-text { font-size: 0.75rem; color: #666; margin-top: 10px; text-align: center; }
-        a { color: #007bff; text-decoration: none; }
+        .user { align-self: flex-end; background: #007bff; color: white; }
+        .toni { align-self: flex-start; background: #e9e9eb; color: #333; }
+        #status { font-size: 0.7rem; text-align: center; margin-bottom: 10px; color: orange; }
     </style>
 </head>
 <body>
@@ -30,61 +25,95 @@
     
     <div id="login-screen">
         <h3 style="text-align:center; margin-top:0;">Bereit fürs Training?</h3>
+        <div id="status">Lade KI-Gehirn... bitte warten...</div>
+        
         <input type="text" id="username" placeholder="Dein Name">
         <input type="password" id="password" placeholder="Passwort (Trainer2026)">
-        <hr style="width:100%; border:0; border-top:1px solid #eee; margin:15px 0;">
-        <label style="font-size:0.8rem; font-weight:bold;">Dein Google API-Key:</label>
-        <input type="text" id="user-key" placeholder="Hier Key einfügen (sk-...)">
-        <button onclick="startToni()">Toni aktivieren</button>
-        <p class="info-text">
-            Du hast keinen Key? <a href="https://aistudio.google.com/" target="_blank">Hier kostenlos erstellen</a>.<br>
-            Dein Key wird nur lokal in deinem Browser gespeichert.
+        <input type="text" id="user-key" placeholder="Google API-Key (AIza...)">
+        
+        <button id="btn-start">Toni aktivieren</button>
+        
+        <p style="font-size:0.7rem; text-align:center; margin-top:15px;">
+            Key vergessen? <a href="https://aistudio.google.com/" target="_blank">Hier klicken</a>
         </p>
     </div>
 
     <div id="chat-screen" style="display:none">
         <div id="chat-history"></div>
         <div style="display:flex; gap:10px">
-            <input type="text" id="user-input" style="flex:1" placeholder="Frag Toni nach einer Übung...">
-            <button onclick="askToni()">FRAGEN</button>
+            <input type="text" id="user-input" style="flex:1" placeholder="Frag Toni...">
+            <button id="btn-send">Senden</button>
         </div>
-        <button onclick="logout()" style="background:#f44336; margin-top:10px; padding:5px; font-size:0.7rem;">Key entfernen / Logout</button>
     </div>
 </div>
 
 <script type="module">
-    import { GoogleGenerativeAI } from "@google/generative-ai";
+    // Direkter Import ohne Umwege
+    import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
     let chatSession;
-    let userName = "";
 
-    // Beim Laden schauen, ob schon ein Key gespeichert ist
-    window.onload = () => {
-        const savedKey = localStorage.getItem('toni_api_key');
-        if (savedKey) {
-            document.getElementById('user-key').value = savedKey;
-        }
-    };
+    // Sobald die KI geladen ist, Status ändern
+    document.getElementById('status').innerText = "✅ System bereit";
+    document.getElementById('status').style.color = "green";
 
-    window.startToni = async function() {
-        userName = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
-        const key = document.getElementById('user-key').value;
-        
-        if (userName && pass === "Trainer2026" && key.length > 20) {
-            // Key im Browser merken
-            localStorage.setItem('toni_api_key', key);
-            
+    // Event-Listener statt onclick (viel sicherer auf GitHub)
+    document.getElementById('btn-start').addEventListener('click', async () => {
+        const user = document.getElementById('username').value.trim();
+        const pass = document.getElementById('password').value.trim();
+        const key = document.getElementById('user-key').value.trim();
+
+        console.log("Login-Versuch von:", user);
+
+        if (user && pass === "Trainer2026" && key.startsWith("AIza")) {
             try {
                 const genAI = new GoogleGenerativeAI(key);
                 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
                 
-                // Toni's Persönlichkeit initialisieren
                 chatSession = model.startChat({
                     history: [
-                        { role: "user", parts: [{ text: "Du bist Toni, ein erfahrener Fußballtrainer für Kinder. Du erklärst Funino und Taktik einfach und motivierend. Antworte immer als Toni." }] },
-                        { role: "model", parts: [{ text: "Verstanden! Ich bin Toni, dein Co-Trainer. Ich bin bereit für das Training mit den Kids!" }] }
-                    ],
+                        { role: "user", parts: [{ text: "Du bist Toni, ein Fußballtrainer. Antworte motivierend." }] },
+                        { role: "model", parts: [{ text: "Alles klar!" }] }
+                    ]
                 });
 
-                document
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('chat-screen').style.display = 'flex';
+                addMsg("toni", `Servus ${user}! Ich bin Toni. Was trainieren wir heute?`);
+            } catch (e) {
+                alert("API-Key Fehler! Bitte prüfe den Key im Google AI Studio.");
+            }
+        } else {
+            alert("Fehler: Name leer, Passwort falsch (Trainer2026) oder API-Key ungültig!");
+        }
+    });
+
+    document.getElementById('btn-send').addEventListener('click', async () => {
+        const input = document.getElementById('user-input');
+        const text = input.value;
+        if (!text || !chatSession) return;
+
+        addMsg("user", text);
+        input.value = "";
+
+        try {
+            const result = await chatSession.sendMessage(text);
+            const response = await result.response;
+            addMsg("toni", response.text());
+        } catch (e) {
+            addMsg("toni", "Verbindung unterbrochen. Bitte Key prüfen.");
+        }
+    });
+
+    function addMsg(role, text) {
+        const history = document.getElementById('chat-history');
+        const div = document.createElement('div');
+        div.className = `msg ${role}`;
+        div.innerText = text;
+        history.appendChild(div);
+        history.scrollTop = history.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
