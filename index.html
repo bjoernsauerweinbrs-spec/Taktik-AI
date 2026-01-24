@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni - Taktik Zentrale V16</title>
+    <title>Coach Toni - Taktik Zentrale V17</title>
     <style>
         :root { --pitch-green: #28a745; --line-white: rgba(255,255,255,0.8); --home-team: #ff0000; --away-team: #007bff; }
         body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -29,10 +29,10 @@
         .goal-left { left: -5px; } .goal-right { right: -5px; }
 
         /* Spieler & Ball */
-        .player { width: 22px; height: 22px; border: 2px solid white; border-radius: 50%; position: absolute; transition: all 1.2s ease-in-out; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; cursor: move; z-index: 10; }
+        .player { width: 24px; height: 24px; border: 2px solid white; border-radius: 50%; position: absolute; transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white; z-index: 10; }
         .home { background: var(--home-team); }
         .away { background: var(--away-team); }
-        #ball { width: 14px; height: 14px; background: white; border: 2px solid black; border-radius: 50%; position: absolute; transition: all 0.8s ease-out; z-index: 20; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        #ball { width: 16px; height: 16px; background: white; border: 2px solid black; border-radius: 50%; position: absolute; transition: all 1s ease-out; z-index: 20; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
         /* Rechts: Weiße Tafel */
         #whiteboard { background: #fff; color: #333; border-radius: 15px; padding: 15px; border: 1px solid #ddd; display: flex; flex-direction: column; }
@@ -48,7 +48,7 @@
 
 <div id="login-overlay">
     <div class="login-box">
-        <h2>⚽ Coach Toni Zentrale</h2>
+        <h2>⚽ Coach Toni Zentrale V17</h2>
         <input type="text" id="username" placeholder="Dein Name">
         <input type="password" id="password" placeholder="Passwort">
         <input type="text" id="user-key" placeholder="Google API-Key">
@@ -82,8 +82,8 @@
     </div>
 
     <div id="whiteboard">
-        <h3 style="margin:0">📋 Kader & Spielnotizen</h3>
-        <textarea id="player-list" placeholder="1. Name (GK)&#10;2. Name (RV)..."></textarea>
+        <h3 style="margin:0">📋 Kader & Spielernotizen</h3>
+        <textarea id="player-list" placeholder="Kaderliste hier eintippen..."></textarea>
     </div>
 </div>
 
@@ -91,21 +91,25 @@
     let USER_KEY = "";
     let selectedVoice = null;
 
-    // Stimmen laden und männliche Stimme finden
+    // Verbesserte Stimmen-Suche für Mac/Windows
     function loadVoices() {
         const voices = window.speechSynthesis.getVoices();
-        // Suche nach deutschen männlichen Stimmen (Stefan, Markus, Google Deutsch Male etc.)
-        selectedVoice = voices.find(v => v.lang.startsWith('de') && (v.name.includes('Male') || v.name.includes('Stefan') || v.name.includes('Microsoft Stefan')));
+        // Suche gezielt nach männlichen deutschen Stimmen
+        selectedVoice = voices.find(v => v.lang.startsWith('de') && 
+            (v.name.includes('Male') || v.name.includes('Stefan') || v.name.includes('Markus') || v.name.includes('Siri') || v.name.includes('Yannick')));
+        
         if (!selectedVoice) selectedVoice = voices.find(v => v.lang.startsWith('de'));
     }
     window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
 
     function speak(text) {
+        window.speechSynthesis.cancel(); // Vorherige Sprache stoppen
         const msg = new SpeechSynthesisUtterance(text);
         if (selectedVoice) msg.voice = selectedVoice;
         msg.lang = 'de-DE';
-        msg.pitch = 0.9; // Etwas tiefer für männlichen Klang
-        msg.rate = 1;
+        msg.pitch = 0.8; // Tiefer für maskulinen Klang
+        msg.rate = 1.1;  // Etwas schneller für Dynamik
         window.speechSynthesis.speak(msg);
     }
 
@@ -118,8 +122,8 @@
             USER_KEY = key;
             document.getElementById('login-overlay').style.display = 'none';
             setFormation('reset');
-            speak(`Hallo Coach. Ich bin bereit für die Taktikbesprechung.`);
-            addMsg("toni", "Das Spielfeld ist bereit. Wir starten mit 4-4-2 (Rot) gegen 3-4-3 (Blau).");
+            speak(`Hallo Coach ${user}. Ich habe das Board auf 4-4-2 gegen 3-4-3 eingestellt. Wie gehen wir vor?`);
+            addMsg("toni", "Bereit zur Analyse.");
         } else { alert("Check Daten!"); }
     }
 
@@ -131,19 +135,11 @@
 
         if (mode === 'reset') {
             // HEIM: 4-4-2 (Rot)
-            const homePos = [
-                [5,50], [20,20], [20,40], [20,60], [20,80], // GK, Abwehr
-                [45,20], [45,40], [45,60], [45,80], // Mittelfeld
-                [70,40], [70,60] // Sturm
-            ];
+            const homePos = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,20], [45,40], [45,60], [45,80], [70,40], [70,60]];
             homePos.forEach((pos, i) => createPlayer('home', i+1, pos[0], pos[1]));
 
             // GAST: 3-4-3 (Blau)
-            const awayPos = [
-                [92,50], [78,25], [78,50], [78,75], // GK, Abwehr
-                [55,20], [55,40], [55,60], [55,80], // Mittelfeld
-                [30,25], [30,50], [30,75] // Sturm
-            ];
+            const awayPos = [[93,50], [78,25], [78,50], [78,75], [58,15], [58,38], [58,62], [58,85], [35,20], [35,50], [35,80]];
             awayPos.forEach((pos, i) => createPlayer('away', i+1, pos[0], pos[1]));
         }
     }
@@ -165,7 +161,12 @@
         addMsg("user", text);
         input.value = "";
 
-        const prompt = `Du bist Fußballtrainer Toni. Antworte kurz. Um Spieler/Ball zu bewegen, nutze am Ende: MOVE[ID,X,Y]. IDs: home1-11, away1-11, ball. X/Y: 0-95. Heim Team (home) ist Rot (4-4-2), Gast (away) ist Blau (3-4-3). Frage: ${text}`;
+        const prompt = `Du bist Fußballtrainer Toni. Erkläre kurz die Taktik. 
+        UM SPIELER ZU BEWEGEN: Schreibe am Ende IMMER das Format MOVE[ID,X,Y]. 
+        Trenne mehrere Bewegungen mit einem Semikolon innerhalb der Klammer oder nutze mehrere MOVE Blöcke.
+        Beispiel: MOVE[ball,30,20; home1,10,10].
+        IDs: home1 bis home11, away1 bis away11, ball. X/Y Werte: 0 bis 95.
+        Frage: ${text}`;
 
         try {
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${USER_KEY}`, {
@@ -176,19 +177,32 @@
             const data = await response.json();
             if (data.candidates) {
                 let answer = data.candidates[0].content.parts[0].text;
-                const moveRegex = /MOVE\[(\w+),(\d+),(\d+)\]/g;
-                let cleanAnswer = answer.replace(moveRegex, "");
+                
+                // Neue, robuste Logik für Bewegungen
+                const moveMatch = answer.match(/MOVE\[(.*?)\]/);
+                let cleanAnswer = answer.replace(/MOVE\[.*?\]/g, "");
                 
                 addMsg("toni", cleanAnswer);
                 speak(cleanAnswer);
 
-                let match;
-                while ((match = moveRegex.exec(answer)) !== null) {
-                    const el = document.getElementById(match[1]);
-                    if (el) { el.style.left = match[2] + "%"; el.style.top = match[3] + "%"; }
+                if (moveMatch) {
+                    const commands = moveMatch[1].split(';');
+                    commands.forEach(cmd => {
+                        const parts = cmd.split(',');
+                        if (parts.length === 3) {
+                            const id = parts[0].trim();
+                            const x = parts[1].trim();
+                            const y = parts[2].trim();
+                            const el = document.getElementById(id);
+                            if (el) {
+                                el.style.left = x + "%";
+                                el.style.top = y + "%";
+                            }
+                        }
+                    });
                 }
             }
-        } catch (e) { addMsg("toni", "Fehler!"); }
+        } catch (e) { addMsg("toni", "Fehler in der Verbindung!"); }
     }
 
     function addMsg(role, text) {
