@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni - V45 ULTIMATE</title>
+    <title>Coach Toni - PRO V47 FINAL</title>
     <style>
         :root { --p-green: #28a745; --l-white: rgba(255,255,255,0.95); --red: #ff0000; --blue: #007bff; }
         body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         .container { display: grid; grid-template-columns: 350px 1fr 300px; width: 100%; gap: 10px; padding: 10px; box-sizing: border-box; }
 
         #chat-sidebar { background: #1e1e1e; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #333; }
-        .header { background: #000; padding: 15px; text-align: center; font-weight: bold; border-bottom: 3px solid var(--p-green); color: var(--p-green); }
+        .header { background: #000; padding: 15px; text-align: center; font-weight: bold; border-bottom: 3px solid var(--p-green); color: var(--p-green); text-transform: uppercase; }
         #chat-history { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .msg { padding: 12px; border-radius: 12px; font-size: 0.9rem; line-height: 1.4; max-width: 90%; }
         .user { align-self: flex-end; background: #007bff; }
@@ -20,28 +20,27 @@
         #pitch { width: 95%; height: 85%; background: var(--p-green); border: 2px solid var(--l-white); position: relative; border-radius: 5px; margin-top: 10px; overflow: hidden; }
         .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--l-white); }
         .m-circle { position: absolute; left: 50%; top: 50%; width: 100px; height: 100px; border: 2px solid var(--l-white); border-radius: 50%; transform: translate(-50%, -50%); }
-        .m-box-16 { position: absolute; width: 16%; height: 44%; border: 2px solid var(--l-white); top: 28%; }
-        .l { left: 0; border-left: none; } .r { right: 0; border-right: none; }
+        .m-box { position: absolute; width: 16%; height: 44%; border: 2px solid var(--l-white); top: 28%; }
+        .m-l { left: 0; border-left: none; } .m-r { right: 0; border-right: none; }
 
         .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 1.2s cubic-bezier(0.2, 0.7, 0.3, 1); }
-        .player { width: 36px; height: 36px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; text-align: center; }
+        .player { width: 36px; height: 36px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white; text-align: center; }
         .home { background-color: var(--red) !important; } .away { background-color: var(--blue) !important; }
         #ball { width: 18px; height: 18px; background: white; border: 2px solid black; border-radius: 50%; z-index: 110; }
 
         #whiteboard { background: #fff; color: #000; border-radius: 15px; padding: 15px; border: 1px solid #ddd; display: flex; flex-direction: column; }
-        #player-list { flex: 1; border: none; font-size: 1.1rem; outline: none; line-height: 1.6; font-family: monospace; font-weight: bold; color: black !important; }
+        #player-list { flex: 1; border: none; font-size: 1.1rem; outline: none; line-height: 1.6; font-family: monospace; font-weight: bold; }
 
         #login-overlay { position: fixed; inset: 0; background: #000; z-index: 4000; display: flex; align-items: center; justify-content: center; }
-        .mic-active { background: #ff0000 !important; box-shadow: 0 0 15px red; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
     <div style="background: #1e1e1e; padding: 40px; border-radius: 20px; border: 2px solid var(--p-green); text-align: center;">
-        <h2 style="color: var(--p-green)">⚽ COACH TONI V45 FINAL</h2>
+        <h2 style="color: var(--p-green)">⚽ COACH TONI V47 FINAL</h2>
         <input type="password" id="password" placeholder="Passwort" style="display:block; width:250px; margin:20px auto; padding:12px; border-radius:8px;">
-        <input type="text" id="user-key" placeholder="Google API-Key" style="display:block; width:250px; margin:20px auto; padding:12px; border-radius:8px;">
+        <input type="text" id="user-key" placeholder="Google API-Key" style="display:block; width:250px; margin:10px auto; padding:12px; border-radius:8px;">
         <button onclick="startToni()" style="background:var(--p-green); color:white; width:100%; padding:12px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">SYSTEM STARTEN</button>
     </div>
 </div>
@@ -60,12 +59,12 @@
 
     <div id="pitch-area">
         <div style="padding:10px; display:flex; gap:10px;">
-            <button onclick="setFormation()">Feld Reset</button>
+            <button onclick="setFormation()">Reset Feld</button>
             <button onclick="loadVoice()">Stimme laden</button>
         </div>
         <div id="pitch">
             <div class="m-line"></div><div class="m-circle"></div>
-            <div class="m-box-16 l"></div><div class="m-box-16 r"></div>
+            <div class="m-box m-l"></div> <div class="m-box m-r"></div>
             <div id="ball" style="left:50%; top:50%;"></div>
             <div id="players-layer"></div>
         </div>
@@ -89,8 +88,6 @@
         if (!recognition) {
             recognition = new Speech();
             recognition.lang = 'de-DE';
-            recognition.onstart = () => document.getElementById('mic-btn').classList.add('mic-active');
-            recognition.onend = () => document.getElementById('mic-btn').classList.remove('mic-active');
             recognition.onresult = (e) => { document.getElementById('user-input').value = e.results[0][0].transcript; askToni(); };
         }
         recognition.start();
@@ -113,7 +110,7 @@
 
     function saveAndSync() {
         const list = document.getElementById('player-list').value;
-        localStorage.setItem('toni_kader_V45', list);
+        localStorage.setItem('toni_kader_V47', list);
         const lines = list.split('\n');
         for(let i=1; i<=15; i++) {
             const el = document.getElementById('home' + i);
@@ -123,9 +120,9 @@
             const m = l.match(/^(\d+)\s*(.*)$/);
             if (m) {
                 const nr = m[1];
-                const name = m[2].trim().split(' ')[0];
+                const name = m[2].trim().split(' ')[0] || nr;
                 const el = document.getElementById('home' + nr);
-                if (el && name) el.innerText = name;
+                if (el) el.innerText = name;
             }
         });
     }
@@ -139,7 +136,7 @@
         
         let initialList = "";
         for(let i=1; i<=15; i++) initialList += i + " \n";
-        const saved = localStorage.getItem('toni_kader_V45');
+        const saved = localStorage.getItem('toni_kader_V47');
         document.getElementById('player-list').value = saved ? saved : initialList;
         saveAndSync();
     }
@@ -150,7 +147,6 @@
         p.style.left = x + "%"; p.style.top = y + "%"; l.appendChild(p);
     }
 
-    // --- DRAG ---
     let activeItem = null;
     document.addEventListener('mousedown', (e) => {
         if (e.target.classList.contains('player') || e.target.id === 'ball') {
@@ -171,7 +167,7 @@
     function startToni() {
         if (document.getElementById('password').value === "Trainer2026") {
             USER_KEY = document.getElementById('user-key').value.trim();
-            localStorage.setItem('toni_key_V45', USER_KEY);
+            localStorage.setItem('toni_key_V47', USER_KEY);
             document.getElementById('login-overlay').style.display = 'none';
             setFormation();
             loadVoice();
@@ -179,7 +175,7 @@
     }
 
     window.onload = () => {
-        const k = localStorage.getItem('toni_key_V45');
+        const k = localStorage.getItem('toni_key_V47');
         if (k) document.getElementById('user-key').value = k;
     };
 
@@ -187,47 +183,37 @@
         if (isLocked) return;
         const input = document.getElementById('user-input');
         const text = input.value.trim(); if (!text) return;
-        
         isLocked = true; document.getElementById('send-btn').disabled = true;
         addMsg("user", text); input.value = "";
         document.getElementById('status').innerText = "Analyse läuft...";
 
         const state = "Kader: " + document.getElementById('player-list').value.replace(/\n/g, ', ') + ". Positionen: " + [...document.querySelectorAll('.player, #ball')].map(el => `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}]`).join(', ');
-        const prompt = `Du bist Toni, Co-Trainer von Manager Björn (BVB & international). Arrogant, witzig, hochintelligent. ROT=home, BLAU=away. Stand: ${state}. PFLICHT: MOVE[ID,X,Y] nutzen. Antworte kurz.`;
+        const prompt = `Du bist Toni, Co-Trainer von Manager Björn (BVB & international). Charakter: Arrogant, witzig, hochintelligent. ROT=home, BLAU=away. Stand: ${state}. PFLICHT: MOVE[ID,X,Y] nutzen. Antworte kurz.`;
 
         try {
-            // Timeout-Sicherung: Wenn nach 10 Sek nichts kommt
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), 12000);
-
-            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`, {
+            // DIE BEWÄHRTE ADRESSE (v1beta + gemini-flash-latest)
+            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${USER_KEY}`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
-                signal: controller.signal,
                 body: JSON.stringify({ contents: [{ parts: [{ text: prompt + " Frage: " + text }] }] })
             });
-            clearTimeout(id);
             const data = await resp.json();
-            
             isLocked = false; document.getElementById('send-btn').disabled = false;
-            document.getElementById('status').innerText = "Ready";
+            document.getElementById('status').innerText = "Bereit";
 
             if (data.candidates) {
                 let answer = data.candidates[0].content.parts[0].text;
                 let moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
-                addMsg("toni", answer.replace(/MOVE\[.*?\]/g, ""));
-                speak(answer.replace(/MOVE\[.*?\]/g, ""));
+                let clean = answer.replace(/MOVE\[.*?\]/g, "");
+                addMsg("toni", clean); speak(clean);
                 moves.forEach(m => {
                     const id = m[1].replace('H','home').replace('A','away');
                     const el = document.getElementById(id);
                     if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
                 });
             } else {
-                addMsg("toni", "Google verweigert die Aussage. Fehler: " + (data.error ? data.error.message : "Unbekannt"));
+                addMsg("toni", "Google verweigert die Aussage. Fehler: " + (data.error ? data.error.message : "Keine Antwort."));
             }
-        } catch (e) { 
-            isLocked = false; document.getElementById('send-btn').disabled = false;
-            addMsg("toni", "Hör mal Björn, die Leitung ist tot. Entweder Quota oder der Key hat Sendepause."); 
-        }
+        } catch (e) { isLocked = false; document.getElementById('send-btn').disabled = false; addMsg("toni", "Technik-Foul!"); }
     }
 
     function addMsg(r, t) {
