@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni - Taktik Zentrale V14</title>
+    <title>Coach Toni - Trainer Zentrale V15</title>
     <style>
-        :root { --pitch-green: #28a745; --line-white: rgba(255,255,255,0.8); }
+        :root { --pitch-green: #28a745; --line-white: rgba(255,255,255,0.8); --home-team: #ff0000; --away-team: #007bff; }
         body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        /* Layout Container */
         .container { display: grid; grid-template-columns: 350px 1fr 300px; width: 100%; gap: 10px; padding: 10px; box-sizing: border-box; }
 
         /* Links: Chat */
@@ -20,87 +18,77 @@
         .toni { align-self: flex-start; background: #333; }
 
         /* Mitte: Taktikboard */
-        #pitch-area { background: #222; border-radius: 15px; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #333; overflow: hidden; }
-        #pitch { width: 90%; height: 90%; background: var(--pitch-green); border: 2px solid var(--line-white); position: relative; border-radius: 5px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        #pitch-area { background: #222; border-radius: 15px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #333; }
+        .controls { padding: 10px; display: flex; gap: 10px; }
+        #pitch { width: 95%; height: 80%; background: var(--pitch-green); border: 2px solid var(--line-white); position: relative; border-radius: 5px; }
+        
+        /* Linien & Tore */
         .center-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--line-white); }
         .center-circle { position: absolute; left: 50%; top: 50%; width: 100px; height: 100px; border: 2px solid var(--line-white); border-radius: 50%; transform: translate(-50%, -50%); }
-        .penalty-area { position: absolute; width: 15%; height: 40%; border: 2px solid var(--line-white); top: 30%; }
-        .left-box { left: 0; border-left: none; }
-        .right-box { right: 0; border-right: none; }
+        .goal { position: absolute; width: 10px; height: 60px; background: white; top: 50%; transform: translateY(-50%); border: 1px solid #333; }
+        .goal-left { left: -5px; } .goal-right { right: -5px; }
+        .funino-goal { width: 10px; height: 30px; background: yellow; position: absolute; }
 
-        /* Spieler/Männchen */
-        .player { width: 25px; height: 25px; background: red; border: 2px solid white; border-radius: 50%; position: absolute; cursor: move; transition: all 0.5s ease; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        /* Spieler */
+        .player { width: 22px; height: 22px; border: 2px solid white; border-radius: 50%; position: absolute; transition: all 1s ease-in-out; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; cursor: move; }
+        .home { background: var(--home-team); }
+        .away { background: var(--away-team); }
 
         /* Rechts: Weiße Tafel */
-        #whiteboard { background: #f8f9fa; color: #333; border-radius: 15px; padding: 20px; border: 1px solid #ddd; display: flex; flex-direction: column; }
-        #whiteboard h3 { margin-top: 0; border-bottom: 2px solid #333; padding-bottom: 5px; }
-        #player-list { border: none; width: 100%; height: 100%; font-family: 'Permanent Marker', cursive, sans-serif; font-size: 1.1rem; background: transparent; resize: none; outline: none; line-height: 1.8; }
+        #whiteboard { background: #fff; color: #333; border-radius: 15px; padding: 15px; border: 1px solid #ddd; display: flex; flex-direction: column; }
+        #player-list { flex: 1; border: none; font-size: 1.1rem; background: transparent; resize: none; outline: none; line-height: 1.6; }
 
-        /* Login Overlay */
-        #login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: #1e1e1e; padding: 40px; border-radius: 20px; text-align: center; border: 1px solid var(--pitch-green); }
-        input { display: block; width: 250px; padding: 12px; margin: 10px auto; border-radius: 8px; border: 1px solid #333; background: #222; color: white; }
-        button { background: var(--pitch-green); color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-
-        .input-area { padding: 15px; background: #111; display: flex; gap: 5px; }
-        .input-area input { flex: 1; margin: 0; }
+        /* Login */
+        #login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: #1e1e1e; padding: 30px; border-radius: 20px; text-align: center; border: 1px solid var(--pitch-green); }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
     <div class="login-box">
-        <h2>Coach Toni Zentrale</h2>
-        <input type="text" id="username" placeholder="Dein Name">
+        <h2>⚽ Trainer Zentrale</h2>
+        <input type="text" id="username" placeholder="Name">
         <input type="password" id="password" placeholder="Passwort">
-        <input type="text" id="user-key" placeholder="Google API-Key">
-        <button onclick="startToni()">Zentrale aktivieren</button>
+        <input type="text" id="user-key" placeholder="API-Key">
+        <button onclick="startToni()">Zentrale starten</button>
     </div>
 </div>
 
 <div class="container">
     <div id="chat-sidebar">
-        <div class="header">⚽ TONI ANALYSE</div>
+        <div class="header">COACH TONI AI</div>
         <div id="chat-history"></div>
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Taktik-Frage...">
-            <button onclick="askToni()">OK</button>
+        <div style="padding:15px; background:#111; display:flex; gap:5px">
+            <input type="text" id="user-input" style="flex:1; background:#222; color:white; border:1px solid #444; padding:8px; border-radius:5px;" placeholder="Frag Toni...">
+            <button onclick="askToni()">FRAGEN</button>
         </div>
     </div>
 
     <div id="pitch-area">
+        <div class="controls">
+            <button onclick="setMode('11v11')">11 gegen 11</button>
+            <button onclick="setMode('funino')" style="background:orange">FUNINO (3v3)</button>
+        </div>
         <div id="pitch">
-            <div class="center-line"></div>
-            <div class="center-circle"></div>
-            <div class="penalty-area left-box"></div>
-            <div class="penalty-area right-box"></div>
+            <div id="field-markings">
+                <div class="center-line"></div>
+                <div class="center-circle"></div>
+                <div id="goals-container"></div>
+            </div>
             <div id="players-layer"></div>
         </div>
     </div>
 
     <div id="whiteboard">
-        <h3>📋 Kader / Notizen</h3>
-        <textarea id="player-list" placeholder="1. Name&#10;2. Name&#10;..."></textarea>
+        <h3 style="margin:0">📋 Kader & Spielernotizen</h3>
+        <textarea id="player-list" placeholder="Nr. Name / Position..."></textarea>
     </div>
 </div>
 
 <script>
     let USER_KEY = "";
-    
-    // Initialisiere 11 Spieler auf dem Feld
-    function setupPitch() {
-        const layer = document.getElementById('players-layer');
-        for(let i=1; i<=11; i++) {
-            const p = document.createElement('div');
-            p.className = 'player';
-            p.id = 'p' + i;
-            p.innerText = i;
-            // Start-Position (4-4-2 mäßig verteilt)
-            p.style.left = (20 + (i%3)*20) + "%";
-            p.style.top = (10 + (i%4)*20) + "%";
-            layer.appendChild(p);
-        }
-    }
+    let currentMode = "11v11";
 
     function startToni() {
         const user = document.getElementById('username').value.trim();
@@ -110,11 +98,55 @@
         if (user && pass === "Trainer2026" && key.startsWith("AIza")) {
             USER_KEY = key;
             document.getElementById('login-overlay').style.display = 'none';
-            setupPitch();
-            addMsg("toni", `Moin ${user}! Das Stadion ist bereit. Das Board steht in der Mitte und rechts kannst du deinen Kader für das Spiel notieren. Was analysieren wir zuerst?`);
+            setMode('11v11');
+            addMsg("toni", `Servus Björn! Ich bin bereit. Das Spielfeld ist aufgebaut. Frag mich nach einer Taktik, und ich zeige dir, wie wir verschieben!`);
+            speak(`Servus Björn! Ich bin bereit.`);
+        } else { alert("Daten prüfen!"); }
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        const layer = document.getElementById('players-layer');
+        const goals = document.getElementById('goals-container');
+        layer.innerHTML = "";
+        goals.innerHTML = "";
+
+        if (mode === '11v11') {
+            goals.innerHTML = '<div class="goal goal-left"></div><div class="goal goal-right"></div>';
+            createPlayers(11, 'home');
+            createPlayers(11, 'away');
         } else {
-            alert("Daten prüfen!");
+            // Funino: 4 Tore (gelb)
+            goals.innerHTML = `
+                <div class="funino-goal" style="top:20%; left:-5px"></div>
+                <div class="funino-goal" style="top:70%; left:-5px"></div>
+                <div class="funino-goal" style="top:20%; right:-5px"></div>
+                <div class="funino-goal" style="top:70%; right:-5px"></div>`;
+            createPlayers(3, 'home');
+            createPlayers(3, 'away');
         }
+    }
+
+    function createPlayers(count, team) {
+        const layer = document.getElementById('players-layer');
+        for (let i = 1; i <= count; i++) {
+            const p = document.createElement('div');
+            p.className = `player ${team}`;
+            p.id = team + i;
+            p.innerText = i;
+            // Startpositionen
+            p.style.left = (team === 'home' ? 10 : 80) + "%";
+            p.style.top = (10 + (i * 7)) + "%";
+            layer.appendChild(p);
+        }
+    }
+
+    function speak(text) {
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'de-DE';
+        msg.pitch = 1;
+        msg.rate = 1;
+        window.speechSynthesis.speak(msg);
     }
 
     async function askToni() {
@@ -124,18 +156,40 @@
         addMsg("user", text);
         input.value = "";
 
+        // Toni erhält die Anweisung, Koordinaten zu senden
+        const prompt = `Du bist Toni. Erkläre kurz die Taktik. WICHTIG: Wenn du Spieler verschieben willst, schreibe am Ende deiner Antwort exakt dieses Format: MOVE[ID,X,Y] wobei ID z.B. home1 oder away2 ist, und X/Y Werte von 0-95 sind. Frage: ${text}`;
+
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${USER_KEY}`;
         try {
             const response = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: `Du bist Fußballtrainer Toni. Antworte kurz und fachlich. Frage: ${text}` }] }] })
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
             const data = await response.json();
             if (data.candidates) {
-                addMsg("toni", data.candidates[0].content.parts[0].text);
+                let answer = data.candidates[0].content.parts[0].text;
+                
+                // Befehle filtern und ausführen
+                const moveRegex = /MOVE\[(\w+),(\d+),(\d+)\]/g;
+                let cleanAnswer = answer.replace(moveRegex, "");
+                
+                addMsg("toni", cleanAnswer);
+                speak(cleanAnswer);
+
+                let match;
+                while ((match = moveRegex.exec(answer)) !== null) {
+                    const id = match[1];
+                    const x = match[2];
+                    const y = match[3];
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.style.left = x + "%";
+                        el.style.top = y + "%";
+                    }
+                }
             }
-        } catch (e) { addMsg("toni", "Fehler!"); }
+        } catch (e) { addMsg("toni", "Verbindungsfehler!"); }
     }
 
     function addMsg(role, text) {
