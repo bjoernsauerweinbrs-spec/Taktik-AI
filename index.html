@@ -3,226 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni - PRO V47 FINAL</title>
+    <title>KI Taktikboard – Coach Toni</title>
+
     <style>
-        :root { --p-green: #28a745; --l-white: rgba(255,255,255,0.95); --red: #ff0000; --blue: #007bff; }
-        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        .container { display: grid; grid-template-columns: 350px 1fr 300px; width: 100%; gap: 10px; padding: 10px; box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0d0d0d;
+            color: white;
+        }
 
-        #chat-sidebar { background: #1e1e1e; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #333; }
-        .header { background: #000; padding: 15px; text-align: center; font-weight: bold; border-bottom: 3px solid var(--p-green); color: var(--p-green); text-transform: uppercase; }
-        #chat-history { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 12px; border-radius: 12px; font-size: 0.9rem; line-height: 1.4; max-width: 90%; }
-        .user { align-self: flex-end; background: #007bff; }
-        .toni { align-self: flex-start; background: #333; border-left: 4px solid var(--p-green); }
+        /* --- HEADER --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 8%;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            backdrop-filter: blur(12px);
+            background: rgba(0,0,0,0.4);
+            z-index: 1000;
+        }
 
-        #pitch-area { background: #222; border-radius: 15px; display: flex; flex-direction: column; align-items: center; border: 1px solid #333; position: relative; }
-        #pitch { width: 95%; height: 85%; background: var(--p-green); border: 2px solid var(--l-white); position: relative; border-radius: 5px; margin-top: 10px; overflow: hidden; }
-        .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--l-white); }
-        .m-circle { position: absolute; left: 50%; top: 50%; width: 100px; height: 100px; border: 2px solid var(--l-white); border-radius: 50%; transform: translate(-50%, -50%); }
-        .m-box { position: absolute; width: 16%; height: 44%; border: 2px solid var(--l-white); top: 28%; }
-        .m-l { left: 0; border-left: none; } .m-r { right: 0; border-right: none; }
+        header h1 {
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            margin: 0;
+        }
 
-        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 1.2s cubic-bezier(0.2, 0.7, 0.3, 1); }
-        .player { width: 36px; height: 36px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white; text-align: center; }
-        .home { background-color: var(--red) !important; } .away { background-color: var(--blue) !important; }
-        #ball { width: 18px; height: 18px; background: white; border: 2px solid black; border-radius: 50%; z-index: 110; }
+        header a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 25px;
+        }
 
-        #whiteboard { background: #fff; color: #000; border-radius: 15px; padding: 15px; border: 1px solid #ddd; display: flex; flex-direction: column; }
-        #player-list { flex: 1; border: none; font-size: 1.1rem; outline: none; line-height: 1.6; font-family: monospace; font-weight: bold; }
+        /* --- HERO --- */
+        .hero {
+            padding-top: 160px;
+            text-align: center;
+            padding-bottom: 120px;
+        }
 
-        #login-overlay { position: fixed; inset: 0; background: #000; z-index: 4000; display: flex; align-items: center; justify-content: center; }
+        .hero h2 {
+            font-size: 3.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            opacity: 0.8;
+            max-width: 700px;
+            margin: 0 auto 40px auto;
+        }
+
+        .cta-btn {
+            background: #28a745;
+            padding: 16px 32px;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .cta-btn:hover {
+            background: #1f8a38;
+        }
+
+        /* --- FEATURES --- */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            padding: 80px 8%;
+        }
+
+        .feature-box {
+            background: #1a1a1a;
+            padding: 35px;
+            border-radius: 18px;
+            border: 1px solid #333;
+            transition: 0.3s;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-6px);
+            border-color: #28a745;
+        }
+
+        .feature-box h3 {
+            margin-top: 0;
+            font-size: 1.4rem;
+        }
+
+        .feature-box p {
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        /* --- DEMO SECTION --- */
+        .demo {
+            padding: 100px 8%;
+            text-align: center;
+        }
+
+        .demo img {
+            width: 90%;
+            max-width: 900px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        }
+
+        /* --- VISION --- */
+        .vision {
+            padding: 120px 8%;
+            text-align: center;
+            font-size: 1.4rem;
+            line-height: 1.8;
+            opacity: 0.85;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 40px;
+            text-align: center;
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
+
 <body>
 
-<div id="login-overlay">
-    <div style="background: #1e1e1e; padding: 40px; border-radius: 20px; border: 2px solid var(--p-green); text-align: center;">
-        <h2 style="color: var(--p-green)">⚽ COACH TONI V47 FINAL</h2>
-        <input type="password" id="password" placeholder="Passwort" style="display:block; width:250px; margin:20px auto; padding:12px; border-radius:8px;">
-        <input type="text" id="user-key" placeholder="Google API-Key" style="display:block; width:250px; margin:10px auto; padding:12px; border-radius:8px;">
-        <button onclick="startToni()" style="background:var(--p-green); color:white; width:100%; padding:12px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">SYSTEM STARTEN</button>
-    </div>
-</div>
+<header>
+    <h1>Coach Toni – KI Taktikboard</h1>
+    <nav>
+        <a href="#features">Features</a>
+        <a href="#demo">Demo</a>
+        <a href="#vision">Vision</a>
+        <a href="taktikboard.html">Taktikboard</a>
+    </nav>
+</header>
 
-<div class="container">
-    <div id="chat-sidebar">
-        <div class="header">TRAINER-KOMMANDO</div>
-        <div id="chat-history"></div>
-        <div id="status" style="font-size: 0.7rem; text-align: center; color: #555;">Ready</div>
-        <div style="padding:15px; background:#111; display:flex; gap:8px; align-items:center;">
-            <button id="mic-btn" onclick="toggleMic()" style="background:#444; border:none; padding:12px; border-radius:8px; cursor:pointer;">🎤</button>
-            <input type="text" id="user-input" style="flex:1; background:#222; color:white; border:1px solid #444; padding:10px; border-radius:5px;" placeholder="Befehl...">
-            <button id="send-btn" onclick="askToni()" style="background:var(--p-green); border:none; color:white; font-weight:bold; padding:10px; border-radius:5px; cursor:pointer;">OK</button>
-        </div>
-    </div>
+<section class="hero">
+    <h2>Das modernste KI‑Taktikboard für Trainer</h2>
+    <p>Trainingssimulation, Spielvorbereitung, Analyse, Trainingspläne und Spielerentwicklung – alles in einem einzigen intelligenten System.</p>
+    <a class="cta-btn" href="taktikboard.html">Jetzt starten</a>
+</section>
 
-    <div id="pitch-area">
-        <div style="padding:10px; display:flex; gap:10px;">
-            <button onclick="setFormation()">Reset Feld</button>
-            <button onclick="loadVoice()">Stimme laden</button>
-        </div>
-        <div id="pitch">
-            <div class="m-line"></div><div class="m-circle"></div>
-            <div class="m-box m-l"></div> <div class="m-box m-r"></div>
-            <div id="ball" style="left:50%; top:50%;"></div>
-            <div id="players-layer"></div>
-        </div>
+<section id="features" class="features">
+    <div class="feature-box">
+        <h3>⚽ KI‑Taktikboard</h3>
+        <p>Bewege Spieler, simuliere Szenen und analysiere Spielsituationen in Echtzeit.</p>
     </div>
 
-    <div id="whiteboard">
-        <h3 style="margin:0">📋 Kaderliste</h3>
-        <textarea id="player-list" oninput="saveAndSync()"></textarea>
+    <div class="feature-box">
+        <h3>🧠 Trainingssimulation</h3>
+        <p>Die KI berechnet Laufwege, Pressing, Umschaltmomente und taktische Muster.</p>
     </div>
-</div>
 
-<script>
-    let USER_KEY = "";
-    let coachVoice = null;
-    let recognition = null;
-    let isLocked = false;
+    <div class="feature-box">
+        <h3>📋 Spielvorbereitung</h3>
+        <p>Erstelle Formationen, analysiere Gegner und plane Spielszenarien.</p>
+    </div>
 
-    function toggleMic() {
-        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Speech) return;
-        if (!recognition) {
-            recognition = new Speech();
-            recognition.lang = 'de-DE';
-            recognition.onresult = (e) => { document.getElementById('user-input').value = e.results[0][0].transcript; askToni(); };
-        }
-        recognition.start();
-    }
+    <div class="feature-box">
+        <h3>📚 Trainingspläne</h3>
+        <p>Automatisch generierte Trainingseinheiten basierend auf Kader, Spielstil und Belastung.</p>
+    </div>
 
-    function loadVoice() {
-        const v = window.speechSynthesis.getVoices();
-        coachVoice = v.find(s => s.lang.startsWith('de') && (s.name.includes('Martin') || s.name.includes('Stefan')));
-        if (!coachVoice) coachVoice = v.find(s => s.lang.startsWith('de'));
-    }
-    window.speechSynthesis.onvoiceschanged = loadVoice;
+    <div class="feature-box">
+        <h3>🎯 Spieleranalyse</h3>
+        <p>Positionsdaten, Heatmaps, KI‑Feedback und individuelle Entwicklungspläne.</p>
+    </div>
 
-    function speak(t) {
-        window.speechSynthesis.cancel();
-        const m = new SpeechSynthesisUtterance(t);
-        if (coachVoice) m.voice = coachVoice;
-        m.pitch = 0.55; m.rate = 1.0;
-        window.speechSynthesis.speak(m);
-    }
+    <div class="feature-box">
+        <h3>🎤 Sprachsteuerung</h3>
+        <p>„Toni“ reagiert auf Trainerbefehle und führt taktische Aktionen aus.</p>
+    </div>
+</section>
 
-    function saveAndSync() {
-        const list = document.getElementById('player-list').value;
-        localStorage.setItem('toni_kader_V47', list);
-        const lines = list.split('\n');
-        for(let i=1; i<=15; i++) {
-            const el = document.getElementById('home' + i);
-            if (el) el.innerText = i;
-        }
-        lines.forEach(l => {
-            const m = l.match(/^(\d+)\s*(.*)$/);
-            if (m) {
-                const nr = m[1];
-                const name = m[2].trim().split(' ')[0] || nr;
-                const el = document.getElementById('home' + nr);
-                if (el) el.innerText = name;
-            }
-        });
-    }
+<section id="demo" class="demo">
+    <h2>Live‑Demo</h2>
+    <p>Ein Blick auf das KI‑Taktikboard in Aktion.</p>
+    <img src="demo.png" alt="Taktikboard Demo">
+</section>
 
-    function setFormation() {
-        const layer = document.getElementById('players-layer'); layer.innerHTML = "";
-        const h = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,20], [45,40], [45,60], [45,80], [70,40], [70,60]];
-        const a = [[93,50], [78,25], [78,50], [78,75], [58,15], [58,38], [58,62], [58,85], [35,20], [35,50], [35,80]];
-        h.forEach((p, i) => createP('home', i+1, p[0], p[1], layer));
-        a.forEach((p, i) => createP('away', i+1, p[0], p[1], layer));
-        
-        let initialList = "";
-        for(let i=1; i<=15; i++) initialList += i + " \n";
-        const saved = localStorage.getItem('toni_kader_V47');
-        document.getElementById('player-list').value = saved ? saved : initialList;
-        saveAndSync();
-    }
+<section id="vision" class="vision">
+    „Wir haben viele Länder bereist, sportliche Kulturen erlebt – und das Beste daraus wollen wir herausziehen und Trainern zur Verfügung stellen.“
+</section>
 
-    function createP(t, n, x, y, l) {
-        const p = document.createElement('div');
-        p.className = `player ${t}`; p.id = t + n; p.innerText = n;
-        p.style.left = x + "%"; p.style.top = y + "%"; l.appendChild(p);
-    }
-
-    let activeItem = null;
-    document.addEventListener('mousedown', (e) => {
-        if (e.target.classList.contains('player') || e.target.id === 'ball') {
-            activeItem = e.target; activeItem.style.transition = "none";
-        }
-    });
-    document.addEventListener('mousemove', (e) => {
-        if (!activeItem) return;
-        const r = document.getElementById('pitch').getBoundingClientRect();
-        activeItem.style.left = Math.max(0, Math.min(96, ((e.clientX - r.left) / r.width) * 100)) + "%";
-        activeItem.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
-    });
-    document.addEventListener('mouseup', () => {
-        if (activeItem) activeItem.style.transition = "all 1.2s ease-in-out";
-        activeItem = null;
-    });
-
-    function startToni() {
-        if (document.getElementById('password').value === "Trainer2026") {
-            USER_KEY = document.getElementById('user-key').value.trim();
-            localStorage.setItem('toni_key_V47', USER_KEY);
-            document.getElementById('login-overlay').style.display = 'none';
-            setFormation();
-            loadVoice();
-        }
-    }
-
-    window.onload = () => {
-        const k = localStorage.getItem('toni_key_V47');
-        if (k) document.getElementById('user-key').value = k;
-    };
-
-    async function askToni() {
-        if (isLocked) return;
-        const input = document.getElementById('user-input');
-        const text = input.value.trim(); if (!text) return;
-        isLocked = true; document.getElementById('send-btn').disabled = true;
-        addMsg("user", text); input.value = "";
-        document.getElementById('status').innerText = "Analyse läuft...";
-
-        const state = "Kader: " + document.getElementById('player-list').value.replace(/\n/g, ', ') + ". Positionen: " + [...document.querySelectorAll('.player, #ball')].map(el => `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}]`).join(', ');
-        const prompt = `Du bist Toni, Co-Trainer von Manager Björn (BVB & international). Charakter: Arrogant, witzig, hochintelligent. ROT=home, BLAU=away. Stand: ${state}. PFLICHT: MOVE[ID,X,Y] nutzen. Antworte kurz.`;
-
-        try {
-            // DIE BEWÄHRTE ADRESSE (v1beta + gemini-flash-latest)
-            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${USER_KEY}`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt + " Frage: " + text }] }] })
-            });
-            const data = await resp.json();
-            isLocked = false; document.getElementById('send-btn').disabled = false;
-            document.getElementById('status').innerText = "Bereit";
-
-            if (data.candidates) {
-                let answer = data.candidates[0].content.parts[0].text;
-                let moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
-                let clean = answer.replace(/MOVE\[.*?\]/g, "");
-                addMsg("toni", clean); speak(clean);
-                moves.forEach(m => {
-                    const id = m[1].replace('H','home').replace('A','away');
-                    const el = document.getElementById(id);
-                    if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
-                });
-            } else {
-                addMsg("toni", "Google verweigert die Aussage. Fehler: " + (data.error ? data.error.message : "Keine Antwort."));
-            }
-        } catch (e) { isLocked = false; document.getElementById('send-btn').disabled = false; addMsg("toni", "Technik-Foul!"); }
-    }
-
-    function addMsg(r, t) {
-        const h = document.getElementById('chat-history');
-        const d = document.createElement('div');
-        d.className = `msg ${r}`; d.innerText = t;
-        h.appendChild(d); h.scrollTop = h.scrollHeight;
-    }
-</script>
+<footer>
+    © 2026 PaceSports – KI Coaching Tools
+</footer>
 
 </body>
 </html>
