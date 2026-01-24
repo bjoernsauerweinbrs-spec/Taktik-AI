@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni - Zentrale V29</title>
+    <title>Coach Toni - Zentrale V30</title>
     <style>
         :root { --pitch-green: #28a745; --line-white: rgba(255,255,255,0.9); --home-team: #ff0000; --away-team: #007bff; }
         body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         .container { display: grid; grid-template-columns: 350px 1fr 300px; width: 100%; gap: 10px; padding: 10px; box-sizing: border-box; }
 
-        /* Sidebar & Chat */
+        /* Chat */
         #chat-sidebar { background: #1e1e1e; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #333; }
         .header { background: #000; padding: 15px; text-align: center; font-weight: bold; border-bottom: 3px solid var(--pitch-green); color: var(--pitch-green); }
         #chat-history { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
@@ -17,7 +17,7 @@
         .user { align-self: flex-end; background: #007bff; }
         .toni { align-self: flex-start; background: #333; border-left: 4px solid var(--pitch-green); }
 
-        /* Pitch & Markierungen */
+        /* Pitch */
         #pitch-area { background: #222; border-radius: 15px; display: flex; flex-direction: column; align-items: center; border: 1px solid #333; }
         #pitch { width: 95%; height: 85%; background: var(--pitch-green); border: 2px solid var(--line-white); position: relative; border-radius: 5px; margin-top: 10px; overflow: hidden; }
         .c-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--line-white); }
@@ -29,38 +29,37 @@
 
         /* Spieler */
         .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 1.2s ease-in-out; }
-        .player { width: 34px; height: 34px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: white; text-align: center; overflow: hidden; }
+        .player { width: 34px; height: 34px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: white; text-align: center; }
         .home { background: var(--home-team); }
         .away { background: var(--away-team); }
         #ball { width: 16px; height: 16px; background: white; border: 2px solid black; border-radius: 50%; z-index: 110; }
 
-        /* Weiße Tafel */
-        #whiteboard { background: #fff; color: #333; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; border: 1px solid #ddd; }
+        /* Tafel */
+        #whiteboard { background: #fff; color: #333; border-radius: 15px; padding: 15px; border: 1px solid #ddd; display: flex; flex-direction: column; }
         #player-list { flex: 1; border: none; font-size: 1rem; outline: none; line-height: 1.5; font-family: monospace; }
 
         #login-overlay { position: fixed; inset: 0; background: #111; z-index: 2000; display: flex; align-items: center; justify-content: center; }
-        .mic-active { background: #ff0000 !important; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .mic-active { background: #ff0000 !important; color: white !important; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
     <div style="background: #1e1e1e; padding: 40px; border-radius: 20px; border: 2px solid #28a745; text-align: center;">
-        <h2 style="color: #28a745">⚽ COACH TONI V29</h2>
-        <input type="password" id="password" placeholder="Passwort (Trainer2026)" style="display:block; width:250px; margin:15px auto; padding:12px;">
-        <input type="text" id="user-key" placeholder="API-Key" style="display:block; width:250px; margin:15px auto; padding:12px;">
-        <button onclick="startToni()" style="background:#28a745; color:white; width:100%; padding:12px; font-weight:bold; border:none; cursor:pointer;">STADION BETRETEN</button>
+        <h2 style="color: #28a745">⚽ COACH TONI V30</h2>
+        <input type="password" id="password" placeholder="Trainer-Passwort" style="display:block; width:250px; margin:15px auto; padding:12px;">
+        <input type="text" id="user-key" placeholder="Google API-Key" style="display:block; width:250px; margin:15px auto; padding:12px;">
+        <button onclick="startToni()" style="background:#28a745; color:white; width:100%; padding:12px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">STADION BETRETEN</button>
     </div>
 </div>
 
 <div class="container">
     <div id="chat-sidebar">
-        <div class="header">TAKTIK ANALYSE</div>
+        <div class="header">TRAINER-BANK</div>
         <div id="chat-history"></div>
         <div style="padding:15px; background:#111; display:flex; gap:5px; align-items:center;">
-            <button id="mic-btn" onclick="toggleMic()" style="background:#444; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer;">🎤</button>
-            <input type="text" id="user-input" style="flex:1; background:#222; color:white; border:1px solid #444; padding:10px; border-radius:5px;" placeholder="Toni fragen...">
+            <button id="mic-btn" onclick="toggleMic()" style="background:#444; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; min-width: 45px;">🎤</button>
+            <input type="text" id="user-input" style="flex:1; background:#222; color:white; border:1px solid #444; padding:10px; border-radius:5px;" placeholder="Toni etwas sagen...">
             <button onclick="askToni()" style="background:#28a745; border:none; color:white; font-weight:bold; padding:10px; border-radius:5px; cursor:pointer;">OK</button>
         </div>
     </div>
@@ -68,7 +67,7 @@
     <div id="pitch-area">
         <div style="padding:10px; display:flex; gap:10px;">
             <button onclick="setFormation()">Feld Reset</button>
-            <button onclick="loadVoice()">Stimme: Martin/Stefan</button>
+            <button onclick="loadVoice()">Stimme laden</button>
         </div>
         <div id="pitch">
             <div class="c-line"></div><div class="c-circle"></div>
@@ -90,38 +89,36 @@
 <script>
     let USER_KEY = "";
     let coachVoice = null;
-    let recognition;
+    let recognition = null;
+    let isListening = false;
 
-    // --- MIKROFON ---
-    function toggleMic() {
+    // --- MIKROFON (Stabiler) ---
+    function initRecognition() {
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Speech) return alert("Browser unterstützt kein Mikro.");
-        
-        if (!recognition) {
-            recognition = new Speech();
-            recognition.lang = 'de-DE';
-            recognition.continuous = false;
-            recognition.interimResults = false;
+        if (!Speech) return null;
+        const rec = new Speech();
+        rec.lang = 'de-DE';
+        rec.continuous = false;
+        rec.onstart = () => { isListening = true; document.getElementById('mic-btn').classList.add('mic-active'); };
+        rec.onend = () => { isListening = false; document.getElementById('mic-btn').classList.remove('mic-active'); };
+        rec.onresult = (e) => {
+            const transcript = e.results[0][0].transcript;
+            document.getElementById('user-input').value = transcript;
+            askToni();
+        };
+        return rec;
+    }
 
-            recognition.onstart = () => document.getElementById('mic-btn').classList.add('mic-active');
-            recognition.onend = () => document.getElementById('mic-btn').classList.remove('mic-active');
-            recognition.onerror = (e) => {
-                alert("Mikro-Fehler: " + e.error);
-                document.getElementById('mic-btn').classList.remove('mic-active');
-            };
-            recognition.onresult = (e) => {
-                const transcript = e.results[0][0].transcript;
-                document.getElementById('user-input').value = transcript;
-                askToni(); // Automatisch senden nach Sprache
-            };
-        }
-        recognition.start();
+    function toggleMic() {
+        if (!recognition) recognition = initRecognition();
+        if (!recognition) return alert("Mikrofon wird von diesem Browser nicht unterstützt.");
+        if (isListening) recognition.stop(); else recognition.start();
     }
 
     // --- STIMME ---
     function loadVoice() {
         const voices = window.speechSynthesis.getVoices();
-        coachVoice = voices.find(v => v.lang.startsWith('de') && (v.name.includes('Martin') || v.name.includes('Stefan') || v.name.includes('Yannick') || v.name.includes('Markus')));
+        coachVoice = voices.find(v => v.lang.startsWith('de') && (v.name.includes('Martin') || v.name.includes('Stefan') || v.name.includes('Yannick')));
         if (!coachVoice) coachVoice = voices.find(v => v.lang.startsWith('de'));
         if (coachVoice) speak("Coach bereit.");
     }
@@ -193,40 +190,34 @@
         const input = document.getElementById('user-input');
         const text = input.value.trim(); if (!text) return;
         addMsg("user", text); input.value = "";
-        addMsg("toni", "... Toni analysiert ...");
-
+        
         let state = "Kader: " + document.getElementById('player-list').value.replace(/\n/g, ', ') + ". Positionen: ";
         document.querySelectorAll('.player, #ball').forEach(el => {
             state += `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}], `;
         });
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${USER_KEY}`;
-        
+        // Smalltalk Check
+        let systemPrompt = `Du bist Toni, der persönliche Co-Trainer von Björn. 
+        Wenn der User dich nur grüßt (Hallo, Servus, etc.), antworte freundlich: 'Hallo, ich bin Toni der persönliche Co-Trainer von Björn, wir freuen uns, dass du hier bist. Wir hoffen, wir können dir einiges zeigen.' 
+        Ansonsten antworte fachlich fundiert. ROT=home, BLAU=away. Stand: ${state}. PFLICHT: Am Ende jeder Bewegung MOVE[ID,X,Y] nutzen.`;
+
         try {
-            const resp = await fetch(url, {
+            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${USER_KEY}`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: `Du bist Toni, Fußballtrainer. Antworte fachlich. ROT=home, BLAU=away. Stand: ${state}. Frage: ${text}. PFLICHT: Am Ende jeder Bewegung MOVE[ID,X,Y] nutzen.` }] }] })
+                body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt + " Frage: " + text }] }] })
             });
             const data = await resp.json();
-            
-            // Letzte Nachricht ("Toni analysiert...") entfernen
-            const history = document.getElementById('chat-history');
-            history.removeChild(history.lastChild);
-
             if (data.candidates) {
                 let answer = data.candidates[0].content.parts[0].text;
                 let moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
                 let clean = answer.replace(/MOVE\[.*?\]/g, "");
-                addMsg("toni", clean); 
-                speak(clean);
+                addMsg("toni", clean); speak(clean);
                 moves.forEach(m => {
                     const el = document.getElementById(m[1].replace('H','home').replace('A','away'));
                     if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
                 });
-            } else {
-                addMsg("toni", "Fehler: " + (data.error ? data.error.message : "Keine Antwort von Google."));
             }
-        } catch (e) { addMsg("toni", "Technischer Fehler beim Chat."); }
+        } catch (e) { addMsg("toni", "Fehler!"); }
     }
 
     function addMsg(role, text) {
