@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainer Toni - Echte Fußball-KI</title>
+    <script type="importmap">
+      { "imports": { "@google/generative-ai": "https://esm.run/@google/generative-ai" } }
+    </script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        #app { background: white; width: 100%; max-width: 500px; height: 90vh; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .header { background: #1a1a1a; color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2rem; }
+        #login-screen, #chat-screen { flex: 1; display: flex; flex-direction: column; padding: 20px; }
+        input { padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; outline: none; }
+        button { background: #4CAF50; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #45a049; }
+        #chat-history { flex: 1; overflow-y: auto; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
+        .msg { padding: 12px 16px; border-radius: 15px; max-width: 85%; line-height: 1.5; font-size: 0.95rem; }
+        .user { align-self: flex-end; background: #007bff; color: white; border-bottom-right-radius: 2px; }
+        .toni { align-self: flex-start; background: #e9e9eb; color: #333; border-bottom-left-radius: 2px; }
+        .info-text { font-size: 0.75rem; color: #666; margin-top: 10px; text-align: center; }
+        a { color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="header">⚽ COACH TONI - KI TRAINING</div>
+    
+    <div id="login-screen">
+        <h3 style="text-align:center; margin-top:0;">Bereit fürs Training?</h3>
+        <input type="text" id="username" placeholder="Dein Name">
+        <input type="password" id="password" placeholder="Passwort (Trainer2026)">
+        <hr style="width:100%; border:0; border-top:1px solid #eee; margin:15px 0;">
+        <label style="font-size:0.8rem; font-weight:bold;">Dein Google API-Key:</label>
+        <input type="text" id="user-key" placeholder="Hier Key einfügen (sk-...)">
+        <button onclick="startToni()">Toni aktivieren</button>
+        <p class="info-text">
+            Du hast keinen Key? <a href="https://aistudio.google.com/" target="_blank">Hier kostenlos erstellen</a>.<br>
+            Dein Key wird nur lokal in deinem Browser gespeichert.
+        </p>
+    </div>
+
+    <div id="chat-screen" style="display:none">
+        <div id="chat-history"></div>
+        <div style="display:flex; gap:10px">
+            <input type="text" id="user-input" style="flex:1" placeholder="Frag Toni nach einer Übung...">
+            <button onclick="askToni()">FRAGEN</button>
+        </div>
+        <button onclick="logout()" style="background:#f44336; margin-top:10px; padding:5px; font-size:0.7rem;">Key entfernen / Logout</button>
+    </div>
+</div>
+
+<script type="module">
+    import { GoogleGenerativeAI } from "@google/generative-ai";
+
+    let chatSession;
+    let userName = "";
+
+    // Beim Laden schauen, ob schon ein Key gespeichert ist
+    window.onload = () => {
+        const savedKey = localStorage.getItem('toni_api_key');
+        if (savedKey) {
+            document.getElementById('user-key').value = savedKey;
+        }
+    };
+
+    window.startToni = async function() {
+        userName = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const key = document.getElementById('user-key').value;
+        
+        if (userName && pass === "Trainer2026" && key.length > 20) {
+            // Key im Browser merken
+            localStorage.setItem('toni_api_key', key);
+            
+            try {
+                const genAI = new GoogleGenerativeAI(key);
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                
+                // Toni's Persönlichkeit initialisieren
+                chatSession = model.startChat({
+                    history: [
+                        { role: "user", parts: [{ text: "Du bist Toni, ein erfahrener Fußballtrainer für Kinder. Du erklärst Funino und Taktik einfach und motivierend. Antworte immer als Toni." }] },
+                        { role: "model", parts: [{ text: "Verstanden! Ich bin Toni, dein Co-Trainer. Ich bin bereit für das Training mit den Kids!" }] }
+                    ],
+                });
+
+                document
