@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni AI - V12</title>
+    <title>Coach Toni AI - V13</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         #app { background: white; width: 95%; max-width: 500px; height: 90vh; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; }
         .header { background: #1a1a1a; color: white; padding: 20px; text-align: center; font-weight: bold; border-bottom: 4px solid #28a745; font-size: 1.2rem; }
         #login-screen, #chat-screen { flex: 1; display: flex; flex-direction: column; padding: 25px; }
@@ -16,13 +16,13 @@
         .msg { padding: 12px 16px; border-radius: 15px; max-width: 85%; line-height: 1.5; font-size: 0.95rem; }
         .user { align-self: flex-end; background: #007bff; color: white; border-bottom-right-radius: 2px; }
         .toni { align-self: flex-start; background: #e9e9eb; color: #333; border-bottom-left-radius: 2px; }
-        .info-box { font-size: 0.7rem; color: #666; text-align: center; padding: 5px; background: #fff3cd; border-radius: 5px; margin-bottom: 10px; }
+        .footer-info { font-size: 0.7rem; color: #888; text-align: center; margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="header">⚽ COACH TONI - V12 (STABLE-MODE)</div>
+    <div class="header">⚽ COACH TONI - V13 (ALIAS-MODE)</div>
     
     <div id="login-screen">
         <h3 style="text-align:center">Trainer Anmeldung</h3>
@@ -34,9 +34,9 @@
 
     <div id="chat-screen" style="display:none">
         <div id="chat-history"></div>
-        <div class="info-box">Modus: Gemini 1.5 Flash (Free Tier)</div>
-        <div style="display:flex; gap:8px">
-            <input type="text" id="user-input" style="flex:1" placeholder="Frag Toni...">
+        <div class="footer-info">Modell: gemini-flash-latest</div>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+            <input type="text" id="user-input" style="flex:1" placeholder="Frag Toni etwas...">
             <button onclick="askToni()">FRAGEN</button>
         </div>
     </div>
@@ -54,9 +54,9 @@
             USER_KEY = key;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('chat-screen').style.display = 'flex';
-            addMsg("toni", `Servus ${user}! Wir nutzen jetzt 1.5 Flash. Das sollte keine Limit-Probleme machen. Was trainieren wir?`);
+            addMsg("toni", `Servus! Ich bin Toni. Ich nutze jetzt den Alias 'gemini-flash-latest'. Was trainieren wir heute?`);
         } else {
-            alert("Check Passwort (Trainer2026) und Key!");
+            alert("Passwort (Trainer2026) oder Key prüfen!");
         }
     }
 
@@ -68,15 +68,15 @@
         addMsg("user", text);
         input.value = "";
         
-        // Wir nutzen v1beta, aber das stabilere 1.5er Modell
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`;
+        // Nutzt den Alias aus deinem Scan
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${USER_KEY}`;
         
         try {
             const response = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: `Du bist Toni, ein erfahrener Fußballtrainer. Antworte motivierend: ${text}` }] }]
+                    contents: [{ parts: [{ text: `Du bist Toni, ein erfahrener Fußballtrainer. Antworte motivierend und kurz: ${text}` }] }]
                 })
             });
 
@@ -86,9 +86,11 @@
                 addMsg("toni", data.candidates[0].content.parts[0].text);
             } else if (data.error) {
                 addMsg("toni", "Google-Info: " + data.error.message);
+            } else {
+                addMsg("toni", "Keine Antwort erhalten. Eventuell ist das Tageslimit für diesen Key erreicht.");
             }
         } catch (e) {
-            addMsg("toni", "Technischer Fehler bei der Verbindung.");
+            addMsg("toni", "Verbindungsproblem. Bitte Internet prüfen.");
         }
     }
 
