@@ -3,70 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni - PRO V34 (Debugger)</title>
+    <title>Coach Toni - PRO V35</title>
     <style>
-        :root { --pitch-green: #28a745; --line-white: rgba(255,255,255,0.95); --home-team: #ff0000; --away-team: #007bff; }
+        :root { --p-green: #28a745; --l-white: rgba(255,255,255,0.95); --red: #ff0000; --blue: #007bff; }
         body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         .container { display: grid; grid-template-columns: 350px 1fr 300px; width: 100%; gap: 10px; padding: 10px; box-sizing: border-box; }
 
+        /* Chat */
         #chat-sidebar { background: #1e1e1e; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #333; }
-        .header { background: #000; padding: 15px; text-align: center; font-weight: bold; border-bottom: 3px solid var(--pitch-green); color: var(--pitch-green); }
+        .header { background: #000; padding: 15px; text-align: center; font-weight: bold; border-bottom: 3px solid var(--p-green); color: var(--p-green); text-transform: uppercase; }
         #chat-history { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .msg { padding: 12px; border-radius: 12px; font-size: 0.9rem; line-height: 1.4; max-width: 90%; }
-        .user { align-self: flex-end; background: #007bff; }
-        .toni { align-self: flex-start; background: #333; border-left: 4px solid var(--pitch-green); }
+        .user { align-self: flex-end; background: #007bff; color: white; }
+        .toni { align-self: flex-start; background: #333; border-left: 4px solid var(--p-green); }
 
-        /* Spielfeld */
+        /* Spielfeld Markierungen */
         #pitch-area { background: #222; border-radius: 15px; display: flex; flex-direction: column; align-items: center; border: 1px solid #333; }
-        #pitch { width: 95%; height: 85%; background: var(--pitch-green); border: 2px solid var(--line-white); position: relative; border-radius: 5px; margin-top: 10px; overflow: hidden; }
-        .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--line-white); }
-        .m-circle { position: absolute; left: 50%; top: 50%; width: 100px; height: 100px; border: 2px solid var(--line-white); border-radius: 50%; transform: translate(-50%, -50%); }
-        .m-box { position: absolute; width: 16%; height: 44%; border: 2px solid var(--line-white); top: 28%; }
-        .m-l { left: 0; border-left: none; } .m-r { right: 0; border-right: none; }
+        #pitch { width: 95%; height: 85%; background: var(--p-green); border: 2px solid var(--l-white); position: relative; border-radius: 5px; margin-top: 10px; overflow: hidden; }
+        .center-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--l-white); }
+        .center-circle { position: absolute; left: 50%; top: 50%; width: 100px; height: 100px; border: 2px solid var(--l-white); border-radius: 50%; transform: translate(-50%, -50%); }
+        .box-16 { position: absolute; width: 16%; height: 44%; border: 2px solid var(--l-white); top: 28%; }
+        .box-left { left: 0; border-left: none; } .box-right { right: 0; border-right: none; }
+        .goal-line { position: absolute; width: 10px; height: 60px; background: white; top: 50%; transform: translateY(-50%); border: 1px solid #333; }
 
+        /* Spieler & Ball */
         .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 1.2s cubic-bezier(0.2, 0.7, 0.3, 1); }
-        .player { width: 34px; height: 34px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; }
+        .player { width: 34px; height: 34px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; text-align: center; }
+        .home { background-color: var(--red) !important; }
+        .away { background-color: var(--blue) !important; }
         #ball { width: 16px; height: 16px; background: white; border: 2px solid black; border-radius: 50%; z-index: 110; }
 
-        #whiteboard { background: #fff; color: #000; border-radius: 15px; padding: 15px; border: 1px solid #ddd; }
-        #player-list { width: 100%; height: 90%; border: none; font-size: 1.1rem; outline: none; font-family: monospace; font-weight: bold; }
+        /* Kaderliste */
+        #whiteboard { background: #fff; color: #000; border-radius: 15px; padding: 15px; border: 1px solid #ddd; display: flex; flex-direction: column; }
+        #player-list { flex: 1; border: none; font-size: 1.1rem; color: #000; outline: none; line-height: 1.6; font-family: 'Courier New', monospace; font-weight: bold; }
 
         #login-overlay { position: fixed; inset: 0; background: #000; z-index: 3000; display: flex; align-items: center; justify-content: center; }
         .mic-active { background: #ff0000 !important; box-shadow: 0 0 10px red; }
-        #status-light { font-size: 0.7rem; color: #555; text-align: center; padding: 5px; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
-    <div style="background: #1e1e1e; padding: 40px; border-radius: 20px; border: 2px solid var(--pitch-green); text-align: center;">
-        <h2 style="color: var(--pitch-green)">⚽ COACH TONI V34</h2>
-        <input type="password" id="password" placeholder="Passwort" style="display:block; width:250px; margin:20px auto; padding:12px; border-radius:8px;">
+    <div style="background: #1e1e1e; padding: 40px; border-radius: 20px; border: 2px solid var(--p-green); text-align: center;">
+        <h2 style="color: var(--p-green)">⚽ COACH TONI V35</h2>
+        <input type="password" id="password" placeholder="Passwort (Trainer2026)" style="display:block; width:250px; margin:20px auto; padding:12px; border-radius:8px;">
         <input type="text" id="user-key" placeholder="Google API-Key" style="display:block; width:250px; margin:20px auto; padding:12px; border-radius:8px;">
-        <button onclick="startToni()" style="background:var(--pitch-green); color:white; width:100%; padding:12px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">STADION BETRETEN</button>
+        <button onclick="startToni()" style="background:var(--p-green); color:white; width:100%; padding:12px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">ZENTRALE STARTEN</button>
     </div>
 </div>
 
 <div class="container">
     <div id="chat-sidebar">
-        <div class="header">TRAINER-BANK</div>
+        <div class="header">TRAINER-TALK</div>
         <div id="chat-history"></div>
-        <div id="status-light">System bereit</div>
+        <div id="status" style="font-size: 0.7rem; text-align: center; color: #555;">System bereit</div>
         <div style="padding:15px; background:#111; display:flex; gap:8px; align-items:center;">
             <button id="mic-btn" onclick="toggleMic()" style="background:#444; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer;">🎤</button>
-            <input type="text" id="user-input" style="flex:1; background:#222; color:white; border:1px solid #444; padding:12px; border-radius:8px;" placeholder="Taktik-Anweisung...">
-            <button onclick="askToni()" style="background:var(--pitch-green); border:none; color:white; font-weight:bold; padding:12px; border-radius:8px; cursor:pointer;">OK</button>
+            <input type="text" id="user-input" style="flex:1; background:#222; color:white; border:1px solid #444; padding:12px; border-radius:8px;" placeholder="Frag den Chef...">
+            <button onclick="askToni()" style="background:var(--p-green); border:none; color:white; font-weight:bold; padding:12px; border-radius:8px; cursor:pointer;">OK</button>
         </div>
     </div>
 
     <div id="pitch-area">
         <div style="padding:10px; display:flex; gap:10px;">
-            <button onclick="setFormation()" style="background:#333; color:white; border:1px solid #555; padding:8px 15px; border-radius:5px; cursor:pointer;">Spielfeld Reset</button>
-            <button onclick="loadVoice()" style="background:#333; color:white; border:1px solid #555; padding:8px 15px; border-radius:5px; cursor:pointer;">Stimme Martin</button>
+            <button onclick="setFormation()" style="background:#333; color:white; border:1px solid #555; padding:8px 15px; border-radius:5px; cursor:pointer;">Reset</button>
+            <button onclick="loadVoice()" style="background:#333; color:white; border:1px solid #555; padding:8px 15px; border-radius:5px; cursor:pointer;">Stimme: Martin</button>
         </div>
         <div id="pitch">
-            <div class="m-line"></div><div class="m-circle"></div>
-            <div class="m-box m-left"></div><div class="m-box m-right"></div>
+            <div class="center-line"></div><div class="center-circle"></div>
+            <div class="box-16 box-left"></div> <div class="box-16 box-right"></div>
+            <div class="goal-line" style="left:-5px"></div> <div class="goal-line" style="right:-5px"></div>
             <div id="ball" style="left:50%; top:50%;"></div>
             <div id="players-layer"></div>
         </div>
@@ -74,7 +80,7 @@
 
     <div id="whiteboard">
         <h3 style="margin:0">📋 Kaderliste</h3>
-        <textarea id="player-list" oninput="saveAndSync()">1 Mike&#10;2 &#10;3 &#10;4 &#10;5 &#10;6 &#10;7 &#10;8 &#10;9 &#10;10 &#10;11</textarea>
+        <textarea id="player-list" oninput="saveAndSync()">1 &#10;2 &#10;3 &#10;4 &#10;5 &#10;6 &#10;7 &#10;8 &#10;9 &#10;10 &#10;11</textarea>
     </div>
 </div>
 
@@ -84,7 +90,7 @@
     let recognition = null;
     let isListening = false;
 
-    // --- MIKROFON (NEU) ---
+    // --- MIKROFON (Stabiler) ---
     function toggleMic() {
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!Speech) return alert("Mikrofon wird nicht unterstützt.");
@@ -106,7 +112,7 @@
         const v = window.speechSynthesis.getVoices();
         coachVoice = v.find(s => s.lang.startsWith('de') && (s.name.includes('Martin') || s.name.includes('Yannick') || s.name.includes('Stefan')));
         if (!coachVoice) coachVoice = v.find(s => s.lang.startsWith('de'));
-        if (coachVoice) speak("Martin übernimmt jetzt hier, Björn. Konzentrier dich.");
+        if (coachVoice) speak("Martin ist bereit. Setz dich, Björn.");
     }
     window.speechSynthesis.onvoiceschanged = loadVoice;
 
@@ -118,10 +124,10 @@
         window.speechSynthesis.speak(m);
     }
 
-    // --- KADER & DRAG ---
+    // --- KADER ---
     function saveAndSync() {
         const list = document.getElementById('player-list').value;
-        localStorage.setItem('toni_kader_V34', list);
+        localStorage.setItem('toni_kader_V35', list);
         list.split('\n').forEach(l => {
             const m = l.match(/^(\d+)\s+(.+)$/);
             if (m) {
@@ -131,6 +137,7 @@
         });
     }
 
+    // --- DRAG ---
     let activeItem = null;
     document.addEventListener('mousedown', (e) => {
         if (e.target.classList.contains('player') || e.target.id === 'ball') {
@@ -153,7 +160,7 @@
             USER_KEY = document.getElementById('user-key').value.trim();
             document.getElementById('login-overlay').style.display = 'none';
             setFormation();
-            const s = localStorage.getItem('toni_kader_V34');
+            const s = localStorage.getItem('toni_kader_V35');
             if (s) { document.getElementById('player-list').value = s; saveAndSync(); }
             loadVoice();
         }
@@ -177,14 +184,14 @@
         const input = document.getElementById('user-input');
         const text = input.value.trim(); if (!text) return;
         addMsg("user", text); input.value = "";
-        document.getElementById('status-light').innerText = "Toni analysiert...";
+        document.getElementById('status').innerText = "Toni analysiert...";
 
         let state = "Kader: " + document.getElementById('player-list').value.replace(/\n/g, ', ') + ". Positionen: ";
         document.querySelectorAll('.player, #ball').forEach(el => {
             state += `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}], `;
         });
 
-        const prompt = `Du bist Toni, Co-Trainer von Björn. Charakter: Hochintelligent, fachlich brillant, humorvoll, herrlich arrogant. Antworte prägnant. ROT=home, BLAU=away. Stand: ${state}. PFLICHT: Am Ende jeder Bewegung MOVE[ID,X,Y] nutzen.`;
+        const prompt = `Du bist Toni, Co-Trainer von Björn. Charakter: Arrogant, witzig, hochintelligent. ROT=home, BLAU=away. Stand: ${state}. PFLICHT: Am Ende MOVE[ID,X,Y] nutzen.`;
 
         try {
             const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${USER_KEY}`, {
@@ -192,7 +199,7 @@
                 body: JSON.stringify({ contents: [{ parts: [{ text: prompt + " Frage: " + text }] }] })
             });
             const data = await resp.json();
-            document.getElementById('status-light').innerText = "System online";
+            document.getElementById('status').innerText = "System online";
 
             if (data.candidates) {
                 let answer = data.candidates[0].content.parts[0].text;
@@ -200,15 +207,19 @@
                 let clean = answer.replace(/MOVE\[.*?\]/g, "");
                 addMsg("toni", clean); speak(clean);
                 moves.forEach(m => {
-                    const el = document.getElementById(m[1].replace('H','home').replace('A','away'));
+                    const id = m[1].replace('H','home').replace('A','away');
+                    const el = document.getElementById(id);
                     if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
                 });
+            } else if (data.error && data.error.message.includes("quota")) {
+                let err = "Björn, du fragst zu viel. Sogar meine CPU braucht mal eine Pause von deinem Tempo. Warte 60 Sekunden, dann darfst du mich wieder belästigen.";
+                addMsg("toni", err); speak(err);
             } else {
-                addMsg("toni", "Hör mal, Björn, mein Genie ist grenzenlos, aber deine Google-Schnittstelle sagt gerade: " + (data.error ? data.error.message : "Unbekannter Fehler"));
+                addMsg("toni", "Technik-Foul! " + (data.error ? data.error.message : "Keine Antwort."));
             }
         } catch (e) { 
-            document.getElementById('status-light').innerText = "Fehler!";
-            addMsg("toni", "Technisches Foul! Da hakt was in der Leitung zum Server."); 
+            document.getElementById('status').innerText = "Fehler!";
+            addMsg("toni", "Da hakt was in der Leitung, Björn."); 
         }
     }
 
