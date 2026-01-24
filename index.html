@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni AI - V8</title>
+    <title>Coach Toni AI - V9 Scanner</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         #app { background: white; width: 95%; max-width: 500px; height: 90vh; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; }
         .header { background: #1a1a1a; color: white; padding: 15px; text-align: center; font-weight: bold; border-bottom: 4px solid #28a745; }
         #login-screen, #chat-screen { flex: 1; display: flex; flex-direction: column; padding: 20px; }
         input { padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; }
-        button { background: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button { background: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; }
         #chat-history { flex: 1; overflow-y: auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px; border-radius: 10px; max-width: 80%; line-height: 1.4; }
-        .user { align-self: flex-end; background: #007bff; color: white; }
+        .msg { padding: 10px; border-radius: 10px; max-width: 80%; line-height: 1.4; font-size: 0.9rem; }
         .toni { align-self: flex-start; background: #eee; color: #333; }
-        .debug { font-size: 0.7rem; color: #888; text-align: center; padding: 5px; background: #f9f9f9; }
+        .scanner-box { font-size: 0.7rem; background: #fff3cd; padding: 10px; border: 1px solid #ffeeba; border-radius: 5px; margin-top: 10px; overflow-y: auto; max-height: 150px; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="header">⚽ COACH TONI - V8 (FINAL-STRIKE)</div>
+    <div class="header">⚽ COACH TONI - V9 (SYSTEM-SCANNER)</div>
     
     <div id="login-screen">
         <h2 style="text-align:center">Trainer Login</h2>
@@ -33,8 +32,10 @@
 
     <div id="chat-screen" style="display:none">
         <div id="chat-history"></div>
-        <div id="diag" class="debug">System bereit...</div>
-        <div style="display:flex; gap:5px">
+        <button onclick="scanModels()" style="background: #17a2b8;">🔍 Welche Modelle habe ich?</button>
+        <div id="model-list" class="scanner-box" style="display:none"></div>
+        
+        <div style="display:flex; gap:5px; margin-top:10px;">
             <input type="text" id="user-input" style="flex:1" placeholder="Frag Toni...">
             <button onclick="askToni()">Senden</button>
         </div>
@@ -53,53 +54,56 @@
             USER_KEY = key;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('chat-screen').style.display = 'flex';
-            addMsg("toni", `Servus ${user}! V8 läuft. Ich teste jetzt die Verbindung...`);
+            addMsg("toni", "Scanner bereit. Klicke auf den blauen Button, um zu sehen, welche Modelle dein Key erlaubt.");
         } else {
-            alert("Check Passwort (Trainer2026) und Key!");
+            alert("Passwort oder Key prüfen!");
+        }
+    }
+
+    async function scanModels() {
+        const listDiv = document.getElementById('model-list');
+        listDiv.style.display = "block";
+        listDiv.innerText = "Suche Modelle...";
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${USER_KEY}`);
+            const data = await response.json();
+            
+            if (data.models) {
+                const names = data.models.map(m => m.name.replace("models/", "")).join(", ");
+                listDiv.innerText = "Verfügbare Modelle: " + names;
+            } else {
+                listDiv.innerText = "Keine Modelle gefunden. Fehler: " + JSON.stringify(data.error);
+            }
+        } catch (e) {
+            listDiv.innerText = "Scanner-Fehler: Verbindung fehlgeschlagen.";
         }
     }
 
     async function askToni() {
         const input = document.getElementById('user-input');
-        const diag = document.getElementById('diag');
         const text = input.value.trim();
         if (!text) return;
-
         addMsg("user", text);
         input.value = "";
-        diag.innerText = "Suche Verbindung...";
-        
-        // Wir probieren zwei verschiedene Wege
-        const tryPaths = [
-            "v1beta/models/gemini-1.5-flash-latest", // Der moderne "Spitzname"
-            "v1beta/models/gemini-pro"              // Das absolut stabilste Standard-Modell
-        ];
 
-        for (let path of tryPaths) {
-            const url = `https://generativelanguage.googleapis.com/${path}:generateContent?key=${USER_KEY}`;
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: "Antworte kurz: " + text }] }] })
-                });
-
-                const data = await response.json();
-
-                if (data.candidates) {
-                    addMsg("toni", data.candidates[0].content.parts[0].text);
-                    diag.innerText = "Verbunden über: " + path;
-                    return; // Erfolg! Wir brechen die Schleife ab.
-                } else {
-                    console.log("Pfad fehlgeschlagen: " + path);
-                }
-            } catch (e) {
-                console.log("Technischer Fehler bei: " + path);
+        // Wir probieren es direkt mit der Standard-URL
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`;
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
+            });
+            const data = await response.json();
+            if (data.candidates) {
+                addMsg("toni", data.candidates[0].content.parts[0].text);
+            } else {
+                addMsg("toni", "Fehler: " + (data.error ? data.error.message : "Unbekannt"));
             }
+        } catch (e) {
+            addMsg("toni", "Verbindung abgebrochen.");
         }
-
-        addMsg("toni", "Hoppla, Google antwortet immer noch mit 'Nicht gefunden'. Bitte prüfe im Google AI Studio, ob dort 'Gemini 1.5 Flash' in der Liste der Modelle auftaucht.");
-        diag.innerText = "FEHLER: Modell nicht erreichbar.";
     }
 
     function addMsg(role, text) {
