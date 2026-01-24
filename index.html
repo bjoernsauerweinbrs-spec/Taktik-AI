@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni - Profi Zentrale V18</title>
+    <title>Coach Toni - Profi Zentrale V19</title>
     <style>
         :root { --pitch-green: #28a745; --line-white: rgba(255,255,255,0.8); --home-team: #ff0000; --away-team: #007bff; }
         body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -22,19 +22,19 @@
         #pitch { width: 95%; height: 85%; background: var(--pitch-green); border: 2px solid var(--line-white); position: relative; border-radius: 5px; cursor: crosshair; }
         
         /* Spieler & Ball */
-        .player, #ball { position: absolute; cursor: grab; transition: transform 0.2s; touch-action: none; user-select: none; }
-        .player:active, #ball:active { cursor: grabbing; transform: scale(1.2); z-index: 100; }
-        .player { width: 26px; height: 26px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; }
+        .player, #ball { position: absolute; cursor: grab; transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); touch-action: none; user-select: none; }
+        .player { width: 26px; height: 26px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; z-index: 10; }
         .home { background: var(--home-team); }
         .away { background: var(--away-team); }
-        #ball { width: 18px; height: 18px; background: white; border: 2px solid black; border-radius: 50%; z-index: 50; }
-
-        /* Rechts: Weiße Tafel */
-        #whiteboard { background: #fff; color: #333; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; }
-        #player-list { flex: 1; border: none; font-size: 1.1rem; outline: none; line-height: 1.6; }
+        #ball { width: 18px; height: 18px; background: white; border: 2px solid black; border-radius: 50%; z-index: 50; transition: all 0.8s ease-out; }
 
         .goal { position: absolute; width: 10px; height: 60px; background: white; top: 50%; transform: translateY(-50%); border: 1px solid #333; }
         .goal-left { left: -5px; } .goal-right { right: -5px; }
+
+        /* Rechts: Weiße Tafel */
+        #whiteboard { background: #fff; color: #333; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; border: 1px solid #ddd; }
+        #player-list { flex: 1; border: none; font-size: 1.1rem; outline: none; line-height: 1.6; font-family: 'Permanent Marker', cursive, sans-serif; }
+
         #login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -42,11 +42,11 @@
 
 <div id="login-overlay">
     <div style="background: #1e1e1e; padding: 30px; border-radius: 20px; border: 1px solid #28a745; text-align: center;">
-        <h2>⚽ Coach Toni V18</h2>
+        <h2>⚽ Coach Toni Zentrale V19</h2>
         <input type="text" id="username" placeholder="Name" style="display:block; width:200px; margin:10px auto; padding:10px; border-radius:5px;">
         <input type="password" id="password" placeholder="Passwort" style="display:block; width:200px; margin:10px auto; padding:10px; border-radius:5px;">
         <input type="text" id="user-key" placeholder="Google API-Key" style="display:block; width:200px; margin:10px auto; padding:10px; border-radius:5px;">
-        <button onclick="startToni()" style="background:#28a745; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">STARTEN</button>
+        <button onclick="startToni()" style="background:#28a745; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">ZENTRALE STARTEN</button>
     </div>
 </div>
 
@@ -56,13 +56,13 @@
         <div id="chat-history"></div>
         <div style="padding:15px; background:#111; display:flex; gap:5px">
             <input type="text" id="user-input" style="flex:1; background:#222; color:white; border:1px solid #444; padding:8px; border-radius:5px;" placeholder="Frag Toni...">
-            <button onclick="askToni()" style="background:#28a745; border:none; color:white; padding:8px 15px; border-radius:5px;">OK</button>
+            <button onclick="askToni()" style="background:#28a745; border:none; color:white; padding:8px 15px; border-radius:5px;">Senden</button>
         </div>
     </div>
 
     <div id="pitch-area">
         <div style="padding:10px;">
-            <button onclick="setFormation('reset')">Reset (442 vs 343)</button>
+            <button onclick="setFormation('reset')">Spielfeld zurücksetzen</button>
         </div>
         <div id="pitch">
             <div class="goal goal-left"></div>
@@ -73,8 +73,8 @@
     </div>
 
     <div id="whiteboard">
-        <h3>📋 Kader / Notizen</h3>
-        <textarea id="player-list" placeholder="Spielerliste hier..."></textarea>
+        <h3 style="margin:0">📋 Weiße Tafel (Kader)</h3>
+        <textarea id="player-list" placeholder="David Luiz (Nr. 10)..."></textarea>
     </div>
 </div>
 
@@ -82,60 +82,48 @@
     let USER_KEY = "";
     let selectedVoice = null;
 
-    function loadVoices() {
+    // Verbessertes Voice-Management
+    function getBestVoice() {
         const voices = window.speechSynthesis.getVoices();
-        // Bevorzugte Stimmen: Markus, Yannick, Stefan, Google Deutsch
-        selectedVoice = voices.find(v => v.lang.startsWith('de') && (v.name.includes('Markus') || v.name.includes('Yannick') || v.name.includes('Stefan') || v.name.includes('Male')));
-        if (!selectedVoice) selectedVoice = voices.find(v => v.lang.startsWith('de'));
+        // Bevorzugte deutsche Männerstimmen
+        const maleNames = ['Stefan', 'Markus', 'Yannick', 'Google Deutsch', 'Microsoft Stefan', 'Siri (Männlich)'];
+        let best = voices.find(v => v.lang.startsWith('de') && maleNames.some(name => v.name.includes(name)));
+        if (!best) best = voices.find(v => v.lang.startsWith('de'));
+        return best;
     }
-    window.speechSynthesis.onvoiceschanged = loadVoices;
 
     function speak(text) {
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(text);
-        if (selectedVoice) msg.voice = selectedVoice;
-        msg.pitch = 0.7; // Sehr tief für maximale Männlichkeit
-        msg.rate = 1.0;
+        msg.voice = getBestVoice();
+        msg.lang = 'de-DE';
+        msg.pitch = 0.6; // Extrem tief eingestellt
+        msg.rate = 0.95; // Leicht langsamer für mehr Autorität
         window.speechSynthesis.speak(msg);
     }
 
-    // --- Drag & Drop Logik ---
+    // Drag & Drop
     let activeItem = null;
-    document.addEventListener('mousedown', startDrag);
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('mouseup', endDrag);
-
-    function startDrag(e) {
-        if (e.target.classList.contains('player') || e.target.id === 'ball') {
-            activeItem = e.target;
-        }
-    }
-
-    function drag(e) {
+    document.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('player') || e.target.id === 'ball') activeItem = e.target;
+    });
+    document.addEventListener('mousemove', (e) => {
         if (!activeItem) return;
         const pitch = document.getElementById('pitch').getBoundingClientRect();
         let x = ((e.clientX - pitch.left) / pitch.width) * 100;
         let y = ((e.clientY - pitch.top) / pitch.height) * 100;
-        
-        // Grenzen einhalten
-        x = Math.max(0, Math.min(97, x));
-        y = Math.max(0, Math.min(96, y));
-        
-        activeItem.style.left = x + "%";
-        activeItem.style.top = y + "%";
-    }
-
-    function endDrag() { activeItem = null; }
+        activeItem.style.left = Math.max(0, Math.min(96, x)) + "%";
+        activeItem.style.top = Math.max(0, Math.min(95, y)) + "%";
+    });
+    document.addEventListener('mouseup', () => activeItem = null);
 
     function startToni() {
-        const user = document.getElementById('username').value.trim();
-        const pass = document.getElementById('password').value.trim();
         const key = document.getElementById('user-key').value.trim();
-        if (user && pass === "Trainer2026" && key.startsWith("AIza")) {
+        if (document.getElementById('password').value === "Trainer2026" && key.startsWith("AIza")) {
             USER_KEY = key;
             document.getElementById('login-overlay').style.display = 'none';
             setFormation('reset');
-            speak(`Hallo Coach. Das Board ist bereit. Du kannst die Spieler jetzt auch selbst verschieben.`);
+            speak("System bereit. Hallo Coach, wie verschieben wir heute?");
         }
     }
 
@@ -143,9 +131,9 @@
         const layer = document.getElementById('players-layer');
         layer.innerHTML = "";
         const homePos = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,20], [45,40], [45,60], [45,80], [70,40], [70,60]];
-        homePos.forEach((pos, i) => createPlayer('home', i+1, pos[0], pos[1]));
+        homePos.forEach((p, i) => createPlayer('home', i+1, p[0], p[1]));
         const awayPos = [[93,50], [78,25], [78,50], [78,75], [58,15], [58,38], [58,62], [58,85], [35,20], [35,50], [35,80]];
-        awayPos.forEach((pos, i) => createPlayer('away', i+1, pos[0], pos[1]));
+        awayPos.forEach((p, i) => createPlayer('away', i+1, p[0], p[1]));
     }
 
     function createPlayer(team, nr, x, y) {
@@ -153,16 +141,14 @@
         p.className = `player ${team}`;
         p.id = team + nr;
         p.innerText = nr;
-        p.style.left = x + "%";
-        p.style.top = y + "%";
+        p.style.left = x + "%"; p.style.top = y + "%";
         document.getElementById('players-layer').appendChild(p);
     }
 
-    // Hilfsfunktion: Holt aktuelle Positionen für Toni
     function getFieldState() {
-        let state = "Aktuelle Positionen: ";
+        let state = "";
         document.querySelectorAll('.player, #ball').forEach(el => {
-            state += `${el.id}(X:${parseInt(el.style.left)},Y:${parseInt(el.style.top)}); `;
+            state += `${el.id}:[${parseInt(el.style.left)},${parseInt(el.style.top)}], `;
         });
         return state;
     }
@@ -174,11 +160,13 @@
         addMsg("user", text);
         input.value = "";
 
-        const currentState = getFieldState();
-        const prompt = `Du bist Toni, ein Weltklasse-Fußballtrainer. Antworte extrem detailliert, fachlich fundiert und motivierend. 
-        Hier ist die aktuelle Lage auf dem Board: ${currentState}. 
-        Nutze Fachbegriffe wie 'Gegenpressing', 'Asymmetrie', 'Halbräume'. 
-        Wenn du Spieler/Ball bewegen willst, nutze am Ende: MOVE[ID,X,Y; ID2,X2,Y2].
+        const state = getFieldState();
+        const prompt = `Du bist Toni, Trainer-Experte. Antworte ausführlich und taktisch. 
+        AKTUELL: ${state}.
+        WICHTIG: Erstelle KEINE Tabellen für Bewegungen. 
+        Wenn du Spieler verschiebst, schreibe am Ende deiner Antwort NUR das Format MOVE[ID,X,Y; ID2,X2,Y2].
+        Beispiel: MOVE[ball,50,50; home1,10,10].
+        IDs: home1-11, away1-11, ball.
         Frage: ${text}`;
 
         try {
@@ -201,12 +189,15 @@
                         const p = cmd.split(',');
                         if (p.length === 3) {
                             const el = document.getElementById(p[0].trim());
-                            if (el) { el.style.left = p[1].trim() + "%"; el.style.top = p[2].trim() + "%"; }
+                            if (el) { 
+                                el.style.left = p[1].trim() + "%"; 
+                                el.style.top = p[2].trim() + "%"; 
+                            }
                         }
                     });
                 }
             }
-        } catch (e) { addMsg("toni", "Fehler!"); }
+        } catch (e) { addMsg("toni", "Fehler in der Verbindung."); }
     }
 
     function addMsg(role, text) {
