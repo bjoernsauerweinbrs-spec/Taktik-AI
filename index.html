@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni AI</title>
+    <title>Coach Toni AI - V4</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         #app { background: white; width: 95%; max-width: 500px; height: 90vh; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; }
@@ -15,13 +15,13 @@
         .msg { padding: 10px; border-radius: 10px; max-width: 80%; line-height: 1.4; }
         .user { align-self: flex-end; background: #007bff; color: white; }
         .toni { align-self: flex-start; background: #eee; color: #333; }
-        .error-text { color: red; font-size: 0.8rem; text-align: center; }
+        .error-text { color: red; font-size: 0.8rem; text-align: center; font-weight: bold; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="header">⚽ COACH TONI</div>
+    <div class="header">⚽ COACH TONI - V4 (FINAL-CHECK)</div>
     
     <div id="login-screen">
         <h2 style="text-align:center">Trainer Login</h2>
@@ -42,7 +42,6 @@
 </div>
 
 <script>
-    // --- HIER BEGINNT DAS JAVASCRIPT (Das "Gehirn" im Haus) ---
     let USER_KEY = "";
 
     function startToni() {
@@ -54,9 +53,9 @@
             USER_KEY = key;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('chat-screen').style.display = 'flex';
-            addMsg("toni", `Servus ${user}! Ich bin Toni. Dein Key ist aktiv. Was trainieren wir heute?`);
+            addMsg("toni", `Servus ${user}! Ich bin Toni. V4 ist bereit. Was trainieren wir?`);
         } else {
-            alert("Fehler bei Name, Passwort oder Key!");
+            alert("Daten prüfen! Passwort ist Trainer2026");
         }
     }
 
@@ -70,7 +69,7 @@
         input.value = "";
         errDiv.innerText = "";
 
-        // Die Verbindung zu Google (v1beta ist für Gemini 1.5 Flash oft am besten)
+        // Dieser Link ist jetzt exakt nach Google-Vorgabe für 1.5 Flash
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`;
         
         try {
@@ -85,12 +84,39 @@
             const data = await response.json();
             
             if (data.error) {
-                errDiv.innerText = "Google sagt: " + data.error.message;
+                // Wenn es wieder 404 ist, probieren wir automatisch v1
+                if (data.error.code === 404) {
+                    errDiv.innerText = "Modell-Suche... versuche Alternative...";
+                    tryV1(text);
+                } else {
+                    errDiv.innerText = "Google-Fehler: " + data.error.message;
+                }
             } else if (data.candidates && data.candidates[0].content.parts[0].text) {
                 addMsg("toni", data.candidates[0].content.parts[0].text);
             }
         } catch (e) {
-            addMsg("toni", "Technischer Fehler. Prüfe Internet und Key.");
+            addMsg("toni", "Verbindung fehlgeschlagen.");
+        }
+    }
+
+    // Sicherheits-Funktion: Falls v1beta nicht geht, springt v1 ein
+    async function tryV1(text) {
+        const urlV1 = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`;
+        try {
+            const response = await fetch(urlV1, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
+            });
+            const data = await response.json();
+            if (data.candidates) {
+                addMsg("toni", data.candidates[0].content.parts[0].text);
+                document.getElementById('error-display').innerText = "";
+            } else {
+                document.getElementById('error-display').innerText = "Google findet das Modell in keiner Version.";
+            }
+        } catch (e) {
+            console.log("Beide Versionen fehlgeschlagen");
         }
     }
 
