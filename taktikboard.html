@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni 2.0 – Professional Hub</title>
+    <title>Coach Toni 2.0 – Taktikboard PRO</title>
     <style>
         :root {
             --green: #2ecc71;
@@ -40,20 +40,19 @@
         #pitch-area { background: #0b1120; border-radius: 18px; border: 1px solid var(--line); display: flex; flex-direction: column; padding: 10px; height: 100%; position: relative; }
         #pitch { flex: 1; background: repeating-linear-gradient(90deg, #166534 0, #166534 8%, #15803d 8%, #15803d 16%); border: 2px solid white; border-radius: 16px; position: relative; overflow: hidden; }
         
-        /* TORE */
         .goal { position: absolute; width: 2.5%; height: 20%; border: 2px solid white; top: 40%; z-index: 5; background: rgba(255,255,255,0.1); }
         .l-goal { left: 0; border-left: none; } .r-goal { right: 0; border-right: none; }
         .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.5); }
         .m-circle { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); }
 
         /* SPIELER & BALL */
-        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .player { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .home { background: radial-gradient(circle, #f87171, #b91c1c); border: 2px solid white; }
         .away { background: radial-gradient(circle, #60a5fa, #1d4ed8); border: 2px solid white; }
         #ball { width: 18px; height: 18px; background: white; border-radius: 50%; border: 2px solid black; }
 
-        /* KADER PANEL */
+        /* PANEL */
         #whiteboard-panel { position: absolute; top: 60px; right: -380px; width: 350px; height: calc(100% - 70px); background: white; color: black; transition: 0.3s ease; z-index: 2000; display: flex; flex-direction: column; padding: 15px; border-radius: 15px 0 0 15px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
         #whiteboard-panel.open { right: 0; }
         #player-list { flex: 1; padding: 10px; font-family: monospace; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; resize: none; }
@@ -77,12 +76,12 @@
 
 <div id="layout">
     <aside id="chat-sidebar">
-        <div class="chat-header">TAKTIK-ZENTRALE</div>
+        <div class="chat-header">TAKTIK-BOARD</div>
         <div id="chat-history"></div>
-        <div id="status" style="font-size:0.7rem; text-align:center; padding:5px; color:#555;">Bereit</div>
+        <div id="status" style="font-size:0.7rem; text-align:center; padding:5px; color:#555;">Ready</div>
         <div class="chat-input-row">
             <button onclick="startMic()" style="background:transparent; border:none; color:white; cursor:pointer; font-size:1.2rem;">🎤</button>
-            <input type="text" id="user-input" placeholder="Anweisung an Toni..." onkeypress="if(event.key==='Enter') askToni()">
+            <input type="text" id="user-input" placeholder="Taktische Analyse anfordern..." onkeypress="if(event.key==='Enter') askToni()">
             <button onclick="askToni()">OK</button>
         </div>
     </aside>
@@ -185,7 +184,7 @@
         draggedElement.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
     };
 
-    document.onmouseup = () => { if (draggedElement) draggedElement.style.transition = "all 1.5s ease"; draggedElement = null; };
+    document.onmouseup = () => { if (draggedElement) draggedElement.style.transition = "all 1s ease"; draggedElement = null; };
 
     async function askToni() {
         if (isLocked) return;
@@ -194,7 +193,8 @@
         addMsg('user', text); input.value = ""; isLocked = true;
         document.getElementById('status').innerText = "Toni analysiert...";
 
-        const system = "Du bist Toni, Co-Trainer von Björn. Mix Klopp (Mentalität) & Nagelsmann (Taktik). Fachmann für Training & brasilianische Technik. Du steuerst ROT (home1-11). Björn steuert BLAU (away1-11). WICHTIG: Deine Bewegungen müssen taktisch LOGISCH sein. Keine Teleportation über das ganze Feld. Verschiebe Spieler schrittweise in freie Räume oder zur Absicherung. Nutze MOVE[homeX,Y,Z] für Bewegungen. Antworte kurz, präzise und auf Deutsch. Keine Arroganz.";
+        // SUPER-PROMPT FÜR TAKTISCHE PRÄZISION
+        const system = "Du bist Toni, ein taktisches Mastermind (Nagelsmann/Klopp/Brasil-Style). Du steuerst ROT (home1-11). Björn steuert Blau. Deine Aufgabe: Analysiere jede Situation taktisch (Räume, Überzahl, Ballorientierung). Du MUSST für jede taktische Korrektur das Format MOVE[homeX,Y,Z] verwenden. Sei fachlich brillant, erkläre kurz WARUM du schiebst, und bewege die Spieler logisch. Keine Arroganz.";
 
         try {
             const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -202,14 +202,15 @@
                 body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{role: "system", content: system}, {role: "user", content: text}] })
             });
             const data = await resp.json();
-            isLocked = false; document.getElementById('status').innerText = "Bereit";
+            isLocked = false; document.getElementById('status').innerText = "Ready";
             if (data.choices) {
                 let answer = data.choices[0].message.content;
                 let clean = answer.replace(/MOVE\[.*?\]/g, "");
                 addMsg('toni', clean); speak(clean);
                 const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
                 moves.forEach(m => {
-                    const el = document.getElementById(m[1].toLowerCase());
+                    const id = m[1].toLowerCase();
+                    const el = document.getElementById(id);
                     if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
                 });
             }
