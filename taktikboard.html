@@ -42,6 +42,7 @@
             display: flex;
             flex-direction: column;
             box-shadow: var(--shadow-strong);
+            overflow: hidden;
         }
 
         .chat-header {
@@ -167,6 +168,11 @@
             box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 18px 40px rgba(0,0,0,0.8);
         }
 
+        /* --- TORE --- */
+        .goal { position: absolute; width: 2%; height: 20%; border: 2px solid white; top: 40%; z-index: 5; background: rgba(255,255,255,0.05); }
+        .l-goal { left: 0; border-left: none; }
+        .r-goal { right: 0; border-right: none; }
+
         .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(249,250,251,0.95); }
         .m-circle { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; border: 2px solid rgba(249,250,251,0.95); border-radius: 50%; transform: translate(-50%, -50%); }
 
@@ -177,7 +183,7 @@
         .player, #ball {
             position: absolute;
             cursor: grab;
-            z-index: 10;
+            z-index: 100;
             transition: transform 0.1s ease;
         }
 
@@ -275,6 +281,7 @@
             </div>
         </div>
         <div id="pitch">
+            <div class="goal l-goal"></div><div class="goal r-goal"></div>
             <div class="m-line"></div>
             <div class="m-circle"></div>
             <div class="m-box-16 l"></div>
@@ -297,6 +304,15 @@
 let GROQ_KEY = "";
 let isLocked = false;
 let voiceEnabled = false;
+let toniVoice = null;
+
+/* STIMMEN-INITIALISIERUNG */
+function setupVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    // Suche gezielt nach männlichen deutschen Stimmen
+    toniVoice = voices.find(v => v.lang.startsWith('de') && (v.name.includes('Stefan') || v.name.includes('Google Deutsch') || v.name.includes('Male'))) || voices.find(v => v.lang.startsWith('de'));
+}
+window.speechSynthesis.onvoiceschanged = setupVoice;
 
 /* LOGIN */
 document.getElementById("login-btn").onclick = () => {
@@ -307,13 +323,12 @@ document.getElementById("login-btn").onclick = () => {
     GROQ_KEY = key;
     document.getElementById("login-overlay").style.display = "none";
     resetFormation();
+    setupVoice();
 };
 
 /* CHAT & KI */
 async function askToni(prompt) {
     document.getElementById("status").textContent = "Toni denkt nach…";
-    
-    // Dein spezifisches Wissen für Toni
     const systemMessage = "Du bist Toni, Co-Trainer von Björn (BVB-Hintergrund, Fulda-Erfahrung, internationaler Experte). Du bist taktisch brillant, direkt und nutzt MOVE[ID,X,Y] für Taktik-Änderungen. Antworte auf Deutsch.";
 
     try {
@@ -345,10 +360,10 @@ document.getElementById("send-btn").onclick = async () => {
     addMessage(text, "user");
     input.value = "";
     const answer = await askToni(text);
-    addMessage(answer.replace(/MOVE\[.*?\]/g, ""), "toni");
-    speak(answer.replace(/MOVE\[.*?\]/g, ""));
+    const cleanAnswer = answer.replace(/MOVE\[.*?\]/g, "");
+    addMessage(cleanAnswer, "toni");
+    speak(cleanAnswer);
     
-    // Move Logik
     const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
     moves.forEach(m => {
         const el = document.getElementById(m[1].replace('H','home').replace('A','away'));
@@ -383,7 +398,7 @@ document.getElementById("player-list").oninput = syncNames;
 /* MOVE ENGINE */
 let dragged = null;
 function makeDraggable(el) {
-    el.onmousedown = (e) => { dragged = el; el.style.transition = "none"; };
+    el.onmousedown = (e) => { dragged = el; el.style.transition = "none"; el.style.zIndex = "1000"; };
 }
 document.onmousemove = (e) => {
     if (!dragged) return;
@@ -391,7 +406,7 @@ document.onmousemove = (e) => {
     dragged.style.left = Math.max(0, Math.min(96, ((e.clientX - r.left) / r.width) * 100)) + "%";
     dragged.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
 };
-document.onmouseup = () => { if(dragged) dragged.style.transition = "all 0.8s ease"; dragged = null; };
+document.onmouseup = () => { if(dragged) { dragged.style.transition = "all 0.8s ease"; dragged.style.zIndex = "100"; } dragged = null; };
 
 /* BOARD INIT */
 function createPlayer(num, team, x, y) {
@@ -417,7 +432,16 @@ document.getElementById("whiteboard-close").onclick = () => document.getElementB
 document.getElementById("reset-btn").onclick = resetFormation;
 document.getElementById("voice-btn").onclick = () => { voiceEnabled = !voiceEnabled; document.getElementById("voice-btn").textContent = voiceEnabled ? "🔇 Aus" : "🔊 Stimme"; };
 
-function speak(text) { if (voiceEnabled) { const u = new SpeechSynthesisUtterance(text); u.lang = "de-DE"; speechSynthesis.speak(u); } }
+function speak(text) { 
+    if (voiceEnabled) { 
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text); 
+        u.lang = "de-DE"; 
+        if (toniVoice) u.voice = toniVoice;
+        u.pitch = 0.8; 
+        speechSynthesis.speak(u); 
+    } 
+}
 </script>
 </body>
 </html>
