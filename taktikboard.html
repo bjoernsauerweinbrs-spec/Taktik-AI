@@ -1,151 +1,294 @@
-let GROQ_KEY = "";
-let voiceEnabled = true;
-let toniVoice = null;
-let draggedElement = null; // Global definiert für stabiles Drag & Drop
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach Toni 2.0 – Taktikboard</title>
 
-// STIMMEN-INIT
-function setupVoice() {
-    const voices = window.speechSynthesis.getVoices();
-    toniVoice = voices.find(v => v.lang.startsWith('de') && (v.name.includes('Stefan') || v.name.includes('Google Deutsch') || v.name.includes('Male'))) || voices.find(v => v.lang.startsWith('de'));
-}
-window.speechSynthesis.onvoiceschanged = setupVoice;
-
-function speak(text) {
-    if (!voiceEnabled) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    if (toniVoice) u.voice = toniVoice;
-    u.lang = "de-DE"; u.pitch = 0.8; u.rate = 1.0;
-    speechSynthesis.speak(u);
-}
-
-/* LOGIN */
-document.getElementById("login-btn").onclick = () => {
-    const pw = document.getElementById("password").value.trim();
-    const key = document.getElementById("user-key").value.trim();
-    if (pw !== "Trainer2026") { alert("Falsches Passwort."); return; }
-    if (!key.startsWith("gsk_")) { alert("Ungültiger GROQ-Key."); return; }
-    GROQ_KEY = key;
-    document.getElementById("login-overlay").style.display = "none";
-    resetFormation();
-    setupVoice();
-};
-
-/* CHAT & GROQ API */
-async function askToni() {
-    const input = document.getElementById("user-input");
-    const text = input.value.trim();
-    if (!text) return;
-
-    addMessage(text, "user");
-    input.value = "";
-    document.getElementById("status").textContent = "Toni analysiert...";
-
-    const systemMsg = "Du bist Toni, Co-Trainer von Björn. BVB-Hintergrund. Du bist motivierend, taktisch brillant, loyal und niemals arrogant. Antworte kurz auf Deutsch. Nutze MOVE[ID,X,Y] für Änderungen.";
-
-    try {
-        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + GROQ_KEY
-            },
-            body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
-                messages: [{role: "system", content: systemMsg}, {role: "user", content: text}]
-            })
-        });
-        const data = await res.json();
-        const answer = data.choices[0].message.content;
-        const cleanAnswer = answer.replace(/MOVE\[.*?\]/g, "");
-        
-        addMessage(cleanAnswer, "toni");
-        speak(cleanAnswer);
-        
-        const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
-        moves.forEach(m => {
-            const el = document.getElementById(m[1].replace('H','home').replace('A','away'));
-            if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
-        });
-    } catch(e) { addMessage("Technik-Foul! Verbindung prüfen.", "toni"); }
-    document.getElementById("status").textContent = "Ready";
-}
-
-function addMessage(text, sender) {
-    const div = document.createElement("div");
-    div.className = "msg " + sender;
-    div.textContent = text;
-    const hist = document.getElementById("chat-history");
-    hist.appendChild(div);
-    hist.scrollTop = hist.scrollHeight;
-}
-
-/* KADER LOGIK (1Mike) */
-function syncNames() {
-    const list = document.getElementById("player-list").value;
-    document.querySelectorAll(".player.home").forEach(p => p.innerText = p.id.replace('home',''));
-    list.split('\n').forEach(line => {
-        const m = line.match(/^(\d+)\s*(.*)$/);
-        if (m) {
-            const el = document.getElementById("home" + m[1]);
-            const name = m[2].trim().split(' ')[0];
-            if (el && name) el.innerText = name;
+    <style>
+        :root {
+            --green: #2ecc71;
+            --green-dark: #27ae60;
+            --bg-dark: #050608;
+            --bg-panel: #111319;
+            --bg-panel-light: #191b23;
+            --line: rgba(255,255,255,0.12);
+            --text-light: rgba(255,255,255,0.9);
+            --shadow-strong: 0 18px 40px rgba(0,0,0,0.65);
         }
-    });
-}
 
-/* STABILE DRAG ENGINE */
-function makeDraggable(el) {
-    el.onmousedown = (e) => {
-        draggedElement = el;
-        el.style.transition = "none";
-        el.style.zIndex = "1000";
-    };
-}
+        * { box-sizing: border-box; }
 
-document.onmousemove = (e) => {
-    if (!draggedElement) return;
-    const r = document.getElementById("pitch").getBoundingClientRect();
-    // Berechnung der Position in Prozent innerhalb des Spielfelds
-    let x = ((e.clientX - r.left) / r.width) * 100;
-    let y = ((e.clientY - r.top) / r.height) * 100;
-    
-    draggedElement.style.left = Math.max(0, Math.min(96, x)) + "%";
-    draggedElement.style.top = Math.max(0, Math.min(95, y)) + "%";
-};
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top, #1b2333 0, #050608 55%);
+            color: var(--text-light);
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
 
-document.onmouseup = () => {
-    if (draggedElement) {
-        draggedElement.style.transition = "all 0.8s cubic-bezier(0.2, 0.7, 0.3, 1)";
-        draggedElement.style.zIndex = "100";
+        #layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            height: 100vh;
+            gap: 12px;
+            padding: 12px;
+        }
+
+        /* --- SIDEBAR & CHAT --- */
+        #chat-sidebar {
+            background: linear-gradient(145deg, #10121a, #151824);
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-strong);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 16px 18px;
+            font-weight: 700;
+            color: var(--green);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(0,0,0,0.2);
+        }
+
+        #chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg { padding: 10px 12px; border-radius: 14px; font-size: 0.9rem; line-height: 1.45; max-width: 92%; }
+        .user { align-self: flex-end; background: linear-gradient(135deg, #2563eb, #38bdf8); color: white; }
+        .toni { align-self: flex-start; background: #1f2937; border-left: 3px solid var(--green); }
+
+        .chat-input-row { padding: 12px; background: #050712; border-top: 1px solid var(--line); display: flex; gap: 8px; }
+        .chat-input-row input { flex: 1; background: #020617; color: white; border: 1px solid #374151; padding: 10px; border-radius: 8px; }
+        .chat-input-row button { border: none; cursor: pointer; border-radius: 8px; padding: 10px; background: var(--green); font-weight: bold; }
+
+        /* --- PITCH AREA --- */
+        #pitch-area {
+            background: #0b1120;
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            position: relative;
+        }
+
+        #pitch {
+            flex: 1;
+            background: repeating-linear-gradient(90deg, #166534 0, #166534 8%, #15803d 8%, #15803d 16%);
+            border: 2px solid white;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .goal { position: absolute; width: 2.5%; height: 20%; border: 2px solid white; top: 40%; z-index: 5; background: rgba(255,255,255,0.1); }
+        .l-goal { left: 0; border-left: none; }
+        .r-goal { right: 0; border-right: none; }
+
+        .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.5); }
+        .m-circle { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); }
+
+        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 0.8s ease; }
+        .player { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .home { background: radial-gradient(circle, #f87171, #b91c1c); border: 2px solid white; }
+        .away { background: radial-gradient(circle, #60a5fa, #1d4ed8); border: 2px solid white; }
+        #ball { width: 18px; height: 18px; background: white; border-radius: 50%; border: 2px solid black; }
+
+        /* --- PANEL --- */
+        #whiteboard-panel {
+            position: absolute; top: 60px; right: -380px; width: 350px; height: calc(100% - 70px);
+            background: white; color: black; transition: 0.3s ease; z-index: 2000;
+            display: flex; flex-direction: column; padding: 15px; border-radius: 15px 0 0 15px;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+        #whiteboard-panel.open { right: 0; }
+        #player-list { flex: 1; width: 100%; font-family: monospace; padding: 10px; border-radius: 8px; resize: none; font-size: 1.1rem; }
+
+        /* --- LOGIN --- */
+        #login-overlay { position: fixed; inset: 0; background: #050608; display: flex; align-items: center; justify-content: center; z-index: 4000; }
+        .login-card { background: #111319; padding: 30px; border-radius: 20px; border: 1px solid var(--green); text-align: center; width: 320px; }
+        .login-card input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: none; }
+    </style>
+</head>
+<body>
+
+<div id="login-overlay">
+    <div class="login-card">
+        <h2 style="color:var(--green)">⚽ COACH TONI 2.0</h2>
+        <input type="password" id="password" placeholder="Passwort (Trainer2026)">
+        <input type="text" id="user-key" placeholder="Groq API-Key (gsk_...)">
+        <button onclick="startToni()" style="width:100%; padding:12px; background:var(--green); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">SYSTEM STARTEN</button>
+    </div>
+</div>
+
+<div id="layout">
+    <aside id="chat-sidebar">
+        <div class="chat-header">TRAINER-KOMMANDO</div>
+        <div id="chat-history"></div>
+        <div id="status" style="font-size:0.7rem; text-align:center; padding:5px; color:#555;">Ready</div>
+        <div class="chat-input-row">
+            <button onclick="toggleMic()" style="background:transparent; border:none; color:white; cursor:pointer;">🎤</button>
+            <input type="text" id="user-input" placeholder="Anweisung..." onkeypress="if(event.key==='Enter') askToni()">
+            <button onclick="askToni()">OK</button>
+        </div>
+    </aside>
+
+    <main id="pitch-area">
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <button onclick="resetBoard()" style="background:var(--green); border:none; padding:8px 15px; border-radius:20px; font-weight:bold; cursor:pointer;">♻ Reset</button>
+            <div>
+                <button id="voice-btn" onclick="toggleVoice()" style="background:#111827; color:white; border:1px solid #333; padding:8px 15px; border-radius:20px; cursor:pointer;">🔊 Stimme</button>
+                <button onclick="toggleKader()" style="background:#111827; color:white; border:1px solid #333; padding:8px 15px; border-radius:20px; cursor:pointer;">📋 Kader</button>
+            </div>
+        </div>
+        <div id="pitch">
+            <div class="goal l-goal"></div><div class="goal r-goal"></div>
+            <div class="m-line"></div><div class="m-circle"></div>
+            <div id="ball" style="left:50%; top:50%;"></div>
+            <div id="players-layer"></div>
+        </div>
+        
+        <div id="whiteboard-panel">
+            <h3>📋 Kaderliste</h3>
+            <textarea id="player-list" oninput="syncNames()" placeholder="1 Neuer"></textarea>
+            <button onclick="toggleKader()" style="margin-top:10px; padding:10px;">Schließen</button>
+        </div>
+    </main>
+</div>
+
+<script>
+    let GROQ_KEY = "";
+    let isLocked = false;
+    let voiceEnabled = true;
+    let toniVoice = null;
+    let draggedElement = null;
+
+    function toggleKader() { document.getElementById('whiteboard-panel').classList.toggle('open'); }
+    function toggleVoice() { voiceEnabled = !voiceEnabled; document.getElementById('voice-btn').innerText = voiceEnabled ? "🔊 Stimme" : "🔇 Aus"; }
+
+    function setupVoice() {
+        const voices = window.speechSynthesis.getVoices();
+        toniVoice = voices.find(v => v.lang.startsWith('de') && (v.name.includes('Stefan') || v.name.includes('Google Deutsch') || v.name.includes('Male'))) || voices.find(v => v.lang.startsWith('de'));
     }
-    draggedElement = null;
-};
+    window.speechSynthesis.onvoiceschanged = setupVoice;
 
-function createPlayer(num, team, x, y) {
-    const p = document.createElement("div");
-    p.className = "player " + team; p.id = team + num;
-    p.textContent = num; p.style.left = x + "%"; p.style.top = y + "%";
-    makeDraggable(p);
-    document.getElementById("players-layer").appendChild(p);
-}
+    function speak(txt) {
+        if (!voiceEnabled) return;
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(txt);
+        if (toniVoice) msg.voice = toniVoice;
+        msg.lang = 'de-DE'; msg.pitch = 0.8;
+        window.speechSynthesis.speak(msg);
+    }
 
-function resetFormation() {
-    document.getElementById("players-layer").innerHTML = "";
-    const home = [[1,5,50],[2,22,20],[4,22,40],[5,22,60],[3,22,80],[6,45,30],[8,45,70],[10,65,50],[7,80,20],[11,80,80],[9,85,50]];
-    const away = [[1,93,50],[4,78,40],[5,78,60],[2,70,15],[3,70,85],[6,55,50],[8,40,30],[10,40,70],[7,30,20],[11,30,80],[9,25,50]];
-    home.forEach(p => createPlayer(p[0], "home", p[1], p[2]));
-    away.forEach(p => createPlayer(p[0], "away", p[1], p[2]));
-    makeDraggable(document.getElementById('ball'));
-}
+    function startToni() {
+        if (document.getElementById('password').value === "Trainer2026") {
+            GROQ_KEY = document.getElementById('user-key').value.trim();
+            document.getElementById('login-overlay').style.display = 'none';
+            resetBoard();
+            setupVoice();
+        } else { alert("Passwort falsch!"); }
+    }
 
-/* UI LISTENERS */
-document.getElementById("send-btn").onclick = askToni;
-document.getElementById("user-input").onkeypress = (e) => { if(e.key === "Enter") askToni(); };
-document.getElementById("whiteboard-open").onclick = () => document.getElementById("whiteboard-panel").classList.add("open");
-document.getElementById("whiteboard-close").onclick = () => document.getElementById("whiteboard-panel").classList.remove("open");
-document.getElementById("reset-btn").onclick = resetFormation;
-document.getElementById("voice-btn").onclick = () => { 
-    voiceEnabled = !voiceEnabled; 
-    document.getElementById("voice-btn").textContent = voiceEnabled ? "🔊 Stimme" : "🔇 Aus"; 
-};
+    function resetBoard() {
+        const layer = document.getElementById('players-layer');
+        layer.innerHTML = "";
+        const h = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,30], [45,70]];
+        h.forEach((p, i) => createPlayer('home', i + 1, p[0], p[1], layer));
+        syncNames();
+    }
+
+    function createPlayer(side, nr, x, y, layer) {
+        const p = document.createElement('div');
+        p.className = `player ${side}`; p.id = side + nr; p.innerText = nr;
+        p.style.left = x + "%"; p.style.top = y + "%";
+        layer.appendChild(p);
+        makeDraggable(p);
+    }
+
+    function syncNames() {
+        const list = document.getElementById('player-list').value;
+        document.querySelectorAll('.player.home').forEach(p => p.innerText = p.id.replace('home',''));
+        list.split('\n').forEach(line => {
+            const m = line.match(/^(\d+)\s*(.*)$/);
+            if (m) {
+                const el = document.getElementById('home' + m[1]);
+                const name = m[2].trim().split(' ')[0];
+                if (el && name) el.innerText = name;
+            }
+        });
+    }
+
+    function makeDraggable(el) {
+        el.onmousedown = () => { draggedElement = el; el.style.transition = "none"; el.style.zIndex = "1000"; };
+    }
+
+    document.onmousemove = (e) => {
+        if (!draggedElement) return;
+        const r = document.getElementById('pitch').getBoundingClientRect();
+        draggedElement.style.left = Math.max(0, Math.min(96, ((e.clientX - r.left) / r.width) * 100)) + "%";
+        draggedElement.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
+    };
+
+    document.onmouseup = () => {
+        if (draggedElement) draggedElement.style.transition = "all 0.8s ease";
+        draggedElement = null;
+    };
+
+    async function askToni() {
+        if (isLocked) return;
+        const input = document.getElementById('user-input');
+        const text = input.value.trim(); if (!text) return;
+        addMsg('user', text); input.value = ""; isLocked = true;
+        document.getElementById('status').innerText = "Toni analysiert...";
+
+        const system = "Du bist Toni, Co-Trainer von Björn (BVB). Antworte als Mix aus Klopp/Nagelsmann. Loyal, motivierend, taktisch tief. Nutze MOVE[ID,X,Y] für Änderungen.";
+
+        try {
+            const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method: "POST", headers: { "Authorization": "Bearer " + GROQ_KEY, "Content-Type": "application/json" },
+                body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{role: "system", content: system}, {role: "user", content: text}] })
+            });
+            const data = await resp.json();
+            isLocked = false; document.getElementById('status').innerText = "Ready";
+            if (data.choices) {
+                let answer = data.choices[0].message.content;
+                let clean = answer.replace(/MOVE\[.*?\]/g, "");
+                addMsg('toni', clean); speak(clean);
+                const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
+                moves.forEach(m => {
+                    const el = document.getElementById(m[1].replace('H','home').replace('A','away'));
+                    if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
+                });
+            }
+        } catch (e) { isLocked = false; addMsg('toni', "Technik-Foul!"); }
+    }
+
+    function addMsg(role, txt) {
+        const h = document.getElementById('chat-history');
+        const d = document.createElement('div'); d.className = `msg ${role}`; d.innerText = txt;
+        h.appendChild(d); h.scrollTop = h.scrollHeight;
+    }
+
+    function toggleMic() {
+        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        rec.lang = "de-DE"; rec.onresult = (e) => { document.getElementById("user-input").value = e.results[0][0].transcript; askToni(); };
+        rec.start();
+    }
+    
+    window.onload = () => { makeDraggable(document.getElementById('ball')); };
+</script>
+</body>
+</html>
