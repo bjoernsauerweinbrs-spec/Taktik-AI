@@ -15,7 +15,12 @@
             --line:rgba(255,255,255,0.12); --text:#e6eef0; --text-light:#9aa3ad;
             --arrow-color:#ffcc00; --arrow-width:6;
         }
-        html,body{height:100%;margin:0;padding:0;font-family:'Inter',Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#1b2333 0,#050608 55%);color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
+        /* KORRIGIERTER CSS-RESET */
+        html, body {
+            height:100%; margin:0; padding:0; font-family:'Inter',Arial,Helvetica,sans-serif;
+            background:radial-gradient(circle at top,#1b2333 0,#050608 55%);
+            color:var(--text); -webkit-font-smoothing:antialiased; overflow:hidden;
+        }
         *{box-sizing:border-box}
         #app{display:grid;grid-template-columns:420px 1fr;gap:12px;height:100vh;padding:12px}
         main,aside{display:flex;flex-direction:column;gap:12px;background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line)}
