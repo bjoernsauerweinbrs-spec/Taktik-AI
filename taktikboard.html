@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni 2.0 – Taktikboard PRO</title>
+    <title>Coach Toni 2.0 – Professional Tactical Hub</title>
 
     <style>
         :root {
@@ -98,7 +98,7 @@
         .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.5); }
         .m-circle { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); }
 
-        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 1s cubic-bezier(0.4, 0, 0.2, 1); }
         .player { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .home { background: radial-gradient(circle, #f87171, #b91c1c); border: 2px solid white; }
         .away { background: radial-gradient(circle, #60a5fa, #1d4ed8); border: 2px solid white; }
@@ -131,12 +131,12 @@
 
 <div id="layout">
     <aside id="chat-sidebar">
-        <div class="chat-header">TRAINER-KOMMANDO</div>
+        <div class="chat-header">TAKTIK-ZENTRALE</div>
         <div id="chat-history"></div>
-        <div id="status" style="font-size:0.7rem; text-align:center; padding:5px; color:#555;">Ready</div>
+        <div id="status" style="font-size:0.7rem; text-align:center; padding:5px; color:#555;">Analyse bereit</div>
         <div class="chat-input-row">
             <button onclick="startMic()" style="background:transparent; border:none; color:white; cursor:pointer;">🎤</button>
-            <input type="text" id="user-input" placeholder="Anweisung..." onkeypress="if(event.key==='Enter') askToni()">
+            <input type="text" id="user-input" placeholder="Taktische Frage oder Anweisung..." onkeypress="if(event.key==='Enter') askToni()">
             <button onclick="askToni()">OK</button>
         </div>
     </aside>
@@ -157,7 +157,7 @@
         </div>
         
         <div id="whiteboard-panel">
-            <h3>📋 Kaderliste (Home)</h3>
+            <h3>📋 Kader (Home/Rot)</h3>
             <textarea id="player-list" oninput="syncNames()" placeholder="1 Neuer"></textarea>
             <button onclick="toggleKader()" style="margin-top:10px; padding:10px;">Schließen</button>
         </div>
@@ -185,7 +185,7 @@
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(txt);
         if (toniVoice) msg.voice = toniVoice;
-        msg.lang = 'de-DE'; msg.pitch = 0.8;
+        msg.lang = 'de-DE'; msg.pitch = 0.8; msg.rate = 1.1;
         window.speechSynthesis.speak(msg);
     }
 
@@ -195,14 +195,14 @@
             document.getElementById('login-overlay').style.display = 'none';
             resetBoard();
             setupVoice();
-        } else { alert("Passwort falsch!"); }
+        } else { alert("Zugriff verweigert."); }
     }
 
     function resetBoard() {
         const layer = document.getElementById('players-layer');
         layer.innerHTML = "";
-        const h = [[10,50],[25,20],[25,40],[25,60],[25,80],[45,30],[45,50],[45,70],[75,25],[85,50],[75,75]];
-        const a = [[90,50],[75,20],[75,40],[75,60],[75,80],[55,30],[55,50],[55,70],[25,25],[15,50],[25,75]];
+        const h = [[5,50],[25,20],[25,40],[25,60],[25,80],[45,30],[45,50],[45,70],[75,25],[85,50],[75,75]];
+        const a = [[95,50],[75,20],[75,40],[75,60],[75,80],[55,30],[55,50],[55,70],[25,25],[15,50],[25,75]];
         h.forEach((p, i) => createPlayer('home', i + 1, p[0], p[1], layer));
         a.forEach((p, i) => createPlayer('away', i + 1, p[0], p[1], layer));
         syncNames();
@@ -239,16 +239,16 @@
         draggedElement.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
     };
 
-    document.onmouseup = () => { if (draggedElement) draggedElement.style.transition = "all 1.2s ease"; draggedElement = null; };
+    document.onmouseup = () => { if (draggedElement) draggedElement.style.transition = "all 1s ease"; draggedElement = null; };
 
     async function askToni() {
         if (isLocked) return;
         const input = document.getElementById('user-input');
         const text = input.value.trim(); if (!text) return;
         addMsg('user', text); input.value = ""; isLocked = true;
-        document.getElementById('status').innerText = "Toni analysiert...";
+        document.getElementById('status').innerText = "Abgleich mit Taktik-Datenbank...";
 
-        const system = "Du bist Toni, Co-Trainer von Björn. Mentalität: Klopp & Nagelsmann. Du bist Fachmann für brasilianische Technik & Taktik. Du steuerst die ROTEN Spieler (home1-home11). Björn steuert Blau. Wenn du Taktik änderst, MUSST du für JEDEN betroffenen Spieler MOVE[homeX,Y,Z] nutzen. Beispiel: 'Wir rücken auf! MOVE[home2,40,20] MOVE[home3,40,40]'. Sei präzise.";
+        const system = "Du bist Toni, ein hochkompetenter Fußball-Fachmann (Mentalität: Nagelsmann & Klopp). Fokus: Modernste Taktik (Hybrid-Formationen, Relationismus, Zonenverteidigung, Ginga-Technik). Du steuerst ROT. Björn steuert BLAU. Keine Erwähnung von Dortmund/BEB. Bei 'Hallo' antworte professionell & kurz ohne MOVE. Nutze MOVE[homeX,Y,Z] nur für logische taktische Verschiebungen. Werde niemals arrogant. Ziehe Informationen aus dem Netz für beste Antworten.";
 
         try {
             const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -256,20 +256,18 @@
                 body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{role: "system", content: system}, {role: "user", content: text}] })
             });
             const data = await resp.json();
-            isLocked = false; document.getElementById('status').innerText = "Ready";
+            isLocked = false; document.getElementById('status').innerText = "Bereit";
             if (data.choices) {
                 let answer = data.choices[0].message.content;
                 let clean = answer.replace(/MOVE\[.*?\]/g, "");
                 addMsg('toni', clean); speak(clean);
-                
-                // EXECUTE MOVES
                 const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
                 moves.forEach(m => {
                     const el = document.getElementById(m[1].toLowerCase());
                     if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
                 });
             }
-        } catch (e) { isLocked = false; addMsg('toni', "Technik-Foul!"); }
+        } catch (e) { isLocked = false; addMsg('toni', "Verbindungsfehler zur Zentrale!"); }
     }
 
     function addMsg(role, txt) {
