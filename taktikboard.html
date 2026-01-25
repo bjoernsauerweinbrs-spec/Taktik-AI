@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni 2.0 – Taktikboard PRO</title>
+    <title>Coach Toni 2.0 – Professional Hub</title>
     <style>
         :root {
             --green: #2ecc71;
-            --green-dark: #27ae60;
             --bg-dark: #050608;
             --line: rgba(255,255,255,0.15);
             --text-light: rgba(255,255,255,0.9);
@@ -40,19 +39,20 @@
         #pitch-area { background: #0b1120; border-radius: 18px; border: 1px solid var(--line); display: flex; flex-direction: column; padding: 10px; height: 100%; position: relative; }
         #pitch { flex: 1; background: repeating-linear-gradient(90deg, #166534 0, #166534 8%, #15803d 8%, #15803d 16%); border: 2px solid white; border-radius: 16px; position: relative; overflow: hidden; }
         
+        /* TORE */
         .goal { position: absolute; width: 2.5%; height: 20%; border: 2px solid white; top: 40%; z-index: 5; background: rgba(255,255,255,0.1); }
         .l-goal { left: 0; border-left: none; } .r-goal { right: 0; border-right: none; }
         .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.5); }
         .m-circle { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); }
 
         /* SPIELER & BALL */
-        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .player { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .home { background: radial-gradient(circle, #f87171, #b91c1c); border: 2px solid white; }
-        .away { background: radial-gradient(circle, #60a5fa, #1d4ed8); border: 2px solid white; }
-        #ball { width: 18px; height: 18px; background: white; border-radius: 50%; border: 2px solid black; }
+        .player, #ball { position: absolute; z-index: 100; transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .player { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); border: 2px solid white; }
+        .home { background: radial-gradient(circle, #f87171, #b91c1c); cursor: default; } /* Toni (Rot) - Nicht ziehbar */
+        .away { background: radial-gradient(circle, #60a5fa, #1d4ed8); cursor: grab; } /* Björn (Blau) - Ziehbar */
+        #ball { width: 18px; height: 18px; background: white; border-radius: 50%; border: 2px solid black; cursor: grab; }
 
-        /* PANEL */
+        /* KADER PANEL */
         #whiteboard-panel { position: absolute; top: 60px; right: -380px; width: 350px; height: calc(100% - 70px); background: white; color: black; transition: 0.3s ease; z-index: 2000; display: flex; flex-direction: column; padding: 15px; border-radius: 15px 0 0 15px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
         #whiteboard-panel.open { right: 0; }
         #player-list { flex: 1; padding: 10px; font-family: monospace; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; resize: none; }
@@ -70,18 +70,18 @@
         <h2 style="color:var(--green)">⚽ COACH TONI 2.0</h2>
         <input type="password" id="password" placeholder="Passwort (Trainer2026)">
         <input type="text" id="user-key" placeholder="Groq API-Key">
-        <button onclick="startToni()" style="width:100%; padding:12px; background:var(--green); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">STARTEN</button>
+        <button onclick="startToni()" style="width:100%; padding:12px; background:var(--green); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">SYSTEM AKTIVIEREN</button>
     </div>
 </div>
 
 <div id="layout">
     <aside id="chat-sidebar">
-        <div class="chat-header">TAKTIK-BOARD</div>
+        <div class="chat-header">TAKTIK-ZENTRALE</div>
         <div id="chat-history"></div>
         <div id="status" style="font-size:0.7rem; text-align:center; padding:5px; color:#555;">Ready</div>
         <div class="chat-input-row">
             <button onclick="startMic()" style="background:transparent; border:none; color:white; cursor:pointer; font-size:1.2rem;">🎤</button>
-            <input type="text" id="user-input" placeholder="Taktische Analyse anfordern..." onkeypress="if(event.key==='Enter') askToni()">
+            <input type="text" id="user-input" placeholder="Analyse anfordern..." onkeypress="if(event.key==='Enter') askToni()">
             <button onclick="askToni()">OK</button>
         </div>
     </aside>
@@ -102,7 +102,7 @@
         </div>
         
         <div id="whiteboard-panel">
-            <h3>📋 Kaderliste (Home)</h3>
+            <h3>📋 Kaderliste (Home/Rot)</h3>
             <textarea id="player-list" oninput="syncNames()" placeholder="1 Neuer"></textarea>
             <button onclick="toggleKader()" style="margin-top:10px; padding:10px;">Schließen</button>
         </div>
@@ -140,24 +140,24 @@
             document.getElementById('login-overlay').style.display = 'none';
             resetBoard();
             setupVoice();
-        } else { alert("Passwort falsch!"); }
+        } else { alert("Zugriff verweigert!"); }
     }
 
     function resetBoard() {
         const layer = document.getElementById('players-layer'); layer.innerHTML = "";
         const h = [[10,50],[25,20],[25,40],[25,60],[25,80],[45,30],[45,50],[45,70],[75,25],[85,50],[75,75]];
         const a = [[90,50],[75,20],[75,40],[75,60],[75,80],[55,30],[55,50],[55,70],[25,25],[15,50],[25,75]];
-        h.forEach((p, i) => createPlayer('home', i + 1, p[0], p[1], layer));
-        a.forEach((p, i) => createPlayer('away', i + 1, p[0], p[1], layer));
+        h.forEach((p, i) => createPlayer('home', i + 1, p[0], p[1], layer, false));
+        a.forEach((p, i) => createPlayer('away', i + 1, p[0], p[1], layer, true));
         syncNames();
     }
 
-    function createPlayer(side, nr, x, y, layer) {
+    function createPlayer(side, nr, x, y, layer, canDrag) {
         const p = document.createElement('div');
         p.className = `player ${side}`; p.id = side + nr; p.innerText = nr;
         p.style.left = x + "%"; p.style.top = y + "%";
         layer.appendChild(p);
-        makeDraggable(p);
+        if (canDrag) makeDraggable(p);
     }
 
     function syncNames() {
@@ -184,17 +184,16 @@
         draggedElement.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
     };
 
-    document.onmouseup = () => { if (draggedElement) draggedElement.style.transition = "all 1s ease"; draggedElement = null; };
+    document.onmouseup = () => { if (draggedElement) draggedElement.style.transition = "all 1.2s ease"; draggedElement = null; };
 
     async function askToni() {
         if (isLocked) return;
         const input = document.getElementById('user-input');
         const text = input.value.trim(); if (!text) return;
         addMsg('user', text); input.value = ""; isLocked = true;
-        document.getElementById('status').innerText = "Toni analysiert...";
+        document.getElementById('status').innerText = "Toni recherchiert im Internet...";
 
-        // SUPER-PROMPT FÜR TAKTISCHE PRÄZISION
-        const system = "Du bist Toni, ein taktisches Mastermind (Nagelsmann/Klopp/Brasil-Style). Du steuerst ROT (home1-11). Björn steuert Blau. Deine Aufgabe: Analysiere jede Situation taktisch (Räume, Überzahl, Ballorientierung). Du MUSST für jede taktische Korrektur das Format MOVE[homeX,Y,Z] verwenden. Sei fachlich brillant, erkläre kurz WARUM du schiebst, und bewege die Spieler logisch. Keine Arroganz.";
+        const system = "Du bist Toni, Co-Trainer von Björn. Mix aus Klopp & Nagelsmann. Fachmann für brasilianische Technik. Du steuerst ROT (home1-11). Björn steuert BLAU (away1-11). Björn darf deine Spieler NICHT manuell bewegen, nur du per MOVE[homeX,Y,Z]. Erkundige dich erst im Netz nach den besten taktischen Antworten für die Situation. Erkläre kurz warum du schiebst und nutze IMMER MOVE-Befehle für taktische Anpassungen.";
 
         try {
             const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
