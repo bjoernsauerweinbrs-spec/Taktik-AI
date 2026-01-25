@@ -8,11 +8,12 @@
         :root {
             --green: #2ecc71;
             --blue: #3498db;
+            --yellow: #f1c40f;
             --dark: #0f172a;
         }
         body {
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
             color: white;
             display: flex;
@@ -23,56 +24,76 @@
         }
         .container {
             text-align: center;
-            max-width: 800px;
-            padding: 40px;
+            max-width: 850px;
+            padding: 50px;
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 30px;
-            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+        .flags {
+            font-size: 50px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.4));
         }
         h1 {
-            font-size: 3.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(to right, var(--green), var(--blue));
+            font-size: 3.8rem;
+            margin: 0 0 15px 0;
+            background: linear-gradient(to right, #2ecc71, #3498db, #f1c40f);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            letter-spacing: -1px;
         }
-        p {
-            font-size: 1.2rem;
-            color: #94a3b8;
+        .mission-statement {
+            font-size: 1.3rem;
+            color: #e2e8f0;
             line-height: 1.6;
+            margin-bottom: 35px;
+            font-weight: 300;
+        }
+        .highlight {
+            color: var(--green);
+            font-weight: 600;
         }
         .features {
             display: flex;
             justify-content: space-around;
-            margin: 40px 0;
+            margin: 45px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 20px 0;
         }
         .feature-item {
-            font-size: 0.9rem;
-            color: var(--green);
-            font-weight: bold;
+            font-size: 0.95rem;
+            color: #94a3b8;
+            font-weight: 600;
+            letter-spacing: 1.5px;
         }
         .start-btn {
             display: inline-block;
-            padding: 18px 40px;
-            background: var(--green);
+            padding: 20px 50px;
+            background: linear-gradient(135deg, var(--green), #27ae60);
             color: #000;
             text-decoration: none;
             border-radius: 50px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+            font-weight: 800;
+            font-size: 1.2rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.4);
+            text-transform: uppercase;
         }
         .start-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(46, 204, 113, 0.5);
-            background: #27ae60;
+            transform: scale(1.08) translateY(-5px);
+            box-shadow: 0 20px 40px rgba(46, 204, 113, 0.6);
         }
         .footer {
-            margin-top: 30px;
-            font-size: 0.8rem;
+            margin-top: 40px;
+            font-size: 0.85rem;
             color: #475569;
         }
     </style>
@@ -80,20 +101,30 @@
 <body>
 
 <div class="container">
-    <div style="font-size: 50px; margin-bottom: 20px;">⚽🇧🇷</div>
+    <div class="flags">
+        <span>🇩🇪</span>
+        <span>🇬🇭</span>
+        <span>🇧🇷</span>
+    </div>
+    
     <h1>COACH TONI 2.0</h1>
-    <p>Die ultimative Verbindung aus brasilianischer Technik-Schule und künstlicher Intelligenz. Analysiere dein Team, erstelle Trainingspläne und dominiere das Spielfeld.</p>
+    
+    <p class="mission-statement">
+        Die ultimative Taktik-Schmiede: <span class="highlight">Brasilianische Technik</span> trifft auf 
+        <span class="highlight">ghanaische Lockerheit</span> und <span class="highlight">deutsche Durchsetzungskraft</span>. 
+        Analysiere dein Team mit KI-Präzision und dominiere das Spielfeld.
+    </p>
     
     <div class="features">
-        <div class="feature-item">✓ KI-TAKTIK</div>
-        <div class="feature-item">✓ LIVE-BOARD</div>
-        <div class="feature-item">✓ KADER-SYNC</div>
+        <div class="feature-item">STRATEGIE</div>
+        <div class="feature-item">PRÄZISION</div>
+        <div class="feature-item">LEIDENSCHAFT</div>
     </div>
 
-    <a href="app.html" class="start-btn">SYSTEM STARTEN</a>
+    <a href="app.html" class="start-btn">SYSTEM INITIALISIEREN</a>
 
     <div class="footer">
-        Powered by Groq Intelligence | © 2026 Coach Björn
+        KI-Modul: Groq Brain v2 | Mastermind: Coach Björn | © 2026
     </div>
 </div>
 
