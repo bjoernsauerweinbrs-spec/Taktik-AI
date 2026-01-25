@@ -4,26 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coach Toni 2.0 – Taktikboard</title>
-
     <style>
         :root {
             --green: #2ecc71;
             --green-dark: #27ae60;
             --bg-dark: #050608;
             --bg-panel: #111319;
-            --bg-panel-light: #191b23;
             --line: rgba(255,255,255,0.12);
             --text-light: rgba(255,255,255,0.9);
             --shadow-strong: 0 18px 40px rgba(0,0,0,0.65);
         }
 
         * { box-sizing: border-box; }
-
         body {
             margin: 0;
             background: radial-gradient(circle at top, #1b2333 0, #050608 55%);
             color: var(--text-light);
-            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: "Inter", system-ui, sans-serif;
             overflow: hidden;
         }
 
@@ -35,6 +32,7 @@
             padding: 12px;
         }
 
+        /* Sidebar & Chat */
         #chat-sidebar {
             background: linear-gradient(145deg, #10121a, #151824);
             border-radius: 18px;
@@ -47,11 +45,8 @@
         .chat-header {
             padding: 16px 18px;
             font-weight: 700;
-            font-size: 1rem;
             color: var(--green);
             border-bottom: 1px solid rgba(255,255,255,0.08);
-            background: radial-gradient(circle at top left, #1f2937 0, #050608 70%);
-            border-radius: 18px 18px 0 0;
             display: flex;
             justify-content: space-between;
         }
@@ -65,84 +60,18 @@
             gap: 10px;
         }
 
-        .msg {
-            padding: 10px 12px;
-            border-radius: 14px;
-            font-size: 0.9rem;
-            line-height: 1.45;
-            max-width: 92%;
-        }
+        .msg { padding: 10px 12px; border-radius: 14px; font-size: 0.9rem; line-height: 1.45; max-width: 92%; }
+        .msg.user { align-self: flex-end; background: linear-gradient(135deg, #2563eb, #38bdf8); color: white; border-bottom-right-radius: 4px; }
+        .msg.toni { align-self: flex-start; background: #1f2937; border: 1px solid rgba(148,163,184,0.4); border-bottom-left-radius: 4px; }
 
-        .msg.user {
-            align-self: flex-end;
-            background: linear-gradient(135deg, #2563eb, #38bdf8);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
+        .chat-input-row { padding: 12px; background: #050712; border-radius: 0 0 18px 18px; border-top: 1px solid rgba(148,163,184,0.25); display: flex; gap: 8px; }
+        .chat-input-row input { flex: 1; background: #020617; color: white; border: 1px solid #374151; padding: 10px; border-radius: 8px; }
+        .chat-input-row button { border: none; cursor: pointer; border-radius: 8px; padding: 10px; font-weight: bold; }
 
-        .msg.toni {
-            align-self: flex-start;
-            background: radial-gradient(circle at top left, #1f2937, #020617);
-            border: 1px solid rgba(148,163,184,0.4);
-            border-bottom-left-radius: 4px;
-            position: relative;
-        }
-
-        .msg.toni::before {
-            content: "T";
-            position: absolute;
-            left: -22px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--green-dark);
-            color: #020617;
-            font-size: 0.7rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #status {
-            font-size: 0.7rem;
-            text-align: center;
-            color: #9ca3af;
-            padding: 4px 0 2px;
-        }
-
-        .chat-input-row {
-            padding: 12px;
-            background: #050712;
-            border-radius: 0 0 18px 18px;
-            border-top: 1px solid rgba(148,163,184,0.25);
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-input-row input {
-            flex: 1;
-            background: #020617;
-            color: white;
-            border: 1px solid #374151;
-            padding: 9px 10px;
-            border-radius: 8px;
-        }
-
-        .chat-input-row button {
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-            padding: 9px 11px;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        #mic-btn { background: #111827; color: #e5e7eb; }
+        #mic-btn { background: #111827; color: white; }
         #send-btn { background: var(--green); color: #020617; }
 
+        /* Spielfeld */
         #pitch-area {
             background: linear-gradient(145deg, #0b1120, #020617);
             border-radius: 18px;
@@ -150,30 +79,11 @@
             display: flex;
             flex-direction: column;
             padding: 10px;
-            box-shadow: var(--shadow-strong);
         }
 
-        .pitch-toolbar {
-            display: flex;
-            justify-content: space-between;
-            padding-bottom: 10px;
-        }
-
-        .toolbar-btn {
-            background: #020617;
-            color: #e5e7eb;
-            border-radius: 999px;
-            border: 1px solid #1f2937;
-            padding: 6px 11px;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-
-        .toolbar-btn.primary {
-            background: #16a34a;
-            border-color: #22c55e;
-            color: #020617;
-        }
+        .pitch-toolbar { display: flex; justify-content: space-between; padding-bottom: 10px; }
+        .toolbar-btn { background: #020617; color: #e5e7eb; border-radius: 999px; border: 1px solid #1f2937; padding: 8px 15px; font-size: 0.8rem; cursor: pointer; }
+        .toolbar-btn.primary { background: #16a34a; color: white; border: none; }
 
         #pitch {
             flex: 1;
@@ -182,264 +92,206 @@
             border-radius: 16px;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 18px 40px rgba(0,0,0,0.8);
         }
 
-        .pitch-vignette {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            background: radial-gradient(circle at center, transparent 0, transparent 55%, rgba(0,0,0,0.55) 100%);
-        }
+        .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.7); }
+        .m-circle { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.7); border-radius: 50%; transform: translate(-50%, -50%); }
+        .m-box-16 { position: absolute; width: 18%; height: 46%; border: 2px solid rgba(255,255,255,0.7); top: 27%; }
+        .l { left: 0; border-left: none; } .r { right: 0; border-right: none; }
 
-        .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(249,250,251,0.95); }
-        .m-circle { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; border: 2px solid rgba(249,250,251,0.95); border-radius: 50%; transform: translate(-50%, -50%); }
+        /* Spieler */
+        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 0.8s cubic-bezier(0.2, 0.7, 0.3, 1); }
+        .player { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .home { background: radial-gradient(circle at 30% 20%, #f87171 0, #b91c1c 100%); border: 2px solid #ef4444; }
+        .away { background: radial-gradient(circle at 30% 20%, #60a5fa 0, #1d4ed8 100%); border: 2px solid #3b82f6; }
+        #ball { width: 18px; height: 18px; background: white; border-radius: 50%; border: 2px solid black; }
 
-        .m-box-16 { position: absolute; width: 18%; height: 46%; border: 2px solid rgba(249,250,251,0.95); top: 27%; }
-        .l { left: 0; border-left: none; }
-        .r { right: 0; border-right: none; }
-
-        .m-box-5 { position: absolute; width: 8%; height: 26%; border: 2px solid rgba(249,250,251,0.95); top: 37%; }
-        .l5 { left: 0; border-left: none; }
-        .r5 { right: 0; border-right: none; }
-
-        .dot { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: rgba(249,250,251,0.95); }
-        .dot.l { left: 11%; top: 50%; transform: translateY(-50%); }
-        .dot.r { right: 11%; top: 50%; transform: translateY(-50%); }
-
-        .player, #ball {
-            position: absolute;
-            cursor: grab;
-            z-index: 10;
-            transition: all 0.8s cubic-bezier(0.2, 0.7, 0.3, 1);
-        }
-
-        .player {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            border: 2px solid rgba(15,23,42,0.95);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 11px;
-            color: #f9fafb;
-            box-shadow: 0 0 0 2px rgba(15,23,42,0.9), 0 10px 18px rgba(0,0,0,0.8);
-        }
-
-        .player::after {
-            content: "";
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 18px;
-            height: 6px;
-            background: radial-gradient(circle at center, rgba(0,0,0,0.7) 0, transparent 70%);
-        }
-
-        .home {
-            background: radial-gradient(circle at 30% 20%, #fecaca 0, #b91c1c 40%, #7f1d1d 100%);
-            box-shadow: 0 0 0 2px rgba(248,113,113,0.9), 0 0 18px rgba(248,113,113,0.9), 0 10px 18px rgba(0,0,0,0.8);
-        }
-
-        .away {
-            background: radial-gradient(circle at 30% 20%, #bfdbfe 0, #1d4ed8 40%, #1e3a8a 100%);
-            box-shadow: 0 0 0 2px rgba(96,165,250,0.9), 0 0 18px rgba(96,165,250,0.9), 0 10px 18px rgba(0,0,0,0.8);
-        }
-
-        #ball {
-            width: 18px;
-            height: 18px;
-            background: radial-gradient(circle at 30% 30%, #ffffff 0, #e5e7eb 40%, #9ca3af 100%);
-            border-radius: 50%;
-            border: 2px solid #020617;
-            box-shadow: 0 0 0 1px rgba(15,23,42,0.9), 0 8px 14px rgba(0,0,0,0.85);
-        }
-
-        #whiteboard-panel {
-            position: fixed;
-            top: 0;
-            right: -380px;
-            width: 360px;
-            height: 100vh;
-            background: linear-gradient(145deg, #f9fafb, #e5e7eb);
-            color: #020617;
-            border-left: 2px solid #d1d5db;
-            box-shadow: -12px 0 30px rgba(0,0,0,0.6);
-            transition: right 0.35s ease;
-            display: flex;
-            flex-direction: column;
-            z-index: 3000;
-        }
-
+        /* Whiteboard */
+        #whiteboard-panel { position: fixed; top: 0; right: -380px; width: 360px; height: 100vh; background: white; color: black; transition: right 0.3s ease; z-index: 3000; display: flex; flex-direction: column; padding: 20px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
         #whiteboard-panel.open { right: 0; }
+        #player-list { flex: 1; width: 100%; font-family: monospace; font-size: 1.1rem; padding: 10px; border: 1px solid #ccc; border-radius: 8px; resize: none; }
 
-        .whiteboard-header {
-            padding: 14px;
-            display: flex;
-            justify-content: space-between;
-            background: #e5e7eb;
-            border-bottom: 1px solid #d1d5db;
-        }
-
-        #player-list {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            outline: none;
-            resize: none;
-            font-size: 0.9rem;
-            font-family: "JetBrains Mono", monospace;
-            background: #f3f4f6;
-        }
-
-        #login-overlay {
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at top, rgba(15,23,42,0.95) 0, rgba(3,7,18,0.98) 55%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 4000;
-        }
-
-        .login-card {
-            background: radial-gradient(circle at top left, #111827 0, #020617 70%);
-            padding: 32px 26px;
-            border-radius: 20px;
-            border: 1px solid rgba(148,163,184,0.6);
-            text-align: center;
-            width: 320px;
-            box-shadow: 0 22px 45px rgba(0,0,0,0.9);
-        }
-
-        .login-card h2 { margin: 0 0 6px; color: var(--green); font-size: 1.1rem; }
-        .login-card p { margin: 0 0 14px; font-size: 0.8rem; color: #9ca3af; }
-
-        .login-card input {
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            background: #020617;
-            border: 1px solid #374151;
-            border-radius: 9px;
-            color: #e5e7eb;
-            font-size: 0.85rem;
-        }
-
-        .login-card button {
-            width: 100%;
-            padding: 11px;
-            background: var(--green);
-            color: #020617;
-            border: none;
-            border-radius: 999px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 1100px) {
-            #layout {
-                grid-template-columns: 1fr;
-                grid-template-rows: 360px 1fr;
-            }
-            #chat-sidebar { order: 2; height: 360px; }
-            #pitch-area { order: 1; }
-        }
-
-        @media (max-width: 700px) {
-            #layout { padding: 6px; gap: 6px; }
-            #chat-sidebar { height: 300px; }
-            #whiteboard-panel { width: 100%; right: -100%; }
-        }
+        /* Login */
+        #login-overlay { position: fixed; inset: 0; background: #050608; display: flex; align-items: center; justify-content: center; z-index: 4000; }
+        .login-card { background: #111319; padding: 40px; border-radius: 20px; border: 1px solid var(--green); text-align: center; }
+        .login-card input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; }
+        .login-card button { width: 100%; padding: 12px; background: var(--green); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
-    <body>
+</head>
+<body>
 
-<!-- LOGIN OVERLAY -->
 <div id="login-overlay">
     <div class="login-card">
         <h2>⚽ COACH TONI 2.0</h2>
-        <p>Passwort & GROQ‑API‑Key eingeben</p>
-
+        <p>Zugriff für Manager Björn</p>
         <input type="password" id="password" placeholder="Passwort (Trainer2026)">
-        <input type="text" id="user-key" placeholder="Groq API-Key (gsk_...)">
-
-        <button id="login-btn">SYSTEM STARTEN</button>
+        <input type="text" id="user-key" placeholder="Google API-Key">
+        <button onclick="startToni()">SYSTEM INITIALISIEREN</button>
     </div>
 </div>
 
-<!-- HAUPTLAYOUT -->
 <div id="layout">
-
-    <!-- CHATBEREICH -->
     <aside id="chat-sidebar">
-
         <header class="chat-header">
             <div>TRAINER-KOMMANDO</div>
-            <span>Toni 2.0</span>
+            <span>V2.0</span>
         </header>
-
         <div id="chat-history"></div>
         <div id="status">Ready</div>
-
         <div class="chat-input-row">
-            <button id="mic-btn">🎤</button>
-            <input type="text" id="user-input" placeholder="Befehl an Toni...">
-            <button id="send-btn">OK</button>
+            <button id="mic-btn" onclick="toggleMic()">🎤</button>
+            <input type="text" id="user-input" placeholder="Anweisung..." onkeypress="if(event.key==='Enter') askToni()">
+            <button id="send-btn" onclick="askToni()">OK</button>
         </div>
-
     </aside>
 
-    <!-- TAKTIKFELD -->
     <main id="pitch-area">
-
         <div class="pitch-toolbar">
-            <button id="reset-btn" class="toolbar-btn primary">♻ Grundordnung</button>
-
+            <button class="toolbar-btn primary" onclick="resetBoard()">♻ Reset</button>
             <div>
-                <button id="voice-btn" class="toolbar-btn">🔊 Stimme</button>
-                <button id="whiteboard-open" class="toolbar-btn">📋 Kader</button>
+                <button class="toolbar-btn" onclick="speak('System online, Coach Björn.')">🔊 Test</button>
+                <button class="toolbar-btn" onclick="toggleKader()">📋 Kader</button>
             </div>
         </div>
-
         <div id="pitch">
-
-            <div class="m-line"></div>
-            <div class="m-circle"></div>
-            <div class="m-box-16 l"></div>
-            <div class="m-box-16 r"></div>
-            <div class="m-box-5 l5"></div>
-            <div class="m-box-5 r5"></div>
-            <div class="dot l"></div>
-            <div class="dot r"></div>
-
+            <div class="m-line"></div><div class="m-circle"></div>
+            <div class="m-box-16 l"></div><div class="m-box-16 r"></div>
             <div id="ball" style="left:50%; top:50%;"></div>
-
             <div id="players-layer"></div>
-
-            <div class="pitch-vignette"></div>
         </div>
-
     </main>
+</div>
 
-    <!-- WHITEBOARD -->
-    <section id="whiteboard-panel">
-        <header class="whiteboard-header">
-            <h3>📋 Kaderliste</h3>
-            <button id="whiteboard-close">✖</button>
-        </header>
-
-        <textarea id="player-list" placeholder="Format: 6 Kimmich&#10;10 Müller"></textarea>
-    </section>
-
-</div> <!-- layout -->
+<section id="whiteboard-panel">
+    <h3>📋 Kader & Namen</h3>
+    <textarea id="player-list" oninput="syncNames()" placeholder="1 Neuer&#10;2 Kimmich"></textarea>
+    <br>
+    <button class="toolbar-btn primary" onclick="toggleKader()">Schließen</button>
+</section>
 
 <script>
-    /* dein komplettes JS */
-</script>
+    let USER_KEY = "";
+    let isLocked = false;
+    let recognition = null;
 
+    function toggleKader() { document.getElementById('whiteboard-panel').classList.toggle('open'); }
+
+    function startToni() {
+        if (document.getElementById('password').value === "Trainer2026") {
+            USER_KEY = document.getElementById('user-key').value.trim();
+            localStorage.setItem('toni_key_v2', USER_KEY);
+            document.getElementById('login-overlay').style.display = 'none';
+            resetBoard();
+        } else { alert("Falsches Passwort!"); }
+    }
+
+    window.onload = () => {
+        const savedKey = localStorage.getItem('toni_key_v2');
+        if (savedKey) document.getElementById('user-key').value = savedKey;
+        const savedKader = localStorage.getItem('toni_kader_v2');
+        if (savedKader) document.getElementById('player-list').value = savedKader;
+    };
+
+    function resetBoard() {
+        const layer = document.getElementById('players-layer');
+        layer.innerHTML = "";
+        const h = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,20], [45,40], [45,60], [45,80], [70,40], [70,60]];
+        const a = [[93,50], [78,25], [78,50], [78,75], [58,15], [58,38], [58,62], [58,85], [35,20], [35,50], [35,80]];
+        h.forEach((p, i) => createPlayer('home', i + 1, p[0], p[1], layer));
+        a.forEach((p, i) => createPlayer('away', i + 1, p[0], p[1], layer));
+        if (!document.getElementById('player-list').value) {
+            let start = ""; for(let i=1; i<=11; i++) start += i + " \n";
+            document.getElementById('player-list').value = start;
+        }
+        syncNames();
+    }
+
+    function createPlayer(side, nr, x, y, layer) {
+        const p = document.createElement('div');
+        p.className = `player ${side}`; p.id = side + nr; p.innerText = nr;
+        p.style.left = x + "%"; p.style.top = y + "%";
+        layer.appendChild(p);
+        makeDraggable(p);
+    }
+
+    function syncNames() {
+        const list = document.getElementById('player-list').value;
+        localStorage.setItem('toni_kader_v2', list);
+        document.querySelectorAll('.player.home').forEach(p => p.innerText = p.id.replace('home',''));
+        list.split('\n').forEach(line => {
+            const m = line.match(/^(\d+)\s*(.*)$/);
+            if (m) {
+                const el = document.getElementById('home' + m[1]);
+                const name = m[2].trim().split(' ')[0];
+                if (el && name) el.innerText = name;
+            }
+        });
+    }
+
+    function makeDraggable(el) {
+        let dragging = false;
+        el.onmousedown = () => { dragging = true; el.style.transition = "none"; };
+        document.onmousemove = (e) => {
+            if (!dragging) return;
+            const r = document.getElementById('pitch').getBoundingClientRect();
+            el.style.left = Math.max(0, Math.min(96, ((e.clientX - r.left) / r.width) * 100)) + "%";
+            el.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
+        };
+        document.onmouseup = () => { dragging = false; el.style.transition = "all 0.8s ease"; };
+    }
+    makeDraggable(document.getElementById('ball'));
+
+    function speak(txt) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(txt);
+        msg.lang = 'de-DE'; msg.pitch = 0.6;
+        window.speechSynthesis.speak(msg);
+    }
+
+    function toggleMic() {
+        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!recognition) {
+            recognition = new Speech(); recognition.lang = 'de-DE';
+            recognition.onresult = (e) => { document.getElementById('user-input').value = e.results[0][0].transcript; askToni(); };
+        }
+        recognition.start();
+    }
+
+    async function askToni() {
+        if (isLocked) return;
+        const input = document.getElementById('user-input');
+        const text = input.value.trim(); if (!text) return;
+        addMsg('user', text); input.value = ""; isLocked = true;
+        document.getElementById('status').innerText = "Toni analysiert...";
+
+        const pos = [...document.querySelectorAll('.player, #ball')].map(el => `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}]`).join(', ');
+        const prompt = `Du bist Toni, Co-Trainer von Björn (BVB & internationaler Profi). Arrogant, witzig, hochintelligent. ROT=home, BLAU=away. Stand: ${pos}. Kader: ${document.getElementById('player-list').value}. PFLICHT: Am Ende MOVE[ID,X,Y] nutzen. Antworte kurz.`;
+
+        try {
+            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${USER_KEY}`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt + " Frage: " + text }] }] })
+            });
+            const data = await resp.json();
+            isLocked = false; document.getElementById('status').innerText = "Ready";
+            if (data.candidates) {
+                let answer = data.candidates[0].content.parts[0].text;
+                addMsg('toni', answer.replace(/MOVE\[.*?\]/g, ""));
+                speak(answer.replace(/MOVE\[.*?\]/g, ""));
+                const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
+                moves.forEach(m => {
+                    const el = document.getElementById(m[1].replace('H','home').replace('A','away'));
+                    if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
+                });
+            } else { addMsg('toni', "Quota-Fehler oder Key ungültig, Coach."); }
+        } catch (e) { isLocked = false; addMsg('toni', "Technik-Foul!"); }
+    }
+
+    function addMsg(role, txt) {
+        const hist = document.getElementById('chat-history');
+        const d = document.createElement('div'); d.className = `msg ${role}`; d.innerText = txt;
+        hist.appendChild(d); hist.scrollTop = hist.scrollHeight;
+    }
+</script>
 </body>
 </html>
