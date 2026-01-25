@@ -3,17 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Coach Toni 2.0 – Trainings- & Spielvorbereitung (Final)</title>
+  <title>Coach Toni 2.0 – Management Plattform</title>
   <style>
     :root{
       --green:#2ecc71; --accent:#0a74da; --bg:#07101a; --panel:#0f1720;
       --line:rgba(255,255,255,0.12); --text:#e6eef0; --card-radius:12px;
       --arrow-color:#ffcc00; --arrow-width:6;
+      --pulse-color: rgba(255,255,255,0.12);
     }
+    /* Reset */
+    html,body{height:100%;margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#1b2333 0,#050608 55%);color:var(--text);-webkit-font-smoothing:antialiased}
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#1b2333 0,#050608 55%);color:var(--text);-webkit-font-smoothing:antialiased}
+    /* Layout */
     #app{display:grid;grid-template-columns:420px 1fr;gap:12px;height:100vh;padding:12px}
-    /* Sidebar / Chat */
+    /* Sidebar */
     #sidebar{background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line);display:flex;flex-direction:column}
     .header{font-weight:800;color:var(--green);padding:12px 8px;border-bottom:1px solid var(--line)}
     #chat-history{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
@@ -23,12 +26,14 @@
     .input-row{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
     .input-row input{flex:1;padding:10px;border-radius:10px;border:1px solid #26303a;background:#07101a;color:#fff}
     .input-row button{padding:10px 14px;border-radius:10px;border:none;background:var(--green);color:#fff;cursor:pointer}
-    /* Main area */
+    /* Main */
     #main{display:flex;flex-direction:column;gap:12px}
-    .controls{display:flex;justify-content:space-between;gap:8px}
+    .controls{display:flex;justify-content:space-between;gap:8px;align-items:center}
     .btn{padding:10px 14px;border-radius:999px;border:none;cursor:pointer;background:#0f1720;color:#fff}
     .btn.primary{background:var(--accent);color:#fff}
     #pitch-area{background:linear-gradient(180deg,#07101a,#0b1220);border-radius:14px;padding:12px;border:1px solid var(--line);position:relative;flex:1;display:flex;flex-direction:column}
+    #playlist-bar{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,0.02);margin-bottom:8px}
+    #playlist-bar .label{font-weight:700;color:#9aa3ad}
     #pitch{flex:1;background:#166534;border-radius:12px;border:3px solid #fff;position:relative;overflow:hidden}
     .goal{position:absolute;width:3%;height:20%;border:3px solid #fff;top:40%;background:rgba(255,255,255,0.05)}
     .l-goal{left:0;border-left:none}.r-goal{right:0;border-right:none}
@@ -39,26 +44,33 @@
     .home{background:radial-gradient(circle at 30% 30%,#f87171,#b91c1c)}
     .away{background:radial-gradient(circle at 30% 30%,#60a5fa,#1d4ed8);cursor:grab}
     #ball{width:20px;height:20px;background:#fff;border-radius:50%;border:2px solid #000;cursor:grab}
-    /* Training menu */
-    #training-panel{background:linear-gradient(145deg,#0b1220,#0f1720);border-radius:12px;padding:12px;border:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
-    .exercise-card{background:#07101a;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
-    .exercise-card h4{margin:0 0 6px 0}
-    .meta{font-size:0.85rem;color:#9aa3ad;margin-bottom:6px}
-    .card-actions{display:flex;gap:8px;margin-top:8px}
-    .script-list{margin-top:8px;background:#071018;padding:8px;border-radius:8px;max-height:180px;overflow:auto}
-    .script-item{padding:8px;border-radius:8px;background:linear-gradient(180deg,#0b1220,#0f1720);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-    /* whiteboard & modals */
+    /* Bank / Sideline */
+    #bank{position:absolute;right:8px;top:8px;width:120px;background:rgba(0,0,0,0.35);padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);z-index:250}
+    #bank h5{margin:0 0 6px 0;font-size:12px;color:#cfe8ff}
+    .bank-player{padding:6px;border-radius:6px;background:rgba(255,255,255,0.03);margin-bottom:6px;font-size:12px}
+    /* Coaching points */
+    #coaching-panel{margin-top:8px;background:linear-gradient(145deg,#071018,#0b1220);padding:10px;border-radius:10px;border:1px solid var(--line);min-height:80px;color:#cfe8ff}
+    #coaching-panel h4{margin:0 0 6px 0;color:#9aa3ad}
+    /* Playlist controls */
+    .playlist-controls{display:flex;gap:8px;align-items:center;margin-left:auto}
+    /* Whiteboard */
     #whiteboard{position:absolute;top:20px;right:-460px;width:420px;height:calc(100% - 40px);background:#f8fafc;color:#0f172a;border-radius:12px;padding:12px;transition:0.35s;z-index:2000;box-shadow:-20px 0 60px rgba(0,0,0,0.6)}
     #whiteboard.open{right:20px}
+    .attendance-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+    .attendance-toggle{width:14px;height:14px;border-radius:50%;display:inline-block;margin-left:8px;cursor:pointer;border:2px solid rgba(0,0,0,0.08)}
+    .attendance-toggle.present{background:var(--green)}
+    .attendance-toggle.absent{background:#ef4444}
+    /* Modal */
     .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#0b1220;color:var(--text);padding:16px;border-radius:10px;border:1px solid var(--line);z-index:4000;display:none;min-width:320px}
     .modal.open{display:block}
-    .modal h4{margin:0 0 8px 0}
-    #exercise-svg{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
-    #voice-select{background:#07101a;color:#fff;border:1px solid #26303a;padding:8px;border-radius:8px}
-    /* arrow animation */
-    .arrow-line{stroke:var(--arrow-color);stroke-width:var(--arrow-width);stroke-linecap:round;stroke-dasharray:12 6;animation:dash 1.2s linear infinite}
-    @keyframes dash{to{stroke-dashoffset:-24}}
-    /* small helpers */
+    /* Timer pulse */
+    .pulse { box-shadow: 0 0 0 0 rgba(255,255,255,0.0); animation: pulse-border 900ms ease-in-out 1; }
+    @keyframes pulse-border {
+      0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.0); }
+      50% { box-shadow: 0 0 0 12px rgba(255,255,255,0.06); }
+      100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.0); }
+    }
+    /* small */
     .small{font-size:12px;color:#9aa3ad}
     .flex{display:flex;gap:8px;align-items:center}
     .hidden{display:none}
@@ -71,7 +83,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-  <!-- LOGIN OVERLAY -->
+  <!-- LOGIN -->
   <div id="login-overlay">
     <div class="login-card">
       <h2 style="color:var(--green);margin:0">⚽ COACH TONI 2.0 – LOGIN</h2>
@@ -84,11 +96,11 @@
     </div>
   </div>
 
-  <div id="app">
-    <!-- LEFT: Chat & Controls -->
+  <div id="app" aria-hidden="false">
+    <!-- Sidebar -->
     <div id="sidebar">
       <div class="header">TONI – STRATEGIE & TRAINING</div>
-      <div id="chat-history"></div>
+      <div id="chat-history" aria-live="polite"></div>
 
       <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
         <label class="small">Stimme</label>
@@ -124,18 +136,34 @@
       <pre id="debug" style="display:none;margin-top:8px;background:#071018;color:#9fd3ff;padding:8px;border-radius:8px"></pre>
     </div>
 
-    <!-- RIGHT: Pitch + Training -->
+    <!-- Main -->
     <div id="main">
       <div class="controls">
         <div style="display:flex;gap:8px;align-items:center">
           <button class="btn primary" onclick="resetBoard()">♻ GRUNDORDNUNG</button>
+          <div id="playlist-bar" aria-hidden="false">
+            <div class="label">Sequenz:</div>
+            <div id="playlist-title" style="font-weight:700">Übung 1 von 1</div>
+            <div class="playlist-controls">
+              <button class="btn" onclick="prevPhase()">◀</button>
+              <button class="btn" onclick="nextPhase()">▶</button>
+              <button class="btn" onclick="addPhase()">＋ Phase</button>
+              <button class="btn" onclick="duplicatePhase()">Duplizieren</button>
+              <button class="btn" onclick="deletePhase()">Löschen</button>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
           <div class="small">SVG Style:</div>
           <input type="color" id="svg-color" value="#ffcc00" onchange="updateSvgStyle()" title="Pfeilfarbe" />
           <input type="range" id="svg-width" min="2" max="12" value="6" onchange="updateSvgStyle()" title="Pfeilbreite" />
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn" onclick="takeSnapshot()">Snapshot</button>
-          <button class="btn" onclick="restoreSnapshot()">Restore</button>
+          <div style="width:12px"></div>
+          <div id="timer" class="small">00:00</div>
+          <div style="display:flex;gap:6px;margin-left:6px">
+            <button class="btn" onclick="startTimer()">Start</button>
+            <button class="btn" onclick="stopTimer()">Stop</button>
+            <button class="btn" onclick="resetTimer()">Reset</button>
+          </div>
         </div>
       </div>
 
@@ -144,17 +172,26 @@
           <div class="goal l-goal"></div><div class="goal r-goal"></div>
           <div class="m-line"></div><div class="m-circle"></div>
           <svg id="exercise-svg" viewBox="0 0 1000 600" preserveAspectRatio="none"></svg>
+          <div id="bank" aria-hidden="false">
+            <h5>Bank</h5>
+            <div id="bank-list"></div>
+          </div>
           <div id="ball" style="left:50%;top:50%"></div>
           <div id="players-layer"></div>
+        </div>
+
+        <div id="coaching-panel">
+          <h4>Coaching-Points</h4>
+          <ol id="coaching-list" style="margin:6px 0 0 18px;color:#dff6ff"></ol>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Whiteboard / Kader -->
-  <div id="whiteboard">
-    <h3 style="margin:0 0 8px 0">📋 Kader (Team Rot / Blau)</h3>
-    <p class="small">Format: "<strong>Nummer Name [team]</strong>" — team optional: "red" oder "blue". Beispiel: <em>5 Hummels blue</em></p>
+  <!-- Whiteboard -->
+  <div id="whiteboard" aria-hidden="true">
+    <h3 style="margin:0 0 8px 0">📋 Kader & Anwesenheit</h3>
+    <p class="small">Format: "Nummer Name [red|blue]" — team optional. Beispiel: <em>5 Hummels blue</em></p>
     <textarea id="player-list" style="width:100%;height:120px;padding:8px;border-radius:8px;border:1px solid #e2e8f0">1 Neuer blue
 5 Hummels blue
 9 Müller red</textarea>
@@ -162,9 +199,13 @@
       <button class="btn primary" onclick="syncNames()">Sync</button>
       <button class="btn" onclick="document.getElementById('whiteboard').classList.remove('open')">Schließen</button>
     </div>
+    <div style="margin-top:12px">
+      <h4 style="margin:0 0 8px 0">Anwesenheit</h4>
+      <div id="attendance-list"></div>
+    </div>
   </div>
 
-  <!-- Confirm modal for pending moves -->
+  <!-- Confirm modal -->
   <div id="confirm-modal" class="modal" aria-hidden="true">
     <h4>Vorschau: Toni schlägt folgende Bewegungen vor</h4>
     <div id="pending-list" style="margin-top:8px;max-height:220px;overflow:auto"></div>
@@ -180,15 +221,20 @@
      ------------------------- */
   let GROQ_KEY = "";
   let isLocked = false;
-  let voiceEnabled = true;
   let toniVoice = null;
   let trainerHasInitiated = false;
-  let pendingMoves = []; // moves proposed by Toni, require trainer confirmation
-  let currentMode = 'training'; // 'training' or 'match'
+  let pendingMoves = [];
+  let currentMode = 'training';
   const MOVE_DELAY_MS = 700;
+  let playlists = {}; // loaded from localStorage
+  let currentSessionId = null;
+  let currentPhaseIndex = 0;
+  let attendance = {}; // id -> boolean
+  let timerInterval = null;
+  let timerSeconds = 0;
 
   /* -------------------------
-     Utilities
+     Utility & Debug
      ------------------------- */
   function logDebug(msg){
     const dbg = document.getElementById('debug');
@@ -198,10 +244,9 @@
   }
 
   /* -------------------------
-     Voice selection & TTS
+     Voice & TTS
      ------------------------- */
   function listVoices(){ return speechSynthesis.getVoices() || []; }
-
   function populateVoiceSelect(){
     const sel = document.getElementById('voice-select');
     sel.innerHTML = '<option value="">Automatisch (männlich bevorzugt)</option>';
@@ -228,18 +273,13 @@
     toniVoice = voices[0] || null;
     logDebug('Toni voice final fallback: ' + (toniVoice ? toniVoice.name : 'none'));
   }
-
-  function selectVoice(name){
-    if(!name){ setupVoice(); return; }
-    const v = listVoices().find(x => x.name === name);
-    if(v){ toniVoice = v; logDebug('Voice manually selected: ' + v.name); }
-  }
+  function selectVoice(name){ if(!name){ setupVoice(); return; } const v = listVoices().find(x => x.name === name); if(v){ toniVoice = v; logDebug('Voice manually selected: ' + v.name); } }
 
   function speakStyled(text){
-    if(!text || !voiceEnabled) return;
+    if(!text) return;
     try{
       speechSynthesis.cancel();
-      const parts = text.replace(/\s+/g,' ').split(/([.!?;:])/).reduce((acc,cur,idx,arr)=>{
+      const parts = text.replace(/\s+/g,' ').split(/([.!?;:])/).reduce((acc,cur)=>{
         if(/[.!?;:]/.test(cur)) acc[acc.length-1] += cur;
         else acc.push(cur.trim());
         return acc;
@@ -261,24 +301,41 @@
   }
 
   /* -------------------------
-     Board & players
+     Board & Players
      ------------------------- */
   function resetBoard(){
     const layer = document.getElementById('players-layer'); layer.innerHTML = '';
     const h = [[10,50],[25,20],[25,40],[25,60],[25,80],[45,30],[45,50],[45,70],[75,25],[85,50],[75,75]];
     const a = [[90,50],[75,20],[75,40],[75,60],[75,80],[55,30],[55,50],[55,70],[25,25],[15,50],[25,75]];
-    h.forEach((p,i)=> createPlayer('home', i+1, p[0], p[1], layer, false));
-    a.forEach((p,i)=> createPlayer('away', i+1, p[0], p[1], layer, true));
-    syncNames();
-    ensurePlayersHaveTeam();
-    takeSnapshot();
-    logDebug('Board reset');
+    // create home and away but only if attendance allows; absent players go to bank
+    const bankList = document.getElementById('bank-list'); bankList.innerHTML = '';
+    for(let i=0;i<11;i++){
+      const num = i+1;
+      const homeId = 'home' + num;
+      const awayId = 'away' + num;
+      // home
+      if(attendance[homeId] !== false){
+        createPlayer('home', num, h[i][0], h[i][1], layer, false);
+      } else {
+        addToBank(homeId);
+      }
+      // away
+      if(attendance[awayId] !== false){
+        createPlayer('away', num, a[i][0], a[i][1], layer, true);
+      } else {
+        addToBank(awayId);
+      }
+    }
+    syncNames(); ensurePlayersHaveTeam(); takeSnapshot();
+    logDebug('Board reset with attendance applied');
   }
 
   function createPlayer(side, nr, x, y, layer, canDrag){
+    const id = side + nr;
+    if(document.getElementById(id)) return;
     const p = document.createElement('div');
     p.className = `player ${side}`;
-    p.id = side + nr;
+    p.id = id;
     p.innerText = nr;
     p.style.left = x + '%';
     p.style.top = y + '%';
@@ -286,6 +343,12 @@
     if(side === 'home'){ p.style.pointerEvents = 'none'; } else { p.style.pointerEvents = 'auto'; }
     layer.appendChild(p);
     if(canDrag) makeDraggableSafe(p);
+  }
+
+  function addToBank(id){
+    const bank = document.getElementById('bank-list');
+    const div = document.createElement('div'); div.className='bank-player'; div.innerText = id;
+    bank.appendChild(div);
   }
 
   function ensurePlayersHaveTeam(){
@@ -344,8 +407,10 @@
   function takeSnapshot(){
     _snapshot.length = 0;
     document.querySelectorAll('.player').forEach(p=>{
-      _snapshot.push({id:p.id,left:p.style.left||p.getAttribute('data-left')||'',top:p.style.top||p.getAttribute('data-top')||''});
+      _snapshot.push({id:p.id,left:p.style.left||p.getAttribute('data-left')||'',top:p.style.top||p.getAttribute('data-top')||'',team:p.dataset.team});
     });
+    const ball = document.getElementById('ball');
+    _snapshot.push({id:'ball', left: ball.style.left || '', top: ball.style.top || ''});
     logDebug('Snapshot saved');
   }
   function restoreSnapshot(){
@@ -392,132 +457,166 @@
   }
 
   /* -------------------------
-     Exercise library + SVG preview + script builder
+     Playlist / Sequencing
      ------------------------- */
-  const EXERCISES = {
-    "pass_rondo_01": {
-      id:"pass_rondo_01", title:"Rondo 6v2", type:"Passspiel", duration:8, players:8,
-      description:"Schnelle Ballzirkulation, max. 2 Kontakte",
-      moves:[ {id:"home1",x:0.25,y:0.5},{id:"home2",x:0.35,y:0.45},{pass:["home1","home2"] }],
-      setup:{cones:6,goals:0}
-    },
-    "crossing_02": {
-      id:"crossing_02", title:"Flanken-Überladung", type:"Flanke", duration:12, players:7,
-      description:"Überladung Flügel, präzise Hereingaben aus vollem Lauf",
-      moves:[ {id:"home7",x:0.75,y:0.25},{id:"home9",x:0.75,y:0.5},{pass:["home7","home9"] }],
-      setup:{cones:8,goals:0}
-    },
-    "shoot_03": {
-      id:"shoot_03", title:"Torschuss-Station", type:"Torschuss", duration:10, players:6,
-      description:"Abschlüsse aus Bewegung, Druck simulieren",
-      moves:[ {id:"home10",x:0.85,y:0.5},{id:"home11",x:0.75,y:0.75},{pass:["home10","home11"] }],
-      setup:{cones:4,goals:1}
-    },
-    "ghana_warmup_01": {
-      id:"ghana_warmup_01", title:"Ghana Rhythm Warmup", type:"Warmup", duration:10, players:8,
-      description:"Rhythmische Aktivierung, Fußarbeit und Passsequenzen zur Percussion.",
-      moves:[{id:"home1",x:0.2,y:0.5},{id:"home2",x:0.3,y:0.4},{id:"home3",x:0.3,y:0.6}],
-      setup:{cones:6,music:'percussion loop'}
+  function loadPlaylists(){
+    playlists = JSON.parse(localStorage.getItem('toni.playlists')||'{}');
+    if(!Object.keys(playlists).length){
+      // create default session
+      const id = 'session-default';
+      playlists[id] = { id, name: 'Default Session', phases: [ createEmptyPhase('phase-1') ], current:0 };
+      localStorage.setItem('toni.playlists', JSON.stringify(playlists));
     }
-  };
-
-  function previewExercise(id){
-    const ex = EXERCISES[id];
-    if(!ex) return alert('Übung nicht gefunden');
-    renderExerciseOnPitch(ex);
-    speakStyled(`${ex.title}. ${ex.description}. Dauer ${ex.duration} Minuten.`);
+    currentSessionId = Object.keys(playlists)[0];
+    currentPhaseIndex = playlists[currentSessionId].current || 0;
+    renderPlaylistBar();
   }
 
-  function renderExerciseOnPitch(ex){
-    const svg = document.getElementById('exercise-svg');
-    svg.innerHTML = '';
-    const svgNS = 'http://www.w3.org/2000/svg';
-    // defs arrow
-    const defs = document.createElementNS(svgNS,'defs');
-    const marker = document.createElementNS(svgNS,'marker');
-    marker.setAttribute('id','arrow'); marker.setAttribute('markerWidth','8'); marker.setAttribute('markerHeight','8'); marker.setAttribute('refX','6'); marker.setAttribute('refY','3'); marker.setAttribute('orient','auto');
-    const path = document.createElementNS(svgNS,'path'); path.setAttribute('d','M0,0 L0,6 L9,3 z'); path.setAttribute('fill',document.getElementById('svg-color').value || '#ffcc00');
-    marker.appendChild(path); defs.appendChild(marker); svg.appendChild(defs);
+  function createEmptyPhase(id){
+    return {
+      id: id,
+      title: 'Neue Phase',
+      players: [], // will be filled when saved
+      ball: { x:0.5, y:0.5 },
+      coachingPoints: [],
+      duration: 8
+    };
+  }
 
-    // draw passes and points
-    ex.moves.forEach(m=>{
-      if(m.x !== undefined){
-        const cx = m.x * 1000;
-        const cy = m.y * 600;
-        const circle = document.createElementNS(svgNS,'circle');
-        circle.setAttribute('cx',cx); circle.setAttribute('cy',cy); circle.setAttribute('r',10); circle.setAttribute('fill',document.getElementById('svg-color').value || '#ffcc00'); circle.setAttribute('stroke','#000'); svg.appendChild(circle);
-      }
-      if(m.pass){
-        const fm = ex.moves.find(mm => mm.id === m.pass[0]);
-        const tm = ex.moves.find(mm => mm.id === m.pass[1]);
-        if(fm && tm){
-          const x1 = fm.x * 1000; const y1 = fm.y * 600;
-          const x2 = tm.x * 1000; const y2 = tm.y * 600;
-          const line = document.createElementNS(svgNS,'line');
-          line.setAttribute('x1',x1); line.setAttribute('y1',y1); line.setAttribute('x2',x2); line.setAttribute('y2',y2);
-          line.setAttribute('stroke',document.getElementById('svg-color').value || '#ffcc00');
-          line.setAttribute('stroke-width',document.getElementById('svg-width').value || 6);
-          line.setAttribute('marker-end','url(#arrow)');
-          line.classList.add('arrow-line');
-          svg.appendChild(line);
-        }
+  function saveCurrentPhase(){
+    const session = playlists[currentSessionId];
+    if(!session) return;
+    const phase = session.phases[currentPhaseIndex];
+    // capture current positions of visible players
+    phase.players = Array.from(document.querySelectorAll('.player')).map(p=>{
+      const rect = p.getBoundingClientRect();
+      const pitch = document.getElementById('pitch').getBoundingClientRect();
+      const x = ((rect.left - pitch.left) + rect.width/2) / pitch.width;
+      const y = ((rect.top - pitch.top) + rect.height/2) / pitch.height;
+      return { id: p.id, team: p.dataset.team, x: Math.max(0,Math.min(1,x)), y: Math.max(0,Math.min(1,y)), visible: (p.style.display !== 'none') };
+    });
+    const ball = document.getElementById('ball');
+    const bRect = ball.getBoundingClientRect();
+    const pRect = document.getElementById('pitch').getBoundingClientRect();
+    phase.ball = { x: ((bRect.left - pRect.left) + bRect.width/2) / pRect.width, y: ((bRect.top - pRect.top) + bRect.height/2) / pRect.height };
+    phase.coachingPoints = Array.from(document.querySelectorAll('#coaching-list li')).map(li => li.innerText);
+    session.phases[currentPhaseIndex] = phase;
+    playlists[currentSessionId] = session;
+    localStorage.setItem('toni.playlists', JSON.stringify(playlists));
+    renderPlaylistBar();
+    logDebug('Phase saved');
+  }
+
+  function loadPhase(index){
+    const session = playlists[currentSessionId];
+    if(!session || !session.phases[index]) return;
+    saveCurrentPhase(); // save current before switching
+    currentPhaseIndex = index;
+    session.current = index;
+    playlists[currentSessionId] = session;
+    localStorage.setItem('toni.playlists', JSON.stringify(playlists));
+    // apply phase state
+    const phase = session.phases[index];
+    // hide all players then show only those in phase.players
+    document.querySelectorAll('.player').forEach(p => p.style.display = 'none');
+    phase.players.forEach(pp => {
+      const el = document.getElementById(pp.id);
+      if(el){
+        el.style.display = pp.visible ? 'flex' : 'none';
+        const pitch = document.getElementById('pitch').getBoundingClientRect();
+        el.style.position = 'absolute';
+        el.style.left = Math.round(pp.x * (pitch.width - el.offsetWidth)) + 'px';
+        el.style.top = Math.round(pp.y * (pitch.height - el.offsetHeight)) + 'px';
       }
     });
-    logDebug('Exercise preview rendered: ' + ex.title);
-  }
-
-  function addToScript(exId){
-    const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
-    const today = new Date().toISOString().slice(0,10);
-    scripts[today] = scripts[today] || [];
-    scripts[today].push({id:exId, time:new Date().toISOString()});
-    localStorage.setItem('trainingScripts', JSON.stringify(scripts));
-    renderScriptList();
-    alert('Übung zur Trainingsliste hinzugefügt');
-  }
-
-  function renderScriptList(){
-    const list = document.getElementById('script-list');
-    list.innerHTML = '';
-    const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
-    const today = new Date().toISOString().slice(0,10);
-    const arr = scripts[today] || [];
-    arr.forEach((s,idx)=>{
-      const ex = EXERCISES[s.id];
-      const item = document.createElement('div'); item.className='script-item';
-      item.innerHTML = `<div><strong>${ex.title}</strong><div style="font-size:12px;color:#9aa3ad">${ex.duration} min · ${ex.players} Spieler</div></div>
-                        <div style="display:flex;gap:6px"><button class="btn" onclick="previewExercise('${ex.id}')">Vorschau</button><button class="btn" onclick="removeFromScript(${idx})">Entfernen</button></div>`;
-      list.appendChild(item);
+    // ball
+    const ball = document.getElementById('ball');
+    const pRect = document.getElementById('pitch').getBoundingClientRect();
+    ball.style.left = Math.round(phase.ball.x * (pRect.width - ball.offsetWidth)) + 'px';
+    ball.style.top = Math.round(phase.ball.y * (pRect.height - ball.offsetHeight)) + 'px';
+    // coaching points
+    const cl = document.getElementById('coaching-list'); cl.innerHTML = '';
+    (phase.coachingPoints || []).forEach(cp => {
+      const li = document.createElement('li'); li.innerText = cp; cl.appendChild(li);
     });
+    renderPlaylistBar();
+    logDebug('Phase loaded: ' + index);
   }
 
-  function removeFromScript(index){
-    const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
-    const today = new Date().toISOString().slice(0,10);
-    if(!scripts[today]) return;
-    scripts[today].splice(index,1);
-    localStorage.setItem('trainingScripts', JSON.stringify(scripts));
-    renderScriptList();
+  function renderPlaylistBar(){
+    const session = playlists[currentSessionId];
+    if(!session) return;
+    const total = session.phases.length;
+    const idx = currentPhaseIndex + 1;
+    document.getElementById('playlist-title').innerText = `Übung ${idx} von ${total} — ${session.phases[currentPhaseIndex].title || 'Phase'}`;
+  }
+
+  function addPhase(){
+    const session = playlists[currentSessionId];
+    const id = 'phase-' + (session.phases.length + 1);
+    session.phases.push(createEmptyPhase(id));
+    playlists[currentSessionId] = session;
+    localStorage.setItem('toni.playlists', JSON.stringify(playlists));
+    currentPhaseIndex = session.phases.length - 1;
+    renderPlaylistBar();
+    loadPhase(currentPhaseIndex);
+  }
+
+  function prevPhase(){ if(currentPhaseIndex>0) loadPhase(currentPhaseIndex-1); }
+  function nextPhase(){ const session = playlists[currentSessionId]; if(currentPhaseIndex < session.phases.length-1) loadPhase(currentPhaseIndex+1); }
+  function duplicatePhase(){ const session = playlists[currentSessionId]; const copy = JSON.parse(JSON.stringify(session.phases[currentPhaseIndex])); copy.id = copy.id + '-copy'; session.phases.splice(currentPhaseIndex+1,0,copy); playlists[currentSessionId]=session; localStorage.setItem('toni.playlists', JSON.stringify(playlists)); renderPlaylistBar(); }
+  function deletePhase(){ const session = playlists[currentSessionId]; if(session.phases.length<=1) return alert('Mindestens eine Phase erforderlich'); session.phases.splice(currentPhaseIndex,1); currentPhaseIndex = Math.max(0,currentPhaseIndex-1); playlists[currentSessionId]=session; localStorage.setItem('toni.playlists', JSON.stringify(playlists)); loadPhase(currentPhaseIndex); }
+
+  /* -------------------------
+     Attendance (Anwesenheit)
+     ------------------------- */
+  function renderAttendanceList(){
+    const container = document.getElementById('attendance-list');
+    container.innerHTML = '';
+    // build from existing players (home/away 1..11)
+    for(let t of ['home','away']){
+      for(let i=1;i<=11;i++){
+        const id = t + i;
+        const row = document.createElement('div'); row.className='attendance-row';
+        const left = document.createElement('div'); left.innerText = id;
+        const right = document.createElement('div');
+        const toggle = document.createElement('span'); toggle.className='attendance-toggle';
+        const present = (attendance[id] !== false);
+        toggle.classList.add(present ? 'present' : 'absent');
+        toggle.onclick = () => { attendance[id] = !(attendance[id] !== false); saveAttendance(); renderAttendanceList(); };
+        right.appendChild(toggle);
+        row.appendChild(left); row.appendChild(right);
+        container.appendChild(row);
+      }
+    }
+  }
+  function saveAttendance(){ localStorage.setItem('toni.attendance', JSON.stringify(attendance)); logDebug('Attendance saved'); }
+
+  /* -------------------------
+     Coaching points helpers
+     ------------------------- */
+  function setCoachingPoints(points){
+    const cl = document.getElementById('coaching-list'); cl.innerHTML = '';
+    points.forEach(p => { const li = document.createElement('li'); li.innerText = p; cl.appendChild(li); });
   }
 
   /* -------------------------
-     Toni interaction: greeting, askToni, trainer-first, pending moves
+     Toni interaction & RAG hook
      ------------------------- */
   function welcomeFlow(){
-    const greeting = "Hallo Trainer. Ich bin Toni. Du kannst wählen: Spielvorbereitung oder Trainingsmodus. Sag mir, womit wir starten, oder mach den ersten Zug. Du hast immer das erste Zugrecht.";
+    const greeting = "Guten Tag, Coach. Ich bin Toni, dein Co-Trainer. Ich unterstütze dich bei Trainingsplanung und Taktikanalyse. Möchtest du eine neue Einheit erstellen oder eine Spielsituation analysieren?";
     addMsg('toni', greeting);
     speakStyled(greeting);
-    document.getElementById('mode-select').focus();
+    trainerHasInitiated = false;
   }
 
-  // Build a board snapshot to send to backend for RAG mapping
   function buildBoardSnapshot(){
     const players = Array.from(document.querySelectorAll('.player')).map(p=>{
       const rect = p.getBoundingClientRect();
       const pitch = document.getElementById('pitch').getBoundingClientRect();
       const x = ((rect.left - pitch.left) + rect.width/2) / pitch.width;
       const y = ((rect.top - pitch.top) + rect.height/2) / pitch.height;
-      return { id: p.id, team: p.dataset.team || (p.classList.contains('home')?'home':'away'), x: Math.max(0,Math.min(1,x)), y: Math.max(0,Math.min(1,y)) };
+      return { id: p.id, team: p.dataset.team || (p.classList.contains('home')?'home':'away'), x: Math.max(0,Math.min(1,x)), y: Math.max(0,Math.min(1,y)), visible: p.style.display !== 'none' };
     });
     const ball = document.getElementById('ball');
     const bRect = ball.getBoundingClientRect();
@@ -535,11 +634,12 @@
     addMsg('user', text); input.value=''; isLocked=true;
     if(/^\s*(\d+)\s*(auf|to)\s*(\d+)\s*$/i.test(text) || /move|lauf/i.test(text)) trainerHasInitiated = true;
 
-    // If GROQ_KEY (or backend) configured, call backend RAG endpoint; otherwise fallback to local simulation
-    let answer = '';
     try{
+      let answer = '';
+      let backendMoves = null;
+      let coachingPoints = null;
       if(GROQ_KEY){
-        // Send snapshot + query to backend orchestrator (you need to implement /api/toni/query server-side)
+        // send to backend orchestrator (placeholder endpoint)
         const snapshot = buildBoardSnapshot();
         const resp = await fetch('/api/toni/query', {
           method:'POST',
@@ -547,32 +647,30 @@
           body: JSON.stringify({ query: text, snapshot, mode: currentMode })
         });
         const data = await resp.json();
-        // Expect backend to return { text, moves: [{id,x,y,reason}], sources: [...] }
         answer = data.text || 'Keine Antwort vom Backend.';
-        // If backend returned moves, convert to pendingMoves
-        if(Array.isArray(data.moves) && data.moves.length){
-          pendingMoves = data.moves.map(m => ({ id: m.id.toLowerCase(), x: Math.max(0,Math.min(1,m.x)), y: Math.max(0,Math.min(1,m.y)), reason: m.reason || '' }));
-          renderPendingList();
-          openConfirmModal();
-        }
+        backendMoves = data.moves || null;
+        coachingPoints = data.coachingPoints || null;
       } else {
-        // Local simulation (for testing without backend)
+        // local simulation
         if(/training|passspiel|flanke|torschuss|warmup|aufwärm/i.test(text)){
           answer = "Passspiel: Rondo 6v2, 8 min, max 2 Kontakte. Flanke: Überladung Flügel, 12 min. Torschuss: Abschlussstationen 4×6 Schüsse, 10 min. Wenn du Laufwege sehen willst, sage 'Simuliere MOVE'.";
+          coachingPoints = ["Rondo: Tempo, 1-2 Kontakte","Flanke: Anlaufwinkel, Präzision","Torschuss: Bewegung vor Abschluss"];
         } else if(/simuliere move/i.test(text)){
           answer = "MOVE[home9,75,50] MOVE[home5,45,30] MOVE[home1,25,60]";
-          // parse into pendingMoves below
         } else {
-          answer = "Verstanden. Möchtest du Trainingsmodus oder Spielvorbereitung? Du kannst auch eine Übung aus der Bibliothek wählen.";
+          answer = "Verstanden. Möchtest du Trainingsmodus oder Spielvorbereitung? Ich kann ein Formular öffnen, um die Einheit zu konfigurieren.";
         }
       }
 
       isLocked = false;
       addMsg('toni', answer.replace(/MOVE\[.*?\]/g,''));
       speakStyled(answer.replace(/MOVE\[.*?\]/g,''));
+      if(coachingPoints) setCoachingPoints(coachingPoints);
 
-      // Parse MOVE commands into pendingMoves if backend didn't already provide them
-      if(!pendingMoves.length){
+      // parse moves from backend or answer
+      if(backendMoves && backendMoves.length){
+        pendingMoves = backendMoves.map(m => ({ id: m.id.toLowerCase(), x: Math.max(0,Math.min(1,m.x)), y: Math.max(0,Math.min(1,m.y)), reason: m.reason || '' }));
+      } else {
         const raw = [...answer.matchAll(/MOVE\[\s*(home(?:[1-9]|1[0-1]))\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\]/gi)];
         if(raw.length){
           pendingMoves = [];
@@ -586,13 +684,16 @@
             const el = document.getElementById(id);
             if(!el) continue;
             if(el.dataset && el.dataset.team && el.dataset.team !== 'home') continue;
+            // enforce attendance: skip if absent
+            if(attendance[id] === false) { logDebug('Skipping absent: ' + id); continue; }
             pendingMoves.push({id,x,y});
           }
-          if(pendingMoves.length){
-            renderPendingList();
-            openConfirmModal();
-          }
         }
+      }
+
+      if(pendingMoves.length){
+        renderPendingList();
+        openConfirmModal();
       }
     }catch(err){
       isLocked=false; addMsg('toni','Verbindungsfehler!'); console.error('askToni error',err);
@@ -633,7 +734,7 @@
   function exportPlanJSON(){
     const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
     const today = new Date().toISOString().slice(0,10);
-    const plan = { date: today, exercises: scripts[today] || [] };
+    const plan = { date: today, exercises: scripts[today] || [], playlist: playlists[currentSessionId] || null };
     const blob = new Blob([JSON.stringify(plan, null, 2)], {type:'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = `training-plan-${today}.json`; a.click();
@@ -649,7 +750,7 @@
     doc.setFontSize(16); doc.text(`Training Plan ${today}`, 40, 50);
     let y = 80;
     for(const s of arr){
-      const ex = EXERCISES[s.id];
+      const ex = EXERCISES[s.id] || { title: s.id, duration: 0, players: 0, description: '' };
       doc.setFontSize(12); doc.text(`${ex.title} — ${ex.duration} min — ${ex.players} Spieler`, 40, y); y += 16;
       doc.setFontSize(10); doc.text(ex.description || '', 40, y); y += 28;
       if(y > 720){ doc.addPage(); y = 40; }
@@ -664,38 +765,22 @@
     const list = document.getElementById('player-list').value || '';
     // default: set numbers
     document.querySelectorAll('.player').forEach(p => p.innerText = p.id.replace(/home|away/,''));
+    // parse lines
     list.split('\n').forEach(line=>{
       const m = line.match(/^(\d+)\s+([^\[]+?)(?:\s+(red|blue|rot|blau))?$/i);
       if(m){
         const num = m[1];
         const name = m[2].trim();
         const teamToken = (m[3] || '').toLowerCase();
-        // determine team and id
-        // try both home and away ids
         const homeEl = document.getElementById('home' + num);
         const awayEl = document.getElementById('away' + num);
-        // if teamToken indicates blue, assign to away; if red, assign to home; else keep existing
         if(teamToken === 'blue' || teamToken === 'blau'){
-          if(awayEl){
-            awayEl.innerText = name.split(' ')[0];
-            awayEl.dataset.team = 'away';
-            awayEl.classList.remove('home'); awayEl.classList.add('away');
-          } else if(homeEl){
-            // move label to away element if exists
-            homeEl.innerText = name.split(' ')[0];
-            homeEl.dataset.team = 'home';
-          }
+          if(awayEl){ awayEl.innerText = name.split(' ')[0]; awayEl.dataset.team='away'; awayEl.classList.add('away'); awayEl.classList.remove('home'); }
+          if(homeEl) { homeEl.style.display = 'none'; }
         } else if(teamToken === 'red' || teamToken === 'rot'){
-          if(homeEl){
-            homeEl.innerText = name.split(' ')[0];
-            homeEl.dataset.team = 'home';
-            homeEl.classList.remove('away'); homeEl.classList.add('home');
-          } else if(awayEl){
-            awayEl.innerText = name.split(' ')[0];
-            awayEl.dataset.team = 'away';
-          }
+          if(homeEl){ homeEl.innerText = name.split(' ')[0]; homeEl.dataset.team='home'; homeEl.classList.add('home'); homeEl.classList.remove('away'); }
+          if(awayEl) { awayEl.style.display = 'none'; }
         } else {
-          // no explicit team: try to set name on whichever exists
           if(homeEl) homeEl.innerText = name.split(' ')[0];
           if(awayEl) awayEl.innerText = name.split(' ')[0];
         }
@@ -706,7 +791,22 @@
       if(p.dataset.team === 'home'){ p.style.pointerEvents = 'none'; p.classList.add('home'); p.classList.remove('away'); }
       else { p.style.pointerEvents = 'auto'; p.classList.add('away'); p.classList.remove('home'); }
     });
-    logDebug('Names synced and team tokens applied');
+    // initialize attendance defaults
+    for(let t of ['home','away']) for(let i=1;i<=11;i++){ const id = t + i; if(attendance[id] === undefined) attendance[id] = true; }
+    saveAttendance(); renderAttendanceList(); renderBank();
+    logDebug('Names synced and attendance defaults set');
+  }
+
+  function renderBank(){
+    const bank = document.getElementById('bank-list'); bank.innerHTML = '';
+    for(let t of ['home','away']){
+      for(let i=1;i<=11;i++){
+        const id = t + i;
+        if(attendance[id] === false){
+          const div = document.createElement('div'); div.className='bank-player'; div.innerText = id; bank.appendChild(div);
+        }
+      }
+    }
   }
 
   function startMic(){
@@ -739,6 +839,15 @@
   }
 
   /* -------------------------
+     Timer
+     ------------------------- */
+  function formatTime(s){ const mm = String(Math.floor(s/60)).padStart(2,'0'); const ss = String(s%60).padStart(2,'0'); return `${mm}:${ss}`; }
+  function startTimer(){ if(timerInterval) return; timerInterval = setInterval(()=>{ timerSeconds++; document.getElementById('timer').innerText = formatTime(timerSeconds); },1000); }
+  function stopTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval = null; } }
+  function resetTimer(){ stopTimer(); timerSeconds = 0; document.getElementById('timer').innerText = formatTime(timerSeconds); }
+  function triggerTimerEndVisual(){ const pitch = document.getElementById('pitch'); pitch.classList.add('pulse'); setTimeout(()=>pitch.classList.remove('pulse'),900); }
+
+  /* -------------------------
      Login / Start
      ------------------------- */
   function startToni(){
@@ -746,13 +855,20 @@
     if(pw === 'Trainer2026'){
       GROQ_KEY = document.getElementById('user-key').value.trim();
       document.getElementById('login-overlay').style.display = 'none';
+      loadPlaylists();
+      attendance = JSON.parse(localStorage.getItem('toni.attendance')||'{}');
+      if(Object.keys(attendance).length===0){
+        for(let t of ['home','away']) for(let i=1;i<=11;i++) attendance[t+i]=true;
+        saveAttendance();
+      }
       resetBoard();
       ensurePlayersHaveTeam();
       makeDraggableSafe(document.getElementById('ball'));
       if(speechSynthesis.getVoices().length === 0) speechSynthesis.onvoiceschanged = function(){ populateVoiceSelect(); setupVoice(); };
       else { populateVoiceSelect(); setupVoice(); }
       renderScriptList();
-      addMsg('toni','Toni initialisiert. Sag "Hallo" oder wähle eine Option.');
+      renderAttendanceList();
+      addMsg('toni','Toni initialisiert. Guten Tag, Coach. Ich bin bereit.');
       logDebug('Toni initialisiert');
     } else {
       alert('Zutritt verweigert.');
@@ -760,22 +876,110 @@
   }
 
   /* -------------------------
-     UI helpers
+     Small helpers & initial data
      ------------------------- */
-  function addMsg(role, txt){
-    const h = document.getElementById('chat-history');
-    const d = document.createElement('div'); d.className = 'msg ' + (role==='toni'?'toni':'user'); d.innerText = txt;
-    h.appendChild(d); h.scrollTop = h.scrollHeight;
+  const EXERCISES = {
+    "pass_rondo_01": { id:"pass_rondo_01", title:"Rondo 6v2", type:"Passspiel", duration:8, players:8, description:"Schnelle Ballzirkulation, max. 2 Kontakte", moves:[{id:"home1",x:0.25,y:0.5},{id:"home2",x:0.35,y:0.45},{pass:["home1","home2"]}], setup:{cones:6,goals:0} },
+    "crossing_02": { id:"crossing_02", title:"Flanken-Überladung", type:"Flanke", duration:12, players:7, description:"Überladung Flügel, präzise Hereingaben aus vollem Lauf", moves:[{id:"home7",x:0.75,y:0.25},{id:"home9",x:0.75,y:0.5},{pass:["home7","home9"]}], setup:{cones:8,goals:0} },
+    "shoot_03": { id:"shoot_03", title:"Torschuss-Station", type:"Torschuss", duration:10, players:6, description:"Abschlüsse aus Bewegung, Druck simulieren", moves:[{id:"home10",x:0.85,y:0.5},{id:"home11",x:0.75,y:0.75},{pass:["home10","home11"]}], setup:{cones:4,goals:1} },
+    "ghana_warmup_01": { id:"ghana_warmup_01", title:"Ghana Rhythm Warmup", type:"Warmup", duration:10, players:8, description:"Rhythmische Aktivierung, Fußarbeit und Passsequenzen zur Percussion.", moves:[{id:"home1",x:0.2,y:0.5},{id:"home2",x:0.3,y:0.4},{id:"home3",x:0.3,y:0.6}], setup:{cones:6,music:'percussion loop'} }
+  };
+
+  function addToScript(exId){
+    const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
+    const today = new Date().toISOString().slice(0,10);
+    scripts[today] = scripts[today] || [];
+    scripts[today].push({id:exId, time:new Date().toISOString()});
+    localStorage.setItem('trainingScripts', JSON.stringify(scripts));
+    renderScriptList();
+    alert('Übung zur Trainingsliste hinzugefügt');
+  }
+
+  function renderScriptList(){
+    const list = document.getElementById('script-list');
+    list.innerHTML = '';
+    const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
+    const today = new Date().toISOString().slice(0,10);
+    const arr = scripts[today] || [];
+    arr.forEach((s,idx)=>{
+      const ex = EXERCISES[s.id] || { title: s.id, duration: 0, players: 0, description: '' };
+      const item = document.createElement('div'); item.className='script-item';
+      item.innerHTML = `<div><strong>${ex.title}</strong><div style="font-size:12px;color:#9aa3ad">${ex.duration} min · ${ex.players} Spieler</div></div>
+                        <div style="display:flex;gap:6px"><button class="btn" onclick="previewExercise('${ex.id}')">Vorschau</button><button class="btn" onclick="removeFromScript(${idx})">Entfernen</button></div>`;
+      list.appendChild(item);
+    });
+  }
+
+  function removeFromScript(index){
+    const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
+    const today = new Date().toISOString().slice(0,10);
+    if(!scripts[today]) return;
+    scripts[today].splice(index,1);
+    localStorage.setItem('trainingScripts', JSON.stringify(scripts));
+    renderScriptList();
+  }
+
+  function previewExercise(id){
+    const ex = EXERCISES[id];
+    if(!ex) return alert('Übung nicht gefunden');
+    renderExerciseOnPitch(ex);
+    speakStyled(`${ex.title}. ${ex.description}. Dauer ${ex.duration} Minuten.`);
+    setCoachingPoints([`1. ${ex.title} – Ziel: ${ex.description}`, `2. Dauer: ${ex.duration} min`, `3. Spieler: ${ex.players}`]);
+  }
+
+  function renderExerciseOnPitch(ex){
+    const svg = document.getElementById('exercise-svg');
+    svg.innerHTML = '';
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const defs = document.createElementNS(svgNS,'defs');
+    const marker = document.createElementNS(svgNS,'marker');
+    marker.setAttribute('id','arrow'); marker.setAttribute('markerWidth','8'); marker.setAttribute('markerHeight','8'); marker.setAttribute('refX','6'); marker.setAttribute('refY','3'); marker.setAttribute('orient','auto');
+    const path = document.createElementNS(svgNS,'path'); path.setAttribute('d','M0,0 L0,6 L9,3 z'); path.setAttribute('fill',document.getElementById('svg-color').value || '#ffcc00');
+    marker.appendChild(path); defs.appendChild(marker); svg.appendChild(defs);
+    ex.moves.forEach(m=>{
+      if(m.x !== undefined){
+        const cx = m.x * 1000; const cy = m.y * 600;
+        const circle = document.createElementNS(svgNS,'circle');
+        circle.setAttribute('cx',cx); circle.setAttribute('cy',cy); circle.setAttribute('r',10); circle.setAttribute('fill',document.getElementById('svg-color').value || '#ffcc00'); circle.setAttribute('stroke','#000'); svg.appendChild(circle);
+      }
+      if(m.pass){
+        const fm = ex.moves.find(mm => mm.id === m.pass[0]);
+        const tm = ex.moves.find(mm => mm.id === m.pass[1]);
+        if(fm && tm){
+          const x1 = fm.x * 1000; const y1 = fm.y * 600;
+          const x2 = tm.x * 1000; const y2 = tm.y * 600;
+          const line = document.createElementNS(svgNS,'line');
+          line.setAttribute('x1',x1); line.setAttribute('y1',y1); line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+          line.setAttribute('stroke',document.getElementById('svg-color').value || '#ffcc00');
+          line.setAttribute('stroke-width',document.getElementById('svg-width').value || 6);
+          line.setAttribute('marker-end','url(#arrow)');
+          line.classList.add('arrow-line');
+          svg.appendChild(line);
+        }
+      }
+    });
+    logDebug('Exercise preview rendered: ' + ex.title);
   }
 
   /* -------------------------
-     Init on load
+     Init
      ------------------------- */
   window.addEventListener('load', function(){
-    // Do not auto-initialize Toni until login
     logDebug('UI loaded (awaiting login)');
-    // Wire OK button to ensure it works
     document.getElementById('ok-btn').addEventListener('click', askToni);
+    document.getElementById('svg-color').addEventListener('change', updateSvgStyle);
+    document.getElementById('svg-width').addEventListener('change', updateSvgStyle);
+    // prepare local structures
+    playlists = JSON.parse(localStorage.getItem('toni.playlists')||'{}');
+    if(!Object.keys(playlists).length){
+      playlists = {};
+      const id = 'session-default';
+      playlists[id] = { id, name: 'Default Session', phases: [ createEmptyPhase('phase-1') ], current:0 };
+      localStorage.setItem('toni.playlists', JSON.stringify(playlists));
+    }
+    currentSessionId = Object.keys(playlists)[0];
+    currentPhaseIndex = playlists[currentSessionId].current || 0;
+    renderPlaylistBar();
   });
 
   // Expose for console/testing
@@ -787,6 +991,8 @@
   window.resetBoard = resetBoard;
   window.selectVoice = selectVoice;
   window.setMode = setMode;
+  window.saveCurrentPhase = saveCurrentPhase;
+  window.loadPhase = loadPhase;
   </script>
 </body>
 </html>
