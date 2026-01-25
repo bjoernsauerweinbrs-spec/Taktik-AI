@@ -3,18 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Coach Toni 2.0 – Elite Plattform</title>
+  <title>Coach Toni 2.0 – Management Plattform</title>
+  
   <link rel="stylesheet" href="css/style.css">
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
   <div id="login-overlay">
     <div class="login-card">
-      <h2 style="color:var(--green); margin:0">COACH TONI 2.0</h2>
-      <p style="color:#9aa3ad; margin:10px 0 25px 0">Strategische Taktik-Plattform</p>
-      <input id="password" type="password" placeholder="Passwort (Trainer2026)" />
-      <button onclick="startToni()">SYSTEM INITIALISIEREN</button>
+      <h2 style="color:var(--green); margin:0">⚽ COACH TONI 2.0</h2>
+      <p style="color:#9aa3ad; margin:10px 0 25px 0">System Initialisierung erforderlich</p>
+      <input id="password" type="password" placeholder="Trainer2026" />
+      <button onclick="startToni()">SYSTEM STARTEN</button>
     </div>
   </div>
 
@@ -22,7 +24,7 @@
     <div id="sidebar">
       <div class="header">TONI – STRATEGIE & TRAINING</div>
       <div id="chat-history"></div>
-      
+
       <div class="sidebar-controls">
         <select id="voice-select" onchange="selectVoice(this.value)"></select>
         <select id="mode-select" onchange="setMode(this.value)">
@@ -33,14 +35,14 @@
 
       <div class="input-row">
         <button onclick="startMic()">🎤</button>
-        <input id="user-input" placeholder="Anweisung eingeben..." onkeypress="if(event.key==='Enter') askToni()" />
+        <input id="user-input" placeholder="Anweisung..." onkeypress="if(event.key==='Enter') askToni()" />
         <button onclick="askToni()">OK</button>
       </div>
 
-      <div class="action-buttons">
+      <div class="action-buttons" style="display:flex; gap:5px; margin-top:10px;">
         <button class="btn" onclick="welcomeFlow()">👋 Gruß</button>
         <button class="btn" onclick="toggleKader()">📋 Kader</button>
-        <button class="btn primary" onclick="exportPlanPDF()">📄 PDF Export</button>
+        <button class="btn primary" onclick="exportPlanPDF()">📄 PDF</button>
       </div>
     </div>
 
@@ -65,16 +67,18 @@
           <div class="goal l-goal"></div><div class="goal r-goal"></div>
           <div class="m-line"></div><div class="m-circle"></div>
           <svg id="exercise-svg" viewBox="0 0 1000 600" preserveAspectRatio="none"></svg>
+          
           <div id="bank">
             <h5>Bank / Reserve</h5>
             <div id="bank-list"></div>
           </div>
+          
           <div id="ball"></div>
           <div id="players-layer"></div>
         </div>
 
         <div id="coaching-panel">
-          <h4>Coaching-Points</h4>
+          <h4>Strategische Coaching-Points</h4>
           <ol id="coaching-list"></ol>
         </div>
       </div>
@@ -82,19 +86,16 @@
   </div>
 
   <div id="whiteboard">
-    <h3>📋 Kader & Anwesenheit</h3>
-    <textarea id="player-list-raw">1 Neuer red
-5 Hummels red
-10 David Luiz red
-11 Björn blue
-2 Nadine blue</textarea>
-    <button class="btn primary" onclick="syncNames()">Kader Sync</button>
-    <div id="attendance-list"></div>
-    <button class="btn" onclick="toggleKader()" style="margin-top:10px">Schließen</button>
+    <h3>📋 Kader-Management</h3>
+    <textarea id="player-list-raw" placeholder="1 Neuer red..."></textarea>
+    <button class="btn primary" onclick="syncNames()" style="width:100%">Kader Synchronisieren</button>
+    <div id="attendance-list" style="margin-top:15px; max-height:200px; overflow-y:auto;"></div>
+    <button class="btn" onclick="toggleKader()" style="width:100%; margin-top:10px;">Schließen</button>
   </div>
 
   <script src="js/chat.js"></script>
   <script src="js/board.js"></script>
   <script src="js/logic.js"></script>
+
 </body>
 </html>
