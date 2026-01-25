@@ -3,201 +3,248 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Coach Toni 2.0 – Professional Tactical Board</title>
+  <title>Coach Toni 2.0 – Trainings- & Spielvorbereitung</title>
   <style>
     :root{
-      --green:#2ecc71;
-      --green-dark:#27ae60;
-      --bg-dark:#050608;
-      --line:rgba(255,255,255,0.18);
-      --text-light:rgba(255,255,255,0.9);
-      --shadow-strong:0 18px 40px rgba(0,0,0,0.7);
-      --max-width:1200px;
+      --green:#2ecc71; --accent:#0a74da; --bg:#07101a; --panel:#0f1720;
+      --line:rgba(255,255,255,0.12); --text:#e6eef0; --card-radius:12px;
+      --arrow-color:#ffcc00; --arrow-width:6;
     }
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#1b2333 0,#050608 55%);color:var(--text-light);-webkit-font-smoothing:antialiased}
-    #layout{display:grid;grid-template-columns:360px 1fr;gap:12px;height:100vh;padding:12px;max-width:var(--max-width);margin:0 auto}
-    /* Sidebar */
-    #chat-sidebar{background:linear-gradient(145deg,#10121a,#151824);border-radius:20px;border:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow-strong)}
-    .chat-header{padding:18px;font-weight:800;color:var(--green);border-bottom:1px solid var(--line);background:rgba(0,0,0,0.25);letter-spacing:1px}
-    #chat-history{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-    .msg{padding:12px 14px;border-radius:16px;font-size:0.92rem;line-height:1.5;max-width:88%;box-shadow:0 4px 10px rgba(0,0,0,0.2)}
-    .user{align-self:flex-end;background:linear-gradient(135deg,#2563eb,#38bdf8);color:#fff;border-bottom-right-radius:4px}
-    .toni{align-self:flex-start;background:#1f2937;border-left:4px solid var(--green);border-bottom-left-radius:4px;color:#e6eef0}
-    .chat-input-row{padding:14px;background:#050712;border-top:1px solid var(--line);display:flex;gap:10px}
-    .chat-input-row input{flex:1;background:#010204;color:#fff;border:1px solid #374151;padding:12px;border-radius:10px;outline:none}
-    .chat-input-row button{background:var(--green);border:none;padding:12px 18px;border-radius:10px;font-weight:800;cursor:pointer}
-    /* Pitch area */
-    #pitch-area{background:#0b1120;border-radius:20px;border:1px solid var(--line);display:flex;flex-direction:column;padding:12px;height:100%;position:relative;box-shadow:var(--shadow-strong)}
-    #pitch-controls{display:flex;justify-content:space-between;margin-bottom:12px}
-    #pitch{flex:1;background:#166534;border:3px solid #fff;border-radius:18px;position:relative;overflow:hidden;box-shadow:inset 0 0 60px rgba(0,0,0,0.4)}
-    .goal{position:absolute;width:3%;height:20%;border:3px solid #fff;top:40%;z-index:5;background:rgba(255,255,255,0.05)}
+    html,body{height:100%;margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#1b2333 0,#050608 55%);color:var(--text);-webkit-font-smoothing:antialiased}
+    #app{display:grid;grid-template-columns:420px 1fr;gap:12px;height:100vh;padding:12px}
+    /* Sidebar / Chat */
+    #sidebar{background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line);display:flex;flex-direction:column}
+    .header{font-weight:800;color:var(--green);padding:12px 8px;border-bottom:1px solid var(--line)}
+    #chat-history{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+    .msg{padding:10px 12px;border-radius:12px;max-width:86%}
+    .user{align-self:flex-end;background:linear-gradient(135deg,#2563eb,#38bdf8);color:#fff}
+    .toni{align-self:flex-start;background:#1f2937;border-left:4px solid var(--green);color:#e6eef0}
+    .input-row{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+    .input-row input{flex:1;padding:10px;border-radius:10px;border:1px solid #26303a;background:#07101a;color:#fff}
+    .input-row button{padding:10px 14px;border-radius:10px;border:none;background:var(--green);color:#fff;cursor:pointer}
+    /* Main area */
+    #main{display:flex;flex-direction:column;gap:12px}
+    .controls{display:flex;justify-content:space-between;gap:8px}
+    .btn{padding:10px 14px;border-radius:999px;border:none;cursor:pointer;background:#0f1720;color:#fff}
+    .btn.primary{background:var(--accent);color:#fff}
+    #pitch-area{background:linear-gradient(180deg,#07101a,#0b1220);border-radius:14px;padding:12px;border:1px solid var(--line);position:relative;flex:1;display:flex;flex-direction:column}
+    #pitch{flex:1;background:#166534;border-radius:12px;border:3px solid #fff;position:relative;overflow:hidden}
+    .goal{position:absolute;width:3%;height:20%;border:3px solid #fff;top:40%;background:rgba(255,255,255,0.05)}
     .l-goal{left:0;border-left:none}.r-goal{right:0;border-right:none}
     .m-line{position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,0.6)}
     .m-circle{position:absolute;left:50%;top:50%;width:140px;height:140px;border:2px solid rgba(255,255,255,0.6);border-radius:50%;transform:translate(-50%,-50%)}
-    .player,#ball{position:absolute;z-index:100;transition:all 1.0s cubic-bezier(0.2,0.8,0.2,1)}
-    .player{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#fff;text-shadow:1px 1px 3px #000;box-shadow:0 12px 24px rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.8)}
-    .home{background:radial-gradient(circle at 30% 30%,#f87171,#b91c1c)} /* Toni (rot) */
-    .away{background:radial-gradient(circle at 30% 30%,#60a5fa,#1d4ed8);cursor:grab} /* Björn (blau) */
-    #ball{width:20px;height:20px;background:#fff;border-radius:50%;border:2px solid #000;cursor:grab;transition:all 0.6s ease-out}
-    /* Whiteboard */
-    #whiteboard-panel{position:absolute;top:70px;right:-420px;width:400px;height:calc(100% - 90px);background:#f8fafc;color:#0f172a;transition:0.4s cubic-bezier(0.4,0,0.2,1);z-index:2000;display:flex;flex-direction:column;padding:20px;border-radius:20px 0 0 20px;box-shadow:-15px 0 40px rgba(0,0,0,0.6)}
-    #whiteboard-panel.open{right:0}
-    #player-list{flex:1;padding:12px;font-family:'JetBrains Mono',monospace;font-size:1.05rem;border-radius:10px;border:2px solid #e2e8f0;background:#fff;resize:none}
-    /* Debug */
-    #status{font-size:0.78rem;text-align:center;padding:8px;color:#94a3b8;font-weight:700}
-    #debug-panel{display:none;background:#071018;color:#9fd3ff;padding:12px;border-radius:10px;margin-top:12px;max-height:160px;overflow:auto}
-    .btn{padding:10px 18px;border-radius:30px;border:none;cursor:pointer}
-    .btn.primary{background:var(--green);color:#fff}
+    .player,#ball{position:absolute;z-index:100;transition:all 1s cubic-bezier(0.2,0.8,0.2,1)}
+    .player{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;text-shadow:1px 1px 3px #000;border:2px solid rgba(255,255,255,0.8)}
+    .home{background:radial-gradient(circle at 30% 30%,#f87171,#b91c1c)}
+    .away{background:radial-gradient(circle at 30% 30%,#60a5fa,#1d4ed8);cursor:grab}
+    #ball{width:20px;height:20px;background:#fff;border-radius:50%;border:2px solid #000;cursor:grab}
+    /* Training menu */
+    #training-panel{background:linear-gradient(145deg,#0b1220,#0f1720);border-radius:12px;padding:12px;border:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+    .exercise-card{background:#07101a;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+    .exercise-card h4{margin:0 0 6px 0}
+    .meta{font-size:0.85rem;color:#9aa3ad;margin-bottom:6px}
+    .card-actions{display:flex;gap:8px;margin-top:8px}
+    .script-list{margin-top:8px;background:#071018;padding:8px;border-radius:8px;max-height:180px;overflow:auto}
+    .script-item{padding:8px;border-radius:8px;background:linear-gradient(180deg,#0b1220,#0f1720);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+    /* whiteboard & modals */
+    #whiteboard{position:absolute;top:20px;right:-460px;width:420px;height:calc(100% - 40px);background:#f8fafc;color:#0f172a;border-radius:12px;padding:12px;transition:0.35s;z-index:2000;box-shadow:-20px 0 60px rgba(0,0,0,0.6)}
+    #whiteboard.open{right:20px}
+    .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#0b1220;color:var(--text);padding:16px;border-radius:10px;border:1px solid var(--line);z-index:4000;display:none;min-width:320px}
+    .modal.open{display:block}
+    .modal h4{margin:0 0 8px 0}
+    #exercise-svg{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+    #voice-select{background:#07101a;color:#fff;border:1px solid #26303a;padding:8px;border-radius:8px}
+    /* arrow animation */
+    .arrow-line{stroke:var(--arrow-color);stroke-width:var(--arrow-width);stroke-linecap:round;stroke-dasharray:12 6;animation:dash 1.2s linear infinite}
+    @keyframes dash{to{stroke-dashoffset:-24}}
+    /* small helpers */
+    .small{font-size:12px;color:#9aa3ad}
+    .flex{display:flex;gap:8px;align-items:center}
+    .hidden{display:none}
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-  <!-- Login Overlay -->
-  <div id="login-overlay" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:3000">
-    <div style="background:#0b1220;padding:28px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.7);">
-      <h2 style="color:var(--green);margin:0 0 12px 0">⚽ COACH TONI 2.0</h2>
-      <input id="password" type="password" placeholder="Passwort (Trainer2026)" style="width:100%;padding:12px;border-radius:8px;border:1px solid #26303a;margin-bottom:8px;background:#07101a;color:#fff" />
-      <input id="user-key" type="text" placeholder="Groq API-Key" style="width:100%;padding:12px;border-radius:8px;border:1px solid #26303a;margin-bottom:12px;background:#07101a;color:#fff" />
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button onclick="startToni()" class="btn primary">SYSTEM INITIALISIEREN</button>
+  <div id="app">
+    <!-- LEFT: Chat & Controls -->
+    <div id="sidebar">
+      <div class="header">TONI – STRATEGIE & TRAINING</div>
+      <div id="chat-history"></div>
+
+      <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+        <label class="small">Stimme</label>
+        <select id="voice-select" onchange="selectVoice(this.value)"></select>
+        <label class="small" style="margin-left:auto">Modus</label>
+        <select id="mode-select" onchange="setMode(this.value)">
+          <option value="training">Trainingsmodus</option>
+          <option value="match">Spielvorbereitung</option>
+        </select>
+      </div>
+
+      <div class="input-row" style="margin-top:8px">
+        <button onclick="startMic()">🎤</button>
+        <input id="user-input" placeholder="Sag 'Hallo' oder stelle eine Frage..." onkeypress="if(event.key==='Enter') askToni()" />
+        <button onclick="askToni()">OK</button>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn" onclick="welcomeFlow()">👋 Begrüßung</button>
+        <button class="btn" onclick="document.getElementById('whiteboard').classList.toggle('open')">📋 Kader</button>
+        <button class="btn" onclick="openConfirmModal()">✅ Vorschau Moves</button>
+      </div>
+
+      <div style="margin-top:10px">
+        <div style="font-weight:700;color:#9aa3ad;margin-bottom:6px">Heute im Plan</div>
+        <div id="script-list" class="script-list"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn" onclick="exportPlanJSON()">Export JSON</button>
+          <button class="btn" onclick="exportPlanPDF()">Export PDF</button>
+        </div>
+      </div>
+
+      <pre id="debug" style="display:none;margin-top:8px;background:#071018;color:#9fd3ff;padding:8px;border-radius:8px"></pre>
+    </div>
+
+    <!-- RIGHT: Pitch + Training -->
+    <div id="main">
+      <div class="controls">
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn primary" onclick="resetBoard()">♻ GRUNDORDNUNG</button>
+          <div class="small">SVG Style:</div>
+          <input type="color" id="svg-color" value="#ffcc00" onchange="updateSvgStyle()" title="Pfeilfarbe" />
+          <input type="range" id="svg-width" min="2" max="12" value="6" onchange="updateSvgStyle()" title="Pfeilbreite" />
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="takeSnapshot()">Snapshot</button>
+          <button class="btn" onclick="restoreSnapshot()">Restore</button>
+        </div>
+      </div>
+
+      <div id="pitch-area">
+        <div id="pitch">
+          <div class="goal l-goal"></div><div class="goal r-goal"></div>
+          <div class="m-line"></div><div class="m-circle"></div>
+          <svg id="exercise-svg" viewBox="0 0 1000 600" preserveAspectRatio="none"></svg>
+          <div id="ball" style="left:50%;top:50%"></div>
+          <div id="players-layer"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div id="layout">
-    <aside id="chat-sidebar">
-      <div class="chat-header">STRATEGIE CENTER</div>
-      <div id="chat-history"></div>
-      <div id="status">SYSTEM READY</div>
-      <div class="chat-input-row">
-        <button onclick="startMic()">🎤</button>
-        <input id="user-input" placeholder="Analyse anfordern..." onkeypress="if(event.key==='Enter') askToni()" />
-        <button onclick="askToni()">OK</button>
-      </div>
-    </aside>
+  <!-- Whiteboard / Kader -->
+  <div id="whiteboard">
+    <h3 style="margin:0 0 8px 0">📋 Kader (Team Rot)</h3>
+    <textarea id="player-list" style="width:100%;height:120px;padding:8px;border-radius:8px;border:1px solid #e2e8f0">1 Neuer
+5 Hummels</textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn primary" onclick="syncNames()">Sync</button>
+      <button class="btn" onclick="document.getElementById('whiteboard').classList.remove('open')">Schließen</button>
+    </div>
+  </div>
 
-    <main id="pitch-area">
-      <div id="pitch-controls" style="margin-bottom:12px">
-        <button onclick="resetBoard()" class="btn primary">♻ GRUNDORDNUNG</button>
-        <div>
-          <button id="voice-btn" onclick="toggleVoice()" class="btn" style="margin-right:8px">🔊 TON</button>
-          <button onclick="toggleKader()" class="btn">📋 KADER</button>
-          <button onclick="document.getElementById('debug-panel').style.display = document.getElementById('debug-panel').style.display === 'block' ? 'none' : 'block'" class="btn">🐞 DEBUG</button>
-        </div>
-      </div>
-
-      <div id="pitch">
-        <div class="goal l-goal"></div><div class="goal r-goal"></div>
-        <div class="m-line"></div><div class="m-circle"></div>
-        <div id="ball" style="left:50%;top:50%"></div>
-        <div id="players-layer"></div>
-      </div>
-
-      <div id="whiteboard-panel">
-        <h3 style="margin-top:0">📋 Kader Team Rot</h3>
-        <textarea id="player-list" oninput="syncNames()" placeholder="1 Neuer&#10;5 Hummels"></textarea>
-        <button onclick="toggleKader()" style="margin-top:12px;padding:12px;background:#0f172a;color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:800">SCHLIESSEN</button>
-        <div id="debug-panel" style="margin-top:12px;display:none"></div>
-      </div>
-    </main>
+  <!-- Confirm modal for pending moves -->
+  <div id="confirm-modal" class="modal" aria-hidden="true">
+    <h4>Vorschau: Toni schlägt folgende Bewegungen vor</h4>
+    <div id="pending-list" style="margin-top:8px;max-height:220px;overflow:auto"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="cancelPending()">Abbrechen</button>
+      <button class="btn primary" onclick="confirmAndExecutePending()">Bestätigen und Ausführen</button>
+    </div>
   </div>
 
   <script>
   /* -------------------------
-     Globale Variablen
+     Globals & State
      ------------------------- */
   let GROQ_KEY = "";
   let isLocked = false;
   let voiceEnabled = true;
   let toniVoice = null;
-  let draggedElement = null;
-  const MOVE_DELAY_MS = 700; // Verzögerung zwischen aufeinanderfolgenden Bewegungen (anpassbar)
+  let trainerHasInitiated = false;
+  let pendingMoves = []; // moves proposed by Toni, require trainer confirmation
+  let currentMode = 'training'; // 'training' or 'match'
+  const MOVE_DELAY_MS = 700;
 
   /* -------------------------
-     UI Helfer
+     Utilities
      ------------------------- */
-  function toggleKader(){ document.getElementById('whiteboard-panel').classList.toggle('open'); }
-  function toggleVoice(){ voiceEnabled = !voiceEnabled; document.getElementById('voice-btn').innerText = voiceEnabled ? "🔊 TON" : "🔇 AUS"; }
-
   function logDebug(msg){
-    const dbg = document.getElementById('debug-panel');
-    if(dbg){
-      const time = new Date().toLocaleTimeString();
-      dbg.textContent = time + '  ' + msg + '\n' + dbg.textContent;
-      dbg.style.display = 'block';
-    }
+    const dbg = document.getElementById('debug');
+    const time = new Date().toLocaleTimeString();
+    if(dbg){ dbg.textContent = time + '  ' + msg + '\n' + dbg.textContent; dbg.style.display = 'block'; }
     console.log(msg);
   }
 
   /* -------------------------
-     Voice Auswahl und Sprechen
+     Voice selection & TTS
      ------------------------- */
-  function listVoices(){
-    const voices = speechSynthesis.getVoices() || [];
-    logDebug('Voices: ' + voices.map(v => v.name + ' (' + v.lang + ')').join('; '));
-    return voices;
+  function listVoices(){ return speechSynthesis.getVoices() || []; }
+
+  function populateVoiceSelect(){
+    const sel = document.getElementById('voice-select');
+    sel.innerHTML = '<option value="">Automatisch (männlich bevorzugt)</option>';
+    const voices = listVoices();
+    voices.forEach(v=>{
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      opt.text = `${v.name} (${v.lang})`;
+      sel.appendChild(opt);
+    });
   }
+  window.addEventListener('voiceschanged', populateVoiceSelect);
 
   function setupVoice(){
     const voices = listVoices();
-    if(!voices || voices.length === 0) return;
-    // Heuristiken für männliche deutsche Stimmen
+    if(!voices.length) return;
     const malePatterns = [/Stefan/i,/Markus/i,/Michael/i,/Peter/i,/David/i,/Thomas/i,/Male/i,/Mann/i,/Männlich/i,/Google Deutsch/i];
     for(const re of malePatterns){
       const found = voices.find(v => re.test(v.name) || re.test(v.voiceURI));
-      if(found && found.lang && found.lang.startsWith('de')) { toniVoice = found; logDebug('Toni voice chosen: ' + found.name); return; }
+      if(found && found.lang && found.lang.startsWith('de')){ toniVoice = found; logDebug('Toni voice chosen: ' + found.name); return; }
     }
-    // Fallback: deutsche Stimme ohne "female" im Namen
     let fallback = voices.find(v => v.lang && v.lang.startsWith('de') && !/frau|female/i.test(v.name));
     if(fallback){ toniVoice = fallback; logDebug('Toni voice fallback: ' + fallback.name); return; }
-    // letzter Fallback: erste verfügbare Stimme
     toniVoice = voices[0] || null;
     logDebug('Toni voice final fallback: ' + (toniVoice ? toniVoice.name : 'none'));
   }
-  speechSynthesis.onvoiceschanged = setupVoice;
 
-  // Prosodische Anpassung um "markante Männerstimme" zu simulieren
+  function selectVoice(name){
+    if(!name){ setupVoice(); return; }
+    const v = listVoices().find(x => x.name === name);
+    if(v){ toniVoice = v; logDebug('Voice manually selected: ' + v.name); }
+  }
+
   function speakStyled(text){
-    if(!voiceEnabled || !text) return;
+    if(!text || !voiceEnabled) return;
     try{
       speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      if(toniVoice) utter.voice = toniVoice;
-      utter.lang = 'de-DE';
-      // leichte Variation: tiefere Pitch, langsameres Tempo, kurze Pausen für "Nachdenken"
-      utter.pitch = 0.78;
-      utter.rate = 0.98;
-      // Insert short pauses where Toni "denkt" (heuristisch: nach Satzzeichen)
-      const processed = text.replace(/([.,;:!?])\s*/g, '$1 <break> ');
-      // Web Speech API unterstützt keine <break>, wir splitten und sprechen sequenziell
-      const parts = processed.split('<break>');
-      (async function speakParts(){
-        for(const part of parts){
-          const p = part.trim();
+      const parts = text.replace(/\s+/g,' ').split(/([.!?;:])/).reduce((acc,cur,idx,arr)=>{
+        if(/[.!?;:]/.test(cur)) acc[acc.length-1] += cur;
+        else acc.push(cur.trim());
+        return acc;
+      },[]).filter(Boolean);
+      (async function(){
+        for(const p of parts){
           if(!p) continue;
           const u = new SpeechSynthesisUtterance(p);
           if(toniVoice) u.voice = toniVoice;
           u.lang = 'de-DE';
-          u.pitch = utter.pitch;
-          u.rate = utter.rate;
+          u.pitch = 0.78;
+          u.rate = 0.98;
           speechSynthesis.speak(u);
-          // Warte bis gesprochen oder eine kleine Pause
-          await new Promise(res => setTimeout(res, Math.max(350, p.length * 20)));
+          await new Promise(r => setTimeout(r, Math.max(350, p.length * 22)));
         }
       })();
-      logDebug('TTS gestartet mit Stimme: ' + (toniVoice ? toniVoice.name : 'default'));
-    }catch(err){
-      console.warn('TTS Fehler', err);
-    }
+      logDebug('TTS started: ' + (toniVoice ? toniVoice.name : 'default'));
+    }catch(e){ console.warn('TTS error', e); }
   }
 
   /* -------------------------
-     Spieler Initialisierung, Dragging, Snapshot
+     Board & players
      ------------------------- */
   function resetBoard(){
-    const layer = document.getElementById('players-layer');
-    layer.innerHTML = '';
-    // Standardpositionen in Prozent (x,y)
+    const layer = document.getElementById('players-layer'); layer.innerHTML = '';
     const h = [[10,50],[25,20],[25,40],[25,60],[25,80],[45,30],[45,50],[45,70],[75,25],[85,50],[75,75]];
     const a = [[90,50],[75,20],[75,40],[75,60],[75,80],[55,30],[55,50],[55,70],[25,25],[15,50],[25,75]];
     h.forEach((p,i)=> createPlayer('home', i+1, p[0], p[1], layer, false));
@@ -205,7 +252,7 @@
     syncNames();
     ensurePlayersHaveTeam();
     takeSnapshot();
-    logDebug('Board zurückgesetzt');
+    logDebug('Board reset');
   }
 
   function createPlayer(side, nr, x, y, layer, canDrag){
@@ -216,9 +263,7 @@
     p.style.left = x + '%';
     p.style.top = y + '%';
     p.setAttribute('data-team', side === 'home' ? 'home' : 'away');
-    // Home nicht interaktiv per Pointer
-    if(side === 'home'){ p.style.pointerEvents = 'none'; }
-    else { p.style.pointerEvents = 'auto'; }
+    if(side === 'home'){ p.style.pointerEvents = 'none'; } else { p.style.pointerEvents = 'auto'; }
     layer.appendChild(p);
     if(canDrag) makeDraggableSafe(p);
   }
@@ -235,7 +280,6 @@
     });
   }
 
-  // moderner Pointer-basiertes Dragging nur für away und ball
   function makeDraggableSafe(el){
     if(!el) return;
     el.style.cursor = 'grab';
@@ -282,7 +326,7 @@
     document.querySelectorAll('.player').forEach(p=>{
       _snapshot.push({id:p.id,left:p.style.left||p.getAttribute('data-left')||'',top:p.style.top||p.getAttribute('data-top')||''});
     });
-    logDebug('Snapshot gespeichert');
+    logDebug('Snapshot saved');
   }
   function restoreSnapshot(){
     _snapshot.forEach(s=>{
@@ -292,53 +336,308 @@
         if(s.top) el.style.top = s.top;
       }
     });
-    logDebug('Snapshot wiederhergestellt');
+    logDebug('Snapshot restored');
   }
 
   /* -------------------------
-     Sichere, sequentielle Bewegungsausführung
+     Sequential movement + animation
      ------------------------- */
-  // Hilfsfunktion: animiert ein einzelnes Element und wartet bis Bewegung abgeschlossen
   function animateMoveTo(el, leftPx, topPx, durationMs){
     return new Promise(resolve=>{
       if(!el) return resolve();
-      // Übergangszeit anpassen
-      el.style.transition = `all ${Math.max(300, durationMs)}ms cubic-bezier(0.2,0.8,0.2,1)`;
+      el.style.transition = `all ${Math.max(300,durationMs)}ms cubic-bezier(0.2,0.8,0.2,1)`;
       el.style.position = 'absolute';
       el.style.left = leftPx + 'px';
       el.style.top = topPx + 'px';
-      // Warte duration + kleine Puffer
-      setTimeout(()=>{ resolve(); }, durationMs + 80);
+      setTimeout(()=> resolve(), durationMs + 80);
     });
   }
 
-  // moves: [{id:'home1', x:0..1, y:0..1}, ...]
   async function moveHomePlayersSequential(fieldId, moves){
     const field = document.getElementById(fieldId);
-    if(!field){ logDebug('Spielfeld nicht gefunden: ' + fieldId); return; }
+    if(!field){ logDebug('Field not found: ' + fieldId); return; }
     const rect = field.getBoundingClientRect();
     for(const mv of moves){
       const el = document.getElementById(mv.id);
-      if(!el){ logDebug('Move Ziel nicht gefunden: ' + mv.id); continue; }
+      if(!el){ logDebug('Move target not found: ' + mv.id); continue; }
       if(el.dataset && el.dataset.team && el.dataset.team !== 'home'){ logDebug('Skip non-home: ' + mv.id); continue; }
       const left = Math.round(mv.x * (rect.width - el.offsetWidth));
       const top = Math.round(mv.y * (rect.height - el.offsetHeight));
-      logDebug('Bewege ' + mv.id + ' -> ' + left + ',' + top);
-      // spreche kurze Bestätigung bevor Bewegung (Toni "denkt" nach)
+      logDebug('Move ' + mv.id + ' -> ' + left + ',' + top);
       speakStyled(`${mv.id} läuft jetzt auf Position ${Math.round(mv.x*100)} Prozent, ${Math.round(mv.y*100)} Prozent.`);
       await animateMoveTo(el, left, top, 600);
-      // Warte zwischen Bewegungen, damit sie nacheinander sichtbar sind
-      await new Promise(res => setTimeout(res, MOVE_DELAY_MS));
+      await new Promise(r=>setTimeout(r, MOVE_DELAY_MS));
     }
-    logDebug('Alle Moves ausgeführt');
+    logDebug('All moves executed');
   }
 
   /* -------------------------
-     Namen synchronisieren
+     Exercise library + SVG preview + script builder
+     ------------------------- */
+  const EXERCISES = {
+    "pass_rondo_01": {
+      id:"pass_rondo_01", title:"Rondo 6v2", type:"Passspiel", duration:8, players:8,
+      description:"Schnelle Ballzirkulation, max. 2 Kontakte",
+      moves:[ {id:"home1",x:0.25,y:0.5},{id:"home2",x:0.35,y:0.45},{pass:["home1","home2"] }],
+      setup:{cones:6,goals:0}
+    },
+    "crossing_02": {
+      id:"crossing_02", title:"Flanken-Überladung", type:"Flanke", duration:12, players:7,
+      description:"Überladung Flügel, präzise Hereingaben aus vollem Lauf",
+      moves:[ {id:"home7",x:0.75,y:0.25},{id:"home9",x:0.75,y:0.5},{pass:["home7","home9"] }],
+      setup:{cones:8,goals:0}
+    },
+    "shoot_03": {
+      id:"shoot_03", title:"Torschuss-Station", type:"Torschuss", duration:10, players:6,
+      description:"Abschlüsse aus Bewegung, Druck simulieren",
+      moves:[ {id:"home10",x:0.85,y:0.5},{id:"home11",x:0.75,y:0.75},{pass:["home10","home11"] }],
+      setup:{cones:4,goals:1}
+    },
+    "ghana_warmup_01": {
+      id:"ghana_warmup_01", title:"Ghana Rhythm Warmup", type:"Warmup", duration:10, players:8,
+      description:"Rhythmische Aktivierung, Fußarbeit und Passsequenzen zur Percussion.",
+      moves:[{id:"home1",x:0.2,y:0.5},{id:"home2",x:0.3,y:0.4},{id:"home3",x:0.3,y:0.6}],
+      setup:{cones:6,music:'percussion loop'}
+    }
+  };
+
+  function previewExercise(id){
+    const ex = EXERCISES[id];
+    if(!ex) return alert('Übung nicht gefunden');
+    renderExerciseOnPitch(ex);
+    speakStyled(`${ex.title}. ${ex.description}. Dauer ${ex.duration} Minuten.`);
+  }
+
+  function renderExerciseOnPitch(ex){
+    const svg = document.getElementById('exercise-svg');
+    svg.innerHTML = '';
+    const svgNS = 'http://www.w3.org/2000/svg';
+    // defs arrow
+    const defs = document.createElementNS(svgNS,'defs');
+    const marker = document.createElementNS(svgNS,'marker');
+    marker.setAttribute('id','arrow'); marker.setAttribute('markerWidth','8'); marker.setAttribute('markerHeight','8'); marker.setAttribute('refX','6'); marker.setAttribute('refY','3'); marker.setAttribute('orient','auto');
+    const path = document.createElementNS(svgNS,'path'); path.setAttribute('d','M0,0 L0,6 L9,3 z'); path.setAttribute('fill',document.getElementById('svg-color').value || '#ffcc00');
+    marker.appendChild(path); defs.appendChild(marker); svg.appendChild(defs);
+
+    // draw passes and points
+    ex.moves.forEach(m=>{
+      if(m.x !== undefined){
+        const cx = m.x * 1000;
+        const cy = m.y * 600;
+        const circle = document.createElementNS(svgNS,'circle');
+        circle.setAttribute('cx',cx); circle.setAttribute('cy',cy); circle.setAttribute('r',10); circle.setAttribute('fill',document.getElementById('svg-color').value || '#ffcc00'); circle.setAttribute('stroke','#000'); svg.appendChild(circle);
+      }
+      if(m.pass){
+        // try to resolve positions from current DOM players; fallback to move coords
+        const from = document.getElementById(m.pass[0]);
+        const to = document.getElementById(m.pass[1]);
+        let x1,y1,x2,y2;
+        const pitch = document.getElementById('pitch');
+        const pRect = pitch.getBoundingClientRect();
+        if(from && to){
+          const fRect = from.getBoundingClientRect(), tRect = to.getBoundingClientRect();
+          x1 = ((fRect.left - pRect.left) + fRect.width/2) / pRect.width * 1000;
+          y1 = ((fRect.top - pRect.top) + fRect.height/2) / pRect.height * 600;
+          x2 = ((tRect.left - pRect.left) + tRect.width/2) / pRect.width * 1000;
+          y2 = ((tRect.top - pRect.top) + tRect.height/2) / pRect.height * 600;
+        } else {
+          // fallback: use moves array coords if available
+          const fm = ex.moves.find(mm => mm.id === m.pass[0]);
+          const tm = ex.moves.find(mm => mm.id === m.pass[1]);
+          if(fm && tm){
+            x1 = fm.x * 1000; y1 = fm.y * 600;
+            x2 = tm.x * 1000; y2 = tm.y * 600;
+          }
+        }
+        if(x1 !== undefined){
+          const line = document.createElementNS(svgNS,'line');
+          line.setAttribute('x1',x1); line.setAttribute('y1',y1); line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+          line.setAttribute('stroke',document.getElementById('svg-color').value || '#ffcc00');
+          line.setAttribute('stroke-width',document.getElementById('svg-width').value || 6);
+          line.setAttribute('marker-end','url(#arrow)');
+          line.classList.add('arrow-line');
+          svg.appendChild(line);
+        }
+      }
+    });
+    logDebug('Exercise preview rendered: ' + ex.title);
+  }
+
+  function addToScript(exId){
+    const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
+    const today = new Date().toISOString().slice(0,10);
+    scripts[today] = scripts[today] || [];
+    scripts[today].push({id:exId, time:new Date().toISOString()});
+    localStorage.setItem('trainingScripts', JSON.stringify(scripts));
+    renderScriptList();
+    alert('Übung zur Trainingsliste hinzugefügt');
+  }
+
+  function renderScriptList(){
+    const list = document.getElementById('script-list');
+    list.innerHTML = '';
+    const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
+    const today = new Date().toISOString().slice(0,10);
+    const arr = scripts[today] || [];
+    arr.forEach((s,idx)=>{
+      const ex = EXERCISES[s.id];
+      const item = document.createElement('div'); item.className='script-item';
+      item.innerHTML = `<div><strong>${ex.title}</strong><div style="font-size:12px;color:#9aa3ad">${ex.duration} min · ${ex.players} Spieler</div></div>
+                        <div style="display:flex;gap:6px"><button class="btn" onclick="previewExercise('${ex.id}')">Vorschau</button><button class="btn" onclick="removeFromScript(${idx})">Entfernen</button></div>`;
+      list.appendChild(item);
+    });
+  }
+
+  function removeFromScript(index){
+    const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
+    const today = new Date().toISOString().slice(0,10);
+    if(!scripts[today]) return;
+    scripts[today].splice(index,1);
+    localStorage.setItem('trainingScripts', JSON.stringify(scripts));
+    renderScriptList();
+  }
+
+  /* -------------------------
+     Toni interaction: greeting, askToni, trainer-first, pending moves
+     ------------------------- */
+  function welcomeFlow(){
+    const greeting = "Hallo Trainer. Ich bin Toni. Du kannst wählen: Spielvorbereitung oder Trainingsmodus. Sag mir, womit wir starten, oder mach den ersten Zug. Du hast immer das erste Zugrecht.";
+    addMsg('toni', greeting);
+    speakStyled(greeting);
+    // show mode hint
+    document.getElementById('mode-select').focus();
+  }
+
+  async function askToni(){
+    if(isLocked) return;
+    const input = document.getElementById('user-input');
+    const text = (input.value||'').trim();
+    if(!text) return;
+    addMsg('user', text); input.value=''; isLocked=true;
+    // If trainer hasn't initiated yet, set flag if they gave a move-like command
+    if(/^\s*(\d+)\s*(auf|to)\s*(\d+)\s*$/i.test(text) || /move|lauf/i.test(text)) trainerHasInitiated = true;
+
+    // system prompt for model (kept concise)
+    const system = "Du bist Toni, Co-Trainer. Mentalität: Klopp & Nagelsmann. Du steuerst das ROTE Team (home1-11). Wenn Du Laufwege ausgeben willst, nutze MOVE[homeX,YY,ZZ]. Antworte präzise, kurz und fachlich.";
+
+    try{
+      let answer = '';
+      if(!GROQ_KEY){
+        // local simulation for common training queries
+        if(/training|passspiel|flanke|torschuss|warmup|aufwärm/i.test(text)){
+          answer = "Passspiel: Rondo 6v2, 8 min, max 2 Kontakte. Flanke: Überladung Flügel, 12 min. Torschuss: Abschlussstationen 4×6 Schüsse, 10 min. Wenn du Laufwege sehen willst, sage 'Simuliere MOVE' oder bitte um Vorschau.";
+        } else if(/simuliere move/i.test(text)){
+          // example moves
+          answer = "MOVE[home9,75,50] MOVE[home5,45,30] MOVE[home1,25,60]";
+        } else {
+          answer = "Verstanden. Möchtest du Trainingsmodus oder Spielvorbereitung? Du kannst auch eine Übung aus der Bibliothek wählen.";
+        }
+      } else {
+        // Real API call (kept as placeholder)
+        const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method:'POST',
+          headers:{ "Authorization":"Bearer " + GROQ_KEY, "Content-Type":"application/json" },
+          body: JSON.stringify({ model:"llama-3.3-70b-versatile", messages:[{role:"system",content:system},{role:"user",content:text}] })
+        });
+        const data = await resp.json();
+        answer = data?.choices?.[0]?.message?.content || "Keine Antwort vom Modell.";
+      }
+
+      isLocked = false;
+      // Show Toni's text without MOVE tags
+      addMsg('toni', answer.replace(/MOVE\[.*?\]/g,''));
+      speakStyled(answer.replace(/MOVE\[.*?\]/g,''));
+
+      // Parse MOVE commands into pendingMoves
+      const raw = [...answer.matchAll(/MOVE\[\s*(home(?:[1-9]|1[0-1]))\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\]/gi)];
+      if(raw.length){
+        pendingMoves = [];
+        for(let i=0;i<raw.length && i<11;i++){
+          const id = raw[i][1].toLowerCase();
+          const xRaw = parseInt(raw[i][2],10);
+          const yRaw = parseInt(raw[i][3],10);
+          if(!/^home([1-9]|1[0-1])$/.test(id)) continue;
+          const x = Math.max(0,Math.min(100,isNaN(xRaw)?50:xRaw))/100;
+          const y = Math.max(0,Math.min(100,isNaN(yRaw)?50:yRaw))/100;
+          const el = document.getElementById(id);
+          if(!el) continue;
+          if(el.dataset && el.dataset.team && el.dataset.team !== 'home') continue;
+          pendingMoves.push({id,x,y});
+        }
+        if(pendingMoves.length){
+          // Show preview modal; do not execute automatically
+          renderPendingList();
+          openConfirmModal();
+        }
+      }
+    }catch(err){
+      isLocked=false; addMsg('toni','Verbindungsfehler!'); console.error('askToni error',err);
+    }
+  }
+
+  function renderPendingList(){
+    const container = document.getElementById('pending-list');
+    container.innerHTML = '';
+    if(!pendingMoves.length){ container.innerText = 'Keine vorgeschlagenen Bewegungen.'; return; }
+    pendingMoves.forEach((m,idx)=>{
+      const div = document.createElement('div');
+      div.style.padding='8px'; div.style.borderBottom='1px solid rgba(255,255,255,0.04)';
+      div.innerText = `${m.id} → ${Math.round(m.x*100)}%, ${Math.round(m.y*100)}%`;
+      container.appendChild(div);
+    });
+  }
+
+  function openConfirmModal(){ document.getElementById('confirm-modal').classList.add('open'); }
+  function closeConfirmModal(){ document.getElementById('confirm-modal').classList.remove('open'); }
+
+  function cancelPending(){ pendingMoves = []; closeConfirmModal(); addMsg('toni','Vorschläge verworfen.'); }
+
+  async function confirmAndExecutePending(){
+    if(!trainerHasInitiated){
+      alert('Bitte zuerst eine Aktion als Trainer durchführen (z. B. eine Frage stellen oder einen ersten Zug machen).');
+      return;
+    }
+    closeConfirmModal();
+    addMsg('toni','Führe die bestätigten Bewegungen nacheinander aus.');
+    await moveHomePlayersSequential('pitch', pendingMoves);
+    pendingMoves = [];
+  }
+
+  /* -------------------------
+     Export JSON & PDF
+     ------------------------- */
+  function exportPlanJSON(){
+    const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
+    const today = new Date().toISOString().slice(0,10);
+    const plan = { date: today, exercises: scripts[today] || [] };
+    const blob = new Blob([JSON.stringify(plan, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `training-plan-${today}.json`; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function exportPlanPDF(){
+    const { jsPDF } = window.jspdf;
+    const scripts = JSON.parse(localStorage.getItem('trainingScripts')||'{}');
+    const today = new Date().toISOString().slice(0,10);
+    const arr = scripts[today] || [];
+    const doc = new jsPDF({unit:'pt', format:'a4'});
+    doc.setFontSize(16); doc.text(`Training Plan ${today}`, 40, 50);
+    let y = 80;
+    for(const s of arr){
+      const ex = EXERCISES[s.id];
+      doc.setFontSize(12); doc.text(`${ex.title} — ${ex.duration} min — ${ex.players} Spieler`, 40, y); y += 16;
+      doc.setFontSize(10); doc.text(ex.description || '', 40, y); y += 28;
+      if(y > 720){ doc.addPage(); y = 40; }
+    }
+    doc.save(`training-plan-${today}.pdf`);
+  }
+
+  /* -------------------------
+     Helpers: sync names, mic, svg style
      ------------------------- */
   function syncNames(){
     const list = document.getElementById('player-list').value || '';
-    // setze default nummern
     document.querySelectorAll('.player.home').forEach(p => p.innerText = p.id.replace('home',''));
     list.split('\n').forEach(line=>{
       const m = line.match(/^(\d+)\s*(.*)$/);
@@ -347,126 +646,64 @@
         if(el && m[2].trim()) el.innerText = m[2].trim().split(' ')[0];
       }
     });
+    logDebug('Names synced');
   }
 
-  /* -------------------------
-     askToni mit sicherer MOVE-Verarbeitung
-     ------------------------- */
-  async function askToni(){
-    if(isLocked) return;
-    const input = document.getElementById('user-input');
-    const text = (input.value || '').trim();
-    if(!text) return;
-    addMsg('user', text);
-    input.value = '';
-    isLocked = true;
-    document.getElementById('status').innerText = 'TONI ANALYSIERT DATENBANK...';
-
-    const system = "Du bist Toni, Co-Trainer von Björn. Mentalität: Jürgen Klopp & Julian Nagelsmann. Taktik-Experte für brasilianisches Stellungsspiel. Du steuerst das ROTE Team (home1-11). Björn steuert Blau (away1-11). Björn darf Deine Spieler NICHT anfassen. Wenn Du Taktik änderst, nutze MOVE[homeX,YY,ZZ] für jeden Laufweg. Analysiere erst die Räume im Netz, dann antworte präzise, kurz und fachlich brillant. Keine Begrüßungen.";
-
-    try{
-      const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method:'POST',
-        headers:{ "Authorization":"Bearer " + GROQ_KEY, "Content-Type":"application/json" },
-        body: JSON.stringify({ model:"llama-3.3-70b-versatile", messages:[{role:"system",content:system},{role:"user",content:text}] })
-      });
-      const data = await resp.json();
-      isLocked = false;
-      document.getElementById('status').innerText = 'SYSTEM READY';
-      if(data && data.choices && data.choices[0] && data.choices[0].message){
-        let answer = data.choices[0].message.content || '';
-        // Zeige Antwort ohne MOVE-Tags
-        addMsg('toni', answer.replace(/MOVE\[.*?\]/g,''));
-        // Toni überdenkt seine Antwort: wir sprechen die Antwort mit kleinen Pausen
-        speakStyled(answer.replace(/MOVE\[.*?\]/g,''));
-        // Parse MOVE Befehle sicher: MOVE[homeX,YY,ZZ]
-        const raw = [...answer.matchAll(/MOVE\[\s*(home[1-9]|home1[0-1])\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\]/gi)];
-        if(raw.length === 0) return;
-        // Limit und Sanitization
-        const MAX = 11;
-        const moves = [];
-        for(let i=0;i<Math.min(raw.length,MAX);i++){
-          const m = raw[i];
-          const id = m[1].toLowerCase();
-          const xRaw = parseInt(m[2],10);
-          const yRaw = parseInt(m[3],10);
-          if(!/^home([1-9]|1[0-1])$/.test(id)) { logDebug('Ungültige ID übersprungen: ' + id); continue; }
-          const x = Math.max(0,Math.min(100,isNaN(xRaw)?50:xRaw))/100;
-          const y = Math.max(0,Math.min(100,isNaN(yRaw)?50:yRaw))/100;
-          const el = document.getElementById(id);
-          if(!el){ logDebug('Element nicht gefunden: ' + id); continue; }
-          if(el.dataset && el.dataset.team && el.dataset.team !== 'home'){ logDebug('Nicht home, skip: ' + id); continue; }
-          moves.push({id,x,y});
-        }
-        if(moves.length>0){
-          // Führe sequentiell aus
-          await moveHomePlayersSequential('pitch', moves);
-          addMsg('toni', `Bewege ${moves.length} Spieler wie beschrieben.`);
-        }
-      }
-    }catch(err){
-      isLocked = false;
-      addMsg('toni','Verbindungsfehler!');
-      console.error('askToni error', err);
-    }
-  }
-
-  function addMsg(role, txt){
-    const h = document.getElementById('chat-history');
-    const d = document.createElement('div');
-    d.className = `msg ${role==='toni'?'toni':'user'}`;
-    d.innerText = txt;
-    h.appendChild(d);
-    h.scrollTop = h.scrollHeight;
-  }
-
-  /* -------------------------
-     Speech Recognition Shortcut
-     ------------------------- */
   function startMic(){
     const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
     if(!Rec){ alert('SpeechRecognition nicht verfügbar'); return; }
-    const rec = new Rec();
-    rec.lang = 'de-DE';
+    const rec = new Rec(); rec.lang='de-DE';
     rec.onresult = (e)=>{ document.getElementById('user-input').value = e.results[0][0].transcript; askToni(); };
     rec.start();
   }
 
-  /* -------------------------
-     Initialisierung
-     ------------------------- */
-  function startToni(){
-    if(document.getElementById('password').value === 'Trainer2026'){
-      GROQ_KEY = document.getElementById('user-key').value.trim();
-      document.getElementById('login-overlay').style.display = 'none';
-      resetBoard();
-      setupVoice();
-      logDebug('Toni initialisiert');
-    } else {
-      alert('Zutritt verweigert.');
+  function updateSvgStyle(){
+    document.documentElement.style.setProperty('--arrow-color', document.getElementById('svg-color').value);
+    document.documentElement.style.setProperty('--arrow-width', document.getElementById('svg-width').value);
+    // re-render current preview if any
+    const svg = document.getElementById('exercise-svg');
+    if(svg && svg.children.length) {
+      // reapply stroke attributes
+      Array.from(svg.querySelectorAll('line')).forEach(l=>{
+        l.setAttribute('stroke', document.getElementById('svg-color').value);
+        l.setAttribute('stroke-width', document.getElementById('svg-width').value);
+      });
+      Array.from(svg.querySelectorAll('circle')).forEach(c=>{
+        c.setAttribute('fill', document.getElementById('svg-color').value);
+      });
     }
   }
 
-  // Stimmen laden und initialisieren
+  function setMode(mode){
+    currentMode = mode;
+    addMsg('toni', `Modus gesetzt: ${mode === 'training' ? 'Trainingsmodus' : 'Spielvorbereitung'}.`);
+    speakStyled(`Modus ${mode === 'training' ? 'Trainingsmodus' : 'Spielvorbereitung'} aktiviert.`);
+  }
+
+  /* -------------------------
+     Init
+     ------------------------- */
   window.addEventListener('load', function(){
-    // make ball draggable
+    resetBoard();
     ensurePlayersHaveTeam();
     makeDraggableSafe(document.getElementById('ball'));
-    // Stimmen
-    if(speechSynthesis.getVoices().length === 0){
-      speechSynthesis.onvoiceschanged = setupVoice;
-    } else {
-      setupVoice();
-    }
-    logDebug('UI geladen');
+    if(speechSynthesis.getVoices().length === 0) speechSynthesis.onvoiceschanged = function(){ populateVoiceSelect(); setupVoice(); };
+    else { populateVoiceSelect(); setupVoice(); }
+    renderScriptList();
+    logDebug('UI ready');
+    // initial greeting hint
+    addMsg('toni', 'Sag "Hallo" oder wähle eine Option. Trainer hat immer das erste Zugrecht.');
   });
 
-  // Expose nützliche Funktionen für Konsole/Tests
+  // Expose for console/testing
   window.moveHomePlayersSequential = moveHomePlayersSequential;
   window.takeSnapshot = takeSnapshot;
   window.restoreSnapshot = restoreSnapshot;
-  window.speakStyled = speakStyled;
+  window.previewExercise = previewExercise;
+  window.addToScript = addToScript;
   window.resetBoard = resetBoard;
+  window.selectVoice = selectVoice;
+  window.setMode = setMode;
   </script>
 </body>
 </html>
