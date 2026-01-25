@@ -86,7 +86,7 @@
 
         #pitch {
             flex: 1;
-            background: repeating-linear-gradient(90deg, #166534 0, #166534 8%, #15803d 8%, #15803d 16%);
+            background: #166534;
             border: 2px solid white;
             border-radius: 16px;
             position: relative;
@@ -94,7 +94,6 @@
             box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
         }
 
-        /* TORE */
         .goal { position: absolute; width: 2.5%; height: 20%; border: 2px solid white; top: 40%; z-index: 5; background: rgba(255,255,255,0.1); }
         .l-goal { left: 0; border-left: none; }
         .r-goal { right: 0; border-right: none; }
@@ -104,7 +103,7 @@
 
         /* --- PLAYER & BALL --- */
         .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 0.8s cubic-bezier(0.2, 0.7, 0.3, 1); }
-        .player { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .player { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .home { background: radial-gradient(circle, #f87171, #b91c1c); border: 2px solid white; }
         .away { background: radial-gradient(circle, #60a5fa, #1d4ed8); border: 2px solid white; }
         #ball { width: 18px; height: 18px; background: white; border-radius: 50%; border: 2px solid black; }
@@ -131,7 +130,7 @@
     <div class="login-card">
         <h2 style="color:var(--green)">⚽ COACH TONI 2.0</h2>
         <input type="password" id="password" placeholder="Passwort (Trainer2026)">
-        <input type="text" id="user-key" placeholder="Groq API-Key (gsk_...)">
+        <input type="text" id="user-key" placeholder="Groq API-Key">
         <button onclick="startToni()" style="width:100%; padding:12px; background:var(--green); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">SYSTEM STARTEN</button>
     </div>
 </div>
@@ -165,7 +164,7 @@
         
         <div id="whiteboard-panel">
             <h3>📋 Kaderliste (Home)</h3>
-            <textarea id="player-list" oninput="syncNames()" placeholder="Beispiel: 1 Mike"></textarea>
+            <textarea id="player-list" oninput="syncNames()" placeholder="1 Neuer"></textarea>
             <button onclick="toggleKader()" style="margin-top:10px; padding:10px;">Schließen</button>
         </div>
     </main>
@@ -192,7 +191,7 @@
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(txt);
         if (toniVoice) msg.voice = toniVoice;
-        msg.lang = 'de-DE'; msg.pitch = 0.8;
+        msg.lang = 'de-DE'; msg.pitch = 0.8; msg.rate = 1.0;
         window.speechSynthesis.speak(msg);
     }
 
@@ -208,8 +207,20 @@
     function resetBoard() {
         const layer = document.getElementById('players-layer');
         layer.innerHTML = "";
-        const h = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,30], [45,70]];
-        const a = [[93,50], [78,25], [78,50], [78,75], [58,15], [58,38], [58,62]];
+        // Home (Rot) - 11 Spieler (4-3-3 Grundordnung)
+        const h = [
+            [5,50], // Torwart (1)
+            [22,20], [22,40], [22,60], [22,80], // Abwehr (2-5)
+            [45,30], [45,50], [45,70], // Mittelfeld (6-8)
+            [75,20], [85,50], [75,80]  // Angriff (9-11)
+        ];
+        // Away (Blau) - 11 Spieler (4-3-3)
+        const a = [
+            [93,50], // Torwart (1)
+            [78,20], [78,40], [78,60], [78,80], // Abwehr (2-5)
+            [55,30], [55,50], [55,70], // Mittelfeld (6-8)
+            [30,20], [20,50], [30,80]  // Angriff (9-11)
+        ];
         h.forEach((p, i) => createPlayer('home', i + 1, p[0], p[1], layer));
         a.forEach((p, i) => createPlayer('away', i + 1, p[0], p[1], layer));
         syncNames();
@@ -259,8 +270,8 @@
         addMsg('user', text); input.value = ""; isLocked = true;
         document.getElementById('status').innerText = "Toni analysiert...";
 
-        // PERSONA: Björn (Away/Blau), Toni (Home/Rot/Brasil-Style)
-        const system = "Du bist Toni, ein Weltklasse-Co-Trainer von Björn (BVB). Fokus: Brasilianischer Technik-Style (Ginga, technisches Niveau, Spielfreude). Du bist ein taktischer Fachmann für Training und Spielsituationen. Du steuerst die ROTEN Spieler (Home). Björn steuert die BLAUEN (Away). Wenn Björn sagt 'Ich greife an', positioniere die Roten defensiv in den Räumen oder antizipiere Konter. Nutze MOVE[home1,20,30] für Bewegungen.";
+        // PERSONA: Björn (Chef), Toni (Brasil-Expertise, steuert Rot)
+        const system = "Du bist Toni, ein Weltklasse-Co-Trainer von Björn (BVB-Boss). Fokus: Brasilianischer Technik-Style. Du bist ein taktischer Fachmann. Du steuerst die ROTEN Spieler (Home). Björn steuert Blau (Away). Sei loyal und fachlich brillant. KEINE Begrüßung mit 'BEB' oder ähnlichen Zertifikaten am Anfang. Nutze MOVE[home1,20,30] für Bewegungen.";
 
         try {
             const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
