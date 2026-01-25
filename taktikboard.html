@@ -10,7 +10,6 @@
             --green: #2ecc71;
             --green-dark: #27ae60;
             --bg-dark: #050608;
-            --bg-panel: #111319;
             --line: rgba(255,255,255,0.12);
             --text-light: rgba(255,255,255,0.9);
             --shadow-strong: 0 18px 40px rgba(0,0,0,0.65);
@@ -35,7 +34,6 @@
             padding: 12px;
         }
 
-        /* --- SIDEBAR & CHAT --- */
         #chat-sidebar {
             background: linear-gradient(145deg, #10121a, #151824);
             border-radius: 18px;
@@ -72,7 +70,6 @@
         .chat-input-row input { flex: 1; background: #020617; color: white; border: 1px solid #374151; padding: 10px; border-radius: 8px; }
         .chat-input-row button { border: none; cursor: pointer; border-radius: 8px; padding: 10px 15px; background: var(--green); font-weight: bold; }
 
-        /* --- PITCH AREA --- */
         #pitch-area {
             background: #0b1120;
             border-radius: 18px;
@@ -86,7 +83,7 @@
 
         #pitch {
             flex: 1;
-            background: #166534;
+            background: repeating-linear-gradient(90deg, #166534 0, #166534 8%, #15803d 8%, #15803d 16%);
             border: 2px solid white;
             border-radius: 16px;
             position: relative;
@@ -101,14 +98,12 @@
         .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.5); }
         .m-circle { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); }
 
-        /* --- PLAYER & BALL --- */
         .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 0.8s cubic-bezier(0.2, 0.7, 0.3, 1); }
-        .player { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .player { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .home { background: radial-gradient(circle, #f87171, #b91c1c); border: 2px solid white; }
         .away { background: radial-gradient(circle, #60a5fa, #1d4ed8); border: 2px solid white; }
         #ball { width: 18px; height: 18px; background: white; border-radius: 50%; border: 2px solid black; }
 
-        /* --- KADER PANEL --- */
         #whiteboard-panel {
             position: absolute; top: 60px; right: -380px; width: 350px; height: calc(100% - 70px);
             background: white; color: black; transition: 0.3s ease; z-index: 2000;
@@ -118,7 +113,6 @@
         #whiteboard-panel.open { right: 0; }
         #player-list { flex: 1; width: 100%; font-family: monospace; padding: 10px; border-radius: 8px; resize: none; font-size: 1.1rem; }
 
-        /* --- LOGIN --- */
         #login-overlay { position: fixed; inset: 0; background: #050608; display: flex; align-items: center; justify-content: center; z-index: 4000; }
         .login-card { background: #111319; padding: 30px; border-radius: 20px; border: 1px solid var(--green); text-align: center; width: 320px; }
         .login-card input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: none; }
@@ -161,7 +155,6 @@
             <div id="ball" style="left:50%; top:50%;"></div>
             <div id="players-layer"></div>
         </div>
-        
         <div id="whiteboard-panel">
             <h3>📋 Kaderliste (Home)</h3>
             <textarea id="player-list" oninput="syncNames()" placeholder="1 Neuer"></textarea>
@@ -191,7 +184,7 @@
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(txt);
         if (toniVoice) msg.voice = toniVoice;
-        msg.lang = 'de-DE'; msg.pitch = 0.8; msg.rate = 1.0;
+        msg.lang = 'de-DE'; msg.pitch = 0.8;
         window.speechSynthesis.speak(msg);
     }
 
@@ -207,20 +200,8 @@
     function resetBoard() {
         const layer = document.getElementById('players-layer');
         layer.innerHTML = "";
-        // Home (Rot) - 11 Spieler (4-3-3 Grundordnung)
-        const h = [
-            [5,50], // Torwart (1)
-            [22,20], [22,40], [22,60], [22,80], // Abwehr (2-5)
-            [45,30], [45,50], [45,70], // Mittelfeld (6-8)
-            [75,20], [85,50], [75,80]  // Angriff (9-11)
-        ];
-        // Away (Blau) - 11 Spieler (4-3-3)
-        const a = [
-            [93,50], // Torwart (1)
-            [78,20], [78,40], [78,60], [78,80], // Abwehr (2-5)
-            [55,30], [55,50], [55,70], // Mittelfeld (6-8)
-            [30,20], [20,50], [30,80]  // Angriff (9-11)
-        ];
+        const h = [[10,50],[25,20],[25,40],[25,60],[25,80],[45,30],[45,50],[45,70],[75,25],[85,50],[75,75]];
+        const a = [[90,50],[75,20],[75,40],[75,60],[75,80],[55,30],[55,50],[55,70],[25,25],[15,50],[25,75]];
         h.forEach((p, i) => createPlayer('home', i + 1, p[0], p[1], layer));
         a.forEach((p, i) => createPlayer('away', i + 1, p[0], p[1], layer));
         syncNames();
@@ -239,10 +220,9 @@
         document.querySelectorAll('.player.home').forEach(p => p.innerText = p.id.replace('home',''));
         list.split('\n').forEach(line => {
             const m = line.match(/^(\d+)\s*(.*)$/);
-            if (m) {
+            if (m && m[1] && m[2]) {
                 const el = document.getElementById('home' + m[1]);
-                const name = m[2].trim().split(' ')[0];
-                if (el && name) el.innerText = name;
+                if (el) el.innerText = m[2].trim().split(' ')[0];
             }
         });
     }
@@ -258,10 +238,7 @@
         draggedElement.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
     };
 
-    document.onmouseup = () => {
-        if (draggedElement) draggedElement.style.transition = "all 0.8s ease";
-        draggedElement = null;
-    };
+    document.onmouseup = () => { if (draggedElement) draggedElement.style.transition = "all 0.8s ease"; draggedElement = null; };
 
     async function askToni() {
         if (isLocked) return;
@@ -270,8 +247,7 @@
         addMsg('user', text); input.value = ""; isLocked = true;
         document.getElementById('status').innerText = "Toni analysiert...";
 
-        // PERSONA: Björn (Chef), Toni (Brasil-Expertise, steuert Rot)
-        const system = "Du bist Toni, ein Weltklasse-Co-Trainer von Björn (BVB-Boss). Fokus: Brasilianischer Technik-Style. Du bist ein taktischer Fachmann. Du steuerst die ROTEN Spieler (Home). Björn steuert Blau (Away). Sei loyal und fachlich brillant. KEINE Begrüßung mit 'BEB' oder ähnlichen Zertifikaten am Anfang. Nutze MOVE[home1,20,30] für Bewegungen.";
+        const system = "Du bist Toni, Co-Trainer von Björn. Mentalität: Mix Klopp (emotional/frech) & Nagelsmann (hochkompetent). Du bist Fachmann für Training/Spielsituationen & brasilianische Technik. Du steuerst ROT. Björn steuert BLAU. Keine BVB/BEB-Erwähnung. Wenn Björn nur 'Hallo' sagt, antworte kurz & respektvoll ohne Figuren zu bewegen. Nutze MOVE[home1,X,Y] nur bei taktischer Notwendigkeit.";
 
         try {
             const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
