@@ -1,193 +1,194 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Coach Toni 2.0 – Management Plattform</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Coach Toni 2.0 – Management Plattform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <style>
-    :root{
-      --green:#2ecc71; --accent:#0a74da; --bg:#07101a; --panel:#0f1720;
-      --line:rgba(255,255,255,0.12); --text:#e6eef0; --text-light:#9aa3ad;
-      --arrow-color:#ffcc00; --arrow-width:6;
-    }
-    html,body{height:100%;margin:0;padding:0;font-family:'Inter',Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#1b2333 0,#050608 55%);color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
-    *{box-sizing:border-box}
-    #app{display:grid;grid-template-columns:420px 1fr;gap:12px;height:100vh;padding:12px}
-    main,aside{display:flex;flex-direction:column;gap:12px;background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line)}
-  .header{font-weight:800;color:var(--green);padding:12px 8px;border-bottom:1px solid var(--line);margin:-12px -12px 0;padding:24px}
-    #chat-history{flex:1;overflow-y:auto;padding:12px 4px;display:flex;flex-direction:column;gap:10px}
-  .msg{padding:10px 12px;border-radius:12px;max-width:86%;line-height:1.4;word-break:break-word}
-  .user{align-self:flex-end;background:linear-gradient(135deg,#2563eb,#38bdf8);color:#fff}
-  .toni{align-self:flex-start;background:#1f2937;border-left:4px solid var(--green);color:var(--text)}
-  .input-row{display:flex;gap:8px;padding:10px 0 0;border-top:1px solid var(--line)}
-  .input-row input{flex:1;padding:10px;border-radius:10px;border:1px solid #26303a;background:var(--bg);color:#fff}
-  .input-row button{padding:10px 14px;border-radius:10px;border:none;background:var(--green);color:#fff;cursor:pointer}
-  .sidebar-controls{display:flex;gap:8px}
-    #debug{display:none;margin-top:8px;background:#071018;color:#9fd3ff;padding:8px;border-radius:8px;white-space:pre-wrap;word-break:break-all;max-height:150px;overflow-y:auto;font-size:10px}
-  .section-title{font-weight:700;color:var(--text-light);margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.5px}
-    main{background:none;border:none;padding:0}
-  .controls{display:flex;justify-content:space-between;align-items:center;gap:12px;background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line);flex-shrink:0}
-    #pitch-area{flex-grow:1;display:flex;flex-direction:column;gap:8px;background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line)}
-    #pitch{flex:1;background:#166534;border-radius:12px;border:3px solid #fff;position:relative;overflow:hidden}
-    #playlist-bar{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
-    #playlist-title{font-weight:700;white-space:nowrap}
-  .playlist-controls{display:flex;gap:6px}
-  .goal{position:absolute;width:3%;height:20%;border:3px solid #fff;top:40%;background:rgba(255,255,255,.05)}
-  .l-goal{left:0;border-left:none}
-  .r-goal{right:0;border-right:none}
-  .m-line{position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,.6)}
-  .m-circle{position:absolute;left:50%;top:50%;width:140px;height:140px;border:2px solid rgba(255,255,255,.6);border-radius:50%;transform:translate(-50%,-50%)}
-  .player,#ball{position:absolute;z-index:100;transition:all 1s cubic-bezier(.2,.8,.2,1)}
-  .player{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;text-shadow:1px 1px 3px #000;border:2px solid rgba(255,255,255,.8)}
-  .home{background:radial-gradient(circle at 30% 30%,#f87171,#b91c1c)}
-  .away{background:radial-gradient(circle at 30% 30%,#60a5fa,#1d4ed8);cursor:grab}
-    #ball{width:20px;height:20px;background:#fff;border-radius:50%;border:2px solid #000;cursor:grab}
-    #bank{position:absolute;right:8px;top:8px;width:120px;background:rgba(0,0,0,.35);padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.04);z-index:250}
-    #bank h5{margin:0 0 6px;font-size:12px;color:#cfe8ff}
-  .bank-player{padding:6px;border-radius:6px;background:rgba(255,255,255,.03);margin-bottom:6px;font-size:12px}
-    #coaching-panel{background:linear-gradient(145deg,#071018,#0b1220);padding:10px;border-radius:10px;border:1px solid var(--line);min-height:80px;color:#cfe8ff}
-    #coaching-panel h4{margin:0 0 6px;color:var(--text-light)}
-    #coaching-list{margin:6px 0 0 18px;padding:0;color:#dff6ff}
-    #whiteboard{position:fixed;top:20px;right:-460px;width:420px;height:calc(100vh - 40px);background:#f8fafc;color:#0f172a;border-radius:12px;padding:12px;transition:.35s;z-index:2000;box-shadow:-20px 0 60px rgba(0,0,0,.6)}
-    #whiteboard.open{right:20px}
-  .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#0b1220;color:var(--text);padding:16px;border-radius:10px;border:1px solid var(--line);z-index:4000;display:none;min-width:320px}
-  .modal.open{display:block}
-    #login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:5000}
-  .login-card{background:#0b1220;padding:24px;border-radius:12px;border:1px solid rgba(255,255,255,.04);width:420px;box-shadow:0 20px 60px rgba(0,0,0,.7)}
-  .login-card h2{color:var(--green);margin:0}
-  .login-card p{color:var(--text-light);margin:8px 0 16px}
-  .login-card input{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #26303a;background:var(--bg);color:#fff}
-  .login-card button{width:100%;margin-top:12px;padding:12px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer}
-  .btn{padding:10px 14px;border-radius:999px;border:none;cursor:pointer;background:var(--panel);color:#fff;white-space:nowrap}
-  .btn.primary{background:var(--accent);color:#fff}
-  .btn-small{padding:6px 10px;font-size:12px}
-  .small{font-size:12px;color:var(--text-light)}
-  .flex{display:flex;gap:8px;align-items:center}
-  .justify-end{justify-content:flex-end}
-    select{background:var(--bg);color:#fff;border:1px solid #26303a;padding:8px;border-radius:8px}
-  </style>
+    <style>
+        :root{
+            --green:#2ecc71; --accent:#0a74da; --bg:#07101a; --panel:#0f1720;
+            --line:rgba(255,255,255,0.12); --text:#e6eef0; --text-light:#9aa3ad;
+            --arrow-color:#ffcc00; --arrow-width:6;
+        }
+        html,body{height:100%;margin:0;padding:0;font-family:'Inter',Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#1b2333 0,#050608 55%);color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
+        *{box-sizing:border-box}
+        #app{display:grid;grid-template-columns:420px 1fr;gap:12px;height:100vh;padding:12px}
+        main,aside{display:flex;flex-direction:column;gap:12px;background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line)}
+       .header{font-weight:800;color:var(--green);padding:12px 8px;border-bottom:1px solid var(--line);margin:-12px -12px 0;padding:24px}
+        #chat-history{flex:1;overflow-y:auto;padding:12px 4px;display:flex;flex-direction:column;gap:10px}
+       .msg{padding:10px 12px;border-radius:12px;max-width:86%;line-height:1.4;word-break:break-word}
+       .user{align-self:flex-end;background:linear-gradient(135deg,#2563eb,#38bdf8);color:#fff}
+       .toni{align-self:flex-start;background:#1f2937;border-left:4px solid var(--green);color:var(--text)}
+       .input-row{display:flex;gap:8px;padding:10px 0 0;border-top:1px solid var(--line)}
+       .input-row input{flex:1;padding:10px;border-radius:10px;border:1px solid #26303a;background:var(--bg);color:#fff}
+       .input-row button{padding:10px 14px;border-radius:10px;border:none;background:var(--green);color:#fff;cursor:pointer}
+       .sidebar-controls{display:flex;gap:8px}
+        #debug{display:none;margin-top:8px;background:#071018;color:#9fd3ff;padding:8px;border-radius:8px;white-space:pre-wrap;word-break:break-all;max-height:150px;overflow-y:auto;font-size:10px}
+       .section-title{font-weight:700;color:var(--text-light);margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+        main{background:none;border:none;padding:0}
+       .controls{display:flex;justify-content:space-between;align-items:center;gap:12px;background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line);flex-shrink:0}
+        #pitch-area{flex-grow:1;display:flex;flex-direction:column;gap:8px;background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line)}
+        #pitch{flex:1;background:#166534;border-radius:12px;border:3px solid #fff;position:relative;overflow:hidden}
+        #playlist-bar{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+        #playlist-title{font-weight:700;white-space:nowrap}
+       .playlist-controls{display:flex;gap:6px}
+       .goal{position:absolute;width:3%;height:20%;border:3px solid #fff;top:40%;background:rgba(255,255,255,.05)}
+       .l-goal{left:0;border-left:none}
+       .r-goal{right:0;border-right:none}
+       .m-line{position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,.6)}
+       .m-circle{position:absolute;left:50%;top:50%;width:140px;height:140px;border:2px solid rgba(255,255,255,.6);border-radius:50%;transform:translate(-50%,-50%)}
+       .player,#ball{position:absolute;z-index:100;transition:all 1s cubic-bezier(.2,.8,.2,1)}
+       .player{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;text-shadow:1px 1px 3px #000;border:2px solid rgba(255,255,255,.8)}
+       .home{background:radial-gradient(circle at 30% 30%,#f87171,#b91c1c)}
+       .away{background:radial-gradient(circle at 30% 30%,#60a5fa,#1d4ed8);cursor:grab}
+        #ball{width:20px;height:20px;background:#fff;border-radius:50%;border:2px solid #000;cursor:grab}
+        #bank{position:absolute;right:8px;top:8px;width:120px;background:rgba(0,0,0,.35);padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.04);z-index:250}
+        #bank h5{margin:0 0 6px;font-size:12px;color:#cfe8ff}
+       .bank-player{padding:6px;border-radius:6px;background:rgba(255,255,255,.03);margin-bottom:6px;font-size:12px}
+        #coaching-panel{background:linear-gradient(145deg,#071018,#0b1220);padding:10px;border-radius:10px;border:1px solid var(--line);min-height:80px;color:#cfe8ff}
+        #coaching-panel h4{margin:0 0 6px;color:var(--text-light)}
+        #coaching-list{margin:6px 0 0 18px;padding:0;color:#dff6ff}
+        #whiteboard{position:fixed;top:20px;right:-460px;width:420px;height:calc(100vh - 40px);background:#f8fafc;color:#0f172a;border-radius:12px;padding:12px;transition:.35s;z-index:2000;box-shadow:-20px 0 60px rgba(0,0,0,.6)}
+        #whiteboard.open{right:20px}
+       .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#0b1220;color:var(--text);padding:16px;border-radius:10px;border:1px solid var(--line);z-index:4000;display:none;min-width:320px}
+       .modal.open{display:block}
+        #login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:5000}
+       .login-card{background:#0b1220;padding:24px;border-radius:12px;border:1px solid rgba(255,255,255,.04);width:420px;box-shadow:0 20px 60px rgba(0,0,0,.7)}
+       .login-card h2{color:var(--green);margin:0}
+       .login-card p{color:var(--text-light);margin:8px 0 16px}
+       .login-card input{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #26303a;background:var(--bg);color:#fff}
+       .login-card button{width:100%;margin-top:12px;padding:12px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer}
+       .btn{padding:10px 14px;border-radius:999px;border:none;cursor:pointer;background:var(--panel);color:#fff;white-space:nowrap}
+       .btn.primary{background:var(--accent);color:#fff}
+       .btn-small{padding:6px 10px;font-size:12px}
+       .small{font-size:12px;color:var(--text-light)}
+       .flex{display:flex;gap:8px;align-items:center}
+       .justify-end{justify-content:flex-end}
+        select{background:var(--bg);color:#fff;border:1px solid #26303a;padding:8px;border-radius:8px}
+    </style>
 </head>
 <body>
 
-  <div id="login-overlay">
-    <div class="login-card">
-      <h2>⚽ COACH TONI 2.0</h2>
-      <p>Bitte Passwort eingeben, um die Plattform zu starten.</p>
-      <input id="password" type="password" placeholder="Passwort (Trainer2026)" value="Trainer2026" />
-      <input id="user-key" type="text" placeholder="Optional: Dein Gemini API-Key" />
-      <button id="login-btn">SYSTEM INITIALISIEREN</button>
+    <div id="login-overlay">
+        <div class="login-card">
+            <h2>⚽ COACH TONI 2.0</h2>
+            <p>Bitte Passwort eingeben, um die Plattform zu starten.</p>
+            <input id="password" type="password" placeholder="Passwort (Trainer2026)" value="Trainer2026" />
+            <input id="user-key" type="text" placeholder="Optional: Dein Gemini API-Key" />
+            <button id="login-btn">SYSTEM INITIALISIEREN</button>
+        </div>
     </div>
-  </div>
 
-  <div id="app" aria-hidden="true">
-    <aside id="sidebar">
-      <header class="header">TONI – STRATEGIE & TRAINING</header>
-      <div id="chat-history" aria-live="polite"></div>
-      <section class="bottom-controls" style="margin-top:auto; padding-top:10px;">
-        <div class="flex">
-          <label for="voice-select" class="small">Stimme</label>
-          <select id="voice-select"></select>
-          <label for="mode-select" class="small" style="margin-left:auto">Modus</label>
-          <select id="mode-select">
-            <option value="training">Trainingsmodus</option>
-            <option value="match">Spielvorbereitung</option>
-          </select>
-        </div>
-        <div class="input-row">
-          <button id="mic-btn" aria-label="Spracheingabe starten">🎤</button>
-          <input id="user-input" placeholder="Frag Toni etwas..." />
-          <button id="ok-btn">OK</button>
-        </div>
-        <nav class="sidebar-controls" style="margin-top:8px;">
-          <button id="welcome-btn" class="btn">👋 Begrüßung</button>
-          <button id="kader-btn" class="btn">📋 Kader</button>
-          <button id="preview-btn" class="btn">✅ Vorschau Moves</button>
-        </nav>
-      </section>
-      <section style="margin-top:10px">
-        <h3 class="section-title">Heute im Plan</h3>
-        <div id="script-list" style="max-height:150px; overflow-y:auto;"></div>
-        <div class="flex" style="margin-top:8px">
-          <button id="export-json-btn" class="btn">Export JSON</button>
-          <button id="export-pdf-btn" class="btn">Export PDF</button>
-        </div>
-      </section>
-      <pre id="debug"></pre>
-    </aside>
+    <div id="app" aria-hidden="true" style="display:none;">
+        <aside id="sidebar">
+            <header class="header">TONI – STRATEGIE & TRAINING</header>
+            <div id="chat-history" aria-live="polite"></div>
+            <section class="bottom-controls" style="margin-top:auto; padding-top:10px;">
+                <div class="flex">
+                    <label for="voice-select" class="small">Stimme</label>
+                    <select id="voice-select"></select>
+                    <label for="mode-select" class="small" style="margin-left:auto">Modus</label>
+                    <select id="mode-select">
+                        <option value="training">Trainingsmodus</option>
+                        <option value="match">Spielvorbereitung</option>
+                    </select>
+                </div>
+                <div class="input-row">
+                    <button id="mic-btn" aria-label="Spracheingabe starten">🎤</button>
+                    <input id="user-input" placeholder="Frag Toni etwas..." />
+                    <button id="ok-btn">OK</button>
+                </div>
+                <nav class="sidebar-controls" style="margin-top:8px;">
+                    <button id="welcome-btn" class="btn">👋 Begrüßung</button>
+                    <button id="kader-btn" class="btn">📋 Kader</button>
+                    <button id="preview-btn" class="btn">✅ Vorschau Moves</button>
+                </nav>
+            </section>
+            <section style="margin-top:10px">
+                <h3 class="section-title">Heute im Plan</h3>
+                <div id="script-list" style="max-height:150px; overflow-y:auto;"></div>
+                <div class="flex" style="margin-top:8px">
+                    <button id="export-json-btn" class="btn">Export JSON</button>
+                    <button id="export-pdf-btn" class="btn">Export PDF</button>
+                </div>
+            </section>
+            <pre id="debug"></pre>
+        </aside>
 
-    <main id="main">
-      <div class="controls">
-        <div class="flex">
-          <button id="reset-board-btn" class="btn primary">♻ GRUNDORDNUNG</button>
-          <nav id="playlist-bar">
-            <div id="playlist-title" class="small"></div>
-            <div class="playlist-controls">
-              <button id="prev-phase-btn" class="btn btn-small">◀</button>
-              <button id="next-phase-btn" class="btn btn-small">▶</button>
-              <button id="add-phase-btn" class="btn btn-small">＋ Phase</button>
-              <button id="dup-phase-btn" class="btn btn-small">Duplizieren</button>
-              <button id="del-phase-btn" class="btn btn-small">Löschen</button>
+        <main id="main">
+            <div class="controls">
+                <div class="flex">
+                    <button id="reset-board-btn" class="btn primary">♻ GRUNDORDNUNG</button>
+                    <nav id="playlist-bar">
+                        <div id="playlist-title" class="small"></div>
+                        <div class="playlist-controls">
+                            <button id="prev-phase-btn" class="btn btn-small">◀</button>
+                            <button id="next-phase-btn" class="btn btn-small">▶</button>
+                            <button id="add-phase-btn" class="btn btn-small">＋ Phase</button>
+                            <button id="dup-phase-btn" class="btn btn-small">Duplizieren</button>
+                            <button id="del-phase-btn" class="btn btn-small">Löschen</button>
+                        </div>
+                    </nav>
+                </div>
+                <div class="flex">
+                    <label for="svg-color" class="small">SVG Style:</label>
+                    <input type="color" id="svg-color" value="#ffcc00" title="Pfeilfarbe" />
+                    <input type="range" id="svg-width" min="2" max="12" value="6" title="Pfeilbreite" />
+                    <div id="timer" class="small" style="width:50px; text-align:center;">00:00</div>
+                    <button id="start-timer-btn" class="btn btn-small">Start</button>
+                    <button id="stop-timer-btn" class="btn btn-small">Stop</button>
+                    <button id="reset-timer-btn" class="btn btn-small">Reset</button>
+                </div>
             </div>
-          </nav>
-        </div>
-        <div class="flex">
-          <label for="svg-color" class="small">SVG Style:</label>
-          <input type="color" id="svg-color" value="#ffcc00" title="Pfeilfarbe" />
-          <input type="range" id="svg-width" min="2" max="12" value="6" title="Pfeilbreite" />
-          <div id="timer" class="small" style="width:50px; text-align:center;">00:00</div>
-          <button id="start-timer-btn" class="btn btn-small">Start</button>
-          <button id="stop-timer-btn" class="btn btn-small">Stop</button>
-          <button id="reset-timer-btn" class="btn btn-small">Reset</button>
-        </div>
-      </div>
-      <div id="pitch-area">
-        <div id="pitch">
-          <div class="goal l-goal"></div><div class="goal r-goal"></div>
-          <div class="m-line"></div><div class="m-circle"></div>
-          <svg id="exercise-svg" viewBox="0 0 1000 600" preserveAspectRatio="none"></svg>
-          <aside id="bank">
-            <h5>Bank</h5>
-            <div id="bank-list"></div>
-          </aside>
-          <div id="ball" style="left:50%;top:50%"></div>
-          <div id="players-layer"></div>
-        </div>
-        <section id="coaching-panel">
-          <h4>Coaching-Points</h4>
-          <ol id="coaching-list"></ol>
-        </section>
-      </div>
-    </main>
-  </div>
+            <div id="pitch-area">
+                <div id="pitch">
+                    <div class="goal l-goal"></div><div class="goal r-goal"></div>
+                    <div class="m-line"></div><div class="m-circle"></div>
+                    <svg id="exercise-svg" viewBox="0 0 1000 600" preserveAspectRatio="none"></svg>
+                    <aside id="bank">
+                        <h5>Bank</h5>
+                        <div id="bank-list"></div>
+                    </aside>
+                    <div id="ball" style="left:50%;top:50%"></div>
+                    <div id="players-layer"></div>
+                </div>
+                <section id="coaching-panel">
+                    <h4>Coaching-Points</h4>
+                    <ol id="coaching-list"></ol>
+                </section>
+            </div>
+        </main>
+    </div>
 
-  <div id="whiteboard">
-    <h3>📋 Kader & Anwesenheit</h3>
-    <p class="small">Format: "Nummer Name [red|blue]" — Team ist optional.</p>
-    <textarea id="player-list" style="width:100%;height:120px;padding:8px;border-radius:8px;">1 Neuer blue
+    <div id="whiteboard">
+        <h3>📋 Kader & Anwesenheit</h3>
+        <p class="small">Format: "Nummer Name [red|blue]" — Team ist optional.</p>
+        <textarea id="player-list" style="width:100%;height:120px;padding:8px;border-radius:8px;">1 Neuer blue
 5 Hummels blue
 9 Müller red</textarea>
-    <div class="flex" style="margin-top:8px">
-      <button id="sync-names-btn" class="btn primary">Sync</button>
-      <button id="close-whiteboard-btn" class="btn">Schließen</button>
+        <div class="flex" style="margin-top:8px">
+            <button id="sync-names-btn" class="btn primary">Sync</button>
+            <button id="close-whiteboard-btn" class="btn">Schließen</button>
+        </div>
     </div>
-  </div>
 
-  <div id="confirm-modal" class="modal">
-    <h4>Vorschau: Toni schlägt folgende Bewegungen vor</h4>
-    <div id="pending-list" style="margin-top:8px;max-height:220px;overflow:auto"></div>
-    <div class="flex justify-end" style="margin-top:12px">
-      <button id="cancel-pending-btn" class="btn">Abbrechen</button>
-      <button id="confirm-pending-btn" class="btn primary">Bestätigen</button>
+    <div id="confirm-modal" class="modal">
+        <h4>Vorschau: Toni schlägt folgende Bewegungen vor</h4>
+        <div id="pending-list" style="margin-top:8px;max-height:220px;overflow:auto"></div>
+        <div class="flex justify-end" style="margin-top:12px">
+            <button id="cancel-pending-btn" class="btn">Abbrechen</button>
+            <button id="confirm-pending-btn" class="btn primary">Bestätigen</button>
+        </div>
     </div>
-  </div>
 
 <script>
 const App = {
+    // Zentraler Zustand der Anwendung
     State: {
         GEMINI_KEY: "",
         isLocked: false,
@@ -208,8 +209,10 @@ const App = {
             "crossing_02": { id:"crossing_02", title:"Flanken-Überladung", type:"Flanke", duration:12, players:7, description:"Überladung Flügel, präzise Hereingaben aus vollem Lauf", moves:[{id:"home7",x:0.75,y:0.25},{id:"home9",x:0.75,y:0.5},{pass:["home7","home9"]}], setup:{cones:8,goals:0} }
         }
     },
+    // Referenzen zu allen DOM-Elementen
     DOM: {},
 
+    // INITIALISIERUNG
     init: function() {
         this.initDOM();
         this.initListeners();
@@ -218,6 +221,7 @@ const App = {
 
     initDOM: function() {
         const ids = ['login-overlay', 'password', 'user-key', 'login-btn', 'app', 'sidebar', 'header', 'chat-history', 'voice-select', 'mode-select', 'mic-btn', 'user-input', 'ok-btn', 'welcome-btn', 'kader-btn', 'preview-btn', 'script-list', 'export-json-btn', 'export-pdf-btn', 'debug', 'main', 'controls', 'reset-board-btn', 'playlist-bar', 'playlist-title', 'prev-phase-btn', 'next-phase-btn', 'add-phase-btn', 'dup-phase-btn', 'del-phase-btn', 'svg-color', 'svg-width', 'timer', 'start-timer-btn', 'stop-timer-btn', 'reset-timer-btn', 'pitch-area', 'pitch', 'exercise-svg', 'bank', 'bank-list', 'ball', 'players-layer', 'coaching-panel', 'coaching-list', 'whiteboard', 'player-list', 'sync-names-btn', 'close-whiteboard-btn', 'confirm-modal', 'pending-list', 'cancel-pending-btn', 'confirm-pending-btn'];
+        this.DOM = {};
         ids.forEach(id => {
             const camelCaseId = id.replace(/-(\w)/g, (_, c) => c.toUpperCase());
             this.DOM = document.getElementById(id);
@@ -247,19 +251,24 @@ const App = {
         window.addEventListener('voiceschanged', () => this.populateVoiceSelect());
     },
     
+    // HAUPT-LOGIK
     startToni: function() {
         if (this.DOM.password.value!== 'Trainer2026') return alert('Zutritt verweigert.');
         this.State.GEMINI_KEY = this.DOM.userKey.value.trim();
         this.DOM.loginOverlay.style.display = 'none';
+        this.DOM.app.style.display = 'grid';
         this.DOM.app.setAttribute('aria-hidden', 'false');
+        
         this.resetBoard();
         this.makeDraggable(this.DOM.ball);
+        
         if (speechSynthesis.getVoices().length === 0) {
             speechSynthesis.onvoiceschanged = () => { this.populateVoiceSelect(); this.setupVoice(); };
         } else {
             this.populateVoiceSelect();
             this.setupVoice();
         }
+        
         this.addMsg('toni', 'Toni initialisiert. Guten Tag, Coach. Ich bin bereit.');
         this.logDebug('Toni initialisiert');
     },
@@ -312,13 +321,14 @@ const App = {
             this.State.pendingMoves = rawMoves.map(m => ({
                 id: m.toLowerCase(),
                 x: parseInt(m, 10) / 100,
-                y: parseInt(m, 10) / 100,
+                y: parseInt(m, 10) / 100
             }));
             this.renderPendingList();
             this.openConfirmModal();
         }
     },
     
+    // UI & HELPER
     addMsg: function(role, txt) {
         const h = this.DOM.chatHistory;
         const d = document.createElement('div');
@@ -347,6 +357,7 @@ const App = {
         if (this.DOM.debug) {
             const time = new Date().toLocaleTimeString();
             this.DOM.debug.textContent = `${time} ${msg}\n${this.DOM.debug.textContent}`;
+            this.DOM.debug.style.display = 'block';
         }
         console.log(msg);
     },
@@ -475,8 +486,7 @@ const App = {
         const rect = field.getBoundingClientRect();
         for(const mv of moves){
             const el = document.getElementById(mv.id);
-            if(!el) continue;
-            if(el.dataset.team!== 'home') continue;
+            if(!el || el.dataset.team!== 'home') continue;
             const left = Math.round(mv.x * (rect.width - el.offsetWidth));
             const top = Math.round(mv.y * (rect.height - el.offsetHeight));
             this.speakStyled(`${mv.id} läuft jetzt.`);
@@ -497,13 +507,15 @@ const App = {
         });
     },
 
-    openConfirmModal: function(){ this.DOM.confirmModal.classList.add('open'); },
+    openConfirmModal: function(){ if(this.State.pendingMoves.length > 0) this.DOM.confirmModal.classList.add('open'); },
     cancelPending: function(){ this.State.pendingMoves = []; this.DOM.confirmModal.classList.remove('open'); this.addMsg('toni','Vorschläge verworfen.'); },
     confirmAndExecutePending: async function(){
         this.DOM.confirmModal.classList.remove('open');
-        this.addMsg('toni','Führe die bestätigten Bewegungen aus.');
-        await this.moveHomePlayersSequential(this.State.pendingMoves);
-        this.State.pendingMoves = [];
+        if (this.State.pendingMoves.length > 0) {
+            this.addMsg('toni','Führe die bestätigten Bewegungen aus.');
+            await this.moveHomePlayersSequential(this.State.pendingMoves);
+            this.State.pendingMoves = [];
+        }
     },
 
     startTimer: function(){ if(this.State.timerInterval) return; this.State.timerInterval = setInterval(()=>{ this.State.timerSeconds++; this.DOM.timer.innerText = this.formatTime(this.State.timerSeconds); },1000); },
@@ -515,10 +527,12 @@ const App = {
         const sel = this.DOM.voiceSelect;
         sel.innerHTML = '<option value="">Automatisch (männlich bevorzugt)</option>';
         speechSynthesis.getVoices().forEach(v=>{
-            const opt = document.createElement('option');
-            opt.value = v.name;
-            opt.text = `${v.name} (${v.lang})`;
-            sel.appendChild(opt);
+            if(v.lang.startsWith('de')) {
+                const opt = document.createElement('option');
+                opt.value = v.name;
+                opt.text = `${v.name} (${v.lang})`;
+                sel.appendChild(opt);
+            }
         });
     },
     setupVoice: function(){
@@ -563,4 +577,4 @@ const App = {
 window.addEventListener('load', () => App.init());
 </script>
 </body>
-</html>[0]
+</html>
