@@ -10,190 +10,170 @@
             --bg-dark: #050608;
             --line: rgba(255,255,255,0.12);
             --text-light: rgba(255,255,255,0.9);
+            --shadow-strong: 0 18px 40px rgba(0,0,0,0.65);
         }
 
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            background: #050608;
+            background: radial-gradient(circle at top, #1b2333 0, #050608 55%);
             color: var(--text-light);
-            font-family: 'Inter', sans-serif;
-            overflow: hidden; /* Verhindert das Scrollen der ganzen Seite */
+            font-family: "Inter", sans-serif;
+            overflow: hidden;
             height: 100vh;
         }
 
         #layout {
             display: grid;
-            grid-template-columns: 350px 1fr;
+            grid-template-columns: 340px 1fr;
             height: 100vh;
             gap: 12px;
             padding: 12px;
         }
 
-        /* --- SIDEBAR (Fixiert) --- */
+        /* --- SIDEBAR & CHAT --- */
         #chat-sidebar {
-            background: #111319;
+            background: linear-gradient(145deg, #10121a, #151824);
             border-radius: 18px;
             border: 1px solid var(--line);
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Wichtig für internes Scrollen */
+            box-shadow: var(--shadow-strong);
+            height: calc(100vh - 24px); /* Fixierte Höhe */
         }
 
         .chat-header {
-            padding: 16px;
+            padding: 16px 18px;
             font-weight: 700;
             color: var(--green);
             border-bottom: 1px solid rgba(255,255,255,0.08);
-            background: #0a0b10;
         }
 
         #chat-history {
             flex: 1;
-            overflow-y: auto; /* NUR die Historie scrollt */
+            overflow-y: auto; /* NUR HIER WIRD GESCROLLT */
             padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .msg { padding: 12px; border-radius: 12px; font-size: 0.9rem; max-width: 90%; line-height: 1.4; }
-        .user { align-self: flex-end; background: #2563eb; color: white; }
-        .toni { align-self: flex-start; background: #1f2937; border-left: 4px solid var(--green); }
+        .msg { padding: 10px 12px; border-radius: 14px; font-size: 0.9rem; line-height: 1.45; max-width: 92%; }
+        .user { align-self: flex-end; background: linear-gradient(135deg, #2563eb, #38bdf8); color: white; }
+        .toni { align-self: flex-start; background: #1f2937; border-left: 3px solid var(--green); }
 
-        .chat-input-row {
-            padding: 15px;
-            background: #0a0b10;
-            border-top: 1px solid var(--line);
-            display: flex;
-            gap: 8px;
-        }
+        .chat-input-row { padding: 12px; background: #050712; border-top: 1px solid var(--line); display: flex; gap: 8px; }
+        .chat-input-row input { flex: 1; background: #020617; color: white; border: 1px solid #374151; padding: 10px; border-radius: 8px; }
+        .chat-input-row button { border: none; cursor: pointer; border-radius: 8px; padding: 10px; background: var(--green); font-weight: bold; }
 
-        .chat-input-row input {
-            flex: 1; background: #000; color: white; border: 1px solid #333; padding: 10px; border-radius: 8px;
-        }
-
-        /* --- PITCH AREA --- */
+        /* --- SPIELFELD --- */
         #pitch-area {
+            background: linear-gradient(145deg, #0b1120, #020617);
+            border-radius: 18px;
+            border: 1px solid var(--line);
             display: flex;
             flex-direction: column;
-            background: #0b1120;
-            border-radius: 18px;
             padding: 10px;
             position: relative;
-            overflow: hidden;
         }
 
-        .pitch-toolbar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .toolbar-btn {
-            background: #111827; color: white; border: 1px solid #333;
-            padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8rem;
-        }
+        .pitch-toolbar { display: flex; justify-content: space-between; padding-bottom: 10px; }
+        .toolbar-btn { background: #020617; color: #e5e7eb; border-radius: 999px; border: 1px solid #1f2937; padding: 8px 15px; font-size: 0.8rem; cursor: pointer; }
 
         #pitch {
             flex: 1;
-            background: #166534; /* Klassisches Grün */
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 12px;
+            background: #166534;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
             position: relative;
             overflow: hidden;
         }
 
-        /* Kader Panel (Einklappbar) */
-        #kader-panel {
-            position: absolute;
-            top: 60px;
-            right: -320px;
-            width: 300px;
-            height: calc(100% - 70px);
-            background: white;
-            color: black;
-            transition: 0.3s ease-in-out;
-            z-index: 2000;
-            border-radius: 12px 0 0 12px;
-            padding: 20px;
-            box-shadow: -10px 0 20px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-        }
-
-        #kader-panel.open { right: 0; }
-
-        #player-list {
-            flex: 1; width: 100%; border: 1px solid #ccc; border-radius: 5px;
-            padding: 10px; font-family: monospace; font-size: 1rem; resize: none;
-        }
-
-        /* Spieler Kreise */
-        .player {
-            position: absolute; width: 44px; height: 44px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 11px; color: white; cursor: grab;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 100;
-            transition: transform 0.1s;
-        }
+        /* --- SPIELER & BALL --- */
+        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 0.8s cubic-bezier(0.2, 0.7, 0.3, 1); }
+        .player { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .home { background: radial-gradient(circle, #f87171, #b91c1c); border: 2px solid white; }
         .away { background: radial-gradient(circle, #60a5fa, #1d4ed8); border: 2px solid white; }
-        #ball { width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; border: 2px solid black; z-index: 110; cursor: grab; }
+        #ball { width: 18px; height: 18px; background: white; border-radius: 50%; border: 2px solid black; }
+
+        /* --- KADER PANEL --- */
+        #whiteboard-panel {
+            position: absolute; top: 60px; right: -360px; width: 340px; height: calc(100% - 70px);
+            background: white; color: black; transition: 0.3s ease; z-index: 2000;
+            display: flex; flex-direction: column; padding: 15px; border-radius: 15px 0 0 15px;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+        #whiteboard-panel.open { right: 0; }
+        #player-list { flex: 1; width: 100%; font-family: monospace; padding: 10px; border-radius: 8px; resize: none; font-size: 1.1rem; }
+
+        /* --- LOGIN --- */
+        #login-overlay { position: fixed; inset: 0; background: #050608; display: flex; align-items: center; justify-content: center; z-index: 4000; }
+        .login-card { background: #111319; padding: 30px; border-radius: 20px; border: 1px solid var(--green); text-align: center; }
+        .login-card input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; }
     </style>
 </head>
 <body>
 
+<div id="login-overlay">
+    <div class="login-card">
+        <h2 style="color:var(--green)">⚽ COACH TONI 2.0</h2>
+        <input type="password" id="password" placeholder="Passwort (Trainer2026)">
+        <input type="text" id="user-key" placeholder="Groq API-Key (gsk_...)">
+        <button onclick="startToni()" style="width:100%; padding:12px; background:var(--green); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">SYSTEM STARTEN</button>
+    </div>
+</div>
+
 <div id="layout">
     <aside id="chat-sidebar">
-        <div class="chat-header">TRAINER-KOMMANDO <span style="float:right; font-size:0.7rem; color:#555;">Toni 2.0</span></div>
+        <div class="chat-header">TRAINER-KOMMANDO</div>
         <div id="chat-history"></div>
-        <div id="status" style="font-size:0.7rem; text-align:center; color:#555; padding:5px;">Bereit</div>
+        <div id="status" style="font-size:0.7rem; text-align:center; padding:5px; color:#555;">Ready</div>
         <div class="chat-input-row">
-            <input type="text" id="user-input" placeholder="Befehl an Toni..." onkeypress="if(event.key==='Enter') askToni()">
-            <button onclick="askToni()" style="background:var(--green); border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">OK</button>
+            <input type="text" id="user-input" placeholder="Anweisung..." onkeypress="if(event.key==='Enter') askToni()">
+            <button onclick="askToni()">OK</button>
         </div>
     </aside>
 
     <main id="pitch-area">
         <div class="pitch-toolbar">
-            <button class="toolbar-btn" onclick="resetBoard()" style="background:var(--green); color:black; border:none; font-weight:bold;">♻ Grundordnung</button>
+            <button class="toolbar-btn" onclick="resetBoard()">♻ Reset</button>
             <div>
-                <button id="voice-btn" class="toolbar-btn" onclick="toggleVoice()">🔊 Stimme</button>
                 <button class="toolbar-btn" onclick="toggleKader()">📋 Kader</button>
             </div>
         </div>
-
         <div id="pitch">
             <div id="ball" style="left:50%; top:50%;"></div>
             <div id="players-layer"></div>
         </div>
-
-        <div id="kader-panel">
-            <h3 style="margin-top:0;">📋 Kaderliste</h3>
-            <p style="font-size:0.7rem; color:#666;">Format: 1 Mike (Nummer Leerzeichen Name)</p>
-            <textarea id="player-list" oninput="syncNames()" placeholder="1 Mike&#10;2 Hummels"></textarea>
-            <button onclick="toggleKader()" style="margin-top:10px; padding:10px; cursor:pointer;">Schließen</button>
+        
+        <div id="whiteboard-panel">
+            <h3>📋 Kaderliste</h3>
+            <p style="font-size:0.7rem; color:gray;">Format: 1 Mike</p>
+            <textarea id="player-list" oninput="syncNames()"></textarea>
+            <button onclick="toggleKader()" style="margin-top:10px; padding:10px;">Schließen</button>
         </div>
     </main>
 </div>
 
 <script>
-    let GROQ_KEY = "DEIN_GROQ_KEY"; // Hier deinen gsk_ Key eintragen
-    let voiceEnabled = true;
+    let GROQ_KEY = "";
+    let isLocked = false;
 
-    function toggleKader() { document.getElementById('kader-panel').classList.toggle('open'); }
-    function toggleVoice() { 
-        voiceEnabled = !voiceEnabled; 
-        document.getElementById('voice-btn').innerText = voiceEnabled ? "🔊 Stimme" : "🔇 Stumm";
+    function toggleKader() { document.getElementById('whiteboard-panel').classList.toggle('open'); }
+
+    function startToni() {
+        if (document.getElementById('password').value === "Trainer2026") {
+            GROQ_KEY = document.getElementById('user-key').value.trim();
+            document.getElementById('login-overlay').style.display = 'none';
+            resetBoard();
+        } else { alert("Passwort falsch!"); }
     }
 
-    // --- Board Logik ---
     function resetBoard() {
         const layer = document.getElementById('players-layer');
         layer.innerHTML = "";
-        const homePositions = [[10,50], [25,20], [25,40], [25,60], [25,80], [45,30], [45,70]];
-        homePositions.forEach((pos, i) => createPlayer('home', i+1, pos[0], pos[1], layer));
+        const h = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,30], [45,70]];
+        h.forEach((p, i) => createPlayer('home', i + 1, p[0], p[1], layer));
         syncNames();
     }
 
@@ -206,85 +186,72 @@
     }
 
     function syncNames() {
-        const text = document.getElementById('player-list').value;
-        const lines = text.split('\n');
-        // Erst alle auf Nummer zurücksetzen
+        const list = document.getElementById('player-list').value;
         document.querySelectorAll('.player.home').forEach(p => p.innerText = p.id.replace('home',''));
-        // Dann Namen zuweisen
-        lines.forEach(line => {
+        list.split('\n').forEach(line => {
             const m = line.match(/^(\d+)\s*(.*)$/);
             if (m) {
                 const el = document.getElementById('home' + m[1]);
-                if (el && m[2].trim()) el.innerText = m[2].trim().split(' ')[0]; // Nur Vorname
+                const name = m[2].trim().split(' ')[0];
+                if (el && name) el.innerText = name;
             }
         });
     }
 
     function makeDraggable(el) {
-        let isDragging = false;
-        el.onmousedown = () => isDragging = true;
+        let dragging = false;
+        el.onmousedown = () => { dragging = true; el.style.transition = "none"; };
         document.onmousemove = (e) => {
-            if (!isDragging) return;
-            const pitch = document.getElementById('pitch').getBoundingClientRect();
-            el.style.left = ((e.clientX - pitch.left) / pitch.width * 100) + "%";
-            el.style.top = ((e.clientY - pitch.top) / pitch.height * 100) + "%";
+            if (!dragging) return;
+            const r = document.getElementById('pitch').getBoundingClientRect();
+            el.style.left = Math.max(0, Math.min(96, ((e.clientX - r.left) / r.width) * 100)) + "%";
+            el.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
         };
-        document.onmouseup = () => isDragging = false;
+        document.onmouseup = () => { dragging = false; el.style.transition = "all 0.8s ease"; };
     }
     makeDraggable(document.getElementById('ball'));
 
-    // --- Toni KI Logik ---
-    async function askToni() {
-        const input = document.getElementById('user-input');
-        const text = input.value; if (!text) return;
-        addMsg('user', text); input.value = "";
-        document.getElementById('status').innerText = "Toni denkt nach...";
+    function speak(txt) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(txt);
+        msg.lang = 'de-DE'; msg.pitch = 0.8;
+        window.speechSynthesis.speak(msg);
+    }
 
-        // Klopp & Nagelsmann Persönlichkeit
-        const systemPrompt = `Du bist Toni, Co-Trainer von Björn (BVB-Hintergrund). Du bist eine Mischung aus Klopp (emotional) und Nagelsmann (taktisch brillant). Antworte kurz, menschlich und fachlich. Nutze MOVE[home1,20,30] für Taktik-Änderungen.`;
+    async function askToni() {
+        if (isLocked) return;
+        const input = document.getElementById('user-input');
+        const text = input.value.trim(); if (!text) return;
+        addMsg('user', text); input.value = ""; isLocked = true;
+        document.getElementById('status').innerText = "Toni analysiert...";
+
+        const prompt = `Du bist Toni (Klopp & Nagelsmann Mix), Co-Trainer von Björn (BVB). Antworte taktisch brilliant und emotional. MOVE[home1,20,30] für Bewegungen. Frage: ${text}`;
 
         try {
-            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                method: "POST",
-                headers: { "Authorization": "Bearer " + GROQ_KEY, "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    model: "llama-3.3-70b-versatile", 
-                    messages: [{role: "system", content: systemPrompt}, {role: "user", content: text}] 
-                })
+            const resp = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+                method: "POST", headers: { "Authorization": "Bearer " + GROQ_KEY, "Content-Type": "application/json" },
+                body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{role: "system", content: prompt}] })
             });
-            const data = await res.json();
-            const answer = data.choices[0].message.content;
-            
-            document.getElementById('status').innerText = "Bereit";
-            addMsg('toni', answer.replace(/MOVE\[.*?\]/g, ""));
-
-            // Stimme ausgeben
-            if (voiceEnabled) {
-                const synth = window.speechSynthesis;
-                const utter = new SpeechSynthesisUtterance(answer.replace(/MOVE\[.*?\]/g, ""));
-                utter.lang = 'de-DE'; utter.pitch = 0.8; utter.rate = 1.0;
-                synth.speak(utter);
+            const data = await resp.json();
+            isLocked = false; document.getElementById('status').innerText = "Ready";
+            if (data.choices) {
+                let answer = data.choices[0].message.content;
+                let clean = answer.replace(/MOVE\[.*?\]/g, "");
+                addMsg('toni', clean); speak(clean);
+                const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
+                moves.forEach(m => {
+                    const el = document.getElementById(m[1].replace('H','home').replace('A','away'));
+                    if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
+                });
             }
-
-            // Bewegungen ausführen
-            const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
-            moves.forEach(m => {
-                const el = document.getElementById(m[1]);
-                if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
-            });
-
-        } catch (e) { document.getElementById('status').innerText = "Technik-Fehler!"; }
+        } catch (e) { isLocked = false; addMsg('toni', "Technik-Foul!"); }
     }
 
-    function addMsg(role, text) {
-        const hist = document.getElementById('chat-history');
-        const div = document.createElement('div');
-        div.className = `msg ${role}`; div.innerText = text;
-        hist.appendChild(div);
-        hist.scrollTop = hist.scrollHeight;
+    function addMsg(role, txt) {
+        const h = document.getElementById('chat-history');
+        const d = document.createElement('div'); d.className = `msg ${role}`; d.innerText = txt;
+        h.appendChild(d); h.scrollTop = h.scrollHeight;
     }
-
-    window.onload = resetBoard;
 </script>
 </body>
 </html>
