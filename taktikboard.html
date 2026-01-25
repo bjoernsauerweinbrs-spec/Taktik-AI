@@ -5,9 +5,358 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coach Toni 2.0 – Taktikboard</title>
 
-</head>
+    <style>
+        :root {
+            --green: #2ecc71;
+            --green-dark: #27ae60;
+            --bg-dark: #050608;
+            --bg-panel: #111319;
+            --bg-panel-light: #191b23;
+            --line: rgba(255,255,255,0.12);
+            --text-light: rgba(255,255,255,0.9);
+            --shadow-strong: 0 18px 40px rgba(0,0,0,0.65);
+        }
 
-<body>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top, #1b2333 0, #050608 55%);
+            color: var(--text-light);
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            overflow: hidden;
+        }
+
+        #layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            height: 100vh;
+            gap: 12px;
+            padding: 12px;
+        }
+
+        #chat-sidebar {
+            background: linear-gradient(145deg, #10121a, #151824);
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-strong);
+        }
+
+        .chat-header {
+            padding: 16px 18px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--green);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: radial-gradient(circle at top left, #1f2937 0, #050608 70%);
+            border-radius: 18px 18px 0 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg {
+            padding: 10px 12px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            max-width: 92%;
+        }
+
+        .msg.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg.toni {
+            align-self: flex-start;
+            background: radial-gradient(circle at top left, #1f2937, #020617);
+            border: 1px solid rgba(148,163,184,0.4);
+            border-bottom-left-radius: 4px;
+            position: relative;
+        }
+
+        .msg.toni::before {
+            content: "T";
+            position: absolute;
+            left: -22px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--green-dark);
+            color: #020617;
+            font-size: 0.7rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #status {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #9ca3af;
+            padding: 4px 0 2px;
+        }
+
+        .chat-input-row {
+            padding: 12px;
+            background: #050712;
+            border-radius: 0 0 18px 18px;
+            border-top: 1px solid rgba(148,163,184,0.25);
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input-row input {
+            flex: 1;
+            background: #020617;
+            color: white;
+            border: 1px solid #374151;
+            padding: 9px 10px;
+            border-radius: 8px;
+        }
+
+        .chat-input-row button {
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 9px 11px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        #mic-btn { background: #111827; color: #e5e7eb; }
+        #send-btn { background: var(--green); color: #020617; }
+
+        #pitch-area {
+            background: linear-gradient(145deg, #0b1120, #020617);
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-shadow: var(--shadow-strong);
+        }
+
+        .pitch-toolbar {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 10px;
+        }
+
+        .toolbar-btn {
+            background: #020617;
+            color: #e5e7eb;
+            border-radius: 999px;
+            border: 1px solid #1f2937;
+            padding: 6px 11px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .toolbar-btn.primary {
+            background: #16a34a;
+            border-color: #22c55e;
+            color: #020617;
+        }
+
+        #pitch {
+            flex: 1;
+            background: repeating-linear-gradient(90deg, #166534 0, #166534 8%, #15803d 8%, #15803d 16%);
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 18px 40px rgba(0,0,0,0.8);
+        }
+
+        .pitch-vignette {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at center, transparent 0, transparent 55%, rgba(0,0,0,0.55) 100%);
+        }
+
+        .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(249,250,251,0.95); }
+        .m-circle { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; border: 2px solid rgba(249,250,251,0.95); border-radius: 50%; transform: translate(-50%, -50%); }
+
+        .m-box-16 { position: absolute; width: 18%; height: 46%; border: 2px solid rgba(249,250,251,0.95); top: 27%; }
+        .l { left: 0; border-left: none; }
+        .r { right: 0; border-right: none; }
+
+        .m-box-5 { position: absolute; width: 8%; height: 26%; border: 2px solid rgba(249,250,251,0.95); top: 37%; }
+        .l5 { left: 0; border-left: none; }
+        .r5 { right: 0; border-right: none; }
+
+        .dot { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: rgba(249,250,251,0.95); }
+        .dot.l { left: 11%; top: 50%; transform: translateY(-50%); }
+        .dot.r { right: 11%; top: 50%; transform: translateY(-50%); }
+
+        .player, #ball {
+            position: absolute;
+            cursor: grab;
+            z-index: 10;
+            transition: all 0.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+        }
+
+        .player {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px solid rgba(15,23,42,0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 11px;
+            color: #f9fafb;
+            box-shadow: 0 0 0 2px rgba(15,23,42,0.9), 0 10px 18px rgba(0,0,0,0.8);
+        }
+
+        .player::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 18px;
+            height: 6px;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.7) 0, transparent 70%);
+        }
+
+        .home {
+            background: radial-gradient(circle at 30% 20%, #fecaca 0, #b91c1c 40%, #7f1d1d 100%);
+            box-shadow: 0 0 0 2px rgba(248,113,113,0.9), 0 0 18px rgba(248,113,113,0.9), 0 10px 18px rgba(0,0,0,0.8);
+        }
+
+        .away {
+            background: radial-gradient(circle at 30% 20%, #bfdbfe 0, #1d4ed8 40%, #1e3a8a 100%);
+            box-shadow: 0 0 0 2px rgba(96,165,250,0.9), 0 0 18px rgba(96,165,250,0.9), 0 10px 18px rgba(0,0,0,0.8);
+        }
+
+        #ball {
+            width: 18px;
+            height: 18px;
+            background: radial-gradient(circle at 30% 30%, #ffffff 0, #e5e7eb 40%, #9ca3af 100%);
+            border-radius: 50%;
+            border: 2px solid #020617;
+            box-shadow: 0 0 0 1px rgba(15,23,42,0.9), 0 8px 14px rgba(0,0,0,0.85);
+        }
+
+        #whiteboard-panel {
+            position: fixed;
+            top: 0;
+            right: -380px;
+            width: 360px;
+            height: 100vh;
+            background: linear-gradient(145deg, #f9fafb, #e5e7eb);
+            color: #020617;
+            border-left: 2px solid #d1d5db;
+            box-shadow: -12px 0 30px rgba(0,0,0,0.6);
+            transition: right 0.35s ease;
+            display: flex;
+            flex-direction: column;
+            z-index: 3000;
+        }
+
+        #whiteboard-panel.open { right: 0; }
+
+        .whiteboard-header {
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            background: #e5e7eb;
+            border-bottom: 1px solid #d1d5db;
+        }
+
+        #player-list {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 0.9rem;
+            font-family: "JetBrains Mono", monospace;
+            background: #f3f4f6;
+        }
+
+        #login-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(15,23,42,0.95) 0, rgba(3,7,18,0.98) 55%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 4000;
+        }
+
+        .login-card {
+            background: radial-gradient(circle at top left, #111827 0, #020617 70%);
+            padding: 32px 26px;
+            border-radius: 20px;
+            border: 1px solid rgba(148,163,184,0.6);
+            text-align: center;
+            width: 320px;
+            box-shadow: 0 22px 45px rgba(0,0,0,0.9);
+        }
+
+        .login-card h2 { margin: 0 0 6px; color: var(--green); font-size: 1.1rem; }
+        .login-card p { margin: 0 0 14px; font-size: 0.8rem; color: #9ca3af; }
+
+        .login-card input {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            background: #020617;
+            border: 1px solid #374151;
+            border-radius: 9px;
+            color: #e5e7eb;
+            font-size: 0.85rem;
+        }
+
+        .login-card button {
+            width: 100%;
+            padding: 11px;
+            background: var(--green);
+            color: #020617;
+            border: none;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1100px) {
+            #layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: 360px 1fr;
+            }
+            #chat-sidebar { order: 2; height: 360px; }
+            #pitch-area { order: 1; }
+        }
+
+        @media (max-width: 700px) {
+            #layout { padding: 6px; gap: 6px; }
+            #chat-sidebar { height: 300px; }
+            #whiteboard-panel { width: 100%; right: -100%; }
+        }
+    </style>
+    <body>
 
 <!-- LOGIN OVERLAY -->
 <div id="login-overlay">
@@ -58,7 +407,6 @@
 
         <div id="pitch">
 
-            <!-- Feldmarkierungen -->
             <div class="m-line"></div>
             <div class="m-circle"></div>
             <div class="m-box-16 l"></div>
@@ -68,795 +416,21 @@
             <div class="dot l"></div>
             <div class="dot r"></div>
 
-            <!-- Ball -->
             <div id="ball" style="left:50%; top:50%;"></div>
 
-            <!-- Spieler -->
             <div id="players-layer"></div>
 
-            <!-- Vignette -->
             <div class="pitch-vignette"></div>
         </div>
 
     </main>
 
-    <!-- WHITEBOARD (KADERLISTE) -->
+    <!-- WHITEBOARD -->
     <section id="whiteboard-panel">
         <header class="whiteboard-header">
             <h3>📋 Kaderliste</h3>
             <button id="whiteboard-close">✖</button>
         </header>
 
-        <textarea id="player-list" placeholder="Format: 6 Kimmich&#10;10 Reus&#10;..."></textarea>
-    </section>
-
-</div>
-
-
- :root {
-    --green: #2ecc71;
-    --green-dark: #27ae60;
-    --bg-dark: #050608;
-    --bg-panel: #111319;
-    --bg-panel-light: #191b23;
-    --line: rgba(255,255,255,0.12);
-    --text-light: rgba(255,255,255,0.9);
-    --shadow-strong: 0 18px 40px rgba(0,0,0,0.65);
-}
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    background: radial-gradient(circle at top, #1b2333 0, #050608 55%);
-    color: var(--text-light);
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    overflow: hidden;
-}
-
-/* GRID LAYOUT */
-#layout {
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    height: 100vh;
-    gap: 12px;
-    padding: 12px;
-}
-
-/* CHAT SIDEBAR */
-#chat-sidebar {
-    background: linear-gradient(145deg, #10121a, #151824);
-    border-radius: 18px;
-    border: 1px solid var(--line);
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow-strong);
-}
-
-.chat-header {
-    padding: 16px 18px;
-    font-weight: 700;
-    font-size: 1rem;
-    color: var(--green);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    background: radial-gradient(circle at top left, #1f2937 0, #050608 70%);
-    border-radius: 18px 18px 0 0;
-    display: flex;
-    justify-content: space-between;
-}
-
-#chat-history {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.msg {
-    padding: 10px 12px;
-    border-radius: 14px;
-    font-size: 0.9rem;
-    line-height: 1.45;
-    max-width: 92%;
-}
-
-.msg.user {
-    align-self: flex-end;
-    background: linear-gradient(135deg, #2563eb, #38bdf8);
-    color: white;
-    border-bottom-right-radius: 4px;
-}
-
-.msg.toni {
-    align-self: flex-start;
-    background: radial-gradient(circle at top left, #1f2937, #020617);
-    border: 1px solid rgba(148,163,184,0.4);
-    border-bottom-left-radius: 4px;
-    position: relative;
-}
-
-.msg.toni::before {
-    content: "T";
-    position: absolute;
-    left: -22px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--green-dark);
-    color: #020617;
-    font-size: 0.7rem;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#status {
-    font-size: 0.7rem;
-    text-align: center;
-    color: #9ca3af;
-    padding: 4px 0 2px;
-}
-
-.chat-input-row {
-    padding: 12px;
-    background: #050712;
-    border-radius: 0 0 18px 18px;
-    border-top: 1px solid rgba(148,163,184,0.25);
-    display: flex;
-    gap: 8px;
-}
-
-.chat-input-row input {
-    flex: 1;
-    background: #020617;
-    color: white;
-    border: 1px solid #374151;
-    padding: 9px 10px;
-    border-radius: 8px;
-}
-
-.chat-input-row button {
-    border: none;
-    cursor: pointer;
-    border-radius: 8px;
-    padding: 9px 11px;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-#mic-btn {
-    background: #111827;
-    color: #e5e7eb;
-}
-
-#send-btn {
-    background: var(--green);
-    color: #020617;
-}
-
-/* PITCH AREA */
-#pitch-area {
-    background: linear-gradient(145deg, #0b1120, #020617);
-    border-radius: 18px;
-    border: 1px solid var(--line);
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    box-shadow: var(--shadow-strong);
-}
-
-.pitch-toolbar {
-    display: flex;
-    justify-content: space-between;
-    padding-bottom: 10px;
-}
-
-.toolbar-btn {
-    background: #020617;
-    color: #e5e7eb;
-    border-radius: 999px;
-    border: 1px solid #1f2937;
-    padding: 6px 11px;
-    font-size: 0.8rem;
-    cursor: pointer;
-}
-
-.toolbar-btn.primary {
-    background: #16a34a;
-    border-color: #22c55e;
-    color: #020617;
-}
-
-/* PITCH */
-#pitch {
-    flex: 1;
-    background:
-        repeating-linear-gradient(
-            90deg,
-            #166534 0,
-            #166534 8%,
-            #15803d 8%,
-            #15803d 16%
-        );
-    border: 2px solid #e5e7eb;
-    border-radius: 16px;
-    position: relative;
-    overflow: hidden;
-    box-shadow:
-        inset 0 0 40px rgba(0,0,0,0.7),
-        0 18px 40px rgba(0,0,0,0.8);
-}
-
-.pitch-vignette {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-        radial-gradient(circle at center, transparent 0, transparent 55%, rgba(0,0,0,0.55) 100%);
-}
-
-/* FIELD MARKINGS */
-.m-line {
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: rgba(249,250,251,0.95);
-}
-
-.m-circle {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 120px;
-    height: 120px;
-    border: 2px solid rgba(249,250,251,0.95);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.m-box-16 {
-    position: absolute;
-    width: 18%;
-    height: 46%;
-    border: 2px solid rgba(249,250,251,0.95);
-    top: 27%;
-}
-
-.l { left: 0; border-left: none; }
-.r { right: 0; border-right: none; }
-
-.m-box-5 {
-    position: absolute;
-    width: 8%;
-    height: 26%;
-    border: 2px solid rgba(249,250,251,0.95);
-    top: 37%;
-}
-
-.l5 { left: 0; border-left: none; }
-.r5 { right: 0; border-right: none; }
-
-.dot {
-    position: absolute;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(249,250,251,0.95);
-}
-
-.dot.l { left: 11%; top: 50%; transform: translateY(-50%); }
-.dot.r { right: 11%; top: 50%; transform: translateY(-50%); }
-
-/* PLAYERS & BALL */
-.player, #ball {
-    position: absolute;
-    cursor: grab;
-    z-index: 10;
-    transition: all 0.8s cubic-bezier(0.2, 0.7, 0.3, 1);
-}
-
-.player {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    border: 2px solid rgba(15,23,42,0.95);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 11px;
-    color: #f9fafb;
-    box-shadow:
-        0 0 0 2px rgba(15,23,42,0.9),
-        0 10px 18px rgba(0,0,0,0.8);
-}
-
-.player::after {
-    content: "";
-    position: absolute;
-    bottom: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 18px;
-    height: 6px;
-    background: radial-gradient(circle at center, rgba(0,0,0,0.7) 0, transparent 70%);
-}
-
-.home {
-    background: radial-gradient(circle at 30% 20%, #fecaca 0, #b91c1c 40%, #7f1d1d 100%);
-    box-shadow:
-        0 0 0 2px rgba(248,113,113,0.9),
-        0 0 18px rgba(248,113,113,0.9),
-        0 10px 18px rgba(0,0,0,0.8);
-}
-
-.away {
-    background: radial-gradient(circle at 30% 20%, #bfdbfe 0, #1d4ed8 40%, #1e3a8a 100%);
-    box-shadow:
-        0 0 0 2px rgba(96,165,250,0.9),
-        0 0 18px rgba(96,165,250,0.9),
-        0 10px 18px rgba(0,0,0,0.8);
-}
-
-#ball {
-    width: 18px;
-    height: 18px;
-    background: radial-gradient(circle at 30% 30%, #ffffff 0, #e5e7eb 40%, #9ca3af 100%);
-    border-radius: 50%;
-    border: 2px solid #020617;
-    box-shadow:
-        0 0 0 1px rgba(15,23,42,0.9),
-        0 8px 14px rgba(0,0,0,0.85);
-}
-
-/* WHITEBOARD */
-#whiteboard-panel {
-    position: fixed;
-    top: 0;
-    right: -380px;
-    width: 360px;
-    height: 100vh;
-    background: linear-gradient(145deg, #f9fafb, #e5e7eb);
-    color: #020617;
-    border-left: 2px solid #d1d5db;
-    box-shadow: -12px 0 30px rgba(0,0,0,0.6);
-    transition: right 0.35s ease;
-    display: flex;
-    flex-direction: column;
-    z-index: 3000;
-}
-
-#whiteboard-panel.open {
-    right: 0;
-}
-
-.whiteboard-header {
-    padding: 14px;
-    display: flex;
-    justify-content: space-between;
-    background: #e5e7eb;
-    border-bottom: 1px solid #d1d5db;
-}
-
-#player-list {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    outline: none;
-    resize: none;
-    font-size: 0.9rem;
-    font-family: "JetBrains Mono", monospace;
-    background: #f3f4f6;
-}
-
-/* LOGIN */
-#login-overlay {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at top, rgba(15,23,42,0.95) 0, rgba(3,7,18,0.98) 55%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 4000;
-}
-
-.login-card {
-    background: radial-gradient(circle at top left, #111827 0, #020617 70%);
-    padding: 32px 26px;
-    border-radius: 20px;
-    border: 1px solid rgba(148,163,184,0.6);
-    text-align: center;
-    width: 320px;
-    box-shadow: 0 22px 45px rgba(0,0,0,0.9);
-}
-
-.login-card h2 {
-    margin: 0 0 6px;
-    color: var(--green);
-    font-size: 1.1rem;
-}
-
-.login-card p {
-    margin: 0 0 14px;
-    font-size: 0.8rem;
-    color: #9ca3af;
-}
-
-.login-card input {
-    width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-    background: #020617;
-    border: 1px solid #374151;
-    border-radius: 9px;
-    color: #e5e7eb;
-    font-size: 0.85rem;
-}
-
-.login-card button {
-    width: 100%;
-    padding: 11px;
-    background: var(--green);
-    color: #020617;
-    border: none;
-    border-radius: 999px;
-    font-weight: 700;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-/* RESPONSIVE */
-@media (max-width: 1100px) {
-    #layout {
-        grid-template-columns: 1fr;
-        grid-template-rows: 360px 1fr;
-    }
-
-    #chat-sidebar {
-        order: 2;
-        height: 360px;
-    }
-
-    #pitch-area {
-        order: 1;
-    }
-}
-
-@media (max-width: 700px) {
-    #layout {
-        padding: 6px;
-        gap: 6px;
-    }
-
-    #chat-sidebar {
-        height: 300px;
-    }
-
-    #whiteboard-panel {
-        width: 100%;
-        right: -100%;
-    }
-}   
-    <script>
-/* ============================================================
-   TONI 2.0 — GLOBAL VARS
-============================================================ */
-let GROQ_KEY = "";
-let coachVoice = null;
-let recognition = null;
-let isLocked = false;
-
-/* ============================================================
-   LOGIN / STARTUP
-============================================================ */
-document.getElementById("login-btn").onclick = () => {
-    const pw = document.getElementById("password").value.trim();
-    const key = document.getElementById("user-key").value.trim();
-
-    if (pw !== "Trainer2026") {
-        alert("Falsches Passwort, Chef.");
-        return;
-    }
-
-    if (!key.startsWith("gsk_")) {
-        alert("Ungültiger GROQ-Key.");
-        return;
-    }
-
-    GROQ_KEY = key;
-    localStorage.setItem("toni_groq_key", key);
-
-    document.getElementById("login-overlay").style.display = "none";
-    setFormation();
-    loadVoice();
-};
-
-window.onload = () => {
-    const saved = localStorage.getItem("toni_groq_key");
-    if (saved) document.getElementById("user-key").value = saved;
-};
-
-/* ============================================================
-   WHITEBOARD SLIDE-IN
-============================================================ */
-document.getElementById("whiteboard-open").onclick = () => {
-    document.getElementById("whiteboard-panel").classList.add("open");
-};
-
-document.getElementById("whiteboard-close").onclick = () => {
-    document.getElementById("whiteboard-panel").classList.remove("open");
-};
-
-/* ============================================================
-   SPEECH OUTPUT
-============================================================ */
-function loadVoice() {
-    const voices = window.speechSynthesis.getVoices();
-    coachVoice = voices.find(v =>
-        v.lang.startsWith("de") &&
-        (v.name.includes("Martin") || v.name.includes("Hans") || v.name.includes("Male"))
-    );
-    if (!coachVoice) coachVoice = voices.find(v => v.lang.startsWith("de"));
-}
-window.speechSynthesis.onvoiceschanged = loadVoice;
-
-function speak(text) {
-    window.speechSynthesis.cancel();
-    const msg = new SpeechSynthesisUtterance(text);
-    if (coachVoice) msg.voice = coachVoice;
-    msg.pitch = 0.85;
-    msg.rate = 1.0;
-    window.speechSynthesis.speak(msg);
-}
-
-/* ============================================================
-   SPEECH INPUT
-============================================================ */
-document.getElementById("mic-btn").onclick = () => {
-    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Speech) return;
-
-    if (!recognition) {
-        recognition = new Speech();
-        recognition.lang = "de-DE";
-        recognition.onresult = e => {
-            document.getElementById("user-input").value = e.results[0][0].transcript;
-            askToni();
-        };
-    }
-    recognition.start();
-};
-
-/* ============================================================
-   FORMATION ENGINE
-============================================================ */
-function setFormation() {
-    const layer = document.getElementById("players-layer");
-    layer.innerHTML = "";
-
-    const home = [
-        [5,50],[22,20],[22,40],[22,60],[22,80],
-        [45,20],[45,40],[45,60],[45,80],
-        [70,40],[70,60]
-    ];
-
-    const away = [
-        [93,50],[78,25],[78,50],[78,75],
-        [58,15],[58,38],[58,62],[58,85],
-        [35,20],[35,50],[35,80]
-    ];
-
-    home.forEach((p,i)=>createPlayer("home",i+1,p[0],p[1]));
-    away.forEach((p,i)=>createPlayer("away",i+1,p[0],p[1]));
-
-    const saved = localStorage.getItem("toni_kader_GROQ");
-    document.getElementById("player-list").value = saved || "";
-}
-
-function createPlayer(team, num, x, y) {
-    const el = document.createElement("div");
-    el.className = `player ${team}`;
-    el.id = `${team}${num}`;
-    el.innerText = num;
-    el.style.left = x + "%";
-    el.style.top = y + "%";
-    document.getElementById("players-layer").appendChild(el);
-}
-
-/* ============================================================
-   DRAG & DROP
-============================================================ */
-let activeItem = null;
-
-document.addEventListener("mousedown", e => {
-    if (e.target.classList.contains("player") || e.target.id === "ball") {
-        activeItem = e.target;
-        activeItem.style.transition = "none";
-    }
-});
-
-document.addEventListener("mousemove", e => {
-    if (!activeItem) return;
-
-    const pitch = document.getElementById("pitch").getBoundingClientRect();
-    activeItem.style.left = Math.max(0, Math.min(96, ((e.clientX - pitch.left) / pitch.width) * 100)) + "%";
-    activeItem.style.top = Math.max(0, Math.min(95, ((e.clientY - pitch.top) / pitch.height) * 100)) + "%";
-});
-
-document.addEventListener("mouseup", () => {
-    if (activeItem) activeItem.style.transition = "all 1.2s ease-in-out";
-    activeItem = null;
-});
-
-/* ============================================================
-   KADER SYNC
-============================================================ */
-document.getElementById("player-list").oninput = () => {
-    const text = document.getElementById("player-list").value;
-    localStorage.setItem("toni_kader_GROQ", text);
-
-    const lines = text.split("\n");
-    lines.forEach(line => {
-        const m = line.match(/^(\d+)\s+(.*)$/);
-        if (!m) return;
-        const nr = m[1];
-        const name = m[2].trim().split(" ")[0];
-        const el = document.getElementById("home" + nr);
-        if (el) el.innerText = name;
-    });
-};
-
-/* ============================================================
-   TONI 2.0 — SYSTEM PROMPT
-============================================================ */
-function buildSystemPrompt(state) {
-return `
-Du bist TONI 2.0, Co‑Trainer von Björn.
-
-DEIN STIL:
-- Mix aus Klopp (emotional, direkt, humorvoll) und Nagelsmann (analytisch, modern, präzise)
-- maximal 3–5 Sätze
-- klare Bilder, klare Lösungen
-- du sagst „Chef“ zum Nutzer
-
-MODI (automatisch):
-
-1) SPIELMODUS:
-- aktiv bei: Pressing, Aufbau, Gegner, Laufwege, Taktik, Formation
-- nutze MOVE[ID,X,Y] für Spieler- und Ballbewegungen
-- mehrere MOVE‑Befehle erlaubt
-- nutze Kader‑Namen, wenn vorhanden
-
-2) TRAININGSMODUS:
-- aktiv bei: Übung, Training, Drill, Passform, Rondo, Torabschluss, Spielform
-- wenn Spieleranzahl unklar: „Chef, wie viele Spieler sind heute da?“
-- beschreibe: Feldaufbau, Ablauf, Coachingpunkte, Variationen, Intensität
-- nutze Kader‑Namen
-- Animation nur, wenn Chef sagt: „Zeig mir das auf dem Board“
-
-3) BRAZIL‑MODE:
-- aktiv bei: Trick, 1 gegen 1, Futsal, Brasilien, Joga Bonito, Elastico, Neymar, Ronaldo
-- erkläre wie brasilianischer Techniktrainer
-- bildhafte Sprache: „Ball streicheln“, „Gegner einfrieren“
-- Schritt‑für‑Schritt‑Erklärung
-- Animation nur auf Wunsch
-
-REGELN:
-- keine Wiederholungen
-- keine unnötigen MOVE‑Befehle
-- nutze MOVE nur für echte Bewegungen
-- Kaderliste = home‑Spieler
-- aktueller Zustand: ${state}
-`;
-}
-
-/* ============================================================
-   TONI 2.0 — ASK FUNCTION
-============================================================ */
-document.getElementById("send-btn").onclick = askToni;
-
-async function askToni() {
-    if (isLocked) return;
-
-    const input = document.getElementById("user-input");
-    const text = input.value.trim();
-    if (!text) return;
-
-    if (!GROQ_KEY) {
-        addMsg("toni", "Chef, ohne Groq-Key geht hier gar nichts.");
-        return;
-    }
-
-    isLocked = true;
-    document.getElementById("send-btn").disabled = true;
-    addMsg("user", text);
-    input.value = "";
-    document.getElementById("status").innerText = "Analyse läuft...";
-
-    const state =
-        [...document.querySelectorAll(".player, #ball")]
-            .map(el => `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}]`)
-            .join(", ");
-
-    const systemPrompt = buildSystemPrompt(state);
-
-    try {
-        const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + GROQ_KEY
-            },
-            body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: text }
-                ]
-            })
-        });
-
-        if (!resp.ok) {
-            const err = await resp.text();
-            addMsg("toni", "Chef, Groq meckert: " + err);
-            resetLock();
-            return;
-        }
-
-        const data = await resp.json();
-        const answer = data.choices?.[0]?.message?.content || "Ich hab gerade einen Hänger, Chef.";
-
-        const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
-        const clean = answer.replace(/MOVE\[.*?\]/g, "").trim();
-
-        addMsg("toni", clean);
-        speak(clean);
-
-        moves.forEach(m => {
-            const id = m[1];
-            const x = m[2];
-            const y = m[3];
-            const el = document.getElementById(id);
-            if (el) {
-                el.style.left = x + "%";
-                el.style.top = y + "%";
-            }
-        });
-
-        resetLock();
-
-    } catch (e) {
-        addMsg("toni", "Chef, die Leitung zu Groq ist tot. Netzwerk oder Key.");
-        resetLock();
-    }
-}
-
-function resetLock() {
-    isLocked = false;
-    document.getElementById("send-btn").disabled = false;
-    document.getElementById("status").innerText = "Ready";
-}
-
-/* ============================================================
-   CHAT MESSAGE HELPER
-============================================================ */
-function addMsg(role, text) {
-    const h = document.getElementById("chat-history");
-    const d = document.createElement("div");
-    d.className = `msg ${role}`;
-    d.innerText = text;
-    h.appendChild(d);
-    h.scrollTop = h.scrollHeight;
-}
-</script>
-</body>
-</html>
+        <textarea id="player-list" placeholder="Format: 6 Kimmich&#10;10
+</head>
