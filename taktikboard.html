@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni – GROQ EDITION</title>
+    <title>Coach Toni – GROQ Edition</title>
 
     <style>
         :root {
@@ -14,8 +14,6 @@
             --bg-panel-light: #191b23;
             --line: rgba(255,255,255,0.12);
             --text-light: rgba(255,255,255,0.9);
-            --red: #e74c3c;
-            --blue: #3498db;
             --shadow-strong: 0 18px 40px rgba(0,0,0,0.65);
         }
 
@@ -25,49 +23,40 @@
 
         body {
             margin: 0;
-            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             background: radial-gradient(circle at top, #1b2333 0, #050608 55%);
             color: var(--text-light);
-            display: flex;
-            height: 100vh;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             overflow: hidden;
         }
 
-        .container {
+        #layout {
             display: grid;
-            grid-template-columns: 360px minmax(0, 1fr) 320px;
-            gap: 14px;
-            padding: 14px;
-            width: 100%;
+            grid-template-columns: 340px 1fr;
+            height: 100vh;
+            gap: 12px;
+            padding: 12px;
         }
 
-        /* SIDEBAR / CHAT */
+        /* CHAT SIDEBAR */
         #chat-sidebar {
             background: linear-gradient(145deg, #10121a, #151824);
             border-radius: 18px;
+            border: 1px solid var(--line);
             display: flex;
             flex-direction: column;
-            border: 1px solid var(--line);
             box-shadow: var(--shadow-strong);
         }
 
-        .header {
+        .chat-header {
             padding: 16px 18px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             font-weight: 700;
             font-size: 1rem;
             color: var(--green);
             border-bottom: 1px solid rgba(255,255,255,0.08);
             background: radial-gradient(circle at top left, #1f2937 0, #050608 70%);
             border-radius: 18px 18px 0 0;
-        }
-
-        .header span {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.55);
-            font-weight: 400;
+            display: flex;
+            justify-content: space-between;
         }
 
         #chat-history {
@@ -85,8 +74,6 @@
             font-size: 0.9rem;
             line-height: 1.45;
             max-width: 92%;
-            position: relative;
-            word-wrap: break-word;
         }
 
         .msg.user {
@@ -101,6 +88,7 @@
             background: radial-gradient(circle at top left, #1f2937, #020617);
             border: 1px solid rgba(148,163,184,0.4);
             border-bottom-left-radius: 4px;
+            position: relative;
         }
 
         .msg.toni::before {
@@ -119,7 +107,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 10px rgba(34,197,94,0.7);
         }
 
         #status {
@@ -136,7 +123,6 @@
             border-top: 1px solid rgba(148,163,184,0.25);
             display: flex;
             gap: 8px;
-            align-items: center;
         }
 
         .chat-input-row input {
@@ -146,7 +132,6 @@
             border: 1px solid #374151;
             padding: 9px 10px;
             border-radius: 8px;
-            font-size: 0.9rem;
         }
 
         .chat-input-row button {
@@ -168,11 +153,6 @@
             color: #020617;
         }
 
-        .mic-active {
-            background: #b91c1c !important;
-            box-shadow: 0 0 15px rgba(248,113,113,0.9);
-        }
-
         /* PITCH AREA */
         #pitch-area {
             background: linear-gradient(145deg, #0b1120, #020617);
@@ -180,22 +160,14 @@
             border: 1px solid var(--line);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 10px 10px 14px;
+            padding: 10px;
             box-shadow: var(--shadow-strong);
         }
 
         .pitch-toolbar {
-            width: 100%;
             display: flex;
             justify-content: space-between;
-            padding: 4px 4px 10px;
-        }
-
-        .pitch-toolbar-left,
-        .pitch-toolbar-right {
-            display: flex;
-            gap: 8px;
+            padding-bottom: 10px;
         }
 
         .toolbar-btn {
@@ -206,13 +178,6 @@
             padding: 6px 11px;
             font-size: 0.8rem;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .toolbar-btn span {
-            font-size: 0.9rem;
         }
 
         .toolbar-btn.primary {
@@ -221,9 +186,9 @@
             color: #020617;
         }
 
+        /* PITCH */
         #pitch {
-            width: 96%;
-            height: calc(100% - 40px);
+            flex: 1;
             background:
                 repeating-linear-gradient(
                     90deg,
@@ -247,7 +212,6 @@
             pointer-events: none;
             background:
                 radial-gradient(circle at center, transparent 0, transparent 55%, rgba(0,0,0,0.55) 100%);
-            z-index: 1;
         }
 
         .m-line {
@@ -257,8 +221,6 @@
             bottom: 0;
             width: 2px;
             background: rgba(249,250,251,0.95);
-            opacity: 0.9;
-            z-index: 0;
         }
 
         .m-circle {
@@ -270,8 +232,6 @@
             border: 2px solid rgba(249,250,251,0.95);
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            opacity: 0.9;
-            z-index: 0;
         }
 
         .m-box-16 {
@@ -280,53 +240,33 @@
             height: 46%;
             border: 2px solid rgba(249,250,251,0.95);
             top: 27%;
-            opacity: 0.9;
-            z-index: 0;
         }
 
         .l { left: 0; border-left: none; }
         .r { right: 0; border-right: none; }
 
-        /* Torraum / 5er */
         .m-box-5 {
             position: absolute;
             width: 8%;
             height: 26%;
             border: 2px solid rgba(249,250,251,0.95);
             top: 37%;
-            opacity: 0.9;
-            z-index: 0;
         }
+
         .l5 { left: 0; border-left: none; }
         .r5 { right: 0; border-right: none; }
 
-        /* Elfmeterpunkt */
         .dot {
             position: absolute;
             width: 6px;
             height: 6px;
             border-radius: 50%;
             background: rgba(249,250,251,0.95);
-            z-index: 0;
-        }
-        .dot.l {
-            left: 11%;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        .dot.r {
-            right: 11%;
-            top: 50%;
-            transform: translateY(-50%);
         }
 
-        #players-layer {
-            position: absolute;
-            inset: 0;
-            z-index: 2;
-        }
+        .dot.l { left: 11%; top: 50%; transform: translateY(-50%); }
+        .dot.r { right: 11%; top: 50%; transform: translateY(-50%); }
 
-        /* BALL & PLAYERS */
         .player, #ball {
             position: absolute;
             cursor: grab;
@@ -348,7 +288,6 @@
             box-shadow:
                 0 0 0 2px rgba(15,23,42,0.9),
                 0 10px 18px rgba(0,0,0,0.8);
-            position: absolute;
         }
 
         .player::after {
@@ -360,8 +299,6 @@
             width: 18px;
             height: 6px;
             background: radial-gradient(circle at center, rgba(0,0,0,0.7) 0, transparent 70%);
-            opacity: 0.9;
-            z-index: -1;
         }
 
         .home {
@@ -391,126 +328,132 @@
                 0 8px 14px rgba(0,0,0,0.85);
         }
 
-        /* WHITEBOARD */
-        #whiteboard {
+        /* WHITEBOARD SLIDE-IN */
+        #whiteboard-panel {
+            position: fixed;
+            top: 0;
+            right: -380px;
+            width: 360px;
+            height: 100vh;
             background: linear-gradient(145deg, #f9fafb, #e5e7eb);
             color: #020617;
-            border-radius: 18px;
-            padding: 16px 16px 14px;
-            border: 1px solid #d1d5db;
+            border-left: 2px solid #d1d5db;
+            box-shadow: -12px 0 30px rgba(0,0,0,0.6);
+            transition: right 0.35s ease;
             display: flex;
             flex-direction: column;
-            box-shadow: var(--shadow-strong);
+            z-index: 3000;
         }
 
-        #whiteboard h3 {
-            margin: 0 0 6px;
-            font-size: 0.95rem;
+        #whiteboard-panel.open {
+            right: 0;
+        }
+
+        .whiteboard-header {
+            padding: 14px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-        }
-
-        #whiteboard h3 span {
-            font-size: 0.7rem;
-            color: #6b7280;
-            font-weight: 500;
+            background: #e5e7eb;
+            border-bottom: 1px solid #d1d5db;
         }
 
         #player-list {
             flex: 1;
+            padding: 12px;
             border: none;
-            font-size: 0.9rem;
             outline: none;
-            line-height: 1.5;
-            font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            font-weight: 600;
-            color: #111827;
-            background: #f3f4f6;
-            border-radius: 10px;
-            padding: 10px;
             resize: none;
+            font-size: 0.9rem;
+            font-family: "JetBrains Mono", monospace;
+            background: #f3f4f6;
         }
 
-        /* LOGIN OVERLAY */
+        /* LOGIN */
         #login-overlay {
             position: fixed;
             inset: 0;
             background: radial-gradient(circle at top, rgba(15,23,42,0.95) 0, rgba(3,7,18,0.98) 55%);
-            z-index: 4000;
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 4000;
         }
 
         .login-card {
             background: radial-gradient(circle at top left, #111827 0, #020617 70%);
-            padding: 32px 26px 24px;
+            padding: 32px 26px;
             border-radius: 20px;
             border: 1px solid rgba(148,163,184,0.6);
             text-align: center;
-            max-width: 360px;
-            width: 100%;
+            width: 320px;
             box-shadow: 0 22px 45px rgba(0,0,0,0.9);
         }
 
         .login-card h2 {
+            margin: 0 0 6px;
             color: var(--green);
-            margin: 0 0 4px;
             font-size: 1.1rem;
         }
 
         .login-card p {
+            margin: 0 0 14px;
             font-size: 0.8rem;
             color: #9ca3af;
-            margin: 0 0 16px;
         }
 
         .login-card input {
-            display: block;
             width: 100%;
-            margin: 10px auto;
-            padding: 10px 11px;
-            border-radius: 9px;
-            border: 1px solid #374151;
+            margin: 10px 0;
+            padding: 10px;
             background: #020617;
+            border: 1px solid #374151;
+            border-radius: 9px;
             color: #e5e7eb;
             font-size: 0.85rem;
         }
 
         .login-card button {
-            background: var(--green);
-            color: #020617;
             width: 100%;
             padding: 11px;
-            font-weight: 700;
+            background: var(--green);
+            color: #020617;
             border: none;
             border-radius: 999px;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 10px;
             font-size: 0.9rem;
         }
 
-        .login-hint {
-            margin-top: 8px;
-            font-size: 0.7rem;
-            color: #9ca3af;
-        }
-
+        /* RESPONSIVE */
         @media (max-width: 1100px) {
-            .container {
+            #layout {
                 grid-template-columns: 1fr;
-                grid-template-rows: 360px minmax(0, 1fr) 260px;
-                height: 100vh;
+                grid-template-rows: 360px 1fr;
             }
+
             #chat-sidebar {
+                order: 2;
+                height: 360px;
+            }
+
+            #pitch-area {
                 order: 1;
             }
-            #pitch-area {
-                order: 2;
+        }
+
+        @media (max-width: 700px) {
+            #layout {
+                padding: 6px;
+                gap: 6px;
             }
-            #whiteboard {
-                order: 3;
+
+            #chat-sidebar {
+                height: 300px;
+            }
+
+            #whiteboard-panel {
+                width: 100%;
+                right: -100%;
             }
         }
     </style>
@@ -518,49 +461,45 @@
 
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN OVERLAY -->
 <div id="login-overlay">
     <div class="login-card">
         <h2>⚽ COACH TONI – GROQ EDITION</h2>
-        <p>Passwort & GROQ‑API‑Key eintragen, dann übernimmt Toni.</p>
+        <p>Passwort & GROQ‑API‑Key eingeben</p>
         <input type="password" id="password" placeholder="Passwort (Trainer2026)">
         <input type="text" id="user-key" placeholder="Groq API-Key (gsk_...)">
-        <button onclick="startToni()">SYSTEM STARTEN</button>
-        <div class="login-hint">Dein Key bleibt nur lokal im Browser gespeichert.</div>
+        <button id="login-btn">SYSTEM STARTEN</button>
     </div>
 </div>
 
 <!-- MAIN LAYOUT -->
-<div class="container">
+<div id="layout">
 
-    <!-- CHAT -->
-    <div id="chat-sidebar">
-        <div class="header">
+    <!-- CHAT SIDEBAR -->
+    <aside id="chat-sidebar">
+        <header class="chat-header">
             <div>TRAINER-KOMMANDO</div>
             <span>Toni: Klopp × Nagelsmann</span>
-        </div>
+        </header>
+
         <div id="chat-history"></div>
         <div id="status">Ready</div>
 
         <div class="chat-input-row">
-            <button id="mic-btn" onclick="toggleMic()">🎤</button>
+            <button id="mic-btn">🎤</button>
             <input type="text" id="user-input" placeholder="Befehl an Toni...">
-            <button id="send-btn" onclick="askToni()">OK</button>
+            <button id="send-btn">OK</button>
         </div>
-    </div>
+    </aside>
 
-    <!-- PITCH -->
-    <div id="pitch-area">
+    <!-- PITCH AREA -->
+    <main id="pitch-area">
+
         <div class="pitch-toolbar">
-            <div class="pitch-toolbar-left">
-                <button class="toolbar-btn primary" onclick="setFormation()">
-                    <span>♻</span> Reset & Grundordnung
-                </button>
-            </div>
-            <div class="pitch-toolbar-right">
-                <button class="toolbar-btn" onclick="loadVoice()">
-                    <span>🔊</span> Stimme laden
-                </button>
+            <button id="reset-btn" class="toolbar-btn primary">♻ Reset & Grundordnung</button>
+            <div>
+                <button id="voice-btn" class="toolbar-btn">🔊 Stimme laden</button>
+                <button id="whiteboard-open" class="toolbar-btn">📋 Kader</button>
             </div>
         </div>
 
@@ -576,266 +515,282 @@
 
             <div id="ball" style="left:50%; top:50%;"></div>
             <div id="players-layer"></div>
+
             <div class="pitch-vignette"></div>
         </div>
-    </div>
 
-    <!-- WHITEBOARD -->
-    <div id="whiteboard">
-        <h3>
-            📋 Kaderliste
-            <span>Format: 6 Kimmich, 10 Reus, ...</span>
-        </h3>
-        <textarea id="player-list" oninput="saveAndSync()"></textarea>
-    </div>
+    </main>
+
+    <!-- WHITEBOARD (SLIDE-IN PANEL) -->
+    <section id="whiteboard-panel">
+        <header class="whiteboard-header">
+            <h3>📋 Kaderliste</h3>
+            <button id="whiteboard-close">✖</button>
+        </header>
+
+        <textarea id="player-list" placeholder="Format: 6 Kimmich&#10;10 Reus&#10;..."></textarea>
+    </section>
+
 </div>
 
 <script>
-    let GROQ_KEY = "";
-    let coachVoice = null;
-    let recognition = null;
-    let isLocked = false;
+let GROQ_KEY = "";
+let coachVoice = null;
+let recognition = null;
+let isLocked = false;
 
-    // Sprachaufnahme
-    function toggleMic() {
-        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Speech) return;
+/* LOGIN / STARTUP */
+document.getElementById("login-btn").onclick = () => {
+    const pw = document.getElementById("password").value.trim();
+    const key = document.getElementById("user-key").value.trim();
 
-        if (!recognition) {
-            recognition = new Speech();
-            recognition.lang = 'de-DE';
-            recognition.onstart = () => document.getElementById('mic-btn').classList.add('mic-active');
-            recognition.onend = () => document.getElementById('mic-btn').classList.remove('mic-active');
-            recognition.onresult = (e) => {
-                document.getElementById('user-input').value = e.results[0][0].transcript;
-                askToni();
-            };
-        }
-        recognition.start();
+    if (pw !== "Trainer2026") {
+        alert("Falsches Passwort, Chef.");
+        return;
     }
 
-    // Männerstimme laden
-    function loadVoice() {
-        const v = window.speechSynthesis.getVoices();
-        coachVoice = v.find(s =>
-            s.lang.startsWith('de') &&
-            (s.name.includes('Martin') || s.name.includes('Stefan') || s.name.includes('Hans') || s.name.includes('Male'))
-        );
-        if (!coachVoice) coachVoice = v.find(s => s.lang.startsWith('de'));
-    }
-    window.speechSynthesis.onvoiceschanged = loadVoice;
-
-    function speak(t) {
-        window.speechSynthesis.cancel();
-        const m = new SpeechSynthesisUtterance(t);
-        if (coachVoice) m.voice = coachVoice;
-        m.pitch = 0.8;
-        m.rate = 1.0;
-        window.speechSynthesis.speak(m);
+    if (!key.startsWith("gsk_")) {
+        alert("Ungültiger GROQ-Key.");
+        return;
     }
 
-    // Kaderliste speichern & Namen auf Trikots
-    function saveAndSync() {
-        const list = document.getElementById('player-list').value;
-        localStorage.setItem('toni_kader_GROQ', list);
+    GROQ_KEY = key;
+    localStorage.setItem("toni_groq_key", key);
 
-        const lines = list.split('\n');
+    document.getElementById("login-overlay").style.display = "none";
+    setFormation();
+    loadVoice();
+};
 
-        for (let i = 1; i <= 15; i++) {
-            const el = document.getElementById('home' + i);
-            if (el) el.innerText = i;
-        }
+window.onload = () => {
+    const saved = localStorage.getItem("toni_groq_key");
+    if (saved) document.getElementById("user-key").value = saved;
+};
 
-        lines.forEach(l => {
-            const m = l.match(/^(\d+)\s*(.*)$/);
-            if (m) {
-                const nr = m[1];
-                const name = m[2].trim().split(' ')[0];
-                const el = document.getElementById('home' + nr);
-                if (el && name) el.innerText = name;
-            }
+/* WHITEBOARD SLIDE-IN */
+document.getElementById("whiteboard-open").onclick = () => {
+    document.getElementById("whiteboard-panel").classList.add("open");
+};
+
+document.getElementById("whiteboard-close").onclick = () => {
+    document.getElementById("whiteboard-panel").classList.remove("open");
+};
+
+/* SPEECH OUTPUT */
+function loadVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    coachVoice = voices.find(v =>
+        v.lang.startsWith("de") &&
+        (v.name.includes("Martin") || v.name.includes("Hans") || v.name.includes("Male"))
+    );
+    if (!coachVoice) coachVoice = voices.find(v => v.lang.startsWith("de"));
+}
+window.speechSynthesis.onvoiceschanged = loadVoice;
+
+function speak(text) {
+    window.speechSynthesis.cancel();
+    const msg = new SpeechSynthesisUtterance(text);
+    if (coachVoice) msg.voice = coachVoice;
+    msg.pitch = 0.85;
+    msg.rate = 1.0;
+    window.speechSynthesis.speak(msg);
+}
+
+/* SPEECH INPUT */
+document.getElementById("mic-btn").onclick = () => {
+    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Speech) return;
+
+    if (!recognition) {
+        recognition = new Speech();
+        recognition.lang = "de-DE";
+        recognition.onresult = e => {
+            document.getElementById("user-input").value = e.results[0][0].transcript;
+            askToni();
+        };
+    }
+    recognition.start();
+};
+
+/* FORMATION ENGINE */
+function setFormation() {
+    const layer = document.getElementById("players-layer");
+    layer.innerHTML = "";
+
+    const home = [
+        [5,50],[22,20],[22,40],[22,60],[22,80],
+        [45,20],[45,40],[45,60],[45,80],
+        [70,40],[70,60]
+    ];
+
+    const away = [
+        [93,50],[78,25],[78,50],[78,75],
+        [58,15],[58,38],[58,62],[58,85],
+        [35,20],[35,50],[35,80]
+    ];
+
+    home.forEach((p,i)=>createPlayer("home",i+1,p[0],p[1]));
+    away.forEach((p,i)=>createPlayer("away",i+1,p[0],p[1]));
+
+    const saved = localStorage.getItem("toni_kader_GROQ");
+    document.getElementById("player-list").value = saved || "";
+}
+
+function createPlayer(team, num, x, y) {
+    const el = document.createElement("div");
+    el.className = `player ${team}`;
+    el.id = `${team}${num}`;
+    el.innerText = num;
+    el.style.left = x + "%";
+    el.style.top = y + "%";
+    document.getElementById("players-layer").appendChild(el);
+}
+
+/* DRAG & DROP */
+let activeItem = null;
+
+document.addEventListener("mousedown", e => {
+    if (e.target.classList.contains("player") || e.target.id === "ball") {
+        activeItem = e.target;
+        activeItem.style.transition = "none";
+    }
+});
+
+document.addEventListener("mousemove", e => {
+    if (!activeItem) return;
+
+    const pitch = document.getElementById("pitch").getBoundingClientRect();
+    activeItem.style.left = Math.max(0, Math.min(96, ((e.clientX - pitch.left) / pitch.width) * 100)) + "%";
+    activeItem.style.top = Math.max(0, Math.min(95, ((e.clientY - pitch.top) / pitch.height) * 100)) + "%";
+});
+
+document.addEventListener("mouseup", () => {
+    if (activeItem) activeItem.style.transition = "all 1.2s ease-in-out";
+    activeItem = null;
+});
+
+/* KADER SYNC */
+document.getElementById("player-list").oninput = () => {
+    const text = document.getElementById("player-list").value;
+    localStorage.setItem("toni_kader_GROQ", text);
+
+    const lines = text.split("\n");
+    lines.forEach(line => {
+        const m = line.match(/^(\d+)\s+(.*)$/);
+        if (!m) return;
+        const nr = m[1];
+        const name = m[2].trim().split(" ")[0];
+        const el = document.getElementById("home" + nr);
+        if (el) el.innerText = name;
+    });
+};
+
+/* TONI (GROQ) */
+document.getElementById("send-btn").onclick = askToni;
+document.getElementById("reset-btn").onclick = setFormation;
+document.getElementById("voice-btn").onclick = loadVoice;
+
+async function askToni() {
+    if (isLocked) return;
+
+    const input = document.getElementById("user-input");
+    const text = input.value.trim();
+    if (!text) return;
+
+    if (!GROQ_KEY) {
+        addMsg("toni", "Chef, ohne Groq-Key geht hier gar nichts.");
+        return;
+    }
+
+    isLocked = true;
+    document.getElementById("send-btn").disabled = true;
+    addMsg("user", text);
+    input.value = "";
+    document.getElementById("status").innerText = "Analyse läuft...";
+
+    const state =
+        [...document.querySelectorAll(".player, #ball")]
+            .map(el => `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}]`)
+            .join(", ");
+
+    const systemPrompt =
+        "Du bist Toni, Co‑Trainer von Björn. " +
+        "Dein Stil: Mix aus Klopp (emotional, direkt, humorvoll, eine gesunde Arroganz) " +
+        "und Nagelsmann (analytisch, modern, präzise). " +
+        "Du sprichst bildhaft, klar, nur Deutsch. " +
+        "ROT = home (Björn), BLAU = away (Gegner). " +
+        "Wenn du Verschieben, Pressing, Laufwege oder Positionswechsel beschreibst, " +
+        "MUSST du das Format MOVE[ID,X,Y] nutzen, z.B. MOVE[home9,50,48] oder MOVE[ball,60,52]. " +
+        "Mehrere MOVE‑Befehle pro Antwort sind erlaubt. " +
+        "Schreibe maximal 3–4 Sätze, direkt, bildhaft, gerne mit einem kleinen Spruch. " +
+        "Aktueller Zustand: " + state + ".";
+
+    try {
+        const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + GROQ_KEY
+            },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: text }
+                ]
+            })
         });
-    }
 
-    // Grundformation
-    function setFormation() {
-        const layer = document.getElementById('players-layer');
-        layer.innerHTML = "";
-
-        const h = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,20], [45,40], [45,60], [45,80], [70,40], [70,60]];
-        const a = [[93,50], [78,25], [78,50], [78,75], [58,15], [58,38], [58,62], [58,85], [35,20], [35,50], [35,80]];
-
-        h.forEach((p, i) => createP('home', i+1, p[0], p[1], layer));
-        a.forEach((p, i) => createP('away', i+1, p[0], p[1], layer));
-
-        let initialList = "";
-        for (let i = 1; i <= 15; i++) initialList += i + " \n";
-
-        const saved = localStorage.getItem('toni_kader_GROQ');
-        document.getElementById('player-list').value = saved ? saved : initialList;
-
-        saveAndSync();
-    }
-
-    function createP(t, n, x, y, l) {
-        const p = document.createElement('div');
-        p.className = `player ${t}`;
-        p.id = t + n;
-        p.innerText = n;
-        p.style.left = x + "%";
-        p.style.top = y + "%";
-        l.appendChild(p);
-    }
-
-    // Drag & Drop
-    let activeItem = null;
-
-    document.addEventListener('mousedown', (e) => {
-        if (e.target.classList.contains('player') || e.target.id === 'ball') {
-            activeItem = e.target;
-            activeItem.style.transition = "none";
-        }
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (!activeItem) return;
-
-        const r = document.getElementById('pitch').getBoundingClientRect();
-        activeItem.style.left = Math.max(0, Math.min(96, ((e.clientX - r.left) / r.width) * 100)) + "%";
-        activeItem.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
-    });
-
-    document.addEventListener('mouseup', () => {
-        if (activeItem) activeItem.style.transition = "all 1.2s ease-in-out";
-        activeItem = null;
-    });
-
-    // Login / Start
-    function startToni() {
-        if (document.getElementById('password').value === "Trainer2026") {
-            GROQ_KEY = document.getElementById('user-key').value.trim();
-            localStorage.setItem('toni_groq_key', GROQ_KEY);
-            document.getElementById('login-overlay').style.display = 'none';
-            setFormation();
-            loadVoice();
-        }
-    }
-
-    window.onload = () => {
-        const k = localStorage.getItem('toni_groq_key');
-        if (k) document.getElementById('user-key').value = k;
-    };
-
-    // Toni fragen (GROQ)
-    async function askToni() {
-        if (isLocked) return;
-
-        const input = document.getElementById('user-input');
-        const text = input.value.trim();
-        if (!text) return;
-
-        if (!GROQ_KEY) {
-            addMsg("toni", "Chef, ohne Groq‑Key bin ich nur Deko. Trag oben einen gültigen gsk_‑Key ein.");
+        if (!resp.ok) {
+            const err = await resp.text();
+            addMsg("toni", "Chef, Groq meckert: " + err);
+            resetLock();
             return;
         }
 
-        isLocked = true;
-        document.getElementById('send-btn').disabled = true;
-        addMsg("user", text);
-        input.value = "";
-        document.getElementById('status').innerText = "Analyse läuft...";
+        const data = await resp.json();
+        const answer = data.choices?.[0]?.message?.content || "Ich hab gerade einen Hänger, Chef.";
 
-        const state =
-            "Kader: " +
-            document.getElementById('player-list').value.replace(/\n/g, ', ') +
-            ". Positionen: " +
-            [...document.querySelectorAll('.player, #ball')]
-                .map(el => `${el.id}:[${Math.round(parseFloat(el.style.left))},${Math.round(parseFloat(el.style.top))}]`)
-                .join(', ');
+        const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
+        const clean = answer.replace(/MOVE\[.*?\]/g, "").trim();
 
-        const systemPrompt =
-            "Du bist 'Toni', der Co‑Trainer von Manager Björn. " +
-            "Dein Charakter: Mix aus Jürgen Klopp (emotional, direkt, humorvoll, eine gesunde Arroganz) " +
-            "und Julian Nagelsmann (modern, analytisch, präzise). " +
-            "Du bist loyal zum Chef, aber sagst klar, was Sache ist. " +
-            "Du denkst in Räumen, Pressinghöhen, Halbräumen, Überladungen und Dynamiken. " +
-            "ROT = home (Björn), BLAU = away (Gegner). " +
-            "Aktueller Zustand des Spielfelds: " + state + ". " +
-            "WICHTIG: Wenn es um Verschieben, Pressing, Laufwege oder Positionswechsel geht, " +
-            "nutzt du das Format MOVE[ID,X,Y], z.B. MOVE[home6,45,62] oder MOVE[ball,60,48]. " +
-            "Du darfst mehrere MOVE‑Befehle in einer Antwort nutzen. " +
-            "Schreibe maximal 3–4 Sätze, direkt, bildhaft, gerne mit einem kleinen Spruch. " +
-            "Kein Englisch, nur Deutsch.";
+        addMsg("toni", clean);
+        speak(clean);
 
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-            const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                method: "POST",
-                signal: controller.signal,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + GROQ_KEY
-                },
-                body: JSON.stringify({
-                    model: "model: "llama-3.3-70b-versatile",
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        { role: "user", content: text }
-                    ]
-                })
-            });
-
-            clearTimeout(timeoutId);
-
-            if (!resp.ok) {
-                const errText = await resp.text();
-                addMsg("toni", "Chef, Groq meckert: " + errText);
-                isLocked = false;
-                document.getElementById('send-btn').disabled = false;
-                document.getElementById('status').innerText = "Fehler";
-                return;
+        moves.forEach(m => {
+            const id = m[1];
+            const x = m[2];
+            const y = m[3];
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.left = x + "%";
+                el.style.top = y + "%";
             }
+        });
 
-            const data = await resp.json();
+        resetLock();
 
-            isLocked = false;
-            document.getElementById('send-btn').disabled = false;
-            document.getElementById('status').innerText = "Ready";
-
-            const answer = data.choices?.[0]?.message?.content || "Ich hab gerade einen Hänger, Chef.";
-            const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
-            const clean = answer.replace(/MOVE\[.*?\]/g, "").trim();
-
-            addMsg("toni", clean);
-            speak(clean);
-
-            moves.forEach(m => {
-                const id = m[1];
-                const el = document.getElementById(id);
-                if (el) {
-                    el.style.left = m[2] + "%";
-                    el.style.top = m[3] + "%";
-                }
-            });
-
-        } catch (e) {
-            isLocked = false;
-            document.getElementById('send-btn').disabled = false;
-            document.getElementById('status').innerText = "Fehler";
-            addMsg("toni", "Chef, die Leitung zu Groq ist gerade tot. Netzwerk, Key oder Limit – eins von den dreien.");
-        }
+    } catch (e) {
+        addMsg("toni", "Chef, die Leitung zu Groq ist tot. Netzwerk oder Key.");
+        resetLock();
     }
+}
 
-    function addMsg(role, text) {
-        const h = document.getElementById('chat-history');
-        const d = document.createElement('div');
-        d.className = `msg ${role}`;
-        d.innerText = text;
-        h.appendChild(d);
-        h.scrollTop = h.scrollHeight;
-    }
+function resetLock() {
+    isLocked = false;
+    document.getElementById("send-btn").disabled = false;
+    document.getElementById("status").innerText = "Ready";
+}
+
+/* CHAT MESSAGE HELPER */
+function addMsg(role, text) {
+    const h = document.getElementById("chat-history");
+    const d = document.createElement("div");
+    d.className = `msg ${role}`;
+    d.innerText = text;
+    h.appendChild(d);
+    h.scrollTop = h.scrollHeight;
+}
 </script>
 
 </body>
