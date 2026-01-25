@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni 2.0 – Taktikboard</title>
+    <title>Coach Toni 2.0 – PRO Taktikboard</title>
     <style>
         :root {
             --green: #2ecc71;
+            --green-dark: #27ae60;
             --bg-dark: #050608;
-            --line: rgba(255,255,255,0.12);
+            --line: rgba(255,255,255,0.15);
             --text-light: rgba(255,255,255,0.9);
-            --shadow-strong: 0 18px 40px rgba(0,0,0,0.65);
+            --shadow: 0 15px 35px rgba(0,0,0,0.7);
         }
 
         * { box-sizing: border-box; }
@@ -18,9 +19,8 @@
             margin: 0;
             background: radial-gradient(circle at top, #1b2333 0, #050608 55%);
             color: var(--text-light);
-            font-family: "Inter", sans-serif;
+            font-family: "Inter", system-ui, sans-serif;
             overflow: hidden;
-            height: 100vh;
         }
 
         #layout {
@@ -31,149 +31,194 @@
             padding: 12px;
         }
 
-        /* --- SIDEBAR & CHAT --- */
+        /* Sidebar */
         #chat-sidebar {
             background: linear-gradient(145deg, #10121a, #151824);
             border-radius: 18px;
             border: 1px solid var(--line);
             display: flex;
             flex-direction: column;
-            box-shadow: var(--shadow-strong);
-            height: calc(100vh - 24px); /* Fixierte Höhe */
+            box-shadow: var(--shadow);
         }
 
         .chat-header {
-            padding: 16px 18px;
+            padding: 16px;
             font-weight: 700;
             color: var(--green);
             border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
         }
 
         #chat-history {
             flex: 1;
-            overflow-y: auto; /* NUR HIER WIRD GESCROLLT */
-            padding: 16px;
+            overflow-y: auto;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        .msg { padding: 10px 12px; border-radius: 14px; font-size: 0.9rem; line-height: 1.45; max-width: 92%; }
-        .user { align-self: flex-end; background: linear-gradient(135deg, #2563eb, #38bdf8); color: white; }
-        .toni { align-self: flex-start; background: #1f2937; border-left: 3px solid var(--green); }
+        .msg { padding: 10px 12px; border-radius: 14px; font-size: 0.9rem; max-width: 90%; }
+        .user { align-self: flex-end; background: #2563eb; color: white; }
+        .toni { align-self: flex-start; background: #1f2937; border: 1px solid rgba(255,255,255,0.2); }
 
-        .chat-input-row { padding: 12px; background: #050712; border-top: 1px solid var(--line); display: flex; gap: 8px; }
+        #status { font-size: 0.7rem; text-align: center; color: #9ca3af; padding: 5px; }
+
+        .chat-input-row { padding: 12px; display: flex; gap: 8px; border-top: 1px solid var(--line); }
         .chat-input-row input { flex: 1; background: #020617; color: white; border: 1px solid #374151; padding: 10px; border-radius: 8px; }
-        .chat-input-row button { border: none; cursor: pointer; border-radius: 8px; padding: 10px; background: var(--green); font-weight: bold; }
 
-        /* --- SPIELFELD --- */
-        #pitch-area {
-            background: linear-gradient(145deg, #0b1120, #020617);
-            border-radius: 18px;
-            border: 1px solid var(--line);
+        /* Pitch Area */
+        #pitch-area { display: flex; flex-direction: column; gap: 10px; }
+        .pitch-toolbar { display: flex; justify-content: space-between; align-items: center; }
+        
+        .mode-switch {
             display: flex;
-            flex-direction: column;
-            padding: 10px;
-            position: relative;
+            background: #020617;
+            padding: 4px;
+            border-radius: 999px;
+            border: 1px solid #1f2937;
         }
 
-        .pitch-toolbar { display: flex; justify-content: space-between; padding-bottom: 10px; }
-        .toolbar-btn { background: #020617; color: #e5e7eb; border-radius: 999px; border: 1px solid #1f2937; padding: 8px 15px; font-size: 0.8rem; cursor: pointer; }
+        .mode-btn {
+            padding: 6px 15px;
+            border-radius: 999px;
+            border: none;
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .mode-btn.active {
+            background: var(--green);
+            color: #020617;
+        }
 
         #pitch {
             flex: 1;
-            background: #166534;
-            border: 2px solid #e5e7eb;
+            background: repeating-linear-gradient(90deg, #166534 0, #166534 8%, #15803d 8%, #15803d 16%);
+            border: 2px solid white;
             border-radius: 16px;
             position: relative;
             overflow: hidden;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
         }
 
-        /* --- SPIELER & BALL --- */
-        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 0.8s cubic-bezier(0.2, 0.7, 0.3, 1); }
-        .player { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .home { background: radial-gradient(circle, #f87171, #b91c1c); border: 2px solid white; }
-        .away { background: radial-gradient(circle, #60a5fa, #1d4ed8); border: 2px solid white; }
+        .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.7); }
+        .m-circle { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.7); border-radius: 50%; transform: translate(-50%, -50%); }
+
+        /* Spieler */
+        .player, #ball { position: absolute; cursor: grab; z-index: 100; transition: all 1.2s cubic-bezier(0.2, 0.7, 0.3, 1); }
+        .player { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; box-shadow: 0 8px 15px rgba(0,0,0,0.5); }
+        .home { background: radial-gradient(circle at 30% 20%, #f87171, #b91c1c); border: 2px solid #ef4444; }
+        .away { background: radial-gradient(circle at 30% 20%, #60a5fa, #1d4ed8); border: 2px solid #3b82f6; }
         #ball { width: 18px; height: 18px; background: white; border-radius: 50%; border: 2px solid black; }
 
-        /* --- KADER PANEL --- */
-        #whiteboard-panel {
-            position: absolute; top: 60px; right: -360px; width: 340px; height: calc(100% - 70px);
-            background: white; color: black; transition: 0.3s ease; z-index: 2000;
-            display: flex; flex-direction: column; padding: 15px; border-radius: 15px 0 0 15px;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-        }
+        /* Panel */
+        #whiteboard-panel { position: fixed; top: 0; right: -380px; width: 360px; height: 100vh; background: white; color: black; transition: right 0.3s ease; z-index: 3000; padding: 20px; display: flex; flex-direction: column; }
         #whiteboard-panel.open { right: 0; }
-        #player-list { flex: 1; width: 100%; font-family: monospace; padding: 10px; border-radius: 8px; resize: none; font-size: 1.1rem; }
+        #player-list { flex: 1; font-family: monospace; font-size: 1rem; padding: 10px; border-radius: 8px; border: 1px solid #ccc; resize: none; }
 
-        /* --- LOGIN --- */
+        /* Login */
         #login-overlay { position: fixed; inset: 0; background: #050608; display: flex; align-items: center; justify-content: center; z-index: 4000; }
-        .login-card { background: #111319; padding: 30px; border-radius: 20px; border: 1px solid var(--green); text-align: center; }
+        .login-card { background: #111319; padding: 40px; border-radius: 20px; border: 1px solid var(--green); text-align: center; }
         .login-card input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; }
+        .login-card button { width: 100%; padding: 12px; background: var(--green); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
     <div class="login-card">
-        <h2 style="color:var(--green)">⚽ COACH TONI 2.0</h2>
+        <h2>⚽ COACH TONI 2.0</h2>
+        <p>Training & Spielvorbereitung</p>
         <input type="password" id="password" placeholder="Passwort (Trainer2026)">
         <input type="text" id="user-key" placeholder="Groq API-Key (gsk_...)">
-        <button onclick="startToni()" style="width:100%; padding:12px; background:var(--green); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">SYSTEM STARTEN</button>
+        <button onclick="startToni()">SYSTEM INITIALISIEREN</button>
     </div>
 </div>
 
 <div id="layout">
     <aside id="chat-sidebar">
-        <div class="chat-header">TRAINER-KOMMANDO</div>
+        <header class="chat-header">
+            <div>TRAINER-KOMMANDO</div>
+            <span>Toni 2.0</span>
+        </header>
         <div id="chat-history"></div>
-        <div id="status" style="font-size:0.7rem; text-align:center; padding:5px; color:#555;">Ready</div>
+        <div id="status">Ready</div>
         <div class="chat-input-row">
+            <button onclick="toggleMic()" style="background:#111827; border:none; color:white; border-radius:8px; padding:10px; cursor:pointer;">🎤</button>
             <input type="text" id="user-input" placeholder="Anweisung..." onkeypress="if(event.key==='Enter') askToni()">
-            <button onclick="askToni()">OK</button>
+            <button onclick="askToni()" style="background:var(--green); border:none; padding:10px; border-radius:8px; font-weight:bold; cursor:pointer;">OK</button>
         </div>
     </aside>
 
     <main id="pitch-area">
         <div class="pitch-toolbar">
-            <button class="toolbar-btn" onclick="resetBoard()">♻ Reset</button>
+            <div class="mode-switch">
+                <button id="btn-training" class="mode-btn active" onclick="setMode('Training')">Training</button>
+                <button id="btn-spiel" class="mode-btn" onclick="setMode('Spielvorbereitung')">Spielvorbereitung</button>
+            </div>
             <div>
-                <button class="toolbar-btn" onclick="toggleKader()">📋 Kader</button>
+                <button class="mode-btn" style="background:#020617; margin-right:5px;" onclick="resetBoard()">♻ Reset</button>
+                <button class="mode-btn active" onclick="toggleKader()">📋 Kader</button>
             </div>
         </div>
         <div id="pitch">
+            <div class="m-line"></div><div class="m-circle"></div>
             <div id="ball" style="left:50%; top:50%;"></div>
             <div id="players-layer"></div>
-        </div>
-        
-        <div id="whiteboard-panel">
-            <h3>📋 Kaderliste</h3>
-            <p style="font-size:0.7rem; color:gray;">Format: 1 Mike</p>
-            <textarea id="player-list" oninput="syncNames()"></textarea>
-            <button onclick="toggleKader()" style="margin-top:10px; padding:10px;">Schließen</button>
         </div>
     </main>
 </div>
 
+<section id="whiteboard-panel">
+    <h3>📋 Kaderliste (1Mike Logik)</h3>
+    <textarea id="player-list" oninput="syncNames()" placeholder="1 Neuer&#10;2 Kimmich"></textarea>
+    <br>
+    <button onclick="toggleKader()" style="background:var(--green); border:none; padding:10px; border-radius:8px; font-weight:bold; cursor:pointer;">Schließen</button>
+</section>
+
 <script>
     let GROQ_KEY = "";
+    let currentMode = "Training";
     let isLocked = false;
+    let voiceEnabled = true;
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('btn-training').classList.toggle('active', mode === 'Training');
+        document.getElementById('btn-spiel').classList.toggle('active', mode === 'Spielvorbereitung');
+        addMessage(`Modus gewechselt zu: ${mode}`, 'toni');
+    }
 
     function toggleKader() { document.getElementById('whiteboard-panel').classList.toggle('open'); }
 
     function startToni() {
         if (document.getElementById('password').value === "Trainer2026") {
             GROQ_KEY = document.getElementById('user-key').value.trim();
+            localStorage.setItem('toni_groq_key_v2', GROQ_KEY);
             document.getElementById('login-overlay').style.display = 'none';
             resetBoard();
         } else { alert("Passwort falsch!"); }
     }
 
+    window.onload = () => {
+        const savedKey = localStorage.getItem('toni_groq_key_v2');
+        if (savedKey) document.getElementById('user-key').value = savedKey;
+        const savedKader = localStorage.getItem('toni_kader_v2');
+        if (savedKader) document.getElementById('player-list').value = savedKader;
+    };
+
     function resetBoard() {
         const layer = document.getElementById('players-layer');
         layer.innerHTML = "";
-        const h = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,30], [45,70]];
+        const h = [[5,50], [22,20], [22,40], [22,60], [22,80], [45,20], [45,40], [45,60], [45,80], [70,40], [70,60]];
+        const a = [[93,50], [78,25], [78,50], [78,75], [58,15], [58,38], [58,62], [58,85], [35,20], [35,50], [35,80]];
         h.forEach((p, i) => createPlayer('home', i + 1, p[0], p[1], layer));
+        a.forEach((p, i) => createPlayer('away', i + 1, p[0], p[1], layer));
         syncNames();
     }
 
@@ -187,6 +232,7 @@
 
     function syncNames() {
         const list = document.getElementById('player-list').value;
+        localStorage.setItem('toni_kader_v2', list);
         document.querySelectorAll('.player.home').forEach(p => p.innerText = p.id.replace('home',''));
         list.split('\n').forEach(line => {
             const m = line.match(/^(\d+)\s*(.*)$/);
@@ -207,51 +253,6 @@
             el.style.left = Math.max(0, Math.min(96, ((e.clientX - r.left) / r.width) * 100)) + "%";
             el.style.top = Math.max(0, Math.min(95, ((e.clientY - r.top) / r.height) * 100)) + "%";
         };
-        document.onmouseup = () => { dragging = false; el.style.transition = "all 0.8s ease"; };
+        document.onmouseup = () => { dragging = false; el.style.transition = "all 1.2s ease"; };
     }
-    makeDraggable(document.getElementById('ball'));
-
-    function speak(txt) {
-        window.speechSynthesis.cancel();
-        const msg = new SpeechSynthesisUtterance(txt);
-        msg.lang = 'de-DE'; msg.pitch = 0.8;
-        window.speechSynthesis.speak(msg);
-    }
-
-    async function askToni() {
-        if (isLocked) return;
-        const input = document.getElementById('user-input');
-        const text = input.value.trim(); if (!text) return;
-        addMsg('user', text); input.value = ""; isLocked = true;
-        document.getElementById('status').innerText = "Toni analysiert...";
-
-        const prompt = `Du bist Toni (Klopp & Nagelsmann Mix), Co-Trainer von Björn (BVB). Antworte taktisch brilliant und emotional. MOVE[home1,20,30] für Bewegungen. Frage: ${text}`;
-
-        try {
-            const resp = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
-                method: "POST", headers: { "Authorization": "Bearer " + GROQ_KEY, "Content-Type": "application/json" },
-                body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{role: "system", content: prompt}] })
-            });
-            const data = await resp.json();
-            isLocked = false; document.getElementById('status').innerText = "Ready";
-            if (data.choices) {
-                let answer = data.choices[0].message.content;
-                let clean = answer.replace(/MOVE\[.*?\]/g, "");
-                addMsg('toni', clean); speak(clean);
-                const moves = [...answer.matchAll(/MOVE\[(\w+),(\d+),(\d+)\]/g)];
-                moves.forEach(m => {
-                    const el = document.getElementById(m[1].replace('H','home').replace('A','away'));
-                    if (el) { el.style.left = m[2] + "%"; el.style.top = m[3] + "%"; }
-                });
-            }
-        } catch (e) { isLocked = false; addMsg('toni', "Technik-Foul!"); }
-    }
-
-    function addMsg(role, txt) {
-        const h = document.getElementById('chat-history');
-        const d = document.createElement('div'); d.className = `msg ${role}`; d.innerText = txt;
-        h.appendChild(d); h.scrollTop = h.scrollHeight;
-    }
-</script>
-</body>
-</html>
+    makeDraggable(document.getElementById('ball
