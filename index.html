@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach Toni 2.0 | Willkommen</title>
+    <style>
+        :root {
+            --green: #2ecc71;
+            --blue: #3498db;
+            --dark: #0f172a;
+        }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--green), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+        .features {
+            display: flex;
+            justify-content: space-around;
+            margin: 40px 0;
+        }
+        .feature-item {
+            font-size: 0.9rem;
+            color: var(--green);
+            font-weight: bold;
+        }
+        .start-btn {
+            display: inline-block;
+            padding: 18px 40px;
+            background: var(--green);
+            color: #000;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+        }
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(46, 204, 113, 0.5);
+            background: #27ae60;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div style="font-size: 50px; margin-bottom: 20px;">⚽🇧🇷</div>
+    <h1>COACH TONI 2.0</h1>
+    <p>Die ultimative Verbindung aus brasilianischer Technik-Schule und künstlicher Intelligenz. Analysiere dein Team, erstelle Trainingspläne und dominiere das Spielfeld.</p>
+    
+    <div class="features">
+        <div class="feature-item">✓ KI-TAKTIK</div>
+        <div class="feature-item">✓ LIVE-BOARD</div>
+        <div class="feature-item">✓ KADER-SYNC</div>
+    </div>
+
+    <a href="app.html" class="start-btn">SYSTEM STARTEN</a>
+
+    <div class="footer">
+        Powered by Groq Intelligence | © 2026 Coach Björn
+    </div>
+</div>
+
+</body>
+</html>
