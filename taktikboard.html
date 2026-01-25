@@ -3,76 +3,59 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Coach Toni – Tactical OS</title>
+    <title>Coach Toni – Tactical OS (Vollständige Version)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
-        /* Grund-Setup & Variablen */
-        :root {
-            --green: #2ecc71; --accent: #0a74da; --bg: #07101a; --panel: #0f1720;
-            --line: rgba(255,255,255,0.12); --text: #e6eef0; --text-light: #9aa3ad;
-            --arrow-color: #ffcc00; --arrow-width: 6;
+        :root{
+            --green:#2ecc71; --accent:#0a74da; --bg:#07101a; --panel:#0f1720;
+            --line:rgba(255,255,255,0.12); --text:#e6eef0; --text-light:#9aa3ad;
         }
         html, body {
-            height: 100%; margin: 0; padding: 0; font-family: 'Inter', Arial, Helvetica, sans-serif;
-            background: radial-gradient(circle at top, #1b2333 0%, #050608 55%);
-            color: var(--text); -webkit-font-smoothing: antialiased; overflow: hidden;
+            height:100%; margin:0; padding:0; font-family:'Inter',Arial,Helvetica,sans-serif;
+            background:radial-gradient(circle at top,#1b2333 0%,#050608 55%);
+            color:var(--text); -webkit-font-smoothing:antialiased; overflow:hidden;
         }
-        * { box-sizing: border-box; }
-
-        /* Layout-Struktur */
-        #app { display: none; grid-template-columns: 420px 1fr; gap: 12px; height: 100vh; padding: 12px; }
-        main, aside { display: flex; flex-direction: column; background: linear-gradient(145deg, #10121a, #151824); border-radius: 14px; padding: 12px; border: 1px solid var(--line); }
-        main { background: none; border: none; padding: 0; gap: 12px; }
-
-        /* Sidebar */
-        aside.header { font-weight: 800; color: var(--green); padding: 12px 8px; border-bottom: 1px solid var(--line); margin: -12px -12px 12px; padding: 24px; }
-        #chat-history { flex: 1; overflow-y: auto; padding-right: 8px; display: flex; flex-direction: column; gap: 10px; }
-       .bottom-controls { margin-top: auto; padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-       .input-row { display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
-       .sidebar-controls { display: flex; gap: 8px; }
-
-        /* Hauptbereich */
-       .controls { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: linear-gradient(145deg, #10121a, #151824); border-radius: 14px; padding: 12px; border: 1px solid var(--line); flex-shrink: 0; }
-        #pitch-area { flex-grow: 1; display: flex; background: linear-gradient(145deg, #10121a, #151824); border-radius: 14px; padding: 12px; border: 1px solid var(--line); }
-        #pitch { flex: 1; background: #166534; border-radius: 12px; border: 3px solid #fff; position: relative; overflow: hidden; }
-
-        /* Spielfeld-Elemente */
-       .goal { position: absolute; width: 3%; height: 20%; border: 3px solid #fff; top: 40%; background: rgba(255,255,255,0.05); }
-       .l-goal { left: 0; border-left: none; }.r-goal { right: 0; border-right: none; }
-       .m-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.6); }
-       .m-circle { position: absolute; left: 50%; top: 50%; width: 140px; height: 140px; border: 2px solid rgba(255,255,255,0.6); border-radius: 50%; transform: translate(-50%,-50%); }
-        #ball { position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; border: 2px solid #000; cursor: grab; z-index: 200; }
-       .player { position: absolute; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; text-shadow: 1px 1px 3px #000; border: 2px solid rgba(255,255,255,0.8); z-index: 100; transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
-       .player.home { background: radial-gradient(circle at 30% 30%, #f87171, #b91c1c); }
-       .player.away { background: radial-gradient(circle at 30% 30%, #60a5fa, #1d4ed8); cursor: grab; }
-
-        /* Overlays & Modals */
-        #login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 5000; }
-       .login-card { background: var(--panel); padding: 24px; border-radius: 12px; border: 1px solid var(--line); width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
-        #whiteboard { position: fixed; top: 20px; right: -460px; width: 420px; height: calc(100vh - 40px); background: #f8fafc; color: #0f172a; border-radius: 12px; padding: 16px; transition: right 0.35s ease-in-out; z-index: 2000; box-shadow: -20px 0 60px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 12px; }
-        #whiteboard.open { right: 20px; }
-       .modal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--panel); color: var(--text); padding: 16px; border-radius: 10px; border: 1px solid var(--line); z-index: 4000; display: none; min-width: 400px; }
-       .modal.open { display: block; }
-
-        /* Allgemeine UI-Komponenten */
-       .btn { padding: 10px 14px; border-radius: 999px; border: none; cursor: pointer; background: var(--panel); color: #fff; white-space: nowrap; font-weight: 700; transition: background 0.2s; }
-       .btn:hover { background: #2a3440; }
-       .btn.primary { background: var(--accent); }.btn.primary:hover { background: #0b84f0; }
-       .btn-small { padding: 6px 10px; font-size: 12px; }
-       .small { font-size: 12px; color: var(--text-light); }
-       .flex { display: flex; gap: 8px; align-items: center; }
-       .justify-end { justify-content: flex-end; }
-        input, textarea, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #26303a; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; font-size: 14px; }
-        textarea { height: 120px; resize: vertical; }
-
-        /* Spezifische UI-Elemente */
-       .msg { padding: 10px 14px; border-radius: 14px; max-width: 86%; line-height: 1.5; }
-        #pending-list { margin-top: 8px; max-height: 220px; overflow: auto; }
-       .pending-item { padding: 8px; border-bottom: 1px solid var(--line); }
+        *{box-sizing:border-box}
+        #app{display:none;grid-template-columns:420px 1fr;gap:12px;height:100vh;padding:12px}
+        main,aside{display:flex;flex-direction:column;gap:12px;background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line)}
+       .header{font-weight:800;color:var(--green);padding:12px 8px;border-bottom:1px solid var(--line);margin:-12px -12px 12px;padding:24px}
+        #chat-history{flex:1;overflow-y:auto;padding-right:8px;display:flex;flex-direction:column;gap:10px}
+       .msg{padding:10px 14px;border-radius:14px;max-width:86%;line-height:1.5;word-break:break-word}
+       .user{align-self:flex-end;background:linear-gradient(135deg,#2563eb,#38bdf8);color:#fff}
+       .toni{align-self:flex-start;background:#1f2937;border-left:4px solid var(--green);color:var(--text)}
+       .bottom-controls{margin-top:auto;padding-top:10px;display:flex;flex-direction:column;gap:8px}
+       .input-row{display:flex;gap:8px;padding-top:10px;border-top:1px solid var(--line)}
+       .sidebar-controls{display:flex;gap:8px}
+        main{background:none;border:none;padding:0}
+       .controls{display:flex;justify-content:space-between;align-items:center;gap:12px;background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line);flex-shrink:0}
+        #pitch-area{flex-grow:1;display:flex;flex-direction:column;gap:12px;background:linear-gradient(145deg,#10121a,#151824);border-radius:14px;padding:12px;border:1px solid var(--line)}
+        #pitch{flex:1;background:#166534;border-radius:12px;border:3px solid #fff;position:relative;overflow:hidden}
+       .goal{position:absolute;width:3%;height:20%;border:3px solid #fff;top:40%;background:rgba(255,255,255,0.05)}
+       .l-goal{left:0;border-left:none}.r-goal{right:0;border-right:none}
+       .m-line{position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,0.6)}
+       .m-circle{position:absolute;left:50%;top:50%;width:140px;height:140px;border:2px solid rgba(255,255,255,0.6);border-radius:50%;transform:translate(-50%,-50%)}
+        #ball{position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;border:2px solid #000;cursor:grab;z-index:200}
+       .player{position:absolute;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;text-shadow:1px 1px 3px #000;border:2px solid rgba(255,255,255,0.8);z-index:100;transition:all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)}
+       .player.home{background:radial-gradient(circle at 30% 30%,#f87171,#b91c1c)}.player.away{background:radial-gradient(circle at 30% 30%,#60a5fa,#1d4ed8);cursor:grab}
+        #login-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:5000}
+       .login-card{background:var(--panel);padding:24px;border-radius:12px;border:1px solid var(--line);width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.7)}
+        #whiteboard{position:fixed;top:20px;right:-460px;width:420px;height:calc(100vh - 40px);background:#f8fafc;color:#0f172a;border-radius:12px;padding:16px;transition:right 0.35s ease-in-out;z-index:2000;box-shadow:-20px 0 60px rgba(0,0,0,0.6);display:flex;flex-direction:column;gap:12px}
+        #whiteboard.open{right:20px}
+       .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--panel);color:var(--text);padding:16px;border-radius:10px;border:1px solid var(--line);z-index:4000;display:none;min-width:400px}
+       .modal.open{display:block}
+       .btn{padding:10px 14px;border-radius:999px;border:none;cursor:pointer;background:var(--panel);color:#fff;white-space:nowrap;font-weight:700;transition:background 0.2s}
+       .btn:hover{background:#2a3440}.btn.primary{background:var(--accent)}.btn.primary:hover{background:#0b84f0}
+       .btn-small{padding:6px 10px;font-size:12px}
+       .small{font-size:12px;color:var(--text-light)}
+       .flex{display:flex;gap:8px;align-items:center}.justify-end{justify-content:flex-end}
+        input,textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid #26303a;background:var(--bg);color:#fff;font-family:'Inter',sans-serif;font-size:14px}
+        textarea{height:120px;resize:vertical}
+        #pending-list{margin-top:8px;max-height:220px;overflow:auto}
+       .pending-item{padding:8px;border-bottom:1px solid var(--line)}
     </style>
 </head>
 <body>
@@ -82,63 +65,36 @@
             <h2>⚽ COACH TONI OS</h2>
             <p>Bitte Passwort eingeben, um die Plattform zu starten.</p>
             <input id="password" type="password" placeholder="Passwort (Trainer2026)" value="Trainer2026" />
-            <input id="user-key" type="text" placeholder="Optional: Dein Gemini API-Key" />
+            <input id="user-key" type="text" placeholder="Optional: Dein GroqCloud API-Key" />
             <button id="login-btn">SYSTEM INITIALISIEREN</button>
         </div>
     </div>
 
-    <div id="app" aria-hidden="true">
+    <div id="app">
         <aside id="sidebar">
             <header class="header">TONI – STRATEGIE & TRAINING</header>
             <div id="chat-history" aria-live="polite"></div>
             <section class="bottom-controls">
-                <div class="flex">
+                 <div class="flex">
                     <label for="voice-select" class="small">Stimme</label>
                     <select id="voice-select"></select>
-                    <label for="mode-select" class="small" style="margin-left:auto">Modus</label>
-                    <select id="mode-select">
-                        <option value="training">Trainingsmodus</option>
-                        <option value="match">Spielvorbereitung</option>
-                    </select>
                 </div>
                 <div class="input-row">
-                    <button id="mic-btn" aria-label="Spracheingabe starten">🎤</button>
                     <input id="user-input" placeholder="Frag Toni etwas..." />
                     <button id="ok-btn">OK</button>
                 </div>
                 <nav class="sidebar-controls">
-                    <button id="welcome-btn" class="btn">👋 Begrüßung</button>
-                    <button id="kader-btn" class="btn">📋 Kader</button>
-                    <button id="preview-btn" class="btn">✅ Vorschau Moves</button>
+                    <button id="welcome-btn" class="btn">👋</button>
+                    <button id="kader-btn" class="btn">📋</button>
+                    <button id="preview-btn" class="btn">✅</button>
                 </nav>
             </section>
         </aside>
-
         <main id="main">
-            <div class="controls">
-                <div class="flex">
-                    <button id="reset-board-btn" class="btn primary">♻ GRUNDORDNUNG</button>
-                    <nav id="playlist-bar">
-                        <div id="playlist-title" class="small"></div>
-                        <div class="playlist-controls">
-                            <button id="prev-phase-btn" class="btn btn-small">◀</button>
-                            <button id="next-phase-btn" class="btn btn-small">▶</button>
-                        </div>
-                    </nav>
-                </div>
-                <div class="flex">
-                    <label for="svg-color" class="small">Pfeil Style:</label>
-                    <input type="color" id="svg-color" value="#ffcc00" title="Pfeilfarbe" />
-                    <input type="range" id="svg-width" min="2" max="12" value="6" title="Pfeilbreite" />
-                    <div id="timer" class="small">00:00</div>
-                    <button id="start-timer-btn" class="btn btn-small">Start</button>
-                </div>
-            </div>
             <div id="pitch-area">
                 <div id="pitch">
                     <div class="goal l-goal"></div><div class="goal r-goal"></div>
                     <div class="m-line"></div><div class="m-circle"></div>
-                    <svg id="exercise-svg" viewBox="0 0 1000 600" preserveAspectRatio="none"></svg>
                     <div id="ball"></div>
                     <div id="players-layer"></div>
                 </div>
@@ -161,108 +117,175 @@
     <div id="confirm-modal" class="modal">
         <h4>Vorschau der Züge</h4>
         <div id="pending-list"></div>
-        <div class="flex justify-end">
+        <div class="flex justify-end" style="margin-top:16px;">
             <button id="cancel-pending-btn" class="btn">Abbrechen</button>
-            <button id="confirm-pending-btn" class="btn primary">Bestätigen & Ausführen</button>
+            <button id="confirm-pending-btn" class="btn primary">Bestätigen</button>
         </div>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const App = {
-            State: {
-                GEMINI_KEY: "", isLocked: false, toniVoice: null, pendingMoves: [],
-            },
-            DOM: {},
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const App = {
+        State: {
+            GROQ_KEY: "", isLocked: false, toniVoice: null, pendingMoves: [],
+        },
+        DOM: {},
 
-            init: function() {
-                this.initDOM();
-                this.initListeners();
-                this.logDebug('Framework initialisiert. Warte auf Login.');
-            },
+        init: function() {
+            this.initDOM();
+            this.initListeners();
+        },
 
-            initDOM: function() {
-                const ids = ['login-overlay', 'password', 'user-key', 'login-btn', 'app', 'sidebar', 'chat-history', 'voice-select', 'mode-select', 'mic-btn', 'user-input', 'ok-btn', 'welcome-btn', 'kader-btn', 'preview-btn', 'main', 'controls', 'reset-board-btn', 'pitch', 'ball', 'players-layer', 'whiteboard', 'player-list', 'sync-names-btn', 'close-whiteboard-btn', 'confirm-modal', 'pending-list', 'cancel-pending-btn', 'confirm-pending-btn'];
-                ids.forEach(id => {
-                    const camelCaseId = id.replace(/-(\w)/g, (_, c) => c.toUpperCase());
-                    this.DOM = document.getElementById(id);
-                });
-            },[camelCaseId]
+        initDOM: function() {
+            const ids = ['login-overlay', 'password', 'user-key', 'login-btn', 'app', 'sidebar', 'chat-history', 'user-input', 'ok-btn', 'welcome-btn', 'kader-btn', 'preview-btn', 'pitch', 'ball', 'players-layer', 'whiteboard', 'player-list', 'sync-names-btn', 'close-whiteboard-btn', 'confirm-modal', 'pending-list', 'cancel-pending-btn', 'confirm-pending-btn', 'voice-select'];
+            ids.forEach(id => {
+                const camelCaseId = id.replace(/-(\w)/g, (_, c) => c.toUpperCase());
+                this.DOM = document.getElementById(id);
+            });
+        },[camelCaseId]
 
-            initListeners: function() {
-                this.DOM.loginBtn.addEventListener('click', () => this.startToni());
-                this.DOM.password.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.startToni(); });
-                this.DOM.okBtn.addEventListener('click', () => this.askToni());
-                this.DOM.userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.askToni(); });
-                this.DOM.welcomeBtn.addEventListener('click', () => this.welcomeFlow());
-                this.DOM.kaderBtn.addEventListener('click', () => this.DOM.whiteboard.classList.toggle('open'));
-                this.DOM.closeWhiteboardBtn.addEventListener('click', () => this.DOM.whiteboard.classList.remove('open'));
-                this.DOM.previewBtn.addEventListener('click', () => this.openConfirmModal());
-                this.DOM.cancelPendingBtn.addEventListener('click', () => this.cancelPending());
-                this.DOM.confirmPendingBtn.addEventListener('click', () => this.confirmAndExecutePending());
-            },
+        initListeners: function() {
+            this.DOM.loginBtn.addEventListener('click', () => this.startToni());
+            this.DOM.password.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.startToni(); });
+            this.DOM.okBtn.addEventListener('click', () => this.askToni());
+            this.DOM.userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.askToni(); });
+            this.DOM.welcomeBtn.addEventListener('click', () => this.welcomeFlow());
+            this.DOM.kaderBtn.addEventListener('click', () => this.DOM.whiteboard.classList.toggle('open'));
+            this.DOM.closeWhiteboardBtn.addEventListener('click', () => this.DOM.whiteboard.classList.remove('open'));
+            this.DOM.previewBtn.addEventListener('click', () => this.openConfirmModal());
+            this.DOM.cancelPendingBtn.addEventListener('click', () => this.cancelPending());
+            this.DOM.confirmPendingBtn.addEventListener('click', () => this.confirmAndExecutePending());
+        },
+        
+        startToni: function() {
+            if (this.DOM.password.value!== 'Trainer2026') return alert('Zugriff verweigert.');
             
-            startToni: function() {
-                if (this.DOM.password.value!== 'Trainer2026') return alert('Zugriff verweigert.');
-                this.State.GEMINI_KEY = this.DOM.userKey.value.trim();
-                this.DOM.loginOverlay.style.display = 'none';
-                this.DOM.app.style.display = 'grid';
-                this.addMsg('toni', 'Systeme hochgefahren. Guten Tag, Coach.');
-                this.logDebug('Toni OS initialisiert.');
-            },
+            this.State.GROQ_KEY = this.DOM.userKey.value.trim();
+            this.DOM.loginOverlay.style.display = 'none';
+            this.DOM.app.style.display = 'grid';
+            
+            this.populateVoiceSelect();
+            this.addMsg('toni', 'Systeme hochgefahren. Guten Tag, Coach. Ich bin bereit.');
+        },
 
-            askToni: async function() {
-                const text = this.DOM.userInput.value.trim();
-                if(!text || this.State.isLocked) return;
-                this.addMsg('user', text);
-                this.DOM.userInput.value = '';
-                this.State.isLocked = true;
-                this.addMsg('toni', '...');
-                // Hier kommt die Logik für die KI-Anfrage
-                setTimeout(() => { // Simuliert eine KI-Antwort
-                    this.updateLastToniMsg(`Verstanden. Du hast "${text}" gesagt. (KI-Antwort simuliert)`);
+        askToni: async function() {
+            const text = this.DOM.userInput.value.trim();
+            if (!text || this.State.isLocked) return;
+            
+            this.addMsg('user', text);
+            this.DOM.userInput.value = '';
+            this.State.isLocked = true;
+            this.addMsg('toni', '...');
+
+            if (!this.State.GROQ_KEY) {
+                setTimeout(() => {
+                    this.updateLastToniMsg(`(LOKALE SIMULATION) API-Key fehlt. Du hast gesagt: "${text}"`);
                     this.State.isLocked = false;
-                }, 1000);
-            },
-
-            addMsg: function(role, txt) {
-                const h = this.DOM.chatHistory;
-                const d = document.createElement('div');
-                d.className = `msg ${role}`;
-                d.innerText = txt;
-                h.appendChild(d);
-                h.scrollTop = h.scrollHeight;
-            },
-
-            updateLastToniMsg: function(txt) {
-                const lastMsg = this.DOM.chatHistory.querySelector('.msg.toni:last-child');
-                if (lastMsg && lastMsg.innerText === '...') { lastMsg.innerText = txt; }
-                else { this.addMsg('toni', txt); }
-            },
-
-            welcomeFlow: function() {
-                this.addMsg('toni', "Guten Tag, Coach. Womit starten wir heute?");
-            },
-
-            logDebug: function(msg) {
-                console.log(`[ToniOS Debug] ${msg}`);
-            },
-
-            openConfirmModal: function() {
-                if (this.State.pendingMoves.length > 0) this.DOM.confirmModal.classList.add('open');
-            },
-            cancelPending: function() {
-                this.State.pendingMoves = [];
-                this.DOM.confirmModal.classList.remove('open');
-                this.addMsg('toni','Vorschläge verworfen.');
-            },
-            confirmAndExecutePending: function() {
-                this.DOM.confirmModal.classList.remove('open');
-                this.addMsg('toni','Bestätigt. Führe Züge aus.');
+                }, 500);
+                return;
             }
-        };
-        App.init();
-    });
-    </script>
+
+            const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+            const systemPrompt = "Du bist 'Toni', ein Weltklasse-Fußball-KI-Co-Trainer. Antworte immer kurz, präzise und professionell. Wenn du Spieler bewegen sollst, nutze das Format: MOVE[spieler_id,x_prozent,y_prozent].";
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.State.GROQ_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: text }],
+                        model: "llama3-8b-8192"
+                    })
+                });
+
+                if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                
+                const data = await response.json();
+                const answer = data.choices?.message?.content || "Entschuldigung, ich konnte keine Antwort generieren.";
+                
+                this.updateLastToniMsg(answer.replace(/MOVE\[.*?\]/g, ''));
+                this.speakStyled(answer.replace(/MOVE\[.*?\]/g, ''));
+
+                const rawMoves = [...answer.matchAll(/MOVE\[\s*(home(?:[1-9]|1[0-1]))\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\]/gi)];
+                if (rawMoves.length) {
+                    this.State.pendingMoves = rawMoves.map(m => ({ id: m.toLowerCase(), x: parseInt(m, 10) / 100, y: parseInt(m, 10) / 100 }));
+                    this.renderPendingList();
+                    this.openConfirmModal();
+                }
+
+            } catch (err) {
+                this.updateLastToniMsg('Verbindung zur KI fehlgeschlagen. Ist der Groq-API-Schlüssel korrekt?');
+                console.error(err);
+            } finally {
+                this.State.isLocked = false;
+            }
+        },
+
+        addMsg: function(role, txt) {
+            const h = this.DOM.chatHistory;
+            const d = document.createElement('div');
+            d.className = `msg ${role}`;
+            d.innerText = txt;
+            h.appendChild(d);
+            h.scrollTop = h.scrollHeight;
+        },
+
+        updateLastToniMsg: function(txt) {
+            const lastMsg = this.DOM.chatHistory.querySelector('.msg.toni:last-child');
+            if (lastMsg && lastMsg.innerText === '...') { lastMsg.innerText = txt; }
+            else { this.addMsg('toni', txt); }
+        },
+
+        welcomeFlow: function() { this.addMsg('toni', "Guten Tag, Coach. Womit starten wir heute?"); },
+
+        renderPendingList: function(){
+            const container = this.DOM.pendingList;
+            container.innerHTML = this.State.pendingMoves.length === 0? 'Keine vorgeschlagenen Bewegungen.' : '';
+            this.State.pendingMoves.forEach(m => {
+                const item = document.createElement('div');
+                item.className = 'pending-item';
+                item.innerText = `MOVE ${m.id} → X: ${Math.round(m.x*100)}%, Y: ${Math.round(m.y*100)}%`;
+                container.appendChild(item);
+            });
+        },
+
+        openConfirmModal: function(){ if (this.State.pendingMoves.length > 0) this.DOM.confirmModal.classList.add('open'); },
+        cancelPending: function(){ this.State.pendingMoves = []; this.DOM.confirmModal.classList.remove('open'); this.addMsg('toni','Vorschläge verworfen.'); },
+        confirmAndExecutePending: function(){
+            this.DOM.confirmModal.classList.remove('open');
+            // Hier kommt deine Logik zum animieren der Spieler...
+            this.addMsg('toni',`Bestätigt. Führe ${this.State.pendingMoves.length} Züge aus.`);
+            this.State.pendingMoves = [];
+        },
+
+        populateVoiceSelect: function(){
+            const sel = this.DOM.voiceSelect;
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Stimme wählen...</option>';
+            speechSynthesis.getVoices().forEach(v => {
+                if(v.lang.startsWith('de')) {
+                    const opt = document.createElement('option');
+                    opt.value = v.name;
+                    opt.text = `${v.name}`;
+                    sel.appendChild(opt);
+                }
+            });
+        },
+
+        speakStyled: function(text){
+            if(!text) return;
+            try{
+                speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                const voices = speechSynthesis.getVoices();
+                u.voice = voices.find(v => v.name === this.DOM.voiceSelect.value) || voices.find(v => v.lang.startsWith('de'));
+                u.lang = 'de-DE';
+                speechSynthesis.speak(u);
+            } catch(e) { console.warn('TTS error', e); }
+        }
+    };
+    App.init();
+});
+</script>
 </body>
 </html>
