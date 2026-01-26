@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toni 2.0 - Taktik-Zentrale</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="app">
         <div id="main">
             <div class="top-controls">
-                <button class="btn primary" onclick="resetBoard()">⚽ ANSTOSS</button>
+                <button class="btn primary" onclick="resetBoard()">⚽ ANSTOSS / RESET</button>
                 <div class="phase-display">
                     <span id="playlist-title">Spielanalyse Aktiv</span>
                 </div>
@@ -29,11 +30,11 @@
 
             <div id="bench-area">
                 <div class="bench-side">
-                    <div class="bench-label">BANK ROT (Björn)</div>
+                    <div id="trainer-bench-label" class="bench-label">BANK TEAM ROT</div>
                     <div id="bench-red" class="bench-slot"></div>
                 </div>
                 <div class="bench-side">
-                    <div class="bench-label">BANK BLAU (Gegner)</div>
+                    <div class="bench-label">BANK TEAM BLAU (Gegner)</div>
                     <div id="bench-blue" class="bench-slot"></div>
                 </div>
             </div>
@@ -50,7 +51,7 @@
             <div class="action-buttons">
                 <button class="btn" onclick="welcomeFlow()">👋 Gruß</button>
                 <button class="btn" onclick="openKaderManager()">📋 Kader Editor</button>
-                <button class="btn primary" onclick="askToniTaktik()">📊 Taktik</button>
+                <button class="btn primary" onclick="askToniTaktik()">📊 Taktik-Check</button>
                 <button class="btn" onclick="clearArrows()">🧹 Pfeile löschen</button>
                 <button class="btn primary full-width" onclick="exportPlanPDF()">📄 PDF EXPORT</button>
             </div>
@@ -68,9 +69,10 @@
     <div id="login-overlay">
         <div class="login-card">
             <h1>COACH LOGIN</h1>
+            <input type="text" id="trainer-name-input" placeholder="Dein Name oder Verein (z.B. Björn)">
             <input type="password" id="password" placeholder="Passwort">
             <input type="password" id="user-groq-key" placeholder="Groq API-Key">
-            <button class="btn primary" onclick="startToni()">INITIALISIEREN</button>
+            <button class="btn primary" onclick="startToni()">SYSTEM INITIALISIEREN</button>
         </div>
     </div>
 
