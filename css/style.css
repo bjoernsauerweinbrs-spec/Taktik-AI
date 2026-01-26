@@ -1,131 +1,57 @@
-/* --- BASIS-SETUP --- */
 * { box-sizing: border-box; }
-body, html {
-    margin: 0; padding: 0;
-    width: 100vw; height: 100vh;
-    background: #050608;
-    color: white;
-    font-family: 'Inter', sans-serif;
-    overflow: hidden;
-}
+body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; background: #050608; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
 
-#app {
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-}
+#app { display: flex; width: 100vw; height: 100vh; }
 
-/* --- SPIELFELD (LINKS) --- */
-#main {
-    flex: 1;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(circle at top, #1b2333 0, #050608 100%);
-    position: relative;
-    padding: 20px;
-}
+/* SPIELFELD-BEREICH */
+#main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at top, #1b2333 0, #050608 100%); padding: 20px; }
 
-/* DAS HOCHAUFLÖSENDE SPIELFELD */
 #board-container {
-    width: 800px;
-    height: 500px;
-    background-color: #27ae60;
-    /* Linien-Design via CSS */
-    background-image: 
-        /* Mittellinie */
-        linear-gradient(to bottom, transparent 49.5%, white 49.5%, white 50.5%, transparent 50.5%),
-        /* Seitenlinien & Torauslinien */
-        linear-gradient(to right, white 2px, transparent 2px, transparent calc(100% - 2px), white calc(100% - 2px)),
-        linear-gradient(to bottom, white 2px, transparent 2px, transparent calc(100% - 2px), white calc(100% - 2px));
-    border: 4px solid white;
-    border-radius: 5px;
+    width: 800px; height: 500px;
+    background: #27ae60;
+    border: 3px solid white;
     position: relative;
     box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    background-image: linear-gradient(to right, transparent 49.8%, white 49.8%, white 50.2%, transparent 50.2%); /* Mittellinie */
 }
 
 /* Mittelkreis */
-#board-container::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 120px; height: 120px;
-    border: 2px solid white;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-}
+#board-container::before { content: ''; position: absolute; top: 50%; left: 50%; width: 100px; height: 100px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); }
 
-/* Strafräume (vereinfacht) */
-#board-container::after {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    background-image: 
-        /* Linker 16er */
-        linear-gradient(to bottom, white 2px, transparent 2px),
-        linear-gradient(to right, white 2px, transparent 2px),
-        /* Rechter 16er (Platzhalter-Logik) */
-        linear-gradient(to left, white 2px, transparent 2px);
-}
+/* Strafräume & Tore */
+.box-16-left, .box-16-right { position: absolute; top: 100px; width: 120px; height: 300px; border: 2px solid white; }
+.box-16-left { left: 0; border-left: none; }
+.box-16-right { right: 0; border-right: none; }
 
-/* --- SPIELER (DIE MÄNNCHEN) --- */
-.player {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 800;
-    cursor: grab;
-    z-index: 100;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-    transition: transform 0.1s;
-    user-select: none;
-}
-.player:active { cursor: grabbing; transform: scale(1.1); }
-.player.red { background: #e74c3c; color: white; border: 2px solid white; }
-.player.blue { background: #3498db; color: white; border: 2px solid white; }
+.box-5-left, .box-5-right { position: absolute; top: 180px; width: 40px; height: 140px; border: 2px solid white; }
+.box-5-left { left: 0; border-left: none; }
+.box-5-right { right: 0; border-right: none; }
 
-/* --- SIDEBAR (RECHTS) --- */
-.sidebar {
-    width: 380px;
-    height: 100vh;
-    background: #0f172a;
-    border-left: 2px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-}
+.goal-left, .goal-right { position: absolute; top: 215px; width: 10px; height: 70px; background: rgba(255,255,255,0.3); border: 2px solid white; }
+.goal-left { left: -12px; }
+.goal-right { right: -12px; }
 
-.header { color: #2ecc71; font-weight: 800; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+/* AUSWECHSELBANK */
+#bench-container { width: 800px; margin-top: 20px; background: rgba(15,23,42,0.8); padding: 10px; border-radius: 10px; border: 1px solid #2ecc71; }
+.bench-label { font-size: 0.7rem; color: #2ecc71; font-weight: bold; display: block; margin-bottom: 5px; }
+#bench { display: flex; gap: 10px; min-height: 40px; flex-wrap: wrap; }
 
-#chat-history {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 15px;
-    padding-right: 5px;
-}
+/* SPIELER */
+.player { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; cursor: grab; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 2px solid white; }
+.player.red { background: #e74c3c; color: white; }
+.player.blue { background: #3498db; color: white; }
+.player:active { cursor: grabbing; }
 
-.msg { padding: 10px 14px; border-radius: 12px; font-size: 0.95rem; line-height: 1.4; max-width: 90%; }
-.msg.user { align-self: flex-end; background: #334155; color: white; }
-.msg.toni { align-self: flex-start; background: #1e293b; border-left: 3px solid #2ecc71; color: #e2e8f0; }
-
-.input-row { display: flex; gap: 8px; margin-bottom: 15px; }
-input { flex: 1; background: #1e293b; border: 1px solid #334155; color: white; padding: 10px; border-radius: 8px; }
-
-.action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.btn { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
-.btn.primary { background: #2ecc71; color: #0f172a; }
+/* SIDEBAR & CHAT */
+.sidebar { width: 380px; background: #0f172a; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #334155; }
+#chat-history { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+.msg { padding: 8px 12px; border-radius: 10px; max-width: 85%; font-size: 0.9rem; }
+.msg.toni { background: #1e293b; border-left: 3px solid #2ecc71; }
+.msg.user { background: #334155; align-self: flex-end; }
 
 /* LOGIN */
 #login-overlay { position: fixed; inset: 0; background: #050608; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+.login-card { background: #0f172a; padding: 40px; border-radius: 20px; border: 1px solid #2ecc71; text-align: center; }
+.login-card input { display: block; width: 100%; margin: 10px 0; padding: 10px; border-radius: 5px; border: none; }
+.btn { cursor: pointer; border: none; padding: 10px; border-radius: 5px; font-weight: bold; }
+.btn.primary { background: #2ecc71; color: #0f172a; }
