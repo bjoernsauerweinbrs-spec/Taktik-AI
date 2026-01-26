@@ -1,23 +1,80 @@
-// Funktion für Toni, um Linien zu zeichnen
-function drawTacticalLine(fromX, fromY, toX, toY, isDashed = false) {
-    const svg = document.getElementById('tactical-svg') || createSvgLayer();
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    
-    line.setAttribute("x1", fromX + "%");
-    line.setAttribute("y1", fromY + "%");
-    line.setAttribute("x2", toX + "%");
-    line.setAttribute("y2", toY + "%");
-    line.setAttribute("stroke", isDashed ? "blue" : "red");
-    line.setAttribute("stroke-width", "2");
-    if(isDashed) line.setAttribute("stroke-dasharray", "5,5");
-    
-    svg.appendChild(line);
+/**
+ * Toni 2.0 - Stabiles Board (Wiederherstellung)
+ */
+
+const pitch = document.getElementById('pitch');
+let squad = []; // Wird von der logic.js befüllt
+
+// DIESE FUNKTION IST DER SCHLÜSSEL FÜR TONI
+function movePlayerOnBoard(identifier, x, y) {
+    const dots = document.querySelectorAll('.player-dot');
+    let found = false;
+    dots.forEach(dot => {
+        const label = dot.querySelector('.player-label').innerText.toLowerCase();
+        const idStr = identifier.toString().toLowerCase();
+        if (label.includes(idStr)) {
+            dot.style.left = x + '%';
+            dot.style.top = y + '%';
+            found = true;
+        }
+    });
+    if(!found) console.log("Spieler nicht gefunden: " + identifier);
 }
 
-function createSvgLayer() {
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.id = "tactical-svg";
-    svg.style = "position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:50;";
-    pitch.appendChild(svg);
-    return svg;
+function drawBoard() {
+    if (!pitch) return;
+    // Das Spielfeld mit deinen Markierungen
+    pitch.innerHTML = `
+        <div class="center-line"></div>
+        <div class="center-circle"></div>
+        <div class="penalty-area left"></div>
+        <div class="penalty-area right"></div>
+        <div id="ball" class="ball"></div>
+    `;
+    
+    // Hier werden deine roten Spieler wieder geladen
+    if (typeof squad !== 'undefined') {
+        squad.forEach(p => {
+            if (p.status === 'team' || p.active === true) {
+                createDot(p, 'red');
+            }
+        });
+    }
+    
+    // Die Tore (interaktiv wie besprochen)
+    addGoal('left');
+    addGoal('right');
 }
+
+function createDot(player, colorClass) {
+    const dot = document.createElement('div');
+    dot.className = `player-dot ${colorClass}`;
+    dot.style.left = '50%';
+    dot.style.top = '50%';
+    dot.innerHTML = `<div class="player-label">#${player.nr} ${player.name}</div>`;
+    makeDraggable(dot);
+    pitch.appendChild(dot);
+}
+
+function addGoal(side) {
+    const goal = document.createElement('div');
+    goal.className = `goal ${side}`;
+    goal.onclick = () => goal.classList.toggle('rotated');
+    pitch.appendChild(goal);
+}
+
+function makeDraggable(el) {
+    let isDragging = false;
+    el.onmousedown = () => isDragging = true;
+    document.onmousemove = (e) => {
+        if (!isDragging) return;
+        let rect = pitch.getBoundingClientRect();
+        let x = ((e.clientX - rect.left) / rect.width) * 100;
+        let y = ((e.clientY - rect.top) / rect.height) * 100;
+        el.style.left = Math.max(0, Math.min(100, x)) + '%';
+        el.style.top = Math.max(0, Math.min(100, y)) + '%';
+    };
+    document.onmouseup = () => isDragging = false;
+}
+
+document.addEventListener('DOMContentLoaded', drawBoard);
