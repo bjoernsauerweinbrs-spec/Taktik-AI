@@ -1,113 +1,98 @@
 /**
- * Toni 2.0 - Storage & Export Engine
- * Verwaltet das dauerhafte Speichern des Kaders und den Klemmbrett-Druck.
+ * Toni 2.0 - Storage & Dashboard Engine
+ * Verwaltet die "Aktentasche" und die Datensicherung.
  */
 
-// --- 1. SPEICHER-LOGIK (LocalStorage) ---
-
 /**
- * Speichert den aktuellen Kader und die Punkte in den Browser-Speicher
- */
-function saveSquadData() {
-    try {
-        localStorage.setItem('toni_squad_data', JSON.stringify(squad));
-        console.log("Aktentasche aktualisiert: Kader gesichert.");
-    } catch (e) {
-        console.error("Fehler beim Speichern in die Aktentasche:", e);
-    }
-}
-
-/**
- * Lädt die gespeicherten Daten beim Starten der App
- */
-function loadSquadData() {
-    const savedData = localStorage.getItem('toni_squad_data');
-    if (savedData) {
-        try {
-            squad = JSON.parse(savedData);
-            console.log("Daten erfolgreich aus der Aktentasche geladen.");
-            
-            // UI aktualisieren, nachdem Daten geladen wurden
-            if (typeof renderSquad === "function") renderSquad();
-            if (typeof drawBoard === "function") drawBoard();
-        } catch (e) {
-            console.error("Fehler beim Parsen der Speicherdaten:", e);
-        }
-    }
-}
-
-// --- 2. EXPORT-LOGIK (Das Klemmbrett) ---
-
-/**
- * Erzeugt eine druckoptimierte Version des aktuellen Boards und der Analyse
+ * Kernfunktion: Öffnet die Aktentasche (Dashboard-Ansicht)
  */
 function exportToKlemmbrett() {
-    toniSpeak("Ich bereite dein Klemmbrett vor, Björn. Ein sauberer Plan ist die halbe Miete!");
+    // Falls ein altes Overlay existiert, entfernen
+    const oldOverlay = document.getElementById('dashboard-overlay');
+    if (oldOverlay) oldOverlay.remove();
 
-    // Screenshot-ähnliches Fenster für den Druck öffnen
-    const printWindow = window.open('', '_blank');
-    const pitchHtml = document.getElementById('pitch').innerHTML;
-    const notes = document.getElementById('toni-output').innerText;
-    
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Toni 2.0 - Trainingsplan Björn</title>
-            <style>
-                body { font-family: 'Segoe UI', sans-serif; padding: 30px; color: #333; }
-                .header { border-bottom: 3px solid #2e7d32; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-                .pitch-box { 
-                    width: 100%; height: 500px; border: 2px solid #000; 
-                    position: relative; background: #fff; overflow: hidden;
-                    transform: scale(0.9); transform-origin: top left;
-                }
-                /* CSS für die gedruckten Punkte übernehmen */
-                .player-dot { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: #d32f2f; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; transform: translate(-50%, -50%); border: 1px solid #000; }
-                .player-label { position: absolute; top: 32px; font-size: 10px; color: #000; font-weight: bold; white-space: nowrap; }
-                .goal { position: absolute; background: #000; border: 1px solid #000; }
-                .standard-goal { width: 10px; height: 80px; }
-                .funino-goal { width: 6px; height: 40px; }
-                .center-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #333; }
-                .center-circle { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; border: 1px solid #333; border-radius: 50%; }
-                .notes-section { margin-top: 40px; background: #f9f9f9; padding: 15px; border-left: 5px solid #2e7d32; }
-                @media print { .no-print { display: none; } }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <div>
-                    <h1 style="margin:0;">⚽ Trainings-Beleg</h1>
-                    <p style="margin:5px 0;">Trainer: Björn | Modus: ${currentMode} | Datum: ${new Date().toLocaleDateString()}</p>
+    // HTML für das Dashboard-Overlay erstellen
+    const dashboardHtml = `
+        <div id="dashboard-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
+            <div style="background:white; width:90%; max-width:800px; max-height:85vh; padding:30px; border-radius:20px; overflow-y:auto; box-shadow:0 25px 50px rgba(0,0,0,0.5); position:relative; font-family:'Inter', sans-serif;">
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2 style="margin:0; color:#1b5e20;">💼 Aktentasche: Trainings-Analyse</h2>
+                    <button onclick="document.getElementById('dashboard-overlay').remove()" style="font-size:24px; cursor:pointer; border:none; background:none; color:#666;">✕</button>
                 </div>
-                <div style="font-size: 40px;">🇧🇷</div>
-            </div>
-            
-            <div class="pitch-box">
-                ${pitchHtml}
-            </div>
+                
+                <p style="color:#666; font-size:0.9em; margin-bottom:20px;">Hier sind die aktuellen Leistungsdaten deines Kaders, Björn.</p>
+                
+                <div style="background:#f9f9f9; border-radius:12px; padding:20px; margin-bottom:20px;">
+                    <table style="width:100%; text-align:left; border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom:2px solid #2e7d32; color:#2e7d32;">
+                                <th style="padding:10px;">Spieler</th>
+                                <th style="padding:10px;">Status</th>
+                                <th style="padding:10px; text-align:center;">⚽ Technik</th>
+                                <th style="padding:10px; text-align:center;">👁️ Scanning</th>
+                                <th style="padding:10px; text-align:center;">Gesamt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${squad.map(p => {
+                                const total = p.points.tech + p.points.scan;
+                                const statusLabel = p.status === 'team' ? 'Feld' : (p.status === 'bank' ? 'Bank' : 'Abwesend');
+                                return `
+                                    <tr style="border-bottom:1px solid #eee;">
+                                        <td style="padding:12px;"><strong>#${p.nr} ${p.name}</strong></td>
+                                        <td style="padding:12px;"><span style="font-size:0.8em; padding:2px 8px; border-radius:10px; background:#e0e0e0;">${statusLabel}</span></td>
+                                        <td style="padding:12px; text-align:center;">${p.points.tech}</td>
+                                        <td style="padding:12px; text-align:center;">${p.points.scan}</td>
+                                        <td style="padding:12px; text-align:center;"><strong style="color:#2e7d32;">${total}</strong></td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="notes-section">
-                <h3>Tonis Analyse & Notizen:</h3>
-                <p>${notes ? notes : "Keine speziellen Notizen für diese Einheit."}</p>
+                <div style="display:flex; gap:15px;">
+                    <button onclick="window.print()" style="flex-grow:1; padding:12px; background:#2e7d32; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🖨️ Für Klemmbrett drucken (PDF)</button>
+                    <button onclick="clearAllData()" style="padding:12px; background:#ffebee; color:#c62828; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Reset Daten</button>
+                </div>
             </div>
-
-            <div style="margin-top: 30px;">
-                <h4>Anwesenheits-Check / Material:</h4>
-                <p>Spieler im Training: ____________________ | Bälle: [ ] | Hütchen: [ ]</p>
-            </div>
-
-            <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: #2e7d32; color: #fff; border: none; cursor: pointer; border-radius: 5px;">Jetzt Drucken / Als PDF speichern</button>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', dashboardHtml);
 }
 
-// --- 3. INITIALISIERUNG ---
+/**
+ * Daten im LocalStorage sichern
+ */
+function saveSquadData() {
+    localStorage.setItem('toni_squad_data', JSON.stringify(squad));
+    console.log("Daten in Aktentasche gesichert.");
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Wenn wir in der app.html sind, laden wir die Daten
-    if (document.getElementById('player-list')) {
-        loadSquadData();
+/**
+ * Daten beim Start laden
+ */
+function loadSquadData() {
+    const saved = localStorage.getItem('toni_squad_data');
+    if (saved) {
+        squad = JSON.parse(saved);
+        if (typeof renderSquad === "function") renderSquad();
     }
+}
+
+/**
+ * Alles auf Null setzen (Sicherheitsfunktion)
+ */
+function clearAllData() {
+    if(confirm("Möchtest du wirklich alle Punkte und Spielerdaten zurücksetzen?")) {
+        localStorage.removeItem('toni_squad_data');
+        location.reload();
+    }
+}
+
+// Beim Start automatisch laden
+document.addEventListener('DOMContentLoaded', () => {
+    loadSquadData();
 });
