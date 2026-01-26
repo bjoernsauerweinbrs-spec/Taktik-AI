@@ -1,34 +1,34 @@
 /**
  * Toni 2.0 - Board Engine
- * Verantwortlich für das Zeichnen der Spieler, Tore, Bälle und die Drag-Logik.
+ * Zeichnet das Spielfeld, die Spieler-Icons und die rotierbaren Tore.
  */
 
 const pitch = document.getElementById('pitch');
 
 /**
- * Kernfunktion: Zeichnet das komplette Spielfeld basierend auf dem Status
+ * Kernfunktion: Löscht das Feld und zeichnet alles basierend auf dem aktuellen Stand neu.
  */
 function drawBoard() {
     if (!pitch) return;
 
-    // 1. Spielfeld leeren (außer Linien)
+    // 1. Alte Elemente entfernen (Spieler, Tore, Hütchen)
     const dynamicElements = pitch.querySelectorAll('.player-dot, .goal, .cone, .shooting-zone');
     dynamicElements.forEach(el => el.remove());
 
-    // 2. Modus-Setup (Größe & Tore)
+    // 2. Tore und Feld-Setup
     if (currentMode === 'funino') {
         setupFuninoField();
     } else {
         setupStandardField();
     }
 
-    // 3. Rote Spieler (Dein Team) platzieren
+    // 3. Deine Spieler (Team Rot) platzieren
     squad.filter(p => p.active && p.status === 'team').forEach(p => {
         const coords = formations["4-4-2_RED"][p.pos] || {x: 50, y: 50};
         createPlayerElement(p, coords, 'var(--red-team)');
     });
 
-    // 4. Blaue Spieler (Gegner) - nur im 11v11 Modus
+    // 4. Gegner (Team Blau) platzieren (nur im 11v11 Modus)
     if (currentMode === '11v11') {
         opponents.forEach(o => {
             const coords = formations["3-4-3_BLUE"][o.pos];
@@ -36,7 +36,7 @@ function drawBoard() {
         });
     }
 
-    // 5. Ersatzbank (Rechter Rand)
+    // 5. Ersatzbank (Rechter Rand des Boards)
     squad.filter(p => p.active && p.status === 'bank').forEach((p, index) => {
         const bankCoords = { x: 96, y: 15 + (index * 7) };
         createPlayerElement(p, bankCoords, 'var(--red-team)');
@@ -44,7 +44,7 @@ function drawBoard() {
 }
 
 /**
- * Erstellt einen Spieler-Punkt (Dot)
+ * Erstellt einen Spieler-Punkt mit Ball-Option
  */
 function createPlayerElement(player, coords, color, isOpponent = false) {
     if (!coords) return;
@@ -55,97 +55,79 @@ function createPlayerElement(player, coords, color, isOpponent = false) {
     dot.style.top = coords.y + '%';
     dot.style.backgroundColor = color;
     
-    // Ball-Icon anzeigen, wenn der Spieler einen Ball hat (für deine 16 Bälle)
-    const ballHtml = (!isOpponent && player.hasBall) ? '<div class="player-ball">⚽</div>' : '';
+    // Ball-Logik: Wenn der Spieler einen Ball hat, ⚽ Icon anzeigen
+    const ballHtml = (!isOpponent && player.hasBall) ? '<div class="player-ball" style="position:absolute; bottom:-5px; right:-5px; font-size:12px;">⚽</div>' : '';
     
     let content = `<span>${player.nr}</span>${ballHtml}`;
     if (!isOpponent && player.name) {
-        content += `<span class="player-label">${player.name}</span>`;
+        content += `<span class="player-label" style="position:absolute; top:32px; font-size:10px; font-weight:bold; white-space:nowrap; color:#333;">${player.name}</span>`;
     }
     dot.innerHTML = content;
 
-    // Interaktives Verschieben aktivieren
+    // Interaktives Verschieben (Drag & Drop)
     dot.onmousedown = (e) => startDrag(e, dot);
     
     pitch.appendChild(dot);
 }
 
 /**
- * Standard-Spielfeld (11v11 oder Training)
+ * Standard-Spielfeld Tore
  */
 function setupStandardField() {
-    pitch.style.width = '850px';
-    pitch.style.height = '550px';
-    
-    // Tore erstellen (Standardmäßig nach innen geöffnet)
-    createGoal('left', 'standard-goal', 0); // 0 Grad
-    createGoal('right', 'standard-goal', 0);
+    createGoal('left', 'standard-goal', 0, '50%');
+    createGoal('right', 'standard-goal', 0, '50%');
 }
 
 /**
- * Funino-Feld (4 Tore & Schusszonen)
+ * Funino-Feld Setup (4 Tore)
  */
 function setupFuninoField() {
-    pitch.style.width = '650px';
-    pitch.style.height = '450px';
-
     createGoal('left', 'funino-goal', 0, '20%');
     createGoal('left', 'funino-goal', 0, '80%');
     createGoal('right', 'funino-goal', 0, '20%');
     createGoal('right', 'funino-goal', 0, '80%');
-
-    // Schusszonen einzeichnen
-    ['left', 'right'].forEach(side => {
-        const zone = document.createElement('div');
-        zone.className = `shooting-zone ${side}`;
-        zone.style.display = 'block';
-        pitch.appendChild(zone);
-    });
 }
 
 /**
- * Erstellt ein Tor mit Rotations-Möglichkeit
+ * Erstellt ein Tor, das bei Klick rotiert
  */
 function createGoal(side, type, rotation = 0, topPos = '50%') {
     const goal = document.createElement('div');
     goal.className = `goal ${type}`;
-    if (side === 'left') {
-        goal.style.left = '-6px';
-    } else {
-        goal.style.right = '-6px';
-    }
+    if (side === 'left') goal.style.left = '-6px';
+    else goal.style.right = '-6px';
+    
     goal.style.top = topPos;
     goal.style.transform = `translateY(-50%) rotate(${rotation}deg)`;
+    goal.style.cursor = 'pointer';
     
-    // Klick auf Tor ermöglicht Drehung (z.B. nach links öffnen)
+    // Dreh-Logik bei Klick
     goal.onclick = () => {
-        const currentRot = parseInt(goal.getAttribute('data-rot') || 0);
-        const newRot = (currentRot + 90) % 360;
-        goal.style.transform = `translateY(-50%) rotate(${newRot}deg)`;
-        goal.setAttribute('data-rot', newRot);
+        let currentRot = parseInt(goal.getAttribute('data-rot') || 0);
+        currentRot = (currentRot + 90) % 360;
+        goal.style.transform = `translateY(-50%) rotate(${currentRot}deg)`;
+        goal.setAttribute('data-rot', currentRot);
     };
 
     pitch.appendChild(goal);
 }
 
 /**
- * Die kombinierte Drag-Logik (Maus-Steuerung)
+ * Drag & Drop Engine
  */
 function startDrag(e, element) {
     let shiftX = e.clientX - element.getBoundingClientRect().left;
     let shiftY = e.clientY - element.getBoundingClientRect().top;
 
     function moveAt(pageX, pageY) {
-        let newX = (pageX - shiftX - pitch.getBoundingClientRect().left) / pitch.offsetWidth * 100;
-        let newY = (pageY - shiftY - pitch.getBoundingClientRect().top) / pitch.offsetHeight * 100;
+        let rect = pitch.getBoundingClientRect();
+        let newX = (pageX - shiftX - rect.left) / rect.width * 100;
+        let newY = (pageY - shiftY - rect.top) / rect.height * 100;
         element.style.left = newX + '%';
         element.style.top = newY + '%';
     }
 
-    function onMouseMove(event) {
-        moveAt(event.pageX, event.pageY);
-    }
-
+    function onMouseMove(event) { moveAt(event.pageX, event.pageY); }
     document.addEventListener('mousemove', onMouseMove);
 
     element.onmouseup = function() {
@@ -155,39 +137,31 @@ function startDrag(e, element) {
 }
 
 /**
- * Hütchen-Logik
+ * Hütchen platzieren
  */
 function placeCones(count) {
     for (let i = 0; i < count; i++) {
         const cone = document.createElement('div');
         cone.className = 'cone';
-        cone.style.left = (Math.random() * 70 + 15) + '%';
-        cone.style.top = (Math.random() * 70 + 15) + '%';
-        cone.innerHTML = '▲'; 
+        cone.style.left = (20 + Math.random() * 60) + '%';
+        cone.style.top = (20 + Math.random() * 60) + '%';
         cone.style.position = 'absolute';
-        cone.style.color = 'orange';
-        cone.style.fontSize = '24px';
         cone.style.cursor = 'move';
+        cone.style.fontSize = '20px';
+        cone.innerHTML = '▲'; 
+        cone.style.color = 'orange';
         cone.onmousedown = (e) => startDrag(e, cone);
         pitch.appendChild(cone);
     }
-    toniSpeak(`Björn, ich habe ${count} Hütchen auf dem Feld verteilt.`);
 }
 
 /**
- * Modus-Wechsel
+ * Modus-Wechsel (11v11 / Funino)
  */
 function switchMode(mode) {
     currentMode = mode;
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(`btn-${mode}`).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(`btn-${mode}`);
+    if (activeBtn) activeBtn.classList.add('active');
     drawBoard();
-}
-
-/**
- * Reset-Funktion
- */
-function resetBoardPositions() {
-    drawBoard();
-    toniSpeak("Alle Positionen sind wieder auf die taktische Grundordnung zurückgesetzt.");
 }
