@@ -1,122 +1,59 @@
-/* Grund-Einstellungen */
-:root {
-    --pitch-bg: #ffffff;
-    --line-color: #333333;
-    --sidebar-bg: #f8f9fa;
-    --red-team: #d32f2f;
-    --blue-team: #1976d2;
-    --yellow-leibchen: #ffeb3b;
-    --toni-green: #2e7d32;
-    --shadow: 0 4px 12px rgba(0,0,0,0.15);
+:root{
+  --green:#2ecc71;
+  --accent:#0a74da;
+  --bg:#07101a;
+  --panel:#0f1720;
+  --line:rgba(255,255,255,0.12);
+  --text:#e6eef0;
+  --card-radius:12px;
+  --arrow-color:#ffcc00;
+  --arrow-width:6;
+  --pulse-color:rgba(255,255,255,0.12);
 }
 
-body {
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    display: flex;
-    height: 100vh;
-    background: #e0e0e0;
-    overflow: hidden;
+/* Grundlayout */
+html,body{height:100%;margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#1b2333 0,#050608 55%);color:var(--text);-webkit-font-smoothing:antialiased;}
+#app{display:flex;gap:16px;padding:16px;box-sizing:border-box;height:100%}
+
+/* Sidebar Chat */
+#sidebar{width:320px;background:var(--panel);border-radius:var(--card-radius);padding:12px;display:flex;flex-direction:column;gap:8px}
+#toni-output{overflow:auto;flex:1;padding:8px}
+
+/* Pitch */
+#pitch-wrapper{flex:1;position:relative;min-width:640px;display:flex;flex-direction:column}
+#pitch{position:relative;background:linear-gradient(#0b2a3a,#04202a);border-radius:12px;flex:1;overflow:hidden;min-height:480px}
+
+/* Spieler-Dots */
+.player-dot{position:absolute;width:40px;height:40px;border-radius:50%;cursor:grab;transition:transform .2s;z-index:100;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+.player-dot.red{background:#e53935}
+.player-dot.blue{background:#1e88e5}
+
+/* Hover-Tooltip */
+.player-dot:hover::after{content:attr(data-stats);position:absolute;bottom:50px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px;border-radius:5px;font-size:11px;white-space:pre;z-index:1000;box-shadow:0 5px 15px rgba(0,0,0,.3)}
+
+/* Label */
+.player-label{position:absolute;top:45px;width:100px;text-align:center;left:-30px;font-size:12px;font-weight:bold;text-shadow:1px 1px 2px rgba(0,0,0,.6)}
+
+/* Goals */
+.goal{position:absolute;width:60px;height:120px;background:rgba(255,255,255,0.06);border-radius:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center}
+.goal.left{left:-30px}
+.goal.right{right:-30px}
+.goal.rotated{transform:translateY(-50%) rotate(180deg)}
+
+/* Tactical SVG layer */
+#tactical-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:50}
+
+/* Playlist / Controls */
+.controls{display:flex;gap:8px;align-items:center}
+button{cursor:pointer;border:none;padding:8px 10px;border-radius:8px;background:#0b2a3a;color:var(--text)}
+button.ghost{background:transparent;border:1px solid var(--line)}
+
+/* Status bar */
+#toni-status-bar{padding:5px 10px;background:#eee;display:flex;align-items:center;gap:10px;font-size:.8em;border-radius:8px}
+#status-led{width:10px;height:10px;background:grey;border-radius:50%}
+
+/* Responsive */
+@media (max-width:900px){
+  #sidebar{width:280px}
+  #pitch-wrapper{min-width:420px}
 }
-
-/* Layout-Struktur */
-#squad-sidebar { width: 300px; background: var(--sidebar-bg); border-right: 1px solid #ccc; display: flex; flex-direction: column; }
-#main-stage { flex-grow: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-#chat-sidebar { width: 340px; background: var(--sidebar-bg); border-left: 1px solid #ccc; display: flex; flex-direction: column; }
-
-/* Obere Navigation & Farbwähler */
-.top-nav {
-    position: absolute;
-    top: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: #fff;
-    padding: 10px 25px;
-    border-radius: 50px;
-    box-shadow: var(--shadow);
-    z-index: 100;
-}
-
-.color-picker-group { display: flex; gap: 8px; align-items: center; border-left: 1px solid #ddd; padding-left: 15px; }
-.color-picker-group input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; background: none; }
-
-/* Spielfeld Design */
-#pitch-container { background: #bbb; padding: 15px; border-radius: 10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
-#pitch {
-    width: 850px;
-    height: 550px;
-    background: var(--pitch-bg);
-    border: 3px solid var(--line-color);
-    position: relative;
-    transition: all 0.4s ease;
-}
-
-.center-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--line-color); }
-.center-circle { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 120px; height: 120px; border: 2px solid var(--line-color); border-radius: 50%; }
-
-/* Tore */
-.goal { position: absolute; background: #000; z-index: 2; transition: transform 0.3s; }
-.standard-goal { width: 12px; height: 80px; }
-.funino-goal { width: 8px; height: 40px; }
-
-/* Spieler-Dots (Die Männchen) */
-.player-dot {
-    position: absolute;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: bold;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-    cursor: grab;
-    z-index: 10;
-}
-
-.player-label {
-    position: absolute;
-    top: 35px;
-    color: #000;
-    font-size: 10px;
-    font-weight: 700;
-    white-space: nowrap;
-    background: rgba(255,255,255,0.8);
-    padding: 1px 4px;
-    border-radius: 3px;
-}
-
-/* Untere Steuerung (Material) */
-.bottom-controls {
-    position: absolute;
-    bottom: 30px;
-    display: flex;
-    gap: 12px;
-}
-
-.nav-btn {
-    border: none;
-    padding: 10px 18px;
-    border-radius: 20px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-    background: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.nav-btn.active { background: var(--red-team); color: #fff; }
-.nav-btn.dark { background: #333; color: #fff; }
-.nav-btn.orange { background: #ff9800; color: #fff; }
-.nav-btn.blue { background: #2196f3; color: #fff; }
-
-/* Toni Sidebar */
-.toni-profile { display: flex; align-items: center; gap: 12px; padding: 20px; border-bottom: 1px solid #ddd; }
-.avatar { width: 45px; height: 45px; background: var(--toni-green); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-#toni-output { flex-grow: 1; padding: 20px; overflow-y: auto; font-size: 0.95em; line-height: 1.5; }
-.chat-input-area { padding: 15px; border-top: 1px solid #ddd; }
-.chat-input-area input { width: 100%; padding: 12px; border-radius: 25px; border: 1px solid #ccc; outline: none; }
