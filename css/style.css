@@ -1,28 +1,23 @@
-/* --- BASIS RESET --- */
+/* --- BASIS-SETUP --- */
 * { box-sizing: border-box; }
 body, html {
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
+    margin: 0; padding: 0;
+    width: 100vw; height: 100vh;
     background: #050608;
     color: white;
     font-family: 'Inter', sans-serif;
     overflow: hidden;
 }
 
-/* --- DAS HAUPT-LAYOUT --- */
 #app {
     display: flex;
     width: 100vw;
     height: 100vh;
-    flex-direction: row; /* Zwingt Spielfeld und Toni nebeneinander */
 }
 
-/* --- SPIELFELD-BEREICH (LINKS) --- */
+/* --- SPIELFELD (LINKS) --- */
 #main {
-    flex-grow: 1; /* Nimmt den restlichen Platz ein */
-    width: calc(100vw - 380px); /* Zieht die Sidebar-Breite exakt ab */
+    flex: 1;
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -30,56 +25,99 @@ body, html {
     justify-content: center;
     background: radial-gradient(circle at top, #1b2333 0, #050608 100%);
     position: relative;
+    padding: 20px;
+}
+
+#board-container {
+    width: 800px;
+    height: 500px;
+    background: #27ae60;
+    border: 5px solid white;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
 }
 
 /* --- SIDEBAR (RECHTS) --- */
 .sidebar {
-    width: 380px; 
-    min-width: 380px; /* Verhindert, dass die Sidebar gequetscht wird */
+    width: 400px;
     height: 100vh;
     background: #0f172a;
     border-left: 2px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
     padding: 20px;
-    z-index: 10;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
 }
 
-/* --- CHAT-STABILISIERUNG --- */
+.header {
+    margin-bottom: 20px;
+    color: #2ecc71;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* --- CHAT-BEREICH --- */
 #chat-history {
     flex: 1;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin: 15px 0;
-    padding-right: 5px;
+    margin-bottom: 20px;
+    padding-right: 10px;
 }
 
-/* Spielfeld-Größe (damit es nicht zu groß für den Bereich wird) */
-#board-container {
-    width: 700px; 
-    height: 450px;
-    background: #27ae60;
-    border: 5px solid white;
-    border-radius: 8px;
-    position: relative;
-    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+.msg {
+    padding: 10px 15px;
+    border-radius: 10px;
+    max-width: 85%;
+    font-size: 0.9rem;
+}
+.msg.user { align-self: flex-end; background: #334155; }
+.msg.toni { align-self: flex-start; background: #1e293b; border-left: 3px solid #2ecc71; }
+
+/* --- KONTROLLEN & BUTTONS --- */
+.input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
 }
 
-/* --- LOGIN & INPUTS --- */
+input {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    outline: none;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.btn {
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    background: #334155;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn.primary { background: #2ecc71; color: #0f172a; }
+
+/* --- LOGIN-SCHUTZ --- */
 #login-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(10, 15, 25, 0.99);
+    background: #050608;
+    z-index: 10000;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10000;
-}
-
-.input-row {
-    display: flex;
-    gap: 5px;
-    padding-top: 10px;
 }
