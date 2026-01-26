@@ -1,116 +1,102 @@
 /**
- * Toni 2.0 - Core Logic Engine
- * Kader-Matrix, Ampel-System & Performance-Tracking
+ * Toni 2.0 - Kader & Logik Steuerung
+ * Verknüpft die Namensliste mit dem Spielfeld
  */
 
-// Initialer Kader (Beispiel-Daten basierend auf deinen Vorgaben)
+// Unser Start-Kader (wie besprochen)
 let squad = [
-    { id: 1, nr: 8, name: "Thorsten", status: "present", points: { tech: 0, scan: 0, fit: 0, star: 0 }, x: "25%", y: "40%" },
-    { id: 2, nr: 99, name: "David Luiz", status: "present", points: { tech: 0, scan: 0, fit: 0, star: 0 }, x: "25%", y: "60%" }
+    { id: "p1", nr: 1, name: "Torwart", team: "red" },
+    { id: "p2", nr: 8, name: "Thorsten", team: "red" },
+    { id: "p3", nr: 11, name: "David Luiz", team: "red" }
 ];
 
-/**
- * Erzeugt die interaktive Kader-Matrix in der linken Sidebar
- */
-function renderSquad() {
-    const container = document.getElementById('player-list');
-    if (!container) return;
-    container.innerHTML = '';
-
-    squad.forEach(p => {
-        const total = p.points.tech + p.points.scan + p.points.fit + p.points.star;
-        
-        const card = document.createElement('div');
-        card.className = 'player-card';
-        card.style = `
-            background: rgba(255,255,255,0.03); margin-bottom: 12px; padding: 15px; 
-            border-radius: 12px; border-left: 4px solid ${getStatusColor(p.status)};
-            position: relative; transition: 0.3s;
-        `;
-
-        card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <strong style="color:white;">#${p.nr} ${p.name}</strong>
-                <span style="font-size: 10px; background: #333; padding: 2px 6px; border-radius: 4px;">${total} PKT</span>
-            </div>
-            
-            <div style="display:flex; gap:5px; margin-bottom:12px;">
-                <div onclick="setStatus(${p.id}, 'present')" style="width:12px; height:12px; border-radius:50%; background:#2ecc71; cursor:pointer; opacity:${p.status==='present'?1:0.2}" title="Anwesend"></div>
-                <div onclick="setStatus(${p.id}, 'matchday')" style="width:12px; height:12px; border-radius:50%; background:#f1c40f; cursor:pointer; opacity:${p.status==='matchday'?1:0.2}" title="Nur Spieltag"></div>
-                <div onclick="setStatus(${p.id}, 'absent')" style="width:12px; height:12px; border-radius:50%; background:#e74c3c; cursor:pointer; opacity:${p.status==='absent'?1:0.2}" title="Abwesend"></div>
-            </div>
-
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                <button onclick="addPoint(${p.id}, 'tech')" class="btn-mini">⚽ Tech</button>
-                <button onclick="addPoint(${p.id}, 'scan')" class="btn-mini">👁️ Scan</button>
-                <button onclick="addPoint(${p.id}, 'fit')" class="btn-mini">🏃 Fit</button>
-                <button onclick="addPoint(${p.id}, 'star')" class="btn-mini">⭐ Ginga</button>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-function getStatusColor(status) {
-    if (status === 'present') return '#2ecc71';
-    if (status === 'matchday') return '#f1c40f';
-    return '#e74c3c';
-}
-
-function setStatus(id, newStatus) {
-    const player = squad.find(p => p.id === id);
-    if (player) {
-        player.status = newStatus;
-        renderSquad();
-        if (typeof drawBoard === 'function') drawBoard();
-        saveSquadData();
-    }
-}
-
-function addPoint(id, category) {
-    const player = squad.find(p => p.id === id);
-    if (player) {
-        player.points[category]++;
-        renderSquad();
-        saveSquadData();
-        // Toni gibt Feedback bei Sonderpunkten
-        if (category === 'star' && typeof toniSpeak === 'function') {
-            toniSpeak(`Herausragend! ${player.name} zeigt echten Ginga-Style.`);
-        }
-    }
-}
-
-function addNewPlayerPrompt() {
-    const name = prompt("Name des Spielers:");
-    const nr = prompt("Trikotnummer:");
-    if (name && nr) {
-        squad.push({
-            id: Date.now(),
-            nr: parseInt(nr),
-            name: name,
-            status: "present",
-            points: { tech: 0, scan: 0, fit: 0, star: 0 },
-            x: "50%", y: "50%"
-        });
-        renderSquad();
-        if (typeof drawBoard === 'function') drawBoard();
-        saveSquadData();
-    }
-}
-
-// Start der Logik beim Laden
 document.addEventListener('DOMContentLoaded', () => {
-    // Hier wird später aus dem LocalStorage geladen
     renderSquad();
 });
 
-// Hilfs-Style für die kleinen Buttons
-const style = document.createElement('style');
-style.innerHTML = `
-    .btn-mini { 
-        background: #1a232e; border: 1px solid #333; color: #9aa3ad; 
-        font-size: 10px; padding: 4px; border-radius: 4px; cursor: pointer; 
+// Zeichnet die Liste links und aktualisiert das Feld
+function renderSquad() {
+    const list = document.getElementById('player-list');
+    list.innerHTML = '';
+    
+    squad.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        card.innerHTML = `
+            <span class="delete-btn" onclick="removePlayer('${p.id}')">✕</span>
+            <div style="font-weight:bold; color:#2ecc71;">#${p.nr} ${p.name}</div>
+            <div style="font-size:10px; color:#8b949e; margin-top:4px;">Tech: 85% | Scan: 90%</div>
+        `;
+        list.appendChild(card);
+    });
+
+    // WICHTIG: Synchronisiere die roten Punkte auf dem Feld
+    syncPlayersToBoard();
+}
+
+// Spieler hinzufügen Dialog
+function addNewPlayerPrompt() {
+    const nr = prompt("Trikotnummer eingeben:");
+    if(!nr) return;
+    const name = prompt("Name des Spielers:");
+    if(!name) return;
+
+    const newId = "p" + Date.now();
+    squad.push({ id: newId, nr: nr, name: name, team: "red" });
+    renderSquad();
+}
+
+// Spieler löschen (Das "x")
+function removePlayer(id) {
+    squad = squad.filter(p => p.id !== id);
+    renderSquad();
+    
+    // Auch vom Spielfeld löschen
+    const boardPlayer = document.getElementById(id);
+    if(boardPlayer) boardPlayer.remove();
+}
+
+// Bringt die Liste als rote Punkte auf das Spielfeld
+function syncPlayersToBoard() {
+    // Nur rote Spieler synchronisieren (Blaue steuert Toni/Formation)
+    squad.forEach((p, index) => {
+        let boardPlayer = document.getElementById(p.id);
+        
+        if(!boardPlayer) {
+            // Wenn Spieler noch nicht auf dem Feld, erstelle ihn
+            // Startpositionen leicht versetzt, damit sie nicht alle aufeinander liegen
+            createPlayerOnBoard(p.team, p.nr, p.name, p.id, 100, 100 + (index * 50));
+        } else {
+            // Update Label falls Name/Nummer geändert wurde
+            const label = boardPlayer.querySelector('.player-label');
+            if(label) label.innerText = `${p.nr} ${p.name}`;
+            boardPlayer.firstChild.textContent = p.nr;
+        }
+    });
+}
+
+function createPlayerOnBoard(team, nr, name, id, x, y) {
+    const p = document.createElement('div');
+    p.className = `player ${team}`;
+    p.id = id;
+    p.innerText = nr;
+    p.draggable = true;
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+
+    if(name) {
+        const label = document.createElement('div');
+        label.className = 'player-label';
+        label.innerText = `${nr} ${name}`;
+        p.appendChild(label);
     }
-    .btn-mini:hover { background: #2ecc71; color: white; }
-`;
-document.head.appendChild(style);
+
+    // Drag & Drop Logik
+    p.addEventListener('dragend', (e) => {
+        const rect = document.getElementById('pitch').getBoundingClientRect();
+        p.style.left = (e.clientX - rect.left - 20) + 'px';
+        p.style.top = (e.clientY - rect.top - 20) + 'px';
+    });
+
+    document.getElementById('pitch').appendChild(p);
+}
