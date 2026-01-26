@@ -1,89 +1,58 @@
-/* --- LOGIC.JS: DAS GEHIRN DER TAKTIK-ZENTRALE --- */
+// TONI'S TAKTISCHE REAKTION
+function toniReacts(movedPlayerId) {
+    if (!movedPlayerId.startsWith('R')) return; // Nur auf Rot reagieren
 
-let currentPhase = 1;
-const totalPhases = 5;
-
-// 1. PHASE-NAVIGATION (Oben am Spielfeld)
-function nextPhase() {
-    if (currentPhase < totalPhases) {
-        currentPhase++;
-        updatePhaseDisplay();
-    }
-}
-
-function prevPhase() {
-    if (currentPhase > 1) {
-        currentPhase--;
-        updatePhaseDisplay();
-    }
-}
-
-function updatePhaseDisplay() {
-    const title = document.getElementById('playlist-title');
-    if (title) title.innerText = `Spielzug ${currentPhase}`;
-    // Toni kommentiert den Phasenwechsel
-    const msg = `Phase ${currentPhase} eingeleitet. Coach Björn, Fokus auf die Raumaufteilung!`;
-    if (typeof addMsg === 'function') addMsg('toni', msg);
-}
-
-// 2. KADER-ÜBERSICHT
-function toggleKader() {
-    const redPlayers = document.querySelectorAll('.player.red');
-    let namen = [];
-    redPlayers.forEach(p => namen.push(p.innerText));
+    const bluePlayers = document.querySelectorAll('.player-wrapper.blue');
+    const movedRed = document.getElementById(movedPlayerId);
     
-    const msg = `Aktueller Kader auf dem Platz: ${namen.join(', ')}. David Luiz ist bereit für seinen Einsatz!`;
-    if (typeof addMsg === 'function') addMsg('toni', msg);
-}
-
-// 3. PDF EXPORT (Simuliert den Trainingsplan)
-function exportPlanPDF() {
-    const content = `
-        TRAININGSPLAN - COACH BJÖRN
-        Einheit: Taktische Tiefenläufe
-        Fokus: Asymmetrische Grundordnung
-        Experte: Toni (Klopp-Nagelsmann-Modus)
-    `;
-    alert("Trainingsplan wird generiert... \n\n" + content + "\n\n(PDF-Download gestartet)");
-    // Hier könnte man später eine echte Library wie jspdf einbinden
-}
-
-// 4. DIE "TONI-SICHT" (Scannt das Spielfeld für die KI)
-function scanBoardForToni() {
-    const players = document.querySelectorAll('.player');
-    let setup = "Aktuelle Situation auf dem Feld: ";
+    // Zufälliger blauer Verteidiger rückt ein Stück entgegen
+    const targetBlue = bluePlayers[Math.floor(Math.random() * bluePlayers.length)];
     
-    players.forEach(p => {
-        const parent = p.parentElement.id;
-        const role = p.innerText;
-        const team = p.classList.contains('red') ? 'Team Björn' : 'Gegner';
-        
-        if (parent === 'board-container') {
-            setup += `${role} (${team}) ist im Spiel. `;
-        } else {
-            setup += `${role} (${team}) sitzt auf der Bank. `;
-        }
+    const rx = parseInt(movedRed.style.left);
+    const ry = parseInt(movedRed.style.top);
+    
+    // Taktik: Toni schiebt einen Blauen leicht in Richtung des Balls (des bewegten Roten)
+    let bx = parseInt(targetBlue.style.left) || 600;
+    let by = parseInt(targetBlue.style.top) || 250;
+    
+    let newX = bx - (bx - rx) * 0.1;
+    let newY = by - (by - ry) * 0.1;
+
+    targetBlue.style.transition = "all 0.5s ease-out";
+    targetBlue.style.left = newX + "px";
+    targetBlue.style.top = newY + "px";
+
+    // Toni kommentiert den Zug
+    const name = movedRed.querySelector('.player-circle').innerText;
+    addMsg('toni', `Coach Björn, ${name} zieht das Spiel breit! Ich verschiebe meine Kette, um die Räume eng zu machen.`);
+}
+
+// KADER MANAGER
+function openKaderManager() {
+    const modal = document.getElementById('kader-modal');
+    const list = document.getElementById('kader-list');
+    modal.style.display = 'flex';
+    list.innerHTML = '';
+
+    const allPlayers = document.querySelectorAll('.player-wrapper.red');
+    allPlayers.forEach(p => {
+        const name = p.querySelector('.player-circle').innerText;
+        const nr = p.querySelector('.player-label').innerText;
+        list.innerHTML += `
+            <div class="kader-item">
+                <input type="text" value="${name}" onchange="updatePlayerName('${p.id}', this.value)">
+                <input type="text" value="${nr}" style="width: 50px;" onchange="updatePlayerNr('${p.id}', this.value)">
+            </div>
+        `;
     });
-    
-    return setup;
 }
 
-// 5. ERWEITERUNG FÜR DEN CHAT (Verknüpfung zu Toni)
-// Wir überschreiben die askToni-Funktion leicht, damit sie das Feld "sieht"
-const originalAskToni = window.askToni;
-window.askToni = async function() {
-    const boardState = scanBoardForToni();
-    // Wir hängen den Feld-Status unsichtbar an die KI-Anfrage an
-    const input = document.getElementById('user-input');
-    if (input && input.value.trim() !== "") {
-        const originalValue = input.value;
-        // Toni bekommt den Kontext "David Luiz auf dem Platz/Bank" mit
-        console.log("Toni scannt das Feld...");
-    }
-    if (typeof originalAskToni === 'function') await originalAskToni();
-};
+function updatePlayerName(id, val) {
+    document.getElementById(id).querySelector('.player-circle').innerText = val.toUpperCase();
+}
+function updatePlayerNr(id, val) {
+    document.getElementById(id).querySelector('.player-label').innerText = val;
+}
+function closeKaderManager() { document.getElementById('kader-modal').style.display = 'none'; }
 
-/* --- INITIALISIERUNG --- */
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("Logik-System für Coach Björn initialisiert.");
-});
+function exportPlanPDF() { alert("Trainingsplan für Team Björn wird erstellt..."); }
