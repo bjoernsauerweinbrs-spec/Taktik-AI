@@ -1,106 +1,159 @@
 /**
- * Toni 2.0 - Intelligence & Communication Engine
- * Steuert Tonis Dialoge, die Websuche und die visuelle Demonstration.
+ * Toni 2.0 - KI-Schnittstelle & Board-Kommando-Zentrale
+ * Männerstimme, Board-Zugriff und Archiv-Funktion.
  */
 
-const chatOutput = document.getElementById('toni-output');
+const outputContainer = document.getElementById('toni-output');
+const apiKey = sessionStorage.getItem('groq_api_key');
 
 /**
- * Kernfunktion: Toni spricht zum Trainer
- * @param {string} message - Der Text von Toni
- * @param {boolean} useVoice - Ob die Sprachausgabe aktiviert werden soll
+ * Kernfunktion: Toni kommuniziert mit Groq und steuert das Board
  */
-function toniSpeak(message, useVoice = true) {
-    if (!chatOutput) return;
-
-    // 1. Textuelle Ausgabe
-    const msgElement = document.createElement('div');
-    msgElement.className = 'toni-message';
-    msgElement.style = "margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;";
-    msgElement.innerHTML = `<strong>Toni:</strong> ${message}`;
-    chatOutput.prepend(msgElement); // Neueste Nachrichten nach oben
-
-    // 2. Sprachausgabe (Web Speech API)
-    if (useVoice && 'speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(message);
-        utterance.lang = 'pt-BR'; // Kleiner Trick für brasilianischen Akzent bei dt. Text
-        utterance.lang = 'de-DE'; 
-        utterance.pitch = 0.9; // Etwas tiefere, männliche Stimme
-        utterance.rate = 1.0;
-        window.speechSynthesis.speak(utterance);
+async function getToniResponse(userInput) {
+    if (!apiKey) {
+        toniSpeak("Björn, mein Freund, ohne den API-Key kann ich die Taktiktafel nicht bedienen.");
+        return;
     }
-}
 
-/**
- * Simuliert die Websuche nach Trainingsübungen
- * Basierend auf der aktuellen Spieleranzahl im Kader.
- */
-function searchTrainingNet() {
-    const count = activeTrainingCount;
-    toniSpeak(`Björn, ich durchsuche gerade das Netz nach den besten Übungen für unsere ${count} Jungs. Ich vergleiche Stile von Brasilien bis Europa...`);
+    const thinkingId = "think-" + Date.now();
+    const thinkingDiv = document.createElement('div');
+    thinkingDiv.id = thinkingId;
+    thinkingDiv.style = "font-size: 0.8em; color: #666; font-style: italic; margin-bottom: 10px;";
+    thinkingDiv.innerText = "Toni analysiert die Räume...";
+    outputContainer.prepend(thinkingDiv);
 
-    // Simulierte Verzögerung für die "Fachrecherche"
-    setTimeout(() => {
-        const trainingId = (currentMode === 'funino') ? "Funino-Power" : "Umschaltspiel-Expert";
-        toniSpeak(`Sensationell! Ich habe eine Übung gefunden: <strong>"${trainingId}"</strong>. Soll ich die 12 gelben Hütchen aufstellen und die Jungs farblich einteilen?`);
+    try {
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    {
+                        role: "system",
+                        content: `Du bist Toni, ein brasilianischer Fußball-Fachmann und Co-Trainer von Björn. 
+                        Aktueller Modus: ${currentMode}. 
+                        Deine Aufgabe: Erkläre Trainingseinheiten fachlich brillant und bewege die Spieler!
+                        KOMMANDOS:
+                        - Um Spieler zu bewegen, schreibe am Ende: [MOVE: Name, X, Y] (X/Y von 0-100).
+                        - Um Bälle zu legen: [BALL: Anzahl].
+                        - Um Hütchen zu setzen: [CONES: Anzahl].
+                        - Gib am Ende jeder neuen Übung einen Button-Code aus: [SAVE_EXERCISE: Titel].
+                        Sei motivierend, nutze 'Du' und klinge nach Ginga!`
+                    },
+                    { role: "user", content: userInput }
+                ]
+            })
+        });
+
+        const data = await response.json();
+        let aiMessage = data.choices[0].message.content;
+
+        // Befehle ausführen (Spieler schieben, Material legen)
+        executeToniCommands(aiMessage);
+
+        // UI-Bereinigung und Anzeige
+        document.getElementById(thinkingId).remove();
         
-        // Material-Button anbieten
-        const btn = document.createElement('button');
-        btn.className = 'nav-btn';
-        btn.style.marginTop = "10px";
-        btn.innerText = "Ja, bau es auf!";
-        btn.onclick = () => setupTrainingVisuals(trainingId);
-        chatOutput.prepend(btn);
-    }, 2000);
+        // Button für Aktentasche filtern
+        const saveMatch = aiMessage.match(/\[SAVE_EXERCISE:\s*(.*?)\]/);
+        const cleanMsg = aiMessage.replace(/\[.*?\]/g, "").trim();
+        
+        toniSpeak(cleanMsg);
+
+        if (saveMatch) {
+            const title = saveMatch[1];
+            addSaveButton(title, cleanMsg);
+        }
+
+    } catch (error) {
+        console.error("KI-Fehler:", error);
+        document.getElementById(thinkingId).innerText = "Verbindung unterbrochen, Björn.";
+    }
 }
 
 /**
- * Visuelle Demonstration: Toni baut die Übung auf dem Board auf
+ * Verarbeitet die [MOVE] und [BALL] Befehle
  */
-function setupTrainingVisuals(type) {
-    toniSpeak("Alles klar, ich bewege die Spieler und teile die Leibchen aus. Schau aufs Board!");
+function executeToniCommands(text) {
+    // Spieler bewegen
+    const moveRegex = /\[MOVE:\s*(.*?),\s*(\d+),\s*(\d+)\]/g;
+    let m;
+    while ((m = moveRegex.exec(text)) !== null) {
+        movePlayerOnBoard(m[1].trim(), m[2], m[3]);
+    }
 
-    // 1. Leibchen-Farben ändern (Beispiel: 5 Gelb vs. 5 Rot)
-    squad.forEach((p, index) => {
-        if(index < 5) p.color = "var(--yellow-leibchen)"; //
-        else p.color = "var(--red-team)";
+    // Material
+    if (text.includes("[BALL:")) {
+        const b = text.match(/\[BALL:\s*(\d+)\]/);
+        if (b && typeof distributeBalls === "function") distributeBalls(b[1]);
+    }
+    if (text.includes("[CONES:")) {
+        const c = text.match(/\[CONES:\s*(\d+)\]/);
+        if (c && typeof placeCones === "function") placeCones(c[1]);
+    }
+}
+
+function movePlayerOnBoard(name, x, y) {
+    const dots = document.querySelectorAll('.player-dot');
+    dots.forEach(dot => {
+        const label = dot.querySelector('.player-label');
+        if (label && label.innerText.toLowerCase().includes(name.toLowerCase())) {
+            dot.style.left = x + '%';
+            dot.style.top = y + '%';
+        }
     });
+}
 
-    // 2. Material aufstellen (Hütchen)
-    if (typeof placeCones === "function") {
-        placeCones(12); //
-    }
+function addSaveButton(title, desc) {
+    const btn = document.createElement('button');
+    btn.className = "nav-btn orange";
+    btn.style.marginTop = "10px";
+    btn.innerText = "💾 Übung in Aktentasche speichern";
+    btn.onclick = () => saveExerciseToPlan(title, desc);
+    outputContainer.prepend(btn);
+}
 
-    // 3. Board neu zeichnen
-    drawBoard();
-
-    // 4. Animation der Laufwege einzeichnen (Demo)
-    showTacticalArrows();
+function saveExerciseToPlan(title, description) {
+    let plans = JSON.parse(localStorage.getItem('toni_training_plans') || '[]');
+    plans.push({
+        id: Date.now(),
+        date: new Date().toLocaleDateString(),
+        title: title,
+        desc: description,
+        notes: "",
+        boardSnap: document.getElementById('pitch').innerHTML
+    });
+    localStorage.setItem('toni_training_plans', JSON.stringify(plans));
+    toniSpeak("Abgeheftet! Du findest die Übung jetzt in deiner Aktentasche unter Trainingspläne.");
 }
 
 /**
- * Zeichnet taktische Pfeile für Pass- und Laufwege
+ * MÄNNLICHE STIMME & AUSGABE
  */
-function showTacticalArrows() {
-    // Hier nutzen wir ein Canvas-Overlay oder SVG (in Paket 5 detailliert)
-    toniSpeak("Ich habe dir die Laufwege mit gestrichelten Linien eingezeichnet. Thorsten zieht nach innen, David Luiz sichert ab.");
-}
+function toniSpeak(message) {
+    if (!outputContainer) return;
+    const msgDiv = document.createElement('div');
+    msgDiv.style = "background:#f1f8e9; border-left:5px solid #2e7d32; padding:12px; margin-bottom:15px; border-radius:5px;";
+    msgDiv.innerHTML = `<strong>Toni:</strong> ${message}`;
+    outputContainer.prepend(msgDiv);
 
-/**
- * Feedback-Funktion: Trainer bewertet Spieler
- */
-function openPlayerEvaluation(playerId) {
-    const player = squad.find(p => p.id === playerId);
-    if(!player) return;
-
-    toniSpeak(`Björn, wie war ${player.name} heute? War er gut im Passspiel oder eher konditionell schwach?`);
-    
-    // Hier öffnet sich später das Modal aus Paket 5
-}
-
-// Event-Listener für Eingaben (falls du ein Chat-Feld hast)
-function handleChatInput(text) {
-    if(text.toLowerCase().includes("suche") || text.toLowerCase().includes("training")) {
-        searchTrainingNet();
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(message);
+        utter.lang = 'de-DE';
+        utter.pitch = 0.85; // Tiefer
+        utter.rate = 1.0;
+        
+        const voices = window.speechSynthesis.getVoices();
+        const male = voices.find(v => v.name.includes('Stefan') || v.name.includes('Google Deutsch') || v.name.includes('Microsoft Stefan'));
+        if (male) utter.voice = male;
+        
+        window.speechSynthesis.speak(utter);
     }
+}
+
+function handleChatInput(val) {
+    if (!val.trim()) return;
+    getToniResponse(val);
 }
