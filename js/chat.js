@@ -1,64 +1,117 @@
 /**
- * Toni 2.0 - Chat & Intelligence Engine (Final Version)
+ * Toni 2.0 - KI & Chat Engine
+ * Steuert die Kommunikation mit der Groq Cloud
  */
 
-const outputContainer = document.getElementById('toni-output');
+const CHAT_HISTORY = document.getElementById('chat-history');
+const CHAT_INPUT = document.getElementById('chat-input');
 
 /**
- * Toni gibt eine Nachricht aus (Text & Audio)
+ * Sendet die Nachricht an Toni (Groq API)
  */
-function toniSpeak(message) {
-    if (!outputContainer) return;
+async function handleChat() {
+    const text = CHAT_INPUT.value.trim();
+    if (!text) return;
 
-    const msg = document.createElement('div');
-    msg.style = "background: #e8f5e9; padding: 10px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #2e7d32;";
-    msg.innerHTML = `<strong>Toni:</strong> ${message}`;
-    outputContainer.prepend(msg);
+    // User Nachricht anzeigen
+    appendMessage('user', text);
+    CHAT_INPUT.value = '';
 
-    // Männliche Stimme (Deutsch)
-    if ('speechSynthesis' in window) {
-        const synth = window.speechSynthesis;
-        const utter = new SpeechSynthesisUtterance(message);
-        utter.pitch = 0.85; // Tiefer für männliche Stimme
-        utter.rate = 1.0;
-        synth.speak(utter);
-    }
-}
+    // Toni zeigt "Denken" an
+    setToniStatus(true);
 
-/**
- * Simuliert die Internet-Recherche
- */
-function searchTrainingNet() {
-    toniSpeak("Ich scanne das Internet nach Top-Übungen für " + activeTrainingCount + " Spieler... Vergleiche brasilianische Technik mit europäischer Taktik.");
-    
-    setTimeout(() => {
-        const title = currentMode === 'funino' ? "Ginga-Kids 3v3" : "Brasilianisches Umschaltspiel";
-        toniSpeak(`Björn, ich habe die Übung <strong>"${title}"</strong> gefunden. Ich platziere die Hütchen und teile die Leibchen für dich ein!`);
-        
-        // Leibchen-Logik: Erste Hälfte Gelb, zweite Hälfte Rot
-        squad.forEach((p, i) => {
-            if(p.status === 'team') {
-                p.color = (i % 2 === 0) ? 'var(--yellow-leibchen)' : 'var(--red-team)';
-            }
+    const apiKey = sessionStorage.getItem('toni_key');
+    const userType = sessionStorage.getItem('toni_type') || 'kinder';
+    const userName = sessionStorage.getItem('toni_name') || 'Björn';
+
+    // System Prompt für Toni (deine Identität)
+    const systemPrompt = `
+        Du bist Toni, ein absoluter Fußball-Fachmann mit brasilianischem Style (Ginga). 
+        Deine Sprache ist motivierend, technisch versiert und taktisch klug. 
+        Du arbeitest für den Trainer ${userName}. 
+        Aktueller Fokus: ${userType}-Training.
+        Du hast Zugriff auf das Board. Wenn der User fragt, wer da ist, nenne die Spieler, die 'present' sind.
+        Aktueller Kader-Status: ${JSON.stringify(squad.filter(p => p.status === 'present'))}
+    `;
+
+    try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: text }
+                ],
+                temperature: 0.7
+            })
         });
+
+        const data = await response.json();
+        const answer = data.choices[0].message.content;
+
+        appendMessage('toni', answer);
         
-        placeCones(8);
-        drawBoard();
-    }, 2000);
+        // Sprachausgabe (Toni hat eine männliche Stimme)
+        toniSpeak(answer);
+
+    } catch (error) {
+        console.error("Toni Error:", error);
+        appendMessage('toni', "Oje Björn, die Verbindung zum Scouting-Server klemmt...");
+    } finally {
+        setToniStatus(false);
+    }
 }
 
 /**
- * Verarbeitet manuelle Trainer-Eingaben
+ * Fügt Nachrichten zum UI hinzu
  */
-function handleChatInput(input) {
-    const val = input.toLowerCase();
-    if (val.includes("suche") || val.includes("übung")) {
-        searchTrainingNet();
-    } else if (val.includes("funino")) {
-        switchMode('funino');
-    } else if (val.includes("11")) {
-        switchMode('11v11');
+function appendMessage(role, text) {
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.innerText = text;
+    CHAT_HISTORY.appendChild(div);
+    CHAT_HISTORY.scrollTop = CHAT_HISTORY.scrollHeight;
+}
+
+/**
+ * Visuelles Feedback (Ampel oben rechts)
+ */
+function setToniStatus(isThinking) {
+    const dot = document.getElementById('toni-status-dot');
+    const text = document.getElementById('toni-status-text');
+    if (isThinking) {
+        dot.className = 'dot online';
+        text.innerText = 'TONI ANALYSIERT...';
     } else {
-        toniSpeak("Interessanter Punkt, Björn. Soll ich das taktisch für dich auf dem Board demonstrieren?");
+        dot.className = 'dot';
+        text.innerText = 'TONI BEREIT';
     }
+}
+
+/**
+ * Tonis Stimme
+ */
+function toniSpeak(text) {
+    if (!window.speechSynthesis) return;
+    
+    // Alle laufenden Ausgaben stoppen
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = sessionStorage.getItem('toni_lang') === 'de' ? 'de-DE' : 'pt-BR';
+    
+    // Versuche eine männliche Stimme zu finden
+    const voices = window.speechSynthesis.getVoices();
+    const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Google Deutsch'));
+    if (maleVoice) utterance.voice = maleVoice;
+
+    utterance.pitch = 0.9; // Etwas tiefer für mehr Autorität
+    utterance.rate = 1.0;
+    
+    window.speechSynthesis.speak(utterance);
 }
