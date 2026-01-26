@@ -1,46 +1,33 @@
-/**
- * Toni 2.0 - Kader-Matrix & Initialisierung
- */
+// Kader-Zustand
 let squad = [
-    { id: 1, nr: 8, name: "Thorsten", status: "team", points: { tech: 0, perc: 0, fit: 0, special: 0 } },
-    { id: 2, nr: 99, name: "David Luiz", status: "team", points: { tech: 0, perc: 0, fit: 0, special: 0 } }
+    { id: 1, nr: 8, name: "Thorsten", pos: "ST", active: true, status: "team", color: "var(--red-team)" },
+    { id: 2, nr: 99, name: "David Luiz", pos: "IV", active: true, status: "team", color: "var(--red-team)" }
 ];
 
-function renderSquad() {
-    const container = document.getElementById('player-list');
-    if (!container) return;
-    container.innerHTML = '';
+// Gegner-Zustand (Team Blau - nur Nummern)
+let opponents = [
+    { id: 101, nr: 1, pos: "TW_B" }, { id: 102, nr: 4, pos: "IV_B" }, { id: 103, nr: 5, pos: "IV_B2" }
+    // Wird automatisch für 3-4-3 erweitert
+];
 
-    squad.forEach(p => {
-        const total = p.points.tech + p.points.perc + p.points.fit + p.points.special;
-        const div = document.createElement('div');
-        div.className = 'player-card';
-        div.style = "background:white; margin:10px; padding:15px; border-radius:10px; box-shadow:0 4px 6px rgba(0,0,0,0.1); border-left:5px solid #b71c1c;";
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                <span>#${p.nr} ${p.name}</span>
-                <span>${total} Pkt</span>
-            </div>
-            <div style="margin-top:10px; display:flex; gap:5px;">
-                <button onclick="addPoint(${p.id}, 'tech')">⚽</button>
-                <button onclick="addPoint(${p.id}, 'perc')">👁️</button>
-                <button onclick="addPoint(${p.id}, 'fit')">🏃</button>
-                <button onclick="addPoint(${p.id}, 'special')">⭐</button>
-            </div>
-        `;
-        container.appendChild(div);
-    });
-    // Zeichne das Board sofort nach der Liste
-    if (typeof drawBoard === 'function') drawBoard();
-}
+// Koordinaten-Mapping (Prozentual)
+const formations = {
+    "4-4-2": {
+        "TW": {x: 8, y: 50}, "IV": {x: 25, y: 35}, "IV2": {x: 25, y: 65},
+        "LV": {x: 30, y: 15}, "RV": {x: 30, y: 85}, "ST": {x: 80, y: 40}, "ST2": {x: 80, y: 60}
+        // Weitere Positionen folgen...
+    },
+    "3-4-3_BLUE": {
+        "TW_B": {x: 92, y: 50}, "IV_B": {x: 75, y: 50}, "IV_B2": {x: 75, y: 25}, "IV_B3": {x: 75, y: 75}
+        // Weitere Positionen folgen...
+    }
+};
 
-function addPoint(id, cat) {
-    const p = squad.find(player => player.id === id);
-    if (p) {
-        p.points[cat]++;
-        renderSquad();
+function updatePlayerStatus(id, key, value) {
+    const player = squad.find(p => p.id === id);
+    if (player) {
+        player[key] = value;
+        renderSquad(); // Neu zeichnen
+        drawBoard();   // Board aktualisieren
     }
 }
-
-// Beim Start ausführen
-document.addEventListener('DOMContentLoaded', renderSquad);
