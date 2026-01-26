@@ -1,15 +1,17 @@
 /* --- TONI'S BRAIN & VOICE --- */
-let GROQ_KEY = "DEIN_GROQ_KEY_HIER"; // Hier kommt später dein Key rein
+let GROQ_KEY = "DEIN_GROQ_KEY_HIER"; 
 let isLocked = false;
 let toniVoice = null;
 
-/* --- DER SPEZIALISIERTE TONI-PROMPT (Dienstanweisung) --- */
+/* --- DER ELITE-TAKTIK PROMPT (Klopp-Nagelsmann-Mix) --- */
 const TONI_PERSONA = `
-Identität: Toni, Elite-Coach.
-Mix: Brasilianische Technik (Finesse), Ghanaische Lockerheit (Humor/Spirit), Deutsche Durchsetzungskraft (Taktik).
-Auftrag: Du bist der Fachmann für Coach Björn.
-Smalltalk-Regel: Ein Funken Humor ist Pflicht! Wenn Björn nach Wetter/Politik fragt, antworte sportlich-charmant und lenke sofort zurück auf Fußball.
-Beispiel: 'Coach, solange es keine Caipirinhas regnet, zählt nur die Standfestigkeit in der Abwehr!'
+Identität: Toni, dein Taktik-Experte.
+Profil: Eine Mischung aus der emotionalen Intelligenz und dem Pressing-Fokus von Jürgen Klopp sowie der tiefen taktischen Analyse und Raumaufteilung von Julian Nagelsmann.
+Sprachstil: 
+- Analytisch ("Zwischenraum-Besetzung", "Asymmetrie", "Umschaltmomente").
+- Motivierend ("Vollgas-Fußball", "Mentalitäts-Monster").
+- Direkt: Er nennt dich 'Coach Björn'.
+Smalltalk-Regel: Humorvoll, aber fachmännisch. Bei Wetter/Politik zieht er sofort den Vergleich zum Platz (z.B. 'Regen ist Pressing-Wetter, da rutscht der Gegner mehr!').
 `;
 
 /* --- CHAT-SYSTEM --- */
@@ -28,6 +30,7 @@ function addMsg(role, txt) {
 /* --- SPRACHAUSGABE (TTS) --- */
 function setupVoice() {
   const voices = speechSynthesis.getVoices();
+  // Suche eine markante deutsche Stimme
   toniVoice = voices.find(v => v.lang.startsWith('de') && !v.name.toLowerCase().includes('female')) || voices[0];
 }
 
@@ -37,8 +40,8 @@ function speakStyled(text) {
   const utterance = new SpeechSynthesisUtterance(text);
   if (toniVoice) utterance.voice = toniVoice;
   utterance.lang = 'de-DE';
-  utterance.pitch = 0.85;
-  utterance.rate = 0.95;
+  utterance.pitch = 0.85; 
+  utterance.rate = 1.0; 
   speechSynthesis.speak(utterance);
 }
 
@@ -58,7 +61,7 @@ function startMic() {
   rec.start();
 }
 
-/* --- INTERAKTION MIT TONI --- */
+/* --- INTERAKTION MIT TONI (Spezialisierte Simulation) --- */
 async function askToni() {
   if (isLocked) return;
   const input = document.getElementById('user-input');
@@ -69,21 +72,19 @@ async function askToni() {
   input.value = '';
   isLocked = true;
 
-  // HINWEIS: Sobald wir den API-Key nutzen, wird dieser Teil durch einen 
-  // echten Fetch-Aufruf an Groq ersetzt.
   setTimeout(() => {
     let answer = "";
     const t = text.toLowerCase();
 
-    // Tonis Charakter-Filter
+    // Tonis neuer Klopp-Nagelsmann-Filter
     if (t.includes('wetter') || t.includes('regen')) {
-      answer = "Wetterbericht? Coach Björn, in Ghana sagen wir: 'Das Spiel wird auf dem Platz gewonnen, nicht in den Wolken!' Bei Regen flutscht der Ball besser – ideal für unsere brasilianische Technik. Wie steht die Abwehr?";
+      answer = "Wetter? Coach Björn, das ist absolutes Pressing-Wetter! Der Ball wird schnell, die Abstände müssen kompakt sein. Wir brauchen heute Mentalitäts-Monster auf dem Platz, keine Schönwetter-Fußballer!";
     } else if (t.includes('politik') || t.includes('nachrichten')) {
-      answer = "Politik überlasse ich den Leuten im Rathaus. Meine einzige Ideologie ist die Dreierkette! Bleiben wir beim Wesentlichen: Wer ist heute unser Spielmacher?";
+      answer = "Coach, ganz ehrlich: Die einzige Wahl, die mich interessiert, ist die zwischen Dreier- und Viererkette. Wir fokussieren uns auf die Zwischenraum-Besetzung. Was ist unser Plan für das Gegenpressing?";
     } else if (t.includes('hallo') || t.includes('wie geht')) {
-      answer = "Mit der Lockerheit von Accra und der Präzision von München! Ich bin bereit, Coach Björn. Lassen wir die Brasilianer tanzen oder bauen wir die deutsche Mauer auf?";
+      answer = "Voller Energie, Coach Björn! Ich habe die Daten analysiert. Sollen wir das Feld mit extremer Dynamik kurz machen oder suchen wir die spielerische Lösung in den Halbräumen?";
     } else {
-      answer = "Interessanter Punkt, Coach. Taktisch gesehen gibt uns das neue Optionen. Soll ich die Laufwege der blauen Spieler entsprechend anpassen?";
+      answer = "Analytisch gesehen ist das ein spannender Ansatz. Wenn wir die Asymmetrie in der Hintermannschaft nutzen, generieren wir Überzahl in Ballnähe. Sollen wir die Laufwege so fixieren?";
     }
 
     addMsg('toni', answer);
@@ -99,7 +100,7 @@ function startToni() {
     document.getElementById('login-overlay').style.display = 'none';
     setupVoice();
     if (typeof resetBoard === 'function') resetBoard();
-    const welcome = "Toni initialisiert. Ich bin bereit, Coach Björn.";
+    const welcome = "System aktiv. Coach Björn, die Taktik-Analyse ist bereit. Gehen wir in die Vollen!";
     addMsg('toni', welcome);
     speakStyled(welcome);
   } else {
@@ -108,7 +109,7 @@ function startToni() {
 }
 
 function welcomeFlow() {
-  const msg = "Guten Tag, Coach Björn. Die brasilianische Spielfreude ist geweckt. Sollen wir die Taktik prüfen?";
+  const msg = "Bereit für Heavy-Metal-Fußball mit chirurgischer Präzision? Sagen Sie mir, wo wir den Gegner packen, Coach Björn.";
   addMsg('toni', msg);
   speakStyled(msg);
 }
