@@ -33,15 +33,43 @@ html, body {
   padding: 12px;
 }
 
-/* Sidebar & Chat */
-#sidebar {
-  background: linear-gradient(145deg, #10121a, #151824);
-  border-radius: 14px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+/* 1. Die Sidebar als festen Container definieren */
+.sidebar {
+    width: 350px;
+    height: 100vh;           /* Fest auf die volle Bildschirmhöhe */
+    position: fixed;
+    right: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;  /* Stapelt Inhalt vertikal */
+    background: #0f172a;
+    border-left: 1px solid rgba(255,255,255,0.1);
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;        /* Nichts darf aus der Sidebar rauswachsen */
+}
+
+/* 2. Den Chat-Verlauf scrollbar machen */
+#chat-history {
+    flex: 1;                 /* Nutzt den verfügbaren Platz zwischen Header und Input */
+    overflow-y: auto;        /* Aktiviert das Scrollen innerhalb des Fensters */
+    margin-bottom: 15px;
+    padding-right: 10px;     /* Platz für die Scrollbar */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #2ecc71 transparent;
+}
+
+/* 3. Das Eingabefeld ganz unten fixieren */
+.input-row {
+    margin-top: auto;        /* Schiebt die Eingabe immer nach ganz unten */
+    display: flex;
+    gap: 8px;
+    background: rgba(255,255,255,0.05);
+    padding: 10px;
+    border-radius: 10px;
 }
 
 .header {
