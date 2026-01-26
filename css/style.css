@@ -1,144 +1,192 @@
-/* --- BASIS-SETUP --- */
-* { box-sizing: border-box; }
-body, html { 
-    margin: 0; padding: 0; 
-    width: 100vw; height: 100vh; 
-    background: #050608; 
-    color: white; 
-    font-family: 'Inter', sans-serif; 
-    overflow: hidden; 
-}
-#app { display: flex; width: 100vw; height: 100vh; }
-
-/* --- SPIELFELD-BEREICH --- */
-#main { 
-    flex: 1; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center; 
-    background: radial-gradient(circle at top, #1e293b 0%, #050608 100%); 
-    padding: 20px; 
+/* Grundkonfiguration & Farben */
+:root {
+    --pitch-white: #ffffff;
+    --line-color: #333333;
+    --sidebar-bg: #fdfdfd;
+    --red-team: #d32f2f;
+    --blue-team: #1976d2;
+    --yellow-leibchen: #ffeb3b;
+    --toni-accent: #2e7d32;
+    --shadow: 0 4px 15px rgba(0,0,0,0.1);
+    --border-radius: 8px;
 }
 
-/* --- DAS SPIELFELD-CONTAINER --- */
-#board-container { 
-    width: 850px; 
-    height: 550px; 
-    background-color: #27ae60; 
-    border: 4px solid white; 
-    position: relative; 
-    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-    overflow: visible;
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background: #f0f2f5;
+    color: #333;
 }
 
-/* MARKIERUNGEN (Fest fixiert) */
-.field-line { position: absolute; border: 2px solid white; pointer-events: none; z-index: 1; }
-.middle-line { top: 0; bottom: 0; left: 50%; width: 0; }
-.center-circle { 
-    top: 50%; left: 50%; 
-    width: 120px; height: 120px; 
-    border: 2px solid white; border-radius: 50%; 
-    transform: translate(-50%, -50%); 
+/* Layout-Struktur */
+#squad-sidebar {
+    width: 300px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
-/* STRAFRÄUME (16m) */
-.box-16-left, .box-16-right { position: absolute; top: 110px; width: 135px; height: 330px; border: 2px solid white; z-index: 1; }
-.box-16-left { left: 0; border-left: none; }
-.box-16-right { right: 0; border-right: none; }
-
-/* TORRÄUME (5m) */
-.box-5-left, .box-5-right { position: absolute; top: 195px; width: 50px; height: 160px; border: 2px solid white; z-index: 1; }
-.box-5-left { left: 0; border-left: none; }
-.box-5-right { right: 0; border-right: none; }
-
-/* TORE (Außerhalb der Torauslinie) */
-.goal-left, .goal-right { 
-    position: absolute; top: 235px; width: 16px; height: 80px; 
-    background: rgba(255,255,255,0.25); border: 2px solid white; z-index: 1;
-}
-.goal-left { left: -18px; border-radius: 4px 0 0 4px; }
-.goal-right { right: -18px; border-radius: 0 4px 4px 0; }
-
-/* --- TAKTISCHE EBENE (Pfeile) --- */
-#tactical-arrows { 
-    position: absolute; top: 0; left: 0; 
-    width: 100%; height: 100%; 
-    z-index: 50; 
-    pointer-events: none; /* WICHTIG: Erlaubt das Klicken der Spieler darunter */
+#main-stage {
+    flex-grow: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-/* --- DER BALL --- */
-.ball { 
-    width: 22px; height: 22px; 
-    background: white; border-radius: 50%; 
-    position: absolute; z-index: 200; cursor: grab;
-    background-image: radial-gradient(circle, #fff 40%, #ccc 100%);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    border: 1px solid #333;
+#chat-sidebar {
+    width: 340px;
+    background: var(--sidebar-bg);
+    border-left: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
 }
 
-/* --- SPIELER-LAYOUT --- */
-.player-wrapper { 
-    position: absolute; 
-    display: flex; flex-direction: column; align-items: center; 
-    z-index: 100; /* Höher als die Pfeile (50) */
-    width: 60px; 
-    pointer-events: auto !important;
+/* Spielfeld (Board) */
+#pitch {
+    width: 850px;
+    height: 550px;
+    background: var(--pitch-white);
+    border: 3px solid var(--line-color);
+    position: relative;
+    transition: all 0.4s ease-in-out;
+    box-shadow: var(--shadow);
 }
 
-.player-circle { 
-    width: 38px; height: 38px; border-radius: 50%; 
-    display: flex; align-items: center; justify-content: center; 
-    font-size: 8px; font-weight: 900; 
-    border: 2px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    text-transform: uppercase; line-height: 1;
+/* Spielfeldmarkierungen */
+.center-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--line-color);
 }
 
-.player-label { 
-    font-size: 10px; font-weight: 800; 
-    margin-top: 4px; text-shadow: 1px 1px 4px black; 
+.center-circle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    border: 2px solid var(--line-color);
+    border-radius: 50%;
+}
+
+/* Schusszonen für Funino (gestrichelt) */
+.shooting-zone {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    border-right: 2px dashed #999;
+    display: none;
+}
+.shooting-zone.right { right: 0; border-right: none; border-left: 2px dashed #999; }
+
+/* Spieler-Dots */
+.player-dot {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
     color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+    cursor: grab;
+    z-index: 10;
 }
 
-/* Teams */
-.red .player-circle { background: #e74c3c; color: white; cursor: grab; }
-.blue .player-circle { background: #3498db; color: white; cursor: default; }
+.player-dot:active { cursor: grabbing; }
 
-/* --- AUSWECHSELBANK --- */
-#bench-area { width: 850px; margin-top: 20px; display: flex; gap: 20px; }
-.bench-side { 
-    flex: 1; background: rgba(15, 23, 42, 0.7); 
-    padding: 12px; border-radius: 12px; 
-    border: 1px solid rgba(255, 255, 255, 0.1); 
+.player-label {
+    position: absolute;
+    top: 35px;
+    color: #000;
+    font-size: 10px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.8);
+    padding: 1px 4px;
+    border-radius: 3px;
 }
-.bench-label { 
-    font-size: 10px; color: #2ecc71; font-weight: bold; 
-    margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;
-}
-.bench-slot { display: flex; gap: 12px; flex-wrap: wrap; min-height: 50px; }
-.bench-slot .player-wrapper { position: relative !important; left: auto !important; top: auto !important; }
 
-/* --- SIDEBAR & CHAT --- */
-.sidebar { width: 380px; background: #0f172a; padding: 20px; display: flex; flex-direction: column; border-left: 1px solid #334155; }
-#chat-history { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-.msg { padding: 10px 14px; border-radius: 12px; font-size: 0.9rem; max-width: 90%; line-height: 1.4; }
-.msg.toni { background: #1e293b; border-left: 4px solid #2ecc71; color: #e2e8f0; }
-.msg.user { background: #334155; align-self: flex-end; color: white; }
+/* Tore & Objekte */
+.goal {
+    position: absolute;
+    background: #000;
+    border: 1px solid #fff;
+}
 
-/* --- LOGIN --- */
-#login-overlay { 
-    position: fixed; inset: 0; background: #050608; 
-    z-index: 10000; display: flex; align-items: center; justify-content: center; 
+.standard-goal { width: 12px; height: 80px; top: 235px; }
+.funino-goal { width: 8px; height: 40px; }
+
+/* Navigation & Buttons */
+.top-nav {
+    position: absolute;
+    top: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #fff;
+    padding: 12px 25px;
+    border-radius: 40px;
+    box-shadow: var(--shadow);
+    z-index: 100;
 }
-.login-card { 
-    background: #0f172a; padding: 40px; border-radius: 24px; 
-    border: 1px solid #2ecc71; text-align: center; 
+
+.nav-btn {
+    border: none;
+    background: #eee;
+    padding: 10px 18px;
+    cursor: pointer;
+    font-weight: 600;
+    border-radius: 20px;
+    transition: 0.2s;
 }
-.login-card input { 
-    display: block; width: 100%; margin-bottom: 15px; 
-    padding: 14px; border-radius: 10px; border: 1px solid #334155; 
-    background: #1e293b; color: white;
+
+.nav-btn.active { background: var(--red-team); color: #fff; }
+
+#briefcase-btn {
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 10px;
 }
-.btn { border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-.btn.primary { background: #2ecc71; color: #0f172a; }
+
+/* Kaderliste-Items */
+.squad-item {
+    background: #fff;
+    border: 1px solid #eee;
+    margin: 10px;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    transition: transform 0.1s;
+}
+
+.squad-item:hover { transform: scale(1.02); }
+
+.squad-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+/* Monitoring-Punkte */
+.performance-badge {
+    background: var(--toni-accent);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.7em;
+}
