@@ -1,9 +1,18 @@
 /* --- TONI'S BRAIN & VOICE --- */
-let GROQ_KEY = "";
+let GROQ_KEY = "DEIN_GROQ_KEY_HIER"; // Hier kommt später dein Key rein
 let isLocked = false;
 let toniVoice = null;
 
-/* --- CHAT-SYSTEM (Die Korrektur) --- */
+/* --- DER SPEZIALISIERTE TONI-PROMPT (Dienstanweisung) --- */
+const TONI_PERSONA = `
+Identität: Toni, Elite-Coach.
+Mix: Brasilianische Technik (Finesse), Ghanaische Lockerheit (Humor/Spirit), Deutsche Durchsetzungskraft (Taktik).
+Auftrag: Du bist der Fachmann für Coach Björn.
+Smalltalk-Regel: Ein Funken Humor ist Pflicht! Wenn Björn nach Wetter/Politik fragt, antworte sportlich-charmant und lenke sofort zurück auf Fußball.
+Beispiel: 'Coach, solange es keine Caipirinhas regnet, zählt nur die Standfestigkeit in der Abwehr!'
+`;
+
+/* --- CHAT-SYSTEM --- */
 function addMsg(role, txt) {
   const history = document.getElementById('chat-history');
   if (!history) return;
@@ -19,13 +28,12 @@ function addMsg(role, txt) {
 /* --- SPRACHAUSGABE (TTS) --- */
 function setupVoice() {
   const voices = speechSynthesis.getVoices();
-  // Suche bevorzugt nach einer deutschen männlichen Stimme für Toni
   toniVoice = voices.find(v => v.lang.startsWith('de') && !v.name.toLowerCase().includes('female')) || voices[0];
 }
 
 function speakStyled(text) {
   if (!text) return;
-  speechSynthesis.cancel(); // Vorherige Sätze abbrechen
+  speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   if (toniVoice) utterance.voice = toniVoice;
   utterance.lang = 'de-DE';
@@ -34,17 +42,11 @@ function speakStyled(text) {
   speechSynthesis.speak(utterance);
 }
 
-function selectVoice(name) {
-  const voices = speechSynthesis.getVoices();
-  const found = voices.find(v => v.name === name);
-  if (found) toniVoice = found;
-}
-
 /* --- MIKROFON (STT) --- */
 function startMic() {
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRec) {
-    alert("Spracherkennung wird von diesem Browser nicht unterstützt.");
+    alert("Spracherkennung wird nicht unterstützt.");
     return;
   }
   const rec = new SpeechRec();
@@ -67,14 +69,23 @@ async function askToni() {
   input.value = '';
   isLocked = true;
 
-  // Hier simulieren wir die Antwort, falls kein Backend/Key da ist
-  // Später binden wir hier deine Groq-Schnittstelle wieder voll ein
+  // HINWEIS: Sobald wir den API-Key nutzen, wird dieser Teil durch einen 
+  // echten Fetch-Aufruf an Groq ersetzt.
   setTimeout(() => {
-    let answer = "Verstanden, Coach. Ich analysiere die Positionen und bereite die nächste Übung vor.";
-    
-    // Einfache Logik-Beispiele
-    if(text.toLowerCase().includes('hallo')) answer = "Guten Tag, Coach Björn. Bereit für die taktische Einheit?";
-    
+    let answer = "";
+    const t = text.toLowerCase();
+
+    // Tonis Charakter-Filter
+    if (t.includes('wetter') || t.includes('regen')) {
+      answer = "Wetterbericht? Coach Björn, in Ghana sagen wir: 'Das Spiel wird auf dem Platz gewonnen, nicht in den Wolken!' Bei Regen flutscht der Ball besser – ideal für unsere brasilianische Technik. Wie steht die Abwehr?";
+    } else if (t.includes('politik') || t.includes('nachrichten')) {
+      answer = "Politik überlasse ich den Leuten im Rathaus. Meine einzige Ideologie ist die Dreierkette! Bleiben wir beim Wesentlichen: Wer ist heute unser Spielmacher?";
+    } else if (t.includes('hallo') || t.includes('wie geht')) {
+      answer = "Mit der Lockerheit von Accra und der Präzision von München! Ich bin bereit, Coach Björn. Lassen wir die Brasilianer tanzen oder bauen wir die deutsche Mauer auf?";
+    } else {
+      answer = "Interessanter Punkt, Coach. Taktisch gesehen gibt uns das neue Optionen. Soll ich die Laufwege der blauen Spieler entsprechend anpassen?";
+    }
+
     addMsg('toni', answer);
     speakStyled(answer);
     isLocked = false;
@@ -88,20 +99,20 @@ function startToni() {
     document.getElementById('login-overlay').style.display = 'none';
     setupVoice();
     if (typeof resetBoard === 'function') resetBoard();
-    addMsg('toni', "Toni initialisiert. Ich bin bereit, Coach.");
-    speakStyled("Toni initialisiert. Ich bin bereit.");
+    const welcome = "Toni initialisiert. Ich bin bereit, Coach Björn.";
+    addMsg('toni', welcome);
+    speakStyled(welcome);
   } else {
     alert("Zugriff verweigert.");
   }
 }
 
 function welcomeFlow() {
-  const msg = "Guten Tag, Coach Björn. Ich habe das Training für heute vorbereitet. Sollen wir die Grundordnung prüfen?";
+  const msg = "Guten Tag, Coach Björn. Die brasilianische Spielfreude ist geweckt. Sollen wir die Taktik prüfen?";
   addMsg('toni', msg);
   speakStyled(msg);
 }
 
-// Damit der Browser die Stimmen lädt
 if (speechSynthesis.onvoiceschanged !== undefined) {
   speechSynthesis.onvoiceschanged = setupVoice;
 }
@@ -109,3 +120,5 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
 window.startToni = startToni;
 window.askToni = askToni;
 window.addMsg = addMsg;
+window.startMic = startMic;
+window.welcomeFlow = welcomeFlow;
