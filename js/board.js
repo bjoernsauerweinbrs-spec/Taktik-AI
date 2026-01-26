@@ -1,88 +1,180 @@
-/* --- BOARD.JS: ABSOLUTE BEWEGUNGSFREIHEIT --- */
-const board = document.getElementById('board-container');
-const ball = document.getElementById('ball');
-const benchRed = document.getElementById('bench-red');
-const benchBlue = document.getElementById('bench-blue');
+/**
+ * Toni 2.0 - Board Engine
+ * Steuert die visuelle Darstellung, Modi-Wechsel und Objekt-Platzierung.
+ */
 
-// KADER: 11 Rot, 11 Blau
-let squad = [
-    { id: 'R1', name: 'NEUER', label: '1', x: 30, y: 235, team: 'red' },
-    { id: 'R2', name: 'LUIZ', label: '4', x: 150, y: 150, team: 'red' },
-    { id: 'R3', name: 'BOAT', label: '17', x: 150, y: 320, team: 'red' },
-    { id: 'R4', name: 'DAVIES', label: '19', x: 180, y: 40, team: 'red' },
-    { id: 'R5', name: 'KIMM', label: '6', x: 180, y: 430, team: 'red' },
-    { id: 'R6', name: 'GORE', label: '8', x: 300, y: 235, team: 'red' },
-    { id: 'R7', name: 'MÜLLER', label: '25', x: 420, y: 140, team: 'red' },
-    { id: 'R8', name: 'MUSI', label: '42', x: 420, y: 330, team: 'red' },
-    { id: 'R9', name: 'SANE', label: '10', x: 580, y: 80, team: 'red' },
-    { id: 'R10', name: 'GNA', label: '7', x: 580, y: 390, team: 'red' },
-    { id: 'R11', name: 'KANE', label: '9', x: 680, y: 235, team: 'red' },
+const pitch = document.getElementById('pitch');
 
-    { id: 'B1', name: 'KAHN', label: 'TW', x: 740, y: 235, team: 'blue' },
-    { id: 'B2', name: 'LAHM', label: 'RV', x: 620, y: 150, team: 'blue' },
-    { id: 'B3', name: 'HUMS', label: 'IV', x: 620, y: 320, team: 'blue' },
-    { id: 'B4', name: 'MERT', label: 'IV', x: 680, y: 235, team: 'blue' },
-    { id: 'B5', name: 'BREH', label: 'LV', x: 600, y: 430, team: 'blue' },
-    { id: 'B6', name: 'SCHW', label: 'ZM', x: 500, y: 235, team: 'blue' },
-    { id: 'B7', name: 'KROO', label: 'ZM', x: 400, y: 100, team: 'blue' },
-    { id: 'B8', name: 'BALL', label: 'ZM', x: 400, y: 370, team: 'blue' },
-    { id: 'B9', name: 'CLO', label: 'ST', x: 280, y: 80, team: 'blue' },
-    { id: 'B10', name: 'PODO', label: 'ST', x: 280, y: 390, team: 'blue' },
-    { id: 'B11', name: 'GÖTZ', label: 'OM', x: 380, y: 235, team: 'blue' }
-];
+/**
+ * Hauptfunktion zum Zeichnen des Boards
+ * Berücksichtigt den aktuellen Modus und die Spielerdaten.
+ */
+function drawBoard() {
+    if (!pitch) return;
 
-function initBoard() {
-    if (!board) return;
-    board.querySelectorAll('.player-wrapper').forEach(p => p.remove());
-    benchRed.innerHTML = ''; benchBlue.innerHTML = '';
+    // 1. Spielfeld reinigen (außer statische Linien)
+    const dynamicElements = pitch.querySelectorAll('.player-dot, .standard-goal, .funino-goal, .cone, .shooting-zone');
+    dynamicElements.forEach(el => el.remove());
 
-    squad.forEach(p => {
-        const div = document.createElement('div');
-        div.className = `player-wrapper ${p.team}`;
-        div.id = p.id;
-        div.innerHTML = `<div class="player-circle">${p.name}</div><div class="player-label">${p.label}</div>`;
-        div.style.left = p.x + 'px';
-        div.style.top = p.y + 'px';
-        makeDraggable(div);
-        board.appendChild(div);
+    // 2. Modus-spezifisches Setup
+    if (currentMode === 'funino') {
+        setupFuninoVisuals();
+    } else {
+        setupStandardVisuals();
+    }
+
+    // 3. Rote Spieler (Dein Team) platzieren
+    squad.filter(p => p.active && p.status === 'team').forEach(p => {
+        const coords = formations["4-4-2_RED"][p.pos] || {x: 50, y: 50};
+        createPlayerDot(p, coords, 'var(--red-team)');
     });
 
-    ball.style.left = "415px"; ball.style.top = "265px";
-    makeDraggable(ball, true);
+    // 4. Blaue Spieler (Gegner) platzieren (nur im 11v11 Modus)
+    if (currentMode === '11v11') {
+        opponents.forEach(o => {
+            const coords = formations["3-4-3_BLUE"][o.pos];
+            createPlayerDot(o, coords, 'var(--blue-team)', true);
+        });
+    }
+
+    // 5. Bank-Spieler am Rand positionieren
+    squad.filter(p => p.active && p.status === 'bank').forEach((p, index) => {
+        const bankCoords = { x: 95, y: 15 + (index * 7) };
+        createPlayerDot(p, bankCoords, 'var(--red-team)');
+    });
 }
 
-function makeDraggable(el, isBall = false) {
-    let isDown = false;
-    let offset = [0,0];
+/**
+ * Erstellt einen Spieler-Punkt auf dem Feld
+ */
+function createPlayerDot(player, coords, color, isOpponent = false) {
+    if (!coords) return;
 
-    el.onmousedown = (e) => {
-        isDown = true;
-        el.style.zIndex = 1000;
-        const rect = board.getBoundingClientRect();
-        offset = [ el.offsetLeft - (e.clientX - rect.left), el.offsetTop - (e.clientY - rect.top) ];
-        e.preventDefault();
-    };
+    const dot = document.createElement('div');
+    dot.className = 'player-dot';
+    dot.style.left = coords.x + '%';
+    dot.style.top = coords.y + '%';
+    dot.style.backgroundColor = color;
+    
+    // HTML Inhalt: Nummer + (optional) Name
+    let content = `<span>${player.nr}</span>`;
+    if (!isOpponent && player.name) {
+        content += `<span class="player-label">${player.name}</span>`;
+    }
+    dot.innerHTML = content;
 
-    document.onmousemove = (e) => {
-        if (!isDown) return;
-        const rect = board.getBoundingClientRect();
-        let x = e.clientX - rect.left + offset[0];
-        let y = e.clientY - rect.top + offset[1];
-        el.style.left = x + 'px';
-        el.style.top = y + 'px';
-    };
+    // Drag & Drop Vorbereitung
+    dot.onmousedown = (e) => startDrag(e, dot, player.id);
+    
+    pitch.appendChild(dot);
+}
 
-    document.onmouseup = () => {
-        if (isDown) {
-            isDown = false;
-            el.style.zIndex = isBall ? 200 : 100;
-            // WICHTIG: Hier wird Toni wach!
-            if (typeof analyzeSituation === 'function') {
-                analyzeSituation();
-            }
-        }
+/**
+ * Setup für 11 gegen 11 und Training (Standard-Feld)
+ */
+function setupStandardVisuals() {
+    pitch.style.width = '850px';
+    pitch.style.height = '550px';
+    
+    // Zwei Standard-Großtore
+    createGoal('left', 'standard-goal');
+    createGoal('right', 'standard-goal');
+}
+
+/**
+ * Setup für Funino (kleines Feld, 4 Tore, Schusszonen)
+ */
+function setupFuninoVisuals() {
+    pitch.style.width = '650px';
+    pitch.style.height = '450px';
+
+    // 4 Mini-Tore (Funino-Style)
+    createGoal('left', 'funino-goal', '15%');
+    createGoal('left', 'funino-goal', '85%');
+    createGoal('right', 'funino-goal', '15%');
+    createGoal('right', 'funino-goal', '85%');
+
+    // Schusszonen einzeichnen (6m Zonen)
+    const zoneL = document.createElement('div');
+    zoneL.className = 'shooting-zone';
+    zoneL.style.display = 'block';
+    pitch.appendChild(zoneL);
+
+    const zoneR = document.createElement('div');
+    zoneR.className = 'shooting-zone right';
+    zoneR.style.display = 'block';
+    pitch.appendChild(zoneR);
+}
+
+/**
+ * Erstellt ein Tor-Objekt
+ */
+function createGoal(side, type, topPos = '50%') {
+    const goal = document.createElement('div');
+    goal.className = `goal ${type}`;
+    if (side === 'left') {
+        goal.style.left = '-6px';
+    } else {
+        goal.style.right = '-6px';
+    }
+    goal.style.top = topPos;
+    goal.style.transform = 'translateY(-50%)';
+    pitch.appendChild(goal);
+}
+
+/**
+ * Einfache Drag-Logik für Spieler-Dots
+ */
+function startDrag(e, element, playerId) {
+    let shiftX = e.clientX - element.getBoundingClientRect().left;
+    let shiftY = e.clientY - element.getBoundingClientRect().top;
+
+    function moveAt(pageX, pageY) {
+        let newX = (pageX - shiftX - pitch.getBoundingClientRect().left) / pitch.offsetWidth * 100;
+        let newY = (pageY - shiftY - pitch.getBoundingClientRect().top) / pitch.offsetHeight * 100;
+        element.style.left = newX + '%';
+        element.style.top = newY + '%';
+    }
+
+    function onMouseMove(event) {
+        moveAt(event.pageX, event.pageY);
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+
+    element.onmouseup = function() {
+        document.removeEventListener('mousemove', onMouseMove);
+        element.onmouseup = null;
     };
 }
 
-window.onload = initBoard;
-function resetBoard() { initBoard(); if(typeof clearArrows==='function') clearArrows(); }
+/**
+ * Hilfsfunktion für Toni: Platziert Hütchen auf dem Board
+ */
+function placeCones(count) {
+    for (let i = 0; i < count; i++) {
+        const cone = document.createElement('div');
+        cone.className = 'cone';
+        cone.style.left = (20 + (i * 5)) + '%';
+        cone.style.top = '10%';
+        cone.innerHTML = '▲'; // Symbol für Hütchen
+        cone.style.position = 'absolute';
+        cone.style.color = 'orange';
+        pitch.appendChild(cone);
+    }
+}
+
+// Event-Listener für den Modus-Switch
+function switchMode(mode) {
+    currentMode = mode;
+    drawBoard();
+    if(typeof toniSpeak === "function") {
+        const modeText = mode === 'funino' ? "Funino Modus" : (mode === '11v11' ? "11 gegen 11 Analyse" : "Trainingsmodus");
+        toniSpeak(`Björn, ich habe auf ${modeText} umgestellt. Die Tore sind platziert.`);
+    }
+}
+
+// Initiales Zeichnen
+document.addEventListener('DOMContentLoaded', () => {
+    drawBoard();
+});
