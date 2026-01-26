@@ -10,11 +10,9 @@
     <div id="app">
         <div id="main">
             <div class="top-controls">
-                <button class="btn primary" onclick="resetBoard()">⚽ NEUER ANSTOSS</button>
+                <button class="btn primary" onclick="resetBoard()">⚽ ANSTOSS</button>
                 <div class="phase-display">
-                    <button onclick="prevPhase()">◀</button>
-                    <span id="playlist-title">Spielzug 1</span>
-                    <button onclick="nextPhase()">▶</button>
+                    <span id="playlist-title">Spielanalyse Aktiv</span>
                 </div>
             </div>
 
@@ -23,6 +21,10 @@
                 <div class="field-line center-circle"></div>
                 <div class="box-16-left"></div><div class="box-5-left"></div><div class="goal-left"></div>
                 <div class="box-16-right"></div><div class="box-5-right"></div><div class="goal-right"></div>
+                
+                <svg id="tactical-arrows" width="850" height="550" style="position:absolute; top:0; left:0; pointer-events:none; z-index:50;"></svg>
+                
+                <div id="ball" class="ball"></div>
             </div>
 
             <div id="bench-area">
@@ -38,7 +40,7 @@
         </div>
 
         <div class="sidebar">
-            <div class="header">📋 TONI STRATEGIE-BOARD</div>
+            <div class="header">📋 TONI ANALYSE-BOT</div>
             <div id="chat-history"></div>
             <div class="input-row">
                 <button class="btn-icon" onclick="startMic()">🎙️</button>
@@ -49,7 +51,7 @@
                 <button class="btn" onclick="welcomeFlow()">👋 Gruß</button>
                 <button class="btn" onclick="openKaderManager()">📋 Kader Editor</button>
                 <button class="btn primary" onclick="askToniTaktik()">📊 Taktik</button>
-                <button class="btn" onclick="askToniPressing()">⚡ Pressing</button>
+                <button class="btn" onclick="clearArrows()">🧹 Pfeile löschen</button>
                 <button class="btn primary full-width" onclick="exportPlanPDF()">📄 PDF EXPORT</button>
             </div>
         </div>
@@ -59,7 +61,7 @@
         <div class="modal-content">
             <h3>Kader-Management</h3>
             <div id="kader-list"></div>
-            <button class="btn primary" onclick="closeKaderManager()">Speichern & Schließen</button>
+            <button class="btn primary" onclick="closeKaderManager()">Speichern</button>
         </div>
     </div>
 
