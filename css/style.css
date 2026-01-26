@@ -1,24 +1,29 @@
-/* --- BASIS LAYOUT --- */
+/* --- BASIS RESET --- */
+* { box-sizing: border-box; }
 body, html {
     margin: 0;
     padding: 0;
-    width: 100%;
-    height: 100%;
-    font-family: 'Inter', -apple-system, sans-serif;
-    background: #050608;
-    color: white;
-    overflow: hidden; /* Verhindert das Scrollen der gesamten Seite */
-}
-
-#app {
-    display: flex; /* Spielfeld und Sidebar nebeneinander */
     width: 100vw;
     height: 100vh;
+    background: #050608;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
 }
 
-/* --- HAUPTBEREICH (SPIELFELD) --- */
+/* --- DAS HAUPT-LAYOUT --- */
+#app {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    flex-direction: row; /* Zwingt Spielfeld und Toni nebeneinander */
+}
+
+/* --- SPIELFELD-BEREICH (LINKS) --- */
 #main {
-    flex: 1; /* Nimmt den restlichen Platz links ein */
+    flex-grow: 1; /* Nimmt den restlichen Platz ein */
+    width: calc(100vw - 380px); /* Zieht die Sidebar-Breite exakt ab */
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -27,137 +32,54 @@ body, html {
     position: relative;
 }
 
-#board-container {
-    position: relative;
-    width: 800px; /* Standardgröße Spielfeld */
-    height: 500px;
-    background: #27ae60; /* Sattes Grün */
-    border: 5px solid white;
-    border-radius: 10px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-}
-
-/* --- SIDEBAR (TONI) --- */
+/* --- SIDEBAR (RECHTS) --- */
 .sidebar {
-    width: 380px; /* Etwas breiter für besseren Lesekomfort */
+    width: 380px; 
+    min-width: 380px; /* Verhindert, dass die Sidebar gequetscht wird */
     height: 100vh;
     background: #0f172a;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
     padding: 20px;
-    box-sizing: border-box;
-}
-
-.sidebar h2 {
-    margin-top: 0;
-    font-size: 1.2rem;
-    color: #2ecc71;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* --- CHAT-VERLAUF --- */
-#chat-history {
-    flex: 1; /* Füllt den Raum zwischen Titel und Eingabe */
-    overflow-y: auto;
-    margin: 15px 0;
-    padding-right: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    scrollbar-width: thin;
-    scrollbar-color: #2ecc71 transparent;
-}
-
-/* Sprechblasen-Design */
-.msg {
-    padding: 10px 14px;
-    border-radius: 12px;
-    max-width: 85%;
-    font-size: 0.95rem;
-    line-height: 1.4;
-}
-
-.msg.user {
-    align-self: flex-end;
-    background: #334155;
-    color: white;
-    border-bottom-right-radius: 2px;
-}
-
-.msg.toni {
-    align-self: flex-start;
-    background: #1e293b;
-    border: 1px solid rgba(46, 204, 113, 0.3);
-    color: #e2e8f0;
-    border-bottom-left-radius: 2px;
-}
-
-/* --- EINGABE-BEREICH --- */
-.input-row {
-    display: flex;
-    gap: 8px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-input#user-input {
-    flex: 1;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #334155;
-    background: #1e293b;
-    color: white;
-    outline: none;
-}
-
-/* --- BUTTONS --- */
-.btn {
-    padding: 10px 15px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.2s;
-}
-
-.btn.primary {
-    background: #2ecc71;
-    color: #050608;
-}
-
-.btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-/* --- SPIELER (MÄNNCHEN) --- */
-.player {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: move;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     z-index: 10;
 }
 
-.player.red { background: #e74c3c; color: white; border: 2px solid #c0392b; }
-.player.blue { background: #3498db; color: white; border: 2px solid #2980b9; }
+/* --- CHAT-STABILISIERUNG --- */
+#chat-history {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 15px 0;
+    padding-right: 5px;
+}
 
-/* --- LOGIN OVERLAY --- */
+/* Spielfeld-Größe (damit es nicht zu groß für den Bereich wird) */
+#board-container {
+    width: 700px; 
+    height: 450px;
+    background: #27ae60;
+    border: 5px solid white;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+}
+
+/* --- LOGIN & INPUTS --- */
 #login-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.98);
+    background: rgba(10, 15, 25, 0.99);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10000;
+}
+
+.input-row {
+    display: flex;
+    gap: 5px;
+    padding-top: 10px;
 }
