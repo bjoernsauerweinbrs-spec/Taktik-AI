@@ -1,98 +1,42 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toni 2.0 - Authentifizierung & KI-Setup</title>
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-        body { 
-            display: flex; align-items: center; justify-content: center; 
-            background: #121212; color: #ffffff; height: 100vh; margin: 0; 
-            font-family: 'Inter', sans-serif; 
-        }
-        .login-card { 
-            background: #1e1e1e; padding: 40px; border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.7); text-align: center; 
-            width: 100%; max-width: 400px; border: 1px solid #333;
-        }
-        .logo-brasil { font-size: 60px; margin-bottom: 10px; display: block; }
-        h2 { margin: 10px 0 25px 0; font-weight: 600; }
-        .input-group { text-align: left; margin-bottom: 15px; }
-        label { display: block; font-size: 0.8em; color: #aaa; margin-bottom: 5px; margin-left: 5px; }
-        input { 
-            width: 100%; padding: 14px; border-radius: 10px; 
-            border: 1px solid #444; background: #2a2a2a; color: white;
-            box-sizing: border-box; font-size: 15px;
-        }
-        .api-info { font-size: 0.7em; color: #2e7d32; margin-top: 5px; display: block; }
-        button { 
-            width: 100%; padding: 14px; margin-top: 20px;
-            background: #2e7d32; color: white; border: none; 
-            border-radius: 10px; cursor: pointer; font-weight: bold; 
-            font-size: 16px; transition: 0.3s;
-        }
-        button:hover { background: #388e3c; }
-        .error { 
-            color: #ff5252; font-size: 0.85em; margin-top: 15px; 
-            display: none; background: rgba(255, 82, 82, 0.1);
-            padding: 10px; border-radius: 8px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Toni 2.0 - Ginga Board</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-    <div class="login-card">
-        <span class="logo-brasil">🇧🇷</span>
-        <h2>Toni 2.0 Login</h2>
-        
-        <div class="input-group">
-            <label>Benutzername</label>
-            <input type="text" id="username" placeholder="z.B. Björn">
-        </div>
+  <div id="app">
+    <aside id="sidebar">
+      <div id="toni-status-bar">
+        <div id="status-led"></div>
+        <span id="status-text">Toni ist im Standby</span>
+      </div>
 
-        <div class="input-group">
-            <label>Passwort</label>
-            <input type="password" id="password" placeholder="Dein Passwort">
-        </div>
+      <div id="chat-controls" class="controls">
+        <input id="toni-input" type="text" placeholder="Hallo" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line)" />
+        <button id="ok-btn">OK</button>
+      </div>
 
-        <div class="input-group">
-            <label>Groq API-Key (Echte KI-Power)</label>
-            <input type="password" id="api-key" placeholder="gsk_...">
-            <a href="https://console.groq.com/keys" target="_blank" class="api-info">Hier API-Key erstellen (kostenlos)</a>
-        </div>
+      <div id="toni-output"></div>
 
-        <button onclick="checkLogin()">Spielfeld betreten</button>
-        <div id="login-error" class="error">Zugriff verweigert. Prüfe Name, Passwort und API-Key.</div>
-    </div>
+      <div class="controls">
+        <button id="btn-roster">Kader</button>
+        <button id="btn-preview">Vorschau Moves</button>
+        <button id="export-json" class="ghost">Export JSON</button>
+      </div>
+    </aside>
 
-    <script>
-        function checkLogin() {
-            const user = document.getElementById('username').value.trim().toLowerCase();
-            const pass = document.getElementById('password').value.trim();
-            const apiKey = document.getElementById('api-key').value.trim();
-            
-            // Login-Logik: Björn/Bjoern/Admin & 1234
-            const validUser = (user === 'björn' || user === 'bjoern' || user === 'admin');
-            const validPass = (pass === '1234');
-            const hasApiKey = apiKey.startsWith('gsk_');
+    <main id="pitch-wrapper">
+      <div id="pitch"></div>
+    </main>
+  </div>
 
-            if(validUser && validPass && hasApiKey) {
-                // Daten sicher im SessionStorage speichern (löscht sich beim Schließen des Tabs)
-                sessionStorage.setItem('toni_auth', 'true');
-                sessionStorage.setItem('groq_api_key', apiKey);
-                window.location.href = 'app.html';
-            } else {
-                const errorBox = document.getElementById('login-error');
-                errorBox.style.display = 'block';
-                if(!hasApiKey && validUser && validPass) {
-                    errorBox.innerText = "Bitte gib einen gültigen Groq API-Key ein (beginnt mit gsk_).";
-                }
-            }
-        }
-
-        document.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') { checkLogin(); }
-        });
-    </script>
+  <!-- Skripte am Ende laden -->
+  <script src="js/storage.js"></script>
+  <script src="js/logic.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/chat.js"></script>
 </body>
 </html>
