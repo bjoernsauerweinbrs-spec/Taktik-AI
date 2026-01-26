@@ -39,10 +39,13 @@
         <button onclick="askToni()">OK</button>
       </div>
 
-      <div class="action-buttons" style="display:flex; gap:5px; margin-top:10px;">
+      <div class="action-buttons" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
         <button class="btn" onclick="welcomeFlow()">👋 Gruß</button>
         <button class="btn" onclick="toggleKader()">📋 Kader</button>
-        <button class="btn primary" onclick="exportPlanPDF()">📄 PDF</button>
+        <button class="btn primary" onclick="askToniTaktik()" title="Die komplette Spielanlage prüfen">📊 Taktik-Check</button>
+        <button class="btn" onclick="askToniPressing()" title="Umschaltmoment und Ballrückeroberung">⚡ Pressing-Check</button>
+        <button class="btn primary" style="grid-column: span 2;" onclick="exportPlanPDF()">📄 Trainingsplan PDF</button>
+      </div>
       </div>
     </div>
 
