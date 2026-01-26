@@ -2,120 +2,55 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Toni - Dein Taktik-Coach</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toni 2.0 - Login</title>
     <style>
-        :root {
-            --pitch-green: #ffffff; /* Clean Design: Weißer Hintergrund */
-            --line-color: #333;
-            --sidebar-bg: #f4f4f4;
-            --accent-color: #d32f2f; /* Rot für Team Björn */
-            --opponent-color: #1976d2; /* Blau für Gegner */
+        body { 
+            background: #121212; color: white; display: flex; align-items: center; 
+            justify-content: center; height: 100vh; margin: 0; font-family: 'Inter', sans-serif; 
         }
-
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-
-        /* Sidebar Links: Kader */
-        #squad-sidebar { width: 250px; background: var(--sidebar-bg); border-right: 2px solid #ddd; display: flex; flex-direction: column; }
-        
-        /* Zentrum: Spielfeld */
-        #main-stage { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; background: #eee; }
-        
-        /* Sidebar Rechts: Toni Analyse */
-        #toni-sidebar { width: 300px; background: var(--sidebar-bg); border-left: 2px solid #ddd; padding: 15px; overflow-y: auto; }
-
-        /* Header / Switcher */
-        .controls { position: absolute; top: 20px; z-index: 10; display: flex; gap: 10px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn { padding: 8px 15px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #fff; font-weight: bold; }
-        .btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
-
-        /* Spielfeld Grafik */
-        #pitch { 
-            width: 800px; height: 500px; background: var(--pitch-green); 
-            border: 3px solid var(--line-color); position: relative; 
-            transition: all 0.5s ease; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        .login-card { 
+            background: #1e1e1e; padding: 40px; border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7); text-align: center; 
+            width: 100%; max-width: 400px; border: 1px solid #333; 
         }
-
-        .center-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--line-color); }
-        .center-circle { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 120px; height: 120px; border: 2px solid var(--line-color); border-radius: 50%; }
-
-        /* Tore */
-        .goal { position: absolute; width: 10px; height: 60px; background: #000; }
-        .goal.left { left: -10px; top: 220px; }
-        .goal.right { right: -10px; top: 220px; }
-
-        /* Funino Tore */
-        .funino-goal { width: 8px; height: 30px; background: #555; position: absolute; display: none; }
-        
-        /* Aktentasche Icon */
-        #briefcase { font-size: 24px; cursor: pointer; }
-
+        .flags { font-size: 45px; margin-bottom: 25px; display: block; letter-spacing: 15px; }
+        h2 { margin-bottom: 25px; font-weight: 600; color: #fff; }
+        input { 
+            width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 10px; 
+            border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; 
+        }
+        button { 
+            width: 100%; padding: 14px; background: #2e7d32; color: white; border: none; 
+            border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; 
+        }
+        button:hover { background: #388e3c; }
+        .error { color: #ff5252; display: none; margin-top: 15px; font-size: 0.85em; }
     </style>
 </head>
 <body>
-
-    <div id="squad-sidebar">
-        <h3 style="padding: 15px;">Kader-Matrix</h3>
-        <div id="player-list" style="padding: 10px;">
-            <p style="color: #666; font-size: 0.9em;">Warte auf Kaderdaten...</p>
-        </div>
-    </div>
-
-    <div id="main-stage">
-        <div class="controls">
-            <div id="briefcase">💼</div>
-            <button class="btn active" onclick="switchMode('11v11', this)">11 gegen 11</button>
-            <button class="btn" onclick="switchMode('training', this)">Training</button>
-            <button class="btn" onclick="switchMode('funino', this)">Funino</button>
-        </div>
-
-        <div id="pitch">
-            <div class="center-line"></div>
-            <div class="center-circle"></div>
-            <div id="goal-l" class="goal left"></div>
-            <div id="goal-r" class="goal right"></div>
-            
-            <div class="funino-goal" style="left: 0; top: 100px;"></div>
-            <div class="funino-goal" style="left: 0; top: 370px;"></div>
-            <div class="funino-goal" style="right: 0; top: 100px;"></div>
-            <div class="funino-goal" style="right: 0; top: 370px;"></div>
-        </div>
-    </div>
-
-    <div id="toni-sidebar">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 50px; height: 50px; background: #ccc; border-radius: 50%;"></div> <strong>Toni (Fachmann)</strong>
-        </div>
-        <hr>
-        <div id="toni-output">
-            <p>Hallo Björn! Ich bin bereit. Wähle einen Modus, um mit der Analyse zu starten.</p>
-        </div>
+    <div class="login-card">
+        <span class="flags">🇧🇷 🇩🇪 🇮🇹</span>
+        <h2>Toni 2.0 Login</h2>
+        <input type="text" id="username" placeholder="Benutzername (Björn)">
+        <input type="password" id="password" placeholder="Passwort (1234)">
+        <input type="password" id="api-key" placeholder="Groq API-Key (gsk_...)">
+        <button onclick="checkLogin()">Spielfeld betreten</button>
+        <p id="error-msg" class="error">Zugriff verweigert. Prüfe deine Daten.</p>
     </div>
 
     <script>
-        function switchMode(mode, btn) {
-            // Button Styling
-            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        function checkLogin() {
+            const user = document.getElementById('username').value.trim().toLowerCase();
+            const pass = document.getElementById('password').value.trim();
+            const apiKey = document.getElementById('api-key').value.trim();
 
-            const pitch = document.getElementById('pitch');
-            const funinoGoals = document.querySelectorAll('.funino-goal');
-            const stdGoals = document.querySelectorAll('.goal');
-            const output = document.getElementById('toni-output');
-
-            if(mode === 'funino') {
-                pitch.style.width = '600px';
-                pitch.style.height = '400px';
-                funinoGoals.forEach(g => g.style.display = 'block');
-                stdGoals.forEach(g => g.style.display = 'none');
-                output.innerHTML = "<p><strong>Toni:</strong> Funino-Modus aktiviert. Schusszonen sind markiert. Wie viele Kinder trainieren heute?</p>";
+            if((user === 'björn' || user === 'admin' || user === 'bjoern') && pass === '1234' && apiKey.startsWith('gsk_')) {
+                sessionStorage.setItem('toni_auth', 'true');
+                sessionStorage.setItem('groq_api_key', apiKey);
+                window.location.href = 'app.html';
             } else {
-                pitch.style.width = '800px';
-                pitch.style.height = '500px';
-                funinoGoals.forEach(g => g.style.display = 'none');
-                stdGoals.forEach(g => g.style.display = 'block');
-                output.innerHTML = mode === '11v11' ? 
-                    "<p><strong>Toni:</strong> 11 gegen 11 Analyse. Rotes Team im 4-4-2. Wer spielt heute von Beginn an?</p>" :
-                    "<p><strong>Toni:</strong> Trainingsmodus. Ich durchsuche das Netz nach Übungen für deine Spieleranzahl...</p>";
+                document.getElementById('error-msg').style.display = 'block';
             }
         }
     </script>
