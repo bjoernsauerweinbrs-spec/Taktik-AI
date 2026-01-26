@@ -1,131 +1,87 @@
-/* --- BOARD STATE & GLOBALS --- */
-let _snapshot = [];
+/* --- SPIELFELD LOGIK (BOARD.JS) --- */
 
-/* --- SPIELFELD INITIALISIEREN --- */
-function resetBoard() {
-  const layer = document.getElementById('players-layer');
-  const bank = document.getElementById('bank-list');
-  if (!layer || !bank) return;
+const board = document.getElementById('board-container');
+const redTeam = [
+  { id: 'R1', pos: [50, 250], role: 'TW' },
+  { id: 'R2', pos: [150, 100], role: 'IV' },
+  { id: 'R3', pos: [150, 400], role: 'IV' },
+  { id: 'R4', pos: [250, 250], role: 'DM' },
+  { id: 'R5', pos: [450, 150], role: 'OM' },
+  { id: 'R6', pos: [450, 350], role: 'OM' },
+  { id: 'R7', pos: [650, 250], role: 'ST' }
+];
 
-  layer.innerHTML = ''; 
-  bank.innerHTML = '';
-  
-  // Standardpositionen (Prozentual)
-  const hPos = [[10,50],[25,20],[25,40],[25,60],[25,80],[45,30],[45,50],[45,70],[75,25],[85,50],[75,75]];
-  const aPos = [[90,50],[75,20],[75,40],[75,60],[75,80],[55,30],[55,50],[55,70],[25,25],[15,50],[25,75]];
+const blueTeam = [
+  { id: 'B1', pos: [750, 250], role: 'TW' },
+  { id: 'B2', pos: [600, 150], role: 'V' },
+  { id: 'B3', pos: [600, 350], role: 'V' },
+  { id: 'B4', pos: [400, 250], role: 'M' },
+  { id: 'B5', pos: [200, 250], role: 'S' }
+];
 
-  for (let i = 0; i < 11; i++) {
-    const nr = i + 1;
-    const hId = 'home' + nr;
-    const aId = 'away' + nr;
+// Funktion: Spieler auf dem Feld erstellen
+function initBoard() {
+  if (!board) return;
+  board.innerHTML = ''; // Feld leeren
 
-    // Home Team (Rot) - Nur erstellen wenn anwesend
-    if (typeof attendance !== 'undefined' && attendance[hId] !== false) {
-      createPlayer('home', nr, hPos[i][0], hPos[i][1], layer, false);
-    } else if (typeof addToBank === 'function') {
-      addToBank(hId);
-    }
-
-    // Away Team (Blau) - Nur erstellen wenn anwesend
-    if (typeof attendance !== 'undefined' && attendance[aId] !== false) {
-      createPlayer('away', nr, aPos[i][0], aPos[i][1], layer, true);
-    } else if (typeof addToBank === 'function') {
-      addToBank(aId);
-    }
-  }
-
-  // Ball initialisieren
-  const ball = document.getElementById('ball');
-  if (ball) {
-    ball.style.left = '50%';
-    ball.style.top = '50%';
-    makeDraggableSafe(ball);
-  }
-
-  if (typeof syncNames === 'function') syncNames();
-  takeSnapshot();
+  // Rote Spieler (Dein Team - Toni's Fokus)
+  redTeam.forEach(p => createPlayer(p, 'red'));
+  // Blaue Spieler (Gegner)
+  blueTeam.forEach(p => createPlayer(p, 'blue'));
 }
 
-/* --- SPIELER ERSTELLEN --- */
-function createPlayer(side, nr, x, y, layer, canDrag) {
-  const id = side + nr;
-  if (document.getElementById(id)) return;
-
-  const p = document.createElement('div');
-  p.className = `player ${side}`;
-  p.id = id;
-  p.innerText = nr;
-  p.style.left = x + '%';
-  p.style.top = y + '%';
-  p.setAttribute('data-team', side);
+function createPlayer(p, color) {
+  const el = document.createElement('div');
+  el.className = `player ${color}`;
+  el.id = p.id;
+  el.innerText = p.role;
+  el.style.left = p.pos[0] + 'px';
+  el.style.top = p.pos[1] + 'px';
   
-  // Home-Spieler (Rot) sind meistens Toni-gesteuert, Away (Blau) ziehst du selbst
-  p.style.pointerEvents = (side === 'home') ? 'none' : 'auto';
-  
-  layer.appendChild(p);
-  if (canDrag) makeDraggableSafe(p);
+  // Drag & Drop Logik
+  makeDraggable(el);
+  board.appendChild(el);
 }
 
-/* --- DRAG & DROP LOGIK --- */
-function makeDraggableSafe(el) {
-  if (!el) return;
-  let dragging = false;
-  let offsetX = 0;
-  let offsetY = 0;
+function makeDraggable(el) {
+  let isDragging = false;
 
   el.onmousedown = (e) => {
-    dragging = true;
-    el.style.transition = 'none';
+    isDragging = true;
     el.style.zIndex = 1000;
-    const rect = el.getBoundingClientRect();
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
   };
 
-  window.onmousemove = (e) => {
-    if (!dragging) return;
-    const pitch = document.getElementById('pitch');
-    const pRect = pitch.getBoundingClientRect();
-    
-    let left = ((e.clientX - pRect.left - offsetX) / pRect.width) * 100;
-    let top = ((e.clientY - pRect.top - offsetY) / pRect.height) * 100;
+  document.onmousemove = (e) => {
+    if (!isDragging) return;
+    const rect = board.getBoundingClientRect();
+    let x = e.clientX - rect.left - 17; // Zentrieren
+    let y = e.clientY - rect.top - 17;
 
     // Grenzen einhalten
-    left = Math.max(0, Math.min(96, left));
-    top = Math.max(0, Math.min(94, top));
+    x = Math.max(0, Math.min(x, rect.width - 35));
+    y = Math.max(0, Math.min(y, rect.height - 35));
 
-    el.style.left = left + '%';
-    el.style.top = top + '%';
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
   };
 
-  window.onmouseup = () => {
-    if (!dragging) return;
-    dragging = false;
-    el.style.transition = 'all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1)';
-    el.style.zIndex = '';
+  document.onmouseup = () => {
+    isDragging = false;
+    el.style.zIndex = 10;
   };
 }
 
-/* --- SNAPSHOTS (TRAININGS-PHASEN) --- */
-function takeSnapshot() {
-  _snapshot = [];
-  document.querySelectorAll('.player').forEach(p => {
-    _snapshot.push({ id: p.id, left: p.style.left, top: p.style.top });
-  });
-  const ball = document.getElementById('ball');
-  if (ball) _snapshot.push({ id: 'ball', left: ball.style.left, top: ball.style.top });
+// Grundordnung wiederherstellen
+function resetBoard() {
+  initBoard();
+  console.log("Spielfeld zurückgesetzt - Grundordnung aktiv.");
 }
 
-function restoreSnapshot() {
-  _snapshot.forEach(s => {
-    const el = document.getElementById(s.id);
-    if (el) {
-      el.style.left = s.left;
-      el.style.top = s.top;
-    }
-  });
-}
+/* --- DER ENTSCHEIDENDE ANPFIFF --- */
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("Board-System bereit...");
+  initBoard();
+});
 
-// Global verfügbar machen
+// Export für andere Scripte
 window.resetBoard = resetBoard;
-window.makeDraggableSafe = makeDraggableSafe;
