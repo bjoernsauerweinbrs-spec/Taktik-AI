@@ -1,11 +1,9 @@
 /**
- * Toni Rettungs-Logik: Stellt Kader & Board-Verbindung wieder her
+ * Toni 2.0 - Kader-Matrix & Daten-Sync
  */
-
-// Dein Kern-Kader
 let squad = [
-    { id: 1, nr: 8, name: "Thorsten", pos: "ST", active: true, points: { tech: 0, perc: 0, fit: 0, special: 0 } },
-    { id: 2, nr: 99, name: "David Luiz", pos: "IV", active: true, points: { tech: 0, perc: 0, fit: 0, special: 0 } }
+    { id: 1, nr: 8, name: "Thorsten", status: "team", active: true, points: { tech: 0, perc: 0, fit: 0, special: 0 } },
+    { id: 2, nr: 99, name: "David Luiz", status: "team", active: true, points: { tech: 0, perc: 0, fit: 0, special: 0 } }
 ];
 
 function renderSquad() {
@@ -17,14 +15,12 @@ function renderSquad() {
         const total = p.points.tech + p.points.perc + p.points.fit + p.points.special;
         const div = document.createElement('div');
         div.className = 'player-card';
-        div.style = "background:white; margin:8px; padding:10px; border-radius:8px; border-left:4px solid #d32f2f; box-shadow:0 2px 4px rgba(0,0,0,0.1);";
-        
         div.innerHTML = `
-            <div style="display:flex; justify-content:space-between;">
+            <div class="card-header">
                 <strong>#${p.nr} ${p.name}</strong>
-                <span>${total} Pkt</span>
+                <span class="total-points">${total} Pkt</span>
             </div>
-            <div style="margin-top:8px; display:flex; gap:4px;">
+            <div class="card-actions">
                 <button onclick="addPoint(${p.id}, 'tech')">⚽</button>
                 <button onclick="addPoint(${p.id}, 'perc')">👁️</button>
                 <button onclick="addPoint(${p.id}, 'fit')">🏃</button>
@@ -33,8 +29,6 @@ function renderSquad() {
         `;
         container.appendChild(div);
     });
-
-    // WICHTIG: Das Board wird sofort mit den Spielern gezeichnet
     if (typeof drawBoard === 'function') drawBoard();
 }
 
@@ -43,20 +37,16 @@ function addPoint(id, cat) {
     if (p) {
         p.points[cat]++;
         renderSquad();
-        if (typeof saveSquadData === 'function') saveSquadData(); // Aktentasche
+        saveSquadData(); // In die Aktentasche speichern
     }
 }
 
-// Startet die Anzeige beim Laden der Seite
-document.addEventListener('DOMContentLoaded', () => {
-    // Falls du Daten im Speicher hast, lade sie
-    if (localStorage.getItem('toni_squad')) {
-        squad = JSON.parse(localStorage.getItem('toni_squad'));
-    }
-    renderSquad();
-});
-
-// Speicher-Funktion für die Aktentasche
 function saveSquadData() {
     localStorage.setItem('toni_squad', JSON.stringify(squad));
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('toni_squad');
+    if (saved) squad = JSON.parse(saved);
+    renderSquad();
+});
