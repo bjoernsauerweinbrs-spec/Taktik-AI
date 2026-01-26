@@ -1,82 +1,151 @@
 /**
- * Toni 2.0 - Board Engine (Finaler Kern)
+ * Toni 2.0 - Board Engine
+ * Zeichnet das Feld, platziert Spieler und steuert die Modi.
  */
-var pitch = document.getElementById('pitch');
 
+const pitch = document.getElementById('pitch');
+let currentMode = '11v11';
+
+/**
+ * Zeichnet das Spielfeld und alle aktiven Spieler
+ */
 function drawBoard() {
     if (!pitch) return;
-    
-    // Spielfeld-Struktur: Mittellinie und Kreis
-    pitch.innerHTML = 
-        '<div class="center-line" style="position:absolute; left:50%; width:2px; height:100%; background:rgba(0,0,0,0.2);"></div>' +
-        '<div class="center-circle" style="position:absolute; top:50%; left:50%; width:100px; height:100px; border:2px solid rgba(0,0,0,0.2); border-radius:50%; transform:translate(-50%,-50%);"></div>' +
-        '<div id="ball" style="position:absolute; top:50%; left:50%; width:15px; height:15px; background:white; border-radius:50%; transform:translate(-50%,-50%); border:1px solid black; z-index:10; cursor:move;">⚽</div>';
 
-    // Spieler aus dem Kader (Team Rot) zeichnen
-    if (typeof squad !== 'undefined') {
-        squad.forEach(function(p) {
-            if (p.status === 'team') {
-                createPlayerDot(p, 'red');
-            }
-        });
-    }
+    // 1. Feld leeren (außer Linien)
+    const players = pitch.querySelectorAll('.player, .ball, .cone');
+    players.forEach(p => p.remove());
+
+    // 2. Spieler platzieren (Nur wenn Status 'present' ist)
+    squad.forEach(p => {
+        if (p.status === 'present') {
+            createPlayerDot(p);
+        }
+    });
+
+    // 3. Ball initial platzieren
+    createObject('ball', '⚽', '50%', '50%');
 }
 
-function createPlayerDot(p, colorClass) {
-    var dot = document.createElement('div');
-    dot.className = 'player-dot ' + colorClass;
-    // Startposition: Mitte oder gespeicherte Werte
+/**
+ * Erstellt einen Spieler-Punkt auf dem Feld
+ */
+function createPlayerDot(p) {
+    const dot = document.createElement('div');
+    dot.className = 'player red';
+    dot.id = `pitch-player-${p.id}`;
     dot.style.left = p.x || '50%';
     dot.style.top = p.y || '50%';
     
-    // Name und Nummer unter dem Spieler
-    dot.innerHTML = p.nr + '<div class="player-label">#' + p.nr + ' ' + p.name + '</div>';
-    
-    // CSS direkt für die Dots (falls style.css noch lädt)
-    dot.style.position = "absolute";
-    dot.style.width = "35px";
-    dot.style.height = "35px";
-    dot.style.borderRadius = "50%";
-    dot.style.display = "flex";
-    dot.style.alignItems = "center";
-    dot.style.justifyContent = "center";
-    dot.style.color = "white";
-    dot.style.fontWeight = "bold";
-    dot.style.cursor = "move";
-    dot.style.zIndex = "20";
-    dot.style.background = colorClass === 'red' ? '#d32f2f' : '#1976d2';
-    dot.style.border = "2px solid white";
+    dot.innerHTML = `
+        ${p.nr}
+        <div class="player-label">#${p.nr} ${p.name}</div>
+    `;
 
     makeDraggable(dot, p.id);
     pitch.appendChild(dot);
 }
 
-function makeDraggable(el, playerId) {
-    var isDragging = false;
-    el.onmousedown = function() { isDragging = true; el.style.cursor = 'grabbing'; };
-    
-    document.onmousemove = function(e) {
-        if (!isDragging) return;
-        var rect = pitch.getBoundingClientRect();
-        var x = ((e.clientX - rect.left) / rect.width) * 100;
-        var y = ((e.clientY - rect.top) / rect.height) * 100;
-        
-        var posX = Math.max(0, Math.min(100, x)) + '%';
-        var posY = Math.max(0, Math.min(100, y)) + '%';
-        
-        el.style.left = posX;
-        el.style.top = posY;
+/**
+ * Universelle Drag & Drop Funktion
+ */
+function makeDraggable(el, id) {
+    let isDragging = false;
 
-        // Position im Speicher aktualisieren
-        var p = squad.find(function(player) { return player.id === playerId; });
-        if (p) { p.x = posX; p.y = posY; }
+    el.onmousedown = (e) => {
+        isDragging = true;
+        el.style.zIndex = 1000;
     };
+
+    document.onmousemove = (e) => {
+        if (!isDragging) return;
+        
+        const rect = pitch.getBoundingClientRect();
+        let x = ((e.clientX - rect.left) / rect.width) * 100;
+        let y = ((e.clientY - rect.top) / rect.height) * 100;
+
+        // Begrenzung aufs Spielfeld
+        x = Math.max(2, Math.min(98, x));
+        y = Math.max(2, Math.min(98, y));
+
+        el.style.left = x + '%';
+        el.style.top = y + '%';
+
+        // Position im Kader-Objekt speichern
+        const player = squad.find(p => p.id === id);
+        if (player) {
+            player.x = x + '%';
+            player.y = y + '%';
+        }
+    };
+
+    document.onmouseup = () => {
+        isDragging = false;
+        el.style.zIndex = 100;
+        saveSquadData(); // Automatische Sicherung in der Aktentasche
+    };
+}
+
+/**
+ * Schaltet zwischen den Modi um (11v11, Training, Funino)
+ */
+function switchMode(mode) {
+    currentMode = mode;
     
-    document.onmouseup = function() { 
-        isDragging = false; 
-        el.style.cursor = 'move';
-        if (typeof saveSquadData === "function") saveSquadData(); 
+    // UI Updates
+    document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`btn-${mode}`).classList.add('active');
+
+    const funinoGoals = document.querySelectorAll('.funino-goal');
+    const stdGoals = document.querySelectorAll('.goal');
+
+    if (mode === 'funino') {
+        pitch.style.width = '700px';
+        pitch.style.height = '450px';
+        funinoGoals.forEach(g => g.style.display = 'block');
+        stdGoals.forEach(g => g.style.display = 'none');
+        if(typeof toniSpeak === 'function') toniSpeak("Funino-Modus. Vier Tore, volle Action, Björn!");
+    } else if (mode === 'training') {
+        pitch.style.width = '850px';
+        pitch.style.height = '500px';
+        funinoGoals.forEach(g => g.style.display = 'none');
+        stdGoals.forEach(g => g.style.display = 'none');
+    } else {
+        pitch.style.width = '900px';
+        pitch.style.height = '550px';
+        funinoGoals.forEach(g => g.style.display = 'none');
+        stdGoals.forEach(g => g.style.display = 'block');
+    }
+    
+    drawBoard();
+}
+
+/**
+ * Hilfsfunktion für Ball und Hütchen
+ */
+function createObject(type, icon, x, y) {
+    const obj = document.createElement('div');
+    obj.className = type;
+    obj.style.position = 'absolute';
+    obj.style.left = x;
+    obj.style.top = y;
+    obj.style.fontSize = '20px';
+    obj.style.cursor = 'move';
+    obj.style.zIndex = '10';
+    obj.innerHTML = icon;
+    
+    // Ball auch ziehbar machen
+    let isDragging = false;
+    obj.onmousedown = () => isDragging = true;
+    document.onmousemove = (e) => {
+        if(!isDragging) return;
+        const rect = pitch.getBoundingClientRect();
+        obj.style.left = ((e.clientX - rect.left) / rect.width) * 100 + '%';
+        obj.style.top = ((e.clientY - rect.top) / rect.height) * 100 + '%';
     };
+    document.onmouseup = () => isDragging = false;
+    
+    pitch.appendChild(obj);
 }
 
 // Initialer Start
