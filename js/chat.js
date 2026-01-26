@@ -116,12 +116,23 @@ function startMic() {
 
 function startToni() {
   const pw = document.getElementById('password').value;
+  const userKey = document.getElementById('user-groq-key').value.trim();
+
   if (pw === 'Trainer2026') {
-    document.getElementById('login-overlay').style.display = 'none';
-    setupVoice();
-    if (typeof resetBoard === 'function') resetBoard();
-    addMsg('toni', "System online. Coach Björn, wir gehen in die Vollen!");
-    speakStyled("System online. Coach Björn, wir gehen in die Vollen!");
+    if (userKey.startsWith('gsk_')) {
+      GROQ_KEY = userKey; // Der Key wird nur für diese Sitzung im Speicher abgelegt
+      document.getElementById('login-overlay').style.display = 'none';
+      setupVoice();
+      if (typeof resetBoard === 'function') resetBoard();
+      
+      const welcome = "System online. Coach Björn, dein persönlicher Taktik-Schlüssel wurde akzeptiert. Analysieren wir die Zwischenräume!";
+      addMsg('toni', welcome);
+      speakStyled(welcome);
+    } else {
+      alert("Bitte gib einen gültigen Groq API-Key ein (er beginnt mit gsk_).");
+    }
+  } else {
+    alert("Trainer-Passwort falsch.");
   }
 }
 
