@@ -3,64 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toni 2.0 - Authentifizierung</title>
+    <title>Toni 2.0 - Authentifizierung & KI-Setup</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         body { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background: #121212; 
-            color: #ffffff; 
-            height: 100vh; 
-            margin: 0; 
+            display: flex; align-items: center; justify-content: center; 
+            background: #121212; color: #ffffff; height: 100vh; margin: 0; 
             font-family: 'Inter', sans-serif; 
         }
         .login-card { 
-            background: #1e1e1e; 
-            padding: 40px; 
-            border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.7); 
-            text-align: center; 
-            width: 100%;
-            max-width: 360px; 
-            border: 1px solid #333;
+            background: #1e1e1e; padding: 40px; border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7); text-align: center; 
+            width: 100%; max-width: 400px; border: 1px solid #333;
         }
-        .logo-brasil { font-size: 60px; margin-bottom: 20px; display: block; }
-        h2 { margin-bottom: 25px; font-weight: 600; letter-spacing: 1px; }
+        .logo-brasil { font-size: 60px; margin-bottom: 10px; display: block; }
+        h2 { margin: 10px 0 25px 0; font-weight: 600; }
+        .input-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; font-size: 0.8em; color: #aaa; margin-bottom: 5px; margin-left: 5px; }
         input { 
-            width: 100%; 
-            padding: 14px; 
-            margin: 12px 0; 
-            border-radius: 10px; 
-            border: 1px solid #444; 
-            background: #2a2a2a; 
-            color: white;
-            box-sizing: border-box; 
-            font-size: 16px;
+            width: 100%; padding: 14px; border-radius: 10px; 
+            border: 1px solid #444; background: #2a2a2a; color: white;
+            box-sizing: border-box; font-size: 15px;
         }
+        .api-info { font-size: 0.7em; color: #2e7d32; margin-top: 5px; display: block; }
         button { 
-            width: 100%; 
-            padding: 14px; 
-            margin-top: 20px;
-            background: #2e7d32; 
-            color: white; 
-            border: none; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 16px;
-            transition: background 0.3s;
+            width: 100%; padding: 14px; margin-top: 20px;
+            background: #2e7d32; color: white; border: none; 
+            border-radius: 10px; cursor: pointer; font-weight: bold; 
+            font-size: 16px; transition: 0.3s;
         }
         button:hover { background: #388e3c; }
         .error { 
-            color: #ff5252; 
-            font-size: 0.85em; 
-            margin-top: 15px; 
-            display: none; 
-            background: rgba(255, 82, 82, 0.1);
-            padding: 8px;
-            border-radius: 5px;
+            color: #ff5252; font-size: 0.85em; margin-top: 15px; 
+            display: none; background: rgba(255, 82, 82, 0.1);
+            padding: 10px; border-radius: 8px;
         }
     </style>
 </head>
@@ -68,32 +44,52 @@
     <div class="login-card">
         <span class="logo-brasil">🇧🇷</span>
         <h2>Toni 2.0 Login</h2>
-        <input type="text" id="username" placeholder="Dein Name (Björn)">
-        <input type="password" id="password" placeholder="Passwort">
+        
+        <div class="input-group">
+            <label>Benutzername</label>
+            <input type="text" id="username" placeholder="z.B. Björn">
+        </div>
+
+        <div class="input-group">
+            <label>Passwort</label>
+            <input type="password" id="password" placeholder="Dein Passwort">
+        </div>
+
+        <div class="input-group">
+            <label>Groq API-Key (Echte KI-Power)</label>
+            <input type="password" id="api-key" placeholder="gsk_...">
+            <a href="https://console.groq.com/keys" target="_blank" class="api-info">Hier API-Key erstellen (kostenlos)</a>
+        </div>
+
         <button onclick="checkLogin()">Spielfeld betreten</button>
-        <div id="login-error" class="error">Zugriff verweigert. Toni schüttelt den Kopf.</div>
+        <div id="login-error" class="error">Zugriff verweigert. Prüfe Name, Passwort und API-Key.</div>
     </div>
 
     <script>
-        // Einfache Authentifizierung für Björn
         function checkLogin() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
+            const user = document.getElementById('username').value.trim().toLowerCase();
+            const pass = document.getElementById('password').value.trim();
+            const apiKey = document.getElementById('api-key').value.trim();
             
-            // Login-Logik: Björn & 1234
-            if(user.toLowerCase() === 'björn' && pass === '1234') {
+            // Login-Logik: Björn/Bjoern/Admin & 1234
+            const validUser = (user === 'björn' || user === 'bjoern' || user === 'admin');
+            const validPass = (pass === '1234');
+            const hasApiKey = apiKey.startsWith('gsk_');
+
+            if(validUser && validPass && hasApiKey) {
+                // Daten sicher im SessionStorage speichern (löscht sich beim Schließen des Tabs)
                 sessionStorage.setItem('toni_auth', 'true');
+                sessionStorage.setItem('groq_api_key', apiKey);
                 window.location.href = 'app.html';
             } else {
                 const errorBox = document.getElementById('login-error');
                 errorBox.style.display = 'block';
-                // Kurzer Rütteleffekt
-                document.querySelector('.login-card').style.animation = "shake 0.5s";
-                setTimeout(() => { document.querySelector('.login-card').style.animation = ""; }, 500);
+                if(!hasApiKey && validUser && validPass) {
+                    errorBox.innerText = "Bitte gib einen gültigen Groq API-Key ein (beginnt mit gsk_).";
+                }
             }
         }
 
-        // Enter-Taste zum Abschicken
         document.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') { checkLogin(); }
         });
