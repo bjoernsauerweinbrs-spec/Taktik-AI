@@ -9,8 +9,8 @@ let activeTrainingCount = 0;
 
 // --- Kader Datenmodell (Fallback, falls Storage leer ist) ---
 let squad = [
-    { id: 1, nr: 8, name: "Thorsten", pos: "ST", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 } },
-    { id: 2, nr: 99, name: "David Luiz", pos: "IV", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 } }
+    { id: 1, nr: 8, name: "Thorsten", pos: "ST", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 }, hasBall: false },
+    { id: 2, nr: 99, name: "David Luiz", pos: "IV", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 }, hasBall: false }
 ];
 
 // --- Gegner Modell (Blau) ---
@@ -51,20 +51,23 @@ function renderSquad() {
         const totalPoints = p.points.tech + p.points.scan + p.points.team;
         
         const div = document.createElement('div');
-        div.className = 'squad-item';
+        div.className = 'player-card'; // Nutzt das CSS aus deinem Sidebar-Design
+        div.style = "background: white; margin: 10px; padding: 12px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative;";
+        
         div.innerHTML = `
+            <button onclick="deletePlayer(${p.id})" style="position:absolute; top:5px; right:5px; border:none; background:none; color:#ff5252; cursor:pointer; font-weight:bold;">✕</button>
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <strong>#${p.nr} ${p.name}</strong>
-                <span class="performance-badge" onclick="showPointMenu(${p.id})">${totalPoints} Pkt</span>
+                <span style="background:#2e7d32; color:white; padding:2px 8px; border-radius:10px; font-size:0.8em;">${totalPoints} Pkt</span>
             </div>
-            <div style="display:flex; gap:10px; margin-top:8px;">
+            <div style="display:flex; gap:8px; margin-top:10px;">
                 <select onchange="setPlayerStatus(${p.id}, this.value)" style="flex-grow:1; font-size:0.75em;">
                     <option value="none" ${p.status === 'none' ? 'selected' : ''}>Abwesend</option>
                     <option value="team" ${p.status === 'team' ? 'selected' : ''}>Spielfeld</option>
                     <option value="bank" ${p.status === 'bank' ? 'selected' : ''}>Bank</option>
                 </select>
-                <button onclick="addPerformancePoint(${p.id}, 'tech')" title="Technik-Punkt" style="padding:0 5px;">⚽</button>
-                <button onclick="addPerformancePoint(${p.id}, 'scan')" title="Scanning-Punkt" style="padding:0 5px;">👁️</button>
+                <button onclick="addPerformancePoint(${p.id}, 'tech')" title="Technik">⚽</button>
+                <button onclick="addPerformancePoint(${p.id}, 'scan')" title="Scanning">👁️</button>
             </div>
         `;
         container.appendChild(div);
@@ -72,8 +75,51 @@ function renderSquad() {
 }
 
 /**
- * Statusänderung (Spielfeld/Bank) mit Auto-Save
+ * Spieler permanent entfernen
  */
+function deletePlayer(id) {
+    if(confirm("Spieler wirklich löschen?")) {
+        squad = squad.filter(p => p.id !== id);
+        renderSquad();
+        if (typeof drawBoard === "function") drawBoard();
+        if (typeof saveSquadData === "function") saveSquadData();
+    }
+}
+
+/**
+ * Team-Farben live aktualisieren
+ */
+function updateTeamColors() {
+    const colorA = document.getElementById('color-team-a').value;
+    const colorB = document.getElementById('color-team-b').value;
+    const colorC = document.getElementById('color-team-c').value;
+    
+    document.documentElement.style.setProperty('--red-team', colorA);
+    document.documentElement.style.setProperty('--yellow-leibchen', colorB);
+    document.documentElement.style.setProperty('--blue-team', colorC);
+    
+    if (typeof drawBoard === "function") drawBoard();
+}
+
+/**
+ * Material: Bälle an alle Feldspieler verteilen
+ */
+function distributeBalls(count) {
+    squad.forEach(p => {
+        if (p.active && p.status === 'team') p.hasBall = true;
+    });
+    if (typeof toniSpeak === "function") toniSpeak(`Björn, jeder Spieler auf dem Feld hat jetzt einen Ball.`);
+    if (typeof drawBoard === "function") drawBoard();
+}
+
+/**
+ * Umschalten des Material-Menüs (Hütchen/Bälle)
+ */
+function toggleMaterialMenu() {
+    const menu = document.getElementById('material-menu');
+    menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'flex' : 'none';
+}
+
 function setPlayerStatus(id, status) {
     const player = squad.find(p => p.id === id);
     if (player) {
@@ -81,13 +127,10 @@ function setPlayerStatus(id, status) {
         player.active = (status !== 'none');
         renderSquad();
         if (typeof drawBoard === "function") drawBoard();
-        if (typeof saveSquadData === "function") saveSquadData(); // In Aktentasche speichern
+        if (typeof saveSquadData === "function") saveSquadData();
     }
 }
 
-/**
- * Monitoring: Punktevergabe durch Björn
- */
 function addPerformancePoint(id, category) {
     const player = squad.find(p => p.id === id);
     if (player) {
@@ -95,36 +138,28 @@ function addPerformancePoint(id, category) {
         renderSquad();
         if (typeof saveSquadData === "function") saveSquadData();
         if (typeof toniSpeak === "function") {
-            toniSpeak(`Klasse! ${player.name} hat sich einen Punkt für ${category === 'tech' ? 'seine Technik' : 'gutes Scanning'} verdient.`);
+            toniSpeak(`Klasse! ${player.name} bekommt einen Punkt.`);
         }
     }
 }
 
-/**
- * Spieler manuell hinzufügen
- */
 function addNewPlayerPrompt() {
-    const name = prompt("Name des Spielers:");
-    const nr = prompt("Trikotnummer:");
+    const name = prompt("Name:");
+    const nr = prompt("Nummer:");
     if (name && nr) {
-        const newId = squad.length + 1;
-        squad.push({ id: newId, nr: parseInt(nr), name: name, pos: "ZM", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 } });
+        squad.push({ id: Date.now(), nr: parseInt(nr), name: name, pos: "ZM", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 }, hasBall: false });
         renderSquad();
         if (typeof drawBoard === "function") drawBoard();
         if (typeof saveSquadData === "function") saveSquadData();
     }
 }
 
-/**
- * Setzt alle Spieler auf ihre Grundpositionen zurück
- */
 function resetBoardPositions() {
-    drawBoard();
-    toniSpeak("Ich habe alle Spieler wieder ordentlich auf ihre Positionen gestellt, Björn.");
+    if (typeof drawBoard === "function") drawBoard();
+    if (typeof toniSpeak === "function") toniSpeak("Alles wieder auf Anfang, Björn.");
 }
 
-// Start-Sequenz
 document.addEventListener('DOMContentLoaded', () => {
-    // Hier wird storage.js beim Laden eingreifen
+    // Falls Daten in storage.js geladen werden, renderSquad() wird dort getriggert
     renderSquad();
 });
