@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toni 2.0 - Taktik-Zentrale</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
-
     <div id="app">
         <div id="main">
             <div class="top-controls">
-                <button class="btn primary" onclick="resetBoard()">⚽ ANSTOSS / RESET</button>
-                <div class="phase-control">
+                <button class="btn primary" onclick="resetBoard()">⚽ RESET / 11 vs 11</button>
+                <div class="phase-display">
                     <button onclick="prevPhase()">◀</button>
                     <span id="playlist-title">Spielzug 1</span>
                     <button onclick="nextPhase()">▶</button>
@@ -21,30 +19,32 @@
             </div>
 
             <div id="board-container">
-                </div>
+                <div class="field-line middle-line"></div>
+                <div class="field-line center-circle"></div>
+                <div class="box-16-left"></div><div class="box-5-left"></div><div class="goal-left"></div>
+                <div class="box-16-right"></div><div class="box-5-right"></div><div class="goal-right"></div>
+            </div>
 
-            <div id="bench-container">
-                <span class="bench-label">AUSWECHSELBANK</span>
+            <div id="bench-area">
+                <div class="bench-label">KADER / AUSWECHSELBANK:</div>
                 <div id="bench"></div>
             </div>
         </div>
 
         <div class="sidebar">
-            <div class="header">📋 TONI ANALYSE</div>
+            <div class="header">📋 TONI TAKTIK-CHECK</div>
             <div id="chat-history"></div>
-
             <div class="input-row">
-                <button class="btn" onclick="startMic()">🎙️</button>
+                <button class="btn-icon" onclick="startMic()">🎙️</button>
                 <input type="text" id="user-input" placeholder="Anweisung..." onkeypress="if(event.key==='Enter') askToni()">
                 <button class="btn primary" onclick="askToni()">OK</button>
             </div>
-
             <div class="action-buttons">
                 <button class="btn" onclick="welcomeFlow()">👋 Gruß</button>
                 <button class="btn" onclick="toggleKader()">📋 Kader</button>
-                <button class="btn primary" onclick="askToniTaktik()">📊 Taktik-Check</button>
+                <button class="btn primary" onclick="askToniTaktik()">📊 Taktik</button>
                 <button class="btn" onclick="askToniPressing()">⚡ Pressing</button>
-                <button class="btn primary" style="grid-column: span 2; background:#3498db;" onclick="exportPlanPDF()">📄 PDF EXPORT</button>
+                <button class="btn primary full-width" onclick="exportPlanPDF()">📄 PDF EXPORT</button>
             </div>
         </div>
     </div>
@@ -54,7 +54,7 @@
             <h1>COACH LOGIN</h1>
             <input type="password" id="password" placeholder="Passwort">
             <input type="password" id="user-groq-key" placeholder="Groq API-Key">
-            <button onclick="startToni()">SYSTEM STARTEN</button>
+            <button class="btn primary" onclick="startToni()">SYSTEM INITIALISIEREN</button>
         </div>
     </div>
 
