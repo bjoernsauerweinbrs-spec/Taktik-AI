@@ -11,14 +11,20 @@
 </head>
 <body>
 
-  <div id="login-overlay">
-    <div class="login-card">
-      <h2 style="color:var(--green); margin:0">⚽ COACH TONI 2.0</h2>
-      <p style="color:#9aa3ad; margin:10px 0 25px 0">System Initialisierung erforderlich</p>
-      <input id="password" type="password" placeholder="Trainer2026" />
-      <button onclick="startToni()">SYSTEM STARTEN</button>
+ <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.95); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10000; backdrop-filter:blur(10px);">
+  <div style="background:rgba(255,255,255,0.05); padding:40px; border-radius:20px; border:1px solid rgba(255,255,255,0.1); text-align:center; max-width:400px; width:90%;">
+    <h2 style="color:white; margin-bottom:20px;">Trainer-Login</h2>
+    <input type="password" id="password" placeholder="Trainer-Passwort" style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:none; outline:none;">
+    
+    <div style="margin-bottom:15px;">
+        <label style="color:#94a3b8; font-size:0.8rem; display:block; margin-bottom:5px;">Dein Groq API-Key (gsk_...):</label>
+        <input type="password" id="user-groq-key" placeholder="Hier Groq-Key einfügen" style="width:100%; padding:12px; border-radius:8px; border:none; outline:none; background:#2d3748; color:white;">
     </div>
+
+    <button onclick="startToni()" style="width:100%; padding:12px; background:#2ecc71; color:black; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">SYSTEM INITIALISIEREN</button>
+    <p style="color:#475569; font-size:0.7rem; margin-top:15px;">Dein Key wird nur lokal für diese Sitzung verwendet und nicht gespeichert.</p>
   </div>
+</div>
 
   <div id="app">
     <div id="sidebar">
