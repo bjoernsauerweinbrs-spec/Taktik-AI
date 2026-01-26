@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toni 2.0 - Taktik-Zentrale</title>
+    <title>Toni 2.0 - Profi Taktik Zentrale</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
@@ -11,7 +11,7 @@
     <div id="app">
         <div id="main">
             <div class="top-controls">
-                <button class="btn primary" onclick="resetBoard()">⚽ ANSTOSS / RESET</button>
+                <button class="btn primary" onclick="resetBoard()">⚽ RESET / ANSTOSS</button>
                 <div class="phase-display">
                     <span id="playlist-title">Spielanalyse Aktiv</span>
                 </div>
@@ -20,20 +20,26 @@
             <div id="board-container">
                 <div class="field-line middle-line"></div>
                 <div class="field-line center-circle"></div>
-                <div class="box-16-left"></div><div class="box-5-left"></div><div class="goal-left"></div>
-                <div class="box-16-right"></div><div class="box-5-right"></div><div class="goal-right"></div>
                 
-                <svg id="tactical-arrows" width="850" height="550" style="position:absolute; top:0; left:0; pointer-events:none; z-index:50;"></svg>
+                <div class="box-16-left"></div>
+                <div class="box-5-left"></div>
+                <div class="goal-left"></div>
+                
+                <div class="box-16-right"></div>
+                <div class="box-5-right"></div>
+                <div class="goal-right"></div>
+                
+                <svg id="tactical-arrows" width="850" height="550"></svg>
                 
                 <div id="ball" class="ball"></div>
             </div>
 
             <div id="bench-area">
-                <div class="bench-side">
+                <div class="bench-side red-side">
                     <div id="trainer-bench-label" class="bench-label">BANK TEAM ROT</div>
                     <div id="bench-red" class="bench-slot"></div>
                 </div>
-                <div class="bench-side">
+                <div class="bench-side blue-side">
                     <div class="bench-label">BANK TEAM BLAU (Gegner)</div>
                     <div id="bench-blue" class="bench-slot"></div>
                 </div>
@@ -45,13 +51,13 @@
             <div id="chat-history"></div>
             <div class="input-row">
                 <button class="btn-icon" onclick="startMic()">🎙️</button>
-                <input type="text" id="user-input" placeholder="Anweisung an Toni..." onkeypress="if(event.key==='Enter') askToni()">
+                <input type="text" id="user-input" placeholder="Anweisung..." onkeypress="if(event.key==='Enter') askToni()">
                 <button class="btn primary" onclick="askToni()">OK</button>
             </div>
             <div class="action-buttons">
                 <button class="btn" onclick="welcomeFlow()">👋 Gruß</button>
                 <button class="btn" onclick="openKaderManager()">📋 Kader Editor</button>
-                <button class="btn primary" onclick="askToniTaktik()">📊 Taktik-Check</button>
+                <button class="btn primary" onclick="analyzeSituation()">📊 Taktik-Check</button>
                 <button class="btn" onclick="clearArrows()">🧹 Pfeile löschen</button>
                 <button class="btn primary full-width" onclick="exportPlanPDF()">📄 PDF EXPORT</button>
             </div>
@@ -69,7 +75,7 @@
     <div id="login-overlay">
         <div class="login-card">
             <h1>COACH LOGIN</h1>
-            <input type="text" id="trainer-name-input" placeholder="Dein Name oder Verein (z.B. Björn)">
+            <input type="text" id="trainer-name-input" placeholder="Name / Verein">
             <input type="password" id="password" placeholder="Passwort">
             <input type="password" id="user-groq-key" placeholder="Groq API-Key">
             <button class="btn primary" onclick="startToni()">SYSTEM INITIALISIEREN</button>
