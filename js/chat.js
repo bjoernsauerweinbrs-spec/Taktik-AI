@@ -1,40 +1,28 @@
 /**
- * Toni 2.0 - KI & Chat Engine
- * Steuert die Kommunikation mit der Groq Cloud
+ * Toni 2.0 - KI Engine
+ * Kommunikation mit Groq & Board-Interaktion
  */
 
-const CHAT_HISTORY = document.getElementById('chat-history');
-const CHAT_INPUT = document.getElementById('chat-input');
+async function handleToniAction() {
+    const userInput = document.getElementById('user-msg');
+    const chatHistory = document.getElementById('chat-history');
+    const text = userInput.value.trim();
 
-/**
- * Sendet die Nachricht an Toni (Groq API)
- */
-async function handleChat() {
-    const text = CHAT_INPUT.value.trim();
     if (!text) return;
 
-    // User Nachricht anzeigen
+    // 1. User Nachricht anzeigen
     appendMessage('user', text);
-    CHAT_INPUT.value = '';
+    userInput.value = '';
 
-    // Toni zeigt "Denken" an
-    setToniStatus(true);
+    // 2. Board-Zustand scannen (Was sieht Toni?)
+    const boardData = typeof getBoardState === 'function' ? getBoardState() : "Keine Daten";
+    const trainerName = sessionStorage.getItem('toni_name') || 'Coach';
 
-    const apiKey = sessionStorage.getItem('toni_key');
-    const userType = sessionStorage.getItem('toni_type') || 'kinder';
-    const userName = sessionStorage.getItem('toni_name') || 'Björn';
-
-    // System Prompt für Toni (deine Identität)
-    const systemPrompt = `
-        Du bist Toni, ein absoluter Fußball-Fachmann mit brasilianischem Style (Ginga). 
-        Deine Sprache ist motivierend, technisch versiert und taktisch klug. 
-        Du arbeitest für den Trainer ${userName}. 
-        Aktueller Fokus: ${userType}-Training.
-        Du hast Zugriff auf das Board. Wenn der User fragt, wer da ist, nenne die Spieler, die 'present' sind.
-        Aktueller Kader-Status: ${JSON.stringify(squad.filter(p => p.status === 'present'))}
-    `;
-
+    // 3. Anfrage an die KI (Groq Cloud)
     try {
+        const apiKey = sessionStorage.getItem('toni_key');
+        if (!apiKey) throw new Error("API-Key fehlt!");
+
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -44,74 +32,78 @@ async function handleChat() {
             body: JSON.stringify({
                 model: "llama-3.3-70b-versatile",
                 messages: [
-                    { role: "system", content: systemPrompt },
+                    {
+                        role: "system",
+                        content: `Du bist Toni, ein Elite-Fußballtrainer mit brasilianischem Ginga-Style. 
+                        Du arbeitest für den Trainer ${trainerName}. 
+                        Deine Aufgabe: Taktik-Analyse auf Profi-Niveau. 
+                        
+                        REGELN:
+                        1. Nutze Fachbegriffe (Halbräume, Deckungsschatten, Verschieben).
+                        2. Wenn du Spieler bewegen willst, schreibe am Ende deiner Antwort: COMMAND_MOVE(id, x, y).
+                        3. Wenn du einen Passweg vorschlägst, schreibe: COMMAND_PASS(id1, id2).
+                        4. Der aktuelle Modus ist 11v11 (Taktik) oder Training.
+                        
+                        AKTUELLER BOARD-ZUSTAND: ${boardData}`
+                    },
                     { role: "user", content: text }
                 ],
-                temperature: 0.7
+                temperature: 0.6
             })
         });
 
         const data = await response.json();
-        const answer = data.choices[0].message.content;
+        let toniAnswer = data.choices[0].message.content;
 
-        appendMessage('toni', answer);
+        // 4. Befehle aus dem Text extrahieren und ausführen
+        processToniCommands(toniAnswer);
+
+        // 5. Toni Nachricht anzeigen (Befehle für den User ausblenden)
+        const cleanAnswer = toniAnswer.replace(/COMMAND_.*?\(.*?\)/g, "").trim();
+        appendMessage('toni', cleanAnswer);
         
-        // Sprachausgabe (Toni hat eine männliche Stimme)
-        toniSpeak(answer);
+        // Sprachausgabe
+        speakToni(cleanAnswer);
 
     } catch (error) {
         console.error("Toni Error:", error);
-        appendMessage('toni', "Oje Björn, die Verbindung zum Scouting-Server klemmt...");
-    } finally {
-        setToniStatus(false);
+        appendMessage('toni', "Fehler bei der Taktik-Analyse. Prüfe den API-Key.");
     }
 }
 
-/**
- * Fügt Nachrichten zum UI hinzu
- */
 function appendMessage(role, text) {
+    const container = document.getElementById('chat-history');
     const div = document.createElement('div');
     div.className = `msg ${role}`;
     div.innerText = text;
-    CHAT_HISTORY.appendChild(div);
-    CHAT_HISTORY.scrollTop = CHAT_HISTORY.scrollHeight;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
 }
 
 /**
- * Visuelles Feedback (Ampel oben rechts)
+ * Verarbeitet die taktischen Befehle der KI
  */
-function setToniStatus(isThinking) {
-    const dot = document.getElementById('toni-status-dot');
-    const text = document.getElementById('toni-status-text');
-    if (isThinking) {
-        dot.className = 'dot online';
-        text.innerText = 'TONI ANALYSIERT...';
-    } else {
-        dot.className = 'dot';
-        text.innerText = 'TONI BEREIT';
+function processToniCommands(text) {
+    // Beispiel: COMMAND_MOVE(p-blue-4, 500, 300)
+    const moveRegex = /COMMAND_MOVE\((.*?),\s*(\d+),\s*(\d+)\)/g;
+    let match;
+
+    while ((match = moveRegex.exec(text)) !== null) {
+        const id = match[1].trim();
+        const x = parseInt(match[2]);
+        const y = parseInt(match[3]);
+        
+        if (typeof animateMove === 'function') {
+            setTimeout(() => {
+                animateMove(id, x, y);
+            }, 500);
+        }
     }
 }
 
-/**
- * Tonis Stimme
- */
-function toniSpeak(text) {
-    if (!window.speechSynthesis) return;
-    
-    // Alle laufenden Ausgaben stoppen
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = sessionStorage.getItem('toni_lang') === 'de' ? 'de-DE' : 'pt-BR';
-    
-    // Versuche eine männliche Stimme zu finden
-    const voices = window.speechSynthesis.getVoices();
-    const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Google Deutsch'));
-    if (maleVoice) utterance.voice = maleVoice;
-
-    utterance.pitch = 0.9; // Etwas tiefer für mehr Autorität
-    utterance.rate = 1.0;
-    
-    window.speechSynthesis.speak(utterance);
+function speakToni(text) {
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = 'de-DE';
+    msg.pitch = 0.8; // Männlichere, tiefere Stimme
+    window.speechSynthesis.speak(msg);
 }
