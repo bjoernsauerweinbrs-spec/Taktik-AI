@@ -3,54 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toni 2.0 - Login</title>
+    <title>Coach Toni 2.0 - Einstieg</title>
     <style>
-        body { 
-            background: #121212; color: white; display: flex; align-items: center; 
-            justify-content: center; height: 100vh; margin: 0; font-family: 'Inter', sans-serif; 
+        :root {
+            --ginga-green: #2ecc71;
+            --ginga-gold: #f1c40f;
         }
-        .login-card { 
-            background: #1e1e1e; padding: 40px; border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.7); text-align: center; 
-            width: 100%; max-width: 400px; border: 1px solid #333; 
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: #000; color: white; }
+        
+        /* Video Hintergrund */
+        #video-bg {
+            position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%;
+            z-index: -1; filter: brightness(0.4) contrast(1.2); object-fit: cover;
         }
-        .flags { font-size: 45px; margin-bottom: 25px; display: block; letter-spacing: 15px; }
-        h2 { margin-bottom: 25px; font-weight: 600; color: #fff; }
+
+        .overlay {
+            position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .login-card {
+            background: rgba(15, 23, 32, 0.95); padding: 40px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 450px;
+            text-align: center; backdrop-filter: blur(10px); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .flag-row { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
+        .flag-btn { 
+            font-size: 30px; cursor: pointer; background: none; border: 2px solid transparent; 
+            border-radius: 10px; transition: 0.3s; padding: 5px; 
+        }
+        .flag-btn:hover, .flag-btn.active { border-color: var(--ginga-green); transform: scale(1.1); }
+
+        .type-selector { display: flex; gap: 10px; margin-bottom: 25px; }
+        .type-btn { 
+            flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #333; 
+            background: #1a1a1a; color: #888; cursor: pointer; font-size: 12px; transition: 0.3s;
+        }
+        .type-btn.active { background: var(--ginga-green); color: white; border-color: var(--ginga-green); }
+
         input { 
-            width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 10px; 
-            border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; 
+            width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; 
+            border: 1px solid #333; background: #07101a; color: white; box-sizing: border-box; 
         }
-        button { 
-            width: 100%; padding: 14px; background: #2e7d32; color: white; border: none; 
-            border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; 
+
+        .start-btn { 
+            width: 100%; padding: 15px; background: var(--ginga-green); color: white; 
+            border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; 
         }
-        button:hover { background: #388e3c; }
-        .error { color: #ff5252; display: none; margin-top: 15px; font-size: 0.85em; }
+        .start-btn:hover { background: #27ae60; }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <span class="flags">🇧🇷 🇩🇪 🇮🇹</span>
-        <h2>Toni 2.0 Login</h2>
-        <input type="text" id="username" placeholder="Benutzername (Björn)">
-        <input type="password" id="password" placeholder="Passwort (1234)">
-        <input type="password" id="api-key" placeholder="Groq API-Key (gsk_...)">
-        <button onclick="checkLogin()">Spielfeld betreten</button>
-        <p id="error-msg" class="error">Zugriff verweigert. Prüfe deine Daten.</p>
+
+    <video autoplay muted loop id="video-bg">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-soccer-player-dribbling-the-ball-in-the-field-41400-large.mp4" type="video/mp4">
+    </video>
+
+    <div class="overlay">
+        <div class="login-card">
+            <h1 style="color: var(--ginga-green); margin-bottom: 10px;">COACH TONI 2.0</h1>
+            <p style="color: #9aa3ad; font-size: 14px; margin-bottom: 30px;">Wähle deine Sprache & Trainer-Typ</p>
+
+            <div class="flag-row">
+                <button class="flag-btn active" onclick="setLang('de', this)" title="Deutsch">🇩🇪</button>
+                <button class="flag-btn" onclick="setLang('en', this)" title="English">🇬🇧</button>
+                <button class="flag-btn" onclick="setLang('br', this)" title="Português">🇧🇷</button>
+            </div>
+
+            <div class="type-selector">
+                <button class="type-btn active" onclick="setType('kinder', this)">KINDER</button>
+                <button class="type-btn" onclick="setType('amateur', this)">AMATEUR</button>
+                <button class="type-btn" onclick="setType('profi', this)">PROFI</button>
+            </div>
+
+            <input type="text" id="username" placeholder="Dein Name (z.B. Björn)">
+            <input type="password" id="api-key" placeholder="Groq API-Key (gsk_...)">
+            
+            <button class="start-btn" onclick="login()">SYSTEM INITIALISIEREN</button>
+        </div>
     </div>
 
     <script>
-        function checkLogin() {
-            const user = document.getElementById('username').value.trim().toLowerCase();
-            const pass = document.getElementById('password').value.trim();
-            const apiKey = document.getElementById('api-key').value.trim();
+        let selectedLang = 'de';
+        let selectedType = 'kinder';
 
-            if((user === 'björn' || user === 'admin' || user === 'bjoern') && pass === '1234' && apiKey.startsWith('gsk_')) {
+        function setLang(lang, btn) {
+            selectedLang = lang;
+            document.querySelectorAll('.flag-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function setType(type, btn) {
+            selectedType = type;
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function login() {
+            const name = document.getElementById('username').value;
+            const key = document.getElementById('api-key').value;
+
+            if(name && key.startsWith('gsk_')) {
+                sessionStorage.setItem('toni_name', name);
+                sessionStorage.setItem('toni_key', key);
+                sessionStorage.setItem('toni_lang', selectedLang);
+                sessionStorage.setItem('toni_type', selectedType);
                 sessionStorage.setItem('toni_auth', 'true');
-                sessionStorage.setItem('groq_api_key', apiKey);
                 window.location.href = 'app.html';
             } else {
-                document.getElementById('error-msg').style.display = 'block';
+                alert('Bitte Name und gültigen Groq-Key eingeben!');
             }
         }
     </script>
