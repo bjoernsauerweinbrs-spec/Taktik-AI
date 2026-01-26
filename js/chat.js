@@ -1,5 +1,5 @@
 /* --- TONI'S BRAIN & VOICE --- */
-let GROQ_KEY = "DEIN_GROQ_KEY_HIER"; 
+let GROQ_KEY = ""; 
 let isLocked = false;
 let toniVoice = null;
 
@@ -10,6 +10,21 @@ Hintergrund: Brasilianische Technik, ghanaische Lockerheit, deutsche Durchsetzun
 Sprachstil: Analytisch ("Asymmetrie", "Halbräume"), motivierend ("Mentalitäts-Monster"), direkt ("Coach Björn").
 Regel: Bei fachfremden Fragen (Wetter/Politik) humorvoll zum Fußball zurücklenken.
 `;
+
+/* --- CHAT-SYSTEM --- */
+function addMsg(role, txt) {
+  const history = document.getElementById('chat-history');
+  if (!history) return;
+  
+  const div = document.createElement('div');
+  div.className = `msg ${role === 'toni' ? 'toni' : 'user'}`;
+  div.innerText = txt;
+  
+  history.appendChild(div);
+  
+  // AUTOMATISCHES SCROLLEN: Springt immer zur neuesten Nachricht
+  history.scrollTop = history.scrollHeight;
+}
 
 /* --- API-VERBINDUNG ZU GROQ --- */
 async function fetchToni(userText) {
@@ -33,7 +48,7 @@ async function fetchToni(userText) {
     return data.choices[0].message.content;
   } catch (err) {
     console.error("Groq Error:", err);
-    return "Coach, die Leitung ins Rechenzentrum ist gerade so lückenhaft wie eine schlechte Viererkette. Versuchen wir es gleich nochmal!";
+    return "Coach, die Leitung ins Rechenzentrum ist gerade lückenhaft. Sicherung prüfen und nochmal versuchen!";
   }
 }
 
@@ -54,7 +69,7 @@ async function askToni() {
   isLocked = false;
 }
 
-/* --- SPEZIAL-ANALYSEN --- */
+/* --- SPEZIAL-ANALYSEN (BUTTONS) --- */
 async function askToniTaktik() {
   const msg = "Toni, kompletter Taktik-Check: Wie bewertest du unsere aktuelle Raumaufteilung und die Besetzung der Halbräume?";
   addMsg('user', msg);
@@ -76,16 +91,6 @@ async function askToniPressing() {
 }
 
 /* --- BASICS (STIMME & LOGIN) --- */
-function addMsg(role, txt) {
-  const history = document.getElementById('chat-history');
-  if (!history) return;
-  const div = document.createElement('div');
-  div.className = `msg ${role === 'toni' ? 'toni' : 'user'}`;
-  div.innerText = txt;
-  history.appendChild(div);
-  history.scrollTop = history.scrollHeight;
-}
-
 function setupVoice() {
   const voices = speechSynthesis.getVoices();
   toniVoice = voices.find(v => v.lang.startsWith('de') && !v.name.toLowerCase().includes('female')) || voices[0];
@@ -120,19 +125,18 @@ function startToni() {
 
   if (pw === 'Trainer2026') {
     if (userKey.startsWith('gsk_')) {
-      GROQ_KEY = userKey; // Der Key wird nur für diese Sitzung im Speicher abgelegt
+      GROQ_KEY = userKey;
       document.getElementById('login-overlay').style.display = 'none';
       setupVoice();
       if (typeof resetBoard === 'function') resetBoard();
-      
-      const welcome = "System online. Coach Björn, dein persönlicher Taktik-Schlüssel wurde akzeptiert. Analysieren wir die Zwischenräume!";
+      const welcome = "System online. Coach Björn, wir gehen in die Vollen!";
       addMsg('toni', welcome);
       speakStyled(welcome);
     } else {
-      alert("Bitte gib einen gültigen Groq API-Key ein (er beginnt mit gsk_).");
+      alert("Bitte gib einen gültigen Groq API-Key ein (gsk_...).");
     }
   } else {
-    alert("Trainer-Passwort falsch.");
+    alert("Passwort falsch.");
   }
 }
 
@@ -146,6 +150,7 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
   speechSynthesis.onvoiceschanged = setupVoice;
 }
 
+/* --- EXPORTE FÜR HTML --- */
 window.startToni = startToni;
 window.askToni = askToni;
 window.addMsg = addMsg;
