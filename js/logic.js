@@ -1,8 +1,8 @@
-/* --- LOGIC.JS: TAKTIK-KI MIT ZONEN-VERTEIDIGUNG --- */
+/* --- LOGIC.JS: TAKTIK-KI MIT FORMATIONS-DISZIPLIN --- */
 
-let coachName = "Trainer";
+let coachName = "Björn"; // Standardmäßig Björn, wird durch Login überschrieben
 
-// 1. LOGIN & TRAINER-NAME
+// 1. SYSTEM START & TRAINER-NAME
 function startToni() {
     const nameInput = document.getElementById('trainer-name-input');
     const loginOverlay = document.getElementById('login-overlay');
@@ -12,12 +12,13 @@ function startToni() {
         coachName = nameInput.value.trim();
         if (benchLabel) benchLabel.innerText = `BANK TEAM ${coachName.toUpperCase()}`;
     }
+    
     if (loginOverlay) loginOverlay.style.display = 'none';
     
-    addMsg('toni', `Coach ${coachName}, ich habe die Abwehrkette von Team Blau neu eingestellt. Wir spielen jetzt eine ballorientierte Raumdeckung. Analysiere deine Passwege!`);
+    addMsg('toni', `System bereit. Coach ${coachName}, ich habe die Formationen analysiert. Team Blau hält jetzt die Räume diszipliniert besetzt.`);
 }
 
-// 2. HAUPTANALYSE (Wird bei jedem Drop von Ball/Spieler aufgerufen)
+// 2. HAUPTANALYSE (Wird nach jeder Bewegung aufgerufen)
 function analyzeSituation() {
     const ball = document.getElementById('ball');
     if (!ball) return;
@@ -42,18 +43,18 @@ function analyzeSituation() {
     if (owner && owner.classList.contains('red')) {
         const name = owner.querySelector('.player-circle').innerText;
         
-        // A) Passwege für Team Rot berechnen
-        calculatePassOptions(owner, ballX, ballY);
+        // Passwege für Team Rot (Björn) berechnen
+        calculatePassLanes(owner, ballX, ballY);
         
-        // B) Team Blau verschiebt sich intelligent (KEIN HAUFEN MEHR)
-        intelligentShiftBlue(ballX, ballY);
+        // Team Blau verschiebt diszipliniert (Formation bleibt gewahrt)
+        tacticalShiftBlue(ballX, ballY);
         
-        addMsg('toni', `Analyse für ${name}: Passoptionen sind grün markiert. Team Blau verschiebt in der Kette (blaue Pfeile), um die Räume eng zu machen.`);
+        addMsg('toni', `Analyse: ${name} am Ball. Ich schlage drei Passwege vor (grün). Mein Team Blau verschiebt ballorientiert, hält aber die Kette (blaue Pfeile).`);
     }
 }
 
-// 3. PASSWEG-ANALYSE (GRÜNE PFEILE)
-function calculatePassOptions(owner, bx, by) {
+// 3. PASSWEG-BERECHNUNG (GRÜN GESTRICHELT)
+function calculatePassLanes(owner, bx, by) {
     const teammates = document.querySelectorAll('.player-wrapper.red');
     
     teammates.forEach(p => {
@@ -63,45 +64,46 @@ function calculatePassOptions(owner, bx, by) {
         const ty = parseInt(p.style.top) + 25;
         const dist = Math.sqrt(Math.pow(tx - bx, 2) + Math.pow(ty - by, 2));
 
-        // Nur sinnvolle Pässe im Umkreis anzeigen
-        if (dist > 50 && dist < 400) {
-            drawArrow(bx + 15, by + 10, tx, ty, '#2ecc71', true); 
+        // Nur sinnvolle Pässe im Umkreis von 400px vorschlagen
+        if (dist > 60 && dist < 400) {
+            drawArrow(bx + 10, by + 10, tx, ty, '#2ecc71', true); 
         }
     });
 }
 
-// 4. INTELLIGENTE VERSCHIEBUNG BLAU (ZONEN-LOGIK)
-function intelligentShiftBlue(ballX, ballY) {
+// 4. DISZIPLINIERTES VERSCHIEBEN (BLAU)
+function tacticalShiftBlue(ballX, ballY) {
     const bluePlayers = document.querySelectorAll('.player-wrapper.blue');
     
+    // Anker-Positionen aus dem squad-Array in board.js (als Fallback)
+    const anchors = {
+        'B1': {x: 740, y: 235}, 'B2': {x: 620, y: 150}, 'B3': {x: 620, y: 320},
+        'B4': {x: 680, y: 235}, 'B5': {x: 600, y: 430}, 'B6': {x: 480, y: 235},
+        'B7': {x: 400, y: 100}, 'B8': {x: 400, y: 370}, 'B9': {x: 280, y: 80},
+        'B10': {x: 280, y: 390}, 'B11': {x: 180, y: 235}
+    };
+
     bluePlayers.forEach(p => {
-        // Wir holen uns die aktuelle Position
+        const anchor = anchors[p.id] || { x: parseInt(p.style.left), y: parseInt(p.style.top) };
         let curX = parseInt(p.style.left);
         let curY = parseInt(p.style.top);
-        
-        // ZONEN-LOGIK: Spieler rückt nur maximal 60px von seiner Position zum Ball
-        // Das verhindert, dass alle auf einen Haufen rennen.
-        let moveX = (ballX - curX) * 0.12; 
-        let moveY = (ballY - curY) * 0.12;
 
-        // Begrenzung der Verschiebung pro Spielzug
-        moveX = Math.max(-60, Math.min(60, moveX));
-        moveY = Math.max(-60, Math.min(60, moveY));
+        // Berechnung: Spieler bewegt sich nur 15% weg von seinem ANKER in Richtung Ball
+        // Das sorgt dafür, dass die Kette niemals zerreißt.
+        let targetX = anchor.x + (ballX - anchor.x) * 0.15;
+        let targetY = anchor.y + (ballY - anchor.y) * 0.15;
 
-        let targetX = curX + moveX;
-        let targetY = curY + moveY;
-
-        // Blauen Laufweg-Pfeil zeichnen
+        // Blauen Laufweg-Pfeil einzeichnen (Von-Zu Bewegung)
         drawArrow(curX + 30, curY + 20, targetX + 30, targetY + 20, '#3498db', false);
 
-        // Spieler sanft bewegen
+        // Tatsächliche Bewegung
         p.style.transition = "all 0.8s ease-in-out";
         p.style.left = targetX + "px";
         p.style.top = targetY + "px";
     });
 }
 
-// 5. GRAFIK: PFEILE ZEICHNEN
+// 5. GRAFIK-ENGINE FÜR PFEILE
 function drawArrow(x1, y1, x2, y2, color, isDashed) {
     const svg = document.getElementById('tactical-arrows');
     if (!svg) return;
@@ -117,29 +119,24 @@ function drawArrow(x1, y1, x2, y2, color, isDashed) {
     line.setAttribute("marker-end", `url(#${markerId})`);
     
     if (!document.getElementById(markerId)) {
-        createMarker(markerId, color);
+        const defs = svg.querySelector('defs') || document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        if (!svg.querySelector('defs')) svg.appendChild(defs);
+        
+        const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+        marker.setAttribute("id", markerId);
+        marker.setAttribute("viewBox", "0 0 10 10");
+        marker.setAttribute("refX", "9"); marker.setAttribute("refY", "5");
+        marker.setAttribute("markerWidth", "5"); marker.setAttribute("markerHeight", "5");
+        marker.setAttribute("orient", "auto");
+        
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+        path.setAttribute("fill", color);
+        
+        marker.appendChild(path);
+        defs.appendChild(marker);
     }
     svg.appendChild(line);
-}
-
-function createMarker(id, color) {
-    const svg = document.getElementById('tactical-arrows');
-    let defs = svg.querySelector('defs') || document.createElementNS("http://www.w3.org/2000/svg", "defs");
-    svg.appendChild(defs);
-    
-    const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-    marker.setAttribute("id", id);
-    marker.setAttribute("viewBox", "0 0 10 10");
-    marker.setAttribute("refX", "9"); marker.setAttribute("refY", "5");
-    marker.setAttribute("markerWidth", "5"); marker.setAttribute("markerHeight", "5");
-    marker.setAttribute("orient", "auto");
-    
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
-    path.setAttribute("fill", color);
-    
-    marker.appendChild(path);
-    defs.appendChild(marker);
 }
 
 function clearArrows() {
@@ -147,31 +144,21 @@ function clearArrows() {
     if (svg) svg.innerHTML = '';
 }
 
-// 6. KADER-MANAGEMENT (NAME & NUMMER)
+// 6. MODAL & KADER STEUERUNG
 function openKaderManager() {
     const modal = document.getElementById('kader-modal');
     const list = document.getElementById('kader-list');
     modal.style.display = 'flex';
     list.innerHTML = '';
-
     document.querySelectorAll('.player-wrapper.red').forEach(p => {
-        const name = p.querySelector('.player-circle').innerText;
+        const n = p.querySelector('.player-circle').innerText;
         const nr = p.querySelector('.player-label').innerText;
-        const item = document.createElement('div');
-        item.className = 'kader-item';
-        item.innerHTML = `
-            <input type="text" value="${name}" onchange="updatePlayer('${p.id}', this.value, 'name')">
-            <input type="text" value="${nr}" style="width:40px;" onchange="updatePlayer('${p.id}', this.value, 'nr')">
-        `;
-        list.appendChild(item);
+        list.innerHTML += `<div style="margin-bottom:8px;"><input value="${n}" onchange="updateP('${p.id}',this.value,'name')"> <input value="${nr}" style="width:40px;" onchange="updateP('${p.id}',this.value,'nr')"></div>`;
     });
 }
-
-function updatePlayer(id, val, type) {
-    const p = document.getElementById(id);
-    if (type === 'name') p.querySelector('.player-circle').innerText = val.toUpperCase();
-    else p.querySelector('.player-label').innerText = val;
+function updateP(id, v, t) {
+    const el = document.getElementById(id);
+    if(t==='name') el.querySelector('.player-circle').innerText = v.toUpperCase();
+    else el.querySelector('.player-label').innerText = v;
 }
-
 function closeKaderManager() { document.getElementById('kader-modal').style.display = 'none'; }
-function exportPlanPDF() { alert("Exportiere Taktik-Analyse..."); }
