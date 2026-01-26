@@ -1,40 +1,33 @@
-// Squad als Single Source of Truth
-let squad = Storage.loadSquad() || [
-  { id: 1, nr: 8, name: "Thorsten", status: "team", x:50, y:50, points:{tech:0,perc:0,fit:0,special:0} },
-  { id: 2, nr: 99, name: "David Luiz", status: "team", x:40, y:40, points:{tech:0,perc:0,fit:0,special:0} }
+// Kader-Zustand
+let squad = [
+    { id: 1, nr: 8, name: "Thorsten", pos: "ST", active: true, status: "team", color: "var(--red-team)" },
+    { id: 2, nr: 99, name: "David Luiz", pos: "IV", active: true, status: "team", color: "var(--red-team)" }
 ];
 
-// Event Bus minimal
-const Bus = new EventTarget();
+// Gegner-Zustand (Team Blau - nur Nummern)
+let opponents = [
+    { id: 101, nr: 1, pos: "TW_B" }, { id: 102, nr: 4, pos: "IV_B" }, { id: 103, nr: 5, pos: "IV_B2" }
+    // Wird automatisch für 3-4-3 erweitert
+];
 
-function saveSquadData() {
-  Storage.saveSquad('toni.squad', squad);
-  Bus.dispatchEvent(new CustomEvent('squad:updated', { detail: { squad } }));
+// Koordinaten-Mapping (Prozentual)
+const formations = {
+    "4-4-2": {
+        "TW": {x: 8, y: 50}, "IV": {x: 25, y: 35}, "IV2": {x: 25, y: 65},
+        "LV": {x: 30, y: 15}, "RV": {x: 30, y: 85}, "ST": {x: 80, y: 40}, "ST2": {x: 80, y: 60}
+        // Weitere Positionen folgen...
+    },
+    "3-4-3_BLUE": {
+        "TW_B": {x: 92, y: 50}, "IV_B": {x: 75, y: 50}, "IV_B2": {x: 75, y: 25}, "IV_B3": {x: 75, y: 75}
+        // Weitere Positionen folgen...
+    }
+};
+
+function updatePlayerStatus(id, key, value) {
+    const player = squad.find(p => p.id === id);
+    if (player) {
+        player[key] = value;
+        renderSquad(); // Neu zeichnen
+        drawBoard();   // Board aktualisieren
+    }
 }
-
-function updatePlayerPosition(id, x, y) {
-  const p = squad.find(s => s.id === Number(id));
-  if (!p) return;
-  p.x = Math.max(0, Math.min(100, Number(x)));
-  p.y = Math.max(0, Math.min(100, Number(y)));
-  saveSquadData();
-}
-
-function getPlayerByIdentifier(identifier) {
-  const idStr = String(identifier).trim().toLowerCase();
-  return squad.find(p => String(p.nr) === idStr || p.name.toLowerCase().includes(idStr) || String(p.id) === idStr);
-}
-
-function addPlayer(name, nr) {
-  const newId = Date.now() + Math.floor(Math.random()*1000);
-  squad.push({ id:newId, nr: Number(nr), name: String(name), status:'team', x:50, y:50, points:{tech:0,perc:0,fit:0,special:0} });
-  saveSquadData();
-}
-
-function removePlayer(id) {
-  squad = squad.filter(p => p.id !== Number(id));
-  saveSquadData();
-}
-
-// Export API
-window.AppLogic = { squad, saveSquadData, updatePlayerPosition, getPlayerByIdentifier, addPlayer, removePlayer, Bus };
