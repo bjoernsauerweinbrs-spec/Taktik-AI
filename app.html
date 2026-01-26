@@ -1,111 +1,70 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Coach Toni 2.0 – Management Plattform</title>
-  
-  <link rel="stylesheet" href="css/style.css">
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toni 2.0 - Taktik-Zentrale</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
- <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.95); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10000; backdrop-filter:blur(10px);">
-  <div style="background:rgba(255,255,255,0.05); padding:40px; border-radius:20px; border:1px solid rgba(255,255,255,0.1); text-align:center; max-width:400px; width:90%;">
-    <h2 style="color:white; margin-bottom:20px;">Trainer-Login</h2>
-    <input type="password" id="password" placeholder="Trainer-Passwort" style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:none; outline:none;">
-    
-    <div style="margin-bottom:15px;">
-        <label style="color:#94a3b8; font-size:0.8rem; display:block; margin-bottom:5px;">Dein Groq API-Key (gsk_...):</label>
-        <input type="password" id="user-groq-key" placeholder="Hier Groq-Key einfügen" style="width:100%; padding:12px; border-radius:8px; border:none; outline:none; background:#2d3748; color:white;">
+    <div id="app">
+        <div id="main">
+            <div class="top-controls" style="position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px;">
+                <button class="btn primary" onclick="resetBoard()">⚽ GRUNDORDNUNG</button>
+                <div style="background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                    <button class="btn" onclick="prevPhase()" style="background: none; color: white; padding: 0;">◀</button>
+                    <span id="playlist-title" style="font-weight: 600; min-width: 100px; text-align: center;">Übung 1</span>
+                    <button class="btn" onclick="nextPhase()" style="background: none; color: white; padding: 0;">▶</button>
+                </div>
+            </div>
+
+            <div id="board-container"></div>
+        </div>
+
+        <div class="sidebar">
+            <div class="header">
+                <span style="color: #2ecc71;">●</span> TONI ANALYSE-BOT
+            </div>
+            
+            <div id="chat-history">
+                </div>
+
+            <div class="input-row">
+                <button class="btn" onclick="startMic()" style="background: #1e293b; color: white;">🎙️</button>
+                <input type="text" id="user-input" placeholder="Anweisung an Toni..." onkeypress="if(event.key==='Enter') askToni()">
+                <button class="btn primary" onclick="askToni()">OK</button>
+            </div>
+
+            <div class="action-buttons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px;">
+                <button class="btn" onclick="welcomeFlow()">👋 Gruß</button>
+                <button class="btn" onclick="toggleKader()">📋 Kader</button>
+                <button class="btn primary" onclick="askToniTaktik()" title="Nagelsmann-Analyse">📊 Taktik-Check</button>
+                <button class="btn" onclick="askToniPressing()" title="Klopp-Analyse">⚡ Pressing-Check</button>
+                <button class="btn primary" style="grid-column: span 2; background: #3498db; color: white;" onclick="exportPlanPDF()">📄 Trainingsplan PDF</button>
+            </div>
+        </div>
     </div>
 
-    <button onclick="startToni()" style="width:100%; padding:12px; background:#2ecc71; color:black; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">SYSTEM INITIALISIEREN</button>
-    <p style="color:#475569; font-size:0.7rem; margin-top:15px;">Dein Key wird nur lokal für diese Sitzung verwendet und nicht gespeichert.</p>
-  </div>
-</div>
-
-  <div id="app">
-    <div id="sidebar">
-      <div class="header">TONI – STRATEGIE & TRAINING</div>
-      <div id="chat-history"></div>
-
-      <div class="sidebar-controls">
-        <select id="voice-select" onchange="selectVoice(this.value)"></select>
-        <select id="mode-select" onchange="setMode(this.value)">
-          <option value="training">Trainingsmodus</option>
-          <option value="match">Spielvorbereitung</option>
-        </select>
-      </div>
-
-      <div class="input-row">
-        <button onclick="startMic()">🎤</button>
-        <input id="user-input" placeholder="Anweisung..." onkeypress="if(event.key==='Enter') askToni()" />
-        <button onclick="askToni()">OK</button>
-      </div>
-
-      <div class="action-buttons" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
-        <button class="btn" onclick="welcomeFlow()">👋 Gruß</button>
-        <button class="btn" onclick="toggleKader()">📋 Kader</button>
-        <button class="btn primary" onclick="askToniTaktik()" title="Die komplette Spielanlage prüfen">📊 Taktik-Check</button>
-        <button class="btn" onclick="askToniPressing()" title="Umschaltmoment und Ballrückeroberung">⚡ Pressing-Check</button>
-        <button class="btn primary" style="grid-column: span 2;" onclick="exportPlanPDF()">📄 Trainingsplan PDF</button>
-      </div>
-      </div>
+    <div id="login-overlay" style="position: fixed; inset: 0; background: #050608; display: flex; align-items: center; justify-content: center; z-index: 10000;">
+        <div style="background: #0f172a; padding: 40px; border-radius: 20px; border: 1px solid #2ecc71; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 0 50px rgba(46, 204, 113, 0.2);">
+            <h1 style="color: white; margin-bottom: 10px; font-weight: 800;">COACH LOGIN</h1>
+            <p style="color: #94a3b8; margin-bottom: 25px;">Bitte Identität bestätigen</p>
+            
+            <input type="password" id="password" placeholder="Trainer-Passwort" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; outline: none;">
+            
+            <input type="password" id="user-groq-key" placeholder="Groq API-Key (gsk_...)" style="width: 100%; padding: 12px; margin-bottom: 25px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; outline: none;">
+            
+            <button onclick="startToni()" style="width: 100%; padding: 15px; background: #2ecc71; color: #050608; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;">System initialisieren</button>
+            
+            <p style="color: #475569; font-size: 0.75rem; margin-top: 20px;">Der API-Key wird nur für diese Sitzung verwendet.</p>
+        </div>
     </div>
 
-    <div id="main">
-      <div class="top-controls">
-        <button class="btn primary" onclick="resetBoard()">♻ GRUNDORDNUNG</button>
-        <div id="playlist-bar">
-          <button class="btn" onclick="prevPhase()">◀</button>
-          <span id="playlist-title">Übung 1 von 1</span>
-          <button class="btn" onclick="nextPhase()">▶</button>
-          <button class="btn" onclick="addPhase()">＋ Phase</button>
-        </div>
-        <div class="timer-box">
-          <span id="timer-display">00:00</span>
-          <button class="btn" onclick="startTimer()">Start</button>
-          <button class="btn" onclick="stopTimer()">Stop</button>
-        </div>
-      </div>
+    <script src="js/board.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/logic.js"></script>
 
-      <div id="pitch-area">
-        <div id="pitch">
-          <div class="goal l-goal"></div><div class="goal r-goal"></div>
-          <div class="m-line"></div><div class="m-circle"></div>
-          <svg id="exercise-svg" viewBox="0 0 1000 600" preserveAspectRatio="none"></svg>
-          
-          <div id="bank">
-            <h5>Bank / Reserve</h5>
-            <div id="bank-list"></div>
-          </div>
-          
-          <div id="ball"></div>
-          <div id="players-layer"></div>
-        </div>
-
-        <div id="coaching-panel">
-          <h4>Strategische Coaching-Points</h4>
-          <ol id="coaching-list"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="whiteboard">
-    <h3>📋 Kader-Management</h3>
-    <textarea id="player-list-raw" placeholder="1 Neuer red..."></textarea>
-    <button class="btn primary" onclick="syncNames()" style="width:100%">Kader Synchronisieren</button>
-    <div id="attendance-list" style="margin-top:15px; max-height:200px; overflow-y:auto;"></div>
-    <button class="btn" onclick="toggleKader()" style="width:100%; margin-top:10px;">Schließen</button>
-  </div>
-
-  <script src="js/chat.js"></script>
-  <script src="js/board.js"></script>
-  <script src="js/logic.js"></script>
-
-</body>
 </body>
 </html>
