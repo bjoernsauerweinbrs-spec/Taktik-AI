@@ -1,59 +1,37 @@
-:root{
-  --green:#2ecc71;
-  --accent:#0a74da;
-  --bg:#07101a;
-  --panel:#0f1720;
-  --line:rgba(255,255,255,0.12);
-  --text:#e6eef0;
-  --card-radius:12px;
-  --arrow-color:#ffcc00;
-  --arrow-width:6;
-  --pulse-color:rgba(255,255,255,0.12);
+:root {
+    --pitch-bg: #ffffff;
+    --line-color: #333333;
+    --sidebar-bg: #f8f9fa;
+    --red-team: #d32f2f;
+    --blue-team: #1976d2;
+    --shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* Grundlayout */
-html,body{height:100%;margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#1b2333 0,#050608 55%);color:var(--text);-webkit-font-smoothing:antialiased;}
-#app{display:flex;gap:16px;padding:16px;box-sizing:border-box;height:100%}
+body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; background: #eee; }
 
-/* Sidebar Chat */
-#sidebar{width:320px;background:var(--panel);border-radius:var(--card-radius);padding:12px;display:flex;flex-direction:column;gap:8px}
-#toni-output{overflow:auto;flex:1;padding:8px}
+/* Layout-Container */
+#squad-sidebar { width: 280px; background: var(--sidebar-bg); border-right: 1px solid #ddd; padding: 20px; overflow-y: auto; }
+#main-stage { flex-grow: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+#chat-sidebar { width: 320px; background: var(--sidebar-bg); border-left: 1px solid #ddd; display: flex; flex-direction: column; }
 
-/* Pitch */
-#pitch-wrapper{flex:1;position:relative;min-width:640px;display:flex;flex-direction:column}
-#pitch{position:relative;background:linear-gradient(#0b2a3a,#04202a);border-radius:12px;flex:1;overflow:hidden;min-height:480px}
+/* Das Board */
+#pitch { 
+    width: 850px; height: 550px; background: var(--pitch-bg); 
+    border: 3px solid var(--line-color); position: relative; 
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: var(--shadow);
+}
 
 /* Spieler-Dots */
-.player-dot{position:absolute;width:40px;height:40px;border-radius:50%;cursor:grab;transition:transform .2s;z-index:100;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
-.player-dot.red{background:#e53935}
-.player-dot.blue{background:#1e88e5}
-
-/* Hover-Tooltip */
-.player-dot:hover::after{content:attr(data-stats);position:absolute;bottom:50px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px;border-radius:5px;font-size:11px;white-space:pre;z-index:1000;box-shadow:0 5px 15px rgba(0,0,0,.3)}
-
-/* Label */
-.player-label{position:absolute;top:45px;width:100px;text-align:center;left:-30px;font-size:12px;font-weight:bold;text-shadow:1px 1px 2px rgba(0,0,0,.6)}
-
-/* Goals */
-.goal{position:absolute;width:60px;height:120px;background:rgba(255,255,255,0.06);border-radius:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center}
-.goal.left{left:-30px}
-.goal.right{right:-30px}
-.goal.rotated{transform:translateY(-50%) rotate(180deg)}
-
-/* Tactical SVG layer */
-#tactical-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:50}
-
-/* Playlist / Controls */
-.controls{display:flex;gap:8px;align-items:center}
-button{cursor:pointer;border:none;padding:8px 10px;border-radius:8px;background:#0b2a3a;color:var(--text)}
-button.ghost{background:transparent;border:1px solid var(--line)}
-
-/* Status bar */
-#toni-status-bar{padding:5px 10px;background:#eee;display:flex;align-items:center;gap:10px;font-size:.8em;border-radius:8px}
-#status-led{width:10px;height:10px;background:grey;border-radius:50%}
-
-/* Responsive */
-@media (max-width:900px){
-  #sidebar{width:280px}
-  #pitch-wrapper{min-width:420px}
+.player-dot {
+    position: absolute; width: 30px; height: 30px; border-radius: 50%;
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: bold; transform: translate(-50%, -50%);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: grab; z-index: 5;
 }
+
+.player-label { position: absolute; top: 32px; color: #000; font-size: 11px; white-space: nowrap; font-weight: 600; }
+
+/* Menü oben */
+.top-nav { position: absolute; top: 20px; display: flex; gap: 15px; background: #fff; padding: 10px 20px; border-radius: 30px; box-shadow: var(--shadow); z-index: 100; }
+.nav-btn { border: none; background: none; padding: 8px 15px; cursor: pointer; font-weight: 600; border-radius: 20px; }
+.nav-btn.active { background: var(--red-team); color: #fff; }
