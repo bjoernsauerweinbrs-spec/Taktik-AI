@@ -1,51 +1,84 @@
 /**
- * Die Aktentasche: Speichern und Laden von Übungen & Kaderzuständen
+ * Toni 2.0 - Storage & Export Engine
+ * Verwaltet das Speichern in der Aktentasche und den Klemmbrett-Druck.
  */
 
-function saveExerciseToArchive(exerciseName) {
-    const snapshot = {
-        id: Date.now(),
-        title: exerciseName || "Unbenannte Übung",
-        timestamp: new Date().toLocaleString('de-DE'),
-        // Speichert den kompletten Kader-Zustand inklusive Punkten
-        squadData: JSON.parse(JSON.stringify(squad)),
-        // Speichert die exakten Positionen der Punkte auf dem Feld
-        positions: Array.from(document.querySelectorAll('.player-dot')).map(dot => ({
-            label: dot.querySelector('.player-label').innerText,
-            x: dot.style.left,
-            y: dot.style.top
-        }))
-    };
+// 1. Automatische Speicherung des Kaders
+function saveSquadData() {
+    localStorage.setItem('toni_squad_data', JSON.stringify(squad));
+    console.log("Kader in Aktentasche gespeichert.");
+}
 
-    let archive = JSON.parse(localStorage.getItem('toni_archive') || '[]');
-    archive.push(snapshot);
-    localStorage.setItem('toni_archive', JSON.stringify(archive));
-    
-    if (typeof toniSpeak === 'function') {
-        toniSpeak(`Björn, ich habe die Übung "${snapshot.title}" sicher in der Aktentasche verstaut.`);
+// 2. Laden beim Start
+function loadSquadData() {
+    const saved = localStorage.getItem('toni_squad_data');
+    if (saved) {
+        squad = JSON.parse(saved);
+        renderSquad();
+        drawBoard();
     }
 }
 
-function loadExerciseFromArchive(id) {
-    let archive = JSON.parse(localStorage.getItem('toni_archive') || '[]');
-    const exercise = archive.find(ex => ex.id === id);
+/**
+ * Die Klemmbrett-Funktion: Erzeugt ein sauberes Druck-Layout
+ */
+function exportToKlemmbrett() {
+    toniSpeak("Ich bereite das Klemmbrett für den Platz vor. Einen Moment...");
+
+    // Wir erstellen ein neues Fenster für den Druck, um Sidebars auszublenden
+    const printWindow = window.open('', '_blank');
+    const pitchSvg = document.getElementById('pitch').innerHTML;
     
-    if (exercise) {
-        squad = exercise.squadData;
-        renderSquad(); // Liste aktualisieren
-        drawBoard();   // Board neu zeichnen
-        
-        // Nach dem Zeichnen die gespeicherten Positionen erzwingen
-        setTimeout(() => {
-            exercise.positions.forEach(pos => {
-                const dots = document.querySelectorAll('.player-dot');
-                dots.forEach(dot => {
-                    if (dot.querySelector('.player-label').innerText === pos.label) {
-                        dot.style.left = pos.x;
-                        dot.style.top = pos.y;
-                    }
-                });
-            });
-        }, 100);
-    }
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Trainingsbeleg - Björn</title>
+            <style>
+                body { font-family: sans-serif; padding: 40px; }
+                .header { border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px; }
+                .pitch-preview { 
+                    width: 100%; height: 400px; border: 2px solid #000; 
+                    position: relative; background: #fff; margin: 20px 0;
+                }
+                .notes { margin-top: 30px; border: 1px solid #ccc; padding: 15px; }
+                .footer { margin-top: 50px; font-size: 0.8em; color: #666; text-align: center; }
+                @media print { .no-print { display: none; } }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>⚽ Trainingsbeleg: ${currentMode.toUpperCase()}</h1>
+                <p>Trainer: Björn | Datum: ${new Date().toLocaleDateString()}</p>
+            </div>
+            
+            <div class="pitch-preview">
+                ${pitchSvg}
+            </div>
+
+            <div class="notes">
+                <h3>Tonis Experten-Analyse:</h3>
+                <p>${document.getElementById('toni-output').innerText}</p>
+            </div>
+
+            <div class="notes">
+                <h3>Material & Notizen:</h3>
+                <p>Anwesende Spieler: ${activeTrainingCount}</p>
+                <p>__________________________________________________________________________</p>
+                <p>__________________________________________________________________________</p>
+            </div>
+
+            <div class="footer">Generiert von Toni - Dein Globaler Taktik-Experte</div>
+            
+            <script>
+                setTimeout(() => { window.print(); }, 500);
+            </script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
 }
+
+// Initialisierung beim Laden
+document.addEventListener('DOMContentLoaded', () => {
+    loadSquadData();
+});
