@@ -3,49 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni 2.0 - Security Entrance</title>
+    <title>Coach Toni 2.0 - Login</title>
     <style>
-        :root {
-            --ginga-green: #2ecc71;
-            --dark-blue: #0a1118;
-        }
+        :root { --ginga-green: #2ecc71; --dark: #0a0c10; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: #000; color: white; overflow: hidden; }
         
         #video-bg {
             position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%;
-            z-index: -1; filter: brightness(0.3) grayscale(0.2); object-fit: cover;
+            z-index: -1; filter: brightness(0.35) grayscale(0.2); object-fit: cover;
         }
 
-        .login-overlay {
-            position: absolute; inset: 0; background: radial-gradient(circle, transparent 0%, rgba(0,0,0,0.9) 100%);
+        .overlay {
+            position: absolute; inset: 0; background: radial-gradient(circle, transparent 0%, rgba(0,0,0,0.85) 100%);
             display: flex; align-items: center; justify-content: center;
         }
 
         .login-card {
-            background: rgba(15, 23, 32, 0.98); padding: 40px; border-radius: 24px;
-            border: 1px solid rgba(46, 204, 113, 0.3); width: 100%; max-width: 400px;
-            text-align: center; backdrop-filter: blur(15px); box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+            background: rgba(15, 20, 28, 0.95); padding: 45px; border-radius: 28px;
+            border: 1px solid rgba(46, 204, 113, 0.2); width: 100%; max-width: 420px;
+            text-align: center; backdrop-filter: blur(15px); box-shadow: 0 30px 60px rgba(0,0,0,0.7);
         }
 
-        h1 { color: var(--ginga-green); font-size: 24px; letter-spacing: 2px; margin-bottom: 5px; }
-        p { color: #666; font-size: 13px; margin-bottom: 30px; }
+        h1 { color: var(--ginga-green); font-size: 26px; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
+        .sub { color: #666; font-size: 12px; margin-bottom: 35px; letter-spacing: 1px; }
 
-        .input-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; font-size: 11px; color: var(--ginga-green); margin-bottom: 5px; margin-left: 5px; font-weight: bold; }
+        .field { margin-bottom: 20px; text-align: left; }
+        label { display: block; font-size: 11px; color: var(--ginga-green); margin: 0 0 8px 5px; font-weight: 800; text-transform: uppercase; }
         
         input { 
-            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #222; 
-            background: #070c12; color: white; box-sizing: border-box; font-size: 14px;
-            transition: 0.3s;
+            width: 100%; padding: 15px; border-radius: 14px; border: 1px solid #222; 
+            background: #05070a; color: white; box-sizing: border-box; font-size: 15px;
+            transition: all 0.3s ease;
         }
-        input:focus { border-color: var(--ginga-green); outline: none; background: #0c1620; }
+        input:focus { border-color: var(--ginga-green); outline: none; box-shadow: 0 0 15px rgba(46, 204, 113, 0.1); }
 
-        .start-btn { 
-            width: 100%; padding: 16px; background: var(--ginga-green); color: #000; 
-            border: none; border-radius: 12px; font-weight: 800; cursor: pointer; 
-            font-size: 16px; margin-top: 20px; transition: 0.3s;
+        .login-btn { 
+            width: 100%; padding: 18px; background: var(--ginga-green); color: #000; 
+            border: none; border-radius: 14px; font-weight: 900; cursor: pointer; 
+            font-size: 16px; margin-top: 25px; transition: 0.3s;
         }
-        .start-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4); }
+        .login-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4); }
     </style>
 </head>
 <body>
@@ -54,46 +51,47 @@
         <source src="https://assets.mixkit.co/videos/preview/mixkit-soccer-player-dribbling-the-ball-in-the-field-41400-large.mp4" type="video/mp4">
     </video>
 
-    <div class="login-overlay">
+    <div class="overlay">
         <div class="login-card">
             <h1>COACH TONI 2.0</h1>
-            <p>ADVANCED TACTICS & GINGA SIMULATION</p>
+            <div class="sub">BRAZILIAN TACTICS ENGINE</div>
 
-            <div class="input-group">
-                <label>TRAINER NAME</label>
-                <input type="text" id="username" placeholder="z.B. Björn" autocomplete="off">
+            <div class="field">
+                <label>Trainer Name</label>
+                <input type="text" id="username" placeholder="Dein Name" value="Björn">
             </div>
 
-            <div class="input-group">
-                <label>PASSWORT</label>
+            <div class="field">
+                <label>System-Passwort</label>
                 <input type="password" id="password" placeholder="••••••••">
             </div>
 
-            <div class="input-group">
-                <label>GROQ API KEY</label>
+            <div class="field">
+                <label>KI-Schlüssel (Groq API)</label>
                 <input type="password" id="api-key" placeholder="gsk_...">
             </div>
             
-            <button class="start-btn" onclick="secureLogin()">SYSTEM STARTEN</button>
+            <button class="login-btn" onclick="auth()">SYSTEM INITIALISIEREN</button>
         </div>
     </div>
 
     <script>
-        function secureLogin() {
+        // Session beim Laden leeren, um Login zu erzwingen
+        sessionStorage.clear();
+
+        function auth() {
             const name = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
             const key = document.getElementById('api-key').value;
 
-            // Einfache Passwort-Logik für den Anfang (wie besprochen)
+            // Passwort-Sperre "Toni2026" wie besprochen
             if(name && pass === "Toni2026" && key.startsWith('gsk_')) {
+                sessionStorage.setItem('toni_auth', 'true');
                 sessionStorage.setItem('toni_name', name);
                 sessionStorage.setItem('toni_key', key);
-                sessionStorage.setItem('toni_auth', 'true');
-                // Wir setzen den Standard-Modus beim Login direkt auf Profi-Taktik
-                sessionStorage.setItem('toni_type', 'profi'); 
                 window.location.href = 'app.html';
             } else {
-                alert('Zugriff verweigert. Bitte Daten prüfen.');
+                alert('Zugriff verweigert. Bitte prüfe Name, Passwort (Toni2026) und API-Key.');
             }
         }
     </script>
