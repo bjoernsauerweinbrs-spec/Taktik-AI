@@ -1,28 +1,28 @@
 /**
- * Toni 2.0 - KI Engine
- * Kommunikation mit Groq & Board-Interaktion
+ * Toni 2.0 - KI Chat Engine
+ * Koordiniert Taktik-Analyse und Co-Trainer-Feedback
  */
 
 async function handleToniAction() {
-    const userInput = document.getElementById('user-msg');
-    const chatHistory = document.getElementById('chat-history');
-    const text = userInput.value.trim();
-
+    const inputField = document.getElementById('user-msg');
+    const text = inputField.value.trim();
     if (!text) return;
 
-    // 1. User Nachricht anzeigen
-    appendMessage('user', text);
-    userInput.value = '';
+    // 1. User Nachricht im Chat anzeigen
+    appendChatMessage('user', text);
+    inputField.value = '';
 
-    // 2. Board-Zustand scannen (Was sieht Toni?)
-    const boardData = typeof getBoardState === 'function' ? getBoardState() : "Keine Daten";
-    const trainerName = sessionStorage.getItem('toni_name') || 'Coach';
+    const trainerName = sessionStorage.getItem('toni_name') || 'Björn';
+    const apiKey = sessionStorage.getItem('toni_key');
 
-    // 3. Anfrage an die KI (Groq Cloud)
+    // Toni zeigt Aktivität
+    const history = document.getElementById('chat-history');
+    const thinking = document.createElement('div');
+    thinking.className = 'msg toni';
+    thinking.innerText = "Toni analysiert...";
+    history.appendChild(thinking);
+
     try {
-        const apiKey = sessionStorage.getItem('toni_key');
-        if (!apiKey) throw new Error("API-Key fehlt!");
-
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -34,76 +34,55 @@ async function handleToniAction() {
                 messages: [
                     {
                         role: "system",
-                        content: `Du bist Toni, ein Elite-Fußballtrainer mit brasilianischem Ginga-Style. 
-                        Du arbeitest für den Trainer ${trainerName}. 
-                        Deine Aufgabe: Taktik-Analyse auf Profi-Niveau. 
-                        
-                        REGELN:
-                        1. Nutze Fachbegriffe (Halbräume, Deckungsschatten, Verschieben).
-                        2. Wenn du Spieler bewegen willst, schreibe am Ende deiner Antwort: COMMAND_MOVE(id, x, y).
-                        3. Wenn du einen Passweg vorschlägst, schreibe: COMMAND_PASS(id1, id2).
-                        4. Der aktuelle Modus ist 11v11 (Taktik) oder Training.
-                        
-                        AKTUELLER BOARD-ZUSTAND: ${boardData}`
+                        content: `Du bist Toni, der Co-Trainer von ${trainerName}. 
+                        Dein Stil: Brasilianischer Ginga, fachlich hochqualifiziert, präzise und motivierend.
+                        Deine Aufgabe: Erkläre Taktiken, Trainingseinheiten und Spielzüge.
+                        WICHTIG: Begrüße kurz als Co-Trainer, wenn man 'Hallo' sagt. 
+                        Wenn du Bewegungen vorschlägst, nutze fachliche Begriffe wie 'Verschieben', 'Halbräume' oder 'Kompaktheit'.`
                     },
                     { role: "user", content: text }
                 ],
-                temperature: 0.6
+                temperature: 0.7
             })
         });
 
         const data = await response.json();
-        let toniAnswer = data.choices[0].message.content;
+        const toniText = data.choices[0].message.content;
 
-        // 4. Befehle aus dem Text extrahieren und ausführen
-        processToniCommands(toniAnswer);
-
-        // 5. Toni Nachricht anzeigen (Befehle für den User ausblenden)
-        const cleanAnswer = toniAnswer.replace(/COMMAND_.*?\(.*?\)/g, "").trim();
-        appendMessage('toni', cleanAnswer);
+        // "Denken" entfernen und echte Antwort anzeigen
+        thinking.remove();
+        appendChatMessage('toni', toniText);
         
-        // Sprachausgabe
-        speakToni(cleanAnswer);
+        // Sprachausgabe (Männliche Stimme)
+        const speech = new SpeechSynthesisUtterance(toniText);
+        speech.lang = 'de-DE';
+        speech.pitch = 0.9;
+        window.speechSynthesis.speak(speech);
 
     } catch (error) {
-        console.error("Toni Error:", error);
-        appendMessage('toni', "Fehler bei der Taktik-Analyse. Prüfe den API-Key.");
+        thinking.innerText = "Oje Chef, da ist ein Fehler in der Leitung...";
+        console.error("Groq Error:", error);
     }
 }
 
-function appendMessage(role, text) {
-    const container = document.getElementById('chat-history');
+function appendChatMessage(role, text) {
+    const history = document.getElementById('chat-history');
     const div = document.createElement('div');
     div.className = `msg ${role}`;
+    div.style.marginBottom = "15px";
+    div.style.padding = "12px";
+    div.style.borderRadius = "10px";
+    div.style.background = role === 'toni' ? "#1c2128" : "#238636";
+    div.style.borderLeft = role === 'toni' ? "4px solid #2ecc71" : "none";
     div.innerText = text;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
+    history.appendChild(div);
+    history.scrollTop = history.scrollHeight;
 }
 
-/**
- * Verarbeitet die taktischen Befehle der KI
- */
-function processToniCommands(text) {
-    // Beispiel: COMMAND_MOVE(p-blue-4, 500, 300)
-    const moveRegex = /COMMAND_MOVE\((.*?),\s*(\d+),\s*(\d+)\)/g;
-    let match;
-
-    while ((match = moveRegex.exec(text)) !== null) {
-        const id = match[1].trim();
-        const x = parseInt(match[2]);
-        const y = parseInt(match[3]);
-        
-        if (typeof animateMove === 'function') {
-            setTimeout(() => {
-                animateMove(id, x, y);
-            }, 500);
-        }
-    }
-}
-
-function speakToni(text) {
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = 'de-DE';
-    msg.pitch = 0.8; // Männlichere, tiefere Stimme
-    window.speechSynthesis.speak(msg);
-}
+// Initialer Gruß beim Start
+document.addEventListener('DOMContentLoaded', () => {
+    const trainer = sessionStorage.getItem('toni_name') || 'Björn';
+    setTimeout(() => {
+        appendChatMessage('toni', `Hallo Chef! Co-Trainer Toni meldet sich zum Dienst. Das 3-4-3 steht bereit. Was gehen wir heute an, ${trainer}?`);
+    }, 1000);
+});
