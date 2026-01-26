@@ -53,13 +53,28 @@ html, body {
   letter-spacing: 1px;
 }
 
+/* Das Chat-Fenster fest fixieren */
 #chat-history {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    height: 350px;           /* Feste Höhe - passt sich nicht mehr an */
+    overflow-y: auto;        /* Scrollbar erscheint nur, wenn nötig */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+    background: rgba(15, 23, 42, 0.5); /* Ein schöner dunkler Hintergrund */
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 10px;
+    scrollbar-width: thin;    /* Schicke, schmale Scrollbar */
+    scrollbar-color: #2ecc71 transparent;
+}
+
+/* Verhindert, dass der gesamte Sidebar-Container mitwächst */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    max-height: 100vh;       /* Die Sidebar darf nie höher als der Bildschirm sein */
+    overflow: hidden;
 }
 
 .msg {
