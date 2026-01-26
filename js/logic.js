@@ -1,58 +1,98 @@
-// TONI'S TAKTISCHE REAKTION
-function toniReacts(movedPlayerId) {
-    if (!movedPlayerId.startsWith('R')) return; // Nur auf Rot reagieren
+/* --- TONI TAKTIK-BRAIN --- */
 
-    const bluePlayers = document.querySelectorAll('.player-wrapper.blue');
-    const movedRed = document.getElementById(movedPlayerId);
+function analyzeSituation() {
+    const ball = document.getElementById('ball');
+    const ballX = parseInt(ball.style.left);
+    const ballY = parseInt(ball.style.top);
     
-    // Zufälliger blauer Verteidiger rückt ein Stück entgegen
-    const targetBlue = bluePlayers[Math.floor(Math.random() * bluePlayers.length)];
-    
-    const rx = parseInt(movedRed.style.left);
-    const ry = parseInt(movedRed.style.top);
-    
-    // Taktik: Toni schiebt einen Blauen leicht in Richtung des Balls (des bewegten Roten)
-    let bx = parseInt(targetBlue.style.left) || 600;
-    let by = parseInt(targetBlue.style.top) || 250;
-    
-    let newX = bx - (bx - rx) * 0.1;
-    let newY = by - (by - ry) * 0.1;
+    clearArrows(); // Alte Pfeile weg
 
-    targetBlue.style.transition = "all 0.5s ease-out";
-    targetBlue.style.left = newX + "px";
-    targetBlue.style.top = newY + "px";
+    // 1. Wer hat den Ball? (Einfacher Check nach Nähe)
+    const players = document.querySelectorAll('.player-wrapper');
+    let owner = null;
+    let minDist = 50;
 
-    // Toni kommentiert den Zug
-    const name = movedRed.querySelector('.player-circle').innerText;
-    addMsg('toni', `Coach Björn, ${name} zieht das Spiel breit! Ich verschiebe meine Kette, um die Räume eng zu machen.`);
+    players.forEach(p => {
+        const px = parseInt(p.style.left) + 30;
+        const py = parseInt(p.style.top) + 25;
+        const dist = Math.sqrt(Math.pow(px - ballX, 2) + Math.pow(py - ballY, 2));
+        if (dist < minDist) { owner = p; minDist = dist; }
+    });
+
+    if (owner) {
+        const team = owner.classList.contains('red') ? 'Björn' : 'Toni';
+        const name = owner.querySelector('.player-circle').innerText;
+        
+        if (team === 'Björn') {
+            handleUserAttack(owner, ballX, ballY);
+        } else {
+            handleToniAttack(owner, ballX, ballY);
+        }
+    }
 }
 
-// KADER MANAGER
-function openKaderManager() {
-    const modal = document.getElementById('kader-modal');
-    const list = document.getElementById('kader-list');
-    modal.style.display = 'flex';
-    list.innerHTML = '';
+// TONI REAGIERT AUF DEINEN ANGRIFF
+function handleUserAttack(player, bx, by) {
+    const name = player.querySelector('.player-circle').innerText;
+    
+    // Taktik-Logik: Wenn Ball links (by < 200)
+    if (by < 200) {
+        addMsg('toni', `Coach Björn, ${name} hat den Ball am Flügel! Ich ziehe meine Abwehr rüber. Dein rechter Flügel sollte jetzt diagonal einrücken!`);
+        drawArrow(400, 400, 550, 300, '#2ecc71'); // Vorschlags-Pfeil
+        shiftBlueTeam(bx + 100, by);
+    } else {
+        addMsg('toni', `Zentraler Aufbau durch ${name}. David Luiz sollte den Raum absichern, falls wir den Ball verlieren!`);
+        drawArrow(150, 250, 150, 350, '#e74c3c');
+    }
+}
 
-    const allPlayers = document.querySelectorAll('.player-wrapper.red');
-    allPlayers.forEach(p => {
-        const name = p.querySelector('.player-circle').innerText;
-        const nr = p.querySelector('.player-label').innerText;
-        list.innerHTML += `
-            <div class="kader-item">
-                <input type="text" value="${name}" onchange="updatePlayerName('${p.id}', this.value)">
-                <input type="text" value="${nr}" style="width: 50px;" onchange="updatePlayerNr('${p.id}', this.value)">
-            </div>
-        `;
+// TONI GREIFT SELBST AN
+function handleToniAttack(player, bx, by) {
+    const name = player.querySelector('.player-circle').innerText;
+    addMsg('toni', `Achtung Björn! Mein Spieler ${name} sucht die Lücke. Deine Kette steht zu tief, schieb raus!`);
+    drawArrow(bx, by, bx - 150, by + 50, '#3498db');
+}
+
+// HELFER: Pfeile zeichnen (SVG)
+function drawArrow(x1, y1, x2, y2, color) {
+    const svg = document.getElementById('tactical-arrows');
+    const newArrow = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    newArrow.setAttribute("x1", x1); newArrow.setAttribute("y1", y1);
+    newArrow.setAttribute("x2", x2); newArrow.setAttribute("y2", y2);
+    newArrow.setAttribute("stroke", color);
+    newArrow.setAttribute("stroke-width", "3");
+    newArrow.setAttribute("marker-end", "url(#arrowhead)");
+    svg.appendChild(newArrow);
+    
+    // Pfeilspitze Marker
+    if (!document.getElementById('arrowhead')) {
+        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        defs.innerHTML = `<marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="${color}" /></marker>`;
+        svg.appendChild(defs);
+    }
+}
+
+function clearArrows() { document.getElementById('tactical-arrows').innerHTML = ''; }
+
+function shiftBlueTeam(tx, ty) {
+    const blue = document.querySelectorAll('.player-wrapper.blue');
+    blue.forEach(p => {
+        p.style.transition = "all 0.8s ease-in-out";
+        let curX = parseInt(p.style.left);
+        p.style.left = (curX - 20) + "px"; // Rückt leicht entgegen
     });
 }
 
-function updatePlayerName(id, val) {
-    document.getElementById(id).querySelector('.player-circle').innerText = val.toUpperCase();
-}
-function updatePlayerNr(id, val) {
-    document.getElementById(id).querySelector('.player-label').innerText = val;
+/* KADER EDIT LOGIK */
+function openKaderManager() {
+    document.getElementById('kader-modal').style.display = 'flex';
+    const list = document.getElementById('kader-list');
+    list.innerHTML = '';
+    const reds = document.querySelectorAll('.player-wrapper.red');
+    reds.forEach(p => {
+        const n = p.querySelector('.player-circle').innerText;
+        const nr = p.querySelector('.player-label').innerText;
+        list.innerHTML += `<div style="margin-bottom:5px;"><input type="text" value="${n}" onchange="document.getElementById('${p.id}').querySelector('.player-circle').innerText=this.value.toUpperCase()"> <input type="text" value="${nr}" style="width:30px;" onchange="document.getElementById('${p.id}').querySelector('.player-label').innerText=this.value"></div>`;
+    });
 }
 function closeKaderManager() { document.getElementById('kader-modal').style.display = 'none'; }
-
-function exportPlanPDF() { alert("Trainingsplan für Team Björn wird erstellt..."); }
