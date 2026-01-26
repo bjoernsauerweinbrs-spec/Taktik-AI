@@ -1,25 +1,44 @@
-/* Der Ginga-Hover: Zeigt die Werte beim Drüberfahren */
-.player-dot:hover::after {
-    content: "⚽ Tech: " attr(data-tech) "\A👁️ Wahr: " attr(data-perc) "\A🏃 Fit: " attr(data-fit) "\A⭐ Sonder: " attr(data-special);
-    white-space: pre;
-    position: absolute;
-    bottom: 55px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(20, 20, 20, 0.95);
-    color: #fff;
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 11px;
-    line-height: 1.4;
-    z-index: 1000;
-    border: 1px solid #4caf50;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+/* Das grüne Ginga-Feld */
+#pitch {
+    width: 800px;
+    height: 500px;
+    background: radial-gradient(circle, #2e7d32 0%, #1b5e20 100%);
+    border: 10px solid #fff;
+    border-radius: 15px;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    margin: 20px auto;
 }
 
-/* Hilfsklasse für die Positionierung */
+/* Spielfeldmarkierungen */
+.center-line { position: absolute; left: 50%; width: 2px; height: 100%; background: white; }
+.center-circle { 
+    position: absolute; top: 50%; left: 50%; width: 120px; height: 120px; 
+    border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); 
+}
+
+/* Die Spieler-Dots */
 .player-dot {
     position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     cursor: grab;
-    transition: transform 0.2s ease;
+    z-index: 100;
+}
+.red { background: linear-gradient(135.deg, #ff1744, #b71c1c); }
+
+.player-label {
+    position: absolute;
+    top: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.9);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
 }
