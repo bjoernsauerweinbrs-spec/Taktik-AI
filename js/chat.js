@@ -1,106 +1,64 @@
 /**
- * Toni 2.0 - Intelligence & Communication Engine
- * Steuert Tonis Dialoge, die Websuche und die visuelle Demonstration.
+ * Toni 2.0 - Chat & Intelligence Engine (Final Version)
  */
 
-const chatOutput = document.getElementById('toni-output');
+const outputContainer = document.getElementById('toni-output');
 
 /**
- * Kernfunktion: Toni spricht zum Trainer
- * @param {string} message - Der Text von Toni
- * @param {boolean} useVoice - Ob die Sprachausgabe aktiviert werden soll
+ * Toni gibt eine Nachricht aus (Text & Audio)
  */
-function toniSpeak(message, useVoice = true) {
-    if (!chatOutput) return;
+function toniSpeak(message) {
+    if (!outputContainer) return;
 
-    // 1. Textuelle Ausgabe
-    const msgElement = document.createElement('div');
-    msgElement.className = 'toni-message';
-    msgElement.style = "margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;";
-    msgElement.innerHTML = `<strong>Toni:</strong> ${message}`;
-    chatOutput.prepend(msgElement); // Neueste Nachrichten nach oben
+    const msg = document.createElement('div');
+    msg.style = "background: #e8f5e9; padding: 10px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #2e7d32;";
+    msg.innerHTML = `<strong>Toni:</strong> ${message}`;
+    outputContainer.prepend(msg);
 
-    // 2. Sprachausgabe (Web Speech API)
-    if (useVoice && 'speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(message);
-        utterance.lang = 'pt-BR'; // Kleiner Trick für brasilianischen Akzent bei dt. Text
-        utterance.lang = 'de-DE'; 
-        utterance.pitch = 0.9; // Etwas tiefere, männliche Stimme
-        utterance.rate = 1.0;
-        window.speechSynthesis.speak(utterance);
+    // Männliche Stimme (Deutsch)
+    if ('speechSynthesis' in window) {
+        const synth = window.speechSynthesis;
+        const utter = new SpeechSynthesisUtterance(message);
+        utter.pitch = 0.85; // Tiefer für männliche Stimme
+        utter.rate = 1.0;
+        synth.speak(utter);
     }
 }
 
 /**
- * Simuliert die Websuche nach Trainingsübungen
- * Basierend auf der aktuellen Spieleranzahl im Kader.
+ * Simuliert die Internet-Recherche
  */
 function searchTrainingNet() {
-    const count = activeTrainingCount;
-    toniSpeak(`Björn, ich durchsuche gerade das Netz nach den besten Übungen für unsere ${count} Jungs. Ich vergleiche Stile von Brasilien bis Europa...`);
-
-    // Simulierte Verzögerung für die "Fachrecherche"
+    toniSpeak("Ich scanne das Internet nach Top-Übungen für " + activeTrainingCount + " Spieler... Vergleiche brasilianische Technik mit europäischer Taktik.");
+    
     setTimeout(() => {
-        const trainingId = (currentMode === 'funino') ? "Funino-Power" : "Umschaltspiel-Expert";
-        toniSpeak(`Sensationell! Ich habe eine Übung gefunden: <strong>"${trainingId}"</strong>. Soll ich die 12 gelben Hütchen aufstellen und die Jungs farblich einteilen?`);
+        const title = currentMode === 'funino' ? "Ginga-Kids 3v3" : "Brasilianisches Umschaltspiel";
+        toniSpeak(`Björn, ich habe die Übung <strong>"${title}"</strong> gefunden. Ich platziere die Hütchen und teile die Leibchen für dich ein!`);
         
-        // Material-Button anbieten
-        const btn = document.createElement('button');
-        btn.className = 'nav-btn';
-        btn.style.marginTop = "10px";
-        btn.innerText = "Ja, bau es auf!";
-        btn.onclick = () => setupTrainingVisuals(trainingId);
-        chatOutput.prepend(btn);
+        // Leibchen-Logik: Erste Hälfte Gelb, zweite Hälfte Rot
+        squad.forEach((p, i) => {
+            if(p.status === 'team') {
+                p.color = (i % 2 === 0) ? 'var(--yellow-leibchen)' : 'var(--red-team)';
+            }
+        });
+        
+        placeCones(8);
+        drawBoard();
     }, 2000);
 }
 
 /**
- * Visuelle Demonstration: Toni baut die Übung auf dem Board auf
+ * Verarbeitet manuelle Trainer-Eingaben
  */
-function setupTrainingVisuals(type) {
-    toniSpeak("Alles klar, ich bewege die Spieler und teile die Leibchen aus. Schau aufs Board!");
-
-    // 1. Leibchen-Farben ändern (Beispiel: 5 Gelb vs. 5 Rot)
-    squad.forEach((p, index) => {
-        if(index < 5) p.color = "var(--yellow-leibchen)"; //
-        else p.color = "var(--red-team)";
-    });
-
-    // 2. Material aufstellen (Hütchen)
-    if (typeof placeCones === "function") {
-        placeCones(12); //
-    }
-
-    // 3. Board neu zeichnen
-    drawBoard();
-
-    // 4. Animation der Laufwege einzeichnen (Demo)
-    showTacticalArrows();
-}
-
-/**
- * Zeichnet taktische Pfeile für Pass- und Laufwege
- */
-function showTacticalArrows() {
-    // Hier nutzen wir ein Canvas-Overlay oder SVG (in Paket 5 detailliert)
-    toniSpeak("Ich habe dir die Laufwege mit gestrichelten Linien eingezeichnet. Thorsten zieht nach innen, David Luiz sichert ab.");
-}
-
-/**
- * Feedback-Funktion: Trainer bewertet Spieler
- */
-function openPlayerEvaluation(playerId) {
-    const player = squad.find(p => p.id === playerId);
-    if(!player) return;
-
-    toniSpeak(`Björn, wie war ${player.name} heute? War er gut im Passspiel oder eher konditionell schwach?`);
-    
-    // Hier öffnet sich später das Modal aus Paket 5
-}
-
-// Event-Listener für Eingaben (falls du ein Chat-Feld hast)
-function handleChatInput(text) {
-    if(text.toLowerCase().includes("suche") || text.toLowerCase().includes("training")) {
+function handleChatInput(input) {
+    const val = input.toLowerCase();
+    if (val.includes("suche") || val.includes("übung")) {
         searchTrainingNet();
+    } else if (val.includes("funino")) {
+        switchMode('funino');
+    } else if (val.includes("11")) {
+        switchMode('11v11');
+    } else {
+        toniSpeak("Interessanter Punkt, Björn. Soll ich das taktisch für dich auf dem Board demonstrieren?");
     }
 }
