@@ -1,72 +1,83 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <title>Toni - Dein Taktik-Coach</title>
-    <style>
-        :root {
-            --pitch-green: #ffffff;
-            --line-color: #333;
-            --sidebar-bg: #f4f4f4;
-            --accent-color: #d32f2f;
-        }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        #squad-sidebar { width: 250px; background: var(--sidebar-bg); border-right: 2px solid #ddd; display: flex; flex-direction: column; }
-        #main-stage { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; background: #eee; }
-        #toni-sidebar { width: 300px; background: var(--sidebar-bg); border-left: 2px solid #ddd; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
-        .controls { position: absolute; top: 20px; z-index: 10; display: flex; gap: 10px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn { padding: 8px 15px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #fff; font-weight: bold; }
-        .btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
-        #pitch { width: 800px; height: 500px; background: var(--pitch-green); border: 3px solid var(--line-color); position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        .center-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--line-color); }
-        .center-circle { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 120px; height: 120px; border: 2px solid var(--line-color); border-radius: 50%; }
-        .player-dot { position: absolute; width: 35px; height: 35px; border-radius: 50%; border: 2px solid white; cursor: move; z-index: 20; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-        .red { background: #d32f2f; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        .player-label { position: absolute; top: 40px; white-space: nowrap; background: rgba(255,255,255,0.8); color: black; padding: 2px 5px; border-radius: 3px; font-size: 10px; }
-        #toni-output { flex-grow: 1; overflow-y: auto; margin-top: 15px; font-size: 0.9em; line-height: 1.5; }
-        .chat-input { width: 100%; padding: 10px; border-radius: 20px; border: 1px solid #ccc; margin-top: 10px; }
-    </style>
-</head>
-<body>
-    <script>
-        if(sessionStorage.getItem('toni_auth') !== 'true') { window.location.href = 'index.html'; }
-    </script>
+/**
+ * Toni 2.0 - Board Engine (Finaler Kern)
+ */
+var pitch = document.getElementById('pitch');
 
-    <div id="squad-sidebar">
-        <h3 style="padding: 15px; margin: 0; border-bottom: 1px solid #ddd;">Kader-Matrix</h3>
-        <div id="player-list" style="padding: 10px; overflow-y: auto; flex-grow: 1;">
-            <p style="color: #666; font-size: 0.9em;">Warte auf Kaderdaten...</p>
-        </div>
-        <button class="btn" style="margin: 10px;" onclick="addNewPlayerPrompt()">+ Spieler</button>
-    </div>
+function drawBoard() {
+    if (!pitch) return;
+    
+    // Spielfeld-Struktur: Mittellinie und Kreis
+    pitch.innerHTML = 
+        '<div class="center-line" style="position:absolute; left:50%; width:2px; height:100%; background:rgba(0,0,0,0.2);"></div>' +
+        '<div class="center-circle" style="position:absolute; top:50%; left:50%; width:100px; height:100px; border:2px solid rgba(0,0,0,0.2); border-radius:50%; transform:translate(-50%,-50%);"></div>' +
+        '<div id="ball" style="position:absolute; top:50%; left:50%; width:15px; height:15px; background:white; border-radius:50%; transform:translate(-50%,-50%); border:1px solid black; z-index:10; cursor:move;">⚽</div>';
 
-    <div id="main-stage">
-        <div class="controls">
-            <div id="briefcase" onclick="exportToKlemmbrett()">💼</div>
-            <button class="btn active" onclick="switchMode('11v11', this)">11 gegen 11</button>
-            <button class="btn" onclick="switchMode('training', this)">Training</button>
-            <button class="btn" onclick="switchMode('funino', this)">Funino</button>
-        </div>
-        <div id="pitch">
-            <div class="center-line"></div>
-            <div class="center-circle"></div>
-        </div>
-    </div>
+    // Spieler aus dem Kader (Team Rot) zeichnen
+    if (typeof squad !== 'undefined') {
+        squad.forEach(function(p) {
+            if (p.status === 'team') {
+                createPlayerDot(p, 'red');
+            }
+        });
+    }
+}
 
-    <div id="toni-sidebar">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 50px; height: 50px; background: #2e7d32; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">T</div>
-            <strong>Toni (Fachmann)</strong>
-        </div>
-        <div id="toni-output">
-            <p>Hallo Björn! Ich bin bereit. Wähle einen Modus.</p>
-        </div>
-        <input type="text" class="chat-input" placeholder="Frag Toni..." onkeypress="if(event.key === 'Enter') { handleChatInput(this.value); this.value=''; }">
-    </div>
+function createPlayerDot(p, colorClass) {
+    var dot = document.createElement('div');
+    dot.className = 'player-dot ' + colorClass;
+    // Startposition: Mitte oder gespeicherte Werte
+    dot.style.left = p.x || '50%';
+    dot.style.top = p.y || '50%';
+    
+    // Name und Nummer unter dem Spieler
+    dot.innerHTML = p.nr + '<div class="player-label">#' + p.nr + ' ' + p.name + '</div>';
+    
+    // CSS direkt für die Dots (falls style.css noch lädt)
+    dot.style.position = "absolute";
+    dot.style.width = "35px";
+    dot.style.height = "35px";
+    dot.style.borderRadius = "50%";
+    dot.style.display = "flex";
+    dot.style.alignItems = "center";
+    dot.style.justifyContent = "center";
+    dot.style.color = "white";
+    dot.style.fontWeight = "bold";
+    dot.style.cursor = "move";
+    dot.style.zIndex = "20";
+    dot.style.background = colorClass === 'red' ? '#d32f2f' : '#1976d2';
+    dot.style.border = "2px solid white";
 
-    <script src="js/logic.js"></script>
-    <script src="js/board.js"></script>
-    <script src="js/chat.js"></script>
-    <script src="js/storage.js"></script>
-</body>
-</html>
+    makeDraggable(dot, p.id);
+    pitch.appendChild(dot);
+}
+
+function makeDraggable(el, playerId) {
+    var isDragging = false;
+    el.onmousedown = function() { isDragging = true; el.style.cursor = 'grabbing'; };
+    
+    document.onmousemove = function(e) {
+        if (!isDragging) return;
+        var rect = pitch.getBoundingClientRect();
+        var x = ((e.clientX - rect.left) / rect.width) * 100;
+        var y = ((e.clientY - rect.top) / rect.height) * 100;
+        
+        var posX = Math.max(0, Math.min(100, x)) + '%';
+        var posY = Math.max(0, Math.min(100, y)) + '%';
+        
+        el.style.left = posX;
+        el.style.top = posY;
+
+        // Position im Speicher aktualisieren
+        var p = squad.find(function(player) { return player.id === playerId; });
+        if (p) { p.x = posX; p.y = posY; }
+    };
+    
+    document.onmouseup = function() { 
+        isDragging = false; 
+        el.style.cursor = 'move';
+        if (typeof saveSquadData === "function") saveSquadData(); 
+    };
+}
+
+// Initialer Start
+document.addEventListener('DOMContentLoaded', drawBoard);
