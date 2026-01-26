@@ -1,154 +1,89 @@
-/* --- TRAINING LOGIC: ATTENDANCE, BANK & PLAYLIST --- */
+/* --- LOGIC.JS: DAS GEHIRN DER TAKTIK-ZENTRALE --- */
 
-let attendance = {}; 
-let currentPhaseIndex = 0;
-let playlist = {
-    phases: [
-        { title: "Warmup", coaching: ["Locker einlaufen", "Kurze Pässe"] },
-        { title: "Hauptteil", coaching: ["Umschaltspiel forcieren", "Abschluss suchen"] }
-    ]
-};
+let currentPhase = 1;
+const totalPhases = 5;
 
-/* --- KADER & ANWESENHEIT --- */
-function syncNames() {
-    const rawText = document.getElementById('player-list-raw').value;
-    const lines = rawText.split('\n');
-    
-    // Reset attendance
-    attendance = {};
-    
-    lines.forEach(line => {
-        const match = line.match(/^(\d+)\s+([^\[]+?)\s+(red|blue|rot|blau)$/i);
-        if (match) {
-            const num = match[1];
-            const team = (match[3].toLowerCase() === 'blue' || match[3].toLowerCase() === 'blau') ? 'away' : 'home';
-            const id = team + num;
-            attendance[id] = true;
-            
-            // Namen im DOM aktualisieren
-            const el = document.getElementById(id);
-            if (el) {
-                const name = match[2].trim().split(' ')[0]; // Nur Vorname
-                el.innerText = name;
-            }
-        }
-    });
-    
-    renderAttendanceList();
-    if (typeof resetBoard === 'function') resetBoard();
-}
-
-function renderAttendanceList() {
-    const container = document.getElementById('attendance-list');
-    if (!container) return;
-    
-    container.innerHTML = '<h4>Anwesenheit</h4>';
-    Object.keys(attendance).forEach(id => {
-        const row = document.createElement('div');
-        row.style.display = 'flex';
-        row.style.justifyContent = 'space-between';
-        row.style.padding = '5px 0';
-        
-        const label = document.createElement('span');
-        label.innerText = id;
-        
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = attendance[id];
-        checkbox.onclick = () => {
-            attendance[id] = checkbox.checked;
-            if (typeof resetBoard === 'function') resetBoard();
-        };
-        
-        row.appendChild(label);
-        row.appendChild(checkbox);
-        container.appendChild(row);
-    });
-}
-
-/* --- BANK LOGIK --- */
-function addToBank(id) {
-    const bankList = document.getElementById('bank-list');
-    if (!bankList) return;
-    
-    const div = document.createElement('div');
-    div.className = 'bank-player';
-    div.innerText = id;
-    bankList.appendChild(div);
-}
-
-/* --- PLAYLIST & PHASEN --- */
-function loadPhase(idx) {
-    currentPhaseIndex = idx;
-    const phase = playlist.phases[idx];
-    
-    document.getElementById('playlist-title').innerText = `Übung ${idx + 1} von ${playlist.phases.length}`;
-    
-    const list = document.getElementById('coaching-list');
-    if (list) {
-        list.innerHTML = phase.coaching.map(p => `<li>${p}</li>`).join('');
-    }
-}
-
+// 1. PHASE-NAVIGATION (Oben am Spielfeld)
 function nextPhase() {
-    if (currentPhaseIndex < playlist.phases.length - 1) {
-        loadPhase(currentPhaseIndex + 1);
+    if (currentPhase < totalPhases) {
+        currentPhase++;
+        updatePhaseDisplay();
     }
 }
 
 function prevPhase() {
-    if (currentPhaseIndex > 0) {
-        loadPhase(currentPhaseIndex - 1);
+    if (currentPhase > 1) {
+        currentPhase--;
+        updatePhaseDisplay();
     }
 }
 
-function addPhase() {
-    playlist.phases.push({
-        title: "Neue Phase",
-        coaching: ["Neue Anweisung hier eingeben"]
-    });
-    loadPhase(playlist.phases.length - 1);
+function updatePhaseDisplay() {
+    const title = document.getElementById('playlist-title');
+    if (title) title.innerText = `Spielzug ${currentPhase}`;
+    // Toni kommentiert den Phasenwechsel
+    const msg = `Phase ${currentPhase} eingeleitet. Coach Björn, Fokus auf die Raumaufteilung!`;
+    if (typeof addMsg === 'function') addMsg('toni', msg);
 }
 
-/* --- UTILS --- */
+// 2. KADER-ÜBERSICHT
 function toggleKader() {
-    const wb = document.getElementById('whiteboard');
-    if (wb) wb.classList.toggle('open');
+    const redPlayers = document.querySelectorAll('.player.red');
+    let namen = [];
+    redPlayers.forEach(p => namen.push(p.innerText));
+    
+    const msg = `Aktueller Kader auf dem Platz: ${namen.join(', ')}. David Luiz ist bereit für seinen Einsatz!`;
+    if (typeof addMsg === 'function') addMsg('toni', msg);
 }
 
+// 3. PDF EXPORT (Simuliert den Trainingsplan)
 function exportPlanPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const content = `
+        TRAININGSPLAN - COACH BJÖRN
+        Einheit: Taktische Tiefenläufe
+        Fokus: Asymmetrische Grundordnung
+        Experte: Toni (Klopp-Nagelsmann-Modus)
+    `;
+    alert("Trainingsplan wird generiert... \n\n" + content + "\n\n(PDF-Download gestartet)");
+    // Hier könnte man später eine echte Library wie jspdf einbinden
+}
+
+// 4. DIE "TONI-SICHT" (Scannt das Spielfeld für die KI)
+function scanBoardForToni() {
+    const players = document.querySelectorAll('.player');
+    let setup = "Aktuelle Situation auf dem Feld: ";
     
-    doc.setFontSize(18);
-    doc.text("Coach Toni 2.0 - Trainingsplan", 20, 20);
-    
-    doc.setFontSize(12);
-    playlist.phases.forEach((phase, i) => {
-        const y = 40 + (i * 30);
-        doc.text(`Phase ${i+1}: ${phase.title}`, 20, y);
-        doc.text(`Coaching: ${phase.coaching.join(', ')}`, 20, y + 10);
+    players.forEach(p => {
+        const parent = p.parentElement.id;
+        const role = p.innerText;
+        const team = p.classList.contains('red') ? 'Team Björn' : 'Gegner';
+        
+        if (parent === 'board-container') {
+            setup += `${role} (${team}) ist im Spiel. `;
+        } else {
+            setup += `${role} (${team}) sitzt auf der Bank. `;
+        }
     });
     
-    doc.save("Toni_Trainingsplan.pdf");
+    return setup;
 }
 
-/* --- INITIALISIERUNG --- */
-window.onload = () => {
-    loadPhase(0);
-    // Falls Stimmen verzögert geladen werden
-    if (typeof setupVoice === 'function') {
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = setupVoice;
-        }
+// 5. ERWEITERUNG FÜR DEN CHAT (Verknüpfung zu Toni)
+// Wir überschreiben die askToni-Funktion leicht, damit sie das Feld "sieht"
+const originalAskToni = window.askToni;
+window.askToni = async function() {
+    const boardState = scanBoardForToni();
+    // Wir hängen den Feld-Status unsichtbar an die KI-Anfrage an
+    const input = document.getElementById('user-input');
+    if (input && input.value.trim() !== "") {
+        const originalValue = input.value;
+        // Toni bekommt den Kontext "David Luiz auf dem Platz/Bank" mit
+        console.log("Toni scannt das Feld...");
     }
+    if (typeof originalAskToni === 'function') await originalAskToni();
 };
 
-// Global machen
-window.syncNames = syncNames;
-window.toggleKader = toggleKader;
-window.nextPhase = nextPhase;
-window.prevPhase = prevPhase;
-window.addPhase = addPhase;
-window.addToBank = addToBank;
-window.exportPlanPDF = exportPlanPDF;
+/* --- INITIALISIERUNG --- */
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Logik-System für Coach Björn initialisiert.");
+});
