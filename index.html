@@ -1,42 +1,123 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Toni 2.0 - Ginga Board</title>
-  <link rel="stylesheet" href="css/style.css" />
+    <meta charset="UTF-8">
+    <title>Toni - Dein Taktik-Coach</title>
+    <style>
+        :root {
+            --pitch-green: #ffffff; /* Clean Design: Weißer Hintergrund */
+            --line-color: #333;
+            --sidebar-bg: #f4f4f4;
+            --accent-color: #d32f2f; /* Rot für Team Björn */
+            --opponent-color: #1976d2; /* Blau für Gegner */
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar Links: Kader */
+        #squad-sidebar { width: 250px; background: var(--sidebar-bg); border-right: 2px solid #ddd; display: flex; flex-direction: column; }
+        
+        /* Zentrum: Spielfeld */
+        #main-stage { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; background: #eee; }
+        
+        /* Sidebar Rechts: Toni Analyse */
+        #toni-sidebar { width: 300px; background: var(--sidebar-bg); border-left: 2px solid #ddd; padding: 15px; overflow-y: auto; }
+
+        /* Header / Switcher */
+        .controls { position: absolute; top: 20px; z-index: 10; display: flex; gap: 10px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn { padding: 8px 15px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #fff; font-weight: bold; }
+        .btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
+
+        /* Spielfeld Grafik */
+        #pitch { 
+            width: 800px; height: 500px; background: var(--pitch-green); 
+            border: 3px solid var(--line-color); position: relative; 
+            transition: all 0.5s ease; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .center-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--line-color); }
+        .center-circle { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 120px; height: 120px; border: 2px solid var(--line-color); border-radius: 50%; }
+
+        /* Tore */
+        .goal { position: absolute; width: 10px; height: 60px; background: #000; }
+        .goal.left { left: -10px; top: 220px; }
+        .goal.right { right: -10px; top: 220px; }
+
+        /* Funino Tore */
+        .funino-goal { width: 8px; height: 30px; background: #555; position: absolute; display: none; }
+        
+        /* Aktentasche Icon */
+        #briefcase { font-size: 24px; cursor: pointer; }
+
+    </style>
 </head>
 <body>
-  <div id="app">
-    <aside id="sidebar">
-      <div id="toni-status-bar">
-        <div id="status-led"></div>
-        <span id="status-text">Toni ist im Standby</span>
-      </div>
 
-      <div id="chat-controls" class="controls">
-        <input id="toni-input" type="text" placeholder="Hallo" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line)" />
-        <button id="ok-btn">OK</button>
-      </div>
+    <div id="squad-sidebar">
+        <h3 style="padding: 15px;">Kader-Matrix</h3>
+        <div id="player-list" style="padding: 10px;">
+            <p style="color: #666; font-size: 0.9em;">Warte auf Kaderdaten...</p>
+        </div>
+    </div>
 
-      <div id="toni-output"></div>
+    <div id="main-stage">
+        <div class="controls">
+            <div id="briefcase">💼</div>
+            <button class="btn active" onclick="switchMode('11v11', this)">11 gegen 11</button>
+            <button class="btn" onclick="switchMode('training', this)">Training</button>
+            <button class="btn" onclick="switchMode('funino', this)">Funino</button>
+        </div>
 
-      <div class="controls">
-        <button id="btn-roster">Kader</button>
-        <button id="btn-preview">Vorschau Moves</button>
-        <button id="export-json" class="ghost">Export JSON</button>
-      </div>
-    </aside>
+        <div id="pitch">
+            <div class="center-line"></div>
+            <div class="center-circle"></div>
+            <div id="goal-l" class="goal left"></div>
+            <div id="goal-r" class="goal right"></div>
+            
+            <div class="funino-goal" style="left: 0; top: 100px;"></div>
+            <div class="funino-goal" style="left: 0; top: 370px;"></div>
+            <div class="funino-goal" style="right: 0; top: 100px;"></div>
+            <div class="funino-goal" style="right: 0; top: 370px;"></div>
+        </div>
+    </div>
 
-    <main id="pitch-wrapper">
-      <div id="pitch"></div>
-    </main>
-  </div>
+    <div id="toni-sidebar">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 50px; height: 50px; background: #ccc; border-radius: 50%;"></div> <strong>Toni (Fachmann)</strong>
+        </div>
+        <hr>
+        <div id="toni-output">
+            <p>Hallo Björn! Ich bin bereit. Wähle einen Modus, um mit der Analyse zu starten.</p>
+        </div>
+    </div>
 
-  <!-- Skripte am Ende laden -->
-  <script src="js/storage.js"></script>
-  <script src="js/logic.js"></script>
-  <script src="js/board.js"></script>
-  <script src="js/chat.js"></script>
+    <script>
+        function switchMode(mode, btn) {
+            // Button Styling
+            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const pitch = document.getElementById('pitch');
+            const funinoGoals = document.querySelectorAll('.funino-goal');
+            const stdGoals = document.querySelectorAll('.goal');
+            const output = document.getElementById('toni-output');
+
+            if(mode === 'funino') {
+                pitch.style.width = '600px';
+                pitch.style.height = '400px';
+                funinoGoals.forEach(g => g.style.display = 'block');
+                stdGoals.forEach(g => g.style.display = 'none');
+                output.innerHTML = "<p><strong>Toni:</strong> Funino-Modus aktiviert. Schusszonen sind markiert. Wie viele Kinder trainieren heute?</p>";
+            } else {
+                pitch.style.width = '800px';
+                pitch.style.height = '500px';
+                funinoGoals.forEach(g => g.style.display = 'none');
+                stdGoals.forEach(g => g.style.display = 'block');
+                output.innerHTML = mode === '11v11' ? 
+                    "<p><strong>Toni:</strong> 11 gegen 11 Analyse. Rotes Team im 4-4-2. Wer spielt heute von Beginn an?</p>" :
+                    "<p><strong>Toni:</strong> Trainingsmodus. Ich durchsuche das Netz nach Übungen für deine Spieleranzahl...</p>";
+            }
+        }
+    </script>
 </body>
 </html>
