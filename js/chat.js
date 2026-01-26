@@ -1,160 +1,106 @@
-/* --- TONI'S BRAIN & VOICE --- */
-let GROQ_KEY = ""; 
-let isLocked = false;
-let toniVoice = null;
+/**
+ * Toni 2.0 - Intelligence & Communication Engine
+ * Steuert Tonis Dialoge, die Websuche und die visuelle Demonstration.
+ */
 
-const TONI_PERSONA = `
-Identität: Toni, Elite-Taktik-Experte.
-Profil: Mischung aus Jürgen Klopp (Emotion/Pressing) und Julian Nagelsmann (Analyse/Räume).
-Hintergrund: Brasilianische Technik, ghanaische Lockerheit, deutsche Durchsetzungskraft.
-Sprachstil: Analytisch ("Asymmetrie", "Halbräume"), motivierend ("Mentalitäts-Monster"), direkt ("Coach Björn").
-Regel: Bei fachfremden Fragen (Wetter/Politik) humorvoll zum Fußball zurücklenken.
-`;
+const chatOutput = document.getElementById('toni-output');
 
-/* --- CHAT-SYSTEM --- */
-function addMsg(role, txt) {
-  const history = document.getElementById('chat-history');
-  if (!history) return;
-  
-  const div = document.createElement('div');
-  div.className = `msg ${role === 'toni' ? 'toni' : 'user'}`;
-  div.innerText = txt;
-  
-  history.appendChild(div);
-  
-  // AUTOMATISCHES SCROLLEN: Springt immer zur neuesten Nachricht
-  history.scrollTop = history.scrollHeight;
-}
+/**
+ * Kernfunktion: Toni spricht zum Trainer
+ * @param {string} message - Der Text von Toni
+ * @param {boolean} useVoice - Ob die Sprachausgabe aktiviert werden soll
+ */
+function toniSpeak(message, useVoice = true) {
+    if (!chatOutput) return;
 
-/* --- API-VERBINDUNG ZU GROQ --- */
-async function fetchToni(userText) {
-  try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${GROQ_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: TONI_PERSONA },
-          { role: "user", content: userText }
-        ],
-        temperature: 0.7
-      })
-    });
-    const data = await response.json();
-    return data.choices[0].message.content;
-  } catch (err) {
-    console.error("Groq Error:", err);
-    return "Coach, die Leitung ins Rechenzentrum ist gerade lückenhaft. Sicherung prüfen und nochmal versuchen!";
-  }
-}
+    // 1. Textuelle Ausgabe
+    const msgElement = document.createElement('div');
+    msgElement.className = 'toni-message';
+    msgElement.style = "margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;";
+    msgElement.innerHTML = `<strong>Toni:</strong> ${message}`;
+    chatOutput.prepend(msgElement); // Neueste Nachrichten nach oben
 
-/* --- INTERAKTION --- */
-async function askToni() {
-  if (isLocked) return;
-  const input = document.getElementById('user-input');
-  const text = input.value.trim();
-  if (!text) return;
-
-  addMsg('user', text);
-  input.value = '';
-  isLocked = true;
-
-  const answer = await fetchToni(text);
-  addMsg('toni', answer);
-  speakStyled(answer);
-  isLocked = false;
-}
-
-/* --- SPEZIAL-ANALYSEN (BUTTONS) --- */
-async function askToniTaktik() {
-  const msg = "Toni, kompletter Taktik-Check: Wie bewertest du unsere aktuelle Raumaufteilung und die Besetzung der Halbräume?";
-  addMsg('user', msg);
-  isLocked = true;
-  const answer = await fetchToni(msg);
-  addMsg('toni', answer);
-  speakStyled(answer);
-  isLocked = false;
-}
-
-async function askToniPressing() {
-  const msg = "Toni, Pressing-Check: Haben wir die nötige Intensität für echtes Gegenpressing? Sind wir Mentalitäts-Monster?";
-  addMsg('user', msg);
-  isLocked = true;
-  const answer = await fetchToni(msg);
-  addMsg('toni', answer);
-  speakStyled(answer);
-  isLocked = false;
-}
-
-/* --- BASICS (STIMME & LOGIN) --- */
-function setupVoice() {
-  const voices = speechSynthesis.getVoices();
-  toniVoice = voices.find(v => v.lang.startsWith('de') && !v.name.toLowerCase().includes('female')) || voices[0];
-}
-
-function speakStyled(text) {
-  if (!text) return;
-  speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  if (toniVoice) utterance.voice = toniVoice;
-  utterance.lang = 'de-DE';
-  utterance.pitch = 0.85;
-  utterance.rate = 1.0;
-  speechSynthesis.speak(utterance);
-}
-
-function startMic() {
-  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRec) return;
-  const rec = new SpeechRec();
-  rec.lang = 'de-DE';
-  rec.onresult = (e) => {
-    document.getElementById('user-input').value = e.results[0][0].transcript;
-    askToni();
-  };
-  rec.start();
-}
-
-function startToni() {
-  const pw = document.getElementById('password').value;
-  const userKey = document.getElementById('user-groq-key').value.trim();
-
-  if (pw === 'Trainer2026') {
-    if (userKey.startsWith('gsk_')) {
-      GROQ_KEY = userKey;
-      document.getElementById('login-overlay').style.display = 'none';
-      setupVoice();
-      if (typeof resetBoard === 'function') resetBoard();
-      const welcome = "System online. Coach Björn, wir gehen in die Vollen!";
-      addMsg('toni', welcome);
-      speakStyled(welcome);
-    } else {
-      alert("Bitte gib einen gültigen Groq API-Key ein (gsk_...).");
+    // 2. Sprachausgabe (Web Speech API)
+    if (useVoice && 'speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'pt-BR'; // Kleiner Trick für brasilianischen Akzent bei dt. Text
+        utterance.lang = 'de-DE'; 
+        utterance.pitch = 0.9; // Etwas tiefere, männliche Stimme
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
     }
-  } else {
-    alert("Passwort falsch.");
-  }
 }
 
-function welcomeFlow() {
-  const msg = "Bereit für Heavy-Metal-Fußball? Lassen wir die Daten tanzen, Coach Björn.";
-  addMsg('toni', msg);
-  speakStyled(msg);
+/**
+ * Simuliert die Websuche nach Trainingsübungen
+ * Basierend auf der aktuellen Spieleranzahl im Kader.
+ */
+function searchTrainingNet() {
+    const count = activeTrainingCount;
+    toniSpeak(`Björn, ich durchsuche gerade das Netz nach den besten Übungen für unsere ${count} Jungs. Ich vergleiche Stile von Brasilien bis Europa...`);
+
+    // Simulierte Verzögerung für die "Fachrecherche"
+    setTimeout(() => {
+        const trainingId = (currentMode === 'funino') ? "Funino-Power" : "Umschaltspiel-Expert";
+        toniSpeak(`Sensationell! Ich habe eine Übung gefunden: <strong>"${trainingId}"</strong>. Soll ich die 12 gelben Hütchen aufstellen und die Jungs farblich einteilen?`);
+        
+        // Material-Button anbieten
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn';
+        btn.style.marginTop = "10px";
+        btn.innerText = "Ja, bau es auf!";
+        btn.onclick = () => setupTrainingVisuals(trainingId);
+        chatOutput.prepend(btn);
+    }, 2000);
 }
 
-if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = setupVoice;
+/**
+ * Visuelle Demonstration: Toni baut die Übung auf dem Board auf
+ */
+function setupTrainingVisuals(type) {
+    toniSpeak("Alles klar, ich bewege die Spieler und teile die Leibchen aus. Schau aufs Board!");
+
+    // 1. Leibchen-Farben ändern (Beispiel: 5 Gelb vs. 5 Rot)
+    squad.forEach((p, index) => {
+        if(index < 5) p.color = "var(--yellow-leibchen)"; //
+        else p.color = "var(--red-team)";
+    });
+
+    // 2. Material aufstellen (Hütchen)
+    if (typeof placeCones === "function") {
+        placeCones(12); //
+    }
+
+    // 3. Board neu zeichnen
+    drawBoard();
+
+    // 4. Animation der Laufwege einzeichnen (Demo)
+    showTacticalArrows();
 }
 
-/* --- EXPORTE FÜR HTML --- */
-window.startToni = startToni;
-window.askToni = askToni;
-window.addMsg = addMsg;
-window.startMic = startMic;
-window.welcomeFlow = welcomeFlow;
-window.askToniTaktik = askToniTaktik;
-window.askToniPressing = askToniPressing;
+/**
+ * Zeichnet taktische Pfeile für Pass- und Laufwege
+ */
+function showTacticalArrows() {
+    // Hier nutzen wir ein Canvas-Overlay oder SVG (in Paket 5 detailliert)
+    toniSpeak("Ich habe dir die Laufwege mit gestrichelten Linien eingezeichnet. Thorsten zieht nach innen, David Luiz sichert ab.");
+}
+
+/**
+ * Feedback-Funktion: Trainer bewertet Spieler
+ */
+function openPlayerEvaluation(playerId) {
+    const player = squad.find(p => p.id === playerId);
+    if(!player) return;
+
+    toniSpeak(`Björn, wie war ${player.name} heute? War er gut im Passspiel oder eher konditionell schwach?`);
+    
+    // Hier öffnet sich später das Modal aus Paket 5
+}
+
+// Event-Listener für Eingaben (falls du ein Chat-Feld hast)
+function handleChatInput(text) {
+    if(text.toLowerCase().includes("suche") || text.toLowerCase().includes("training")) {
+        searchTrainingNet();
+    }
+}
