@@ -1,145 +1,91 @@
+/**
+ * Toni 2.0 - Board Steuerung
+ * Formationen, Modi und Spielfeld-Logik
+ */
+
 let currentMode = '11v11';
-let players = [];
-let materials = [];
-
-// Initialisierung beim Laden
-document.addEventListener('DOMContentLoaded', () => {
-    setupBoard();
-    loadTrainerSettings();
-});
-
-function setupBoard() {
-    const pitch = document.getElementById('pitch');
-    
-    // Spieler-Setup basierend auf Modus
-    renderPlayers();
-    
-    // Drag & Drop Initialisierung
-    pitch.addEventListener('dragover', e => e.preventDefault());
-}
 
 function setMode(mode) {
     currentMode = mode;
-    const matBtn = document.getElementById('material-btn-container');
-    
-    // UI-Anpassung
-    document.querySelectorAll('.mode-group .btn').forEach(btn => {
+    console.log("Wechsle in Modus:", mode);
+
+    // UI Feedback
+    document.querySelectorAll('.top-nav .btn').forEach(btn => {
         btn.classList.toggle('active', btn.innerText.toLowerCase().includes(mode.toLowerCase()));
     });
 
-    if(mode === 'training' || mode === 'funino') {
-        matBtn.style.display = 'flex';
-        // Im Trainingsmodus: Start-Setup mit bunten Spielern
-        initTrainingPlayers();
-    } else {
-        matBtn.style.display = 'none';
-        // Im 11v11: Klassisch Rot gegen Blau
-        initTacticalPlayers();
+    if (mode === '11v11') {
+        applyTacticalFormation();
+    } else if (mode === 'training') {
+        applyTrainingSetup();
     }
 }
 
-function initTacticalPlayers() {
+// 11 vs 11: Rot im 3-4-3, Blau im 4-4-2
+function applyTacticalFormation() {
     const pitch = document.getElementById('pitch');
-    // Alle alten Spieler/Materialien löschen
-    document.querySelectorAll('.player, .cone, .ball').forEach(el => el.remove());
-    
-    // Erstelle 11 Rote (Trainer) und 11 Blaue (Toni)
-    for(let i=1; i<=11; i++) {
-        createPlayer('red', i, 50, i * 45 + 50);
-        createPlayer('blue', i, 850, i * 45 + 50);
+    // Zuerst alle blauen Spieler löschen, um neu zu ordnen
+    document.querySelectorAll('.player.blue').forEach(el => el.remove());
+
+    // 1. Blaue Spieler (Toni - 4-4-2)
+    const bluePositions = [
+        {x: 920, y: 280}, // TW
+        {x: 780, y: 80}, {x: 750, y: 200}, {x: 750, y: 360}, {x: 780, y: 480}, // Abwehr
+        {x: 600, y: 80}, {x: 580, y: 200}, {x: 580, y: 360}, {x: 600, y: 480}, // Mittelfeld
+        {x: 400, y: 200}, {x: 400, y: 360} // Sturm
+    ];
+
+    bluePositions.forEach((pos, i) => {
+        createPlayerOnBoard('blue', i + 1, "", "b" + i, pos.x, pos.y);
+    });
+
+    // 2. Rote Spieler (Dein Kader - 3-4-3)
+    // Wir nehmen die vorhandenen roten Spieler und schieben sie auf Position
+    const redPlayers = document.querySelectorAll('.player.red');
+    const redPositions = [
+        {x: 40, y: 280}, // TW (Nr 1)
+        {x: 180, y: 120}, {x: 160, y: 280}, {x: 180, y: 440}, // 3er Kette
+        {x: 350, y: 50}, {x: 330, y: 200}, {x: 330, y: 360}, {x: 350, y: 510}, // 4er Mittelfeld
+        {x: 550, y: 120}, {x: 580, y: 280}, {x: 550, y: 440} // 3er Sturm
+    ];
+
+    redPlayers.forEach((p, i) => {
+        if (redPositions[i]) {
+            p.style.transition = "all 0.8s ease-in-out";
+            p.style.left = redPositions[i].x + 'px';
+            p.style.top = redPositions[i].y + 'px';
+            setTimeout(() => p.style.transition = "none", 800);
+        }
+    });
+}
+
+// Trainings-Setup: Buntere Mischung (Leibchen-Prinzip)
+function applyTrainingSetup() {
+    // Hier könnten wir später Hütchen und Bälle per Zufall oder Standardmuster streuen
+    alert("Trainingsmodus aktiviert: Materialliste in der Aktentasche verfügbar.");
+}
+
+// Hilfsfunktion (falls noch nicht in logic.js global verfügbar)
+if (typeof createPlayerOnBoard !== 'function') {
+    function createPlayerOnBoard(team, nr, name, id, x, y) {
+        const p = document.createElement('div');
+        p.className = `player ${team}`;
+        p.id = id;
+        p.innerText = nr;
+        p.draggable = true;
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        if (name) {
+            const label = document.createElement('div');
+            label.className = 'player-label';
+            label.innerText = `${nr} ${name}`;
+            p.appendChild(label);
+        }
+        p.addEventListener('dragend', (e) => {
+            const rect = document.getElementById('pitch').getBoundingClientRect();
+            p.style.left = (e.clientX - rect.left - 20) + 'px';
+            p.style.top = (e.clientY - rect.top - 20) + 'px';
+        });
+        document.getElementById('pitch').appendChild(p);
     }
-}
-
-function createPlayer(team, number, x, y) {
-    const p = document.createElement('div');
-    p.className = `player ${team}`;
-    p.id = `p-${team}-${number}`;
-    p.innerText = number;
-    p.style.left = x + 'px';
-    p.style.top = y + 'px';
-    p.draggable = true;
-    
-    // Drag-Logic
-    p.addEventListener('dragend', (e) => {
-        const rect = document.getElementById('pitch').getBoundingClientRect();
-        p.style.left = (e.clientX - rect.left - 20) + 'px';
-        p.style.top = (e.clientY - rect.top - 20) + 'px';
-        
-        // Nach jeder Bewegung: Toni "sieht" das jetzt
-        console.log(`Spieler ${number} bewegt auf:`, p.style.left, p.style.top);
-    });
-
-    document.getElementById('pitch').appendChild(p);
-}
-
-// NEU: Material-Funktionen
-function addCone() {
-    const cone = document.createElement('div');
-    cone.className = 'cone';
-    cone.style.position = 'absolute';
-    cone.style.width = '20px';
-    cone.style.height = '20px';
-    cone.style.background = 'orange'; // Symbol für Hütchen
-    cone.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
-    cone.style.left = '475px';
-    cone.style.top = '300px';
-    cone.draggable = true;
-    
-    cone.addEventListener('dragend', (e) => {
-        const rect = document.getElementById('pitch').getBoundingClientRect();
-        cone.style.left = (e.clientX - rect.left - 10) + 'px';
-        cone.style.top = (e.clientY - rect.top - 10) + 'px';
-    });
-    
-    document.getElementById('pitch').appendChild(cone);
-}
-
-// NEU: Animation für Toni (Laufwege)
-function animateMove(playerId, targetX, targetY) {
-    const player = document.getElementById(playerId);
-    if(!player) return;
-    
-    // Zeichne Pfeil (vereinfacht)
-    drawArrow(parseFloat(player.style.left), parseFloat(player.style.top), targetX, targetY);
-    
-    // Bewege Spieler
-    player.style.transition = "all 2s ease-in-out";
-    player.style.left = targetX + "px";
-    player.style.top = targetY + "px";
-    
-    // Nach Animation Transition entfernen
-    setTimeout(() => { player.style.transition = "none"; }, 2000);
-}
-
-function drawArrow(x1, y1, x2, y2) {
-    const svg = document.getElementById('drawing-layer');
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", x1 + 20);
-    line.setAttribute("y1", y1 + 20);
-    line.setAttribute("x2", x2 + 20);
-    line.setAttribute("y2", y2 + 20);
-    line.setAttribute("stroke", "rgba(255,255,255,0.5)");
-    line.setAttribute("stroke-width", "2");
-    line.setAttribute("stroke-dasharray", "5,5");
-    svg.appendChild(line);
-}
-
-// Funktion für den "Zustandsscan" (Wichtig für Tonis Qualifikation!)
-function getBoardState() {
-    const state = {
-        mode: currentMode,
-        redTeam: [],
-        blueTeam: [],
-        materials: []
-    };
-    
-    document.querySelectorAll('.player.red').forEach(p => {
-        state.redTeam.push({ id: p.innerText, x: p.style.left, y: p.style.top });
-    });
-    
-    document.querySelectorAll('.player.blue').forEach(p => {
-        state.blueTeam.push({ id: p.innerText, x: p.style.left, y: p.style.top });
-    });
-    
-    return JSON.stringify(state);
 }
