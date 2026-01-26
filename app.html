@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toni - Globaler Taktik-Experte</title>
+    <title>Toni - Globaler Taktik-Experte & Trainer-Tool</title>
     
     <link rel="stylesheet" href="css/style.css">
     
@@ -12,27 +12,21 @@
 <body>
 
     <aside id="squad-sidebar">
-        <div style="padding: 20px; border-bottom: 1px solid #ddd; background: #fff;">
-            <h2 style="margin: 0; font-size: 1.2em; color: #333;">Kader-Matrix</h2>
-            <p style="font-size: 0.75em; color: #666; margin-top: 4px;">Anwesenheit & Performance</p>
+        <div style="padding: 20px; border-bottom: 1px solid #ddd;">
+            <h2 style="margin: 0; font-size: 1.2em;">Kader-Matrix</h2>
+            <p style="font-size: 0.8em; color: #666;">Status & Performance</p>
         </div>
-        
         <div id="player-list">
             </div>
-
-        <div style="padding: 15px; border-top: 1px solid #ddd;">
-            <button class="nav-btn" style="width: 100%; background: #eee;" onclick="addNewPlayerPrompt()">+ Spieler hinzufügen</button>
-        </div>
     </aside>
 
     <main id="main-stage">
         
         <nav class="top-nav">
-            <div id="briefcase-btn" title="Klemmbrett-Export / Aktentasche" onclick="exportToKlemmbrett()">💼</div>
-            <div style="height: 25px; width: 1px; background: #ddd; margin: 0 10px;"></div>
-            <button id="btn-11v11" class="nav-btn active" onclick="switchMode('11v11')">11 gegen 11</button>
-            <button id="btn-training" class="nav-btn" onclick="switchMode('training')">Training</button>
-            <button id="btn-funino" class="nav-btn" onclick="switchMode('funino')">Funino</button>
+            <div id="briefcase-btn" title="Aktentasche öffnen" onclick="toniSpeak('Ich öffne deine Aktentasche mit allen gespeicherten Plänen...')">💼</div>
+            <button class="nav-btn active" onclick="switchMode('11v11')">11 gegen 11</button>
+            <button class="nav-btn" onclick="switchMode('training')">Training</button>
+            <button class="nav-btn" onclick="switchMode('funino')">Funino</button>
         </nav>
 
         <div id="pitch">
@@ -40,36 +34,33 @@
             <div class="center-circle"></div>
             </div>
 
-        <div style="margin-top: 25px; display: flex; gap: 12px;">
-            <button class="nav-btn" style="background: #333; color: white;" onclick="searchTrainingNet()">Toni: Übung suchen</button>
-            <button class="nav-btn" style="background: #ff9800; color: white;" onclick="placeCones(12); toniSpeak('Ich habe 12 gelbe Hütchen für dich markiert.');">Hütchen aufstellen</button>
-            <button class="nav-btn" style="background: #2196f3; color: white;" onclick="resetBoardPositions()">Positionen Reset</button>
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button class="nav-btn" style="background: #555; color: white;" onclick="searchTrainingNet()">Übung suchen</button>
+            <button class="nav-btn" style="background: #ff9800; color: white;" onclick="toniSpeak('Ich stelle 12 gelbe Hütchen auf!', false); placeCones(12);">Hütchen aufstellen</button>
         </div>
     </main>
 
     <aside id="chat-sidebar">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 10px; background: white; border-radius: 10px; shadow: var(--shadow);">
-            <div style="width: 45px; height: 45px; background: #2e7d32; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.1em;">T</div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="width: 50px; height: 50px; background: #2e7d32; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2em;">T</div>
             <div>
-                <strong style="display: block; font-size: 0.95em;">Toni (Fachmann)</strong>
-                <span style="font-size: 0.7em; color: #2e7d32; font-weight: bold;">● GLOBAL EXPERT ACTIVE</span>
+                <strong style="display: block;">Toni</strong>
+                <span style="font-size: 0.75em; color: #2e7d32; font-weight: bold;">● EXPERTE ONLINE</span>
             </div>
         </div>
         
-        <div id="toni-output" style="flex-grow: 1; overflow-y: auto; padding-right: 5px; font-size: 0.9em; line-height: 1.5;">
+        <div id="toni-output" style="flex-grow: 1; overflow-y: auto; padding-right: 5px;">
             </div>
 
         <div style="margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px;">
-            <input type="text" id="chat-input" placeholder="Frag Toni (z.B. 'Suche Funino Übung')..." 
-                   onkeypress="if(event.key === 'Enter') { handleChatInput(this.value); this.value=''; }" 
-                   style="width: 100%; padding: 12px; border-radius: 25px; border: 1px solid #ccc; outline: none; box-sizing: border-box;">
+            <input type="text" placeholder="Frag Toni etwas..." onkeypress="if(event.key === 'Enter') { handleChatInput(this.value); this.value=''; }" 
+                   style="width: 100%; padding: 10px; border-radius: 20px; border: 1px solid #ccc; outline: none;">
         </div>
     </aside>
 
     <script src="js/logic.js"></script>
     <script src="js/board.js"></script>
     <script src="js/chat.js"></script>
-    <script src="js/storage.js"></script>
 
 </body>
 </html>
