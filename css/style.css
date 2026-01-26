@@ -1,38 +1,25 @@
-/* Das Design für die Spieler-Punkte auf dem Board */
-.player-dot {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: grab;
-    transition: transform 0.2s;
-    z-index: 100;
-}
-
-/* Der Hover-Effekt für die Performance-Werte */
+/* Der Ginga-Hover: Zeigt die Werte beim Drüberfahren */
 .player-dot:hover::after {
-    content: attr(data-stats);
+    content: "⚽ Tech: " attr(data-tech) "\A👁️ Wahr: " attr(data-perc) "\A🏃 Fit: " attr(data-fit) "\A⭐ Sonder: " attr(data-special);
+    white-space: pre;
     position: absolute;
-    bottom: 50px;
+    bottom: 55px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.85);
-    color: white;
-    padding: 8px;
-    border-radius: 5px;
+    background: rgba(20, 20, 20, 0.95);
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
     font-size: 11px;
-    white-space: pre;
+    line-height: 1.4;
     z-index: 1000;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border: 1px solid #4caf50;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
 }
 
-.player-label {
+/* Hilfsklasse für die Positionierung */
+.player-dot {
     position: absolute;
-    top: 45px;
-    width: 100px;
-    text-align: center;
-    left: -30px;
-    font-size: 12px;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px white;
+    cursor: grab;
+    transition: transform 0.2s ease;
 }
