@@ -1,20 +1,20 @@
 /**
- * Toni 2.0 - Core Logic Engine
- * Zuständig für Kader, Formationen, Material und Team-Farben.
+ * Toni 2.0 - Core Logic Engine (Clean Version)
+ * Verwaltung von Kader, Formationen und Material-Logik.
  */
 
 // --- Globaler Zustand ---
 let currentMode = '11v11'; 
 let activeTrainingCount = 0;
 
-// --- Kader Datenmodell (Deine Jungs) ---
+// --- Kader-Datenmodell (Deine Jungs) ---
 let squad = [
     { id: 1, nr: 8, name: "Thorsten", pos: "ST", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 }, hasBall: false },
     { id: 2, nr: 99, name: "David Luiz", pos: "IV", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 }, hasBall: false },
     { id: 3, nr: 7, name: "David", pos: "ZM", active: true, status: "bank", points: { tech: 0, scan: 0, team: 0 }, hasBall: false }
 ];
 
-// --- Gegner Modell (Team Blau) ---
+// --- Gegner-Modell (Team Blau) ---
 let opponents = [
     { id: 101, nr: 1, pos: "TW_B" }, { id: 102, nr: 4, pos: "IV_B" }, { id: 103, nr: 5, pos: "IV_B2" },
     { id: 104, nr: 2, pos: "IV_B3" }, { id: 105, nr: 6, pos: "LM_B" }, { id: 106, nr: 7, pos: "RM_B" },
@@ -22,7 +22,7 @@ let opponents = [
     { id: 110, nr: 11, pos: "ST_B2" }, { id: 111, nr: 3, pos: "ST_B3" }
 ];
 
-// --- Formationen (in % des Feldes) ---
+// --- Formationen-Mappings (Koordinaten in % des Feldes) ---
 const formations = {
     "4-4-2_RED": {
         "TW": {x: 8, y: 50}, "IV": {x: 22, y: 35}, "IV2": {x: 22, y: 65},
@@ -39,33 +39,34 @@ const formations = {
 };
 
 /**
- * Material-Logik: Jedem aktiven Spieler einen Ball geben
+ * Material-Verteilung: Jedem aktiven Spieler einen Ball zuweisen
  */
 function distributeBalls(count) {
     squad.forEach(p => {
-        if (p.active) p.hasBall = true;
+        if (p.active && p.status === 'team') p.hasBall = true;
     });
-    toniSpeak(`Björn, ich habe jedem deiner ${activeTrainingCount} Jungs einen Ball gegeben. Jetzt bringen wir Ginga ins Training!`);
-    drawBoard();
+    // Toni gibt Feedback über die neue KI-Schnittstelle
+    if (typeof toniSpeak === "function") {
+        toniSpeak(`Björn, jeder Spieler auf dem Feld hat jetzt einen Ball. Ginga-Modus aktiviert!`);
+    }
+    if (typeof drawBoard === "function") drawBoard();
 }
 
 /**
- * Team-Farben aktualisieren (Leibchen-System)
+ * Team-Farben: Aktualisiert die Leibchen-Farben (CSS Variablen)
  */
 function updateTeamColors() {
     const colorA = document.getElementById('color-team-a').value;
     const colorB = document.getElementById('color-team-b').value;
     
-    // Wir setzen CSS Variablen global
     document.documentElement.style.setProperty('--red-team', colorA);
     document.documentElement.style.setProperty('--yellow-leibchen', colorB);
     
-    toniSpeak("Die Leibchenfarben wurden angepasst. Sieht gut aus!");
-    drawBoard();
+    if (typeof drawBoard === "function") drawBoard();
 }
 
 /**
- * Spielerliste links rendern
+ * Rendert die Spielerliste in der Sidebar
  */
 function renderSquad() {
     const container = document.getElementById('player-list');
@@ -75,25 +76,25 @@ function renderSquad() {
 
     squad.forEach(p => {
         if (p.active) activeTrainingCount++;
-        const total = p.points.tech + p.points.scan + p.points.team;
+        const totalPoints = p.points.tech + p.points.scan + p.points.team;
         
         const div = document.createElement('div');
-        div.className = 'player-card'; // Styling über CSS
-        div.style = "background: white; margin: 10px; padding: 12px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);";
+        div.className = 'squad-item';
+        div.style = "background: #fff; margin: 8px; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid var(--red-team);";
         
         div.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <strong>#${p.nr} ${p.name}</strong>
-                <span style="background:var(--toni-green); color:white; padding:2px 6px; border-radius:10px; font-size:0.7em;">${total} Pkt</span>
+                <strong style="font-size:0.9em;">#${p.nr} ${p.name}</strong>
+                <span style="font-size:0.75em; font-weight:bold; color:var(--toni-green);">${totalPoints} Pkt</span>
             </div>
-            <div style="display:flex; gap:5px; margin-top:8px;">
-                <select onchange="setPlayerStatus(${p.id}, this.value)" style="font-size:0.7em; flex-grow:1;">
-                    <option value="none" ${p.status === 'none' ? 'selected' : ''}>Ausblenden</option>
-                    <option value="team" ${p.status === 'team' ? 'selected' : ''}>Spielfeld</option>
+            <div style="display:flex; gap:6px; margin-top:8px;">
+                <select onchange="setPlayerStatus(${p.id}, this.value)" style="font-size:0.7em; flex-grow:1; border-radius:4px; border:1px solid #ddd;">
+                    <option value="none" ${p.status === 'none' ? 'selected' : ''}>Aus</option>
+                    <option value="team" ${p.status === 'team' ? 'selected' : ''}>Feld</option>
                     <option value="bank" ${p.status === 'bank' ? 'selected' : ''}>Bank</option>
                 </select>
-                <button onclick="addPoint(${p.id}, 'tech')" title="Technik">⚽</button>
-                <button onclick="addPoint(${p.id}, 'scan')" title="Scanning">👁️</button>
+                <button onclick="addPoint(${p.id}, 'tech')" style="font-size:0.8em; border:none; background:#eee; cursor:pointer; border-radius:4px;">⚽</button>
+                <button onclick="addPoint(${p.id}, 'scan')" style="font-size:0.8em; border:none; background:#eee; cursor:pointer; border-radius:4px;">👁️</button>
             </div>
         `;
         container.appendChild(div);
@@ -101,30 +102,61 @@ function renderSquad() {
 }
 
 /**
- * Punktesystem mit Auto-Save
+ * Performance-Monitoring: Punkte vergeben & Speichern
  */
-function addPoint(id, cat) {
-    const p = squad.find(player => player.id === id);
-    if (p) {
-        p.points[cat]++;
+function addPoint(id, category) {
+    const player = squad.find(p => p.id === id);
+    if (player) {
+        player.points[category]++;
         renderSquad();
-        saveSquadData();
-        toniSpeak(`Punkt für ${p.name}! Seine ${cat === 'tech' ? 'Technik' : 'Wahrnehmung'} wird immer besser.`);
+        if (typeof saveSquadData === "function") saveSquadData();
+        if (typeof toniSpeak === "function") {
+            const catLabel = category === 'tech' ? 'Technik' : 'Scanning';
+            toniSpeak(`Klasse Aktion von ${player.name}! Ein Punkt für ${catLabel}.`);
+        }
     }
 }
 
+/**
+ * Status-Wechsel: Feld, Bank oder Abwesend
+ */
 function setPlayerStatus(id, status) {
-    const p = squad.find(player => player.id === id);
-    if (p) {
-        p.status = status;
-        p.active = (status !== 'none');
+    const player = squad.find(p => p.id === id);
+    if (player) {
+        player.status = status;
+        player.active = (status !== 'none');
         renderSquad();
-        drawBoard();
-        saveSquadData();
+        if (typeof drawBoard === "function") drawBoard();
+        if (typeof saveSquadData === "function") saveSquadData();
     }
 }
 
-// Initialer Start
+/**
+ * Taktischer Reset: Alle Spieler auf Grundpositionen
+ */
+function resetBoardPositions() {
+    if (typeof drawBoard === "function") drawBoard();
+    if (typeof toniSpeak === "function") {
+        toniSpeak("Alles wieder in Reih und Glied, Björn. Taktische Grundordnung ist wiederhergestellt.");
+    }
+}
+
+/**
+ * Neuen Spieler über Prompt hinzufügen
+ */
+function addNewPlayerPrompt() {
+    const name = prompt("Name des neuen Spielers:");
+    const nr = prompt("Trikotnummer:");
+    if (name && nr) {
+        const newId = squad.length > 0 ? Math.max(...squad.map(p => p.id)) + 1 : 1;
+        squad.push({ id: newId, nr: parseInt(nr), name: name, pos: "ZM", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 }, hasBall: false });
+        renderSquad();
+        if (typeof drawBoard === "function") drawBoard();
+        if (typeof saveSquadData === "function") saveSquadData();
+    }
+}
+
+// Initialer Aufruf
 document.addEventListener('DOMContentLoaded', () => {
     renderSquad();
 });
