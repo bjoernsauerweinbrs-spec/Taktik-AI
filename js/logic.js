@@ -1,28 +1,20 @@
 /**
  * Toni 2.0 - Core Logic Engine
- * Verwaltung von Kader, Formationen, Material und Team-Farben.
+ * Verwaltung von Kader (3-Stufen-Status) und deutschen Leistungs-Kategorien.
  */
 
-// --- Globaler Zustand ---
 let currentMode = '11v11'; 
-let activeTrainingCount = 0;
-
-// --- Kader Datenmodell ---
 let squad = [
-    { id: 1, nr: 8, name: "Thorsten", pos: "ST", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 }, hasBall: false },
-    { id: 2, nr: 99, name: "David Luiz", pos: "IV", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 }, hasBall: false },
-    { id: 3, nr: 7, name: "David", pos: "ZM", active: true, status: "bank", points: { tech: 0, scan: 0, team: 0 }, hasBall: false }
+    { id: 1, nr: 8, name: "Thorsten", pos: "ST", active: true, status: "team", points: { tech: 0, scan: 0, fit: 0, special: 0 }, hasBall: false },
+    { id: 2, nr: 99, name: "David Luiz", pos: "IV", active: true, status: "team", points: { tech: 0, scan: 0, fit: 0, special: 0 }, hasBall: false }
 ];
 
-// --- Gegner Modell (Team Blau) ---
 let opponents = [
     { id: 101, nr: 1, pos: "TW_B" }, { id: 102, nr: 4, pos: "IV_B" }, { id: 103, nr: 5, pos: "IV_B2" },
-    { id: 104, nr: 2, pos: "IV_B3" }, { id: 105, nr: 6, pos: "LM_B" }, { id: 106, nr: 7, pos: "RM_B" },
-    { id: 107, nr: 8, pos: "ZM_B" }, { id: 108, nr: 10, pos: "ZM_B2" }, { id: 109, nr: 9, pos: "ST_B" },
-    { id: 110, nr: 11, pos: "ST_B2" }, { id: 111, nr: 3, pos: "ST_B3" }
+    { id: 104, nr: 2, pos: "IV_B3" }, { id: 106, nr: 7, pos: "RM_B" }, { id: 107, nr: 8, pos: "ZM_B" }, 
+    { id: 108, nr: 10, pos: "ZM_B2" }, { id: 109, nr: 9, pos: "ST_B" }, { id: 110, nr: 11, pos: "ST_B2" }
 ];
 
-// --- Formationen ---
 const formations = {
     "4-4-2_RED": {
         "TW": {x: 8, y: 50}, "IV": {x: 22, y: 35}, "IV2": {x: 22, y: 65},
@@ -38,103 +30,37 @@ const formations = {
     }
 };
 
-/**
- * Spielerliste links rendern mit Lösch-Funktion
- */
 function renderSquad() {
     const container = document.getElementById('player-list');
     if (!container) return;
     container.innerHTML = '';
-    activeTrainingCount = 0;
 
     squad.forEach(p => {
-        if (p.active) activeTrainingCount++;
-        const total = p.points.tech + p.points.scan;
-        
+        const total = p.points.tech + p.points.scan + p.points.fit + p.points.special;
         const div = document.createElement('div');
-        div.className = 'player-card'; 
-        div.style = "background: white; margin: 10px; padding: 12px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative;";
+        div.className = 'player-card';
+        div.style = "background:white; margin:8px; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); position:relative; border-left:4px solid var(--red-team);";
         
         div.innerHTML = `
-            <button onclick="deletePlayer(${p.id})" style="position:absolute; top:5px; right:5px; border:none; background:none; color:#ccc; cursor:pointer; font-weight:bold;">✕</button>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            <button onclick="deletePlayer(${p.id})" style="position:absolute; top:2px; right:5px; border:none; background:none; cursor:pointer; color:#ccc;">✕</button>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                 <strong>#${p.nr} ${p.name}</strong>
-                <span style="background:var(--toni-green); color:white; padding:2px 6px; border-radius:10px; font-size:0.7em;">${total} Pkt</span>
+                <span style="font-size:0.8em; color:var(--toni-green); font-weight:bold;">${total} Pkt</span>
             </div>
-            <div style="display:flex; gap:5px; margin-top:8px;">
-                <select onchange="setPlayerStatus(${p.id}, this.value)" style="font-size:0.7em; flex-grow:1;">
-                    <option value="none" ${p.status === 'none' ? 'selected' : ''}>Aus</option>
-                    <option value="team" ${p.status === 'team' ? 'selected' : ''}>Feld</option>
-                    <option value="bank" ${p.status === 'bank' ? 'selected' : ''}>Bank</option>
-                </select>
+            <select onchange="setPlayerStatus(${p.id}, this.value)" style="width:100%; font-size:0.75em; margin-bottom:8px;">
+                <option value="team" ${p.status === 'team' ? 'selected' : ''}>Anwesend (Training+Spiel)</option>
+                <option value="spiel" ${p.status === 'spiel' ? 'selected' : ''}>Nur Spieltag (fehlt Training)</option>
+                <option value="none" ${p.status === 'none' ? 'selected' : ''}>Abwesend (Nicht im Kader)</option>
+            </select>
+            <div style="display:flex; justify-content:space-between; gap:2px;">
                 <button onclick="addPoint(${p.id}, 'tech')" title="Technik">⚽</button>
-                <button onclick="addPoint(${p.id}, 'scan')" title="Scanning">👁️</button>
+                <button onclick="addPoint(${p.id}, 'scan')" title="Wahrnehmung">👁️</button>
+                <button onclick="addPoint(${p.id}, 'fit')" title="Fitness">🏃</button>
+                <button onclick="addPoint(${p.id}, 'special')" title="Sonderpunkte">⭐</button>
             </div>
         `;
         container.appendChild(div);
     });
-}
-
-/**
- * Spieler permanent entfernen
- */
-function deletePlayer(id) {
-    if(confirm("Möchtest du diesen Spieler wirklich aus dem Kader löschen?")) {
-        squad = squad.filter(p => p.id !== id);
-        renderSquad();
-        if (typeof drawBoard === "function") drawBoard();
-        saveSquadData();
-    }
-}
-
-/**
- * Material-Menü umschalten
- */
-function toggleMaterialMenu() {
-    const menu = document.getElementById('material-menu');
-    if (menu.style.display === 'none' || menu.style.display === '') {
-        menu.style.display = 'flex';
-    } else {
-        menu.style.display = 'none';
-    }
-}
-
-/**
- * Team-Farben aktualisieren (Drei Farben)
- */
-function updateTeamColors() {
-    const colorA = document.getElementById('color-team-a').value;
-    const colorB = document.getElementById('color-team-b').value;
-    const colorC = document.getElementById('color-team-c').value;
-    
-    document.documentElement.style.setProperty('--red-team', colorA);
-    document.documentElement.style.setProperty('--yellow-leibchen', colorB);
-    document.documentElement.style.setProperty('--blue-team', colorC);
-    
-    if (typeof drawBoard === "function") drawBoard();
-}
-
-/**
- * Material-Logik
- */
-function distributeBalls(count) {
-    squad.forEach(p => {
-        if (p.active && p.status === 'team') p.hasBall = true;
-    });
-    if (typeof toniSpeak === "function") toniSpeak(`Björn, ich habe Bälle verteilt. Jeder auf dem Feld hat jetzt einen!`);
-    if (typeof drawBoard === "function") drawBoard();
-}
-
-/**
- * Punktesystem
- */
-function addPoint(id, cat) {
-    const p = squad.find(player => player.id === id);
-    if (p) {
-        p.points[cat]++;
-        renderSquad();
-        saveSquadData();
-    }
 }
 
 function setPlayerStatus(id, status) {
@@ -148,17 +74,32 @@ function setPlayerStatus(id, status) {
     }
 }
 
-function addNewPlayerPrompt() {
-    const name = prompt("Name des Spielers:");
-    const nr = prompt("Trikotnummer:");
-    if (name && nr) {
-        const newId = Date.now();
-        squad.push({ id: newId, nr: parseInt(nr), name: name, pos: "ZM", active: true, status: "team", points: { tech: 0, scan: 0, team: 0 }, hasBall: false });
+function addPoint(id, cat) {
+    const p = squad.find(player => player.id === id);
+    if (p) {
+        p.points[cat]++;
         renderSquad();
         saveSquadData();
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    renderSquad();
-});
+function deletePlayer(id) {
+    if(confirm("Spieler wirklich löschen?")) {
+        squad = squad.filter(p => p.id !== id);
+        renderSquad();
+        if (typeof drawBoard === "function") drawBoard();
+        saveSquadData();
+    }
+}
+
+function addNewPlayerPrompt() {
+    const name = prompt("Name:");
+    const nr = prompt("Nummer:");
+    if (name && nr) {
+        squad.push({ id: Date.now(), nr: parseInt(nr), name: name, pos: "ZM", active: true, status: "team", points: { tech: 0, scan: 0, fit: 0, special: 0 }, hasBall: false });
+        renderSquad();
+        saveSquadData();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => { renderSquad(); });
