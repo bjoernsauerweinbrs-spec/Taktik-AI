@@ -1,60 +1,68 @@
-:root {
-  --green: #2ecc71;
-  --accent: #0a74da;
-  --bg: #07101a;
-  --panel: #0f1720;
-  --line: rgba(255,255,255,0.12);
-  --text: #e6eef0;
-  --card-radius: 12px;
-  --arrow-color: #ffcc00;
-  --arrow-width: 6;
-  --pulse-color: rgba(255,255,255,0.12);
+/* --- BASIS LAYOUT --- */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #050608;
+    color: white;
+    overflow: hidden; /* Verhindert das Scrollen der gesamten Seite */
 }
-
-/* Grundlayout */
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', Arial, Helvetica, sans-serif;
-  background: radial-gradient(circle at top, #1b2333 0, #050608 55%);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-  overflow: hidden;
-}
-
-* { box-sizing: border-box; }
 
 #app {
-  display: grid;
-  grid-template-columns: 420px 1fr;
-  gap: 12px;
-  height: 100vh;
-  padding: 12px;
+    display: flex; /* Spielfeld und Sidebar nebeneinander */
+    width: 100vw;
+    height: 100vh;
 }
 
-/* 1. Die Sidebar als festen Container definieren */
-.sidebar {
-    width: 350px;
-    height: 100vh;           /* Fest auf die volle Bildschirmhöhe */
-    position: fixed;
-    right: 0;
-    top: 0;
+/* --- HAUPTBEREICH (SPIELFELD) --- */
+#main {
+    flex: 1; /* Nimmt den restlichen Platz links ein */
     display: flex;
-    flex-direction: column;  /* Stapelt Inhalt vertikal */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top, #1b2333 0, #050608 100%);
+    position: relative;
+}
+
+#board-container {
+    position: relative;
+    width: 800px; /* Standardgröße Spielfeld */
+    height: 500px;
+    background: #27ae60; /* Sattes Grün */
+    border: 5px solid white;
+    border-radius: 10px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+/* --- SIDEBAR (TONI) --- */
+.sidebar {
+    width: 380px; /* Etwas breiter für besseren Lesekomfort */
+    height: 100vh;
     background: #0f172a;
-    border-left: 1px solid rgba(255,255,255,0.1);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
     padding: 20px;
     box-sizing: border-box;
-    overflow: hidden;        /* Nichts darf aus der Sidebar rauswachsen */
 }
 
-/* 2. Den Chat-Verlauf scrollbar machen */
+.sidebar h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: #2ecc71;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* --- CHAT-VERLAUF --- */
 #chat-history {
-    flex: 1;                 /* Nutzt den verfügbaren Platz zwischen Header und Input */
-    overflow-y: auto;        /* Aktiviert das Scrollen innerhalb des Fensters */
-    margin-bottom: 15px;
-    padding-right: 10px;     /* Platz für die Scrollbar */
+    flex: 1; /* Füllt den Raum zwischen Titel und Eingabe */
+    overflow-y: auto;
+    margin: 15px 0;
+    padding-right: 10px;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -62,352 +70,94 @@ html, body {
     scrollbar-color: #2ecc71 transparent;
 }
 
-/* 3. Das Eingabefeld ganz unten fixieren */
+/* Sprechblasen-Design */
+.msg {
+    padding: 10px 14px;
+    border-radius: 12px;
+    max-width: 85%;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.msg.user {
+    align-self: flex-end;
+    background: #334155;
+    color: white;
+    border-bottom-right-radius: 2px;
+}
+
+.msg.toni {
+    align-self: flex-start;
+    background: #1e293b;
+    border: 1px solid rgba(46, 204, 113, 0.3);
+    color: #e2e8f0;
+    border-bottom-left-radius: 2px;
+}
+
+/* --- EINGABE-BEREICH --- */
 .input-row {
-    margin-top: auto;        /* Schiebt die Eingabe immer nach ganz unten */
     display: flex;
     gap: 8px;
-    background: rgba(255,255,255,0.05);
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+input#user-input {
+    flex: 1;
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: white;
+    outline: none;
 }
 
-.header {
-  font-weight: 800;
-  color: var(--green);
-  padding: 12px 8px;
-  border-bottom: 1px solid var(--line);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-/* Das Chat-Fenster fest fixieren */
-#chat-history {
-    height: 350px;           /* Feste Höhe - passt sich nicht mehr an */
-    overflow-y: auto;        /* Scrollbar erscheint nur, wenn nötig */
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 15px;
-    background: rgba(15, 23, 42, 0.5); /* Ein schöner dunkler Hintergrund */
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 10px;
-    scrollbar-width: thin;    /* Schicke, schmale Scrollbar */
-    scrollbar-color: #2ecc71 transparent;
-}
-
-/* Verhindert, dass der gesamte Sidebar-Container mitwächst */
-.sidebar {
-    display: flex;
-    flex-direction: column;
-    max-height: 100vh;       /* Die Sidebar darf nie höher als der Bildschirm sein */
-    overflow: hidden;
-}
-
-.msg {
-  padding: 10px 12px;
-  border-radius: 12px;
-  max-width: 86%;
-  font-size: 0.92rem;
-  line-height: 1.45;
-}
-
-.user {
-  align-self: flex-end;
-  background: linear-gradient(135deg, #2563eb, #38bdf8);
-  color: #fff;
-}
-
-.toni {
-  align-self: flex-start;
-  background: #1f2937;
-  border-left: 4px solid var(--green);
-  color: #e6eef0;
-}
-
-.input-row {
-  display: flex;
-  gap: 8px;
-  padding: 10px;
-  border-top: 1px solid var(--line);
-}
-
-.input-row input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #26303a;
-  background: #07101a;
-  color: #fff;
-}
-
-.sidebar-controls {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  padding: 0 8px;
-}
-
-.sidebar-controls select {
-  flex: 1;
-  background: #07101a;
-  color: #fff;
-  border: 1px solid #26303a;
-  padding: 8px;
-  border-radius: 8px;
-}
-
-/* Spielfeld-Bereich */
-#main {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.top-controls {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  align-items: center;
-}
-
+/* --- BUTTONS --- */
 .btn {
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  background: #0f1720;
-  color: #fff;
-  transition: 0.2s;
-  font-size: 0.85rem;
-  font-weight: 600;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
 }
 
-.btn:hover { background: #1a2533; }
-.btn.primary { background: var(--accent); color: #fff; }
-
-#pitch-area {
-  background: linear-gradient(180deg, #07101a, #0b1220);
-  border-radius: 14px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  position: relative;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+.btn.primary {
+    background: #2ecc71;
+    color: #050608;
 }
 
-#pitch {
-  flex: 1;
-  background: #166534;
-  border-radius: 12px;
-  border: 3px solid #fff;
-  position: relative;
-  overflow: hidden;
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
 }
 
-/* Spielfeld-Markierungen */
-.goal {
-  position: absolute;
-  width: 3%;
-  height: 20%;
-  border: 3px solid #fff;
-  top: 40%;
-  background: rgba(255,255,255,0.05);
-}
-.l-goal { left: 0; border-left: none; }
-.r-goal { right: 0; border-right: none; }
-.m-line {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: rgba(255,255,255,0.6);
-}
-.m-circle {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 140px;
-  height: 140px;
-  border: 2px solid rgba(255,255,255,0.6);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-}
-
-/* Spieler & Ball */
-.player, #ball {
-  position: absolute;
-  z-index: 100;
-  transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
+/* --- SPIELER (MÄNNCHEN) --- */
 .player {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  color: #fff;
-  border: 2px solid rgba(255,255,255,0.8);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: move;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 10;
 }
 
-.home { background: radial-gradient(circle at 30% 30%, #f87171, #b91c1c); }
-.away { background: radial-gradient(circle at 30% 30%, #60a5fa, #1d4ed8); cursor: grab; }
-#ball {
-  width: 20px;
-  height: 20px;
-  background: #fff;
-  border-radius: 50%;
-  border: 2px solid #000;
-  cursor: grab;
-}
+.player.red { background: #e74c3c; color: white; border: 2px solid #c0392b; }
+.player.blue { background: #3498db; color: white; border: 2px solid #2980b9; }
 
-/* Bank (Sideline) */
-#bank {
-  position: absolute;
-  right: 8px;
-  top: 8px;
-  width: 130px;
-  background: rgba(0,0,0,0.45);
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.05);
-  z-index: 250;
-}
-
-#bank h5 {
-  margin: 0 0 8px 0;
-  font-size: 11px;
-  color: #9aa3ad;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.bank-player {
-  padding: 6px;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.03);
-  margin-bottom: 6px;
-  font-size: 11px;
-  text-align: center;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-/* Coaching Points Panel */
-#coaching-panel {
-  margin-top: 10px;
-  background: #0b1220;
-  padding: 15px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  min-height: 100px;
-  color: #cfe8ff;
-}
-
-#coaching-list {
-  margin: 8px 0 0 20px;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-/* Whiteboard / Kader Modal */
-#whiteboard {
-  position: absolute;
-  top: 20px;
-  right: -460px;
-  width: 420px;
-  height: calc(100% - 40px);
-  background: #f8fafc;
-  color: #0f172a;
-  border-radius: 12px;
-  padding: 20px;
-  transition: 0.35s;
-  z-index: 2000;
-  box-shadow: -20px 0 60px rgba(0,0,0,0.6);
-}
-
-#whiteboard.open { right: 20px; }
-
-#player-list-raw {
-  width: 100%;
-  height: 120px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  margin-bottom: 15px;
-  font-family: monospace;
-}
-
-/* Login Overlay */
+/* --- LOGIN OVERLAY --- */
 #login-overlay {
-  position: fixed;
-  inset: 0;
-  background: #050608;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 5000;
-}
-
-.login-card {
-  background: #0b1220;
-  padding: 40px;
-  border-radius: 24px;
-  border: 1px solid var(--green);
-  text-align: center;
-  width: 400px;
-}
-
-.login-card input {
-  width: 100%;
-  padding: 14px;
-  border-radius: 10px;
-  border: 1px solid #26303a;
-  background: #000;
-  color: #fff;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-/* SVG Pfeile & Animation */
-#exercise-svg {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 50;
-}
-
-.arrow-line {
-  stroke: var(--arrow-color);
-  stroke-width: var(--arrow-width);
-  stroke-linecap: round;
-  stroke-dasharray: 12 6;
-  animation: dash 1.5s linear infinite;
-}
-
-@keyframes dash {
-  to { stroke-dashoffset: -24; }
-}
-
-/* Timer & Pulse */
-#timer-display {
-  font-family: 'Courier New', monospace;
-  font-size: 1.1rem;
-  color: var(--green);
-  font-weight: bold;
-}
-
-.pulse {
-  animation: pulse-border 1s ease-in-out infinite;
-}
-
-@keyframes pulse-border {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
-  50% { box-shadow: 0 0 0 15px rgba(46, 204, 113, 0); }
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.98);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
 }
