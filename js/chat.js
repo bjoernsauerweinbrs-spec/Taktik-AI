@@ -1,98 +1,94 @@
 /**
- * Toni 2.0 - Elite AI Engine (Fix: Male Voice & Decision Tree)
+ * Toni 2.0 - Chat & Voice Engine
  */
 
-let recognition;
-let isListening = false;
-const coachName = sessionStorage.getItem('toni_coach_name') || "Coach";
-
-// 1. BEFEHLSEBENE (Decision Tree nach Copilot)
-function processTacticalCommand(input) {
-    const text = input.toLowerCase();
+// Diese Funktion wird aufgerufen, wenn du auf "ANALYSE STARTEN" drückst
+function handleToniAction() {
+    const input = document.getElementById('user-msg');
+    const message = input.value.trim();
     
-    // Altersklassen-Logik
-    if (text.includes("senioren") || text.includes("u19") || text.includes("herren") || text.includes("großfeld")) {
-        window.setPitch('grossfeld');
-        return "Alles klar, Björn. Senioren spielen auf dem Großfeld. Ich habe das Board vorbereitet!";
+    if (message === "") {
+        // Wenn das Feld leer ist, fragen wir Toni nach einem Status-Check
+        toniSpeak("Ich bin bereit, Björn. Möchtest du eine taktische Analyse starten oder den Kader prüfen?");
+        addChatMessage("Toni", "Ich bin bereit, Björn. Möchtest du eine taktische Analyse starten oder den Kader prüfen?");
+        return;
     }
-    if (text.includes("funino") || text.includes("u7") || text.includes("minis")) {
-        window.setPitch('funino');
-        return "Funino-Festival! Ich baue das Feld mit den 4 Toren auf.";
-    }
-    if (text.includes("kleinfeld") || text.includes("u13") || text.includes("d-jugend")) {
-        window.setPitch('kleinfeld');
-        return "Kleinfeld-Modus aktiviert. Das halbe Feld steht bereit.";
-    }
-    return null; // Kein direkter Befehl erkannt -> KI fragen
+
+    // Nachricht im Chat anzeigen
+    addChatMessage("Björn", message);
+    
+    // Logik-Check für Toni
+    processToniResponse(message.toLowerCase());
+    
+    // Feld leeren
+    input.value = "";
 }
 
-// 2. STIMMEN-FIX (Männlich)
-function speak(text) {
-    const msg = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    
-    // Wir suchen gezielt nach deutschen Männerstimmen
-    const maleVoice = voices.find(v => 
-        (v.lang.startsWith('de')) && 
-        (v.name.includes('Stefan') || v.name.includes('Conrad') || v.name.includes('Klaus') || v.name.includes('Male'))
-    );
+function processToniResponse(msg) {
+    let response = "";
 
-    if (maleVoice) msg.voice = maleVoice;
-    msg.pitch = 0.85; // Tiefere Stimme für Björns Toni
-    msg.rate = 1.0;
-    msg.lang = 'de-DE';
-    window.speechSynthesis.speak(msg);
-}
-
-// Stimmen laden beim Start
-window.speechSynthesis.onvoiceschanged = () => { console.log("Stimmen synchronisiert."); };
-
-async function handleToniAction() {
-    const inputField = document.getElementById('user-msg');
-    const userInput = inputField.value.trim();
-    if (!userInput) return;
-
-    appendChatMessage('user', userInput);
-    inputField.value = '';
-
-    // Erst prüfen: Ist es ein direkter Befehl für das Spielfeld?
-    const autoResponse = processTacticalCommand(userInput);
-    
-    if (autoResponse) {
-        appendChatMessage('toni', autoResponse);
-        speak(autoResponse);
-        return; // Loop beenden, keine KI-Anfrage nötig!
+    if (msg.includes("hallo") || msg.includes("hi")) {
+        response = "Hallo Björn! Ich habe alle Systeme hochgefahren. Der brasilianische Ginga-Style ist bereit für das Training. Was steht heute an?";
+    } else if (msg.includes("taktik") || msg.includes("board")) {
+        response = "Ich öffne das Board. Die roten Spieler stehen bereit für deine Anweisungen.";
+        if(window.showPitch) window.showPitch(); // Falls Board-Logik verknüpft
+    } else if (msg.includes("kader") || msg.includes("briefcase")) {
+        response = "Ich öffne die Aktentasche. Deine Spielerdaten sind geladen.";
+        toggleBriefcase();
+    } else {
+        response = "Verstanden, Björn. Ich analysiere das und bereite die Spielsituation entsprechend vor.";
     }
 
-    // Wenn kein direkter Befehl: KI fragen
-    try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${sessionStorage.getItem('toni_key')}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
-                messages: [
-                    {
-                        role: "system",
-                        content: `Du bist Toni, ein Elite-Fußball-KI-Coach (Mix aus Klopp & Nagelsmann). 
-                        Dein Partner ist Coach ${coachName}. Sei motivierend und direkt. 
-                        Wenn du eine Altersklasse hörst, bestätige den Spielfeldtyp sofort.`
-                    },
-                    { role: "user", content: userInput }
-                ]
-            })
-        });
+    toniSpeak(response);
+    addChatMessage("Toni", response);
+}
 
-        const data = await response.json();
-        const answer = data.choices[0].message.content;
-        appendChatMessage('toni', answer);
-        speak(answer);
-    } catch (e) {
-        appendChatMessage('toni', "Verbindungsproblem, Coach!");
+// Sprachausgabe (Toni als absoluter Fachmann)
+function toniSpeak(text) {
+    if ('speechSynthesis' in window) {
+        const utterance = new Uint8Array(); // Placeholder für saubere Syntax
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'de-DE';
+        msg.pitch = 0.9; // Etwas tiefere, männliche Stimme
+        msg.rate = 1.0;
+        
+        // Findet eine männliche Stimme, falls vorhanden
+        const voices = window.speechSynthesis.getVoices();
+        const maleVoice = voices.find(voice => voice.name.includes('Stefan') || voice.name.includes('Google Deutsch'));
+        if (maleVoice) msg.voice = maleVoice;
+
+        window.speechSynthesis.speak(msg);
     }
 }
 
-// ... (Rest der Funktionen: toggleVoice, appendChatMessage bleiben gleich)
+// Chat-Historie im UI ergänzen
+function addChatMessage(sender, text) {
+    const history = document.getElementById('chat-history');
+    if (!history) return;
+
+    const div = document.createElement('div');
+    div.style.marginBottom = "10px";
+    div.style.padding = "8px 12px";
+    div.style.borderRadius = "8px";
+    
+    if (sender === "Björn") {
+        div.style.background = "rgba(46, 204, 113, 0.1)";
+        div.style.alignSelf = "flex-end";
+        div.style.borderLeft = "3px solid #2ecc71";
+    } else {
+        div.style.background = "rgba(255, 255, 255, 0.05)";
+        div.style.borderLeft = "3px solid #f1c40f";
+    }
+
+    div.innerHTML = `<strong>${sender}:</strong> <span style="font-size: 13px;">${text}</span>`;
+    history.appendChild(div);
+    history.scrollTop = history.scrollHeight;
+}
+
+// Enter-Taste zum Senden erlauben
+document.getElementById('user-msg').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleToniAction();
+    }
+});
