@@ -3,78 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Taktik-AI Pro | Coach Björn</title>
+    <title>Taktik-Board | Coach Björn & Toni</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header class="main-header">
-        <div class="header-left">
-            <h1>Taktik-AI <span class="coach-tag">Coach Björn</span></h1>
-        </div>
+
+    <header>
+        <div id="toni-status" class="status-badge">KI: Verbinde...</div>
         <div class="header-center">
             <select id="field-mode" onchange="updateFieldMode()">
-                <option value="mode-match">Match (2 Tore)</option>
+                <option value="mode-match">Match (11 gegen 11)</option>
                 <option value="mode-funino">Funino (4 Tore)</option>
+                <option value="mode-half">Halbfeld (F/E-Jugend)</option>
             </select>
         </div>
-        <div class="header-right">
-            <button class="briefcase-toggle" onclick="toggleBriefcase()">📁 Aktentasche</button>
-        </div>
+        <button class="briefcase-btn" onclick="toggleBriefcase()">📁</button>
     </header>
 
-    <main class="dashboard-grid">
-        <section class="board-container">
-            <div id="taktik-board" class="soccer-pitch mode-match">
-                <div class="goal goal-left goal-match"></div>
-                <div class="goal goal-right goal-match"></div>
-                <div class="goal goal-funino-tl"></div>
-                <div class="goal goal-funino-bl"></div>
-                <div class="goal goal-funino-tr"></div>
-                <div class="goal goal-funino-br"></div>
-            </div>
-        </section>
+    <div id="taktik-board" class="soccer-pitch mode-match">
+        <div class="penalty-area left-area"></div>
+        <div class="penalty-area right-area"></div>
+        </div>
 
-        <section class="sidebar-right chat-section">
-            <div class="chat-header">Toni (KI-Analyst)</div>
-            <div id="chat-output" class="scrollable-content"></div>
-            <div class="chat-input-area">
-                <input type="text" id="user-input" placeholder="Taktik-Befehl an Toni...">
-                <button onclick="sendMessage()">Senden</button>
-            </div>
-        </section>
-    </main>
-
-    <div id="briefcase-overlay" class="overlay-hidden">
-        <div class="briefcase-content">
-            <div class="briefcase-header">
-                <h2>📁 Kader & Management</h2>
-                <button class="close-btn" onclick="toggleBriefcase()">✖</button>
-            </div>
-            
-            <div class="add-player-section">
-                <h3>Neuen Spieler hinzufügen</h3>
-                <div class="player-form">
-                    <input type="number" id="p-nr" placeholder="Nr.">
-                    <input type="text" id="p-name" placeholder="Name">
-                    <select id="p-pos">
-                        <option value="IV">Innenverteidiger</option>
-                        <option value="ZM">Zentrales Mittelfeld</option>
-                        <option value="ST">Stürmer</option>
-                        <option value="TW">Torwart</option>
-                    </select>
-                    <button onclick="addPlayerToBriefcase()">Hinzufügen</button>
-                </div>
-            </div>
-
-            <div id="smart-squad-list" class="scrollable-content">
-                <p class="empty-hint">Noch keine Spieler im Kader. Nutze das Formular oben!</p>
-            </div>
+    <div id="chat-container">
+        <div id="chat-output"></div>
+        <div class="chat-input-area">
+            <input type="text" id="user-input" placeholder="Toni eine Frage stellen...">
+            <button onclick="sendMessage()">Senden</button>
         </div>
     </div>
 
-    <script src="js/storage.js"></script>
-    <script src="js/board.js"></script>
-    <script src="js/chat.js"></script>
+    <div id="briefcase-overlay" class="overlay-hidden">
+        <div class="briefcase-content">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Aktentasche</h2>
+                <button onclick="toggleBriefcase()">✖</button>
+            </div>
+            <hr>
+            
+            <div class="add-player-section">
+                <h3>Neuen Spieler anlegen</h3>
+                <div class="player-form">
+                    <input type="number" id="p-nr" placeholder="Nr.">
+                    <input type="text" id="p-name" placeholder="Name des Spielers">
+                    <select id="p-pos">
+                        <option value="Torwart">Torwart</option>
+                        <option value="Abwehr">Abwehr</option>
+                        <option value="Mittelfeld">Mittelfeld</option>
+                        <option value="Sturm">Sturm</option>
+                    </select>
+                    <button class="btn-add-pro" onclick="addPlayerToBriefcase()">Spieler verpflichten</button>
+                </div>
+            </div>
+
+            <div id="smart-squad-list">
+                </div>
+        </div>
+    </div>
+
     <script src="js/logic.js"></script>
+    <script src="js/chat.js"></script>
+    <script>
+        // Toni's Willkommens-Check beim Laden
+        window.onload = () => {
+            const trainer = localStorage.getItem('trainer_name') || 'Coach';
+            appendMessage('toni', `Hallo ${trainer}! Toni hier. Brasilianische Technik steht bereit. Welche Altersklasse trainieren wir heute?`);
+            checkKIConnection();
+        };
+    </script>
 </body>
 </html>
