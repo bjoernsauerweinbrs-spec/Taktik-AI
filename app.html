@@ -3,101 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni 2.0 - Elite Board</title>
+    <title>Coach Toni 2.0 - Elite Interface</title>
     <style>
         :root { --ginga-green: #2ecc71; --bg-dark: #0d1117; --panel-dark: #161b22; --border: #30363d; }
-        
         * { box-sizing: border-box; }
         body, html { margin: 0; padding: 0; height: 100vh; font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); color: white; overflow: hidden; }
 
-        /* Sicherheits-Check: Inhalt nur zeigen, wenn autorisiert */
         body:not(.authorized) { display: none; }
+        .main-layout { display: flex; height: 100vh; width: 100vw; }
 
-        .main-layout { display: flex; height: 100vh; }
+        /* Sidebar Links: Koffer */
+        aside#left-sidebar { width: 80px; background: var(--panel-dark); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
+        .icon-btn { font-size: 32px; cursor: pointer; margin-bottom: 30px; transition: transform 0.2s; filter: drop-shadow(0 0 5px rgba(46, 204, 113, 0.3)); }
 
-        /* Sidebars */
-        aside { width: 300px; background: var(--panel-dark); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        #right-sidebar { border-right: none; border-left: 1px solid var(--border); width: 320px; }
-
-        /* Spielfeld-Container */
+        /* Spielfeld-Zentrum */
         main { flex-grow: 1; position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         
-        #pitch { 
-            width: 950px; height: 600px; background: #1a3a1a; border: 3px solid white; 
-            position: relative; border-radius: 8px; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        #setup-overlay { 
+            position: absolute; inset: 0; background: radial-gradient(circle, #161b22 0%, #0d1117 100%); 
+            z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; 
         }
 
-        /* Taktische Linien */
-        .mid-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: white; }
-        .center-circle { position: absolute; left: 50%; top: 50%; width: 140px; height: 140px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); }
-        .penalty-area { position: absolute; width: 160px; height: 320px; border: 2px solid white; top: 50%; transform: translateY(-50%); }
-        .penalty-area.left { left: 0; border-left: none; }
-        .penalty-area.right { right: 0; border-right: none; }
-        .goal-box { position: absolute; width: 12px; height: 80px; background: white; top: 50%; transform: translateY(-50%); border: 1px solid #000; }
-        .goal-box.left { left: -14px; } .goal-box.right { right: -14px; }
+        #pitch { 
+            display: none; width: 950px; height: 600px; background: #1a3a1a; border: 4px solid white; 
+            position: relative; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1);
+        }
 
-        /* Rechter Chat: Fest & Scrollbar */
-        #chat-history { flex-grow: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .chat-input-area { padding: 15px; border-top: 1px solid var(--border); background: var(--panel-dark); }
-        textarea { width: 100%; background: #0d1117; border: 1px solid var(--border); color: white; border-radius: 8px; padding: 12px; resize: none; outline: none; }
-        textarea:focus { border-color: var(--ginga-green); }
+        /* Rechter Chat & Voice */
+        aside#right-sidebar { width: 380px; background: var(--panel-dark); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+        #chat-history { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
+        
+        .chat-input-area { padding: 20px; border-top: 1px solid var(--border); background: var(--panel-dark); }
+        .input-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        textarea { flex-grow: 1; background: #0d1117; border: 1px solid var(--border); color: white; border-radius: 12px; padding: 12px; resize: none; outline: none; font-size: 14px; }
+        
+        /* Mikrofon Button */
+        .mic-btn { 
+            width: 50px; height: 50px; border-radius: 50%; border: none; background: #30363d; color: white; 
+            cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; transition: 0.3s;
+        }
+        .mic-btn.active { background: #f85149; animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse { 
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); }
+            100% { transform: scale(1); }
+        }
 
-        /* Aktentasche Modal (Das Elite Control Center) */
-        #briefcase-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; padding: 20px; }
-        .modal-content { background: var(--panel-dark); height: 90vh; max-width: 1200px; margin: auto; border-radius: 15px; border: 1px solid var(--ginga-green); display: flex; flex-direction: column; position: relative; }
-        .modal-tabs { display: flex; border-bottom: 1px solid var(--border); background: #21262d; border-radius: 15px 15px 0 0; }
-        .tab-btn { padding: 18px 25px; cursor: pointer; font-weight: bold; border-right: 1px solid var(--border); transition: 0.3s; color: #8b949e; }
-        .tab-btn:hover { color: white; }
+        .btn-send { background: var(--ginga-green); color: black; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
+
+        /* Aktentasche Modal */
+        #briefcase-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; }
+        .modal-content { background: var(--panel-dark); height: 90vh; width: 95vw; max-width: 1200px; margin: 5vh auto; border-radius: 20px; border: 1px solid var(--ginga-green); display: flex; flex-direction: column; overflow: hidden; }
+        .modal-tabs { display: flex; background: #21262d; border-bottom: 1px solid var(--border); }
+        .tab-btn { padding: 20px 30px; cursor: pointer; font-weight: bold; color: #8b949e; border-right: 1px solid var(--border); transition: 0.2s; }
         .tab-btn.active { background: var(--ginga-green); color: black; }
-        .close-briefcase { margin-left: auto; padding: 18px 25px; cursor: pointer; color: #f85149; font-weight: bold; }
-
-        .tab-content { flex-grow: 1; padding: 25px; overflow-y: auto; }
-
-        /* Spieler Icons */
-        .player { position: absolute; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: move; border: 2px solid white; z-index: 100; transition: transform 0.1s; }
-        .player.red { background: radial-gradient(circle, #ff4d4d, #b30000); }
-        .player.blue { background: radial-gradient(circle, #3498db, #2980b9); }
-        .player-label { position: absolute; top: 42px; left: 50%; transform: translateX(-50%); font-size: 11px; background: rgba(0,0,0,0.85); padding: 2px 6px; border-radius: 4px; white-space: nowrap; font-weight: bold; color: white; }
-
-        .btn-green { background: #238636; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
-        .btn-green:hover { background: #2ea043; }
-
-        /* MacBook Air Optimierung */
-        @media (max-height: 800px) { #pitch { transform: scale(0.85); } aside { width: 260px; } }
+        .tab-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
     </style>
 </head>
 <body class="authorized">
 
     <div class="main-layout">
         <aside id="left-sidebar">
-            <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight:900; color:var(--ginga-green); letter-spacing: 1px;">ELITE BOARD</span>
-                <div onclick="toggleBriefcase()" style="cursor:pointer; font-size:24px;" title="Aktentasche öffnen">💼</div>
-            </div>
-            <div id="quick-squad-status" style="padding: 20px;">
-                <p style="color: #8b949e; font-size: 13px;">SYSTEMSTATUS</p>
-                <div style="color: var(--ginga-green); font-weight: bold;">● Live-Analyse aktiv</div>
-            </div>
+            <div class="icon-btn" onclick="toggleBriefcase()" title="Aktentasche">💼</div>
+            <div style="margin-top: auto; padding-bottom: 20px; color: var(--ginga-green); font-size: 10px; font-weight: 900; transform: rotate(-90deg);">ELITE TACTICS</div>
         </aside>
 
         <main>
+            <div id="setup-overlay">
+                <div style="font-size: 60px; margin-bottom: 20px;">⚽</div>
+                <h1 style="color:var(--ginga-green); font-size: 32px; letter-spacing: 2px;">SYSTEM BEREIT</h1>
+                <p id="setup-status" style="color: #8b949e;">Warte auf Initialisierung durch Coach Toni...</p>
+            </div>
             <div id="pitch">
-                <div class="mid-line"></div>
-                <div class="center-circle"></div>
-                <div class="penalty-area left"></div>
-                <div class="penalty-area right"></div>
-                <div class="goal-box left"></div>
-                <div class="goal-box right"></div>
                 </div>
         </main>
 
         <aside id="right-sidebar">
-            <div style="padding: 20px; border-bottom: 1px solid var(--border); font-weight: 900; color: var(--ginga-green);">CO-TRAINER TONI</div>
-            <div id="chat-history">
-                </div>
+            <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 900; color: var(--ginga-green);">TONI AI COACH</span>
+                <span id="connection-status" style="font-size: 10px; color: #2ecc71;">● ONLINE</span>
+            </div>
+            <div id="chat-history"></div>
             <div class="chat-input-area">
-                <textarea id="user-msg" rows="3" placeholder="Elite-Analyse anfordern..."></textarea>
-                <button class="btn-green" onclick="handleToniAction()">ANALYSIEREN</button>
+                <div class="input-row">
+                    <textarea id="user-msg" rows="2" placeholder="Sprechen oder tippen..."></textarea>
+                    <button id="start-mic" class="mic-btn" onclick="toggleVoice()">🎤</button>
+                </div>
+                <button class="btn-send" onclick="handleToniAction()">ANALYSE STARTEN</button>
             </div>
         </aside>
     </div>
@@ -106,45 +99,31 @@
         <div class="modal-content">
             <div class="modal-tabs">
                 <div id="tab-kader" class="tab-btn active" onclick="switchTab('kader')">KADER</div>
-                <div id="tab-sporttasche" class="tab-btn" onclick="switchTab('sporttasche')">SPORTTASCHE</div>
                 <div id="tab-analyse" class="tab-btn" onclick="switchTab('analyse')">ANALYSE</div>
                 <div id="tab-match" class="tab-btn" onclick="switchTab('match')">MATCH</div>
-                <div class="close-briefcase" onclick="toggleBriefcase()">SCHLIESSEN ✖</div>
+                <div id="tab-training" class="tab-btn" onclick="switchTab('training')">ORDNER</div>
+                <div style="margin-left: auto; padding: 20px; cursor: pointer; color: #f85149;" onclick="toggleBriefcase()">✖</div>
             </div>
-            <div id="tab-content-area" class="tab-content">
-                <h3>Elite Control Center</h3>
-                <p>Wähle einen Reiter oben aus, um den Kader zu pflegen oder Analysen einzusehen.</p>
-            </div>
+            <div id="tab-content-area" class="tab-content"></div>
         </div>
     </div>
 
     <script src="js/logic.js"></script>
-    <script src="js/board.js"></script>
     <script src="js/chat.js"></script>
     <script>
-        // Sicherheits-Check: Ohne Session-Key zurück zum Login
-        if(sessionStorage.getItem('toni_auth') !== 'true') { 
-            window.location.href = 'index.html'; 
-        } else { 
-            document.body.classList.add('authorized'); 
-        }
+        if(sessionStorage.getItem('toni_auth') !== 'true') { window.location.href = 'index.html'; }
+        else { document.body.classList.add('authorized'); }
 
         function toggleBriefcase() {
             const m = document.getElementById('briefcase-modal');
-            const isVisible = m.style.display === 'block';
-            m.style.display = isVisible ? 'none' : 'block';
-            if(!isVisible) switchTab('kader');
+            m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+            if(m.style.display === 'block') switchTab('kader');
         }
 
-        function switchTab(tab) {
+        function switchTab(t) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tab).classList.add('active');
-            
-            const area = document.getElementById('tab-content-area');
-            // Die Logik für den Inhalt kommt jetzt gleich in der js/logic.js
-            area.innerHTML = `<h3>Lädt ${tab.toUpperCase()}...</h3>`;
-            
-            if(window.loadTabContent) window.loadTabContent(tab);
+            document.getElementById('tab-' + t).classList.add('active');
+            if(window.loadTabContent) window.loadTabContent(t);
         }
     </script>
 </body>
