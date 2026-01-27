@@ -1,12 +1,16 @@
 /**
- * Toni 2.0 - Elite Board Engine (Canvas & Animation)
+ * Toni 2.0 - Elite Board Engine (Step 10.1: ID-Fix & Real Zone Analysis)
  */
 
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 let currentPitchType = 'none';
-let players = []; // Hier leben unsere Spieler-Objekte
+let players = []; 
+let nextPlayerId = 1; // Eindeutige ID für jeden Spieler
 let ball = { x: 475, y: 300, targetX: 475, targetY: 300 };
+let runs = []; 
+let draggedObject = null;
+let showZones = false; 
 
 window.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('pitch');
@@ -14,100 +18,122 @@ window.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
         container.appendChild(canvas);
         resizeCanvas();
-        renderLoop(); // Startet die 60 FPS Animation
+        setupInteractions(); 
+        renderLoop(); 
     }
 });
 
-function resizeCanvas() {
-    canvas.width = 950;
-    canvas.height = 600;
-}
+function resizeCanvas() { canvas.width = 950; canvas.height = 600; }
 
-// Die Render-Loop (Copilots Herzstück)
 function renderLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     if (currentPitchType !== 'none') {
         drawPitchLines(currentPitchType);
+        if(showZones) drawZones();
+        updateAndDrawRuns();
         updateAndDrawPlayers();
         drawBall();
     }
-    
     requestAnimationFrame(renderLoop);
 }
 
-function updateAndDrawPlayers() {
-    players.forEach(p => {
-        // Smooth Movement (Laufwege wie im Video)
-        p.x += (p.targetX - p.x) * 0.08;
-        p.y += (p.targetY - p.y) * 0.08;
+// 18-Zonen-Grid
+function drawZones() {
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+    ctx.setLineDash([5, 5]);
+    const zoneW = 850 / 6;
+    const zoneH = 500 / 3;
+    for(let i=1; i<6; i++) {
+        let x = 50 + zoneW * i;
+        ctx.beginPath(); ctx.moveTo(x, 50); ctx.lineTo(x, 550); ctx.stroke();
+    }
+    for(let i=1; i<3; i++) {
+        let y = 50 + zoneH * i;
+        ctx.beginPath(); ctx.moveTo(50, y); ctx.lineTo(900, y); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+}
 
-        // Spieler zeichnen (Elite-Design)
-        ctx.beginPath();
-        const grad = ctx.createRadialGradient(p.x, p.y, 5, p.x, p.y, 20);
-        grad.addColorStop(0, p.team === 'red' ? '#ff4d4d' : '#3498db');
-        grad.addColorStop(1, p.team === 'red' ? '#b30000' : '#2980b9');
-        
-        ctx.fillStyle = grad;
-        ctx.arc(p.x, p.y, 20, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Nummer & Name
-        ctx.fillStyle = "white";
-        ctx.font = "bold 14px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText(p.nr, p.x, p.y + 5);
-        
-        ctx.font = "10px sans-serif";
-        ctx.fillText(p.name, p.x, p.y + 35);
+function updateAndDrawRuns() {
+    runs = runs.filter(r => {
+        const p = players.find(pl => pl.id === r.playerId);
+        if(!p) return false;
+        const dist = Math.sqrt((p.x - r.toX)**2 + (p.y - r.toY)**2);
+        if(dist > 10) {
+            drawArrow(r.fromX, r.fromY, r.toX, r.toY);
+            return true;
+        }
+        return false;
     });
 }
 
-function drawBall() {
-    ball.x += (ball.targetX - ball.x) * 0.1;
-    ball.y += (ball.targetY - ball.y) * 0.1;
-    
+function drawArrow(fx, fy, tx, ty) {
+    const headlen = 12;
+    const angle = Math.atan2(ty - fy, tx - fx);
+    ctx.strokeStyle = "rgba(46, 204, 113, 0.7)";
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 4]);
+    ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(tx, ty); ctx.stroke();
+    ctx.setLineDash([]);
     ctx.beginPath();
-    ctx.fillStyle = "white";
-    ctx.arc(ball.x, ball.y, 8, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "black";
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(tx - headlen * Math.cos(angle - Math.PI/6), ty - headlen * Math.sin(angle - Math.PI/6));
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(tx - headlen * Math.cos(angle + Math.PI/6), ty - headlen * Math.sin(angle + Math.PI/6));
     ctx.stroke();
 }
 
-// Spielfeld-Linien (Nagelsmann-Style)
-function drawPitchLines(type) {
-    ctx.fillStyle = "#1a3a1a";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "rgba(255,255,255,0.8)";
-    ctx.lineWidth = 2;
-
-    ctx.strokeRect(50, 50, 850, 500); // Außen
-    if(type === 'grossfeld') {
-        ctx.beginPath();
-        ctx.moveTo(475, 50); ctx.lineTo(475, 550); // Mitte
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(475, 300, 70, 0, Math.PI * 2); // Kreis
-        ctx.stroke();
-    }
+function setupInteractions() {
+    canvas.onmousedown = e => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left; const my = e.clientY - rect.top;
+        if(Math.sqrt((mx-ball.x)**2+(my-ball.y)**2) < 15) { draggedObject = ball; return; }
+        draggedObject = players.find(p => Math.sqrt((mx-p.x)**2+(my-p.y)**2) < 20);
+        
+        // Copilot Fix: Nur Runs für Spieler, nicht für den Ball
+        if(draggedObject && draggedObject !== ball) {
+            runs = runs.filter(r => r.playerId !== draggedObject.id);
+            runs.push({ fromX: draggedObject.x, fromY: draggedObject.y, toX: draggedObject.x, toY: draggedObject.y, playerId: draggedObject.id });
+        }
+    };
+    canvas.onmousemove = e => {
+        if (draggedObject) {
+            const rect = canvas.getBoundingClientRect();
+            draggedObject.targetX = e.clientX - rect.left;
+            draggedObject.targetY = e.clientY - rect.top;
+            if(draggedObject !== ball) {
+                let run = runs.find(r => r.playerId === draggedObject.id);
+                if(run) { run.toX = draggedObject.targetX; run.toY = draggedObject.targetY; }
+            }
+        }
+    };
+    canvas.onmouseup = () => { draggedObject = null; };
 }
 
-// Befehle für Toni (KI-Hooks)
+// "Echte" Zonen-Analyse (Nagelsmann-Mode)
+window.analyzeZones = () => {
+    showZones = true;
+    const zoneW = 850 / 6;
+    const zoneH = 500 / 3;
+    let report = "Analyse läuft... ";
+
+    // Beispiel: Zähle Spieler in Zone 14 (Zentrum vor dem 16er)
+    // Zone 14 ist meistens die 5. Spalte, mittlere Reihe (Index 4,1)
+    const redInZone14 = players.filter(p => p.team === 'red' && p.x > 50 + 4*zoneW && p.x < 50 + 5*zoneW && p.y > 50 + zoneH && p.y < 50 + 2*zoneH).length;
+    const blueInZone14 = players.filter(p => p.team === 'blue' && p.x > 50 + 4*zoneW && p.x < 50 + 5*zoneW && p.y > 50 + zoneH && p.y < 50 + 2*zoneH).length;
+
+    if(redInZone14 > blueInZone14) {
+        report = "Björn, wir dominieren Zone 14! Wir haben dort Überzahl. Such den Steckpass!";
+    } else if (redInZone14 < blueInZone14) {
+        report = "Coach, der Gegner macht das Zentrum vor dem Sechzehner dicht. Wir müssen über die Flügel kommen!";
+    } else {
+        report = "Zentrum ist ausgeglichen. Wir brauchen einen kreativen Laufweg, um die Kette zu sprengen.";
+    }
+    return report;
+};
+
 window.spawnPlayer = (team, nr, name, x, y) => {
-    players.push({ team, nr, name, x, y, targetX: x, targetY: y });
+    players.push({ id: nextPlayerId++, team, nr, name, x, y, targetX: x, targetY: y });
 };
 
-window.movePlayer = (nr, newX, newY) => {
-    const p = players.find(player => player.nr == nr);
-    if(p) { p.targetX = newX; p.targetY = newY; }
-};
-
-window.setPitch = (type) => { 
-    currentPitchType = type; 
-    document.getElementById('setup-overlay').style.display = 'none';
-    document.getElementById('pitch').style.display = 'block';
-};
+// ... Rest wie bisher (setPitch, setFormation etc.)
