@@ -1,79 +1,85 @@
 :root {
-    --pitch-green: #2ecc71;
-    --line-white: rgba(255, 255, 255, 0.8);
-    --dark-blue: #0f172a;
-    --card-bg: #1e293b;
-    --accent: #3b82f6;
+    --pitch-dark: #0f172a;
+    --grass-green: #15803d;
+    --neon-accent: #22c55e;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --text-main: #f8fafc;
+    --glass: rgba(255, 255, 255, 0.1);
 }
 
 body {
-    margin: 0; font-family: 'Segoe UI', sans-serif;
-    background-color: var(--dark-blue); color: white;
-    overflow: hidden; display: flex; flex-direction: column; height: 100vh;
+    margin: 0; font-family: 'Inter', system-ui, sans-serif;
+    background: var(--pitch-dark); color: var(--text-main);
+    overflow: hidden; height: 100vh; display: flex; flex-direction: column;
 }
 
-/* --- DAS PROFI-SPIELFELD --- */
+/* --- HIGHTECH SPIELFELD --- */
 #taktik-board {
-    position: relative; width: 95vw; height: 60vh;
-    margin: 10px auto; background-color: var(--pitch-green);
-    border: 3px solid var(--line-white); border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    touch-action: none;
+    position: relative; width: 95vw; height: 55vh;
+    margin: 10px auto; background: var(--grass-green);
+    border: 4px solid rgba(255,255,255,0.2); border-radius: 12px;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.8);
 }
 
-/* Mittellinie & Kreis */
-#taktik-board::before {
-    content: ''; position: absolute; top: 0; left: 50%;
-    width: 2px; height: 100%; background: var(--line-white);
+.pitch-lines {
+    position: absolute; width: 100%; height: 100%;
+    border-right: 2px solid rgba(255,255,255,0.4); /* Mittellinie */
+    left: -50%; transform: translateX(50%); pointer-events: none;
 }
-#taktik-board::after {
-    content: ''; position: absolute; top: 50%; left: 50%;
-    width: 80px; height: 80px; border: 2px solid var(--line-white);
+
+.center-circle {
+    position: absolute; top: 50%; left: 50%;
+    width: 80px; height: 80px; border: 2px solid rgba(255,255,255,0.4);
     border-radius: 50%; transform: translate(-50%, -50%);
 }
 
-/* Strafräume */
-.penalty-area {
-    position: absolute; width: 15%; height: 40%;
-    border: 2px solid var(--line-white); top: 30%;
-}
-.left-area { left: 0; border-left: none; }
-.right-area { right: 0; border-right: none; }
-
-/* --- HEADER & NAVIGATION --- */
-header {
-    padding: 15px; display: flex; justify-content: space-between;
-    align-items: center; background: var(--card-bg);
-}
-
-.status-badge {
-    font-size: 12px; padding: 4px 8px; border-radius: 20px;
-    background: #334155; color: #94a3b8;
-}
-
-/* --- AKTENTASCHE ICON --- */
-.briefcase-btn {
-    background: none; border: none; font-size: 24px; cursor: pointer;
-    transition: transform 0.2s;
-}
-.briefcase-btn:hover { transform: scale(1.1); }
-
-/* --- SPIELER CHIPS --- */
-.player-chip {
-    position: absolute; width: 35px; height: 35px;
-    background: #e74c3c; border: 2px solid white; color: white;
-    border-radius: 50%; display: flex; align-items: center;
-    justify-content: center; font-weight: bold; font-size: 14px;
-    cursor: move; z-index: 10; box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-}
-
-/* --- OVERLAY (AKTENTASCHE) --- */
-.overlay-hidden { display: none !important; }
-#briefcase-overlay {
-    position: fixed; top: 0; right: 0; width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.95); z-index: 100;
-}
+/* --- BENTO-STYLE AKTENTASCHE --- */
 .briefcase-content {
-    width: 90%; max-width: 400px; margin-left: auto; height: 100%;
-    background: var(--card-bg); padding: 20px; overflow-y: auto;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-left: 1px solid var(--glass); padding: 20px;
 }
+
+.briefcase-tabs {
+    display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    background: var(--glass); border: none; color: #94a3b8;
+    padding: 10px 16px; border-radius: 8px; cursor: pointer;
+    white-space: nowrap; transition: 0.3s;
+}
+
+.tab-btn.active {
+    background: var(--neon-accent); color: var(--pitch-dark);
+    font-weight: bold; box-shadow: 0 0 15px var(--neon-accent);
+}
+
+.tab-content { display: none; animation: fadeIn 0.4s; }
+.tab-content.active { display: block; }
+
+/* --- SPIELER KARTEN (ANALYSE-LOOK) --- */
+.player-smart-box {
+    background: var(--card-bg); border: 1px solid var(--glass);
+    border-radius: 12px; margin-bottom: 12px; backdrop-filter: blur(10px);
+}
+
+.rating-stars {
+    letter-spacing: 5px; filter: drop-shadow(0 0 5px #f6e05e);
+}
+
+/* --- VIDEO-KABINE --- */
+.video-upload-zone {
+    border: 2px dashed var(--glass); border-radius: 12px;
+    padding: 30px; text-align: center; cursor: pointer;
+    transition: 0.3s;
+}
+
+.video-upload-zone:hover { border-color: var(--neon-accent); background: rgba(34, 197, 94, 0.05); }
+
+/* --- MESSAGES --- */
+.message { padding: 12px; border-radius: 8px; margin-bottom: 8px; max-width: 85%; }
+.toni-msg { background: var(--glass); border-left: 4px solid var(--neon-accent); }
+.user-msg { background: #3b82f6; align-self: flex-end; margin-left: auto; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
