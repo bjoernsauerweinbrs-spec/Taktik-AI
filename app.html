@@ -3,111 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Toni 2.0 - Tactical Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <title>Taktik-AI Pro | Coach Björn</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="pro-layout">
-
+<body>
     <header class="main-header">
-        <div class="brand">TONI <span style="color: #3b82f6; font-weight: 600;">PRO</span></div>
-        
-        <nav class="mode-selector">
-            <button onclick="setMode('match')" id="btn-match"><i class="fas fa-trophy"></i> Spieltag</button>
-            <button onclick="setMode('training')" id="btn-training" class="active"><i class="fas fa-whistle"></i> Training</button>
-            <button onclick="setMode('funino')" id="btn-funino"><i class="fas fa-child"></i> Funino</button>
-        </nav>
-
-        <div class="trainer-info">
-            <span id="display-trainer-name" style="margin-right: 15px; font-weight: 600; font-size: 0.9rem;">Coach</span>
-            <button class="icon-btn" title="Aktentasche öffnen" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem;">
-                <i class="fas fa-briefcase"></i>
-            </button>
+        <div class="header-left">
+            <h1>Taktik-AI <span class="coach-tag">Coach Björn</span></h1>
+        </div>
+        <div class="header-center">
+            <select id="field-mode" onchange="updateFieldMode()">
+                <option value="mode-match">Match (2 Tore)</option>
+                <option value="mode-funino">Funino (4 Tore)</option>
+            </select>
+        </div>
+        <div class="header-right">
+            <button class="briefcase-toggle" onclick="toggleBriefcase()">📁 Aktentasche</button>
         </div>
     </header>
 
     <main class="dashboard-grid">
-        
-        <aside class="sidebar-left">
-            <div class="sidebar-header">
-                <h3 style="margin: 0; font-size: 1rem;">Kader <span id="player-count" style="color: #94a3b8; font-weight: 400;">(0)</span></h3>
-                <button class="add-btn" onclick="addNewPlayer()" title="Neuer Spieler">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </div>
-            <div id="player-list" class="scrollable-content">
-                </div>
-        </aside>
-
         <section class="board-container">
-            <div id="pitch" class="soccer-pitch">
-                <div id="exercise-overlay"></div> </div>
-            
-            <div class="board-controls" style="margin-top: 15px; display: flex; gap: 10px;">
-                <button onclick="resetBoard()" class="control-btn"><i class="fas fa-undo"></i> Reset</button>
-                <button onclick="generateFlyer()" class="control-btn flyer-btn"><i class="fas fa-file-pdf"></i> Spieltags-Flyer</button>
-                <button onclick="takeScreenshot()" class="control-btn"><i class="fas fa-camera"></i> Screenshot</button>
+            <div id="taktik-board" class="soccer-pitch mode-match">
+                <div class="goal goal-left goal-match"></div>
+                <div class="goal goal-right goal-match"></div>
+                <div class="goal goal-funino-tl"></div>
+                <div class="goal goal-funino-bl"></div>
+                <div class="goal goal-funino-tr"></div>
+                <div class="goal goal-funino-br"></div>
             </div>
         </section>
 
-        <aside class="sidebar-right">
-            <div class="ai-header">
-                <h3 style="margin: 0; font-size: 1rem;">Toni <small style="font-weight: 400; opacity: 0.6;">Co-Trainer</small></h3>
-                <div class="status-indicator">
-                    <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 5px; color: #22c55e;"></i> Online
-                </div>
+        <section class="sidebar-right chat-section">
+            <div class="chat-header">Toni (KI-Analyst)</div>
+            <div id="chat-output" class="scrollable-content"></div>
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="Taktik-Befehl an Toni...">
+                <button onclick="sendMessage()">Senden</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="briefcase-overlay" class="overlay-hidden">
+        <div class="briefcase-content">
+            <div class="briefcase-header">
+                <h2>📁 Kader & Management</h2>
+                <button class="close-btn" onclick="toggleBriefcase()">✖</button>
             </div>
             
-            <div id="chat-history" class="scrollable-content">
-                <div class="ai-msg">
-                    Hallo Coach! Ich bin bereit. Wir nutzen heute den brasilianischen Style für die Technikübungen. Welchen Modus gehen wir an?
+            <div class="add-player-section">
+                <h3>Neuen Spieler hinzufügen</h3>
+                <div class="player-form">
+                    <input type="number" id="p-nr" placeholder="Nr.">
+                    <input type="text" id="p-name" placeholder="Name">
+                    <select id="p-pos">
+                        <option value="IV">Innenverteidiger</option>
+                        <option value="ZM">Zentrales Mittelfeld</option>
+                        <option value="ST">Stürmer</option>
+                        <option value="TW">Torwart</option>
+                    </select>
+                    <button onclick="addPlayerToBriefcase()">Hinzufügen</button>
                 </div>
             </div>
 
-            <div class="chat-footer">
-                <textarea id="user-input" rows="2" placeholder="Frag Toni nach einer Übung..."></textarea>
-                <button id="send-btn" onclick="sendMessage()">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-                <button id="mute-btn" onclick="toggleMute()" title="Sprachausgabe umschalten">
-                    <i class="fas fa-volume-up"></i>
-                </button>
+            <div id="smart-squad-list" class="scrollable-content">
+                <p class="empty-hint">Noch keine Spieler im Kader. Nutze das Formular oben!</p>
             </div>
-        </aside>
-
-    </main>
+        </div>
+    </div>
 
     <script src="js/storage.js"></script>
     <script src="js/board.js"></script>
     <script src="js/chat.js"></script>
     <script src="js/logic.js"></script>
-    <script>
-        // Initialisierung beim Laden
-        window.onload = () => {
-            const name = localStorage.getItem('toni_trainer_name') || 'Coach';
-            document.getElementById('display-trainer-name').innerText = name;
-            
-            // Falls kein Passwort vorhanden, zurück zum Login
-            if (!localStorage.getItem('toni_team_pw')) {
-                window.location.href = 'index.html';
-            }
-            
-            // Kader initial laden
-            if (typeof renderPlayerList === 'function') {
-                renderPlayerList();
-            }
-        };
-
-        function setMode(mode) {
-            document.querySelectorAll('.mode-selector button').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn-' + mode).classList.add('active');
-            console.log("Modus gewechselt zu: " + mode);
-        }
-
-        function generateFlyer() {
-            alert("Manager Björn, der Spieltags-Flyer wird vorbereitet. Die PDF-Engine wird gerade kalibriert.");
-        }
-    </script>
 </body>
 </html>
