@@ -1,133 +1,99 @@
-// --- GLOBALE VARIABLEN ---
+// --- FINALE GEPRÜFTE LOGIK ---
 let briefcaseOpen = false;
 let players = [];
 
-// --- 1. DIE AKTENTASCHE STEUERN ---
 function toggleBriefcase() {
-    briefcaseOpen = !briefcaseOpen;
     const overlay = document.getElementById('briefcase-overlay');
+    briefcaseOpen = !briefcaseOpen;
     overlay.classList.toggle('overlay-hidden', !briefcaseOpen);
 }
 
-// --- 2. SPIELFELD-MODUS (MATCH / FUNINO) ---
 function updateFieldMode() {
     const mode = document.getElementById('field-mode').value;
-    const board = document.getElementById('taktik-board');
-    
-    // Wechselt die CSS-Klasse (steuert die Tore)
-    board.className = 'soccer-pitch ' + mode;
-    
-    console.log("Spielfeld-Modus geändert auf: " + mode);
+    document.getElementById('taktik-board').className = 'soccer-pitch ' + mode;
 }
 
-// --- 3. KADER-MANAGEMENT (SMART-BOXEN) ---
 function addPlayerToBriefcase() {
     const nr = document.getElementById('p-nr').value;
     const name = document.getElementById('p-name').value;
     const pos = document.getElementById('p-pos').value;
 
-    if (!nr || !name) {
-        alert("Coach, wir brauchen Nummer und Name für den Spielberichtsbogen!");
-        return;
-    }
+    if (!nr || !name) return alert("Coach, Name und Nummer fehlen!");
 
-    // Spieler-Objekt erstellen
-    const player = {
-        id: Date.now(),
-        nr: nr,
-        name: name,
-        pos: pos,
-        status: 'green' // Standard: Fit & Anwesend
-    };
-
+    const player = { id: Date.now(), nr, name, pos, status: 'green', rating: 4 };
     players.push(player);
-    renderSquad();        // Liste in der Tasche aktualisieren
-    createBoardChip(player); // Chip auf das Feld bringen
-
-    // Eingabefelder leeren
+    renderSquad();
+    updateBoard(); // Synchronisiert die Chips
+    
     document.getElementById('p-nr').value = '';
     document.getElementById('p-name').value = '';
 }
 
-// Erstellt die visuellen Karten in der Aktentasche
+// Rendert die Smart-Boxen mit Anwesenheits-Logik
 function renderSquad() {
     const list = document.getElementById('smart-squad-list');
-    if (players.length === 0) {
-        list.innerHTML = '<p class="empty-hint">Noch kein Profi im Kader.</p>';
-        return;
-    }
-
     list.innerHTML = players.map(p => `
-        <div class="player-smart-box" onclick="togglePlayerDetails(${p.id})">
-            <div class="box-header">
+        <div class="player-smart-box" style="border-left-color: ${p.status === 'green' ? '#48bb78' : p.status === 'red' ? '#f56565' : '#ecc94b'}">
+            <div class="box-header" onclick="togglePlayerDetails(${p.id})">
                 <span class="p-nr-badge">${p.nr}</span>
                 <strong>${p.name}</strong>
-                <small>${p.pos}</small>
+                <select onchange="updateStatus(${p.id}, this.value)" onclick="event.stopPropagation()">
+                    <option value="green" ${p.status === 'green' ? 'selected' : ''}>🟢 Fit</option>
+                    <option value="red" ${p.status === 'red' ? 'selected' : ''}>🔴 Fehlt</option>
+                </select>
             </div>
-            <div id="details-${p.id}" style="display:none; margin-top:10px; font-size:0.85em; border-top:1px solid #4a5568; padding-top:8px;">
-                <p>Status: 🟢 Einsatzbereit</p>
-                <p>Bewertung: ★★★★☆</p>
-                <p style="color: #94a3b8; margin-top:5px;">Klick zum Einklappen</p>
+            <div id="details-${p.id}" style="display:none; margin-top:10px; border-top:1px solid #444; padding-top:10px;">
+                <label>Position: ${p.pos}</label><br>
+                <label>Bewertung: ★★★★☆</label>
             </div>
         </div>
     `).join('');
 }
 
-// Zeigt/Versteckt die Details einer Spieler-Box
+function updateStatus(id, newStatus) {
+    const player = players.find(p => p.id === id);
+    if(player) {
+        player.status = newStatus;
+        renderSquad();
+        updateBoard(); // Entfernt oder zeigt den Chip auf dem Feld
+    }
+}
+
+function updateBoard() {
+    const board = document.getElementById('taktik-board');
+    // Alle alten Chips entfernen, um sauber neu zu zeichnen
+    document.querySelectorAll('.player-chip').forEach(c => c.remove());
+    
+    // Nur fitte Spieler (Grün) auf dem Board anzeigen
+    players.filter(p => p.status === 'green').forEach(p => {
+        const chip = document.createElement('div');
+        chip.className = 'player-chip';
+        chip.innerText = p.nr;
+        chip.style.left = '10%';
+        chip.style.top = (20 + (players.indexOf(p) * 8)) + '%';
+        makeDraggable(chip);
+        board.appendChild(chip);
+    });
+}
+
 function togglePlayerDetails(id) {
     const el = document.getElementById(`details-${id}`);
-    el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
-// --- 4. BOARD-LOGIK (DIE ROTEN CHIPS) ---
-function createBoardChip(player) {
-    const board = document.getElementById('taktik-board');
-    const chip = document.createElement('div');
-    
-    chip.className = 'player-chip';
-    chip.id = `chip-${player.id}`;
-    chip.innerText = player.nr;
-    
-    // Startposition an der Seitenlinie
-    chip.style.left = '5%';
-    chip.style.top = (15 + (players.indexOf(player) * 7)) + '%';
-    
-    // Drag & Drop aktivieren (Handy + MacBook)
-    makeDraggable(chip);
-    board.appendChild(chip);
-}
-
-// Die "Physik" für das Verschieben
 function makeDraggable(el) {
     let isDragging = false;
-
-    // Start (Maus & Touch)
-    el.onmousedown = (e) => start(e);
-    el.ontouchstart = (e) => start(e.touches[0]);
-
-    function start(e) {
-        isDragging = true;
-        document.onmousemove = (e) => move(e);
-        document.ontouchmove = (e) => move(e.touches[0]);
-    }
-
-    function move(e) {
+    const start = (e) => { isDragging = true; };
+    const move = (e) => {
         if (!isDragging) return;
-        const board = document.getElementById('taktik-board').getBoundingClientRect();
-        
-        // Position in Prozent berechnen (für Responsive Design)
-        let x = ((e.clientX - board.left) / board.width) * 100;
-        let y = ((e.clientY - board.top) / board.height) * 100;
-        
-        // Grenzen einhalten (0-95%)
-        el.style.left = Math.max(0, Math.min(95, x)) + '%';
-        el.style.top = Math.max(0, Math.min(95, y)) + '%';
-    }
-
-    // Stop
-    document.onmouseup = document.ontouchend = () => {
-        isDragging = false;
-        document.onmousemove = null;
-        document.ontouchmove = null;
+        const b = document.getElementById('taktik-board').getBoundingClientRect();
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+        el.style.left = Math.max(0, Math.min(95, ((clientX - b.left) / b.width) * 100)) + '%';
+        el.style.top = Math.max(0, Math.min(95, ((clientY - b.top) / b.height) * 100)) + '%';
     };
+    const stop = () => { isDragging = false; };
+    el.onmousedown = el.ontouchstart = start;
+    document.onmousemove = document.ontouchmove = move;
+    document.onmouseup = document.ontouchend = stop;
 }
