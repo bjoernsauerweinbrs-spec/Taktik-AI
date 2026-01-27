@@ -1,4 +1,4 @@
-// --- TONI 2.0: KI-STEUERUNG & FUNK-FIX ---
+// --- TONI ELITE 2026: KI-STEUERUNG & FUNK-FIX ---
 
 async function sendMessage() {
     const userInput = document.getElementById('user-input');
@@ -8,30 +8,35 @@ async function sendMessage() {
     appendMessage('user', userText);
     userInput.value = '';
 
-    // Lade Key und Provider
     const apiKey = localStorage.getItem('api_key');
-    const provider = localStorage.getItem('selected_provider') || 'groq';
+    // Wichtig: Wir nutzen das aktuellste Modell, um das Decommissioned-Problem zu lösen
+    const modelId = "llama-3.3-70b-versatile"; 
 
     if (!apiKey || apiKey.length < 10) {
-        appendMessage('toni', "❌ Coach, ich finde keinen gültigen Key! Bitte geh zurück zur Startseite und log dich neu ein.");
+        appendMessage('toni', "❌ Coach, ich finde keinen gültigen Key! Bitte geh kurz zur Startseite und log dich neu ein.");
         return;
     }
 
     const loadingId = 'loading-' + Date.now();
-    appendMessage('toni', 'Toni denkt nach... 🇧🇷', loadingId);
+    appendMessage('toni', 'Toni analysiert... 🇧🇷', loadingId);
 
-    // Hol aktuelle Daten für Toni
+    // Kontext für Toni sammeln
     const currentMode = document.getElementById('field-mode').value;
-    const squadInfo = players.map(p => `${p.name} (Nr. ${p.nr}, ${p.rating} Sterne)`).join(', ');
+    const activeTab = document.querySelector('.tab-btn.active')?.innerText || 'Kader';
+    const squadInfo = players.map(p => `${p.name} (Nr. ${p.nr}, ${p.rating} Sterne, ${p.weight || 'kein'} kg)`).join(', ');
 
     const systemPrompt = `
-        Du bist Toni, ein brasilianischer Fußball-Fachmann. Dein Chef ist Björn.
-        Antworte immer mit brasilianischem Flair. 
-        AKTUELLER SPIELFELD-MODUS: ${currentMode}.
-        DEIN KADER: ${squadInfo || 'Noch keine Spieler in der Aktentasche'}.
+        Du bist Toni, ein brasilianischer Elite-Fußballtrainer. Dein Chef ist Björn.
+        Verhalte dich wie ein absoluter Fachmann für Taktik, Technik und Sport-Ernährung.
+        AKTUELLER BEREICH: ${activeTab}.
+        SPIELFELD: ${currentMode}.
+        KADER: ${squadInfo || 'Noch leer'}.
         
-        Wenn Björn dich bittet, Spieler zu bewegen, nutze am Ende deiner Antwort:
-        MOVE:Nr:X:Y (X und Y sind Prozentwerte 0-100).
+        DEINE AUFGABEN:
+        1. Gib präzise Tipps zur Beidfüßigkeit und Bewegungsabläufen (z.B. Übersteiger).
+        2. Wenn Björn im Ernährungs-Tab ist, schlage gesunde 'Samba-Rezepte' vor.
+        3. Nutze MOVE:Nr:X:Y am Ende, um Spieler zu verschieben.
+        4. Bleib motivierend, professionell und brasilianisch im Stil.
     `;
 
     try {
@@ -42,7 +47,7 @@ async function sendMessage() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: "llama3-70b-8192",
+                model: modelId,
                 messages: [
                     { role: "system", content: systemPrompt },
                     { role: "user", content: userText }
@@ -52,26 +57,21 @@ async function sendMessage() {
         });
 
         const data = await response.json();
-        
-        // Entferne Lade-Animation
         const loader = document.getElementById(loadingId);
         if (loader) loader.remove();
 
-        if (data.error) {
-            throw new Error(data.error.message);
-        }
+        if (data.error) throw new Error(data.error.message);
 
         const toniAntwort = data.choices[0].message.content;
         appendMessage('toni', toniAntwort);
         
-        // Verarbeite Bewegungs-Befehle
+        // Bewegungen auf dem Board ausführen
         handleToniMoves(toniAntwort);
 
     } catch (error) {
         const loader = document.getElementById(loadingId);
         if (loader) loader.remove();
-        appendMessage('toni', "📡 Funkloch, Manager! Fehler: " + error.message);
-        console.error("KI Fehler:", error);
+        appendMessage('toni', "📡 Funkloch behoben, aber API meldet: " + error.message);
     }
 }
 
@@ -82,10 +82,9 @@ function handleToniMoves(text) {
         const nr = match[1];
         const x = match[2];
         const y = match[3];
-        
         const chips = document.querySelectorAll('.player-chip');
         chips.forEach(chip => {
-            if (chip.innerText === nr) {
+            if (chip.querySelector('.nr').innerText === nr) {
                 chip.style.transition = "all 1s ease-in-out";
                 chip.style.left = x + '%';
                 chip.style.top = y + '%';
