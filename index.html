@@ -3,170 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toni 2.0 - Tactical Management</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <title>Taktik-AI Login | Coach Björn</title>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --accent: #3b82f6;
-            --border: #334155;
-            --success: #22c55e;
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #3b82f6;
         }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
+        body { 
+            background: var(--bg); color: var(--text); font-family: sans-serif;
+            display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;
         }
-
         .login-card {
-            background: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 450px;
-            border: 1px solid var(--border);
+            background: var(--card); padding: 30px; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 350px;
         }
-
-        .header { text-align: center; margin-bottom: 2rem; }
-        .header h1 { font-weight: 600; font-size: 1.8rem; margin: 0; letter-spacing: -1px; }
-        .header span { color: var(--accent); font-weight: 600; }
-        .header p { color: #94a3b8; font-size: 0.85rem; margin-top: 0.5rem; }
-
-        .form-group { margin-bottom: 1.25rem; }
-        label { display: block; margin-bottom: 0.5rem; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-
+        h2 { text-align: center; margin-bottom: 20px; color: var(--accent); }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.9em; color: #94a3b8; }
         input, select {
-            width: 100%;
-            padding: 0.85rem;
-            background: #0f172a;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: white;
-            font-size: 1rem;
-            transition: border-color 0.2s;
+            width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155;
+            background: #0f172a; color: white; box-sizing: border-box;
         }
-
-        input:focus { border-color: var(--accent); outline: none; }
-
-        .api-panel {
-            background: rgba(15, 23, 42, 0.5);
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-top: 1.5rem;
-            border: 1px solid var(--border);
+        button {
+            width: 100%; padding: 12px; background: var(--accent); border: none;
+            border-radius: 6px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px;
         }
-
-        .btn-start {
-            width: 100%;
-            padding: 1rem;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            margin-top: 1.5rem;
-            transition: transform 0.1s, opacity 0.2s;
-        }
-
-        .btn-start:active { transform: scale(0.98); }
-        .btn-start:hover { opacity: 0.9; }
-
-        .footer-note {
-            text-align: center;
-            font-size: 0.7rem;
-            color: #64748b;
-            margin-top: 1.5rem;
-        }
+        button:hover { background: #2563eb; }
     </style>
 </head>
 <body>
 
-<div class="login-card">
-    <div class="header">
-        <h1>TONI <span>2.0</span></h1>
-        <p>Global Elite Taktik-Management</p>
-    </div>
-
-    <div class="form-group">
-        <label for="trainerName">Trainer Name</label>
-        <input type="text" id="trainerName" placeholder="z.B. Coach Björn">
-    </div>
-
-    <div class="form-group">
-        <label for="teamPassword">Team-Passwort</label>
-        <input type="password" id="teamPassword" placeholder="••••••••">
-    </div>
-
-    <div class="api-panel">
-        <label for="activeModel">Primäres KI-Gehirn</label>
-        <select id="activeModel">
-            <option value="gemini">Gemini 1.5 Flash (Kostenlos)</option>
-            <option value="groq">Groq / Llama 3 (High-Speed)</option>
-            <option value="openai">OpenAI GPT-4o (Elite)</option>
-        </select>
-
-        <div style="margin-top: 1rem;">
-            <label>API Key hinterlegen</label>
-            <input type="password" id="currentApiKey" placeholder="Key für ausgewähltes Modell eingeben...">
+    <div class="login-card">
+        <h2>Taktik-AI <small style="display:block; font-size: 0.5em; color: white;">Coach Björn Edition</small></h2>
+        
+        <div class="input-group">
+            <label>Dein Name</label>
+            <input type="text" id="trainer-name" placeholder="z.B. Björn" value="Björn">
         </div>
+
+        <div class="input-group">
+            <label>KI-Anbieter wählen</label>
+            <select id="provider-select">
+                <option value="groq">Groq (Empfohlen: Schnell & Kostenlos)</option>
+                <option value="openai">OpenAI (GPT-4)</option>
+                <option value="gemini">Google Gemini</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>API-Key eingeben</label>
+            <input type="password" id="api-key" placeholder="Hier deinen Key einfügen...">
+        </div>
+
+        <button onclick="startSystem()">System starten & zum Feld</button>
     </div>
 
-    <button class="btn-start" onclick="initSystem()">System starten</button>
+    <script>
+        function startSystem() {
+            const name = document.getElementById('trainer-name').value;
+            const key = document.getElementById('api-key').value;
+            const provider = document.getElementById('provider-select').value;
 
-    <div class="footer-note">
-        Architektur & Management: <strong>Björn</strong> | Co-Trainer: Toni
-    </div>
-</div>
+            if (!key || !name) {
+                alert("Coach, ohne Namen und API-Key kommen wir nicht aus der Kabine!");
+                return;
+            }
 
-<script>
-    // Initialisierung & Speicherung
-    window.onload = () => {
-        document.getElementById('trainerName').value = localStorage.getItem('toni_trainer_name') || '';
-        document.getElementById('activeModel').value = localStorage.getItem('toni_active_model') || 'gemini';
-        loadKey();
-    };
+            // Daten lokal im Browser sichern
+            localStorage.setItem('trainer_name', name);
+            localStorage.setItem('api_key', key);
+            localStorage.setItem('selected_provider', provider);
 
-    document.getElementById('activeModel').onchange = loadKey;
-
-    function loadKey() {
-        const model = document.getElementById('activeModel').value;
-        const key = localStorage.getItem('toni_key_' + model) || '';
-        document.getElementById('currentApiKey').value = key;
-    }
-
-    function initSystem() {
-        const name = document.getElementById('trainerName').value;
-        const pass = document.getElementById('teamPassword').value;
-        const model = document.getElementById('activeModel').value;
-        const key = document.getElementById('currentApiKey').value;
-
-        if (!name || !pass || !key) {
-            alert("Manager, wir brauchen Namen, Passwort und API-Key für den Start!");
-            return;
+            // Weiterleitung zur Haupt-App
+            window.location.href = 'app.html';
         }
-
-        // Lokale Speicherung (BYOK Prinzip)
-        localStorage.setItem('toni_trainer_name', name);
-        localStorage.setItem('toni_team_pw', pass);
-        localStorage.setItem('toni_active_model', model);
-        localStorage.setItem('toni_key_' + model, key);
-
-        // Weiterleitung zum Board
-        window.location.href = 'app.html';
-    }
-</script>
-
+        
+        // Automatisches Laden beim Start, falls schon mal eingeloggt
+        window.onload = () => {
+            const savedName = localStorage.getItem('trainer_name');
+            const savedKey = localStorage.getItem('api_key');
+            if(savedName) document.getElementById('trainer-name').value = savedName;
+            if(savedKey) document.getElementById('api-key').value = savedKey;
+        };
+    </script>
 </body>
 </html>
