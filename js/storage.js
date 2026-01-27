@@ -1,100 +1,110 @@
-/* js/storage.js 
-   Zuständig für: Kaderverwaltung, Ampelsystem, Aktentaschen-Archiv, 
-   Punktesystem (Kondition, Übersicht, Technik, Taktik) und Persistenz 
-*/
+/**
+ * Toni 2.0 - Storage Engine
+ * Verwaltet Kader, Bewertungen und die Aktentasche (Saison-Archiv)
+ */
 
 const ToniStorage = {
+    // Keys für den LocalStorage
+    KEYS: {
+        PLAYERS: 'toni_players',
+        ARCHIVE: 'toni_archive',
+        CONFIG: 'toni_config'
+    },
+
+    // --- KADER MANAGEMENT ---
     
-    // 1. AUTHENTIFIZIERUNG & TRAINER-IDENTITÄT
-    saveAuthConfig(name, apiKey) {
-        localStorage.setItem('toni_trainer_name', name);
-        localStorage.setItem('toni_api_key', apiKey);
+    getPlayers: function() {
+        const data = localStorage.getItem(this.KEYS:PLAYERS);
+        return data ? JSON.parse(data) : [];
     },
 
-    getAuthConfig() {
-        return {
-            name: localStorage.getItem('toni_trainer_name') || 'Trainer',
-            apiKey: localStorage.getItem('toni_api_key') || ''
-        };
-    },
-
-    // 2. KADER-MANAGEMENT & AMPELSYSTEM
-    // Speichert den kompletten Kader inklusive aller Leistungsdaten
-    saveKader(kaderData) {
-        localStorage.setItem('toni_kader', JSON.stringify(kaderData));
-    },
-
-    getKader() {
-        const savedKader = localStorage.getItem('toni_kader');
-        if (savedKader) {
-            return JSON.parse(savedKader);
+    savePlayer: function(player) {
+        let players = this.getPlayers();
+        const index = players.findIndex(p => p.id === player.id);
+        
+        if (index > -1) {
+            players[index] = player; // Update
         } else {
-            // Initialer Standard-Kader (Beispiel: David Luiz)
-            return [
-                { 
-                    id: 'home_dl4', 
-                    name: 'David Luiz', 
-                    nummer: 4, 
-                    status: 'green', // Ampel: green=Teilnahme, yellow=Nur Training, red=Abwesend
-                    onPitch: true,   // Ob der Spieler in der Startelf/auf dem Feld ist
-                    stats: { 
-                        kondition: 85, 
-                        uebersicht: 90, 
-                        technik: 95, 
-                        taktik: 88, 
-                        sonderpunkte: 5 
-                    },
-                    history: [] // Für spätere Leistungsentwicklung
-                }
-            ];
+            players.push(player); // Neu
+        }
+        
+        localStorage.setItem(this.KEYS.PLAYERS, JSON.stringify(players));
+        this.updateUI();
+    },
+
+    deletePlayer: function(id) {
+        let players = this.getPlayers().filter(p => p.id !== id);
+        localStorage.setItem(this.KEYS.PLAYERS, JSON.stringify(players));
+        this.updateUI();
+    },
+
+    // --- BEWERTUNGSSYSTEM (Die 5 Kategorien) ---
+
+    addAssessment: function(playerId, values) {
+        let players = this.getPlayers();
+        let player = players.find(p => p.id === playerId);
+        
+        if (player) {
+            if (!player.history) player.history = [];
+            
+            player.history.push({
+                date: new Date().toISOString(),
+                stats: {
+                    kondition: values.kondition || 3,
+                    technik: values.technik || 3,
+                    taktik: values.taktik || 3,
+                    teamgeist: values.teamgeist || 3,
+                    koordination: values.koordination || 3
+                },
+                mode: localStorage.getItem('toni_active_mode')
+            });
+
+            // Nur die letzten 20 Einträge behalten (wie vom Manager gewünscht)
+            if (player.history.length > 20) player.history.shift();
+            
+            this.savePlayer(player);
         }
     },
 
-    // 3. AKTENTASCHE: ARCHIV FÜR TRAININGSDOKUMENTE
-    // Speichert eine abgeschlossene Einheit mit Trainername und Zeitstempel
-    saveTrainingSession(sessionText) {
-        const config = this.getAuthConfig();
-        const archiv = this.getArchiv();
-        
-        const newEntry = {
+    // --- AKTENTASCHE (Trainings-Archiv) ---
+
+    saveToArchive: function(sessionData) {
+        let archive = this.getArchive();
+        archive.push({
             id: 'session_' + Date.now(),
-            trainer: config.name,
-            datum: new Date().toLocaleDateString('de-DE'),
-            uhrzeit: new Date().toLocaleTimeString('de-DE'),
-            titel: "Trainingseinheit " + new Date().toLocaleDateString(),
-            inhalt: sessionText,
-            timestamp: Date.now()
-        };
-
-        archiv.push(newEntry);
-        localStorage.setItem('toni_archiv', JSON.stringify(archiv));
-        return newEntry;
+            date: new Date().toLocaleString(),
+            trainer: localStorage.getItem('toni_trainer_name'),
+            title: sessionData.title || "Trainingseinheit",
+            notes: sessionData.notes || "",
+            boardState: sessionData.boardState // Screenshot/Positionen
+        });
+        
+        localStorage.setItem(this.KEYS.ARCHIVE, JSON.stringify(archive));
     },
 
-    getArchiv() {
-        const archiv = localStorage.getItem('toni_archiv');
-        return archiv ? JSON.parse(archiv) : [];
+    getArchive: function() {
+        const data = localStorage.getItem(this.KEYS.ARCHIVE);
+        return data ? JSON.parse(data) : [];
     },
 
-    deleteFromArchiv(id) {
-        let archiv = this.getArchiv();
-        archiv = archiv.filter(entry => entry.id !== id);
-        localStorage.setItem('toni_archiv', JSON.stringify(archiv));
-    },
+    // --- UI UPDATE TRIGGER ---
 
-    // 4. SPEZIAL: ERNÄHRUNGSVORSCHLÄGE (CACHE)
-    // Damit Toni sich merkt, was er zuletzt für welche Altersgruppe empfohlen hat
-    saveNutritionAdvice(ageGroup, advice) {
-        const nutritionData = JSON.parse(localStorage.getItem('toni_nutrition')) || {};
-        nutritionData[ageGroup] = {
-            text: advice,
-            date: new Date().toISOString()
-        };
-        localStorage.setItem('toni_nutrition', JSON.stringify(nutritionData));
+    updateUI: function() {
+        // Diese Funktion wird in der app.html / board.js überschrieben, 
+        // um die Spielerliste links neu zu zeichnen.
+        if (typeof renderPlayerList === 'function') {
+            renderPlayerList();
+        }
     }
 };
 
-// Initialisierung der Datenstrukturen, falls sie leer sind
-if (!localStorage.getItem('toni_kader')) {
-    ToniStorage.saveKader(ToniStorage.getKader());
+// Beispielhafter Spieler-Bauplan für den Manager:
+/*
+{
+    id: "uuid-123",
+    name: "David Luiz",
+    number: "23",
+    status: "green", // green, yellow, red, gray
+    history: [ { date: "...", stats: {...} } ]
 }
+*/
