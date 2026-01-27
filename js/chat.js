@@ -1,67 +1,48 @@
-// --- TONI 2.0: KI-STEUERUNG & ANALYSE ---
-
-async function checkKIConnection() {
-    const statusBadge = document.getElementById('toni-status');
-    const apiKey = localStorage.getItem('api_key');
-    const provider = localStorage.getItem('selected_provider');
-
-    if (!apiKey) {
-        statusBadge.innerText = "KI: Kein Key gefunden";
-        statusBadge.style.color = "#f56565";
-        return;
-    }
-    statusBadge.innerText = `KI: Bereit (${provider})`;
-    statusBadge.style.color = "#48bb78";
-}
+// --- TONI 2.0: KI-STEUERUNG & FUNK-FIX ---
 
 async function sendMessage() {
     const userInput = document.getElementById('user-input');
-    const chatOutput = document.getElementById('chat-output');
     const userText = userInput.value.trim();
-
     if (!userText) return;
 
     appendMessage('user', userText);
     userInput.value = '';
 
-    const loadingId = 'loading-' + Date.now();
-    appendMessage('toni', '...', loadingId);
+    // Lade Key und Provider
+    const apiKey = localStorage.getItem('api_key');
+    const provider = localStorage.getItem('selected_provider') || 'groq';
 
-    // DATEN AUS DER AKTENTASCHE HOLEN
+    if (!apiKey || apiKey.length < 10) {
+        appendMessage('toni', "❌ Coach, ich finde keinen gültigen Key! Bitte geh zurück zur Startseite und log dich neu ein.");
+        return;
+    }
+
+    const loadingId = 'loading-' + Date.now();
+    appendMessage('toni', 'Toni denkt nach... 🇧🇷', loadingId);
+
+    // Hol aktuelle Daten für Toni
     const currentMode = document.getElementById('field-mode').value;
-    const squadInfo = players.map(p => `Nr. ${p.nr}: ${p.name} (${p.pos}, ${p.rating} Sterne)`).join(', ');
+    const squadInfo = players.map(p => `${p.name} (Nr. ${p.nr}, ${p.rating} Sterne)`).join(', ');
 
     const systemPrompt = `
-        Du bist Toni, ein brasilianischer Taktik-Experte. Dein Chef ist Björn.
-        Verhalte dich professionell, aber mit brasilianischem Flair.
-        AKTUELLER MODUS: ${currentMode}.
-        KADER: ${squadInfo || 'Noch leer'}.
+        Du bist Toni, ein brasilianischer Fußball-Fachmann. Dein Chef ist Björn.
+        Antworte immer mit brasilianischem Flair. 
+        AKTUELLER SPIELFELD-MODUS: ${currentMode}.
+        DEIN KADER: ${squadInfo || 'Noch keine Spieler in der Aktentasche'}.
         
-        WICHTIG: Wenn du Spieler bewegen willst, antworte am Ende mit: 
-        MOVE:Nr:X:Y (X/Y 0-100).
-        Zusatz: Du kannst Hütchen setzen mit: CONE:X:Y.
+        Wenn Björn dich bittet, Spieler zu bewegen, nutze am Ende deiner Antwort:
+        MOVE:Nr:X:Y (X und Y sind Prozentwerte 0-100).
     `;
 
     try {
-        const apiKey = localStorage.getItem('api_key');
-        const provider = localStorage.getItem('selected_provider') || 'groq';
-
-        let url = 'https://api.groq.com/openai/v1/chat/completions';
-        let model = "llama3-70b-8192";
-
-        if (provider === 'openai') {
-            url = 'https://api.openai.com/v1/chat/completions';
-            model = "gpt-4";
-        }
-
-        const response = await fetch(url, {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: model,
+                model: "llama3-70b-8192",
                 messages: [
                     { role: "system", content: systemPrompt },
                     { role: "user", content: userText }
@@ -70,32 +51,31 @@ async function sendMessage() {
             })
         });
 
-        if (!response.ok) throw new Error("API-Verbindung fehlgeschlagen.");
-
         const data = await response.json();
-        const toniAntwort = data.choices[0].message.content;
+        
+        // Entferne Lade-Animation
+        const loader = document.getElementById(loadingId);
+        if (loader) loader.remove();
 
-        document.getElementById(loadingId).remove();
+        if (data.error) {
+            throw new Error(data.error.message);
+        }
+
+        const toniAntwort = data.choices[0].message.content;
         appendMessage('toni', toniAntwort);
-        handleMoveCommands(toniAntwort);
+        
+        // Verarbeite Bewegungs-Befehle
+        handleToniMoves(toniAntwort);
 
     } catch (error) {
-        if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
-        appendMessage('toni', "Funkloch, Coach! Prüf mal deinen Key. Fehler: " + error.message);
+        const loader = document.getElementById(loadingId);
+        if (loader) loader.remove();
+        appendMessage('toni', "📡 Funkloch, Manager! Fehler: " + error.message);
+        console.error("KI Fehler:", error);
     }
 }
 
-function appendMessage(sender, text, id = null) {
-    const chatOutput = document.getElementById('chat-output');
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `message ${sender}-msg`;
-    if (id) msgDiv.id = id;
-    msgDiv.innerText = text;
-    chatOutput.appendChild(msgDiv);
-    chatOutput.scrollTop = chatOutput.scrollHeight;
-}
-
-function handleMoveCommands(text) {
+function handleToniMoves(text) {
     const moveRegex = /MOVE:(\d+):(\d+):(\d+)/g;
     let match;
     while ((match = moveRegex.exec(text)) !== null) {
@@ -112,4 +92,14 @@ function handleMoveCommands(text) {
             }
         });
     }
+}
+
+function appendMessage(sender, text, id = null) {
+    const chatOutput = document.getElementById('chat-output');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${sender}-msg`;
+    if (id) msgDiv.id = id;
+    msgDiv.innerText = text;
+    chatOutput.appendChild(msgDiv);
+    chatOutput.scrollTop = chatOutput.scrollHeight;
 }
