@@ -3,73 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Taktik-Board | Coach Björn & Toni</title>
+    <title>Toni Elite | Coach Björn</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
     <header>
-        <div id="toni-status" class="status-badge">KI: Verbinde...</div>
+        <div id="toni-status" class="status-badge">📡 Systemprüfung...</div>
         <div class="header-center">
             <select id="field-mode" onchange="updateFieldMode()">
                 <option value="mode-match">Match (11 gegen 11)</option>
-                <option value="mode-funino">Funino (4 Tore)</option>
                 <option value="mode-half">Halbfeld (F/E-Jugend)</option>
+                <option value="mode-funino">Funino (4 Tore)</option>
             </select>
         </div>
-        <button class="briefcase-btn" onclick="toggleBriefcase()">📁</button>
+        <button class="briefcase-btn" onclick="toggleBriefcase()">💼</button>
     </header>
 
-    <div id="taktik-board" class="soccer-pitch mode-match">
-        <div class="penalty-area left-area"></div>
-        <div class="penalty-area right-area"></div>
+    <div id="taktik-board" class="soccer-pitch">
+        <div class="pitch-lines">
+            <div class="penalty-area left"></div>
+            <div class="penalty-area right"></div>
+            <div class="center-circle"></div>
+        </div>
         </div>
 
     <div id="chat-container">
         <div id="chat-output"></div>
         <div class="chat-input-area">
-            <input type="text" id="user-input" placeholder="Toni eine Frage stellen...">
+            <input type="text" id="user-input" placeholder="Toni eine Taktik-Frage stellen...">
             <button onclick="sendMessage()">Senden</button>
         </div>
     </div>
 
     <div id="briefcase-overlay" class="overlay-hidden">
         <div class="briefcase-content">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2>Aktentasche</h2>
-                <button onclick="toggleBriefcase()">✖</button>
+            <div class="briefcase-header">
+                <h2>Elite Control Center</h2>
+                <button onclick="toggleBriefcase()" class="close-btn">✖</button>
             </div>
-            <hr>
             
-            <div class="add-player-section">
-                <h3>Neuen Spieler anlegen</h3>
+            <nav class="briefcase-tabs">
+                <button onclick="switchTab('squad')" class="tab-btn active">👥 Kader</button>
+                <button onclick="switchTab('training')" class="tab-btn">👟 Sporttasche</button>
+                <button onclick="switchTab('analysis')" class="tab-btn">📊 Analyse</button>
+                <button onclick="switchTab('match')" class="tab-btn">🏆 Match</button>
+            </nav>
+
+            <hr class="divider">
+
+            <div id="tab-squad" class="tab-content active">
                 <div class="player-form">
                     <input type="number" id="p-nr" placeholder="Nr.">
-                    <input type="text" id="p-name" placeholder="Name des Spielers">
+                    <input type="text" id="p-name" placeholder="Spielername">
                     <select id="p-pos">
                         <option value="Torwart">Torwart</option>
                         <option value="Abwehr">Abwehr</option>
                         <option value="Mittelfeld">Mittelfeld</option>
                         <option value="Sturm">Sturm</option>
                     </select>
-                    <button class="btn-add-pro" onclick="addPlayerToBriefcase()">Spieler verpflichten</button>
+                    <button class="btn-pro" onclick="addPlayerToBriefcase()">Verpflichten</button>
+                </div>
+                <div id="smart-squad-list"></div>
+            </div>
+
+            <div id="tab-training" class="tab-content">
+                <h3>Samba-Ernährung & Training</h3>
+                <div id="nutrition-hub">
+                    <p class="hint">Rezepte und Pläne erscheinen nach Analyse durch Toni.</p>
+                </div>
+                <div class="material-check">
+                    <h4>Material-Checkliste</h4>
+                    <div id="material-list"></div>
                 </div>
             </div>
 
-            <div id="smart-squad-list">
+            <div id="tab-analysis" class="tab-content">
+                <h3>Video-Kabine & Performance</h3>
+                <div class="video-upload-zone">
+                    <label for="video-upload" class="upload-label">
+                        <span>📹 Sequenz hochladen (Übersteiger etc.)</span>
+                        <input type="file" id="video-upload" accept="video/*" onchange="handleVideoUpload(this)">
+                    </label>
                 </div>
+                <div id="performance-charts">
+                    </div>
+            </div>
+
+            <div id="tab-match" class="tab-content">
+                <h3>Spieltag-Zentrale</h3>
+                <button class="btn-pro" onclick="generateLockerRoomPoster()">📄 Kabinenaushang erstellen</button>
+                <div id="match-strategy"></div>
+            </div>
         </div>
     </div>
 
     <script src="js/logic.js"></script>
     <script src="js/chat.js"></script>
-    <script>
-        // Toni's Willkommens-Check beim Laden
-        window.onload = () => {
-            const trainer = localStorage.getItem('trainer_name') || 'Coach';
-            appendMessage('toni', `Hallo ${trainer}! Toni hier. Brasilianische Technik steht bereit. Welche Altersklasse trainieren wir heute?`);
-            checkKIConnection();
-        };
-    </script>
 </body>
 </html>
