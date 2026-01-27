@@ -1,134 +1,91 @@
 /**
- * Toni 2.0 - Board Engine
- * Steuert Drag & Drop, Spieler-Chips und das Zeichnen von Übungen
+ * Toni 2.0 - Elite Board Engine (Canvas Logic)
+ * Erstellt von Toni für Coach Björn
  */
 
-const ToniBoard = {
-    activeMode: 'training',
-    selectedPlayerId: null,
+const canvas = document.createElement('canvas');
+const ctx = canvas.getContext('2d');
+let currentPitchType = 'none';
 
-    init: function() {
-        console.log("Board Engine startet...");
-        this.renderPlayersOnPitch();
-        this.setupEventListeners();
-    },
-
-    // --- RENDERING ---
-
-    renderPlayersOnPitch: function() {
-        const pitch = document.getElementById('pitch');
-        const players = ToniStorage.getPlayers().filter(p => p.status === 'green' || p.status === 'yellow');
-        
-        // Bestehende Chips entfernen (außer Overlay)
-        const oldChips = pitch.querySelectorAll('.player-chip');
-        oldChips.forEach(chip => chip.remove());
-
-        players.forEach((player, index) => {
-            const chip = document.createElement('div');
-            chip.className = 'player-chip';
-            chip.id = `chip-${player.id}`;
-            chip.innerText = player.number || (index + 1);
-            chip.title = player.name;
-            
-            // Startposition (verteilt am Rand oder geladen)
-            chip.style.left = player.posX || "10px";
-            chip.style.top = player.posY || (index * 45 + 10) + "px";
-
-            chip.onmousedown = (e) => this.dragStart(e, chip, player.id);
-            chip.ontouchstart = (e) => this.dragStart(e, chip, player.id);
-            
-            // Klick für Bewertung
-            chip.onclick = () => this.openAssessment(player.id);
-
-            pitch.appendChild(chip);
-        });
-    },
-
-    // --- DRAG & DROP LOGIK ---
-
-    dragStart: function(e, element, playerId) {
-        e.preventDefault();
-        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        
-        const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-        const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-        
-        pos3 = clientX;
-        pos4 = clientY;
-
-        const elementDrag = (e) => {
-            const cX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-            const cY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-            
-            pos1 = pos3 - cX;
-            pos2 = pos4 - cY;
-            pos3 = cX;
-            pos4 = cY;
-            
-            element.style.top = (element.offsetTop - pos2) + "px";
-            element.style.left = (element.offsetLeft - pos1) + "px";
-        };
-
-        const closeDragElement = () => {
-            document.onmouseup = null;
-            document.onmousemove = null;
-            document.ontouchend = null;
-            document.ontouchmove = null;
-            
-            // Position im Storage speichern
-            this.savePosition(playerId, element.style.left, element.style.top);
-        };
-
-        if (e.type === 'touchstart') {
-            document.ontouchend = closeDragElement;
-            document.ontouchmove = elementDrag;
-        } else {
-            document.onmouseup = closeDragElement;
-            document.onmousemove = elementDrag;
-        }
-    },
-
-    savePosition: function(id, x, y) {
-        let players = ToniStorage.getPlayers();
-        let p = players.find(player => player.id === id);
-        if (p) {
-            p.posX = x;
-            p.posY = y;
-            ToniStorage.savePlayer(p);
-        }
-    },
-
-    // --- TRAININGSOBJEKTE (Hütchen, Tore) ---
-
-    addMaterial: function(type, x, y) {
-        const overlay = document.getElementById('exercise-overlay');
-        const item = document.createElement('div');
-        item.className = `board-item ${type}`; // CSS Klassen für cone, ball, goal
-        item.style.left = x + "px";
-        item.style.top = y + "px";
-        overlay.appendChild(item);
-    },
-
-    clearMaterial: function() {
-        document.getElementById('exercise-overlay').innerHTML = '';
-    },
-
-    // --- SCREENSHOT ---
-
-    takeSnapshot: function() {
-        // Hier nutzen wir später html2canvas für den Flyer
-        console.log("Screenshot vom Board erstellt...");
-        alert("Screenshot gespeichert (Simulation)");
+// Initialisierung des Boards im Pitch-Container
+window.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('pitch');
+    if(container) {
+        container.innerHTML = ''; // Altes CSS-Feld löschen
+        container.appendChild(canvas);
+        resizeCanvas();
     }
-};
+});
 
-// Globaler Reset für den Button
-function resetBoard() {
-    if(confirm("Board zurücksetzen? Alle Hütchen und Laufwege werden gelöscht.")) {
-        ToniBoard.clearMaterial();
-        ToniBoard.renderPlayersOnPitch();
+function resizeCanvas() {
+    canvas.width = 950;
+    canvas.height = 600;
+    if(currentPitchType !== 'none') drawPitch(currentPitchType);
+}
+
+/**
+ * Zeichnet das Spielfeld basierend auf Tonis Entscheidung
+ * @param {string} type - 'grossfeld', 'kleinfeld', 'funino'
+ */
+function drawPitch(type) {
+    currentPitchType = type;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Rasenfarbe
+    ctx.fillStyle = "#1a3a1a";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 3;
+
+    if (type === 'grossfeld' || type === 'kleinfeld') {
+        // Außenlinie
+        ctx.strokeRect(50, 50, 850, 500);
+        
+        // Mittellinie
+        ctx.beginPath();
+        ctx.moveTo(475, 50);
+        ctx.lineTo(475, 550);
+        ctx.stroke();
+
+        // Mittelkreis
+        ctx.beginPath();
+        ctx.arc(475, 300, 70, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Strafräume
+        drawBox(50, 150, 120, 300, 'left'); // Links
+        drawBox(780, 150, 120, 300, 'right'); // Rechts
+    }
+
+    if (type === 'funino') {
+        ctx.strokeRect(50, 50, 850, 500);
+        // 4 Minitore an den Ecken markieren
+        ctx.fillStyle = "rgba(255,255,255,0.2)";
+        ctx.fillRect(50, 80, 10, 80);  ctx.fillRect(50, 440, 10, 80);
+        ctx.fillRect(890, 80, 10, 80); ctx.fillRect(890, 440, 10, 80);
+        appendToniText("Funino-Feld mit 4 Toren aufgebaut, Björn!");
     }
 }
 
-// Start der Engine
-ToniBoard.init();
+function drawBox(x, y, w, h, side) {
+    ctx.strokeRect(x, y, w, h);
+    // Tore
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    if(side === 'left') {
+        ctx.moveTo(50, 260); ctx.lineTo(50, 340);
+    } else {
+        ctx.moveTo(900, 260); ctx.lineTo(900, 340);
+    }
+    ctx.stroke();
+    ctx.lineWidth = 3;
+}
+
+// Hook für Toni: Er kann das Feld per Chat-Befehl ändern
+function appendToniText(msg) {
+    if(window.appendChatMessage) window.appendChatMessage('toni', msg);
+}
+
+// Export für die KI-Steuerung
+window.drawPitch = drawPitch;
