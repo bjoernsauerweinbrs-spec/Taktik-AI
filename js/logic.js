@@ -1,22 +1,26 @@
 /**
- * Toni 2.0 - Elite Logic Center (KI-Video & Kader-Brücke)
+ * Toni 2.0 - Elite Logic Center (Vollständige Version)
+ * Enthält: Kader, Video-KI, Winkel-Check & Daten-Brücke
  */
 
 let squad = [];
 let detector;
 let isAiLoading = false;
+let currentVideoEvents = [];
+let nextPlayerId = 1;
 
-// 1. KI-INITIALISIERUNG
+// 1. KI-INITIALISIERUNG (TensorFlow MoveNet)
 async function initToniAI() {
-    if (isAiLoading) return;
+    if (isAiLoading || !window.poseDetection) return;
     isAiLoading = true;
-    console.log("Toni: Starte KI-Sichtsystem...");
     try {
         detector = await poseDetection.createDetector(
             poseDetection.SupportedModels.MoveNet,
             { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
         );
-        document.getElementById('ai-status').innerText = "● KI-ENGINE AKTIV";
+        const status = document.getElementById('ai-status');
+        if(status) status.innerText = "● KI-ENGINE AKTIV";
+        console.log("Toni: KI-Sichtsystem erfolgreich geladen.");
     } catch (e) {
         console.error("KI-Fehler:", e);
     }
@@ -25,6 +29,7 @@ async function initToniAI() {
 // 2. TAB-STEUERUNG
 window.loadTabContent = function(tab) {
     const area = document.getElementById('tab-content-area');
+    if(!area) return;
     area.innerHTML = ""; 
 
     switch(tab) {
@@ -35,7 +40,7 @@ window.loadTabContent = function(tab) {
     }
 };
 
-// 3. VIDEO-KI-LABOR
+// 3. VIDEO-KI-LABOR (Interface)
 function renderAnalyse(area) {
     area.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -50,16 +55,19 @@ function renderAnalyse(area) {
                     <canvas id="v-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
                     <p id="v-placeholder" style="color:#444;">Video hochladen für Technik-Check</p>
                 </div>
-                <div style="margin-top:15px; display:flex; gap:10px;">
-                    <input type="file" id="v-upload" style="display:none;" accept="video/*" onchange="loadVideo(event)">
-                    <button class="btn-send" onclick="document.getElementById('v-upload').click()">VIDEO UPLOAD</button>
-                    <button class="btn-send" style="background:#30363d;" onclick="startAnalysis()">ANALYSE STARTEN</button>
+                <div style="margin-top:15px; display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; gap:10px;">
+                        <input type="file" id="v-upload" style="display:none;" accept="video/*" onchange="loadVideo(event)">
+                        <button class="btn-send" onclick="document.getElementById('v-upload').click()">VIDEO UPLOAD</button>
+                        <button class="btn-send" style="background:#30363d;" onclick="startAnalysis()">ANALYSE STARTEN</button>
+                    </div>
+                    <button class="btn-send" style="background:#238636;" onclick="saveAnalysisToPlayer()">ERGEBNIS IN AKTE SPEICHERN</button>
                 </div>
             </div>
 
             <div class="card" style="background:#161b22; padding:15px; border-radius:15px; border:1px solid #30363d;">
                 <h3 style="color:var(--ginga-green); font-size:16px;">📊 KI-ERKENNTNISSE</h3>
-                <div id="analysis-log" style="height:300px; overflow-y:auto; font-family:monospace; font-size:11px; color:#8b949e;">
+                <div id="analysis-log" style="height:320px; overflow-y:auto; font-family:monospace; font-size:11px; color:#8b949e; background:#0d1117; padding:10px; border-radius:8px;">
                     <p>> Toni wartet auf Daten...</p>
                 </div>
             </div>
@@ -68,20 +76,11 @@ function renderAnalyse(area) {
     initToniAI();
 }
 
-function loadVideo(e) {
-    const file = e.target.files[0];
-    const v = document.getElementById('v-player');
-    if (file) {
-        v.src = URL.createObjectURL(file);
-        v.style.display = "block";
-        document.getElementById('v-placeholder').style.display = "none";
-        logToAI("Video erfolgreich geladen. Bereit für Inferenz.");
-    }
-}
-
+// 4. KI-VIDEO-LOGIK
 async function startAnalysis() {
     const v = document.getElementById('v-player');
-    if (!v.src || !detector) return;
+    if (!v || !v.src || !detector) return;
+    currentVideoEvents = []; // Reset für neues Video
     v.play();
     processVideoFrame();
 }
@@ -105,17 +104,6 @@ async function processVideoFrame() {
     requestAnimationFrame(processVideoFrame);
 }
 
-function drawSkeleton(ctx, kp) {
-    ctx.fillStyle = "#2ecc71";
-    ctx.strokeStyle = "#2ecc71";
-    ctx.lineWidth = 2;
-    kp.forEach(p => {
-        if (p.score > 0.5) {
-            ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI); ctx.fill();
-        }
-    });
-}
-
 function checkJointAngles(kp) {
     const hip = kp.find(k => k.name === 'left_hip');
     const knee = kp.find(k => k.name === 'left_knee');
@@ -124,7 +112,7 @@ function checkJointAngles(kp) {
     if (hip?.score > 0.6 && knee?.score > 0.6 && ankle?.score > 0.6) {
         const angle = calcAngle(hip, knee, ankle);
         if (angle < 150) {
-            logToAI(`WARNUNG: Standbein-Winkel kritisch (${Math.round(angle)}°)`);
+            logToAI(`Technik-Warnung: Standbein-Winkel kritisch (${Math.round(angle)}°)`);
         }
     }
 }
@@ -140,20 +128,43 @@ function calcAngle(p1, p2, p3) {
 
 function logToAI(msg) {
     const log = document.getElementById('analysis-log');
+    if(!log) return;
     const entry = document.createElement('div');
     entry.style = "margin-bottom:5px; border-left:2px solid #2ecc71; padding-left:5px;";
-    entry.innerText = `> ${new Date().toLocaleTimeString()}: ${msg}`;
+    const time = new Date().toLocaleTimeString();
+    entry.innerText = `> ${time}: ${msg}`;
     log.prepend(entry);
+    currentVideoEvents.push(`${new Date().toLocaleDateString()} ${time}: ${msg}`);
 }
 
-// 4. KADER-VERWALTUNG (Bleibt stabil für deine Daten)
+function drawSkeleton(ctx, kp) {
+    ctx.fillStyle = "#2ecc71";
+    kp.forEach(p => {
+        if (p.score > 0.5) {
+            ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI); ctx.fill();
+        }
+    });
+}
+
+function loadVideo(e) {
+    const file = e.target.files[0];
+    const v = document.getElementById('v-player');
+    if (file && v) {
+        v.src = URL.createObjectURL(file);
+        v.style.display = "block";
+        document.getElementById('v-placeholder').style.display = "none";
+        logToAI("Video erfolgreich geladen.");
+    }
+}
+
+// 5. KADER-MANAGEMENT & DATEN-BRÜCKE
 function renderKader(area) {
     area.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h2>Kader-Management</h2>
             <button class="btn-send" style="width:auto; padding:10px 20px;" onclick="addPlayerElite()">+ SPIELER HINZUFÜGEN</button>
         </div>
-        <div id="player-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:15px;"></div>
+        <div id="player-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:15px;"></div>
     `;
     updatePlayerList();
 }
@@ -165,20 +176,51 @@ function addPlayerElite() {
     const h = prompt("Größe in m (z.B. 1.85):");
     const w = prompt("Gewicht in kg:");
 
-    squad.push({ id: Date.now(), name, nr, h: parseFloat(h), w: parseFloat(w), status: 'green' });
+    squad.push({ id: nextPlayerId++, name, nr, h: parseFloat(h), w: parseFloat(w), history: [] });
     updatePlayerList();
 }
 
+window.saveAnalysisToPlayer = function() {
+    if (currentVideoEvents.length === 0) {
+        alert("Keine Analyse-Daten vorhanden, Björn!");
+        return;
+    }
+    const pName = prompt("Welchem Spieler soll diese Analyse zugeordnet werden?");
+    const player = squad.find(p => p.name.toLowerCase() === pName?.toLowerCase());
+
+    if (player) {
+        player.history.push(...currentVideoEvents);
+        alert(`Analyse für ${player.name} gespeichert!`);
+        currentVideoEvents = [];
+        updatePlayerList();
+    } else {
+        alert("Spieler nicht gefunden.");
+    }
+};
+
 function updatePlayerList() {
     const grid = document.getElementById('player-grid');
-    if(!grid) return; grid.innerHTML = "";
+    if(!grid) return; 
+    grid.innerHTML = "";
+    
     squad.forEach(p => {
         const bmi = (p.h && p.w) ? (p.w / (p.h * p.h)).toFixed(1) : "N/A";
+        const historyHtml = p.history.length > 0 ? p.history.map(h => `<div style="font-size:10px; color:#aaa; border-bottom:1px solid #333; padding:2px 0;">${h}</div>`).join('') : "Keine Video-Daten.";
+        
         grid.innerHTML += `
             <div style="background:#161b22; border:1px solid #30363d; padding:15px; border-radius:12px;">
-                <div style="font-size:20px; font-weight:900; color:var(--ginga-green);">#${p.nr}</div>
-                <div style="font-weight:bold;">${p.name}</div>
-                <div style="font-size:11px; color:#8b949e;">BMI: ${bmi}</div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="font-size:24px; font-weight:900; color:var(--ginga-green);">#${p.nr}</span>
+                    <span style="font-size:10px; background:#30363d; padding:2px 6px; border-radius:4px;">BMI: ${bmi}</span>
+                </div>
+                <div style="font-weight:bold; font-size:18px; margin-bottom:10px;">${p.name}</div>
+                <div style="background:#0d1117; padding:10px; border-radius:8px; max-height:100px; overflow-y:auto;">
+                    <strong style="font-size:10px; color:var(--ginga-green);">KI-LOGBUCH:</strong>
+                    ${historyHtml}
+                </div>
             </div>`;
     });
 }
+
+function renderMatch(area) { area.innerHTML = "<h2>Spieltags-Zentrale</h2><p>In Kürze verfügbar.</p>"; }
+function renderTraining(area) { area.innerHTML = "<h2>Übungs-Archiv</h2><p>In Kürze verfügbar.</p>"; }
