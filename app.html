@@ -2,103 +2,150 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Toni Elite | Coach Björn</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach Toni 2.0 - Elite Board</title>
+    <style>
+        :root { --ginga-green: #2ecc71; --bg-dark: #0d1117; --panel-dark: #161b22; --border: #30363d; }
+        
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; height: 100vh; font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); color: white; overflow: hidden; }
+
+        /* Sicherheits-Check: Inhalt nur zeigen, wenn autorisiert */
+        body:not(.authorized) { display: none; }
+
+        .main-layout { display: flex; height: 100vh; }
+
+        /* Sidebars */
+        aside { width: 300px; background: var(--panel-dark); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        #right-sidebar { border-right: none; border-left: 1px solid var(--border); width: 320px; }
+
+        /* Spielfeld-Container */
+        main { flex-grow: 1; position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        
+        #pitch { 
+            width: 950px; height: 600px; background: #1a3a1a; border: 3px solid white; 
+            position: relative; border-radius: 8px; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+
+        /* Taktische Linien */
+        .mid-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: white; }
+        .center-circle { position: absolute; left: 50%; top: 50%; width: 140px; height: 140px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); }
+        .penalty-area { position: absolute; width: 160px; height: 320px; border: 2px solid white; top: 50%; transform: translateY(-50%); }
+        .penalty-area.left { left: 0; border-left: none; }
+        .penalty-area.right { right: 0; border-right: none; }
+        .goal-box { position: absolute; width: 12px; height: 80px; background: white; top: 50%; transform: translateY(-50%); border: 1px solid #000; }
+        .goal-box.left { left: -14px; } .goal-box.right { right: -14px; }
+
+        /* Rechter Chat: Fest & Scrollbar */
+        #chat-history { flex-grow: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .chat-input-area { padding: 15px; border-top: 1px solid var(--border); background: var(--panel-dark); }
+        textarea { width: 100%; background: #0d1117; border: 1px solid var(--border); color: white; border-radius: 8px; padding: 12px; resize: none; outline: none; }
+        textarea:focus { border-color: var(--ginga-green); }
+
+        /* Aktentasche Modal (Das Elite Control Center) */
+        #briefcase-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; padding: 20px; }
+        .modal-content { background: var(--panel-dark); height: 90vh; max-width: 1200px; margin: auto; border-radius: 15px; border: 1px solid var(--ginga-green); display: flex; flex-direction: column; position: relative; }
+        .modal-tabs { display: flex; border-bottom: 1px solid var(--border); background: #21262d; border-radius: 15px 15px 0 0; }
+        .tab-btn { padding: 18px 25px; cursor: pointer; font-weight: bold; border-right: 1px solid var(--border); transition: 0.3s; color: #8b949e; }
+        .tab-btn:hover { color: white; }
+        .tab-btn.active { background: var(--ginga-green); color: black; }
+        .close-briefcase { margin-left: auto; padding: 18px 25px; cursor: pointer; color: #f85149; font-weight: bold; }
+
+        .tab-content { flex-grow: 1; padding: 25px; overflow-y: auto; }
+
+        /* Spieler Icons */
+        .player { position: absolute; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: move; border: 2px solid white; z-index: 100; transition: transform 0.1s; }
+        .player.red { background: radial-gradient(circle, #ff4d4d, #b30000); }
+        .player.blue { background: radial-gradient(circle, #3498db, #2980b9); }
+        .player-label { position: absolute; top: 42px; left: 50%; transform: translateX(-50%); font-size: 11px; background: rgba(0,0,0,0.85); padding: 2px 6px; border-radius: 4px; white-space: nowrap; font-weight: bold; color: white; }
+
+        .btn-green { background: #238636; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+        .btn-green:hover { background: #2ea043; }
+
+        /* MacBook Air Optimierung */
+        @media (max-height: 800px) { #pitch { transform: scale(0.85); } aside { width: 260px; } }
+    </style>
 </head>
-<body>
+<body class="authorized">
 
-    <header>
-        <div id="toni-status" class="status-badge">📡 Systemprüfung...</div>
-        <div class="header-center">
-            <select id="field-mode" onchange="updateFieldMode()">
-                <option value="mode-match">Match (11 gegen 11)</option>
-                <option value="mode-half">Halbfeld (F/E-Jugend)</option>
-                <option value="mode-funino">Funino (4 Tore)</option>
-            </select>
-        </div>
-        <button class="briefcase-btn" onclick="toggleBriefcase()">💼</button>
-    </header>
+    <div class="main-layout">
+        <aside id="left-sidebar">
+            <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight:900; color:var(--ginga-green); letter-spacing: 1px;">ELITE BOARD</span>
+                <div onclick="toggleBriefcase()" style="cursor:pointer; font-size:24px;" title="Aktentasche öffnen">💼</div>
+            </div>
+            <div id="quick-squad-status" style="padding: 20px;">
+                <p style="color: #8b949e; font-size: 13px;">SYSTEMSTATUS</p>
+                <div style="color: var(--ginga-green); font-weight: bold;">● Live-Analyse aktiv</div>
+            </div>
+        </aside>
 
-    <div id="taktik-board" class="soccer-pitch">
-        <div class="pitch-lines">
-            <div class="penalty-area left"></div>
-            <div class="penalty-area right"></div>
-            <div class="center-circle"></div>
-        </div>
-        </div>
+        <main>
+            <div id="pitch">
+                <div class="mid-line"></div>
+                <div class="center-circle"></div>
+                <div class="penalty-area left"></div>
+                <div class="penalty-area right"></div>
+                <div class="goal-box left"></div>
+                <div class="goal-box right"></div>
+                </div>
+        </main>
 
-    <div id="chat-container">
-        <div id="chat-output"></div>
-        <div class="chat-input-area">
-            <input type="text" id="user-input" placeholder="Toni eine Taktik-Frage stellen...">
-            <button onclick="sendMessage()">Senden</button>
-        </div>
+        <aside id="right-sidebar">
+            <div style="padding: 20px; border-bottom: 1px solid var(--border); font-weight: 900; color: var(--ginga-green);">CO-TRAINER TONI</div>
+            <div id="chat-history">
+                </div>
+            <div class="chat-input-area">
+                <textarea id="user-msg" rows="3" placeholder="Elite-Analyse anfordern..."></textarea>
+                <button class="btn-green" onclick="handleToniAction()">ANALYSIEREN</button>
+            </div>
+        </aside>
     </div>
 
-    <div id="briefcase-overlay" class="overlay-hidden">
-        <div class="briefcase-content">
-            <div class="briefcase-header">
-                <h2>Elite Control Center</h2>
-                <button onclick="toggleBriefcase()" class="close-btn">✖</button>
+    <div id="briefcase-modal">
+        <div class="modal-content">
+            <div class="modal-tabs">
+                <div id="tab-kader" class="tab-btn active" onclick="switchTab('kader')">KADER</div>
+                <div id="tab-sporttasche" class="tab-btn" onclick="switchTab('sporttasche')">SPORTTASCHE</div>
+                <div id="tab-analyse" class="tab-btn" onclick="switchTab('analyse')">ANALYSE</div>
+                <div id="tab-match" class="tab-btn" onclick="switchTab('match')">MATCH</div>
+                <div class="close-briefcase" onclick="toggleBriefcase()">SCHLIESSEN ✖</div>
             </div>
-            
-            <nav class="briefcase-tabs">
-                <button onclick="switchTab('squad')" class="tab-btn active">👥 Kader</button>
-                <button onclick="switchTab('training')" class="tab-btn">👟 Sporttasche</button>
-                <button onclick="switchTab('analysis')" class="tab-btn">📊 Analyse</button>
-                <button onclick="switchTab('match')" class="tab-btn">🏆 Match</button>
-            </nav>
-
-            <hr class="divider">
-
-            <div id="tab-squad" class="tab-content active">
-                <div class="player-form">
-                    <input type="number" id="p-nr" placeholder="Nr.">
-                    <input type="text" id="p-name" placeholder="Spielername">
-                    <select id="p-pos">
-                        <option value="Torwart">Torwart</option>
-                        <option value="Abwehr">Abwehr</option>
-                        <option value="Mittelfeld">Mittelfeld</option>
-                        <option value="Sturm">Sturm</option>
-                    </select>
-                    <button class="btn-pro" onclick="addPlayerToBriefcase()">Verpflichten</button>
-                </div>
-                <div id="smart-squad-list"></div>
-            </div>
-
-            <div id="tab-training" class="tab-content">
-                <h3>Samba-Ernährung & Training</h3>
-                <div id="nutrition-hub">
-                    <p class="hint">Rezepte und Pläne erscheinen nach Analyse durch Toni.</p>
-                </div>
-                <div class="material-check">
-                    <h4>Material-Checkliste</h4>
-                    <div id="material-list"></div>
-                </div>
-            </div>
-
-            <div id="tab-analysis" class="tab-content">
-                <h3>Video-Kabine & Performance</h3>
-                <div class="video-upload-zone">
-                    <label for="video-upload" class="upload-label">
-                        <span>📹 Sequenz hochladen (Übersteiger etc.)</span>
-                        <input type="file" id="video-upload" accept="video/*" onchange="handleVideoUpload(this)">
-                    </label>
-                </div>
-                <div id="performance-charts">
-                    </div>
-            </div>
-
-            <div id="tab-match" class="tab-content">
-                <h3>Spieltag-Zentrale</h3>
-                <button class="btn-pro" onclick="generateLockerRoomPoster()">📄 Kabinenaushang erstellen</button>
-                <div id="match-strategy"></div>
+            <div id="tab-content-area" class="tab-content">
+                <h3>Elite Control Center</h3>
+                <p>Wähle einen Reiter oben aus, um den Kader zu pflegen oder Analysen einzusehen.</p>
             </div>
         </div>
     </div>
 
     <script src="js/logic.js"></script>
+    <script src="js/board.js"></script>
     <script src="js/chat.js"></script>
+    <script>
+        // Sicherheits-Check: Ohne Session-Key zurück zum Login
+        if(sessionStorage.getItem('toni_auth') !== 'true') { 
+            window.location.href = 'index.html'; 
+        } else { 
+            document.body.classList.add('authorized'); 
+        }
+
+        function toggleBriefcase() {
+            const m = document.getElementById('briefcase-modal');
+            const isVisible = m.style.display === 'block';
+            m.style.display = isVisible ? 'none' : 'block';
+            if(!isVisible) switchTab('kader');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            
+            const area = document.getElementById('tab-content-area');
+            // Die Logik für den Inhalt kommt jetzt gleich in der js/logic.js
+            area.innerHTML = `<h3>Lädt ${tab.toUpperCase()}...</h3>`;
+            
+            if(window.loadTabContent) window.loadTabContent(tab);
+        }
+    </script>
 </body>
 </html>
