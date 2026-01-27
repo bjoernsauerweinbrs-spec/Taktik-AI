@@ -1,192 +1,143 @@
-/* Grundkonfiguration & Farben */
+/* css/style.css
+   Zuständig für: Visuelles Design, Spielfeld-Ästhetik, 
+   Spieler-Tokens (Brasilien-Style) und Layout-Stabilität
+*/
+
 :root {
-    --pitch-white: #ffffff;
-    --line-color: #333333;
-    --sidebar-bg: #fdfdfd;
-    --red-team: #d32f2f;
-    --blue-team: #1976d2;
-    --yellow-leibchen: #ffeb3b;
-    --toni-accent: #2e7d32;
-    --shadow: 0 4px 15px rgba(0,0,0,0.1);
-    --border-radius: 8px;
+    --green-active: #2ecc71;
+    --green-dark: #27ae60;
+    --accent-blue: #3498db;
+    --red-home: #e74c3c;
+    --red-dark: #c0392b;
+    --bg-dark: #070c14;
+    --panel-dark: #0f172a;
+    --border-color: #1e293b;
+    --text-main: #e6eef0;
+    --text-muted: #94a3b8;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 body {
-    font-family: 'Inter', -apple-system, sans-serif;
     margin: 0;
-    display: flex;
-    height: 100vh;
-    background: #f0f2f5;
-    color: #333;
+    padding: 0;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    overflow: hidden; /* Verhindert Scrollen des gesamten Layouts */
 }
 
-/* Layout-Struktur */
-#squad-sidebar {
-    width: 300px;
-    background: var(--sidebar-bg);
-    border-right: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-}
-
-#main-stage {
-    flex-grow: 1;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-#chat-sidebar {
-    width: 340px;
-    background: var(--sidebar-bg);
-    border-left: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-}
-
-/* Spielfeld (Board) */
+/* SPIELFELD-DESIGN (PITCH) */
 #pitch {
-    width: 850px;
-    height: 550px;
-    background: var(--pitch-white);
-    border: 3px solid var(--line-color);
+    background: radial-gradient(circle, #2d5a27 0%, #1a4d2e 100%);
+    border: 3px solid #ffffff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     position: relative;
-    transition: all 0.4s ease-in-out;
-    box-shadow: var(--shadow);
 }
 
-/* Spielfeldmarkierungen */
-.center-line {
+/* Hilfslinien Spielfeld */
+#pitch::before {
+    content: "";
     position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--line-color);
+    top: 0; left: 50%;
+    width: 2px; height: 100%;
+    background: rgba(255,255,255,0.5);
 }
 
-.center-circle {
+#pitch::after {
+    content: "";
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 120px;
-    height: 120px;
-    border: 2px solid var(--line-color);
+    top: 50%; left: 50%;
+    width: 120px; height: 120px;
+    border: 2px solid rgba(255,255,255,0.5);
     border-radius: 50%;
-}
-
-/* Schusszonen für Funino (gestrichelt) */
-.shooting-zone {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 80px;
-    border-right: 2px dashed #999;
-    display: none;
-}
-.shooting-zone.right { right: 0; border-right: none; border-left: 2px dashed #999; }
-
-/* Spieler-Dots */
-.player-dot {
-    position: absolute;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 700;
     transform: translate(-50%, -50%);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
-    cursor: grab;
-    z-index: 10;
 }
 
-.player-dot:active { cursor: grabbing; }
-
-.player-label {
-    position: absolute;
-    top: 35px;
-    color: #000;
-    font-size: 10px;
-    white-space: nowrap;
-    background: rgba(255,255,255,0.8);
-    padding: 1px 4px;
-    border-radius: 3px;
+/* SPIELER-TOKENS (BRASILIEN-STYLE) */
+.player-token {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
 }
 
-/* Tore & Objekte */
-.goal {
-    position: absolute;
-    background: #000;
-    border: 1px solid #fff;
+.player-token:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 15px var(--green-active);
+    z-index: 1000 !important;
 }
 
-.standard-goal { width: 12px; height: 80px; top: 235px; }
-.funino-goal { width: 8px; height: 40px; }
-
-/* Navigation & Buttons */
-.top-nav {
-    position: absolute;
-    top: 25px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: #fff;
-    padding: 12px 25px;
-    border-radius: 40px;
-    box-shadow: var(--shadow);
-    z-index: 100;
+.player-token.home {
+    background: radial-gradient(circle at 30% 30%, var(--red-home), var(--red-dark));
 }
 
-.nav-btn {
-    border: none;
-    background: #eee;
-    padding: 10px 18px;
-    cursor: pointer;
-    font-weight: 600;
-    border-radius: 20px;
-    transition: 0.2s;
+.player-token.away {
+    background: radial-gradient(circle at 30% 30%, var(--accent-blue), #2980b9);
 }
 
-.nav-btn.active { background: var(--red-team); color: #fff; }
-
-#briefcase-btn {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
+/* AMPELSYSTEM SIDEBAR */
+.player-list-item {
+    transition: background 0.2s;
+    border: 1px solid transparent;
 }
 
-/* Kaderliste-Items */
-.squad-item {
-    background: #fff;
-    border: 1px solid #eee;
-    margin: 10px;
-    padding: 12px;
-    border-radius: var(--border-radius);
-    transition: transform 0.1s;
+.player-list-item:hover {
+    background: #2d3748;
+    border-color: var(--green-active);
 }
 
-.squad-item:hover { transform: scale(1.02); }
-
-.squad-controls {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
+.ampel-status {
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
-/* Monitoring-Punkte */
-.performance-badge {
-    background: var(--toni-accent);
-    color: white;
-    padding: 2px 6px;
+/* SCROLLBAR DESIGN (Modern Dark) */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: #334155;
     border-radius: 10px;
-    font-size: 0.7em;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--green-active);
+}
+
+/* MODUS-BUTTONS & HEADER CONTROLS */
+.header-controls button {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.header-controls button:hover {
+    background: var(--green-active);
+    color: #fff;
+    border-color: var(--green-active);
+}
+
+/* AKTENTASCHE STYLING */
+#archive-list button {
+    transition: background 0.2s;
+}
+
+#archive-list button:hover {
+    background: #2980b9;
+}
+
+/* NINO-MODUS SPEZIAL (FUNINO) */
+.minitor {
+    width: 40px;
+    height: 10px;
+    background: #fff;
+    position: absolute;
+    border-radius: 2px;
 }
