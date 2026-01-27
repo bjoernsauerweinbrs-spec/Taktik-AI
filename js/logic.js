@@ -1,96 +1,83 @@
-/* js/logic.js 
-   Zuständig für: KI-Fachwissen, brasilianische Taktik-Prinzipien, 
-   altersgerechte Ernährung und Performance-Berechnungen
-*/
+/**
+ * Toni 2.0 - UI Logic
+ * Steuert die Spielerliste, die Ampel-Logik und das Bewertungs-System
+ */
 
-const ToniLogic = {
+// Funktion zum Anzeigen der Spielerliste in der Sidebar
+function renderPlayerList() {
+    const listContainer = document.getElementById('player-list');
+    const players = ToniStorage.getPlayers();
+    const countSpan = document.getElementById('player-count');
     
-    // 1. DER SYSTEM-PROMPT (Tonis Fachwissen-Identität)
-    // Diese Instruktion wird bei jeder Anfrage an Groq mitgeschickt
-    getSystemInstruction(trainerName, modus) {
-        return `Du bist Toni, ein Weltklasse-Fußball-Co-Trainer mit brasilianischer Seele. 
-        Du arbeitest für Coach ${trainerName}.
-        
-        DEIN CHARAKTER:
-        - Deine Stimme ist männlich, fachmännisch, ruhig und inspirierend.
-        - Dein Stil ist "Jogo Bonito": Du liebst technische Finesse, Rotation und Mut im 1vs1.
-        
-        DEINE EXPERTISE:
-        - Taktik: Du bist Experte für das Verschieben im Block (11vs11) und Funino (3vs3).
-        - Analyse: Du erkennst Räume (Half-Spaces) und gibst präzise Coaching-Points.
-        - Ernährung: Du berätst altersgerecht (U11, U15, U19, Herren).
-        
-        ANWEISUNGEN FÜR DAS BOARD:
-        - Modus: ${modus}. 
-        - Wenn du Übungen vorschlägst, nenne immer: Titel, Dauer, Material und Coaching-Points.
-        - Visualisierung: Beschreibe Laufwege als "brasilianische Kurven" – flüssig und raumschaffend.
-        
-        Wichtig: Bleibe immer der loyale Fachmann an der Seite von Coach ${trainerName}.`;
-    },
+    countSpan.innerText = `(${players.length})`;
+    listContainer.innerHTML = '';
 
-    // 2. DAS PUNKTESYSTEM (Auswertung für die Aktentasche)
-    // Berechnet den Gesamtscore basierend auf deinen 5 Kategorien
-    calculateTotalScore(p) {
-        if (!p || !p.stats) return 0;
-        const s = p.stats;
-        // Gewichtung: Technik und Taktik zählen in deinem brasilianischen Stil am meisten
-        const total = (s.kondition * 0.15) + 
-                      (s.uebersicht * 0.20) + 
-                      (s.technik * 0.30) + 
-                      (s.taktik * 0.25) + 
-                      (s.sonderpunkte * 0.10);
-        return Math.round(total);
-    },
-
-    // 3. KI-ERNÄHRUNGSBERATUNG (Altersentsprechend)
-    // Diese Funktion liefert Toni die Fakten für die Live-Beratung
-    getNutritionAdvice(ageGroup) {
-        const advice = {
-            "U11": {
-                fokus: "Wachstum & Energie",
-                tipps: [
-                    "Viel Obst und Gemüse für die Regeneration.",
-                    "Ausreichend Wasser vor und während des Trainings.",
-                    "Keine Energy-Drinks! Natürliche Schorlen bevorzugen.",
-                    "Kohlenhydrate (Nudeln/Reis) 3 Stunden vor dem Spiel."
-                ],
-                warnung: "Vermeide zu viel Zucker direkt vor dem Spiel."
-            },
-            "U15": {
-                fokus: "Muskelaufbau & Ausdauer",
-                tipps: [
-                    "Erhöhter Proteinbedarf (Hülsenfrüchte, helles Fleisch, Quark).",
-                    "Vollkornprodukte für langanhaltende Energie.",
-                    "Magnesium gegen Krämpfe bei hoher Intensität.",
-                    "Regenerations-Snack (Banane) direkt nach dem Training."
-                ]
-            },
-            "U19/Herren": {
-                fokus: "Maximale Performance & Regeneration",
-                tipps: [
-                    "Gezieltes Carbo-Loading 24h vor dem Wettkampf.",
-                    "Optimierung des Elektrolythaushalts.",
-                    "Hochwertige Fette (Omega-3) zur Entzündungshemmung.",
-                    "Individualisierte Flüssigkeitsstrategie."
-                ]
-            }
-        };
-
-        return advice[ageGroup] || advice["U19/Herren"];
-    },
-
-    // 4. BRASILIANISCHE TAKTIK-LOGIK (Bewegungsregeln)
-    // Definiert, wie Toni die "roten Spieler" taktisch bewegen soll
-    getTacticalMove(playerId, ballPosition) {
-        // Beispiel-Logik: Ein brasilianischer Verteidiger wie David Luiz 
-        // rückt bei Ballbesitz aktiv ins Mittelfeld ein, um das Spiel aufzubauen.
-        if (playerId.includes('DL4')) { // Speziell für David Luiz
-            return {
-                action: "Inverted Fullback / Libero",
-                targetSpace: "Zentrum / Zone 14",
-                instruction: "Übernimm die Spielgestaltung und schaffe Überzahl."
-            };
-        }
-        return null;
+    if (players.length === 0) {
+        listContainer.innerHTML = '<p style="color: #64748b; font-size: 0.8rem; text-align: center;">Keine Spieler im Kader.</p>';
+        return;
     }
-};
+
+    players.forEach(player => {
+        const item = document.createElement('div');
+        item.className = 'player-item';
+        item.style.cssText = "background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid " + getStatusColor(player.status);
+        
+        item.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600;">#${player.number} ${player.name}</span>
+                <div style="display: flex; gap: 5px;">
+                    <button onclick="changeStatus('${player.id}')" style="background:none; border:none; color:#94a3b8; cursor:pointer;"><i class="fas fa-traffic-light"></i></button>
+                    <button onclick="deletePlayer('${player.id}')" style="background:none; border:none; color:#ef4444; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `;
+        listContainer.appendChild(item);
+    });
+}
+
+// Hilfsfunktion für Farben
+function getStatusColor(status) {
+    const colors = { 'green': '#22c55e', 'yellow': '#eab308', 'red': '#ef4444', 'gray': '#64748b' };
+    return colors[status] || colors.gray;
+}
+
+// Neuen Spieler hinzufügen
+function addNewPlayer() {
+    const name = prompt("Name des Spielers:");
+    const number = prompt("Rückennummer:");
+    if (name && number) {
+        const newPlayer = {
+            id: 'p_' + Date.now(),
+            name: name,
+            number: number,
+            status: 'green',
+            posX: '10px',
+            posY: '10px',
+            history: []
+        };
+        ToniStorage.savePlayer(newPlayer);
+        ToniBoard.renderPlayersOnPitch(); // Sofort auf das Feld bringen
+    }
+}
+
+function deletePlayer(id) {
+    if(confirm("Spieler wirklich löschen?")) {
+        ToniStorage.deletePlayer(id);
+        ToniBoard.renderPlayersOnPitch();
+    }
+}
+
+function changeStatus(id) {
+    const players = ToniStorage.getPlayers();
+    const p = players.find(player => player.id === id);
+    if (p) {
+        const states = ['green', 'yellow', 'red', 'gray'];
+        let current = states.indexOf(p.status);
+        p.status = states[(current + 1) % states.length];
+        ToniStorage.savePlayer(p);
+        ToniBoard.renderPlayersOnPitch();
+    }
+}
+
+// Initiale Liste laden
+document.addEventListener('DOMContentLoaded', renderPlayerList);
