@@ -1,140 +1,130 @@
-let players = [];
-let briefcaseOpen = false;
+/**
+ * Toni 2.0 - Elite Logic Center
+ * Verwaltung von Kader, Ampelsystem und BMI
+ */
 
-// --- 1. TAB-STEUERUNG (Kader, Tasche, Analyse, Match) ---
-function switchTab(tabId) {
-    // Alle Inhalte ausblenden
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+let squad = [
+    { id: "p1", nr: 1, name: "Thorsten", pos: "TW", height: 1.90, weight: 88, status: "green", stats: {tech: 85, scan: 90, fit: 80} },
+    { id: "p2", nr: 11, name: "David Luiz", pos: "IV", height: 1.89, weight: 84, status: "yellow", stats: {tech: 80, scan: 75, fit: 85} }
+];
+
+// Tab-Inhalte laden
+window.loadTabContent = function(tab) {
+    const area = document.getElementById('tab-content-area');
     
-    // Gewählten Tab aktivieren
-    document.getElementById('tab-' + tabId).classList.add('active');
-    // Button als aktiv markieren
-    event.currentTarget.classList.add('active');
-}
-
-function toggleBriefcase() {
-    briefcaseOpen = !briefcaseOpen;
-    const overlay = document.getElementById('briefcase-overlay');
-    overlay.classList.toggle('overlay-hidden', !briefcaseOpen);
-}
-
-// --- 2. KADER & BOARD-AUTOMATIK ---
-function addPlayerToBriefcase() {
-    const nr = document.getElementById('p-nr').value;
-    const name = document.getElementById('p-name').value;
-    const pos = document.getElementById('p-pos').value;
-
-    if (!nr || !name) {
-        alert("Coach, wir brauchen Nummer und Name!");
-        return;
+    if (tab === 'kader') {
+        renderKaderTab(area);
+    } else if (tab === 'sporttasche') {
+        area.innerHTML = `
+            <h3>🎒 Sporttasche</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                <div class="card"><h4>Samba-Technik</h4><p>Übungen für Beidfüßigkeit & Ginga</p></div>
+                <div class="card"><h4>Trainingsmaterial</h4><p>Hütchen, Stangen, Koordinationsleiter</p></div>
+            </div>`;
+    } else if (tab === 'analyse') {
+        area.innerHTML = `<h3>📊 Analyse-Zentrum</h3><p>Video-Analyse, Kabinen-Ansprachen und Performance-Werte werden hier nach der Toni-Analyse abgelegt.</p>`;
+    } else if (tab === 'match') {
+        area.innerHTML = `<h3>🏆 Spieltag-Zentrale</h3><button class="btn-green" style="width:auto; padding:10px 20px;">+ NEUES MATCH ERSTELLEN</button>`;
     }
+};
 
-    const player = {
-        id: Date.now(),
-        nr: nr,
-        name: name,
-        pos: pos,
-        status: 'green',
-        rating: 3,
-        weight: "", // Vorbereitung für optionale Gewichtskontrolle
-        lastAnalysis: null
-    };
-
-    players.push(player);
-    renderSquad();
-    createBoardChip(player); // SPIELER ERSCHEINT JETZT AUF DEM BOARD
-
-    // Felder leeren
-    document.getElementById('p-nr').value = '';
-    document.getElementById('p-name').value = '';
-}
-
-function renderSquad() {
-    const list = document.getElementById('smart-squad-list');
-    list.innerHTML = players.map(p => `
-        <div class="player-smart-box">
-            <div class="box-header" style="padding:15px; display:flex; justify-content:space-between; cursor:pointer;" onclick="togglePlayerDetails(${p.id})">
-                <span><strong>${p.nr}</strong> - ${p.name}</span>
-                <span>${p.status === 'green' ? '🟢' : '🔴'}</span>
-            </div>
-            <div id="details-${p.id}" style="display:none; padding:15px; background:rgba(0,0,0,0.3); border-top:1px solid rgba(255,255,255,0.1);">
-                <div style="margin-bottom:10px;">
-                    <label>Technik-Rating:</label>
-                    <span class="rating-stars" style="color:#f6e05e; cursor:pointer; font-size:1.2em;" onclick="updateRating(${p.id})">
-                        ${'★'.repeat(p.rating)}${'☆'.repeat(5-p.rating)}
-                    </span>
-                </div>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <input type="number" placeholder="Gewicht (opt.)" value="${p.weight}" onchange="updateWeight(${p.id}, this.value)" style="width:50%; background:#0f172a; color:white; border:none; padding:5px; border-radius:4px;">
-                    <select onchange="updateStatus(${p.id}, this.value)" style="flex:1; background:#0f172a; color:white; border:none; border-radius:4px;">
-                        <option value="green" ${p.status === 'green' ? 'selected' : ''}>Anwesend</option>
-                        <option value="red" ${p.status === 'red' ? 'selected' : ''}>Fehlt</option>
-                    </select>
-                </div>
-            </div>
+function renderKaderTab(container) {
+    container.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3>Kader-Verwaltung</h3>
+            <button class="btn-green" style="width:auto; padding:10px 20px;" onclick="addPlayerPrompt()">+ SPIELER VERPFLICHTEN</button>
         </div>
-    `).join('');
+        <div id="kader-list-full"></div>
+    `;
+    
+    const list = document.getElementById('kader-list-full');
+    squad.forEach(p => {
+        const bmi = (p.weight / (p.height * p.height)).toFixed(1);
+        const card = document.createElement('div');
+        card.style = "background:#0d1117; border:1px solid #30363d; padding:15px; border-radius:10px; margin-bottom:10px; display:flex; align-items:center; gap:20px;";
+        
+        card.innerHTML = `
+            <div style="font-size:24px; font-weight:900; color:#2ecc71; width:40px;">#${p.nr}</div>
+            <div style="flex-grow:1;">
+                <div style="font-weight:bold; font-size:18px;">${p.name} <span style="font-size:12px; color:#8b949e;">(${p.pos})</span></div>
+                <div style="font-size:12px; color:#8b949e;">Größe: ${p.height}m | Gewicht: ${p.weight}kg | <strong>BMI: ${bmi}</strong></div>
+            </div>
+            
+            <div style="display:flex; gap:5px;">
+                <div onclick="updateStatus('${p.id}', 'red')" style="width:20px; height:20px; border-radius:50%; background:${p.status==='red'?'#f85149':'#300'}; cursor:pointer; border:1px solid white;"></div>
+                <div onclick="updateStatus('${p.id}', 'yellow')" style="width:20px; height:20px; border-radius:50%; background:${p.status==='yellow'?'#f1c40f':'#330'}; cursor:pointer; border:1px solid white;"></div>
+                <div onclick="updateStatus('${p.id}', 'green')" style="width:20px; height:20px; border-radius:50%; background:${p.status==='green'?'#2ecc71':'#030'}; cursor:pointer; border:1px solid white;"></div>
+            </div>
+
+            <button onclick="removePlayer('${p.id}')" style="background:none; border:none; color:#f85149; cursor:pointer; font-weight:bold;">✕</button>
+        `;
+        list.appendChild(card);
+    });
+    syncToBoard();
 }
 
-// --- 3. VIDEO & ANALYSE FUNKTIONEN ---
-function handleVideoUpload(input) {
-    if (input.files && input.files[0]) {
-        appendMessage('toni', "🚀 Video empfangen! Ich analysiere jetzt den Bewegungsablauf (Beidfüßigkeit & Explosivität)...");
-        // Hier wird später die API-Anbindung für die Videoanalyse sitzen
-        setTimeout(() => {
-            appendMessage('toni', "✅ Analyse fertig: Der Übersteiger war explosiv, aber die Ballmitnahme mit dem rechten Fuß war etwas zu weit. 82% Samba-Score!");
-        }, 3000);
+function updateStatus(id, newStatus) {
+    const p = squad.find(x => x.id === id);
+    if(p) p.status = newStatus;
+    renderKaderTab(document.getElementById('tab-content-area'));
+}
+
+function addPlayerPrompt() {
+    const name = prompt("Name des Spielers:");
+    const nr = prompt("Trikotnummer:");
+    const pos = prompt("Position (z.B. TW, IV, ST):");
+    const h = parseFloat(prompt("Größe in m (z.B. 1.85):")) || 0;
+    const w = parseFloat(prompt("Gewicht in kg:")) || 0;
+    
+    if(name && nr) {
+        squad.push({ id: "p"+Date.now(), nr, name, pos, height: h, weight: w, status: "green", stats: {tech:0, scan:0, fit:0} });
+        renderKaderTab(document.getElementById('tab-content-area'));
     }
 }
 
-// --- 4. HILFSFUNKTIONEN ---
-function togglePlayerDetails(id) {
-    const el = document.getElementById(`details-${id}`);
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+function removePlayer(id) {
+    squad = squad.filter(p => p.id !== id);
+    renderKaderTab(document.getElementById('tab-content-area'));
+    const bPlayer = document.getElementById(id);
+    if(bPlayer) bPlayer.remove();
 }
 
-function updateRating(id) {
-    const p = players.find(x => x.id === id);
-    p.rating = (p.rating % 5) + 1;
-    renderSquad();
+function syncToBoard() {
+    squad.forEach(p => {
+        let bPlayer = document.getElementById(p.id);
+        if(!bPlayer && p.status !== 'red') {
+            createPlayerOnBoard('red', p.nr, p.name, p.id, 100, 100);
+        } else if (p.status === 'red' && bPlayer) {
+            bPlayer.remove();
+        }
+    });
 }
 
-function updateWeight(id, val) {
-    const p = players.find(x => x.id === id);
-    p.weight = val;
-}
+function createPlayerOnBoard(team, nr, name, id, x, y) {
+    const p = document.createElement('div');
+    p.className = `player ${team}`;
+    p.id = id;
+    p.innerText = nr;
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    
+    const label = document.createElement('div');
+    label.className = 'player-label';
+    label.innerText = name;
+    p.appendChild(label);
 
-function updateStatus(id, status) {
-    const p = players.find(x => x.id === id);
-    p.status = status;
-    renderSquad();
-    const chip = document.getElementById(`chip-${id}`);
-    if (chip) chip.style.display = status === 'red' ? 'none' : 'block';
-}
-
-function createBoardChip(player) {
-    const board = document.getElementById('taktik-board');
-    const chip = document.createElement('div');
-    chip.className = 'player-chip';
-    chip.id = `chip-${player.id}`;
-    chip.innerHTML = `<span class="nr">${player.nr}</span><span class="name-label">${player.name}</span>`;
-    chip.style.left = '45%'; chip.style.top = '45%';
-    makeDraggable(chip);
-    board.appendChild(chip);
-}
-
-function makeDraggable(el) {
-    let isDragging = false;
-    const move = (e) => {
-        if (!isDragging) return;
-        const b = document.getElementById('taktik-board').getBoundingClientRect();
-        const x = e.clientX || e.touches[0].clientX;
-        const y = e.clientY || e.touches[0].clientY;
-        el.style.left = Math.max(0, Math.min(92, ((x - b.left) / b.width) * 100)) + '%';
-        el.style.top = Math.max(0, Math.min(92, ((y - b.top) / b.height) * 100)) + '%';
+    // Einfaches Dragging
+    p.onmousedown = function(e) {
+        let shiftX = e.clientX - p.getBoundingClientRect().left;
+        let shiftY = e.clientY - p.getBoundingClientRect().top;
+        function moveAt(pageX, pageY) {
+            const rect = document.getElementById('pitch').getBoundingClientRect();
+            p.style.left = (pageX - rect.left - shiftX) + 'px';
+            p.style.top = (pageY - rect.top - shiftY) + 'px';
+        }
+        function onMouseMove(e) { moveAt(e.pageX, e.pageY); }
+        document.addEventListener('mousemove', onMouseMove);
+        p.onmouseup = function() { document.removeEventListener('mousemove', onMouseMove); p.onmouseup = null; };
     };
-    el.onmousedown = el.ontouchstart = () => isDragging = true;
-    document.onmousemove = document.ontouchmove = move;
-    document.onmouseup = document.ontouchend = () => isDragging = false;
+    document.getElementById('pitch').appendChild(p);
 }
