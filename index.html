@@ -1,99 +1,129 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni 2.0 - Login</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Coach Toni 2.0 – Initialisierung</title>
     <style>
-        :root { --ginga-green: #2ecc71; --dark: #0a0c10; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: #000; color: white; overflow: hidden; }
-        
-        #video-bg {
-            position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%;
-            z-index: -1; filter: brightness(0.35) grayscale(0.2); object-fit: cover;
+        :root {
+            --green: #2ecc71;
+            --accent: #0a74da;
+            --bg: #07101a;
+            --panel: #0f1720;
+            --text: #e6eef0;
         }
-
-        .overlay {
-            position: absolute; inset: 0; background: radial-gradient(circle, transparent 0%, rgba(0,0,0,0.85) 100%);
-            display: flex; align-items: center; justify-content: center;
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top, #1b2333 0, #050608 55%);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
         }
-
         .login-card {
-            background: rgba(15, 20, 28, 0.95); padding: 45px; border-radius: 28px;
-            border: 1px solid rgba(46, 204, 113, 0.2); width: 100%; max-width: 420px;
-            text-align: center; backdrop-filter: blur(15px); box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+            background: #0b1220;
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            text-align: center;
         }
-
-        h1 { color: var(--ginga-green); font-size: 26px; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
-        .sub { color: #666; font-size: 12px; margin-bottom: 35px; letter-spacing: 1px; }
-
-        .field { margin-bottom: 20px; text-align: left; }
-        label { display: block; font-size: 11px; color: var(--ginga-green); margin: 0 0 8px 5px; font-weight: 800; text-transform: uppercase; }
-        
-        input { 
-            width: 100%; padding: 15px; border-radius: 14px; border: 1px solid #222; 
-            background: #05070a; color: white; box-sizing: border-box; font-size: 15px;
-            transition: all 0.3s ease;
+        h2 { color: var(--green); margin-bottom: 10px; font-weight: 800; }
+        p { color: #9aa3ad; margin-bottom: 25px; font-size: 0.95rem; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--green); }
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #26303a;
+            background: #07101a;
+            color: #fff;
+            font-size: 1rem;
+            box-sizing: border-box;
         }
-        input:focus { border-color: var(--ginga-green); outline: none; box-shadow: 0 0 15px rgba(46, 204, 113, 0.1); }
-
-        .login-btn { 
-            width: 100%; padding: 18px; background: var(--ginga-green); color: #000; 
-            border: none; border-radius: 14px; font-weight: 900; cursor: pointer; 
-            font-size: 16px; margin-top: 25px; transition: 0.3s;
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            border: none;
+            background: var(--green);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
         }
-        .login-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4); }
+        button:hover { background: #27ae60; transform: translateY(-2px); }
+        .footer-note { margin-top: 20px; font-size: 0.75rem; color: #4b5563; }
     </style>
 </head>
 <body>
 
-    <video autoplay muted loop id="video-bg">
-        <source src="https://assets.mixkit.co/videos/preview/mixkit-soccer-player-dribbling-the-ball-in-the-field-41400-large.mp4" type="video/mp4">
-    </video>
+    <div class="login-card">
+        <h2>⚽ COACH TONI 2.0</h2>
+        <p>Willkommen zurück, Coach. Bitte identifizieren Sie sich für den Zugriff auf das Taktikboard.</p>
+        
+        <div class="input-group">
+            <label for="trainer-name">Name des Trainers</label>
+            <input id="trainer-name" type="text" placeholder="z.B. Coach Björn" required />
+        </div>
 
-    <div class="overlay">
-        <div class="login-card">
-            <h1>COACH TONI 2.0</h1>
-            <div class="sub">BRAZILIAN TACTICS ENGINE</div>
+        <div class="input-group">
+            <label for="password">System-Passwort</label>
+            <input id="password" type="password" placeholder="Passwort eingeben" />
+        </div>
 
-            <div class="field">
-                <label>Trainer Name</label>
-                <input type="text" id="username" placeholder="Dein Name" value="Björn">
-            </div>
+        <div class="input-group">
+            <label for="user-key">Ihr persönlicher Groq API-Key</label>
+            <input id="user-key" type="password" placeholder="gsk_..." />
+        </div>
 
-            <div class="field">
-                <label>System-Passwort</label>
-                <input type="password" id="password" placeholder="••••••••">
-            </div>
-
-            <div class="field">
-                <label>KI-Schlüssel (Groq API)</label>
-                <input type="password" id="api-key" placeholder="gsk_...">
-            </div>
-            
-            <button class="login-btn" onclick="auth()">SYSTEM INITIALISIEREN</button>
+        <button onclick="performLogin()">SYSTEM STARTEN</button>
+        
+        <div class="footer-note">
+            Toni 2.0 – Hochpräzise KI-Taktikanalyse & Trainingssteuerung
         </div>
     </div>
 
     <script>
-        // Session beim Laden leeren, um Login zu erzwingen
-        sessionStorage.clear();
+        function performLogin() {
+            const name = document.getElementById('trainer-name').value.trim();
+            const pw = document.getElementById('password').value;
+            const key = document.getElementById('user-key').value.trim();
 
-        function auth() {
-            const name = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            const key = document.getElementById('api-key').value;
+            if (!name || !key) {
+                alert("Bitte geben Sie Ihren Namen und den API-Key ein.");
+                return;
+            }
 
-            // Passwort-Sperre "Toni2026" wie besprochen
-            if(name && pass === "Toni2026" && key.startsWith('gsk_')) {
-                sessionStorage.setItem('toni_auth', 'true');
-                sessionStorage.setItem('toni_name', name);
-                sessionStorage.setItem('toni_key', key);
+            // Validierung gegen dein festes Passwort
+            if (pw === 'Trainer2026') {
+                // Speicherung in localStorage für Persistenz in der Aktentasche
+                localStorage.setItem('toni_trainer_name', name);
+                localStorage.setItem('toni_api_key', key);
+                
+                // Weiterleitung zur Haupt-App
                 window.location.href = 'app.html';
             } else {
-                alert('Zugriff verweigert. Bitte prüfe Name, Passwort (Toni2026) und API-Key.');
+                alert("Zutritt verweigert. Passwort inkorrekt.");
             }
         }
+
+        // Check ob bereits eingeloggt
+        window.onload = function() {
+            if (localStorage.getItem('toni_api_key') && localStorage.getItem('toni_trainer_name')) {
+                // Optional: Automatische Weiterleitung falls gewünscht
+                // window.location.href = 'app.html';
+            }
+        };
     </script>
 </body>
 </html>
