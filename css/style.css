@@ -1,176 +1,127 @@
-/* Toni 2.0 - Professional Tactical Design */
-
+/* --- BASIS-SETUP --- */
 :root {
-    --pitch-green: #1b4332;
-    --pitch-lines: rgba(255, 255, 255, 0.3);
-    --sidebar-bg: #0f172a;
+    --bg-dark: #0f172a;
     --card-bg: #1e293b;
-    --accent: #3b82f6;
+    --pitch-green: #2d5a27;
+    --accent-blue: #3b82f6;
     --text-main: #f8fafc;
-    --text-dim: #94a3b8;
-    --header-height: 60px;
-    --sidebar-width: 300px;
-    --status-green: #22c55e;
-    --status-yellow: #eab308;
-    --status-red: #ef4444;
+    --player-red: #ef4444;
 }
 
-* { box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    width: 100vw;
-    font-family: 'Inter', sans-serif;
-    background-color: #020617;
-    color: var(--text-main);
-    overflow: hidden; /* Verhindert das Scrollen der gesamten Seite */
-}
-
-/* Layout-Struktur */
-.pro-layout {
-    display: flex;
+body { 
+    background: var(--bg-dark); 
+    color: var(--text-main); 
+    height: 100vh; 
+    display: flex; 
     flex-direction: column;
-    height: 100vh;
+    overflow: hidden; /* Verhindert Wackeln auf Desktop */
 }
 
+/* --- HEADER --- */
 .main-header {
-    height: var(--header-height);
-    background: var(--sidebar-bg);
-    border-bottom: 1px solid #334155;
+    background: var(--card-bg);
+    padding: 10px 20px;
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    padding: 0 1.5rem;
+    align-items: center;
+    border-bottom: 2px solid #334155;
     z-index: 100;
 }
 
+/* --- DAS LAYOUT (MACBOOK / DESKTOP) --- */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: var(--sidebar-width) 1fr var(--sidebar-width);
-    height: calc(100vh - var(--header-height));
-    overflow: hidden;
+    grid-template-columns: 300px 1fr 350px; /* 3 Spalten nebeneinander */
+    gap: 10px;
+    padding: 10px;
+    flex: 1;
+    height: calc(100vh - 60px);
 }
 
-/* Sidebars */
-.sidebar-left, .sidebar-right {
-    background: var(--sidebar-bg);
-    border-right: 1px solid #334155;
+/* --- SPIELFELD (BOARD) --- */
+.board-container {
     display: flex;
     flex-direction: column;
+    height: 100%;
+}
+
+.soccer-pitch {
+    background-color: var(--pitch-green);
+    background-image: 
+        linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px),
+        url('https://www.transparenttextures.com/patterns/p6.png');
+    background-size: 100% 10%, auto;
+    border: 3px solid rgba(255,255,255,0.4);
+    border-radius: 12px;
+    position: relative;
+    flex: 1;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
     overflow: hidden;
 }
 
-.sidebar-right {
-    border-right: none;
-    border-left: 1px solid #334155;
+/* --- SPIELER-CHIPS (DRAG & DROP) --- */
+.player-chip {
+    width: 32px;
+    height: 32px;
+    background: var(--player-red);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    cursor: grab;
+    font-weight: 600;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    z-index: 50;
+    touch-action: none; /* ESSENZIELL: Verhindert Scrollen beim Ziehen am Handy */
 }
 
-.sidebar-header, .ai-header {
-    padding: 1rem;
-    border-bottom: 1px solid #334155;
+/* --- SIDEBARS --- */
+.sidebar-left, .sidebar-right {
+    background: var(--card-bg);
+    border-radius: 12px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    padding: 15px;
+    overflow: hidden;
 }
 
 .scrollable-content {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem;
+    margin-top: 10px;
 }
 
-/* Spielfeld-Bereich */
-.board-container {
-    background: #020617;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    position: relative;
-}
+/* --- 📱 MOBILE OPTIMIERUNG (Breakpoints) --- */
+@media screen and (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* Stapelt alles untereinander */
+        grid-template-rows: auto;
+        overflow-y: auto;
+    }
 
-.soccer-pitch {
-    width: 100%;
-    max-width: 900px;
-    aspect-ratio: 2 / 3;
-    background-color: var(--pitch-green);
-    border: 2px solid white;
-    border-radius: 4px;
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-}
+    .board-container {
+        height: 65vh; /* Spielfeld bekommt den Fokus oben */
+        min-height: 400px;
+    }
 
-/* Hilfslinien Spielfeld */
-.soccer-pitch::before {
-    content: '';
-    position: absolute;
-    top: 50%; width: 100%; height: 2px; background: var(--pitch-lines);
-}
+    .sidebar-left, .sidebar-right {
+        height: auto;
+        min-height: 300px;
+        margin-bottom: 10px;
+    }
 
-/* Spieler-Chips */
-.player-chip {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.8rem;
-    position: absolute;
-    cursor: grab;
-    border: 2px solid white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
+    .player-chip {
+        width: 42px; /* Größer für die Finger-Bedienung */
+        height: 42px;
+        font-size: 16px;
+    }
 
-/* Modus-Selector Buttons */
-.mode-selector button {
-    background: transparent;
-    border: 1px solid #334155;
-    color: var(--text-dim);
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    margin: 0 0.25rem;
-    transition: all 0.2s;
-}
-
-.mode-selector button.active {
-    background: var(--accent);
-    color: white;
-    border-color: var(--accent);
-}
-
-/* Chat-Eingabe unten fixiert */
-.chat-footer {
-    padding: 1rem;
-    background: #1e293b;
-    border-top: 1px solid #334155;
-    display: flex;
-    gap: 0.5rem;
-}
-
-#user-input {
-    flex: 1;
-    background: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 4px;
-    color: white;
-    padding: 0.5rem;
-    resize: none;
-    font-family: inherit;
-}
-
-#send-btn {
-    background: var(--accent);
-    border: none;
-    border-radius: 4px;
-    color: white;
-    width: 40px;
-    cursor: pointer;
+    body {
+        overflow-y: auto; /* Erlaubt Scrollen zwischen Board, Kader und Chat */
+    }
 }
