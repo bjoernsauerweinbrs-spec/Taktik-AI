@@ -1,177 +1,278 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni 2.0 - Taktikboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Coach Toni 2.0 - Taktik & Training</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        :root { --ginga-green: #2ecc71; --bg-dark: #0d1117; --panel-dark: #161b22; --text-gray: #8b949e; }
-        
-        body, html { 
-            margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; 
-            background: var(--bg-dark); color: white; overflow: hidden;
+        /* Ergänzende Styles für die neuen Funktionen direkt im Grid */
+        :root {
+            --bg-dark: #070c14;
+            --panel-dark: #0f172a;
+            --green-active: #2ecc71;
+            --yellow-training: #f1c40f;
+            --red-absent: #e74c3c;
+            --blue-ki: #3498db;
         }
 
-        .main-layout { display: flex; height: 100vh; width: 100vw; }
-
-        /* Sidebar allgemein */
-        aside { background: var(--panel-dark); border-right: 1px solid #30363d; display: flex; flex-direction: column; }
-        
-        /* Linke Sidebar: Kader */
-        #squad-sidebar { width: 280px; }
-        #toni-sidebar { width: 320px; border-right: none; border-left: 1px solid #30363d; }
-
-        .sidebar-header { 
-            padding: 20px; border-bottom: 1px solid #30363d; display: flex; 
-            justify-content: space-between; align-items: center; font-weight: 900; color: var(--ginga-green);
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: grid;
+            grid-template-columns: 300px 1fr 350px; /* Kader | Board | Chat */
+            grid-template-rows: 60px 1fr 120px;    /* Header | Main | Bank */
+            height: 100vh;
         }
 
-        /* Spielfeld Bereich */
-        main { flex-grow: 1; position: relative; background: #000; display: flex; flex-direction: column; }
-        #pitch-container { flex-grow: 1; position: relative; padding: 20px; display: flex; justify-content: center; align-items: center; }
-        
-        #pitch { 
-            width: 1000px; height: 600px; background: #1a1c1e; border: 4px solid #30363d; 
-            border-radius: 10px; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
+        /* HEADER */
+        header {
+            grid-column: 1 / span 3;
+            background: #111b2d;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 2px solid var(--green-active);
         }
 
-        /* Spieler auf dem Feld */
-        .player {
-            position: absolute; width: 40px; height: 40px; border-radius: 50%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: bold; cursor: move; transition: transform 0.2s; z-index: 10;
-        }
-        .player.red { background: radial-gradient(circle, #ff4d4d, #b30000); border: 2px solid white; color: white; }
-        .player.blue { background: radial-gradient(circle, #3498db, #2980b9); border: 2px solid white; color: white; }
-        
-        .player-label {
-            position: absolute; top: 45px; white-space: nowrap; font-size: 10px;
-            background: rgba(0,0,0,0.7); padding: 2px 5px; border-radius: 4px;
+        /* LINKER BEREICH: KADER & AMPELSYSTEM */
+        #sidebar-left {
+            grid-column: 1;
+            grid-row: 2 / span 2;
+            background: var(--panel-dark);
+            border-right: 1px solid #1e293b;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            overflow-y: auto;
         }
 
-        /* Kader Liste links */
-        #player-list { flex-grow: 1; overflow-y: auto; padding: 15px; }
-        .player-card {
-            background: #0d1117; border: 1px solid #30363d; padding: 12px;
-            border-radius: 8px; margin-bottom: 10px; position: relative;
-        }
-        .delete-btn { position: absolute; right: 8px; top: 8px; color: #f85149; cursor: pointer; font-weight: bold; }
-
-        /* Chat Bereich rechts (FEST) */
-        #chat-history { flex-grow: 1; overflow-y: auto; padding: 20px; font-size: 14px; }
-        .chat-input-area { 
-            padding: 20px; border-top: 1px solid #30363d; background: var(--panel-dark);
-            position: sticky; bottom: 0;
-        }
-        #user-msg { 
-            width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
-            padding: 12px; color: white; resize: none; margin-bottom: 10px;
+        .player-list-item {
+            display: flex;
+            align-items: center;
+            background: #1e293b;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: grab;
         }
 
-        /* Die Aktentasche (Modal) */
-        #briefcase-modal {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-            z-index: 1000; align-items: center; justify-content: center;
+        .ampel-status {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 10px;
+            cursor: pointer;
         }
-        .modal-content {
-            background: var(--panel-dark); width: 80%; height: 80%; border-radius: 20px;
-            border: 1px solid var(--ginga-green); padding: 30px; position: relative;
-            display: flex; flex-direction: column;
-        }
-        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; }
 
-        .btn { 
-            background: #21262d; border: 1px solid #30363d; color: white; padding: 8px 16px;
-            border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s;
+        /* MITTE: SPIELFELD */
+        main {
+            grid-column: 2;
+            grid-row: 2;
+            position: relative;
+            background: #0a0f18;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
-        .btn:hover { background: #30363d; }
-        .btn-green { background: #238636; border: none; }
-        .btn-green:hover { background: #2ea043; }
 
-        .top-nav { height: 60px; border-bottom: 1px solid #30363d; display: flex; align-items: center; padding: 0 20px; gap: 20px; }
+        #pitch {
+            width: 95%;
+            height: 90%;
+            background-color: #1a4d2e;
+            border: 4px solid #fff;
+            position: relative;
+            border-radius: 5px;
+        }
+
+        /* UNTEN: AUSWECHSELBÄNKE */
+        #bench-area {
+            grid-column: 2;
+            grid-row: 3;
+            background: #0d1421;
+            border-top: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+        }
+
+        .bench-box {
+            width: 45%;
+            border: 1px dashed #334155;
+            border-radius: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            position: relative;
+        }
+
+        .bench-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: #0d1421;
+            padding: 0 5px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        /* RECHTS: CHAT & TONI */
+        #sidebar-right {
+            grid-column: 3;
+            grid-row: 2 / span 2;
+            background: var(--panel-dark);
+            border-left: 1px solid #1e293b;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* AKTENTASCHE OVERLAY */
+        #aktentasche-overlay {
+            display: none;
+            position: fixed;
+            top: 5%;
+            left: 5%;
+            width: 90%;
+            height: 90%;
+            background: #0f172a;
+            z-index: 1000;
+            border: 2px solid var(--green-active);
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            flex-direction: column;
+        }
+
+        .aktentasche-header {
+            padding: 20px;
+            background: #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .aktentasche-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="main-layout">
-        <aside id="squad-sidebar">
-            <div class="sidebar-header">
-                <span id="trainer-display">TRAINER</span>
-                <div id="briefcase-btn" style="cursor:pointer; font-size: 24px;" onclick="toggleBriefcase()">💼</div>
-            </div>
-            <div id="player-list">
-                </div>
-            <div style="padding: 15px;">
-                <button class="btn btn-green" style="width: 100%;" onclick="addNewPlayerPrompt()">+ SPIELER HINZUFÜGEN</button>
-            </div>
-        </aside>
-
-        <main>
-            <div class="top-nav">
-                <button class="btn" onclick="setMode('11v11')">11 vs 11</button>
-                <button class="btn" onclick="setMode('training')">Training</button>
-                <button class="btn" onclick="setMode('funino')">Funino</button>
-                <div style="margin-left: auto; color: var(--ginga-green); font-weight: 900; letter-spacing: 2px;">GINGA SYSTEM 2.0</div>
-            </div>
-            <div id="pitch-container">
-                <div id="pitch">
-                    <svg id="drawing-layer" style="position:absolute; width:100%; height:100%; pointer-events:none;"></svg>
-                </div>
-            </div>
-        </main>
-
-        <aside id="toni-sidebar">
-            <div class="sidebar-header">CO-TRAINER TONI</div>
-            <div id="chat-history"></div>
-            <div class="chat-input-area">
-                <textarea id="user-msg" rows="3" placeholder="Frag Toni nach einer Taktik..."></textarea>
-                <button class="btn btn-green" style="width: 100%;" onclick="handleToniAction()">TONI ANALYSIEREN LASSEN</button>
-            </div>
-        </aside>
+<header>
+    <div style="display: flex; align-items: center;">
+        <img src="assets/logo.png" alt="Logo" style="height: 40px; margin-right: 15px;">
+        <h1 style="font-size: 1.2rem;">Coach Toni 2.0 <span id="display-trainer-name" style="color: var(--green-active); font-size: 0.9rem; margin-left: 15px;"></span></h1>
     </div>
+    <div class="header-controls">
+        <button onclick="toggleModus('11v11')" title="11 gegen 11"><i class="fas fa-users"></i></button>
+        <button onclick="toggleModus('funino')" title="Funino Modus"><i class="fas fa-th-large"></i></button>
+        <button onclick="openAktentasche()" title="Aktentasche öffnen"><i class="fas fa-briefcase"></i></button>
+        <button onclick="logout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+</header>
 
-    <div id="briefcase-modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="toggleBriefcase()">×</span>
-            <h2 style="color: var(--ginga-green);">💼 AKTENTASCHE - TRAINER BÜRO</h2>
-            <div style="display: flex; gap: 20px; flex-grow: 1;">
-                <div style="flex: 1; border: 1px solid #30363d; padding: 15px; border-radius: 10px;">
-                    <h3>📋 Letztes Clipboard</h3>
-                    <div id="clipboard-preview" style="background: white; color: black; height: 200px; padding: 10px; font-size: 12px;">
-                        Noch kein Dokument erstellt.
-                    </div>
-                    <button class="btn" style="margin-top: 10px;">Drucken / PDF</button>
+<aside id="sidebar-left">
+    <h3 style="color: var(--green-active); border-bottom: 1px solid #334155; padding-bottom: 10px;">Kaderverwaltung</h3>
+    <div id="player-pool">
+        </div>
+    <button onclick="addPlayerPrompt()" style="margin-top: 15px; background: #263238; border: none; color: white; padding: 10px; border-radius: 4px; cursor: pointer;">
+        <i class="fas fa-plus"></i> Spieler hinzufügen
+    </button>
+</aside>
+
+<main>
+    <div id="pitch">
+        </div>
+</main>
+
+<div id="bench-area">
+    <div class="bench-box" id="bench-red">
+        <div class="bench-label">Auswechselbank (Heim)</div>
+    </div>
+    <div class="bench-box" id="bench-blue">
+        <div class="bench-label">Auswechselbank (Blau / KI)</div>
+    </div>
+</div>
+
+<aside id="sidebar-right">
+    <div id="chat-container" style="flex: 1; overflow-y: auto; padding: 15px;">
+        </div>
+    <div id="chat-input-area" style="padding: 15px; background: #111b2d;">
+        <textarea id="user-input" placeholder="Toni eine Frage stellen oder Übung anfordern..." style="width: 100%; height: 60px; background: #070c14; color: #fff; border: 1px solid #334155; border-radius: 8px; padding: 8px;"></textarea>
+        <button id="send-btn" style="width: 100%; margin-top: 10px; padding: 10px; background: var(--green-active); color: #fff; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;">
+            ABSENDEN
+        </button>
+    </div>
+</aside>
+
+<div id="aktentasche-overlay">
+    <div class="aktentasche-header">
+        <h2><i class="fas fa-briefcase"></i> Aktentasche von Coach <span id="koffer-trainer-name"></span></h2>
+        <button onclick="closeAktentasche()" style="background: var(--red-absent); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">X Schließen</button>
+    </div>
+    <div class="aktentasche-content">
+        <div id="saved-trainings">
+            <h3><i class="fas fa-file-pdf"></i> Trainingspläne & Archiv</h3>
+            <div id="archive-list">
                 </div>
-                <div style="flex: 1; border: 1px solid #30363d; padding: 15px; border-radius: 10px;">
-                    <h3>🍎 Ernährungsplan</h3>
-                    <p style="color: #8b949e;">Stand: Januar 2026<br>Fokus: Schnellkraft & Regeneration</p>
-                    <button class="btn">Ansehen</button>
+        </div>
+        <div id="player-stats-center">
+            <h3><i class="fas fa-chart-line"></i> Spieler-Bewertungssystem</h3>
+            <div id="stats-display">
                 </div>
-                <div style="flex: 1; border: 1px solid #30363d; padding: 15px; border-radius: 10px;">
-                    <h3>⏳ Historie</h3>
-                    <ul style="font-size: 13px; color: #8b949e;">
-                        <li>25.01. - Taktik-Analyse 3-4-3</li>
-                        <li>24.01. - Trainingseinheit "Ginga-Technik"</li>
-                    </ul>
-                </div>
+            <hr style="border: 0.5px solid #334155; margin: 20px 0;">
+            <h3><i class="fas fa-apple-alt"></i> KI-Ernährungsberatung</h3>
+            <div id="nutrition-advice" style="background: #1e293b; padding: 15px; border-radius: 8px; font-size: 0.9rem;">
+                Wähle einen Spieler oder eine Altersgruppe, um live beraten zu werden.
             </div>
         </div>
     </div>
+</div>
 
-    <script src="js/logic.js"></script>
-    <script src="js/board.js"></script>
-    <script src="js/chat.js"></script>
-    <script>
-        // Init Name
-        document.getElementById('trainer-display').innerText = sessionStorage.getItem('toni_name') || 'COACH';
-        
-        function toggleBriefcase() {
-            const modal = document.getElementById('briefcase-modal');
-            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+<script src="js/storage.js"></script>
+<script src="js/logic.js"></script>
+<script src="js/board.js"></script>
+<script src="js/chat.js"></script>
+
+<script>
+    // Initialisierung beim Laden
+    window.onload = function() {
+        const config = ToniStorage.getAuthConfig();
+        if (!config.apiKey) {
+            window.location.href = 'index.html';
+            return;
         }
-    </script>
+        document.getElementById('display-trainer-name').innerText = "| Coach " + config.name;
+        document.getElementById('koffer-trainer-name').innerText = config.name;
+        
+        // Initialisiere Board und Kader
+        ToniBoard.init();
+    };
+
+    function openAktentasche() {
+        document.getElementById('aktentasche-overlay').style.display = 'flex';
+        renderArchive();
+        renderPlayerStats();
+    }
+
+    function closeAktentasche() {
+        document.getElementById('aktentasche-overlay').style.display = 'none';
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+</script>
 </body>
 </html>
