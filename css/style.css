@@ -1,118 +1,79 @@
-/* --- BASIS & FARBEN --- */
 :root {
-    --bg-dark: #0f172a;
+    --pitch-green: #2ecc71;
+    --line-white: rgba(255, 255, 255, 0.8);
+    --dark-blue: #0f172a;
     --card-bg: #1e293b;
-    --pitch-green: #2d5a27;
-    --accent-blue: #3b82f6;
-    --text-main: #f8fafc;
-    --player-red: #ef4444;
+    --accent: #3b82f6;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
-
-body { 
-    background: var(--bg-dark); 
-    color: var(--text-main); 
-    height: 100vh; 
-    display: flex; 
-    flex-direction: column; 
-    overflow: hidden; 
+body {
+    margin: 0; font-family: 'Segoe UI', sans-serif;
+    background-color: var(--dark-blue); color: white;
+    overflow: hidden; display: flex; flex-direction: column; height: 100vh;
 }
 
-/* --- HEADER --- */
-.main-header { 
-    background: var(--card-bg); 
-    padding: 10px 20px; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    border-bottom: 2px solid #334155; 
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+/* --- DAS PROFI-SPIELFELD --- */
+#taktik-board {
+    position: relative; width: 95vw; height: 60vh;
+    margin: 10px auto; background-color: var(--pitch-green);
+    border: 3px solid var(--line-white); border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    touch-action: none;
 }
 
-.coach-tag { 
-    font-size: 0.6em; 
-    background: var(--accent-blue); 
-    padding: 3px 10px; 
-    border-radius: 4px; 
-    margin-left: 10px; 
-    text-transform: uppercase;
+/* Mittellinie & Kreis */
+#taktik-board::before {
+    content: ''; position: absolute; top: 0; left: 50%;
+    width: 2px; height: 100%; background: var(--line-white);
+}
+#taktik-board::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 80px; height: 80px; border: 2px solid var(--line-white);
+    border-radius: 50%; transform: translate(-50%, -50%);
 }
 
-/* --- DAS LAYOUT (DESKTOP) --- */
-.dashboard-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 380px; /* Spielfeld links, Toni rechts */
-    flex: 1; 
-    overflow: hidden; 
-    padding: 15px; 
-    gap: 15px; 
+/* Strafräume */
+.penalty-area {
+    position: absolute; width: 15%; height: 40%;
+    border: 2px solid var(--line-white); top: 30%;
+}
+.left-area { left: 0; border-left: none; }
+.right-area { right: 0; border-right: none; }
+
+/* --- HEADER & NAVIGATION --- */
+header {
+    padding: 15px; display: flex; justify-content: space-between;
+    align-items: center; background: var(--card-bg);
 }
 
-/* --- SPIELFELD & TORE --- */
-.board-container { height: 100%; display: flex; flex-direction: column; }
-
-.soccer-pitch { 
-    background-color: var(--pitch-green); 
-    position: relative; 
-    flex: 1;
-    border-radius: 12px; 
-    border: 3px solid rgba(255,255,255,0.4);
-    box-shadow: inset 0 0 60px rgba(0,0,0,0.5);
-    background-image: linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px); 
-    background-size: 100% 10%;
+.status-badge {
+    font-size: 12px; padding: 4px 8px; border-radius: 20px;
+    background: #334155; color: #94a3b8;
 }
 
-/* Tore Logik */
-.goal { position: absolute; border: 3px solid white; display: none; transition: all 0.3s; }
-
-/* Match Modus: 2 große Tore */
-.mode-match .goal-match { display: block; width: 15px; height: 25%; top: 37.5%; }
-.goal-left { left: -3px; border-left: none; }
-.goal-right { right: -3px; border-right: none; }
-
-/* Funino Modus: 4 Minitore */
-.mode-funino .goal-funino-tl, .mode-funino .goal-funino-bl, 
-.mode-funino .goal-funino-tr, .mode-funino .goal-funino-br { display: block; width: 12px; height: 15%; }
-.goal-funino-tl { left: -3px; top: 15%; border-left: none; }
-.goal-funino-bl { left: -3px; bottom: 15%; border-left: none; }
-.goal-funino-tr { right: -3px; top: 15%; border-right: none; }
-.goal-funino-br { right: -3px; bottom: 15%; border-right: none; }
-
-/* --- AKTENTASCHE (BRIEFCASE OVERLAY) --- */
-#briefcase-overlay { 
-    position: fixed; right: 0; top: 0; width: 100%; height: 100%; 
-    background: rgba(15, 23, 42, 0.9); z-index: 1000; 
-    display: flex; justify-content: flex-end; 
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+/* --- AKTENTASCHE ICON --- */
+.briefcase-btn {
+    background: none; border: none; font-size: 24px; cursor: pointer;
+    transition: transform 0.2s;
 }
-.overlay-hidden { transform: translateX(100%); }
+.briefcase-btn:hover { transform: scale(1.1); }
 
-.briefcase-content { 
-    width: 450px; background: var(--card-bg); height: 100%; 
-    padding: 25px; display: flex; flex-direction: column; 
-    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+/* --- SPIELER CHIPS --- */
+.player-chip {
+    position: absolute; width: 35px; height: 35px;
+    background: #e74c3c; border: 2px solid white; color: white;
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-weight: bold; font-size: 14px;
+    cursor: move; z-index: 10; box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
-/* SPIELER SMART-BOX */
-.player-smart-box { 
-    background: #334155; border-radius: 10px; padding: 15px; 
-    margin-bottom: 12px; border-left: 6px solid #48bb78; 
-    cursor: pointer; transition: transform 0.2s;
+/* --- OVERLAY (AKTENTASCHE) --- */
+.overlay-hidden { display: none !important; }
+#briefcase-overlay {
+    position: fixed; top: 0; right: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.95); z-index: 100;
 }
-.player-smart-box:hover { transform: scale(1.02); background: #3e4c5f; }
-
-/* MOBILE ANPASSUNG */
-@media (max-width: 1024px) {
-    .dashboard-grid { grid-template-columns: 1fr; grid-template-rows: 60vh 1fr; overflow-y: auto; }
-    .briefcase-content { width: 100%; }
-}
-
-/* SPIELER CHIPS */
-.player-chip { 
-    width: 36px; height: 36px; background: var(--player-red); 
-    color: white; border-radius: 50%; position: absolute; 
-    display: flex; align-items: center; justify-content: center; 
-    font-weight: bold; border: 2px solid white; z-index: 100; 
-    touch-action: none; cursor: grab;
+.briefcase-content {
+    width: 90%; max-width: 400px; margin-left: auto; height: 100%;
+    background: var(--card-bg); padding: 20px; overflow-y: auto;
 }
