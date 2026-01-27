@@ -1,104 +1,84 @@
-// --- TONI ELITE 2026: KI-STEUERUNG & FUNK-FIX ---
+/**
+ * Toni 2.0 - Elite AI Engine
+ * Fokus: Taktik-Analyse, BMI-Auswertung & Performance
+ */
 
-async function sendMessage() {
-    const userInput = document.getElementById('user-input');
-    const userText = userInput.value.trim();
-    if (!userText) return;
+async function handleToniAction() {
+    const inputField = document.getElementById('user-msg');
+    const text = inputField.value.trim();
+    if (!text) return;
 
-    appendMessage('user', userText);
-    userInput.value = '';
+    // Nachricht im Chat anzeigen
+    appendChatMessage('user', text);
+    inputField.value = '';
 
-    const apiKey = localStorage.getItem('api_key');
-    // Wichtig: Wir nutzen das aktuellste Modell, um das Decommissioned-Problem zu lösen
-    const modelId = "llama-3.3-70b-versatile"; 
+    const history = document.getElementById('chat-history');
+    const thinking = document.createElement('div');
+    thinking.className = 'msg toni-msg';
+    thinking.innerHTML = "<em>Toni greift auf globale Taktik-Datenbanken zu...</em>";
+    history.appendChild(thinking);
+    history.scrollTop = history.scrollHeight;
 
-    if (!apiKey || apiKey.length < 10) {
-        appendMessage('toni', "❌ Coach, ich finde keinen gültigen Key! Bitte geh kurz zur Startseite und log dich neu ein.");
-        return;
-    }
-
-    const loadingId = 'loading-' + Date.now();
-    appendMessage('toni', 'Toni analysiert... 🇧🇷', loadingId);
-
-    // Kontext für Toni sammeln
-    const currentMode = document.getElementById('field-mode').value;
-    const activeTab = document.querySelector('.tab-btn.active')?.innerText || 'Kader';
-    const squadInfo = players.map(p => `${p.name} (Nr. ${p.nr}, ${p.rating} Sterne, ${p.weight || 'kein'} kg)`).join(', ');
-
-    const systemPrompt = `
-        Du bist Toni, ein brasilianischer Elite-Fußballtrainer. Dein Chef ist Björn.
-        Verhalte dich wie ein absoluter Fachmann für Taktik, Technik und Sport-Ernährung.
-        AKTUELLER BEREICH: ${activeTab}.
-        SPIELFELD: ${currentMode}.
-        KADER: ${squadInfo || 'Noch leer'}.
-        
-        DEINE AUFGABEN:
-        1. Gib präzise Tipps zur Beidfüßigkeit und Bewegungsabläufen (z.B. Übersteiger).
-        2. Wenn Björn im Ernährungs-Tab ist, schlage gesunde 'Samba-Rezepte' vor.
-        3. Nutze MOVE:Nr:X:Y am Ende, um Spieler zu verschieben.
-        4. Bleib motivierend, professionell und brasilianisch im Stil.
-    `;
+    // Wir ziehen die aktuellen Kader-Daten für Toni (inkl. BMI)
+    const squadContext = squad.map(p => {
+        const bmi = (p.weight / (p.height * p.height)).toFixed(1);
+        return `${p.name} (#${p.nr}, Pos: ${p.pos}, BMI: ${bmi}, Status: ${p.status})`;
+    }).join(", ");
 
     try {
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
+                'Authorization': `Bearer ${sessionStorage.getItem('toni_key')}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: modelId,
+                model: "llama-3.3-70b-versatile",
                 messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: userText }
+                    {
+                        role: "system",
+                        content: `Du bist Toni, ein Elite-Fußball-KI-Coach. Dein Wissen basiert auf weltweiten Analysen, Big Data und moderner Sportwissenschaft.
+                        Dein Stil: Hochprofessionell, präzise, analytisch. Kein Smalltalk über "Ginga" oder Klischees.
+                        Du kennst den aktuellen Kader: ${squadContext}.
+                        Wenn der Trainer nach Ernährung fragt und Daten fehlen, gib einen Standard-Profi-Plan aus. Wenn Größe/Gewicht da sind, beziehe den BMI ein.
+                        Du nennst deinen Partner beim Namen (Björn) oder sagst 'Trainer'.`
+                    },
+                    { role: "user", content: text }
                 ],
-                temperature: 0.7
+                temperature: 0.5
             })
         });
 
         const data = await response.json();
-        const loader = document.getElementById(loadingId);
-        if (loader) loader.remove();
+        const toniText = data.choices[0].message.content;
 
-        if (data.error) throw new Error(data.error.message);
-
-        const toniAntwort = data.choices[0].message.content;
-        appendMessage('toni', toniAntwort);
+        thinking.remove();
+        appendChatMessage('toni', toniText);
         
-        // Bewegungen auf dem Board ausführen
-        handleToniMoves(toniAntwort);
+        // Elite-Sprachausgabe (Tiefere, professionelle Stimme)
+        const speech = new SpeechSynthesisUtterance(toniText);
+        speech.lang = 'de-DE';
+        speech.pitch = 0.85; 
+        speech.rate = 1.0;
+        window.speechSynthesis.speak(speech);
 
     } catch (error) {
-        const loader = document.getElementById(loadingId);
-        if (loader) loader.remove();
-        appendMessage('toni', "📡 Funkloch behoben, aber API meldet: " + error.message);
+        thinking.innerHTML = "Fehler bei der Datenabfrage. Bitte API-Key prüfen.";
     }
 }
 
-function handleToniMoves(text) {
-    const moveRegex = /MOVE:(\d+):(\d+):(\d+)/g;
-    let match;
-    while ((match = moveRegex.exec(text)) !== null) {
-        const nr = match[1];
-        const x = match[2];
-        const y = match[3];
-        const chips = document.querySelectorAll('.player-chip');
-        chips.forEach(chip => {
-            if (chip.querySelector('.nr').innerText === nr) {
-                chip.style.transition = "all 1s ease-in-out";
-                chip.style.left = x + '%';
-                chip.style.top = y + '%';
-            }
-        });
-    }
-}
-
-function appendMessage(sender, text, id = null) {
-    const chatOutput = document.getElementById('chat-output');
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `message ${sender}-msg`;
-    if (id) msgDiv.id = id;
-    msgDiv.innerText = text;
-    chatOutput.appendChild(msgDiv);
-    chatOutput.scrollTop = chatOutput.scrollHeight;
+function appendChatMessage(role, text) {
+    const history = document.getElementById('chat-history');
+    const div = document.createElement('div');
+    div.style = `
+        padding: 12px; 
+        border-radius: 8px; 
+        margin-bottom: 10px; 
+        font-size: 14px;
+        line-height: 1.5;
+        ${role === 'toni' ? 'background: #1c2128; border-left: 4px solid #2ecc71;' : 'background: #238636; align-self: flex-end; color: white;'}
+    `;
+    div.innerText = text;
+    history.appendChild(div);
+    history.scrollTop = history.scrollHeight;
 }
