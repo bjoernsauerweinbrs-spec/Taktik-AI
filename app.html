@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coach Toni 2.0 - Elite Interface</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+
     <style>
         :root { --ginga-green: #2ecc71; --bg-dark: #0d1117; --panel-dark: #161b22; --border: #30363d; }
         * { box-sizing: border-box; }
@@ -25,9 +29,10 @@
         }
 
         #pitch { 
-            display: none; width: 950px; height: 600px; background: #1a3a1a; border: 4px solid white; 
+            display: none; width: 950px; height: 600px; background: #1a3a1a; 
             position: relative; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1);
         }
+        canvas { border-radius: 8px; }
 
         /* Rechter Chat & Voice */
         aside#right-sidebar { width: 380px; background: var(--panel-dark); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
@@ -37,19 +42,10 @@
         .input-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
         textarea { flex-grow: 1; background: #0d1117; border: 1px solid var(--border); color: white; border-radius: 12px; padding: 12px; resize: none; outline: none; font-size: 14px; }
         
-        /* Mikrofon Button */
-        .mic-btn { 
-            width: 50px; height: 50px; border-radius: 50%; border: none; background: #30363d; color: white; 
-            cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; transition: 0.3s;
-        }
+        .mic-btn { width: 50px; height: 50px; border-radius: 50%; border: none; background: #30363d; color: white; cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
         .mic-btn.active { background: #f85149; animation: pulse 1.5s infinite; }
         
-        @keyframes pulse { 
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); }
-            100% { transform: scale(1); }
-        }
-
+        @keyframes pulse { 0% { transform: scale(1); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
         .btn-send { background: var(--ginga-green); color: black; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
 
         /* Aktentasche Modal */
@@ -73,7 +69,7 @@
             <div id="setup-overlay">
                 <div style="font-size: 60px; margin-bottom: 20px;">⚽</div>
                 <h1 style="color:var(--ginga-green); font-size: 32px; letter-spacing: 2px;">SYSTEM BEREIT</h1>
-                <p id="setup-status" style="color: #8b949e;">Warte auf Initialisierung durch Coach Toni...</p>
+                <p id="setup-status" style="color: #8b949e;">Initialisiere Toni AI Coaching...</p>
             </div>
             <div id="pitch">
                 </div>
@@ -99,7 +95,7 @@
         <div class="modal-content">
             <div class="modal-tabs">
                 <div id="tab-kader" class="tab-btn active" onclick="switchTab('kader')">KADER</div>
-                <div id="tab-analyse" class="tab-btn" onclick="switchTab('analyse')">ANALYSE</div>
+                <div id="tab-analyse" class="tab-btn" onclick="switchTab('analyse')">KI-VIDEO</div>
                 <div id="tab-match" class="tab-btn" onclick="switchTab('match')">MATCH</div>
                 <div id="tab-training" class="tab-btn" onclick="switchTab('training')">ORDNER</div>
                 <div style="margin-left: auto; padding: 20px; cursor: pointer; color: #f85149;" onclick="toggleBriefcase()">✖</div>
@@ -109,10 +105,16 @@
     </div>
 
     <script src="js/logic.js"></script>
+    <script src="js/board.js"></script>
     <script src="js/chat.js"></script>
+    
     <script>
-        if(sessionStorage.getItem('toni_auth') !== 'true') { window.location.href = 'index.html'; }
-        else { document.body.classList.add('authorized'); }
+        // Check Login
+        if(sessionStorage.getItem('toni_auth') !== 'true') { 
+            window.location.href = 'index.html'; 
+        } else { 
+            document.body.classList.add('authorized'); 
+        }
 
         function toggleBriefcase() {
             const m = document.getElementById('briefcase-modal');
