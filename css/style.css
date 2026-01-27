@@ -1,143 +1,176 @@
-/* css/style.css
-   Zuständig für: Visuelles Design, Spielfeld-Ästhetik, 
-   Spieler-Tokens (Brasilien-Style) und Layout-Stabilität
-*/
+/* Toni 2.0 - Professional Tactical Design */
 
 :root {
-    --green-active: #2ecc71;
-    --green-dark: #27ae60;
-    --accent-blue: #3498db;
-    --red-home: #e74c3c;
-    --red-dark: #c0392b;
-    --bg-dark: #070c14;
-    --panel-dark: #0f172a;
-    --border-color: #1e293b;
-    --text-main: #e6eef0;
-    --text-muted: #94a3b8;
+    --pitch-green: #1b4332;
+    --pitch-lines: rgba(255, 255, 255, 0.3);
+    --sidebar-bg: #0f172a;
+    --card-bg: #1e293b;
+    --accent: #3b82f6;
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+    --header-height: 60px;
+    --sidebar-width: 300px;
+    --status-green: #22c55e;
+    --status-yellow: #eab308;
+    --status-red: #ef4444;
 }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-body {
+body, html {
     margin: 0;
     padding: 0;
-    background-color: var(--bg-dark);
+    height: 100vh;
+    width: 100vw;
+    font-family: 'Inter', sans-serif;
+    background-color: #020617;
     color: var(--text-main);
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    overflow: hidden; /* Verhindert Scrollen des gesamten Layouts */
+    overflow: hidden; /* Verhindert das Scrollen der gesamten Seite */
 }
 
-/* SPIELFELD-DESIGN (PITCH) */
-#pitch {
-    background: radial-gradient(circle, #2d5a27 0%, #1a4d2e 100%);
-    border: 3px solid #ffffff;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+/* Layout-Struktur */
+.pro-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.main-header {
+    height: var(--header-height);
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid #334155;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    z-index: 100;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr var(--sidebar-width);
+    height: calc(100vh - var(--header-height));
+    overflow: hidden;
+}
+
+/* Sidebars */
+.sidebar-left, .sidebar-right {
+    background: var(--sidebar-bg);
+    border-right: 1px solid #334155;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar-right {
+    border-right: none;
+    border-left: 1px solid #334155;
+}
+
+.sidebar-header, .ai-header {
+    padding: 1rem;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.scrollable-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+/* Spielfeld-Bereich */
+.board-container {
+    background: #020617;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
     position: relative;
 }
 
+.soccer-pitch {
+    width: 100%;
+    max-width: 900px;
+    aspect-ratio: 2 / 3;
+    background-color: var(--pitch-green);
+    border: 2px solid white;
+    border-radius: 4px;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
 /* Hilfslinien Spielfeld */
-#pitch::before {
-    content: "";
+.soccer-pitch::before {
+    content: '';
     position: absolute;
-    top: 0; left: 50%;
-    width: 2px; height: 100%;
-    background: rgba(255,255,255,0.5);
+    top: 50%; width: 100%; height: 2px; background: var(--pitch-lines);
 }
 
-#pitch::after {
-    content: "";
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 120px; height: 120px;
-    border: 2px solid rgba(255,255,255,0.5);
+/* Spieler-Chips */
+.player-chip {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    transform: translate(-50%, -50%);
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+    position: absolute;
+    cursor: grab;
+    border: 2px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* SPIELER-TOKENS (BRASILIEN-STYLE) */
-.player-token {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    user-select: none;
-}
-
-.player-token:hover {
-    transform: scale(1.15);
-    box-shadow: 0 0 15px var(--green-active);
-    z-index: 1000 !important;
-}
-
-.player-token.home {
-    background: radial-gradient(circle at 30% 30%, var(--red-home), var(--red-dark));
-}
-
-.player-token.away {
-    background: radial-gradient(circle at 30% 30%, var(--accent-blue), #2980b9);
-}
-
-/* AMPELSYSTEM SIDEBAR */
-.player-list-item {
-    transition: background 0.2s;
-    border: 1px solid transparent;
-}
-
-.player-list-item:hover {
-    background: #2d3748;
-    border-color: var(--green-active);
-}
-
-.ampel-status {
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
-}
-
-/* SCROLLBAR DESIGN (Modern Dark) */
-::-webkit-scrollbar {
-    width: 6px;
-}
-::-webkit-scrollbar-track {
-    background: var(--bg-dark);
-}
-::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: var(--green-active);
-}
-
-/* MODUS-BUTTONS & HEADER CONTROLS */
-.header-controls button {
+/* Modus-Selector Buttons */
+.mode-selector button {
     background: transparent;
-    border: 1px solid var(--border-color);
-    color: var(--text-main);
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin-left: 10px;
+    border: 1px solid #334155;
+    color: var(--text-dim);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
     cursor: pointer;
+    margin: 0 0.25rem;
     transition: all 0.2s;
 }
 
-.header-controls button:hover {
-    background: var(--green-active);
-    color: #fff;
-    border-color: var(--green-active);
+.mode-selector button.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
 }
 
-/* AKTENTASCHE STYLING */
-#archive-list button {
-    transition: background 0.2s;
+/* Chat-Eingabe unten fixiert */
+.chat-footer {
+    padding: 1rem;
+    background: #1e293b;
+    border-top: 1px solid #334155;
+    display: flex;
+    gap: 0.5rem;
 }
 
-#archive-list button:hover {
-    background: #2980b9;
+#user-input {
+    flex: 1;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 4px;
+    color: white;
+    padding: 0.5rem;
+    resize: none;
+    font-family: inherit;
 }
 
-/* NINO-MODUS SPEZIAL (FUNINO) */
-.minitor {
+#send-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 4px;
+    color: white;
     width: 40px;
-    height: 10px;
-    background: #fff;
-    position: absolute;
-    border-radius: 2px;
+    cursor: pointer;
 }
