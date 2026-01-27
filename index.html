@@ -3,87 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taktik-AI Login | Coach Björn</title>
+    <title>Toni 2.0 - Elite Login</title>
     <style>
-        :root {
-            --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #3b82f6;
-        }
         body { 
-            background: var(--bg); color: var(--text); font-family: sans-serif;
-            display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;
+            background: #0d1117; 
+            color: white; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
         }
-        .login-card {
-            background: var(--card); padding: 30px; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 350px;
+        .login-box { 
+            background: #161b22; 
+            padding: 40px; 
+            border-radius: 12px; 
+            border: 1px solid #30363d; 
+            text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            width: 350px;
         }
-        h2 { text-align: center; margin-bottom: 20px; color: var(--accent); }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 0.9em; color: #94a3b8; }
-        input, select {
-            width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155;
-            background: #0f172a; color: white; box-sizing: border-box;
+        h2 { color: #2ecc71; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; }
+        input { 
+            background: #0d1117; 
+            border: 1px solid #30363d; 
+            color: white; 
+            padding: 15px; 
+            border-radius: 6px; 
+            width: 100%; 
+            margin-bottom: 20px; 
+            text-align: center; 
+            font-size: 18px; 
+            outline: none;
         }
-        button {
-            width: 100%; padding: 12px; background: var(--accent); border: none;
-            border-radius: 6px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px;
+        input:focus { border-color: #2ecc71; }
+        button { 
+            background: #238636; 
+            border: none; 
+            color: white; 
+            padding: 15px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            width: 100%;
+            font-size: 16px;
+            transition: background 0.3s;
         }
-        button:hover { background: #2563eb; }
+        button:hover { background: #2ea043; }
     </style>
 </head>
 <body>
-
-    <div class="login-card">
-        <h2>Taktik-AI <small style="display:block; font-size: 0.5em; color: white;">Coach Björn Edition</small></h2>
-        
-        <div class="input-group">
-            <label>Dein Name</label>
-            <input type="text" id="trainer-name" placeholder="z.B. Björn" value="Björn">
-        </div>
-
-        <div class="input-group">
-            <label>KI-Anbieter wählen</label>
-            <select id="provider-select">
-                <option value="groq">Groq (Empfohlen: Schnell & Kostenlos)</option>
-                <option value="openai">OpenAI (GPT-4)</option>
-                <option value="gemini">Google Gemini</option>
-            </select>
-        </div>
-
-        <div class="input-group">
-            <label>API-Key eingeben</label>
-            <input type="password" id="api-key" placeholder="Hier deinen Key einfügen...">
-        </div>
-
-        <button onclick="startSystem()">System starten & zum Feld</button>
+    <div class="login-box">
+        <h2>ELITE CONTROL</h2>
+        <p style="color: #8b949e; margin-bottom: 20px;">Systemzugriff erforderlich</p>
+        <input type="password" id="pw" placeholder="Passwort eingeben" onkeypress="handleKey(event)">
+        <button onclick="login()">ZUGRIFF BESTÄTIGEN</button>
     </div>
 
     <script>
-        function startSystem() {
-            const name = document.getElementById('trainer-name').value;
-            const key = document.getElementById('api-key').value;
-            const provider = document.getElementById('provider-select').value;
-
-            if (!key || !name) {
-                alert("Coach, ohne Namen und API-Key kommen wir nicht aus der Kabine!");
-                return;
+        // Verhindert das Umgehen durch direkten URL-Aufruf (wird in app.html geprüft)
+        function login() {
+            const pass = document.getElementById('pw').value;
+            if(pass === 'Toni2026') {
+                sessionStorage.setItem('toni_auth', 'true');
+                window.location.href = 'app.html';
+            } else {
+                alert('Zugriff verweigert. Falsches Passwort.');
             }
-
-            // Daten lokal im Browser sichern
-            localStorage.setItem('trainer_name', name);
-            localStorage.setItem('api_key', key);
-            localStorage.setItem('selected_provider', provider);
-
-            // Weiterleitung zur Haupt-App
-            window.location.href = 'app.html';
         }
-        
-        // Automatisches Laden beim Start, falls schon mal eingeloggt
-        window.onload = () => {
-            const savedName = localStorage.getItem('trainer_name');
-            const savedKey = localStorage.getItem('api_key');
-            if(savedName) document.getElementById('trainer-name').value = savedName;
-            if(savedKey) document.getElementById('api-key').value = savedKey;
-        };
+
+        function handleKey(e) {
+            if(e.key === 'Enter') login();
+        }
     </script>
 </body>
 </html>
