@@ -1,129 +1,172 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Coach Toni 2.0 – Initialisierung</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toni 2.0 - Tactical Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
     <style>
         :root {
-            --green: #2ecc71;
-            --accent: #0a74da;
-            --bg: #07101a;
-            --panel: #0f1720;
-            --text: #e6eef0;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent: #3b82f6;
+            --border: #334155;
+            --success: #22c55e;
         }
+
         body {
-            margin: 0;
-            padding: 0;
             font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at top, #1b2333 0, #050608 55%);
-            color: var(--text);
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
-            align-items: center;
             justify-content: center;
-            height: 100vh;
-            overflow: hidden;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
         }
+
         .login-card {
-            background: #0b1220;
-            padding: 40px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             width: 100%;
             max-width: 450px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-            text-align: center;
+            border: 1px solid var(--border);
         }
-        h2 { color: var(--green); margin-bottom: 10px; font-weight: 800; }
-        p { color: #9aa3ad; margin-bottom: 25px; font-size: 0.95rem; }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--green); }
-        input {
+
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { font-weight: 600; font-size: 1.8rem; margin: 0; letter-spacing: -1px; }
+        .header span { color: var(--accent); font-weight: 600; }
+        .header p { color: #94a3b8; font-size: 0.85rem; margin-top: 0.5rem; }
+
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        input, select {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #26303a;
-            background: #07101a;
-            color: #fff;
+            padding: 0.85rem;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: white;
             font-size: 1rem;
-            box-sizing: border-box;
+            transition: border-color 0.2s;
         }
-        button {
-            width: 100%;
-            padding: 15px;
-            margin-top: 20px;
+
+        input:focus { border-color: var(--accent); outline: none; }
+
+        .api-panel {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1.5rem;
             border-radius: 8px;
+            margin-top: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .btn-start {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            color: white;
             border: none;
-            background: var(--green);
-            color: #fff;
-            font-weight: 700;
+            border-radius: 6px;
+            font-weight: 600;
             font-size: 1rem;
             cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
+            margin-top: 1.5rem;
+            transition: transform 0.1s, opacity 0.2s;
         }
-        button:hover { background: #27ae60; transform: translateY(-2px); }
-        .footer-note { margin-top: 20px; font-size: 0.75rem; color: #4b5563; }
+
+        .btn-start:active { transform: scale(0.98); }
+        .btn-start:hover { opacity: 0.9; }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-top: 1.5rem;
+        }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <h2>⚽ COACH TONI 2.0</h2>
-        <p>Willkommen zurück, Coach. Bitte identifizieren Sie sich für den Zugriff auf das Taktikboard.</p>
-        
-        <div class="input-group">
-            <label for="trainer-name">Name des Trainers</label>
-            <input id="trainer-name" type="text" placeholder="z.B. Coach Björn" required />
-        </div>
+<div class="login-card">
+    <div class="header">
+        <h1>TONI <span>2.0</span></h1>
+        <p>Global Elite Taktik-Management</p>
+    </div>
 
-        <div class="input-group">
-            <label for="password">System-Passwort</label>
-            <input id="password" type="password" placeholder="Passwort eingeben" />
-        </div>
+    <div class="form-group">
+        <label for="trainerName">Trainer Name</label>
+        <input type="text" id="trainerName" placeholder="z.B. Coach Björn">
+    </div>
 
-        <div class="input-group">
-            <label for="user-key">Ihr persönlicher Groq API-Key</label>
-            <input id="user-key" type="password" placeholder="gsk_..." />
-        </div>
+    <div class="form-group">
+        <label for="teamPassword">Team-Passwort</label>
+        <input type="password" id="teamPassword" placeholder="••••••••">
+    </div>
 
-        <button onclick="performLogin()">SYSTEM STARTEN</button>
-        
-        <div class="footer-note">
-            Toni 2.0 – Hochpräzise KI-Taktikanalyse & Trainingssteuerung
+    <div class="api-panel">
+        <label for="activeModel">Primäres KI-Gehirn</label>
+        <select id="activeModel">
+            <option value="gemini">Gemini 1.5 Flash (Kostenlos)</option>
+            <option value="groq">Groq / Llama 3 (High-Speed)</option>
+            <option value="openai">OpenAI GPT-4o (Elite)</option>
+        </select>
+
+        <div style="margin-top: 1rem;">
+            <label>API Key hinterlegen</label>
+            <input type="password" id="currentApiKey" placeholder="Key für ausgewähltes Modell eingeben...">
         </div>
     </div>
 
-    <script>
-        function performLogin() {
-            const name = document.getElementById('trainer-name').value.trim();
-            const pw = document.getElementById('password').value;
-            const key = document.getElementById('user-key').value.trim();
+    <button class="btn-start" onclick="initSystem()">System starten</button>
 
-            if (!name || !key) {
-                alert("Bitte geben Sie Ihren Namen und den API-Key ein.");
-                return;
-            }
+    <div class="footer-note">
+        Architektur & Management: <strong>Björn</strong> | Co-Trainer: Toni
+    </div>
+</div>
 
-            // Validierung gegen dein festes Passwort
-            if (pw === 'Trainer2026') {
-                // Speicherung in localStorage für Persistenz in der Aktentasche
-                localStorage.setItem('toni_trainer_name', name);
-                localStorage.setItem('toni_api_key', key);
-                
-                // Weiterleitung zur Haupt-App
-                window.location.href = 'app.html';
-            } else {
-                alert("Zutritt verweigert. Passwort inkorrekt.");
-            }
+<script>
+    // Initialisierung & Speicherung
+    window.onload = () => {
+        document.getElementById('trainerName').value = localStorage.getItem('toni_trainer_name') || '';
+        document.getElementById('activeModel').value = localStorage.getItem('toni_active_model') || 'gemini';
+        loadKey();
+    };
+
+    document.getElementById('activeModel').onchange = loadKey;
+
+    function loadKey() {
+        const model = document.getElementById('activeModel').value;
+        const key = localStorage.getItem('toni_key_' + model) || '';
+        document.getElementById('currentApiKey').value = key;
+    }
+
+    function initSystem() {
+        const name = document.getElementById('trainerName').value;
+        const pass = document.getElementById('teamPassword').value;
+        const model = document.getElementById('activeModel').value;
+        const key = document.getElementById('currentApiKey').value;
+
+        if (!name || !pass || !key) {
+            alert("Manager, wir brauchen Namen, Passwort und API-Key für den Start!");
+            return;
         }
 
-        // Check ob bereits eingeloggt
-        window.onload = function() {
-            if (localStorage.getItem('toni_api_key') && localStorage.getItem('toni_trainer_name')) {
-                // Optional: Automatische Weiterleitung falls gewünscht
-                // window.location.href = 'app.html';
-            }
-        };
-    </script>
+        // Lokale Speicherung (BYOK Prinzip)
+        localStorage.setItem('toni_trainer_name', name);
+        localStorage.setItem('toni_team_pw', pass);
+        localStorage.setItem('toni_active_model', model);
+        localStorage.setItem('toni_key_' + model, key);
+
+        // Weiterleitung zum Board
+        window.location.href = 'app.html';
+    }
+</script>
+
 </body>
 </html>
