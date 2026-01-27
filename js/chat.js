@@ -1,65 +1,61 @@
-/**
- * Toni 2.0 - Taktische Intelligenz & Board-Anbindung
+/** * Toni 2.0 - Taktische Intelligenz & Board-Anbindung
+ * Fachmann-Modus: Brasilianischer Style & Proaktive Analyse
  */
-
 window.handleToniAction = async function() {
     const inputField = document.getElementById('user-msg');
-    const message = inputField.value.trim();
-    if (!message) return;
+    const msg = inputField.value.trim();
+    if (!msg) return;
 
-    appendChatMessage("Björn", message);
+    appendChatMessage("Björn", msg); //
     inputField.value = "";
+    const lowMsg = msg.toLowerCase();
 
-    // 1. Lokale Vorab-Prüfung (Decision Tree)
-    const lowMsg = message.toLowerCase();
-    
+    // 1. Identitäts-Check & Altersklassen-Abfrage
     if (lowMsg.includes("hallo") || lowMsg.includes("start")) {
-        const reply = "Hallo Björn! Bevor wir loslegen: Für welche Altersklasse steht heute die Analyse an? (Senioren, U19, Funino?) Sobald ich das weiß, baue ich das passende Spielfeld auf.";
-        appendChatMessage("Toni", reply);
-        speakText(reply);
+        const r = "Hallo Björn! Um das System scharf zu schalten: Welche Altersklasse trainieren wir heute? Senioren, U19 oder Funino? Ich brauche das, um das richtige Spielfeld zu generieren.";
+        processToniOutput(r);
         return;
     }
 
-    // 2. Taktische Automatik: Senioren erkannt?
+    // 2. Automatisches Spielfeld-Setup (Senioren = Großfeld)
     if (lowMsg.includes("senioren") || lowMsg.includes("herren")) {
-        if (typeof window.setPitch === "function") window.setPitch('grossfeld');
-        const reply = "Senioren – alles klar, Björn. Das Großfeld ist aufgebaut. Soll ich die Grundformation 4-3-3 oder 4-4-2 setzen?";
-        appendChatMessage("Toni", reply);
-        speakText(reply);
+        if (typeof window.setPitch === "function") window.setPitch('grossfeld'); //
+        const r = "Senioren erkannt. Großfeld ist aufgebaut, Björn. Brasilianischer Ginga-Style ist geladen. Sollen wir mit der 4-3-3 Grundordnung starten?";
+        processToniOutput(r);
         return;
     }
 
-    // 3. Wenn keine Automatik greift: Echte KI-Anfrage (Groq)
-    // Hier fügen wir deinen API-Key ein, um Toni echtes Wissen zu geben
-    const response = await askToniAI(message);
-    appendChatMessage("Toni", response);
-    speakText(response);
+    // 3. Experten-KI (Groq/Llama-Schnittstelle)
+    const aiResponse = await askToniAI(msg); 
+    processToniOutput(aiResponse);
 };
 
-// Hilfsfunktion für das Chat-Design
+function processToniOutput(text) {
+    appendChatMessage("Toni", text); //
+    speakText(text); //
+}
+
 function appendChatMessage(sender, text) {
     const history = document.getElementById('chat-history');
-    const msgDiv = document.createElement('div');
-    msgDiv.style.margin = "10px 0";
-    msgDiv.style.padding = "12px";
-    msgDiv.style.borderRadius = "10px";
-    
-    if (sender === "Björn") {
-        msgDiv.style.background = "rgba(46, 204, 113, 0.15)";
-        msgDiv.style.borderLeft = "4px solid #2ecc71";
-    } else {
-        msgDiv.style.background = "rgba(255, 255, 255, 0.05)";
-        msgDiv.style.borderLeft = "4px solid #f1c40f";
-    }
-    msgDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
-    history.appendChild(msgDiv);
+    const div = document.createElement('div');
+    div.className = "chat-msg " + (sender === "Björn" ? "bjorn-msg" : "toni-msg");
+    div.style = `margin: 10px 0; padding: 12px; border-radius: 10px; border-left: 4px solid ${sender === "Björn" ? "#2ecc71" : "#f1c40f"}; background: rgba(255,255,255,0.05);`;
+    div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+    history.appendChild(div);
     history.scrollTop = history.scrollHeight;
 }
 
 function speakText(text) {
     window.speechSynthesis.cancel();
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = 'de-DE';
-    msg.pitch = 0.85; // Männlicher, tiefer Ton
-    window.speechSynthesis.speak(msg);
+    const m = new SpeechSynthesisUtterance(text);
+    m.lang = 'de-DE';
+    m.pitch = 0.85; // Männliche Stimme
+    const voices = window.speechSynthesis.getVoices();
+    m.voice = voices.find(v => v.name.includes('Stefan') || v.name.includes('Deutsch')) || voices[0];
+    window.speechSynthesis.speak(m);
+}
+
+async function askToniAI(prompt) {
+    // Hier wird deine Groq-API-Anbindung sitzen
+    return "Ich analysiere die Spielsituation für dich, Björn. Wie sollen die roten Spieler sich taktisch verhalten?";
 }
