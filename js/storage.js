@@ -1,94 +1,100 @@
-/**
- * Toni 2.0 - Storage & Aktentasche
- * Verantwortlich für das Speichern und das Dashboard-Klemmbrett
- */
+/* js/storage.js 
+   Zuständig für: Kaderverwaltung, Ampelsystem, Aktentaschen-Archiv, 
+   Punktesystem (Kondition, Übersicht, Technik, Taktik) und Persistenz 
+*/
 
-// Speichert den aktuellen Kader und die Punkte im LocalStorage
-function saveSquadData() {
-    localStorage.setItem('toni_ginga_squad', JSON.stringify(squad));
-}
+const ToniStorage = {
+    
+    // 1. AUTHENTIFIZIERUNG & TRAINER-IDENTITÄT
+    saveAuthConfig(name, apiKey) {
+        localStorage.setItem('toni_trainer_name', name);
+        localStorage.setItem('toni_api_key', apiKey);
+    },
 
-// Lädt die Daten beim Starten der Seite
-function loadSquadData() {
-    const savedData = localStorage.getItem('toni_ginga_squad');
-    if (savedData) {
-        squad = JSON.parse(savedData);
-        if (typeof renderSquad === 'function') renderSquad();
-        if (typeof drawBoard === 'function') drawBoard();
+    getAuthConfig() {
+        return {
+            name: localStorage.getItem('toni_trainer_name') || 'Trainer',
+            apiKey: localStorage.getItem('toni_api_key') || ''
+        };
+    },
+
+    // 2. KADER-MANAGEMENT & AMPELSYSTEM
+    // Speichert den kompletten Kader inklusive aller Leistungsdaten
+    saveKader(kaderData) {
+        localStorage.setItem('toni_kader', JSON.stringify(kaderData));
+    },
+
+    getKader() {
+        const savedKader = localStorage.getItem('toni_kader');
+        if (savedKader) {
+            return JSON.parse(savedKader);
+        } else {
+            // Initialer Standard-Kader (Beispiel: David Luiz)
+            return [
+                { 
+                    id: 'home_dl4', 
+                    name: 'David Luiz', 
+                    nummer: 4, 
+                    status: 'green', // Ampel: green=Teilnahme, yellow=Nur Training, red=Abwesend
+                    onPitch: true,   // Ob der Spieler in der Startelf/auf dem Feld ist
+                    stats: { 
+                        kondition: 85, 
+                        uebersicht: 90, 
+                        technik: 95, 
+                        taktik: 88, 
+                        sonderpunkte: 5 
+                    },
+                    history: [] // Für spätere Leistungsentwicklung
+                }
+            ];
+        }
+    },
+
+    // 3. AKTENTASCHE: ARCHIV FÜR TRAININGSDOKUMENTE
+    // Speichert eine abgeschlossene Einheit mit Trainername und Zeitstempel
+    saveTrainingSession(sessionText) {
+        const config = this.getAuthConfig();
+        const archiv = this.getArchiv();
+        
+        const newEntry = {
+            id: 'session_' + Date.now(),
+            trainer: config.name,
+            datum: new Date().toLocaleDateString('de-DE'),
+            uhrzeit: new Date().toLocaleTimeString('de-DE'),
+            titel: "Trainingseinheit " + new Date().toLocaleDateString(),
+            inhalt: sessionText,
+            timestamp: Date.now()
+        };
+
+        archiv.push(newEntry);
+        localStorage.setItem('toni_archiv', JSON.stringify(archiv));
+        return newEntry;
+    },
+
+    getArchiv() {
+        const archiv = localStorage.getItem('toni_archiv');
+        return archiv ? JSON.parse(archiv) : [];
+    },
+
+    deleteFromArchiv(id) {
+        let archiv = this.getArchiv();
+        archiv = archiv.filter(entry => entry.id !== id);
+        localStorage.setItem('toni_archiv', JSON.stringify(archiv));
+    },
+
+    // 4. SPEZIAL: ERNÄHRUNGSVORSCHLÄGE (CACHE)
+    // Damit Toni sich merkt, was er zuletzt für welche Altersgruppe empfohlen hat
+    saveNutritionAdvice(ageGroup, advice) {
+        const nutritionData = JSON.parse(localStorage.getItem('toni_nutrition')) || {};
+        nutritionData[ageGroup] = {
+            text: advice,
+            date: new Date().toISOString()
+        };
+        localStorage.setItem('toni_nutrition', JSON.stringify(nutritionData));
     }
+};
+
+// Initialisierung der Datenstrukturen, falls sie leer sind
+if (!localStorage.getItem('toni_kader')) {
+    ToniStorage.saveKader(ToniStorage.getKader());
 }
-
-/**
- * Öffnet das Klemmbrett (Dashboard) für den Trainer
- */
-function exportToKlemmbrett() {
-    const oldOverlay = document.getElementById('dashboard-overlay');
-    if (oldOverlay) oldOverlay.remove();
-
-    // Berechnung der Team-Stats
-    const totalPoints = squad.reduce((sum, p) => sum + (p.points.tech + p.points.scan + p.points.fit + p.points.star), 0);
-
-    const dashboardHtml = `
-        <div id="dashboard-overlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:3000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
-            <div style="background:#0f1720; width:90%; max-width:800px; padding:30px; border-radius:20px; border:1px solid #2ecc71; color:white; font-family:'Inter', sans-serif;">
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-                    <h2 style="margin:0; color:#2ecc71;">💼 TRAININGSDATEN: ${sessionStorage.getItem('toni_name') || 'Trainer'}</h2>
-                    <button onclick="document.getElementById('dashboard-overlay').remove()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">✕</button>
-                </div>
-
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:25px;">
-                    <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px;">
-                        <span style="font-size:12px; color:#9aa3ad;">GESAMT-GINGA-FAKTOR</span>
-                        <div style="font-size:24px; font-weight:bold; color:#f1c40f;">${totalPoints} Punkte</div>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px;">
-                        <span style="font-size:12px; color:#9aa3ad;">AKTIVE SPIELER</span>
-                        <div style="font-size:24px; font-weight:bold; color:#2ecc71;">${squad.filter(p => p.status === 'present').length} / ${squad.length}</div>
-                    </div>
-                </div>
-
-                <div style="max-height:300px; overflow-y:auto; margin-bottom:20px; background:rgba(0,0,0,0.2); border-radius:10px;">
-                    <table style="width:100%; border-collapse:collapse; text-align:left;">
-                        <thead>
-                            <tr style="border-bottom:1px solid #333; color:#9aa3ad; font-size:12px;">
-                                <th style="padding:10px;">SPIELER</th>
-                                <th style="padding:10px;">⚽</th>
-                                <th style="padding:10px;">👁️</th>
-                                <th style="padding:10px;">🏃</th>
-                                <th style="padding:10px;">⭐</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${squad.map(p => `
-                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                                    <td style="padding:10px;">#${p.nr} ${p.name}</td>
-                                    <td style="padding:10px;">${p.points.tech}</td>
-                                    <td style="padding:10px;">${p.points.scan}</td>
-                                    <td style="padding:10px;">${p.points.fit}</td>
-                                    <td style="padding:10px; color:#f1c40f;">${p.points.star}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div style="display:flex; gap:15px;">
-                    <button onclick="window.print()" style="flex-grow:1; padding:15px; background:#2ecc71; border:none; border-radius:10px; color:white; font-weight:bold; cursor:pointer;">ALS PDF SPEICHERN / DRUCKEN</button>
-                    <button onclick="resetAllData()" style="padding:15px; background:#e74c3c; border:none; border-radius:10px; color:white; font-weight:bold; cursor:pointer;">DATEN RESET</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', dashboardHtml);
-}
-
-function resetAllData() {
-    if (confirm("Möchtest du wirklich alle Kaderdaten und Punkte löschen?")) {
-        localStorage.removeItem('toni_ginga_squad');
-        location.reload();
-    }
-}
-
-// Beim Laden der App die Daten herbeiholen
-document.addEventListener('DOMContentLoaded', loadSquadData);
