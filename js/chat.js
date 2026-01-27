@@ -1,47 +1,80 @@
 /**
- * Toni 2.0 - Stabiler Chat-Kern
+ * Toni 2.0 - Stabiler Chat-Kern (Fix für ReferenceError)
  */
 
-// 1. Hauptfunktion für den Button
-window.handleToniAction = function() {
-    console.log("Toni: Button gedrückt");
-    const input = document.getElementById('user-msg');
-    if (!input) return;
+// 1. Die Hauptfunktion, die dein Button in der app.html aufruft
+window.handleToniAction = async function() {
+    console.log("Toni: Aktion ausgelöst");
+    const inputField = document.getElementById('user-msg');
+    if (!inputField) return;
 
-    const message = input.value.trim();
+    const message = inputField.value.trim();
     
     if (message === "") {
-        const hello = "Ich bin bereit, Björn. Was steht auf dem Trainingsplan?";
-        addChatMessage("Toni", hello);
-        speakText(hello);
+        const greeting = "Ich bin bereit, Björn. Was steht heute auf dem Plan?";
+        appendChatMessage("Toni", greeting);
+        speakText(greeting);
         return;
     }
 
-    addChatMessage("Björn", message);
-    input.value = "";
+    // Zeige deine Nachricht an
+    appendChatMessage("Björn", message);
+    inputField.value = "";
 
-    // Einfache Logik-Weiche
-    const reply = getToniReply(message.toLowerCase());
-    addChatMessage("Toni", reply);
+    // Hole Antwort von Toni
+    const reply = getToniDecision(message.toLowerCase());
+    appendChatMessage("Toni", reply);
     speakText(reply);
 };
 
-// 2. Antwort-Logik
-function getToniReply(msg) {
+// 2. Die Funktion, die laut Konsole gefehlt hat
+function appendChatMessage(sender, text) {
+    const history = document.getElementById('chat-history');
+    if (!history) {
+        console.error("Fehler: chat-history Element nicht gefunden!");
+        return;
+    }
+
+    const msgDiv = document.createElement('div');
+    msgDiv.style.margin = "10px 0";
+    msgDiv.style.padding = "10px";
+    msgDiv.style.borderRadius = "10px";
+    msgDiv.style.fontSize = "14px";
+    msgDiv.style.lineHeight = "1.4";
+    
+    if (sender === "Björn") {
+        msgDiv.style.background = "rgba(46, 204, 113, 0.15)";
+        msgDiv.style.borderLeft = "4px solid #2ecc71";
+        msgDiv.style.marginLeft = "30px";
+    } else {
+        msgDiv.style.background = "rgba(255, 255, 255, 0.05)";
+        msgDiv.style.borderLeft = "4px solid #f1c40f";
+        msgDiv.style.marginRight = "30px";
+    }
+
+    msgDiv.innerHTML = `<strong style="color:var(--accent);">${sender}:</strong> ${text}`;
+    history.appendChild(msgDiv);
+    
+    // Automatisch nach unten scrollen
+    history.scrollTop = history.scrollHeight;
+}
+
+// 3. Logik-Zentrale
+function getToniDecision(msg) {
     if (msg.includes("hallo") || msg.includes("hi")) {
-        return "Hallo Coach Björn! Alle Systeme sind scharf geschaltet. Bereit für die Analyse?";
+        return "Servus Björn! Das System läuft auf Hochtouren. Sollen wir das Training starten?";
     }
     if (msg.includes("kader") || msg.includes("briefcase")) {
         if (typeof toggleBriefcase === "function") toggleBriefcase();
-        return "Ich öffne die Aktentasche für dich.";
+        return "Ich öffne die Aktentasche. Werfen wir einen Blick auf die Jungs.";
     }
-    return "Verstanden, Björn. Ich habe das im Blick und bereite alles vor.";
+    return "Alles klar, Coach. Ich habe das notiert und bereite die Analyse vor.";
 }
 
-// 3. Sprachausgabe (Männlich & Souverän)
+// 4. Sprachausgabe
 function speakText(text) {
     if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel(); // Vorherige Sprache stoppen
+    window.speechSynthesis.cancel();
     
     const msg = new SpeechSynthesisUtterance(text);
     msg.lang = 'de-DE';
@@ -55,33 +88,7 @@ function speakText(text) {
     window.speechSynthesis.speak(msg);
 }
 
-// 4. Chat-UI Update
-function addChatMessage(sender, text) {
-    const history = document.getElementById('chat-history');
-    if (!history) return;
-
-    const div = document.createElement('div');
-    div.style.margin = "8px 0";
-    div.style.padding = "10px";
-    div.style.borderRadius = "8px";
-    div.style.fontSize = "13px";
-    
-    if (sender === "Björn") {
-        div.style.background = "rgba(46, 204, 113, 0.1)";
-        div.style.borderLeft = "3px solid #2ecc71";
-        div.style.marginLeft = "20px";
-    } else {
-        div.style.background = "rgba(255, 255, 255, 0.05)";
-        div.style.borderLeft = "3px solid #f1c40f";
-        div.style.marginRight = "20px";
-    }
-
-    div.innerHTML = `<strong>${sender}:</strong> ${text}`;
-    history.appendChild(div);
-    history.scrollTop = history.scrollHeight;
-}
-
-// Enter-Taste Support
+// Enter-Taste aktivieren
 document.getElementById('user-msg')?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -89,4 +96,4 @@ document.getElementById('user-msg')?.addEventListener('keypress', (e) => {
     }
 });
 
-console.log("Toni: Chat-Modul geladen.");
+console.log("Toni: Chat-Modul erfolgreich initialisiert.");
