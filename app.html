@@ -34,37 +34,32 @@
                     <i class="fas fa-clipboard-list"></i>
                     <span>Plan</span>
                 </button>
-                <button onclick="switchTab('video')" id="tab-video" class="tab-link">
-                    <i class="fas fa-video"></i>
-                    <span>Video</span>
-                </button>
             </nav>
 
             <div id="tab-content" class="sidebar-content">
-                <div class="placeholder-text" style="padding: 20px; color: #666;">Warte auf System-Start...</div>
+                <div id="initial-loader" style="padding: 20px; color: #555; text-align: center;">
+                    <i class="fas fa-circle-notch fa-spin"></i><br><br>
+                    Warte auf System-Start...
+                </div>
             </div>
         </aside>
 
         <main class="pitch-area">
             
             <header class="top-bar">
-                <button class="menu-btn" onclick="toggleSidebar()">
+                <button class="menu-btn" onclick="toggleSidebar(true)">
                     <i class="fas fa-briefcase"></i>
                 </button>
-                <div id="status-display">Ginga-System bereit...</div>
-                <div class="top-actions">
-                    <span id="user-name-display">Trainer</span>
-                </div>
+                <div id="status-display" style="font-size: 0.8rem; color: #666;">Bereit für Ginga...</div>
+                <div style="font-size: 0.8rem; font-weight: bold; color: var(--gold);" id="user-name-display">Trainer</div>
             </header>
 
             <div id="canvas-wrapper" class="canvas-wrapper">
                 
-                <div id="start-overlay" onclick="window.ToniEvents.emit('SYSTEM:START')" style="position: absolute; inset: 0; z-index: 9999; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
-                    <div style="width: 80px; height: 80px; border-radius: 50%; background: #ffd700; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(255,215,0,0.4); margin-bottom: 20px;">
-                        <i class="fas fa-play" style="font-size: 2rem; color: black; margin-left: 5px;"></i>
-                    </div>
-                    <p style="color: white; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Tippe zum Starten</p>
-                    <small style="color: #666; margin-top: 10px;">Toni 2.0 Kalibrierung</small>
+                <div id="start-overlay" onclick="window.ToniEvents.emit('SYSTEM:START')" style="position: absolute; inset: 0; z-index: 9999; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
+                    <div style="width: 90px; height: 90px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(255,215,0,0.3); margin-bottom: 25px;">
+                        <div class="play-icon"></div> </div>
+                    <p style="color: white; font-weight: bold; letter-spacing: 2px;">STARTEN</p>
                 </div>
 
                 <div id="pitch-surface" class="pitch-surface">
