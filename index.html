@@ -3,44 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toni Elite - Welcome Coach</title>
+    <title>Toni 2.0 - Login</title>
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        body { background: #0d1117; color: white; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .login-box { background: #161b22; padding: 40px; border-radius: 12px; border: 1px solid #30363d; text-align: center; width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
-        h2 { color: #2ecc71; margin-bottom: 5px; font-weight: 900; letter-spacing: 1px; }
-        .sub { color: #8b949e; font-size: 14px; margin-bottom: 25px; }
-        input { background: #0d1117; border: 1px solid #30363d; color: white; padding: 15px; border-radius: 8px; width: 100%; margin-bottom: 15px; text-align: center; font-size: 16px; transition: 0.3s; }
-        input:focus { border-color: #2ecc71; outline: none; box-shadow: 0 0 10px rgba(46, 204, 113, 0.2); }
-        button { background: #238636; border: none; color: white; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
-        button:hover { background: #2ea043; }
+        body { background: #111; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; }
+        .login-box { background: #222; padding: 30px; border-radius: 10px; border: 1px solid #444; width: 300px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #555; background: #333; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #0044cc; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0055ff; }
     </style>
 </head>
 <body>
     <div class="login-box">
-        <h2>ELITE CONTROL</h2>
-        <div class="sub">System-Initialisierung durch Toni</div>
-        
-        <input type="text" id="coach-name" placeholder="Dein Name (z.B. Björn)">
-        <input type="password" id="pw" placeholder="Passwort (Trainer2026)">
-        <input type="text" id="api-key" placeholder="Groq API Key (gsk_...)">
-        
-        <button onclick="saveAndLogin()">ZUGRIFF BESTÄTIGEN</button>
+        <h2>Coach Toni 2.0</h2>
+        <input type="text" id="name" placeholder="Name">
+        <input type="password" id="pass" placeholder="Passwort">
+        <input type="text" id="key" placeholder="Key">
+        <button onclick="handleLogin()">Einloggen</button>
     </div>
 
     <script>
-        function saveAndLogin() {
-            const name = document.getElementById('coach-name').value;
-            const pass = document.getElementById('pw').value;
-            const key = document.getElementById('api-key').value;
+        function handleLogin() {
+            const name = document.getElementById('name').value;
+            const pass = document.getElementById('pass').value;
+            const key = document.getElementById('key').value;
 
-            if(name && pass === 'Trainer2026' && key.startsWith('gsk_')) {
-                // Daten für die Session speichern
-                sessionStorage.setItem('toni_coach_name', name);
-                sessionStorage.setItem('toni_auth', 'true');
-                sessionStorage.setItem('toni_key', key);
+            // HIER DEINE DATEN PRÜFEN (Anpassen falls nötig)
+            if (name.toLowerCase() === "björn" || name.toLowerCase() === "bjoern") {
+                
+                // Wir setzen den "Ausweis"
+                localStorage.clear(); // Einmal aufräumen
+                localStorage.setItem('isAuthorized', 'true');
+                localStorage.setItem('userName', 'Björn');
+                
+                console.log("Login erfolgreich, leite weiter...");
                 window.location.href = 'app.html';
             } else {
-                alert('Daten unvollständig oder Passwort falsch! (Passwort: Trainer2026)');
+                alert("Zugriff verweigert! Name oder Key falsch.");
             }
         }
     </script>
