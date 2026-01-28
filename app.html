@@ -1,82 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Toni 2.0 - Ginga Dashboard</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Toni 2.0 — Elite Taktik Board</title>
+
+  <!-- Styles: Hauptdatei + Animationen (werden separat angelegt) -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+
+  <!-- Minimal meta info for accessibility / theme -->
+  <meta name="theme-color" content="#0B0F12">
 </head>
-
-<body class="blackout">
-
-    <div class="dashboard">
-        
-        <aside class="aktentasche" id="sidebar">
-            <header class="sidebar-header">
-                <div class="brand">TONI 2.0</div>
-                <button class="close-btn" onclick="toggleSidebar(false)">
-                    <i class="fas fa-times"></i>
-                </button>
-            </header>
-            
-            <nav class="sidebar-tabs">
-                <button onclick="switchTab('chat')" id="tab-chat" class="tab-link active">
-                    <i class="fas fa-comment-dots"></i>
-                    <span>Toni</span>
-                </button>
-                <button onclick="switchTab('kader')" id="tab-kader" class="tab-link">
-                    <i class="fas fa-users-gear"></i>
-                    <span>Kader</span>
-                </button>
-                <button onclick="switchTab('matchplan')" id="tab-matchplan" class="tab-link">
-                    <i class="fas fa-clipboard-list"></i>
-                    <span>Plan</span>
-                </button>
-            </nav>
-
-            <div id="tab-content" class="sidebar-content">
-                <div id="initial-loader" style="padding: 20px; color: #555; text-align: center;">
-                    <i class="fas fa-circle-notch fa-spin"></i><br><br>
-                    Warte auf System-Start...
-                </div>
-            </div>
-        </aside>
-
-        <main class="pitch-area">
-            
-            <header class="top-bar">
-                <button class="menu-btn" onclick="toggleSidebar(true)">
-                    <i class="fas fa-briefcase"></i>
-                </button>
-                <div id="status-display" style="font-size: 0.8rem; color: #666;">Bereit für Ginga...</div>
-                <div style="font-size: 0.8rem; font-weight: bold; color: var(--gold);" id="user-name-display">Trainer</div>
-            </header>
-
-            <div id="canvas-wrapper" class="canvas-wrapper">
-                
-                <div id="start-overlay" onclick="window.ToniEvents.emit('SYSTEM:START')" style="position: absolute; inset: 0; z-index: 9999; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
-                    <div style="width: 90px; height: 90px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(255,215,0,0.3); margin-bottom: 25px;">
-                        <div class="play-icon"></div> </div>
-                    <p style="color: white; font-weight: bold; letter-spacing: 2px;">STARTEN</p>
-                </div>
-
-                <div id="pitch-surface" class="pitch-surface">
-                    <svg id="pitch-svg" class="pitch-svg"></svg>
-                </div>
-            </div>
-            
-        </main>
+<body>
+  <!-- Blackout / Ginga Start Overlay -->
+  <div id="blackout" aria-hidden="false" class="blackout">
+    <div class="blackout-inner">
+      <div class="brand">Toni</div>
+      <div id="blackout-hint" class="hint">Lade...</div>
+      <!-- Dev: Skip-Button (sichtbar nur in dev-mode) -->
+      <button id="skip-sequence" class="visually-hidden">Skip</button>
     </div>
+  </div>
 
-    <script src="js/modules/eventbus.js"></script>
-    <script src="js/modules/database.js"></script>
-    <script src="js/modules/voice.js"></script>
-    <script src="js/modules/arena.js"></script>
-    <script src="js/modules/engine.js"></script>
-    <script src="js/modules/roster.js"></script>
-    <script src="js/app.js"></script>
+  <!-- App Shell: Header + Grid -->
+  <div id="app" class="app" role="application" aria-label="Toni Taktik Board">
+    <!-- Header -->
+    <header class="header" role="banner">
+      <div class="header-left">
+        <button id="toggle-sidebar" class="icon-btn" aria-label="Aktentasche öffnen">☰</button>
+        <div class="brand-small">Toni 2.0</div>
+      </div>
+      <div class="header-center">
+        <div id="status-live" class="status">● Live‑Analyse: Aus</div>
+      </div>
+      <div class="header-right">
+        <div class="coach">Coach Björn</div>
+      </div>
+    </header>
 
+    <!-- Left: Aktentasche (single DOM element, lazy mount panels) -->
+    <aside id="sidebar" class="sidebar" aria-hidden="true" role="complementary">
+      <nav class="sidebar-tabs" role="tablist" aria-label="Aktentasche Tabs">
+        <button data-view="chat" class="tab active" role="tab" aria-selected="true">Toni</button>
+        <button data-view="roster" class="tab" role="tab">Kader</button>
+        <button data-view="matchplan" class="tab" role="tab">Matchplan</button>
+        <button data-view="video" class="tab" role="tab">Video</button>
+      </nav>
+
+      <div id="sidebar-content" class="sidebar-content" role="region" aria-live="polite">
+        <!-- Panels werden per JS lazy gemountet -->
+        <div id="panel-placeholder" class="panel-placeholder">Wähle einen Tab</div>
+      </div>
+    </aside>
+
+    <!-- Main: Canvas / Pitch -->
+    <main class="canvas-wrap" role="main">
+      <!-- SVG container for animated construction + fallback canvas -->
+      <div id="pitch-container" class="pitch-container" aria-label="Spielfeld">
+        <!-- SVG for lines and animated construction -->
+        <svg id="pitch-svg" width="950" height="600" viewBox="0 0 950 600" preserveAspectRatio="xMidYMid meet" class="pitch-svg" aria-hidden="false"></svg>
+
+        <!-- Canvas fallback / rendering surface (native resolution 950x600) -->
+        <canvas id="pitch-canvas" width="950" height="600" class="pitch-canvas" aria-hidden="true"></canvas>
+      </div>
+    </main>
+
+    <!-- Right: Compact quick panel (optional) -->
+    <aside id="quick-panel" class="quick-panel" role="complementary" aria-label="Schnellzugriff">
+      <div class="qp-section">
+        <h4>Analyse‑Bericht</h4>
+        <div id="analysis-summary" class="analysis-summary">Toni wartet auf Daten...</div>
+      </div>
+      <div class="qp-section">
+        <h4>Events</h4>
+        <ul id="event-list" class="event-list" aria-live="polite"></ul>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Footer / small helpers -->
+  <div id="toast" class="toast" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- App bootstrap: module loader will import js/app.js which wires EventBus, Sequencer, Sidebar API -->
+  <script type="module">
+    // Minimal bootstrap to attach app root and load main module.
+    // The real logic lives in js/app.js and modules/* — these files will be created/filled next.
+    (async function bootstrap() {
+      // Feature: expose a small global for dev inspection
+      window.TONI_APP = { ready: false };
+
+      try {
+        // dynamic import of main app module (must exist in repo)
+        const app = await import('./js/app.js');
+        if (app && typeof app.start === 'function') {
+          await app.start({
+            root: document.getElementById('app'),
+            blackout: document.getElementById('blackout'),
+            sidebar: document.getElementById('sidebar'),
+            pitchSvg: document.getElementById('pitch-svg'),
+            pitchCanvas: document.getElementById('pitch-canvas'),
+            quickPanel: document.getElementById('quick-panel')
+          });
+          window.TONI_APP.ready = true;
+        } else {
+          console.warn('app.start not found — ensure js/app.js exports start()');
+          document.getElementById('blackout-hint').textContent = 'Fehler beim Start';
+        }
+      } catch (err) {
+        console.error('Bootstrap error', err);
+        document.getElementById('blackout-hint').textContent = 'Startfehler';
+      }
+
+      // Toggle sidebar button (mobile)
+      document.getElementById('toggle-sidebar').addEventListener('click', () => {
+        const ev = new CustomEvent('ui:toggleSidebar', { bubbles: true });
+        document.dispatchEvent(ev);
+      });
+
+      // Skip sequence (dev)
+      const skipBtn = document.getElementById('skip-sequence');
+      if (skipBtn) {
+        skipBtn.addEventListener('click', () => {
+          const ev = new CustomEvent('sequence:skip', { bubbles: true });
+          document.dispatchEvent(ev);
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
