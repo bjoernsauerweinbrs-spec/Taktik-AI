@@ -1,36 +1,31 @@
 /**
  * Toni 2.0 - Voice Engine
- * Männliche Identität mit präziser Autorität (Pitch 0.75-0.9).
+ * Männliche Identität mit präziser Autorität.
  */
 
 window.toniVoice = {
     speak: (text) => {
-        // Falls der Browser gerade schon spricht, brich es ab (für flüssige Übergänge)
+        // Falls Toni noch spricht, bricht er kurz ab für den neuen Satz
         speechSynthesis.cancel();
 
         const utter = new SpeechSynthesisUtterance(text);
         const voices = speechSynthesis.getVoices();
         
-        // Suche nach einer männlichen deutschen Stimme (Stefan, Markus, Microsoft, etc.)
+        // Suche nach einer männlichen deutschen Stimme
         const maleVoice = voices.find(v => 
             v.lang.startsWith('de') && 
-            (v.name.includes('Stefan') || v.name.includes('Markus') || v.name.includes('Microsoft') || v.name.includes('Male'))
+            (v.name.includes('Stefan') || v.name.includes('Markus') || v.name.includes('Microsoft'))
         );
 
-        if (maleVoice) {
-            utter.voice = maleVoice;
-        }
+        if (maleVoice) utter.voice = maleVoice;
         
         utter.lang = 'de-DE';
-        utter.pitch = 0.85; // Copilot-Vorgabe für tiefere, autoritäre Stimme
-        utter.rate = 1.0;   // Natürliches Sprechtempo
-        utter.volume = 1.0; // Volle Lautstärke
+        utter.pitch = 0.85; // Tieferer Pitch für Trainer-Autorität
+        utter.rate = 1.0;
         
         speechSynthesis.speak(utter);
     }
 };
 
-// Wichtig für Chrome/Mac: Stimmen müssen initial geladen werden
-speechSynthesis.onvoiceschanged = () => {
-    speechSynthesis.getVoices();
-};
+// Vorladen der Stimmen
+speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
