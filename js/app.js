@@ -1,114 +1,82 @@
 /**
- * Toni 2.0 - Hauptsteuerung (The Orchestrator)
- * Diese Datei ist das Gehirn, das alle Module (Voice, Calc, Database) verbindet.
+ * TONI 2.0 - Haupt-Controller (Der Dirigent)
  */
 
-const state = {
-    isAuthorized: localStorage.getItem('isAuthorized') === 'true',
-    currentPitch: '',
-    isLocked: false,
-    squad: []
-};
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Sicherheits-Check (Login-Status)
+    const isAuthorized = localStorage.getItem('isAuthorized');
+    const userName = localStorage.getItem('userName') || 'Trainer';
 
-// 1. Initialisierung beim Laden der Seite
-document.addEventListener('DOMContentLoaded', async () => {
-    if (!state.isAuthorized) return;
-
-    try {
-        // Datenbank starten
-        await window.initToniDB();
-        console.log("✅ Toni-Datenbank bereit.");
-
-        // Knöpfe und Eingabefelder aktivieren
-        initEventListeners();
-        
-    } catch (err) {
-        console.error("❌ Fehler beim Systemstart:", err);
+    if (!isAuthorized) {
+        window.location.href = 'index.html'; // Zurück zum Login, falls nicht angemeldet
+        return;
     }
+
+    // 2. Initialisierung der UI
+    document.getElementById('user-name-display').textContent = userName;
+    console.log(`[Toni 2.0] Willkommen zurück, ${userName}. Ginga-System wird geladen...`);
+
+    // 3. Start der Ginga-Sequenz (Ablaufsteuerung)
+    startGingaSequence(userName);
 });
 
 /**
- * 2. Die Antwort-Logik (Altersklassen-Weiche)
- * Verarbeitet: "Senioren", "Jugend", "Funino"
+ * Die dramaturgische Start-Sequenz
+ * Blackout -> Stimme -> Arena Build
  */
-window.processAgeGroupAnswer = function(answer) {
-    const lowerAnswer = answer.toLowerCase();
-    let selectedType = "";
-
-    if (lowerAnswer.includes("senior")) {
-        selectedType = "Senioren-Großfeld";
-    } else if (lowerAnswer.includes("jugend") || lowerAnswer.includes("u17") || lowerAnswer.includes("kleinfeld")) {
-        selectedType = "Jugend-Kleinfeld";
-    } else if (lowerAnswer.includes("funino")) {
-        selectedType = "Funino";
-    }
-
-    if (selectedType) {
-        state.currentPitch = selectedType;
-        
-        // Toni bestätigt männlich und autoritär
-        const response = `Verstanden, ${selectedType} ist aktiv. Ginga-Style geladen. Ich habe die Grundordnung auf 4-3-3 gesetzt. Das Board gehört dir.`;
-        window.toniVoice.speak(response);
-
-        // UI aktualisieren
-        const label = document.getElementById('pitch-label');
-        if (label) label.innerText = `Aktiv: ${selectedType}`;
-
-        // Hier triggern wir später das Einfliegen der Spieler
-        console.log(`Konfiguration für ${selectedType} abgeschlossen.`);
-    } 
-    else {
-        // Fachmännische Rückführung bei unklarer Antwort
-        const retryMsg = "Das klingt gut, Björn, aber ich brauche die Altersklasse für die Feldkonfiguration. Bitte wähle Senioren-Großfeld, Jugend-Kleinfeld oder Funino.";
-        window.toniVoice.speak(retryMsg);
-    }
-};
-
-/**
- * 3. Chat-Interaktion (Anfragen an Toni)
- */
-function askToni() {
-    const input = document.getElementById('user-input');
-    const text = input.value.trim();
+async function startGingaSequence(userName) {
+    const status = document.getElementById('status-display');
     
-    if (text) {
-        addMessage('user', text);
-        input.value = '';
-        
-        // Simulierter Denkprozess (später echte KI-Anbindung)
-        setTimeout(() => {
-            const response = "Analysiere die Taktik im Ginga-Style...";
-            addMessage('toni', response);
-            window.toniVoice.speak(response);
-        }, 1000);
-    }
-}
+    // Phase 1: Begrüßung (Voice)
+    status.textContent = "Toni bereitet sich vor...";
+    
+    // Wir senden ein Event an das Voice-Modul
+    window.ToniEvents.emit('VOICE:SPEAK', {
+        text: `Hallo ${userName}, ich bin Toni. Dein Taktik-System auf Weltniveau ist bereit. Übernehmen wir die Spielkontrolle?`
+    });
 
-function addMessage(sender, text) {
-    const chatBody = document.getElementById('chat-messages');
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `message ${sender}`;
-    msgDiv.innerHTML = `<strong>${sender === 'toni' ? 'Toni' : 'Björn'}:</strong> ${text}`;
-    chatBody.appendChild(msgDiv);
-    chatBody.scrollTop = chatBody.scrollHeight;
+    // Wir warten auf das Ende der Stimme (via EventBus)
+    window.ToniEvents.on('VOICE:ENDED', () => {
+        status.textContent = "Baue Stadion auf...";
+        
+        // Phase 2: Arena-Konstruktion triggern
+        window.ToniEvents.emit('ARENA:BUILD', { type: 'senioren' }); 
+    });
+
+    // Wenn die Arena fertig ist, blenden wir alles ein
+    window.ToniEvents.on('ARENA:READY', () => {
+        document.body.classList.remove('blackout');
+        document.body.classList.add('ready');
+        status.textContent = "System bereit. Ginga!";
+        
+        // Aktentasche automatisch im Chat-Modus öffnen
+        setTimeout(() => toggleSidebar(true), 1000);
+    });
 }
 
 /**
- * 4. Event-Listener (Klicks und Tastendruck)
+ * Steuerung der Aktentasche (Sidebar)
  */
-function initEventListeners() {
-    // Senden-Button
-    document.getElementById('send-btn')?.addEventListener('click', askToni);
-    
-    // Enter-Taste im Textfeld
-    document.getElementById('user-input')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') askToni();
-    });
+function toggleSidebar(forceOpen = null) {
+    const sidebar = document.getElementById('sidebar');
+    if (forceOpen === true) {
+        sidebar.classList.add('active');
+    } else if (forceOpen === false) {
+        sidebar.classList.remove('active');
+    } else {
+        sidebar.classList.toggle('active');
+    }
+}
 
-    // Reset-Button im Header
-    document.getElementById('btn-reset-board')?.addEventListener('click', () => {
-        if(confirm("Möchtest du das Board wirklich zurücksetzen?")) {
-            location.reload();
-        }
-    });
+/**
+ * Tab-Wechsel innerhalb der Aktentasche
+ */
+function switchTab(tabName) {
+    // Inaktive Tabs visuell zurücksetzen
+    document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
+    
+    // Aktiven Tab markieren
+    // (Hier würde der EventBus später den Inhalt des Tabs laden)
+    window.ToniEvents.emit('UI:TAB_CHANGED', { tab: tabName });
+    console.log(`[UI] Wechsel zu Tab: ${tabName}`);
 }
