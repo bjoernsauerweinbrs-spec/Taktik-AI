@@ -1,0 +1,41 @@
+/* Toni 2.0 - Stadion-Effekte */
+.pitch-container.building {
+    perspective: 1000px;
+}
+
+.pitch-surface {
+    transition: transform 4s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: rotateX(20deg) scale(0.8);
+    opacity: 0.5;
+}
+
+.pitch-container.ready .pitch-surface {
+    transform: rotateX(0deg) scale(1);
+    opacity: 1;
+}
+
+/* Licht-Scan (Peak bei 2,6s) */
+.pitch-container.scanning::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(0, 255, 0, 0.2), transparent);
+    transform: skewX(-25deg);
+    animation: scan 1.4s ease-in-out;
+}
+
+@keyframes scan {
+    100% { left: 150%; }
+}
+
+/* Linien-Zeichnen */
+.pitch-svg-layer path {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawLines 3.5s forwards;
+}
+
+@keyframes drawLines {
+    to { stroke-dashoffset: 0; }
+}
