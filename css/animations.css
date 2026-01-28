@@ -1,4 +1,6 @@
 /* Toni 2.0 - Stadion-Effekte */
+
+/* Grundzustand während des Aufbaus */
 .pitch-container.building {
     perspective: 1000px;
 }
@@ -9,12 +11,13 @@
     opacity: 0.5;
 }
 
+/* Zustand wenn bereit */
 .pitch-container.ready .pitch-surface {
     transform: rotateX(0deg) scale(1);
     opacity: 1;
 }
 
-/* Licht-Scan (Peak bei 2,6s) */
+/* Der Licht-Scan (Peak bei 2,6s) */
 .pitch-container.scanning::after {
     content: '';
     position: absolute;
@@ -23,13 +26,14 @@
     background: linear-gradient(to right, transparent, rgba(0, 255, 0, 0.2), transparent);
     transform: skewX(-25deg);
     animation: scan 1.4s ease-in-out;
+    pointer-events: none;
 }
 
 @keyframes scan {
     100% { left: 150%; }
 }
 
-/* Linien-Zeichnen */
+/* Linien-Zeichnen Effekt */
 .pitch-svg-layer path {
     stroke-dasharray: 1000;
     stroke-dashoffset: 1000;
