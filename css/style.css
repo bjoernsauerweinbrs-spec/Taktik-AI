@@ -1,153 +1,266 @@
-/* Toni 2.0 - Globales Design & Dashboard */
+/* TONI 2.0 - GINGA MASTER STYLESHEET
+    Optimiert für 13"/15" Laptops & Smartphones
+    Kein Scrollen - Full Focus auf Taktik & Ginga
+*/
+
 :root {
-    --pitch-green: #2d5a27;
-    --pitch-line: rgba(255, 255, 255, 0.6);
-    --team-red: radial-gradient(circle at 30% 30%, #ff4d4d, #b30000);
-    --team-blue: radial-gradient(circle at 30% 30%, #4d94ff, #0033cc);
-    --sidebar-dark: #1a1a1a;
-    --accent-gold: #ffd700;
+    --gold: #ffd700;
+    --gold-dim: rgba(255, 215, 0, 0.3);
+    --dark: #0a0a0a;
+    --sidebar-bg: #111;
+    --card-bg: #1a1a1a;
+    --sidebar-width: 320px;
+    --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --red-team: #d32f2f;
+    --blue-team: #1976d2;
+}
+
+/* 1. BASIS RESET & LAYOUT-GUARDS */
+* { 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
 }
 
 body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #000;
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    background: var(--dark);
     color: white;
-    overflow: hidden;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden; /* STRENGES SCROLL-VERBOT */
 }
 
-/* Layout Struktur */
-.dashboard-container {
+/* BLACKOUT SEQUENZ */
+body.blackout { opacity: 0; }
+body.ready { opacity: 1; transition: opacity 2s ease; }
+
+.dashboard {
     display: flex;
     width: 100vw;
     height: 100vh;
-}
-
-/* Sidebar / Aktentasche */
-.sidebar {
-    width: 250px;
-    background: var(--sidebar-dark);
-    border-right: 1px solid #333;
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-header { padding: 20px; border-bottom: 1px solid #333; }
-.sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
-.sidebar-nav li {
-    padding: 15px 20px;
-    cursor: pointer;
-    transition: background 0.3s;
-    border-bottom: 1px solid #222;
-}
-.sidebar-nav li:hover { background: #333; color: var(--accent-gold); }
-
-/* Haupt-Spielfeld Bereich */
-.main-board {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    background: #111;
     position: relative;
 }
 
-.board-header {
-    padding: 10px 20px;
-    background: rgba(0,0,0,0.5);
+/* 2. DIE ZENTRALE AKTENTASCHE (SIDEBAR) */
+.aktentasche {
+    width: var(--sidebar-width);
+    height: 100%;
+    background: var(--sidebar-bg);
+    border-right: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: transform var(--transition);
+    flex-shrink: 0;
+}
+
+.sidebar-header {
+    padding: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid #222;
 }
 
-/* Das Spielfeld (The Pitch) */
-.pitch-container {
+.brand {
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: var(--gold);
+    font-size: 1.2rem;
+}
+
+.close-btn {
+    background: none; border: none; color: white;
+    font-size: 1.5rem; cursor: pointer; display: none; /* Nur Mobil sichtbar */
+}
+
+/* TABS */
+.sidebar-tabs {
+    display: flex;
+    background: #151515;
+    border-bottom: 1px solid #222;
+}
+
+.tab-link {
+    flex: 1;
+    padding: 15px 5px;
+    background: none; border: none;
+    color: #666; font-size: 14px;
+    cursor: pointer; transition: 0.3s;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+
+.tab-link i { font-size: 18px; }
+.tab-link.active { color: var(--gold); border-bottom: 2px solid var(--gold); background: #1a1a1a; }
+
+.sidebar-content {
+    flex-grow: 1;
+    overflow-y: auto; /* Scrollen nur innerhalb der Tabs erlaubt */
+    padding-bottom: 20px;
+}
+
+/* 3. PITCH AREA (DAS SPIELFELD) */
+.pitch-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background: radial-gradient(circle, #1a3a1a 0%, #0a0a0a 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.top-bar {
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.menu-btn {
+    background: var(--gold); border: none;
+    width: 40px; height: 40px; border-radius: 8px;
+    cursor: pointer; font-size: 1.2rem;
+}
+
+#status-display {
+    font-size: 0.9rem; color: #888; flex-grow: 1;
+}
+
+/* CANVAS & SURFACE */
+.canvas-wrapper {
     flex-grow: 1;
     position: relative;
-    margin: 20px;
-    background-color: var(--pitch-green);
-    border: 3px solid var(--pitch-line);
-    border-radius: 5px;
+    margin: 15px;
+    display: flex;
+    align-items: center; justify-content: center;
     overflow: hidden;
-    box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
 }
 
 .pitch-surface {
     width: 100%;
-    height: 100%;
+    max-width: 1000px; /* Begrenzung für Desktop */
+    aspect-ratio: 100 / 60;
+    background: #2d5a27;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 5px;
     position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
-/* SPIELER DESIGN (Ginga-Style) */
-.player {
+.pitch-svg {
     position: absolute;
-    width: 36px;
-    height: 36px;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 4. PLAYER STYLING (GINGA-MOVEMENT) */
+.player {
+    width: 36px; height: 36px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 13px;
-    color: white;
-    cursor: grab;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 14px;
+    cursor: grab; z-index: 10;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+    border: 2px solid rgba(255,255,255,0.9);
+    user-select: none;
+    transform: translate(-50%, -50%); /* Zentriert den Punkt auf den Koordinaten */
+}
+
+.player.team-home { background: var(--red-team); color: white; }
+.player.team-away { background: var(--blue-team); color: white; }
+
+.player.dragging {
+    cursor: grabbing;
+    transform: translate(-50%, -50%) scale(1.3);
     z-index: 100;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1); /* Der Ginga-Flow */
+    opacity: 0.9;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.8);
 }
 
-.player:active { cursor: grabbing; transform: translate(-50%, -50%) scale(1.2); }
-
-/* Team Rot (Dein Team) */
-.player.red {
-    background: var(--team-red);
-    border: 2px solid white;
+/* 5. KADER-MANAGEMENT (ROSTER CARDS) */
+.roster-header {
+    padding: 20px;
+    border-bottom: 1px solid #222;
+    display: flex; justify-content: space-between; align-items: center;
 }
 
-/* Team Blau (Gegner) */
-.player.blue {
-    background: var(--team-blue);
-    border: 2px solid #fff;
+.add-btn {
+    background: var(--gold); border: none; padding: 8px 12px;
+    border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;
 }
 
-/* Torwart-Highlight */
-.player[id$="-1"] { border: 2px solid var(--accent-gold); }
-
-/* Chat-Sidebar */
-.chat-sidebar {
-    width: 300px;
-    background: var(--sidebar-dark);
-    border-left: 1px solid #333;
-    display: flex;
-    flex-direction: column;
+.player-card {
+    background: var(--card-bg);
+    border: 1px solid #282828;
+    border-radius: 12px;
+    padding: 15px; margin: 10px;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: 0.3s;
 }
 
-.chat-body { flex-grow: 1; padding: 15px; overflow-y: auto; }
-.message { margin-bottom: 12px; padding: 8px 12px; border-radius: 8px; font-size: 0.9em; }
-.message.toni { background: #333; border-left: 3px solid var(--accent-gold); }
-.message.user { background: #0044cc; text-align: right; }
+.player-card:hover { border-color: #444; background: #222; }
 
-.chat-input-area { padding: 15px; border-top: 1px solid #333; display: flex; gap: 5px; }
-.chat-input-area input {
-    flex-grow: 1;
-    background: #222;
-    border: 1px solid #444;
-    color: white;
-    padding: 8px;
-    border-radius: 4px;
+.card-info { display: flex; align-items: center; gap: 15px; }
+
+.card-nr {
+    background: #333; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; color: var(--gold); font-weight: bold;
+    border: 1px solid var(--gold-dim);
 }
 
-/* Hilfs-Klassen */
-.btn-select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    background: #444;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+.card-name-pos strong { display: block; font-size: 15px; color: #eee; }
+.card-name-pos span { font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: 1px; }
+
+.card-stats {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: #aaa;
+    padding: 8px 0; border-top: 1px solid #222;
 }
-.btn-select:hover { background: var(--accent-gold); color: black; }
+
+.spawn-btn {
+    background: rgba(255, 215, 0, 0.05);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    padding: 8px; border-radius: 6px;
+    cursor: pointer; font-weight: bold; transition: 0.3s;
+}
+
+.spawn-btn:hover { background: var(--gold); color: black; }
+
+/* 6. MOBILE OPTIMIERUNG (DER GHOST-MODUS) */
+@media (max-width: 768px) {
+    .aktentasche {
+        position: fixed;
+        left: 0; top: 0;
+        transform: translateX(-100%);
+        box-shadow: 20px 0 60px rgba(0,0,0,0.9);
+        width: 85%; /* Fast Fullscreen auf dem Handy */
+    }
+
+    .aktentasche.active {
+        transform: translateX(0);
+    }
+
+    .close-btn { display: block; }
+    
+    .pitch-area { width: 100vw; }
+    
+    .canvas-wrapper { margin: 5px; }
+    
+    .player { width: 32px; height: 32px; font-size: 12px; }
+    
+    .top-bar { padding: 10px; gap: 10px; }
+}
+
+/* LAPTOP SPEZIFISCH (13"/15") */
+@media (min-width: 769px) and (max-height: 800px) {
+    .pitch-surface { max-width: 850px; }
+    .card-info { gap: 10px; }
+    .player-card { padding: 10px; }
+}
