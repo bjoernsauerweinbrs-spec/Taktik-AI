@@ -1,28 +1,25 @@
 /**
- * TONI 2.0 - Haupt-Controller (Der Dirigent)
- * Steuert den Ablauf nach dem Klick auf den Start-Trigger
+ * TONI 2.0 - Haupt-Controller (Finaler Fix)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Sicherheits-Check (Login-Status prüfen)
+    // 1. Check, ob Björn oder Nadine autorisiert sind
     const isAuthorized = localStorage.getItem('isAuthorized');
-    
     if (!isAuthorized) {
         window.location.href = 'index.html';
         return;
     }
 
-    console.log("[Toni 2.0] System im Standby. Warte auf Benutzer-Interaktion...");
+    console.log("[Toni 2.0] System bereit. Warte auf Tippen auf das Play-Symbol...");
 
-    // 2. Warten auf das Start-Signal vom Overlay (Wichtig für Mobile-Audio)
+    // 2. Start-Event vom Overlay (Zündschlüssel für Audio)
     window.ToniEvents.on('SYSTEM:START', () => {
         const overlay = document.getElementById('start-overlay');
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) overlay.style.display = 'none'; // Play-Button weg
         
         const userName = localStorage.getItem('userName') || 'Trainer';
         document.getElementById('user-name-display').textContent = userName;
         
-        console.log(`[Toni 2.0] Start-Signal empfangen. Ginga-Sequenz für ${userName} wird eingeleitet...`);
         startGingaSequence(userName);
     });
 });
@@ -33,35 +30,34 @@ document.addEventListener('DOMContentLoaded', () => {
 async function startGingaSequence(userName) {
     const status = document.getElementById('status-display');
     
-    // Phase 1: Begrüßung (Voice Modul aktivieren)
-    status.textContent = "Toni bereitet sich vor...";
-    
+    // Phase 1: Männliche Stimme begrüßt Björn/Nadine
+    status.textContent = "Toni analysiert Daten...";
     window.ToniEvents.emit('VOICE:SPEAK', {
-        text: `Hallo ${userName}, ich bin Toni. Dein Taktik-System auf Weltniveau ist bereit. Übernehmen wir die Spielkontrolle?`
+        text: `Hallo ${userName}, ich bin Toni. Das Stadion ist bereit für deinen Ginga Style. Legen wir los?`
     });
 
-    // Phase 2: Stadionbau starten, wenn Toni fertig gesprochen hat
+    // Phase 2: Stadionbau nach Sprachausgabe
     window.ToniEvents.on('VOICE:ENDED', () => {
-        status.textContent = "Baue Stadion auf...";
+        status.textContent = "Baue Arena...";
         window.ToniEvents.emit('ARENA:BUILD', { type: 'senioren' }); 
     });
 
-    // Phase 3: System freigeben, wenn das Stadion fertig ist
+    // Phase 3: System-Freigabe und Aktentaschen-Inhalt laden
     window.ToniEvents.on('ARENA:READY', () => {
         document.body.classList.remove('blackout');
         document.body.classList.add('ready');
-        status.textContent = "System bereit. Ginga!";
+        status.textContent = "System online.";
         
-        // Aktentasche (Sidebar) nach einer kurzen Verzögerung einblenden
+        // Aktentasche öffnen und "Systemsteuerung"-Meldung durch Chat ersetzen
         setTimeout(() => {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) sidebar.classList.add('active');
-        }, 1000);
+            window.toggleSidebar(true);
+            window.switchTab('chat'); // Lädt sofort den Chat-Inhalt
+        }, 800);
     });
 }
 
 /**
- * Globale UI-Funktionen
+ * Steuerung der Aktentasche (Sidebar)
  */
 window.toggleSidebar = function(forceOpen = null) {
     const sidebar = document.getElementById('sidebar');
@@ -76,11 +72,37 @@ window.toggleSidebar = function(forceOpen = null) {
     }
 };
 
+/**
+ * Inhalts-Wechsel (Repariert die Meldung "Warte auf System-Start")
+ */
 window.switchTab = function(tabName) {
+    const content = document.getElementById('tab-content');
+    
+    // Aktiven Button visuell markieren
     document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById(`tab-${tabName}`);
     if (activeBtn) activeBtn.classList.add('active');
-    
-    window.ToniEvents.emit('UI:TAB_CHANGED', { tab: tabName });
-    console.log(`[UI] Tab gewechselt zu: ${tabName}`);
+
+    // Inhalt der Aktentasche je nach Tab füllen
+    if (tabName === 'chat') {
+        const userName = localStorage.getItem('userName') || 'Trainer';
+        content.innerHTML = `
+            <div class="chat-wrapper">
+                <div class="message-toni">
+                    <strong>TONI:</strong><br>
+                    Hallo ${userName}! Ich habe das Feld für die Senioren aufgebaut. 
+                    Wie kann ich dir heute taktisch helfen?
+                </div>
+                <div class="chat-input-area" style="margin-top: 20px;">
+                    <input type="text" placeholder="Frag Toni nach Taktik..." 
+                           style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 5px;">
+                </div>
+            </div>
+        `;
+    } else if (tabName === 'kader') {
+        content.innerHTML = `<div style="padding:10px;">Lade Kader-Datenbank...</div>`;
+        window.ToniEvents.emit('UI:TAB_CHANGED', { tab: 'kader' });
+    } else {
+        content.innerHTML = `<div style="padding:10px; color:#666;">Bereich ${tabName} wird vorbereitet...</div>`;
+    }
 };
