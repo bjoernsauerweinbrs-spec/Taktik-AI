@@ -2,7 +2,6 @@
  * Toni 2.0 - Command Processor
  * Verarbeitet die JSON-Befehle zur Board-Steuerung.
  */
-
 window.toniCommander = {
     execute: (jsonCommand) => {
         try {
@@ -11,7 +10,7 @@ window.toniCommander = {
 
             switch(cmd.type) {
                 case 'movePlayer':
-                    // Spätere Verknüpfung mit der board.js
+                    // Hier greifen wir später auf die Board-Logik zu
                     console.log(`Bewege Spieler ${cmd.payload.playerId} zu Position X:${cmd.payload.x} Y:${cmd.payload.y}`);
                     break;
                 case 'setFormation':
