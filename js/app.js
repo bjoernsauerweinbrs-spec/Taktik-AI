@@ -1,39 +1,71 @@
 /**
  * Toni 2.0 - Hauptsteuerung (The Orchestrator)
- * Diese Datei verbindet die app.html mit allen Modulen.
+ * Diese Datei ist das Gehirn, das alle Module (Voice, Calc, Database) verbindet.
  */
 
 const state = {
     isAuthorized: localStorage.getItem('isAuthorized') === 'true',
-    currentPitch: 'grossfeld',
+    currentPitch: '',
     isLocked: false,
     squad: []
 };
 
-// Startet das System, sobald die Seite geladen ist
+// 1. Initialisierung beim Laden der Seite
 document.addEventListener('DOMContentLoaded', async () => {
     if (!state.isAuthorized) return;
 
     try {
-        // 1. Datenbank-Verbindung herstellen
+        // Datenbank starten
         await window.initToniDB();
         console.log("✅ Toni-Datenbank bereit.");
 
-        // 2. Ersten Kader-Check (lädt Spieler in die Sidebar)
-        if (typeof refreshSquad === "function") {
-            await refreshSquad();
-        }
-        
-        // 3. Aktiviert die Knöpfe und Eingabefelder
+        // Knöpfe und Eingabefelder aktivieren
         initEventListeners();
         
     } catch (err) {
-        console.error("❌ Fehler beim Starten von Toni 2.0:", err);
+        console.error("❌ Fehler beim Systemstart:", err);
     }
 });
 
 /**
- * TONI-CHAT LOGIK
+ * 2. Die Antwort-Logik (Altersklassen-Weiche)
+ * Verarbeitet: "Senioren", "Jugend", "Funino"
+ */
+window.processAgeGroupAnswer = function(answer) {
+    const lowerAnswer = answer.toLowerCase();
+    let selectedType = "";
+
+    if (lowerAnswer.includes("senior")) {
+        selectedType = "Senioren-Großfeld";
+    } else if (lowerAnswer.includes("jugend") || lowerAnswer.includes("u17") || lowerAnswer.includes("kleinfeld")) {
+        selectedType = "Jugend-Kleinfeld";
+    } else if (lowerAnswer.includes("funino")) {
+        selectedType = "Funino";
+    }
+
+    if (selectedType) {
+        state.currentPitch = selectedType;
+        
+        // Toni bestätigt männlich und autoritär
+        const response = `Verstanden, ${selectedType} ist aktiv. Ginga-Style geladen. Ich habe die Grundordnung auf 4-3-3 gesetzt. Das Board gehört dir.`;
+        window.toniVoice.speak(response);
+
+        // UI aktualisieren
+        const label = document.getElementById('pitch-label');
+        if (label) label.innerText = `Aktiv: ${selectedType}`;
+
+        // Hier triggern wir später das Einfliegen der Spieler
+        console.log(`Konfiguration für ${selectedType} abgeschlossen.`);
+    } 
+    else {
+        // Fachmännische Rückführung bei unklarer Antwort
+        const retryMsg = "Das klingt gut, Björn, aber ich brauche die Altersklasse für die Feldkonfiguration. Bitte wähle Senioren-Großfeld, Jugend-Kleinfeld oder Funino.";
+        window.toniVoice.speak(retryMsg);
+    }
+};
+
+/**
+ * 3. Chat-Interaktion (Anfragen an Toni)
  */
 function askToni() {
     const input = document.getElementById('user-input');
@@ -43,11 +75,11 @@ function askToni() {
         addMessage('user', text);
         input.value = '';
         
-        // Toni antwortet und nutzt das voice.js Modul
+        // Simulierter Denkprozess (später echte KI-Anbindung)
         setTimeout(() => {
-            const response = "Ich bin bereit, Björn. Das Spielfeld wird im Ginga-Style kalibriert.";
+            const response = "Analysiere die Taktik im Ginga-Style...";
             addMessage('toni', response);
-            if (window.toniVoice) window.toniVoice.speak(response);
+            window.toniVoice.speak(response);
         }, 1000);
     }
 }
@@ -62,11 +94,21 @@ function addMessage(sender, text) {
 }
 
 /**
- * BUTTON-STEUERUNG
+ * 4. Event-Listener (Klicks und Tastendruck)
  */
 function initEventListeners() {
+    // Senden-Button
     document.getElementById('send-btn')?.addEventListener('click', askToni);
+    
+    // Enter-Taste im Textfeld
     document.getElementById('user-input')?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') askToni();
+    });
+
+    // Reset-Button im Header
+    document.getElementById('btn-reset-board')?.addEventListener('click', () => {
+        if(confirm("Möchtest du das Board wirklich zurücksetzen?")) {
+            location.reload();
+        }
     });
 }
