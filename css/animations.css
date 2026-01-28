@@ -1,45 +1,72 @@
-/* Toni 2.0 - Stadion-Effekte */
+/* TONI 2.0 - GINGA ANIMATIONS 
+   Zuständig für Stadion-Bau, Player-Movement und UI-Effekte
+*/
 
-/* Grundzustand während des Aufbaus */
-.pitch-container.building {
-    perspective: 1000px;
+/* 1. DER STADION-BAU (SVG DRAWING) */
+@keyframes draw {
+    from {
+        stroke-dashoffset: 2000; /* Startet komplett unsichtbar */
+    }
+    to {
+        stroke-dashoffset: 0;    /* Zieht die Linie bis zum Ende */
+    }
 }
 
-.pitch-surface {
-    transition: transform 4s cubic-bezier(0.22, 1, 0.36, 1);
-    transform: rotateX(20deg) scale(0.8);
-    opacity: 0.5;
+/* 2. DER REVEAL-EFFEKT (VOM BLACKOUT ZUM RASEN) */
+@keyframes stadiumReveal {
+    from {
+        opacity: 0;
+        filter: brightness(0) blur(10px);
+    }
+    to {
+        opacity: 1;
+        filter: brightness(1) blur(0);
+    }
 }
 
-/* Zustand wenn bereit */
-.pitch-container.ready .pitch-surface {
-    transform: rotateX(0deg) scale(1);
-    opacity: 1;
+.ready #pitch-surface {
+    animation: stadiumReveal 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* Der Licht-Scan (Peak bei 2,6s) */
-.pitch-container.scanning::after {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 50%; height: 100%;
-    background: linear-gradient(to right, transparent, rgba(0, 255, 0, 0.2), transparent);
-    transform: skewX(-25deg);
-    animation: scan 1.4s ease-in-out;
-    pointer-events: none;
+/* 3. GINGA-PLAYER-MOVEMENT */
+/* Sorgt dafür, dass Spieler nicht "teleportieren", sondern gleiten */
+.player {
+    transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55), 
+                top 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55), 
+                left 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
 
-@keyframes scan {
-    100% { left: 150%; }
+/* 4. PULSIERENDE HIGHLIGHTS (NAGELSMANN-STYLE) */
+/* Für freie Räume oder markierte Spieler */
+@keyframes pulseGold {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(255, 215, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+    }
 }
 
-/* Linien-Zeichnen Effekt */
-.pitch-svg-layer path {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    animation: drawLines 3.5s forwards;
+.highlight-space {
+    animation: pulseGold 2s infinite;
+    border-radius: 50%;
 }
 
-@keyframes drawLines {
-    to { stroke-dashoffset: 0; }
+/* 5. SIDEBAR SLIDE (MOBILE) */
+/* Unterstützt das CSS in style.css für maximale Geschmeidigkeit */
+.aktentasche {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 6. STATUS-PULS (TONI IS THINKING) */
+@keyframes statusGlow {
+    0%, 100% { color: #888; text-shadow: none; }
+    50% { color: var(--gold); text-shadow: 0 0 8px var(--gold); }
+}
+
+#status-display {
+    animation: statusGlow 3s infinite ease-in-out;
 }
