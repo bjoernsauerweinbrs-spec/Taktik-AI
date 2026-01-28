@@ -2,79 +2,84 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Toni 2.0 - Ginga Taktik-Plattform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Toni 2.0 - Ginga Dashboard</title>
     
-    <script>
-        if (localStorage.getItem('isAuthorized') !== 'true') {
-            window.location.replace('index.html');
-        }
-    </script>
-
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/animations.css">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
 </head>
-<body>
 
-    <div class="dashboard-container">
-        <aside class="sidebar" id="aktentasche">
-            <div class="sidebar-header"><h2><i class="fas fa-briefcase"></i> Aktentasche</h2></div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li onclick="showSection('kader')"><i class="fas fa-users"></i> Kader</li>
-                    <li onclick="showSection('training')"><i class="fas fa-clipboard-list"></i> Matchplan</li>
-                    <li onclick="showSection('video')"><i class="fas fa-video"></i> Video</li>
-                </ul>
+<body class="blackout">
+
+    <div class="dashboard">
+        
+        <aside class="aktentasche" id="sidebar">
+            <header class="sidebar-header">
+                <div class="brand">TONI 2.0</div>
+                <button class="close-btn" onclick="toggleSidebar(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </header>
+            
+            <nav class="sidebar-tabs">
+                <button onclick="switchTab('chat')" id="tab-chat" class="tab-link active">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>Toni</span>
+                </button>
+                <button onclick="switchTab('kader')" id="tab-kader" class="tab-link">
+                    <i class="fas fa-users-gear"></i>
+                    <span>Kader</span>
+                </button>
+                <button onclick="switchTab('matchplan')" id="tab-matchplan" class="tab-link">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Plan</span>
+                </button>
+                <button onclick="switchTab('video')" id="tab-video" class="tab-link">
+                    <i class="fas fa-video"></i>
+                    <span>Video</span>
+                </button>
             </nav>
-            <div id="sidebar-content" class="sidebar-body"></div>
+
+            <div id="tab-content" class="sidebar-content">
+                <div class="placeholder-text">Warte auf System-Start...</div>
+            </div>
         </aside>
 
-        <main class="main-board">
-            <header class="board-header">
-                <div class="status-info"><span id="pitch-label">Arena bereit...</span></div>
-                <div class="board-actions">
-                    <button onclick="localStorage.clear(); location.reload();" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
-                    <button id="btn-skip-intro">Skip</button>
+        <main class="pitch-area">
+            
+            <header class="top-bar">
+                <button class="menu-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-briefcase"></i>
+                </button>
+                <div id="status-display">Ginga-System initialisiert...</div>
+                <div class="top-actions">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="user-name-display">Trainer</span>
                 </div>
             </header>
-            <div id="pitch-container" class="pitch-container">
-                <svg id="pitch-lines" class="pitch-svg-layer"></svg>
-                <div id="pitch" class="pitch-surface"></div>
-            </div>
-        </main>
 
-        <section class="chat-sidebar">
-            <div class="chat-header"><h3>Toni - KI Co-Trainer</h3></div>
-            <div id="chat-messages" class="chat-body"></div>
-            <div class="chat-input-area">
-                <input type="text" id="user-input" placeholder="Schreib Toni...">
-                <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+            <div id="canvas-wrapper" class="canvas-wrapper">
+                <div id="pitch-surface" class="pitch-surface">
+                    <svg id="pitch-svg" class="pitch-svg"></svg>
+                    
+                    </div>
             </div>
-        </section>
+            
+        </main>
     </div>
 
+    <script src="js/modules/eventbus.js"></script>
+    
     <script src="js/modules/database.js"></script>
-    <script src="js/modules/calc.js"></script>
     <script src="js/modules/voice.js"></script>
-    <script src="js/modules/commander.js"></script>
-    <script src="js/modules/arena-build.js"></script>
-    <script src="js/modules/player-engine.js"></script>
-    <script src="js/modules/opponent-engine.js"></script>
+    
+    <script src="js/modules/arena.js"></script>
+    <script src="js/modules/engine.js"></script>
+    <script src="js/modules/roster.js"></script>
+    
     <script src="js/app.js"></script>
 
-    <script>
-        window.addEventListener('DOMContentLoaded', async () => {
-            await window.initToniDB();
-            document.body.addEventListener('click', () => {
-                if (!window.introStarted) {
-                    window.introStarted = true;
-                    window.toniArena.start(); 
-                }
-            }, { once: true });
-        });
-
-        function showSection(s) { console.log("Sektion:", s); }
-    </script>
 </body>
 </html>
