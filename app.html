@@ -11,8 +11,12 @@
 <body>
 
     <div class="dashboard-container">
+        
         <aside class="sidebar" id="aktentasche">
-            <div class="sidebar-header"><h2><i class="fas fa-briefcase"></i> Aktentasche</h2></div>
+            <div class="sidebar-header">
+                <h2><i class="fas fa-briefcase"></i> Aktentasche</h2>
+            </div>
+            
             <nav class="sidebar-nav">
                 <ul>
                     <li onclick="showSection('kader')"><i class="fas fa-users"></i> Kader-Management</li>
@@ -20,52 +24,86 @@
                     <li onclick="showSection('video')"><i class="fas fa-video"></i> Video-Analyse</li>
                 </ul>
             </nav>
-            <div id="sidebar-content" class="sidebar-body"></div>
+
+            <div id="sidebar-content" class="sidebar-body">
+                </div>
         </aside>
 
         <main class="main-board">
             <header class="board-header">
-                <div class="status-info"><span id="pitch-label">Initialisiere Arena...</span></div>
+                <div class="status-info">
+                    <span id="pitch-label"><i class="fas fa-sync-alt fa-spin"></i> Warte auf Start...</span>
+                </div>
                 <div class="board-actions">
-                    <button id="btn-skip-intro">Skip Intro</button>
+                    <button id="btn-reset-board" title="Board zurücksetzen"><i class="fas fa-undo"></i></button>
+                    <button id="btn-skip-intro" class="btn-secondary">Skip</button>
                 </div>
             </header>
+
             <div id="pitch-container" class="pitch-container">
                 <svg id="pitch-lines" class="pitch-svg-layer"></svg>
-                <div id="pitch" class="pitch-surface"></div>
+                
+                <div id="pitch" class="pitch-surface">
+                    </div>
             </div>
         </main>
 
         <section class="chat-sidebar">
-            <div class="chat-header"><h3>Toni - KI Co-Trainer</h3></div>
+            <div class="chat-header">
+                <div class="toni-avatar"><i class="fas fa-robot"></i></div>
+                <h3>Toni - KI Co-Trainer</h3>
+            </div>
             <div id="chat-messages" class="chat-body"></div>
             <div class="chat-input-area">
-                <input type="text" id="user-input" placeholder="Schreib Toni..." autocomplete="off">
+                <input type="text" id="user-input" placeholder="Schreib Toni etwas..." autocomplete="off">
                 <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
             </div>
         </section>
+
     </div>
+
+    <script>
+        if (localStorage.getItem('isAuthorized') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
 
     <script src="js/modules/database.js"></script>
     <script src="js/modules/calc.js"></script>
     <script src="js/modules/voice.js"></script>
     <script src="js/modules/commander.js"></script>
     <script src="js/modules/arena-build.js"></script>
+    <script src="js/modules/player-engine.js"></script>
+    <script src="js/modules/opponent-engine.js"></script>
+    
     <script src="js/app.js"></script>
 
     <script>
+        // Start-Initialisierung
         window.addEventListener('DOMContentLoaded', async () => {
-            if (localStorage.getItem('isAuthorized') !== 'true') window.location.href = 'index.html';
-            await window.initToniDB();
+            console.log("🚀 Toni 2.0 Systemstart...");
             
-            // Trigger für den Arena-Build beim ersten Klick
-            document.body.addEventListener('click', () => {
-                if (!window.introStarted) {
-                    window.introStarted = true;
-                    window.toniArena.start();
-                }
-            }, { once: true });
+            try {
+                await window.initToniDB();
+                
+                // Erster Klick startet das Stadion-Intro
+                document.body.addEventListener('click', () => {
+                    if (!window.introStarted) {
+                        window.introStarted = true;
+                        window.toniArena.start(); 
+                    }
+                }, { once: true });
+
+            } catch (error) {
+                console.error("❌ Kritischer Fehler:", error);
+            }
         });
+
+        // Einfache Navigation für die Sidebar
+        function showSection(section) {
+            console.log("Wechsle Sektion zu:", section);
+            // Logik wird in app.js verarbeitet
+        }
     </script>
 </body>
 </html>
