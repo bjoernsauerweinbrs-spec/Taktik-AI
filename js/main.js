@@ -1,3 +1,13 @@
+// Debug‑Wrapper (temporär)
+(function(){
+  try {
+    // ab hier kommt dein bisheriger main.js‑Code
+  } catch (err) {
+    console.error('Fehler in main.js (gefangen):', err);
+    console.error(err.stack);
+    throw err; // optional: weiterwerfen, damit DevTools normale Fehleranzeige behält
+  }
+})();
 // public/js/main.js
 document.addEventListener('DOMContentLoaded', async () => {
   console.log("Toni 2.0 startet…");
