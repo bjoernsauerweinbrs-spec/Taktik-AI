@@ -1,0 +1,97 @@
+/* =========================================
+   Toni 2.0 – Taktikboard Styles
+   Spielfeld, Canvas, Spieler-Icons, Tools
+   ========================================= */
+
+/* Container für das gesamte Taktikboard */
+#taktikboard-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #0a0a0a;
+}
+
+/* Spielfeld-Canvas */
+#taktikboard {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #0f0f0f;
+}
+
+/* Tool-Leiste */
+#taktik-tools {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Tool-Buttons */
+#taktik-tools button {
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    backdrop-filter: blur(6px);
+    transition: 0.2s ease;
+}
+
+/* Spieler-Icons */
+.player-icon {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 48px;
+    font-weight: bold;
+    cursor: grab;
+    user-select: none;
+    transition: 0.2s ease;
+}
+
+/* Beim Ziehen */
+.player-icon:active {
+    cursor: grabbing;
+    transform: scale(1.1);
+}
+
+/* Spieler-Nummer */
+.player-number {
+    font-size: 18px;
+}
+
+/* Spieler-Name (optional) */
+.player-name {
+    font-size: 10px;
+    margin-top: -4px;
+    opacity: 0.8;
+}
+
+/* Linien (Laufwege, Passwege etc.) */
+.tactic-line {
+    position: absolute;
+    pointer-events: none;
+}
+
+/* Animierte Sequenzen */
+.sequence-step {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.8;
+}
+
+/* Zonen (Pressing, Funinho etc.) */
+.tactic-zone {
+    position: absolute;
+    border-radius: 6px;
+    opacity: 0.25;
+    pointer-events: none;
+}

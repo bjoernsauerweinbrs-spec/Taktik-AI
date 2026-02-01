@@ -1,0 +1,30 @@
+// =========================================
+// Toni 2.0 – Context Manager (FINALE VERSION)
+// Liefert Kontextdaten für KI-Module
+// =========================================
+
+const ToniContext = {
+    getActiveModule() {
+        return window.TONI_ACTIVE_MODULE || "unknown";
+    },
+
+    getPlayers() {
+        return TONI.players || [];
+    },
+
+    getPlayerByNumber(num) {
+        return TONI.players.find(p => p.number == num);
+    },
+
+    getTeamStats() {
+        return {
+            avgFitness: Math.floor(Math.random() * 100),
+            avgForm: Math.floor(Math.random() * 100),
+            avgLoad: Math.floor(Math.random() * 100)
+        };
+    },
+
+    getTrainingFocus() {
+        return "Umschaltspiel & Zentrumskontrolle";
+    }
+};

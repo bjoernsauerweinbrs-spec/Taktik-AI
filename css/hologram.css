@@ -1,0 +1,42 @@
+#toni-hologram {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: radial-gradient(circle at center,
+        rgba(255,140,0,0.08),
+        rgba(255,140,0,0.02),
+        transparent 70%
+    );
+    z-index: 9999;
+}
+
+#toni-hologram.active {
+    opacity: 1;
+}
+
+#toni-hologram.pulse {
+    animation: holoPulse 0.6s ease-out;
+}
+
+@keyframes holoPulse {
+    0% { opacity: 0.2; }
+    50% { opacity: 0.5; }
+    100% { opacity: 0.2; }
+}
+
+#toni-hologram.scan {
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,140,0,0.15) 0px,
+        rgba(255,140,0,0.05) 4px,
+        transparent 8px
+    );
+    animation: holoScan 0.8s linear;
+}
+
+@keyframes holoScan {
+    0% { background-position-y: -100%; }
+    100% { background-position-y: 100%; }
+}

@@ -1,0 +1,168 @@
+/* =========================================
+   Toni 2.0 – Analysezentrum Styles
+   Spieler-Dashboard, Team-Dashboard, Charts
+   ========================================= */
+
+/* Hauptcontainer im Aktentasche-Content */
+.analysis-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Spieler-Header */
+.analysis-player-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 106, 0, 0.3);
+}
+
+.analysis-player-header img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--neon-orange);
+}
+
+.analysis-player-name {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--neon-orange);
+    text-shadow: 0 0 6px var(--neon-orange-glow);
+}
+
+/* Panel-Grundstruktur */
+.analysis-panel {
+    background: rgba(15, 15, 15, 0.8);
+    border: 1px solid var(--neon-orange);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 0 16px rgba(255, 106, 0, 0.25);
+    backdrop-filter: blur(8px);
+}
+
+/* Panel-Titel */
+.analysis-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    color: var(--neon-orange);
+    text-shadow: 0 0 6px var(--neon-orange-glow);
+}
+
+/* Charts */
+.analysis-chart {
+    width: 100%;
+    height: 180px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 106, 0, 0.3);
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+/* Heatmap */
+.analysis-heatmap {
+    width: 100%;
+    height: 260px;
+    background: rgba(255, 106, 0, 0.05);
+    border: 1px solid rgba(255, 106, 0, 0.3);
+    border-radius: 6px;
+}
+
+/* Werte-Grid */
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.analysis-value-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 106, 0, 0.3);
+    border-radius: 6px;
+    padding: 12px;
+    text-align: center;
+}
+
+.analysis-value-label {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.analysis-value-number {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--neon-orange);
+    text-shadow: 0 0 6px var(--neon-orange-glow);
+}
+
+/* Punktebewertung */
+.analysis-score {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid var(--neon-orange);
+    box-shadow: 0 0 16px var(--neon-orange-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    font-weight: bold;
+    margin: 0 auto 12px auto;
+    color: var(--neon-orange);
+}
+
+/* Trend */
+.analysis-trend {
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* Tabellen */
+.analysis-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.analysis-table th,
+.analysis-table td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(255, 106, 0, 0.2);
+}
+
+.analysis-table th {
+    color: var(--neon-orange);
+    text-shadow: 0 0 6px var(--neon-orange-glow);
+    font-weight: bold;
+}
+
+/* Besprechungs-Modul */
+.analysis-notes {
+    width: 100%;
+    min-height: 120px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 106, 0, 0.3);
+    border-radius: 6px;
+    color: #fff;
+    resize: vertical;
+}
+
+.analysis-save-btn {
+    margin-top: 10px;
+    padding: 10px 16px;
+    background: rgba(255, 106, 0, 0.15);
+    border: 1px solid var(--neon-orange);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.analysis-save-btn:hover {
+    background: rgba(255, 106, 0, 0.25);
+    box-shadow: 0 0 12px var(--neon-orange-glow);
+}

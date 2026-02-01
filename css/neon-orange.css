@@ -1,0 +1,106 @@
+/* =========================================
+   Toni 2.0 – Neon Orange High-Tech Styles
+   Glow, Hologramm, Akzente, Effekte
+   ========================================= */
+
+/* Hauptfarbe */
+:root {
+    --neon-orange: #ff6a00;
+    --neon-orange-glow: rgba(255, 106, 0, 0.7);
+}
+
+/* Glow-Effekt */
+.neon-glow {
+    box-shadow: 0 0 12px var(--neon-orange-glow),
+                0 0 24px var(--neon-orange-glow);
+}
+
+/* Text-Glow */
+.neon-text {
+    color: var(--neon-orange);
+    text-shadow: 0 0 6px var(--neon-orange-glow);
+}
+
+/* Linien & Rahmen */
+.neon-border {
+    border: 1px solid var(--neon-orange);
+    box-shadow: 0 0 8px var(--neon-orange-glow);
+}
+
+/* Buttons */
+.holo-button {
+    border-color: var(--neon-orange);
+    color: #fff;
+}
+
+.holo-button:hover {
+    background: rgba(255, 106, 0, 0.15);
+    box-shadow: 0 0 12px var(--neon-orange-glow);
+}
+
+/* Aktentasche */
+#aktentasche {
+    background: rgba(20, 20, 20, 0.85);
+    border-left: 1px solid var(--neon-orange);
+    box-shadow: -4px 0 20px rgba(255, 106, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+/* Voice Overlay */
+#voice-overlay {
+    border: 1px solid var(--neon-orange);
+    box-shadow: 0 0 20px var(--neon-orange-glow);
+}
+
+/* Taktikboard-Tools */
+#taktik-tools button {
+    border: 1px solid var(--neon-orange);
+    background: rgba(255, 106, 0, 0.1);
+    color: #fff;
+}
+
+#taktik-tools button:hover {
+    background: rgba(255, 106, 0, 0.2);
+    box-shadow: 0 0 12px var(--neon-orange-glow);
+}
+
+/* Spieler-Hologramm */
+.player-icon {
+    border: 2px solid var(--neon-orange);
+    box-shadow: 0 0 10px var(--neon-orange-glow);
+    background: rgba(255, 106, 0, 0.1);
+    color: #fff;
+    transition: 0.2s ease;
+}
+
+.player-icon:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 18px var(--neon-orange-glow);
+}
+
+/* Hologramm-Linien */
+.holo-line {
+    stroke: var(--neon-orange);
+    filter: drop-shadow(0 0 6px var(--neon-orange-glow));
+}
+
+/* Panels */
+.holo-panel {
+    border: 1px solid var(--neon-orange);
+    background: rgba(15, 15, 15, 0.8);
+    box-shadow: 0 0 16px rgba(255, 106, 0, 0.3);
+    backdrop-filter: blur(8px);
+}
+
+/* Hover-Highlight */
+.hover-glow:hover {
+    box-shadow: 0 0 16px var(--neon-orange-glow);
+}
+
+/* Neon-Orange Divider */
+.divider {
+    height: 1px;
+    background: var(--neon-orange);
+    box-shadow: 0 0 6px var(--neon-orange-glow);
+    margin: 10px 0;
+}

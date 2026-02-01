@@ -1,0 +1,23 @@
+{
+    "version": "2.0",
+    "theme": "neon-orange",
+    "language": "de",
+    "arena": {
+        "autoResize": true,
+        "showPitchLines": true
+    },
+    "tools": {
+        "defaultColorPass": "rgba(0,150,255,0.9)",
+        "defaultColorRun": "rgba(0,255,150,0.9)",
+        "defaultColorZone": "rgba(255,106,0,0.25)",
+        "defaultColorMarker": "rgba(255,255,0,0.9)"
+    },
+    "sequencer": {
+        "speed": 800,
+        "loop": false
+    },
+    "voice": {
+        "enabled": true,
+        "wakeWord": "Toni"
+    }
+}

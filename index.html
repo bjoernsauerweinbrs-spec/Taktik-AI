@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Toni 2.0</title>
+
+  <!-- favicon (relativ, GitHub Pages kompatibel) -->
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/board.css">
+  <link rel="stylesheet" href="css/aktentasche.css">
+  <link rel="stylesheet" href="css/analysis.css">
+  <link rel="stylesheet" href="css/voice.css">
+  <link rel="stylesheet" href="css/hologram.css">
+</head>
+<body>
+  <!-- Minimaler App‑Shell -->
+  <header>
+    <h1>Toni 2.0</h1>
+    <div id="status" aria-live="polite"></div>
+  </header>
+
+  <main id="app-root">
+    <!-- Auth Section -->
+    <section id="auth-section">
+      <h2>Anmelden / Registrieren</h2>
+      <input id="username" placeholder="Benutzername">
+      <input id="password" type="password" placeholder="Passwort">
+      <button id="register-btn">Registrieren</button>
+      <button id="login-btn">Anmelden</button>
+    </section>
+
+    <!-- App Section -->
+    <section id="app-section" style="display:none;">
+      <h2>App</h2>
+      <textarea id="user-data" rows="8" cols="60" placeholder="Deine Daten"></textarea>
+      <div>
+        <button id="save-btn">Speichern</button>
+        <button id="export-btn">Export</button>
+        <input id="import-file" type="file" accept=".json">
+        <button id="logout-btn">Abmelden</button>
+      </div>
+
+      <!-- Platzhalter für Taktikboard, UI Module -->
+      <div id="taktikboard-container"></div>
+    </section>
+  </main>
+
+  <footer>
+    <small>Lokale Version · Backend deaktiviert</small>
+  </footer>
+
+  <!-- Core scripts in this exact order -->
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+
+  <!-- Optional module scripts. Entfernen, wenn main.js dynamisch lädt -->
+  <script src="js/engine/arena.js"></script>
+  <script src="js/engine/dragdrop.js"></script>
+  <script src="js/engine/players.js"></script>
+  <script src="js/engine/sequencer.js"></script>
+  <script src="js/engine/tools.js"></script>
+
+  <script src="js/ui/aktentasche-ui.js"></script>
+  <script src="js/ui/taktikboard-ui.js"></script>
+  <script src="js/ui/analysis-center-ui.js"></script>
+  <script src="js/ui/beratung-ui.js"></script>
+
+  <script src="js/voice/voice-input.js"></script>
+  <script src="js/voice/voice-output.js"></script>
+  <script src="js/voice/voice-commands.js"></script>
+  <script src="js/voice/hologram-effects.js"></script>
+
+  <script src="js/ai/client.js"></script>
+  <script src="js/ai/analysis-ai.js"></script>
+
+  <!-- App glue -->
+  <script src="js/app.js"></script>
+</body>
+</html>
