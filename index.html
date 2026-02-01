@@ -1,84 +1,123 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Toni 2.0</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Taktik‑AI — Interaktives Taktik‑Board</title>
 
-  <!-- favicon (relativ, GitHub Pages kompatibel) -->
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <!-- Meta -->
+  <meta name="description" content="Interaktives Taktik‑Board mit KI‑Unterstützung. Co‑Trainer für modernes Fußballtraining." />
+  <meta name="theme-color" content="#0b1220" />
 
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/board.css">
-  <link rel="stylesheet" href="css/aktentasche.css">
-  <link rel="stylesheet" href="css/analysis.css">
-  <link rel="stylesheet" href="css/voice.css">
-  <link rel="stylesheet" href="css/hologram.css">
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data/favicon.svg" />
+
+  <!-- Styles (relativ zum Repo root; passe an, falls du andere Ordnerstruktur nutzt) -->
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/board.css" />
+  <link rel="stylesheet" href="css/hologram.css" />
+  <link rel="stylesheet" href="css/neon-orange.css" />
+  <link rel="stylesheet" href="css/voice.css" />
+
+  <!-- Open Graph (optional) -->
+  <meta property="og:title" content="Taktik‑AI" />
+  <meta property="og:description" content="Interaktives Taktik‑Board mit KI‑Unterstützung" />
+  <meta property="og:type" content="website" />
 </head>
 <body>
-  <!-- Minimaler App‑Shell -->
-  <header>
-    <h1>Toni 2.0</h1>
-    <div id="status" aria-live="polite"></div>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="logo">Taktik‑AI</h1>
+      <nav class="main-nav">
+        <a href="#board">Board</a>
+        <a href="#analysis">Analyse</a>
+        <a href="#library">Bibliothek</a>
+        <a href="#voice">Sprache</a>
+      </nav>
+    </div>
   </header>
 
-  <main id="app-root">
-    <!-- Auth Section -->
-    <section id="auth-section">
-      <h2>Anmelden / Registrieren</h2>
-      <input id="username" placeholder="Benutzername">
-      <input id="password" type="password" placeholder="Passwort">
-      <button id="register-btn">Registrieren</button>
-      <button id="login-btn">Anmelden</button>
-    </section>
-
-    <!-- App Section -->
-    <section id="app-section" style="display:none;">
-      <h2>App</h2>
-      <textarea id="user-data" rows="8" cols="60" placeholder="Deine Daten"></textarea>
-      <div>
-        <button id="save-btn">Speichern</button>
-        <button id="export-btn">Export</button>
-        <input id="import-file" type="file" accept=".json">
-        <button id="logout-btn">Abmelden</button>
+  <main id="app" class="app-container">
+    <!-- Hauptbereich: Taktikboard -->
+    <section id="board" class="board-section">
+      <div id="pitch" class="pitch">
+        <!-- Canvas / SVG / DOM für das Taktikboard -->
       </div>
 
-      <!-- Platzhalter für Taktikboard, UI Module -->
-      <div id="taktikboard-container"></div>
+      <aside id="tools" class="tools-panel">
+        <h2>Werkzeuge</h2>
+        <div id="tool-list"></div>
+      </aside>
+    </section>
+
+    <!-- Analysebereich -->
+    <section id="analysis" class="analysis-section">
+      <h2>Analyse</h2>
+      <div id="analysis-center"></div>
+    </section>
+
+    <!-- Bibliothek / Aktentasche -->
+    <section id="library" class="library-section">
+      <h2>Aktentasche</h2>
+      <div id="aktentasche"></div>
+    </section>
+
+    <!-- Sprachsteuerung -->
+    <section id="voice" class="voice-section">
+      <h2>Spracheingabe</h2>
+      <div id="voice-status">Mikrofon: inaktiv</div>
+      <button id="voice-toggle">Sprache aktivieren</button>
     </section>
   </main>
 
-  <footer>
-    <small>Lokale Version · Backend deaktiviert</small>
+  <footer class="site-footer">
+    <div class="container">
+      <small>© <span id="year"></span> Taktik‑AI — Alle Rechte vorbehalten</small>
+    </div>
   </footer>
 
-  <!-- Core scripts in this exact order -->
-  <script src="js/storage.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/main.js"></script>
+  <noscript>
+    <div class="no-js-warning">
+      JavaScript ist deaktiviert. Die Anwendung benötigt JavaScript, um zu funktionieren.
+    </div>
+  </noscript>
 
-  <!-- Optional module scripts. Entfernen, wenn main.js dynamisch lädt -->
-  <script src="js/engine/arena.js"></script>
-  <script src="js/engine/dragdrop.js"></script>
-  <script src="js/engine/players.js"></script>
-  <script src="js/engine/sequencer.js"></script>
-  <script src="js/engine/tools.js"></script>
+  <!-- Core scripts (Dateien im Repo‑Root) -->
+  <script defer src="app.js"></script>
+  <script defer src="storage.js"></script>
+  <script defer src="main.js"></script>
 
-  <script src="js/ui/aktentasche-ui.js"></script>
-  <script src="js/ui/taktikboard-ui.js"></script>
-  <script src="js/ui/analysis-center-ui.js"></script>
-  <script src="js/ui/beratung-ui.js"></script>
+  <!-- Engine scripts (relativ zum Root; liegen in /engine) -->
+  <script defer src="engine/arena.js"></script>
+  <script defer src="engine/dragdrop.js"></script>
+  <script defer src="engine/players.js"></script>
+  <script defer src="engine/sequencer.js"></script>
+  <script defer src="engine/tools.js"></script>
 
-  <script src="js/voice/voice-input.js"></script>
-  <script src="js/voice/voice-output.js"></script>
-  <script src="js/voice/voice-commands.js"></script>
-  <script src="js/voice/hologram-effects.js"></script>
+  <!-- UI modules (relativ zum Root; liegen in /ui) -->
+  <script defer src="ui/aktentasche-ui.js"></script>
+  <script defer src="ui/beratung-ui.js"></script>
+  <script defer src="ui/analysis-center-ui.js"></script>
 
-  <script src="js/ai/client.js"></script>
-  <script src="js/ai/analysis-ai.js"></script>
+  <!-- Voice modules (relativ zum Root; liegen in /voice) -->
+  <script defer src="voice/voice-input.js"></script>
+  <script defer src="voice/voice-commands.js"></script>
 
-  <!-- App glue -->
-  <script src="js/app.js"></script>
+  <!-- Inline initialisation (klein, optional) -->
+  <script>
+    // Setze Jahr im Footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Beispiel: Voice Toggle (falls voice-input.js erwartet wird)
+    const voiceToggle = document.getElementById('voice-toggle');
+    if (voiceToggle) {
+      voiceToggle.addEventListener('click', () => {
+        const status = document.getElementById('voice-status');
+        const active = status.textContent.includes('aktiv');
+        status.textContent = active ? 'Mikrofon: inaktiv' : 'Mikrofon: aktiv';
+        // Die eigentliche Sprachlogik liegt in voice-input.js
+      });
+    }
+  </script>
 </body>
 </html>
