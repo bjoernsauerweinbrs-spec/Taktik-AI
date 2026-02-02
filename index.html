@@ -2,10 +2,10 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — Pro Coaching OS</title>
+    <title>TONI 2.0 — Tactical OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
-<body>
+<body class="pro-layout">
 
     <div id="login-screen">
         <div class="login-box">
@@ -18,39 +18,41 @@
     </div>
 
     <aside class="sidebar-minimal">
-        <div class="main-briefcase-btn" onclick="BriefcaseUI.toggle()" title="Zentrale öffnen">
-            <div style="font-size:30px;">💼</div>
-            <span style="font-size:9px; font-weight:bold;">ZENTRALE</span>
-        </div>
-        
-        <div id="voice-trigger-btn" class="main-briefcase-btn" onclick="ToniAI.toggleListening()" style="margin-top:20px; color:var(--data-cyan);">
-            <div style="font-size:30px;">🎤</div>
-            <span id="mic-status-label" style="font-size:9px; font-weight:bold;">BEREIT</span>
+        <div class="sidebar-top">
+            <div class="control-unit" onclick="BriefcaseUI.toggle()" title="Zentrale">
+                <div class="icon">💼</div>
+                <span>ZENTRALE</span>
+            </div>
+            <div id="voice-trigger-btn" class="control-unit" onclick="ToniAI.toggleListening()" title="Sprachbefehl">
+                <div class="icon">🎤</div>
+                <span id="mic-status-label">AUS</span>
+            </div>
         </div>
     </aside>
 
     <main id="stage">
         <canvas id="main-canvas"></canvas>
-        <div id="hologram-ui"></div>
     </main>
 
-    <aside class="analysis-panel" id="side-analysis">
+    <aside class="analysis-panel">
         <div id="setcard-content">
             </div>
     </aside>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
-        <div class="briefcase-header">
-            <h1 style="color:var(--accent-orange);">ZENTRALE AKTENTASCHE</h1>
-            <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:white; font-size:30px; cursor:pointer;">✕</button>
-        </div>
-        <div class="folder-grid" id="briefcase-nav">
-            <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')"><h3>Sporttasche</h3></div>
-            <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')"><h3>Geschäftszimmer</h3></div>
-        </div>
-        <div id="briefcase-content" class="hidden" style="width:100%; max-width:900px;">
-            <button onclick="BriefcaseUI.backToNav()" style="color:var(--data-cyan); background:none; border:none; cursor:pointer; font-weight:bold; margin-bottom:20px;">← ZURÜCK</button>
-            <div id="active-content"></div>
+        <div class="briefcase-window">
+            <div class="briefcase-header">
+                <h2>AKTENTASCHE</h2>
+                <button onclick="BriefcaseUI.toggle()">✕</button>
+            </div>
+            <div id="briefcase-nav" class="folder-grid">
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">👟 Sporttasche</div>
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')">🏢 Geschäftszimmer</div>
+            </div>
+            <div id="briefcase-content" class="hidden">
+                <button onclick="BriefcaseUI.backToNav()" class="back-btn">← ZURÜCK</button>
+                <div id="active-content"></div>
+            </div>
         </div>
     </div>
 
@@ -61,8 +63,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => { 
-            ToniAuth.init();
-            if(window.arena) arena.init('main-canvas');
+            ToniAuth.init(); 
+            arena.init('main-canvas');
         });
     </script>
 </body>
