@@ -2,57 +2,58 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — Tactical Command</title>
+    <title>TONI 2.0 — World-Class Intelligence</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body>
 
     <aside class="sidebar-minimal">
         <div class="main-briefcase-btn" onclick="toggleBriefcase()">
-            <div style="font-size:32px;">💼</div>
-            <span style="font-size:10px; font-weight:bold;">ZENTRALE</span>
+            <div style="font-size:35px;">💼</div>
+            <span style="font-size:10px; font-weight:bold; letter-spacing:1px;">ZENTRALE</span>
         </div>
     </aside>
 
     <main id="stage">
         <div class="tools-overlay">
-            <button class="tool-btn" onclick="arena.setMode('standard')">Standard</button>
-            <button class="tool-btn" onclick="arena.setMode('funinho')">Funinho</button>
+            <button class="tool-btn" onclick="arena.setMode('standard')">STANDARD</button>
+            <button class="tool-btn" onclick="arena.setMode('funinho')">FUNINHO</button>
         </div>
         <canvas id="main-canvas"></canvas>
     </main>
 
     <aside class="analysis-panel">
-        <h2 style="color: var(--data-cyan); font-size: 16px; letter-spacing: 2px;">ANALYSEZENTRUM</h2>
+        <h2 style="color: var(--data-cyan); font-size: 16px; letter-spacing: 2px; border-bottom: 1px solid rgba(0,209,255,0.1); padding-bottom:15px;">ANALYSEZENTRUM</h2>
         <div id="setcard-content" style="margin-top: 30px;">
-            <p style="color: #667085; font-style: italic;">Wähle einen Spieler auf dem Feld aus...</p>
+            <p style="color: #667085; font-style: italic; text-align:center;">Spieler auf dem Feld berühren...</p>
         </div>
     </aside>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <button onclick="toggleBriefcase()" style="position:absolute; top:40px; right:40px; background:none; border:none; color:white; font-size:30px; cursor:pointer;">✕</button>
-        <h1 style="color: var(--accent-orange); letter-spacing: 5px;">ZENTRALE AKTENTASCHE</h1>
+        <h1 style="color: var(--accent-orange); letter-spacing: 5px; margin-bottom:0;">ZENTRALE AKTENTASCHE</h1>
+        <p style="color:#667085; font-size:12px; margin-bottom:50px;">VERSION 2.0 — BJÖRN'S TACTICAL HUB</p>
         
         <div class="folder-grid" id="main-folders">
             <div class="folder-item" onclick="openFolder('sporttasche')">
-                <div style="font-size:50px;">👟</div>
+                <div style="font-size:55px;">👟</div>
                 <h3>Sporttasche</h3>
-                <p style="font-size:11px; color:#667085;">Kader & Training</p>
+                <span class="folder-sub">Kader & Training</span>
             </div>
-            <div class="folder-item">
-                <div style="font-size:50px;">📊</div>
+            <div class="folder-item" onclick="alert('Analyse-Archiv wird geladen...')">
+                <div style="font-size:55px;">📊</div>
                 <h3>Analysezentrum</h3>
-                <p style="font-size:11px; color:#667085;">Leistungsdaten</p>
+                <span class="folder-sub">Leistungsdaten</span>
             </div>
-            <div class="folder-item">
-                <div style="font-size:50px;">🏢</div>
+            <div class="folder-item" onclick="openFolder('geschäft')">
+                <div style="font-size:55px;">🏢</div>
                 <h3>Geschäftszimmer</h3>
-                <p style="font-size:11px; color:#667085;">Management</p>
+                <span class="folder-sub">Sponsoring & Media</span>
             </div>
         </div>
 
-        <div id="subfolder-view" class="hidden" style="width:100%; max-width:800px; margin-top:40px;">
-            <button onclick="closeFolder()" style="color: var(--data-cyan); cursor:pointer; background:none; border:none; margin-bottom:20px;">← ZURÜCK</button>
+        <div id="subfolder-view" class="hidden" style="width:100%; max-width:800px; margin-top:30px; background:rgba(255,255,255,0.02); padding:30px; border-radius:20px;">
+            <button onclick="closeFolder()" style="color: var(--data-cyan); cursor:pointer; background:none; border:none; margin-bottom:25px; font-weight:bold;">← ZURÜCK ZUR AUSWAHL</button>
             <div id="subfolder-content"></div>
         </div>
     </div>
@@ -61,23 +62,23 @@
     <script src="ui/aktentasche-ui.js"></script>
     <script>
         function toggleBriefcase() {
-            document.getElementById('briefcase-overlay').classList.toggle('hidden');
+            const el = document.getElementById('briefcase-overlay');
+            el.classList.toggle('hidden');
         }
 
         function openFolder(type) {
-            document.getElementById('main-folders').classList.add('hidden');
+            document.getElementById('main-folders').style.display = 'none';
             document.getElementById('subfolder-view').classList.remove('hidden');
             if (type === 'sporttasche') window.Aktentasche.showSporttasche();
+            if (type === 'geschäft') window.Aktentasche.showGeschäftszimmer();
         }
 
         function closeFolder() {
-            document.getElementById('main-folders').classList.remove('hidden');
+            document.getElementById('main-folders').style.display = 'grid';
             document.getElementById('subfolder-view').classList.add('hidden');
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            arena.init('main-canvas');
-        });
+        document.addEventListener('DOMContentLoaded', () => { arena.init('main-canvas'); });
     </script>
 </body>
 </html>
