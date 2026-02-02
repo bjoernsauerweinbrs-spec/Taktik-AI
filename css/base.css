@@ -1,63 +1,35 @@
-(function() {
-    window.arena = {
-        canvas: null,
-        ctx: null,
-        players: [],
-        ready: false,
+body {
+    background: #0B1220 !important; /* Erzwingt den dunklen Hintergrund */
+    color: #ffffff;
+    display: grid;
+    grid-template-columns: 80px 1fr 320px; /* Sidebar | Field | Setcard */
+    height: 100vh;
+    margin: 0;
+}
 
-        init(id) {
-            // SICHERHEITS-CHECK: Finde das Element, egal ob ID oder Objekt
-            const el = (typeof id === 'string') ? document.getElementById(id) : id;
-            
-            if (!el || el.tagName !== 'CANVAS') {
-                console.error("❌ Arena-Fehler: Ungültiges Canvas-Element bei ID:", id);
-                return false;
-            }
+.analysis-panel {
+    background: #1A2233;
+    padding: 20px;
+    border-left: 1px solid rgba(0, 209, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+}
 
-            this.canvas = el;
-            this.ctx = el.getContext('2d');
-            this.resize();
-            window.addEventListener('resize', () => this.resize());
-            this.ready = true;
-            this.render();
-            console.log("🏟️ Arena Engine initialisiert.");
-            return true;
-        },
+.setcard-header {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 25px;
+}
 
-        resize() {
-            if (!this.canvas) return;
-            const container = this.canvas.parentElement;
-            this.canvas.width = container.clientWidth;
-            this.canvas.height = container.clientHeight;
-            this.render();
-        },
-
-        render() {
-            if (!this.ready) return;
-            const ctx = this.ctx;
-            ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            this.drawPitch(ctx);
-            this.players.forEach(p => this.drawPlayer(ctx, p));
-        },
-
-        drawPitch(ctx) {
-            ctx.strokeStyle = "rgba(0, 209, 255, 0.1)";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(50, 50, this.canvas.width - 100, this.canvas.height - 100);
-        },
-
-        drawPlayer(ctx, p) {
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = "#FF6A00";
-            ctx.fillStyle = "#FF6A00";
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = "#fff";
-            ctx.font = "bold 12px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText(p.number, p.x, p.y + 5);
-        }
-    };
-})();
+.player-avatar {
+    width: 60px;
+    height: 60px;
+    background: #FF6A00;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(255, 106, 0, 0.4);
+}
