@@ -2,48 +2,49 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 - Tactical Intelligence</title>
-    <link rel="stylesheet" href="css/neon-orange.css">
+    <title>TONI 2.0 - High Professional</title>
+    <link rel="stylesheet" href="css/base.css">
 </head>
 <body>
-    <div id="app-shell">
-        <aside class="sidebar">
-            <nav id="main-nav">
-                <div class="nav-item active" onclick="switchMode('tactic')">📊 Analyse</div>
-                <div class="nav-item" onclick="switchMode('kader')">👤 Kader</div>
-                <div class="nav-item" onclick="switchMode('briefcase')">💼 Aktentasche</div>
-            </nav>
-        </aside>
-        
-        <main id="stage">
-            <canvas id="main-canvas"></canvas>
-        </main>
 
-        <div id="voice-overlay" class="hidden">
-            <div class="listening-ring"></div>
-            <span id="voice-text">Toni hört zu...</span>
+    <aside class="sidebar">
+        <div class="nav-icon active" title="Analyse">📊</div>
+        <div class="nav-icon" title="Kader">👥</div>
+        <div class="nav-icon" title="Aktentasche">💼</div>
+    </aside>
+
+    <main id="stage">
+        <canvas id="main-canvas"></canvas>
+    </main>
+
+    <aside class="analysis-panel" id="analysis-sidebar">
+        <h2>Analysezentrum</h2>
+        <hr style="border: 0; border-top: 1px solid rgba(0,209,255,0.2); margin: 15px 0;">
+        <div id="setcard-placeholder">
+            <p style="color: #666;">Wähle einen Spieler für die Setcard-Details...</p>
         </div>
-    </div>
+    </aside>
 
     <script src="js/storage.js"></script>
     <script src="engine/arena.js"></script>
     <script src="engine/players.js"></script>
     <script src="engine/dragdrop.js"></script>
-    <script src="ui/taktikboard-ui.js"></script>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialisierung ohne Konflikte
-            arena.init('main-canvas');
+            // Initialisierung mit Fehlerprüfung
+            const isOk = arena.init('main-canvas');
             
-            // Beispieldaten laden
-            arena.players = [
-                { id: 1, name: "Schuster", number: 9, x: 200, y: 300, team: 'home' },
-                { id: 2, name: "Weber", number: 10, x: 400, y: 350, team: 'away' }
-            ];
-            
-            initDragDrop();
-            arena.render();
+            if (isOk) {
+                // Testdaten
+                arena.players = [
+                    { name: "Max", number: 10, x: 200, y: 150 },
+                    { name: "Tim", number: 9, x: 300, y: 250 }
+                ];
+                
+                if (typeof initDragDrop === 'function') initDragDrop();
+                arena.render();
+            }
         });
     </script>
 </body>
