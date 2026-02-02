@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 – INTELLIGENCE & VOICE CORE
- * Fokus: Freier Dialog, Spracherkennung & Klopp/Nagelsmann Persona
+ * Persona: Klopp/Nagelsmann Mix
  */
 
 (function() {
@@ -9,7 +9,9 @@
         recognition: null,
         isListening: false,
 
+        // Zentrale Start-Funktion [cite: 2026-02-02]
         init() {
+            console.log("⚽ Toni Intelligence: Aufwärmen abgeschlossen.");
             this.setupVoice();
             this.startGreeting();
         },
@@ -17,10 +19,11 @@
         // --- SPRACHAUSGABE (Toni spricht) ---
         say(text) {
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Vorherige Sprache stoppen
+                window.speechSynthesis.cancel();
                 const msg = new SpeechSynthesisUtterance(text);
                 const voices = window.speechSynthesis.getVoices();
-                msg.voice = voices.find(v => v.lang === 'de-DE' && v.name.includes('Male')) || voices[0];
+                // Suche nach einer kräftigen, männlichen Stimme
+                msg.voice = voices.find(v => v.lang === 'de-DE' && (v.name.includes('Male') || v.name.includes('Google'))) || voices[0];
                 msg.pitch = 0.85; 
                 msg.rate = 1.0;
                 window.speechSynthesis.speak(msg);
@@ -34,21 +37,18 @@
                 this.recognition = new SpeechRecognition();
                 this.recognition.lang = 'de-DE';
                 this.recognition.continuous = false;
-                this.recognition.interimResults = false;
-
+                
                 this.recognition.onresult = (event) => {
                     const transcript = event.results[0][0].transcript;
                     this.processInput(transcript);
                 };
 
-                this.recognition.onend = () => {
-                    this.setListeningState(false);
-                };
+                this.recognition.onend = () => this.setListeningState(false);
             }
         },
 
         toggleListening() {
-            if (!this.recognition) return alert("Spracherkennung wird von diesem Browser nicht unterstützt.");
+            if (!this.recognition) return alert("Browser unterstützt keine Spracherkennung.");
             if (this.isListening) {
                 this.recognition.stop();
             } else {
@@ -60,15 +60,14 @@
         setListeningState(state) {
             this.isListening = state;
             const btn = document.getElementById('voice-trigger-btn');
-            if (btn) {
-                btn.style.background = state ? 'var(--accent-orange)' : 'var(--data-cyan)';
-                btn.classList.toggle('pulse-animation', state);
-            }
+            if (btn) btn.classList.toggle('pulse-animation', state);
         },
 
-        // --- DIALOG LOGIK ---
+        // --- DIALOG-LOGIK ---
         async speak(text, showInput = true) {
             const container = document.getElementById('setcard-content');
+            if (!container) return;
+
             container.innerHTML = `
                 <div class="toni-speech-bubble animate-fadeIn">
                     <div class="toni-badge">TONI // CO-TRAINER AI</div>
@@ -76,10 +75,9 @@
                     ${showInput ? `
                         <div id="toni-chat-area" style="margin-top:20px;">
                             <div style="display:flex; gap:10px;">
-                                <input id="toni-free-input" type="text" placeholder="Antworte Toni..." onkeypress="if(event.key==='Enter') ToniAI.handleManualInput()">
-                                <button id="voice-trigger-btn" onclick="ToniAI.toggleListening()" title="Spracheingabe">🎤</button>
+                                <input id="toni-free-input" type="text" placeholder="Schreib mir oder sprich..." onkeypress="if(event.key==='Enter') ToniAI.handleManualInput()">
+                                <button id="voice-trigger-btn" onclick="ToniAI.toggleListening()">🎤</button>
                             </div>
-                            <div id="toni-quick-actions" style="margin-top:15px; display:flex; flex-wrap:wrap; gap:5px;"></div>
                         </div>
                     ` : ''}
                 </div>
@@ -87,42 +85,33 @@
             this.say(text.replace(/<[^>]*>/g, ''));
         },
 
-        // Verarbeitet sowohl getippten als auch gesprochenen Text
         processInput(input) {
-            console.log("Toni empfängt:", input);
-            const lowInput = input.toLowerCase();
-
-            // Beispiel für flexible Logik (wird durch Gemini/KI-Modell im Hintergrund gesteuert)
+            const low = input.toLowerCase();
+            
             if (this.userName === '') {
                 this.userName = input;
-                this.speak(`Schön dich kennenzulernen, ${this.userName}! Ich hab das System gecheckt – wir sind bereit für Höchstleistung. Was hast du heute vor? Taktik büffeln, Training planen oder die Stadionzeitung rocken?`);
+                this.speak(`Schön dich kennenzulernen, ${this.userName}! Ich erkläre dir kurz was Toni 2.0 für dich tun kann. Ich plane dein Training, verwalte den Kader und erstelle Stadionzeitungen – alles lokal und sicher auf deinem Gerät. Womit fangen wir an?`);
                 return;
             }
 
-            if (lowInput.includes("training") || lowInput.includes("buch")) {
-                this.speak("Alles klar, ab in die Sporttasche. Ich lade die Übungskataloge!");
+            if (low.includes("training") || low.includes("sporttasche")) {
+                this.speak("Ab zur Sporttasche. Voller Fokus auf die Einheiten!");
                 setTimeout(() => BriefcaseUI.switchSektor('sport'), 1500);
-            } else if (lowInput.includes("zeitung") || lowInput.includes("stadion")) {
-                this.speak("Redaktionsschluss! Ich öffne das Geschäftszimmer für dich.");
+            } else if (low.includes("zeitung") || low.includes("geschäft")) {
+                this.speak("Redaktion öffnet. Wir machen das Heft heute druckreif!");
                 setTimeout(() => BriefcaseUI.switchSektor('orga'), 1500);
-            } else if (lowInput.includes("hallo") || lowInput.includes("hi")) {
-                this.speak(`Hi ${this.userName}! Alles im grünen Bereich. Worauf liegt der Fokus?`);
             } else {
-                this.speak("Das klingt nach einem Plan! Ich analysiere das im Hintergrund. Soll ich dir die Details in der Zentrale zeigen?");
+                this.speak("Klasse Idee! Ich schlage vor, wir schauen uns das direkt in der Zentrale an.");
             }
         },
 
         handleManualInput() {
-            const inputEl = document.getElementById('toni-free-input');
-            const val = inputEl.value;
-            if (val) {
-                this.processInput(val);
-                inputEl.value = '';
-            }
+            const el = document.getElementById('toni-free-input');
+            if (el.value) { this.processInput(el.value); el.value = ''; }
         },
 
         startGreeting() {
-            this.speak("Hallo! Ich bin Toni, dein persönlicher Co-Trainer. Ich stehe dir für die tägliche Arbeit als Coach oder Manager zur Verfügung. Wie ist dein Name?");
+            this.speak("Hallo! Ich bin Toni, dein persönlicher Co-Trainer. Ich stehe dir in der täglichen Arbeit eines Trainers oder Managers zur Verfügung. Wie ist dein Name?");
         }
     };
 })();
