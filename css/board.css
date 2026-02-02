@@ -1,97 +1,68 @@
-/* =========================================
-   Toni 2.0 – Taktikboard Styles
-   Spielfeld, Canvas, Spieler-Icons, Tools
-   ========================================= */
-
-/* Container für das gesamte Taktikboard */
-#taktikboard-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+/* board.css - Korrektur für die Werkzeuge */
+#board-container {
+    position: relative;
+    width: 100%;
+    height: 80vh;
+    background: #0b1220;
     overflow: hidden;
-    background: #0a0a0a;
 }
 
-/* Spielfeld-Canvas */
-#taktikboard {
+#arena-canvas {
+    display: block;
     width: 100%;
     height: 100%;
-    display: block;
-    background: #0f0f0f;
 }
 
-/* Tool-Leiste */
-#taktik-tools {
+.tools-panel {
     position: absolute;
     top: 20px;
     left: 20px;
-    z-index: 30;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    background: rgba(15, 25, 40, 0.9);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--neon-orange, #ff6a00);
+    box-shadow: 0 0 15px rgba(255, 106, 0, 0.3);
+    z-index: 100;
+    max-width: 250px;
 }
 
-/* Tool-Buttons */
-#taktik-tools button {
-    padding: 8px 12px;
+.tools-panel h3 {
+    margin: 0 0 10px 0;
     font-size: 14px;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.tool-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.holo-button {
+    background: rgba(255, 106, 0, 0.1);
+    border: 1px solid #ff6a00;
+    color: #ff6a00;
+    padding: 8px;
     cursor: pointer;
-    border-radius: 6px;
-    backdrop-filter: blur(6px);
-    transition: 0.2s ease;
-}
-
-/* Spieler-Icons */
-.player-icon {
-    position: absolute;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+    font-size: 12px;
+    transition: all 0.2s ease;
     text-align: center;
-    line-height: 48px;
-    font-weight: bold;
-    cursor: grab;
-    user-select: none;
-    transition: 0.2s ease;
 }
 
-/* Beim Ziehen */
-.player-icon:active {
-    cursor: grabbing;
-    transform: scale(1.1);
+.holo-button:hover, .holo-button.active {
+    background: #ff6a00;
+    color: #fff;
+    box-shadow: 0 0 10px #ff6a00;
 }
 
-/* Spieler-Nummer */
-.player-number {
-    font-size: 18px;
+.holo-button.danger {
+    border-color: #ff3333;
+    color: #ff3333;
 }
 
-/* Spieler-Name (optional) */
-.player-name {
-    font-size: 10px;
-    margin-top: -4px;
-    opacity: 0.8;
-}
-
-/* Linien (Laufwege, Passwege etc.) */
-.tactic-line {
-    position: absolute;
-    pointer-events: none;
-}
-
-/* Animierte Sequenzen */
-.sequence-step {
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0.8;
-}
-
-/* Zonen (Pressing, Funinho etc.) */
-.tactic-zone {
-    position: absolute;
-    border-radius: 6px;
-    opacity: 0.25;
-    pointer-events: none;
+.holo-button.danger:hover {
+    background: #ff3333;
+    color: #fff;
 }
