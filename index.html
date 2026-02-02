@@ -1,28 +1,30 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8"><title>TONI 2.0 — High-Class OS</title>
+    <meta charset="UTF-8"><title>TONI 2.0 — Pro Coaching OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body>
     <aside class="sidebar-minimal"><div class="main-briefcase-btn" onclick="BriefcaseUI.toggle()">💼</div></aside>
     <main id="stage">
         <canvas id="main-canvas"></canvas>
-        <div id="hologram-ui" onclick="ToniAI.startOnboarding()"></div>
+        <div id="hologram-ui" onclick="ToniAI.startGreeting()"></div>
     </main>
-    <aside class="analysis-panel" id="side-analysis"><div id="setcard-content"></div></aside>
+    <aside class="analysis-panel" id="side-analysis">
+        <div id="setcard-content"></div>
+    </aside>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div style="display:flex; justify-content:space-between; width:100%; max-width:1000px; margin-bottom:40px;">
             <h1 style="color:var(--accent-orange);">ZENTRALE AKTENTASCHE</h1>
             <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:white; font-size:30px; cursor:pointer;">✕</button>
         </div>
-        <div class="folder-grid" id="briefcase-nav">
+        <div id="briefcase-nav" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:20px; width:100%; max-width:1000px;">
             <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">👟 <h3>Sporttasche</h3></div>
             <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')">🏢 <h3>Geschäftszimmer</h3></div>
         </div>
         <div id="briefcase-content" class="hidden" style="width:100%; max-width:1000px;">
-            <button onclick="document.getElementById('briefcase-nav').classList.remove('hidden'); document.getElementById('briefcase-content').classList.add('hidden');" style="color:var(--data-cyan); background:none; border:none; cursor:pointer; font-weight:bold; margin-bottom:20px;">← ZURÜCK</button>
+            <button onclick="document.getElementById('briefcase-nav').style.display='grid'; document.getElementById('briefcase-content').classList.add('hidden');" style="color:var(--data-cyan); background:none; border:none; cursor:pointer; font-weight:bold; margin-bottom:20px;">← ZURÜCK</button>
             <div id="active-content"></div>
         </div>
     </div>
@@ -34,8 +36,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => { 
             arena.init('main-canvas'); 
-            BriefcaseUI.init();
-            setTimeout(() => ToniAI.startOnboarding(), 1000); 
+            // Startet den Klopp/Nagelsmann Dialog [cite: 2026-02-02]
+            setTimeout(() => ToniAI.startGreeting(), 1000); 
         });
     </script>
 </body>
