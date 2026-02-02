@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 – ARENA ENGINE
- * Sicherstellung der Spielfeld-Darstellung & Spieler-Interaktion
+ * TONI 2.0 – ARENA ENGINE (FULL VERSION)
+ * Goal Rendering & Hybrid Layouts
  */
 (function() {
     window.arena = {
@@ -12,10 +12,7 @@
             this.ctx = this.canvas.getContext('2d');
             this.resize();
             window.addEventListener('resize', () => this.resize());
-            
-            // Klick-Erkennung für Setcard-Öffnung
             this.canvas.addEventListener('mousedown', (e) => this.handleClick(e));
-            
             this.animate();
         },
 
@@ -29,10 +26,8 @@
             const rect = this.canvas.getBoundingClientRect();
             const mx = e.clientX - rect.left;
             const my = e.clientY - rect.top;
-
             this.players.forEach(p => {
-                const dist = Math.hypot(p.x - mx, p.y - my);
-                if (dist < 20) window.showSetcard(p);
+                if (Math.hypot(p.x - mx, p.y - my) < 20) window.showSetcard(p);
             });
         },
 
@@ -49,13 +44,9 @@
 
             this.players.forEach(p => {
                 const color = p.team === 'home' ? '#FF6A00' : '#00D1FF';
-                
-                // Spieler-Glow
                 ctx.shadowBlur = 10 + (this.pulse * 10); ctx.shadowColor = color;
                 ctx.fillStyle = color;
                 ctx.beginPath(); ctx.arc(p.x, p.y, 18, 0, Math.PI * 2); ctx.fill();
-
-                // NAME & NUMMER (Wiederhergestellt)
                 ctx.shadowBlur = 0; ctx.fillStyle = "white"; ctx.textAlign = "center";
                 ctx.font = "bold 12px Inter";
                 ctx.fillText(p.number, p.x, p.y + 5);
@@ -67,8 +58,61 @@
         drawPitch(ctx) {
             const w = this.canvas.width; const h = this.canvas.height; const pad = 60;
             ctx.strokeStyle = "rgba(0, 209, 255, 0.2)"; ctx.lineWidth = 2;
-            ctx.strokeRect(pad, pad, w - (pad * 2), h - (pad * 2)); // Außenlinie
-            ctx.beginPath(); ctx.moveTo(w/2, pad); ctx.lineTo(w/2, h-pad); ctx.stroke(); // Mitte
+            
+            // Außenlinie
+            ctx.strokeRect(pad, pad, w - (pad * 2), h - (pad * 2));
+
+            if (this.mode === 'standard') {
+                this.drawStandardElements(ctx, w, h, pad);
+            } else {
+                this.drawFuninhoElements(ctx, w, h, pad);
+            }
+        },
+
+        drawStandardElements(ctx, w, h, pad) {
+            // Mittellinie & Kreis
+            ctx.beginPath(); ctx.moveTo(w/2, pad); ctx.lineTo(w/2, h-pad); ctx.stroke();
+            ctx.beginPath(); ctx.arc(w/2, h/2, 60, 0, Math.PI * 2); ctx.stroke();
+            
+            // Strafräume
+            ctx.strokeRect(pad, h/2 - 90, 80, 180); // Links
+            ctx.strokeRect(w - pad - 80, h/2 - 90, 80, 180); // Rechts
+            
+            // TORE (Standard)
+            this.drawGoal(ctx, pad, h/2, -15, 65); // Links
+            this.drawGoal(ctx, w - pad, h/2, 15, 65); // Rechts
+        },
+
+        drawFuninhoElements(ctx, w, h, pad) {
+            const goalSize = 35;
+            const offset = h * 0.22; // Optimierter Versatz von den Ecken
+
+            // 4 TORE (Funinho)
+            this.drawGoal(ctx, pad, h/2 - offset, -10, goalSize);
+            this.drawGoal(ctx, pad, h/2 + offset, -10, goalSize);
+            this.drawGoal(ctx, w - pad, h/2 - offset, 10, goalSize);
+            this.drawGoal(ctx, w - pad, h/2 + offset, 10, goalSize);
+            
+            // Schusszonen
+            ctx.setLineDash([5, 10]);
+            ctx.beginPath();
+            ctx.moveTo(pad + 100, pad); ctx.lineTo(pad + 100, h - pad);
+            ctx.moveTo(w - pad - 100, pad); ctx.lineTo(w - pad - 100, h - pad);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        },
+
+        drawGoal(ctx, x, y, depth, size) {
+            ctx.save();
+            ctx.strokeStyle = "white"; ctx.lineWidth = 3;
+            ctx.shadowBlur = 10; ctx.shadowColor = "white";
+            ctx.beginPath();
+            ctx.moveTo(x, y - size / 2);
+            ctx.lineTo(x + depth, y - size / 2);
+            ctx.lineTo(x + depth, y + size / 2);
+            ctx.lineTo(x, y + size / 2);
+            ctx.stroke();
+            ctx.restore();
         },
 
         setMode(m) { this.mode = m; }
