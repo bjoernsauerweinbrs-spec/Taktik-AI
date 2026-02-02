@@ -1,82 +1,52 @@
 /**
  * =========================================
- * TONI 2.0 – TACTICAL AI ENGINE
- * Geometrische Analyse & Aktive Korrektur
+ * TONI 2.0 – TACTICAL AI (FUNINHO UPDATE)
  * =========================================
  */
 (function() {
     window.AnalysisAI = {
-        config: {
-            gapThreshold: 120, 
-            defensiveZoneY: 0.6 
-        },
-
-        // 1. ANALYSE: Scannt das Spielfeld
         scanBoard() {
-            const players = window.arena.players;
-            const homeTeam = players.filter(p => p.team === 'home');
-            const awayTeam = players.filter(p => p.team === 'away');
-
-            if (homeTeam.length < 4) return "Björn, ich brauche mindestens vier Verteidiger für eine Analyse.";
-
-            const defenseLine = this.detectBackFour(homeTeam);
-            const gaps = this.findGaps(defenseLine);
-            const threats = this.detectThreats(awayTeam, defenseLine);
-
-            return this.generateReport(defenseLine, gaps, threats);
+            const mode = window.arena.mode;
+            if (mode === 'funinho') return this.analyzeFuninho();
+            return this.analyzeStandard();
         },
 
-        // 2. AKTION: Korrigiert die Positionen aktiv
-        fixDefenseLine() {
+        analyzeStandard() {
             const homeTeam = window.arena.players.filter(p => p.team === 'home');
-            if (homeTeam.length < 4) return;
-
-            const defenseLine = this.detectBackFour(homeTeam);
-            const canvasW = window.arena.canvas.width;
+            if (homeTeam.length < 4) return "Nicht genug Spieler für Kettenanalyse.";
             
-            // Berechnung der idealen Werte
-            const idealY = defenseLine.reduce((acc, p) => acc + p.y, 0) / defenseLine.length;
-            const spacing = canvasW / 5;
+            const sorted = [...homeTeam].sort((a, b) => b.y - a.y).slice(0, 4).sort((a, b) => a.x - b.x);
+            let gap = false;
+            for (let i = 0; i < sorted.length - 1; i++) {
+                if (Math.abs(sorted[i+1].x - sorted[i].x) > 130) gap = true;
+            }
+            
+            return gap ? "Björn, da ist eine Schnittstelle in der Kette. Soll ich sie schließen?" : "Abwehr steht kompakt.";
+        },
 
-            // Toni verschiebt die Spieler (Brasilianischer Stil: Harmonische Verteilung)
-            defenseLine.forEach((player, index) => {
-                player.x = spacing * (index + 1);
-                player.y = idealY;
+        analyzeFuninho() {
+            const homeTeam = window.arena.players.filter(p => p.team === 'home');
+            if (homeTeam.length !== 3) return "Funinho-Analyse erfordert genau 3 Spieler pro Team.";
+
+            // Analyse der Dreiecksbildung (Raumbesetzung)
+            const centerX = homeTeam.reduce((acc, p) => acc + p.x, 0) / 3;
+            const spread = Math.max(...homeTeam.map(p => p.x)) - Math.min(...homeTeam.map(p => p.x));
+
+            if (spread < 150) {
+                return "Wir stehen zu eng! Zieh das Spiel in die Breite, um beide Mini-Tore zu bedrohen.";
+            }
+            return "Gute Raumaufteilung. Wir können beide Tore effektiv attackieren.";
+        },
+
+        fixDefenseLine() {
+            // Bestehende Korrektur-Logik
+            const defenseLine = window.arena.players.filter(p => p.team === 'home').sort((a,b) => a.x - b.x);
+            const spacing = window.arena.canvas.width / 5;
+            defenseLine.forEach((p, i) => {
+                p.x = spacing * (i + 1);
+                p.y = 400;
             });
-
-            if (window.toniSpeak) {
-                window.toniSpeak("Ich habe die Kette korrigiert, Björn. Jetzt stehen wir kompakt und lassen keine Schnittstellen mehr zu.");
-            }
-            
-            console.log("🛡️ Taktische Korrektur ausgeführt.");
-        },
-
-        detectBackFour(team) {
-            const sortedByY = [...team].sort((a, b) => b.y - a.y);
-            return sortedByY.slice(0, 4).sort((a, b) => a.x - b.x);
-        },
-
-        findGaps(line) {
-            let foundGaps = [];
-            for (let i = 0; i < line.length - 1; i++) {
-                const dist = line[i+1].x - line[i].x;
-                if (dist > this.config.gapThreshold) {
-                    foundGaps.push({ p1: line[i], p2: line[i+1], width: dist });
-                }
-            }
-            return foundGaps;
-        },
-
-        detectThreats(opponents, defenseLine) {
-            const lineY = defenseLine[0].y;
-            return opponents.filter(opp => opp.y > lineY - 50);
-        },
-
-        generateReport(line, gaps, threats) {
-            if (gaps.length > 0) {
-                return `Ich sehe eine Lücke zwischen ${gaps[0].p1.name} und ${gaps[0].p2.name}. Soll ich die Kette korrigieren?`;
-            }
-            return "Die Abwehr steht stabil. Sehr gut gearbeitet.";
+            window.toniSpeak("Kette korrigiert. Kompaktheit ist wiederhergestellt.");
         }
     };
 })();
