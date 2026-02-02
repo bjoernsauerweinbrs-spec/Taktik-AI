@@ -1,39 +1,91 @@
 window.BriefcaseUI = {
+    // Öffnet/Schließt die Aktentasche
     toggle() {
-        document.getElementById('briefcase-overlay').classList.toggle('hidden');
+        const overlay = document.getElementById('briefcase-overlay');
+        if (overlay) {
+            overlay.classList.toggle('hidden');
+        }
     },
 
+    // Schaltet zwischen Sporttasche und Geschäftszimmer um
     async switchSektor(sektor) {
-        document.getElementById('briefcase-nav').classList.add('hidden');
-        document.getElementById('briefcase-content').classList.remove('hidden');
+        const nav = document.getElementById('briefcase-nav');
+        const content = document.getElementById('briefcase-content');
         const target = document.getElementById('active-content');
 
+        if (!nav || !content || !target) return;
+
+        nav.classList.add('hidden');
+        content.classList.remove('hidden');
+
         if (sektor === 'sport') {
-            target.innerHTML = "<h3>👟 SPORTTASCHE // TEAMLISTE</h3><div id='player-list'>Lade Kader...</div>";
-            this.loadSquad();
-        } else {
-            target.innerHTML = "<h3>🏢 GESCHÄFTSZIMMER</h3><p>Organisatorische Daten bereit.</p>";
+            target.innerHTML = `
+                <div class="squad-header">
+                    <h3>👟 SPORTTASCHE // KADERPLANUNG</h3>
+                    <p>Wähle einen Spieler aus, um ihn auf das Feld zu setzen.</p>
+                </div>
+                <div id="player-list-container" class="player-grid-view">
+                    Lade Teamdaten...
+                </div>
+            `;
+            await this.loadSquad();
+        } else if (sektor === 'orga') {
+            target.innerHTML = `
+                <div class="squad-header">
+                    <h3>🏢 GESCHÄFTSZIMMER</h3>
+                    <p>Stadionzeitung und organisatorische Abläufe.</p>
+                </div>
+                <div class="orga-placeholder">System bereit für Redaktionsschluss.</div>
+            `;
         }
     },
 
+    // Lädt die players.sample.json und trennt Rot von Blau [cite: 2026-01-25]
     async loadSquad() {
+        const container = document.getElementById('player-list-container');
         try {
-            // Lädt deine besprochene Teamliste [cite: 2026-01-24]
             const resp = await fetch('data/players.sample.json');
+            if (!resp.ok) throw new Error("Datei nicht gefunden");
             const data = await resp.json();
-            let html = "<ul style='list-style:none; padding:0; margin-top:20px;'>";
-            data.players.forEach(p => {
-                html += `<li style='padding:10px; border-bottom:1px solid #333; cursor:pointer;' onclick='arena.addPlayer("${p.name}", "red")'>
-                            <b>#${p.number}</b> ${p.name} (${p.position})
-                         </li>`;
+            
+            let html = "";
+
+            // DEIN TEAM (ROT) [cite: 2026-01-25]
+            html += `<div class="team-section">
+                        <h4 class="team-title red-accent">🔴 MEIN TEAM (HOME)</h4>
+                        <div class="player-list">`;
+            data.homeTeam.players.forEach(p => {
+                html += `
+                    <div class="player-card red-border" onclick="arena.addPlayer('${p.name}', 'red', '${p.position}')">
+                        <span class="p-number">#${p.number}</span>
+                        <span class="p-name">${p.name}</span>
+                        <span class="p-pos">${p.position}</span>
+                    </div>`;
             });
-            html += "</ul>";
-            document.getElementById('player-list').innerHTML = html;
+            html += `</div></div>`;
+
+            // GEGNER (BLAU) [cite: 2026-01-25]
+            html += `<div class="team-section">
+                        <h4 class="team-title blue-accent">🔵 GEGNER (AWAY)</h4>
+                        <div class="player-list">`;
+            data.awayTeam.players.forEach(p => {
+                html += `
+                    <div class="player-card blue-border" onclick="arena.addPlayer('${p.name}', 'blue', '${p.position}')">
+                        <span class="p-number">#${p.number}</span>
+                        <span class="p-name">${p.name}</span>
+                        <span class="p-pos">${p.position}</span>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            container.innerHTML = html;
         } catch (e) {
-            document.getElementById('player-list').innerHTML = "Fehler beim Laden der players.sample.json";
+            container.innerHTML = `<div class="error-msg">Fehler beim Laden des Kaders: data/players.sample.json fehlt oder ist fehlerhaft.</div>`;
+            console.error(e);
         }
     },
 
+    // Zurück zur Hauptübersicht der Aktentasche
     backToNav() {
         document.getElementById('briefcase-nav').classList.remove('hidden');
         document.getElementById('briefcase-content').classList.add('hidden');
