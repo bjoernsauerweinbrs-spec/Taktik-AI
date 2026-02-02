@@ -1,49 +1,52 @@
 (function() {
     window.BriefcaseUI = {
         kader: [],
-        initKader() {
+        init() {
             const saved = localStorage.getItem('toni2_kader');
-            this.kader = saved ? JSON.parse(saved) : [
-                { id: 1, name: "David Luiz", number: 4, rating: 8, hr: 65, sleep: "7.5h", status: "Bereit", pos: "IV", x: 250, y: 350, team: 'home' }
-            ];
-            this.save();
+            this.kader = saved ? JSON.parse(saved) : [{id:1, name:"David Luiz", number:4, pos:"IV", rating:8, hr:65, status:"Fit"}];
         },
-        save() { localStorage.setItem('toni2_kader', JSON.stringify(this.kader)); },
-        addPlayer() {
-            const name = document.getElementById('new-p-name').value;
-            const nr = document.getElementById('new-p-nr').value;
-            if(!name || !nr) return;
-            this.kader.push({ id: Date.now(), name: name, number: nr, pos: "ST", rating: 5, hr: 70, sleep: "8h", status: "Bereit", x: 300, y: 300, team: 'home' });
-            this.save(); this.renderSport();
+        toggle() {
+            const el = document.getElementById('briefcase-overlay');
+            el.style.display = (el.style.display === 'none') ? 'flex' : 'none';
         },
-        renderSport() {
-            const t = document.getElementById('sub-content');
-            t.innerHTML = `
-                <div style="background:rgba(255,106,0,0.1); padding:15px; border-radius:10px; margin-bottom:20px; display:flex; gap:10px;">
-                    <input id="new-p-name" placeholder="Name" style="background:#1A2233; color:white; flex:2;">
-                    <input id="new-p-nr" placeholder="Nr." style="background:#1A2233; color:white; flex:1;">
-                    <button onclick="BriefcaseUI.addPlayer()" style="background:var(--accent-orange); color:white; border:none; padding:5px 15px; border-radius:4px;">HINZUFÜGEN</button>
+        switchSektor(sektor) {
+            document.getElementById('briefcase-main-nav').classList.add('hidden');
+            const content = document.getElementById('briefcase-content');
+            content.classList.remove('hidden');
+            const target = document.getElementById('active-sektor-content');
+
+            if(sektor === 'sporttasche') {
+                target.innerHTML = `
+                    <div class="sporttasche-cockpit">
+                        <button class="nav-card" onclick="BriefcaseUI.renderKader()">📋 Kaderliste & Rating</button>
+                        <button class="nav-card" onclick="alert('Trainingsbuch wird geladen...')">📖 Trainingsbuch</button>
+                        <button class="nav-card" onclick="alert('Spieltagsplanung wird geladen...')">🏟️ Spieltagsplanung</button>
+                    </div>`;
+            } else if (sektor === 'orga') {
+                target.innerHTML = `<div class="nav-card" onclick="Stadionzeitung.open()">📰 Stadionzeitung (Redaktion)</div>`;
+            }
+        },
+        renderKader() {
+            const target = document.getElementById('active-sektor-content');
+            target.innerHTML = `
+                <h3>Kader-Management</h3>
+                <div class="kader-input-bar">
+                    <input id="p-name" placeholder="Name"> <input id="p-nr" placeholder="Nr.">
+                    <button onclick="BriefcaseUI.addPlayer()">+</button>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    ${this.kader.map(p => `
-                        <div style="padding:15px; background:rgba(255,255,255,0.05); border-radius:10px; display:flex; justify-content:space-between;">
-                            <span>#${p.number} ${p.name}</span>
-                            <button onclick="BriefcaseUI.toBoard(${p.id})" style="background:var(--success-green); border:none; color:white; padding:4px 8px; border-radius:4px;">AUFS BOARD</button>
-                        </div>
-                    `).join('')}
+                <div class="kader-grid-display">
+                    ${this.kader.map(p => `<div class="player-row"><span>#${p.number} ${p.name}</span> <button onclick="BriefcaseUI.toBoard(${p.id})">Aufs Feld</button></div>`).join('')}
                 </div>`;
         },
-        renderOrga() {
-            document.getElementById('sub-content').innerHTML = `
-                <div style="text-align:center;">
-                    <button onclick="window.Stadionzeitung.render()" style="background:white; color:black; padding:30px; border-radius:12px; cursor:pointer; font-weight:bold;">📰 STADIONZEITUNG ÖFFNEN</button>
-                </div>`;
+        backToMain() {
+            document.getElementById('briefcase-main-nav').classList.remove('hidden');
+            document.getElementById('briefcase-content').classList.add('hidden');
         },
         toBoard(id) {
             const p = this.kader.find(x => x.id === id);
-            if(!arena.players.find(x => x.id === id)) { 
-                arena.players.push({...p}); 
-                toggleBriefcase(); 
+            if(!arena.players.find(ap => ap.id === id)) {
+                arena.players.push({...p, x: 200, y: 300, team: 'home'});
+                this.toggle();
             }
         }
     };
