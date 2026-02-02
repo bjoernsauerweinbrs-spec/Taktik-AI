@@ -6,13 +6,13 @@ window.ToniAI = {
     init() {
         this.setupVoice();
         this.setupMic();
-        this.speak("Bom dia, Coach Björn! Aktiviere das Mikrofon in der Sidebar für die Analyse."); [cite: 2026-01-24, 2026-01-26]
+        this.speak("Bom dia, Coach Björn! Alle Systeme sind scharf geschaltet. Aktiviere das Mikrofon in der Sidebar für die taktische Analyse."); [cite: 2026-01-24, 2026-01-26]
     },
 
     setupVoice() {
         const load = () => {
             const voices = window.speechSynthesis.getVoices();
-            // Sucht gezielt nach männlichen Stimmen [cite: 2026-01-26]
+            // Sucht gezielt nach männlichen Stimmen (Stefan, Kaspar, Male) [cite: 2026-01-26]
             this.maleVoice = voices.find(v => v.lang.includes('de') && (v.name.includes('Male') || v.name.includes('Stefan') || v.name.includes('Google Deutsch'))) || voices[0];
         };
         load();
@@ -23,13 +23,18 @@ window.ToniAI = {
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(text);
         if(this.maleVoice) msg.voice = this.maleVoice;
-        msg.pitch = 0.85;
-        document.getElementById('setcard-content').innerHTML = `
-            <div style="background:rgba(0,209,255,0.05); border:1px solid var(--data-cyan); padding:20px; border-radius:15px;">
-                <div style="color:var(--data-cyan); font-size:9px; font-weight:bold; letter-spacing:2px; margin-bottom:10px;">TONI // AI CO-TRAINER</div>
-                <div style="line-height:1.6; font-size:14px;">${text}</div>
-            </div>
-        `;
+        msg.pitch = 0.85; // Klopp-Tiefe
+        msg.rate = 1.0;
+        
+        const container = document.getElementById('setcard-content');
+        if(container) {
+            container.innerHTML = `
+                <div style="background:rgba(0,209,255,0.05); border:1px solid var(--data-cyan); padding:20px; border-radius:15px; animation: fadeIn 0.5s;">
+                    <div style="color:var(--data-cyan); font-size:9px; font-weight:bold; letter-spacing:2px; margin-bottom:10px;">TONI // AI CO-TRAINER</div>
+                    <div style="line-height:1.6; font-size:14px; color:white;">${text}</div>
+                </div>
+            `;
+        }
         window.speechSynthesis.speak(msg);
     },
 
@@ -41,8 +46,7 @@ window.ToniAI = {
         this.recognition.continuous = true;
         this.recognition.onresult = (e) => {
             const cmd = e.results[e.results.length - 1][0].transcript.toLowerCase();
-            if(cmd.includes("zentrale") || cmd.includes("koffer")) BriefcaseUI.toggle();
-            this.speak(`Verstanden: "${cmd}"`);
+            this.handleCommand(cmd);
         };
     },
 
@@ -56,5 +60,11 @@ window.ToniAI = {
             this.recognition.start(); this.isListening = true;
             btn.classList.add('mic-active-glow'); label.innerText = "AKTIV";
         }
+    },
+
+    handleCommand(cmd) {
+        if(cmd.includes("zentrale") || cmd.includes("koffer")) BriefcaseUI.toggle(); [cite: 2026-02-02]
+        if(cmd.includes("ball links")) arena.moveBall('links');
+        this.speak(`Verstanden: "${cmd}". Ich führe die Analyse durch.`);
     }
 };
