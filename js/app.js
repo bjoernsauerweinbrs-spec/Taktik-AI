@@ -1,5 +1,4 @@
-// app.js (aktualisiert) — robuste UI-Initialisierung und Fallbacks
-
+// js/app.js (aktualisiert) — robuste UI-Initialisierung und Fallbacks
 (function () {
   'use strict';
 
@@ -41,7 +40,7 @@
     };
   })();
 
-  // Kernfunktionen (minimal, anpassbar)
+  // Kernfunktionen
   function saveState() {
     try {
       const state = window.__appState || { players: window.ToniPlayers || [] };
@@ -81,11 +80,9 @@
         console.error('Import: ungültiges JSON.');
         return;
       }
-      // Übernehme importierte Daten in App-Zustand (minimal)
       window.__appState = data;
       StorageBackend.save('taktikai_state', data);
       console.log('Import erfolgreich, Zustand aktualisiert.');
-      // Optional: trigger UI refresh hooks
       if (typeof window.onStateImported === 'function') window.onStateImported(data);
     };
     reader.onerror = function (err) {
@@ -100,10 +97,7 @@
       sessionStorage.removeItem('sessionUser');
       console.log('Logout: Session entfernt.');
       if (typeof window.onLogout === 'function') window.onLogout();
-      // Optional: redirect if function exists
-      if (typeof window.redirectToLogin === 'function') {
-        window.redirectToLogin();
-      }
+      if (typeof window.redirectToLogin === 'function') window.redirectToLogin();
     } catch (e) {
       console.error('Logout Fehler:', e);
     }
@@ -118,7 +112,7 @@
     if (exportBtn) exportBtn.addEventListener('click', exportState);
 
     const importFile = getEl('import-file');
-    const importBtn = getEl('import-btn'); // optional sichtbarer Button
+    const importBtn = getEl('import-btn');
     if (importFile) {
       importFile.addEventListener('change', (e) => {
         const f = e.target.files && e.target.files[0];
@@ -132,7 +126,6 @@
     const logoutBtn = getEl('logout-btn');
     if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
 
-    // Beispiel: voice toggle (falls vorhanden)
     const voiceToggle = getEl('voice-toggle');
     const voiceStatus = getEl('voice-status');
     if (voiceToggle && voiceStatus) {
@@ -144,12 +137,11 @@
     }
   }
 
-  // Öffentliche Initialisierung, damit main.js oder andere Skripte window.initApp() aufrufen können
+  // Öffentliche Initialisierung
   function initApp() {
     try {
       initUIBindings();
       console.log('app.js: UI Bindings initialisiert.');
-      // Lade gespeicherten Zustand falls vorhanden
       const saved = StorageBackend.load('taktikai_state');
       if (saved) {
         window.__appState = saved;
@@ -163,7 +155,6 @@
 
   // Automatische Initialisierung nach DOMContentLoaded, falls initApp nicht manuell aufgerufen wird
   document.addEventListener('DOMContentLoaded', () => {
-    // Wenn main.js bereits initApp aufruft, ist das kein Problem — initApp ist idempotent.
     if (!window.initAppCalled) {
       try {
         initApp();
