@@ -1,36 +1,30 @@
-/* Update für Drill-Cards im Analysezentrum */
-.drill-card {
-    background: rgba(26, 34, 51, 0.6);
-    border-left: 4px solid var(--accent-orange);
-    padding: 15px;
-    margin-top: 20px;
-    border-radius: 4px;
-    backdrop-filter: blur(10px);
-}
-
-.drill-badge {
-    font-size: 10px;
-    text-transform: uppercase;
-    color: var(--data-cyan);
-    border: 1px solid var(--data-cyan);
-    padding: 2px 6px;
-    display: inline-block;
-    margin-bottom: 10px;
-}
-
-.drill-meta {
+/* Horizontaler Glas-Look für die Werkzeuge */
+.tools-overlay {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Zentriert über dem Spielfeld */
     display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: #667085;
-    margin-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 8px;
+    flex-direction: row; /* Horizontal statt vertikal */
+    gap: 15px;
+    background: rgba(11, 18, 32, 0.7);
+    backdrop-filter: blur(15px);
+    padding: 10px 20px;
+    border-radius: 50px; /* Abgerundeter Capsule-Look */
+    border: 1px solid rgba(0, 209, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Optimierung der Tools-Overlay Buttons */
 .tool-btn {
-    background: linear-gradient(135deg, rgba(255, 106, 0, 0.1), transparent);
-    border: 1px solid rgba(255, 106, 0, 0.4);
-    box-shadow: inset 0 0 10px rgba(255, 106, 0, 0.1);
+    border-radius: 20px;
+    padding: 8px 18px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid transparent;
+    transition: 0.3s all ease;
+}
+
+.tool-btn:hover {
+    border-color: var(--data-cyan);
+    background: rgba(0, 209, 255, 0.1);
 }
