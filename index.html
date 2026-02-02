@@ -2,83 +2,74 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — World-Class Intelligence</title>
+    <title>TONI 2.0 — High-Class Edition</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body>
 
     <aside class="sidebar-minimal">
         <div class="main-briefcase-btn" onclick="toggleBriefcase()">
-            <div style="font-size:35px;">💼</div>
-            <span style="font-size:10px; font-weight:bold; letter-spacing:1px;">ZENTRALE</span>
+            <div style="font-size:32px;">💼</div>
+            <span style="font-size:10px; font-weight:bold;">ZENTRALE</span>
         </div>
     </aside>
 
     <main id="stage">
         <div class="tools-overlay">
-            <button class="tool-btn" onclick="arena.setMode('standard')">STANDARD</button>
-            <button class="tool-btn" onclick="arena.setMode('funinho')">FUNINHO</button>
+            <button onclick="arena.setMode('standard')" style="padding:5px 10px; cursor:pointer;">STANDARD</button>
+            <button onclick="arena.setMode('funinho')" style="padding:5px 10px; cursor:pointer;">FUNINHO</button>
         </div>
         <canvas id="main-canvas"></canvas>
     </main>
 
     <aside class="analysis-panel">
-        <h2 style="color: var(--data-cyan); font-size: 16px; letter-spacing: 2px; border-bottom: 1px solid rgba(0,209,255,0.1); padding-bottom:15px;">ANALYSEZENTRUM</h2>
+        <h2 style="color: var(--data-cyan); font-size: 16px;">ANALYSEZENTRUM</h2>
         <div id="setcard-content" style="margin-top: 30px;">
-            <p style="color: #667085; font-style: italic; text-align:center;">Spieler auf dem Feld berühren...</p>
+            <p style="color: #667085; font-style: italic;">Spieler auf dem Feld anklicken...</p>
         </div>
     </aside>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <button onclick="toggleBriefcase()" style="position:absolute; top:40px; right:40px; background:none; border:none; color:white; font-size:30px; cursor:pointer;">✕</button>
-        <h1 style="color: var(--accent-orange); letter-spacing: 5px; margin-bottom:0;">ZENTRALE AKTENTASCHE</h1>
-        <p style="color:#667085; font-size:12px; margin-bottom:50px;">VERSION 2.0 — BJÖRN'S TACTICAL HUB</p>
+        <h1 style="color: var(--accent-orange); letter-spacing: 5px;">ZENTRALE AKTENTASCHE</h1>
         
-        <div class="folder-grid" id="main-folders">
-            <div class="folder-item" onclick="openFolder('sporttasche')">
-                <div style="font-size:55px;">👟</div>
-                <h3>Sporttasche</h3>
-                <span class="folder-sub">Kader & Training</span>
-            </div>
-            <div class="folder-item" onclick="alert('Analyse-Archiv wird geladen...')">
-                <div style="font-size:55px;">📊</div>
-                <h3>Analysezentrum</h3>
-                <span class="folder-sub">Leistungsdaten</span>
-            </div>
-            <div class="folder-item" onclick="openFolder('geschäft')">
-                <div style="font-size:55px;">🏢</div>
-                <h3>Geschäftszimmer</h3>
-                <span class="folder-sub">Sponsoring & Media</span>
-            </div>
+        <div id="folder-main" class="folder-grid">
+            <div class="folder-item" onclick="openSub('sport')">👟 <h3>Sporttasche</h3></div>
+            <div class="folder-item" onclick="openSub('analyse')">📊 <h3>Analyse</h3></div>
+            <div class="folder-item" onclick="openSub('orga')">🏢 <h3>Geschäft</h3></div>
         </div>
 
-        <div id="subfolder-view" class="hidden" style="width:100%; max-width:800px; margin-top:30px; background:rgba(255,255,255,0.02); padding:30px; border-radius:20px;">
-            <button onclick="closeFolder()" style="color: var(--data-cyan); cursor:pointer; background:none; border:none; margin-bottom:25px; font-weight:bold;">← ZURÜCK ZUR AUSWAHL</button>
-            <div id="subfolder-content"></div>
+        <div id="sub-view" class="hidden" style="width:100%; max-width:700px; margin-top:40px;">
+            <button onclick="closeSub()" style="color:var(--data-cyan); background:none; border:none; cursor:pointer; margin-bottom:20px;">← ZURÜCK</button>
+            <div id="sub-content"></div>
         </div>
     </div>
 
     <script src="engine/arena.js"></script>
     <script src="ui/aktentasche-ui.js"></script>
     <script>
-        function toggleBriefcase() {
-            const el = document.getElementById('briefcase-overlay');
-            el.classList.toggle('hidden');
+        function toggleBriefcase() { document.getElementById('briefcase-overlay').classList.toggle('hidden'); }
+        
+        function openSub(type) {
+            document.getElementById('folder-main').classList.add('hidden');
+            document.getElementById('sub-view').classList.remove('hidden');
+            if(type === 'sport') window.Aktentasche.renderSporttasche();
+            if(type === 'orga') window.Aktentasche.renderOrga();
         }
 
-        function openFolder(type) {
-            document.getElementById('main-folders').style.display = 'none';
-            document.getElementById('subfolder-view').classList.remove('hidden');
-            if (type === 'sporttasche') window.Aktentasche.showSporttasche();
-            if (type === 'geschäft') window.Aktentasche.showGeschäftszimmer();
+        function closeSub() {
+            document.getElementById('folder-main').classList.remove('hidden');
+            document.getElementById('sub-view').classList.add('hidden');
         }
 
-        function closeFolder() {
-            document.getElementById('main-folders').style.display = 'grid';
-            document.getElementById('subfolder-view').classList.add('hidden');
-        }
-
-        document.addEventListener('DOMContentLoaded', () => { arena.init('main-canvas'); });
+        document.addEventListener('DOMContentLoaded', () => { 
+            arena.init('main-canvas');
+            // Automatischer Demo-Kader für Björn
+            arena.players = [
+                { id: 1, name: "David Luiz", number: 4, rating: 8, pos: "IV", x: 250, y: 350, team: 'home' },
+                { id: 2, name: "Max Miller", number: 10, rating: 6, pos: "OM", x: 450, y: 300, team: 'home' }
+            ];
+        });
     </script>
 </body>
 </html>
