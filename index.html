@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8"><title>TONI 2.0 — Pro Coaching OS</title>
+    <meta charset="UTF-8">
+    <title>TONI 2.0 — Pro Tactical OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body>
-    <aside class="sidebar-minimal"><div class="main-briefcase-btn" onclick="BriefcaseUI.toggle()">💼</div></aside>
+    <aside class="sidebar-minimal">
+        <div class="main-briefcase-btn" onclick="BriefcaseUI.toggle()">💼</div>
+    </aside>
+
     <main id="stage">
         <canvas id="main-canvas"></canvas>
+        <div id="hologram-ui"></div>
     </main>
+
     <aside class="analysis-panel" id="side-analysis">
-        <div id="setcard-content"></div>
+        <div id="setcard-content">
+            </div>
     </aside>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
@@ -22,16 +29,29 @@
             <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')"><h3>Sporttasche</h3></div>
             <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')"><h3>Geschäftszimmer</h3></div>
         </div>
+        <div id="briefcase-content" class="hidden" style="width:100%; max-width:1000px;">
+            <button onclick="document.getElementById('briefcase-nav').classList.remove('hidden'); document.getElementById('briefcase-content').classList.add('hidden');" style="color:var(--data-cyan); background:none; border:none; cursor:pointer; font-weight:bold;">← ZURÜCK</button>
+            <div id="active-content"></div>
+        </div>
     </div>
 
     <script src="engine/arena.js"></script>
-    <script src="engine/toni-ai.js"></script>
-    <script src="ui/briefcase-ui.js"></script>
     <script src="ui/stadionzeitung-ui.js"></script>
+    <script src="ui/briefcase-ui.js"></script>
+    <script src="engine/toni-ai.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', () => { 
-            arena.init('main-canvas'); 
-            ToniAI.init(); // Startet Dialog & Voice
+            // 1. Spielfeld laden
+            if(window.arena) arena.init('main-canvas'); 
+            // 2. Koffer initialisieren
+            if(window.BriefcaseUI) BriefcaseUI.init();
+            // 3. Toni AI starten
+            if(window.ToniAI && typeof ToniAI.init === 'function') {
+                ToniAI.init();
+            } else {
+                console.error("❌ ToniAI.init konnte nicht gefunden werden.");
+            }
         });
     </script>
 </body>
