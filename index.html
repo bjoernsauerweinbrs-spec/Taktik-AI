@@ -2,13 +2,12 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — Tactical Hub</title>
+    <title>TONI 2.0 — Pro Coaching OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body>
-
     <aside class="sidebar-minimal">
-        <div class="main-briefcase-btn" onclick="toggleBriefcase()">
+        <div class="main-briefcase-btn" onclick="BriefcaseUI.toggle()">
             <div style="font-size:35px;">💼</div>
             <span style="font-size:10px; font-weight:bold;">ZENTRALE</span>
         </div>
@@ -16,34 +15,35 @@
 
     <main id="stage">
         <div class="tools-overlay">
-            <button class="tool-btn" onclick="arena.setMode('standard')">STANDARD</button>
-            <button class="tool-btn" onclick="arena.setMode('funinho')">FUNINHO</button>
+            <button class="tool-btn" onclick="arena.setMode('standard')">Standard</button>
+            <button class="tool-btn" onclick="arena.setMode('funinho')">Funinho</button>
         </div>
         <canvas id="main-canvas"></canvas>
-        <div id="hologram-ui"></div>
+        <div id="hologram-ui" onclick="ToniAI.speak('Björn, ich analysiere die aktuelle Feldposition.')"></div>
     </main>
 
     <aside class="analysis-panel">
-        <h2 style="color: var(--data-cyan); font-size: 14px; letter-spacing: 2px;">ANALYSEZENTRUM</h2>
-        <div id="setcard-content" style="margin-top: 25px;">
-            <p style="color: #667085; font-style: italic; text-align:center;">Spieler wählen...</p>
+        <h2 class="panel-title">ANALYSEZENTRUM</h2>
+        <div id="setcard-content">
+            <p class="empty-msg">Wähle einen Spieler...</p>
         </div>
     </aside>
 
-    <div id="briefcase-overlay" class="briefcase-overlay hidden">
+    <div id="briefcase-overlay" class="briefcase-overlay" style="display: none;">
         <div class="briefcase-header">
-            <h1 style="color: var(--accent-orange); letter-spacing: 5px;">ZENTRALE AKTENTASCHE</h1>
-            <button onclick="toggleBriefcase()" class="close-overlay-btn">✕</button>
+            <h1 class="glow-text">ZENTRALE AKTENTASCHE</h1>
+            <button onclick="BriefcaseUI.toggle()" class="close-btn">✕</button>
         </div>
         
-        <div class="folder-grid" id="main-folders">
-            <div class="folder-item" onclick="openSub('sport')">👟 <h3>Sporttasche</h3></div>
-            <div class="folder-item" onclick="openSub('medical')">⌚ <h3>Medical Hub</h3></div>
-            <div class="folder-item" onclick="openSub('orga')">🏢 <h3>Geschäftszimmer</h3></div>
+        <div class="folder-grid" id="briefcase-main-nav">
+            <div class="folder-item" onclick="BriefcaseUI.switchSektor('sporttasche')">👟 <h3>Sporttasche</h3><span>Kader, Training, Spieltag</span></div>
+            <div class="folder-item" onclick="BriefcaseUI.switchSektor('medical')">⌚ <h3>Medical Hub</h3><span>Bio-Metriken</span></div>
+            <div class="folder-item" onclick="BriefcaseUI.switchSektor('orga')">🏢 <h3>Geschäftszimmer</h3><span>Redaktion & Media</span></div>
         </div>
 
-        <div id="sub-view" class="hidden">
-            <div id="sub-content"></div>
+        <div id="briefcase-content" class="hidden">
+            <button onclick="BriefcaseUI.backToMain()" class="back-btn">← ZURÜCK</button>
+            <div id="active-sektor-content"></div>
         </div>
     </div>
 
@@ -51,22 +51,9 @@
     <script src="ui/stadionzeitung-ui.js"></script>
     <script src="ui/briefcase-ui.js"></script>
     <script>
-        function toggleBriefcase() { 
-            document.getElementById('briefcase-overlay').classList.toggle('hidden'); 
-        }
-        function openSub(t) {
-            document.getElementById('main-folders').classList.add('hidden');
-            document.getElementById('sub-view').classList.remove('hidden');
-            if(t==='sport') BriefcaseUI.renderSport();
-            if(t==='orga') BriefcaseUI.renderOrga();
-        }
-        function closeSub() {
-            document.getElementById('main-folders').classList.remove('hidden');
-            document.getElementById('sub-view').classList.add('hidden');
-        }
         document.addEventListener('DOMContentLoaded', () => { 
-            arena.init('main-canvas'); 
-            BriefcaseUI.initKader();
+            arena.init('main-canvas');
+            BriefcaseUI.init();
         });
     </script>
 </body>
