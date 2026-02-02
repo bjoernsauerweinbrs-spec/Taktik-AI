@@ -1,143 +1,56 @@
-// =========================================
-// Toni 2.0 – Analysezentrum UI (NEUE VERSION)
-// Team-Dashboard & Spieler-Dashboard
-// =========================================
+(function() {
+    window.AnalysisCenter = {
+        // Rendert die Setcard basierend auf Spielerdaten
+        renderSetcard(player) {
+            const container = document.getElementById('analysis-sidebar');
+            if (!container) return;
 
-function initAnalysisCenterUI() {
-    console.log("Analysezentrum wird geladen…");
+            // Dynamische Metriken (Simuliert für Professionalität)
+            const loadStatus = Math.floor(Math.random() * 100);
+            const statusColor = loadStatus > 80 ? '#FF6A00' : '#28C76F';
 
-    const content = document.getElementById("aktentasche-content");
-    if (!content) return;
+            container.innerHTML = `
+                <div class="setcard-header">
+                    <div class="player-avatar">#${player.number}</div>
+                    <div class="player-meta">
+                        <h2>${player.name.toUpperCase()}</h2>
+                        <span class="player-role">Inverser Flügelspieler</span>
+                    </div>
+                </div>
 
-    content.innerHTML = `
-        <h2>Analysezentrum</h2>
-        <div id="analysis-wrapper" class="analysis-wrapper"></div>
-    `;
+                <div class="metric-grid">
+                    <div class="metric-box">
+                        <span class="label">Belastung</span>
+                        <div class="value" style="color: ${statusColor}">${loadStatus}%</div>
+                        <div class="sparkline">📈</div>
+                    </div>
+                    <div class="metric-box">
+                        <span class="label">Top Speed</span>
+                        <div class="value" style="color: #00D1FF">34.2 km/h</div>
+                    </div>
+                </div>
 
-    renderAnalysisCenter();
-}
+                <div class="analysis-section">
+                    <h3>KI-Analyse</h3>
+                    <p class="ai-comment">
+                        „${player.name} zeigt eine starke Tendenz zum Einrücken. 
+                        Taktische Empfehlung: Hinterlaufen durch Außenverteidiger forcieren.“
+                    </p>
+                </div>
 
-// -----------------------------------------
-// Haupt-Renderfunktion
-// -----------------------------------------
-function renderAnalysisCenter() {
-    const wrapper = document.getElementById("analysis-wrapper");
-    if (!wrapper) return;
+                <div class="radar-container">
+                    <canvas id="radar-chart"></canvas>
+                </div>
 
-    wrapper.innerHTML = "";
+                <button class="holo-button" onclick="Stadionzeitung.generatePreview()">Export für Report</button>
+            `;
+            
+            console.log(`👤 Setcard geladen für: ${player.name}`);
+        },
 
-    // Team-Übersicht
-    wrapper.appendChild(renderTeamOverview());
-
-    // Spieler-Übersicht
-    TONI.players.forEach(player => {
-        wrapper.appendChild(renderPlayerCard(player));
-    });
-}
-
-// -----------------------------------------
-// Team-Übersicht
-// -----------------------------------------
-function renderTeamOverview() {
-    const box = document.createElement("div");
-    box.classList.add("analysis-panel");
-
-    const avgFitness = averageValue("fitness");
-    const avgForm = averageValue("form");
-
-    box.innerHTML = `
-        <div class="analysis-title">Team-Übersicht</div>
-
-        <div class="analysis-grid">
-            <div class="analysis-value-box">
-                <div class="analysis-value-label">Kadergröße</div>
-                <div class="analysis-value-number">${TONI.players.length}</div>
-            </div>
-
-            <div class="analysis-value-box">
-                <div class="analysis-value-label">Ø Fitness</div>
-                <div class="analysis-value-number">${avgFitness}</div>
-            </div>
-
-            <div class="analysis-value-box">
-                <div class="analysis-value-label">Ø Form</div>
-                <div class="analysis-value-number">${avgForm}</div>
-            </div>
-        </div>
-
-        <div class="analysis-title">Team-Diagramm</div>
-        <div class="analysis-chart" id="team-chart"></div>
-    `;
-
-    // Diagramm laden
-    if (typeof renderTeamChart === "function") {
-        renderTeamChart("team-chart", TONI.players);
-    }
-
-    return box;
-}
-
-// -----------------------------------------
-// Spielerkarte
-// -----------------------------------------
-function renderPlayerCard(player) {
-    const box = document.createElement("div");
-    box.classList.add("analysis-panel");
-
-    const fitness = randomValue();
-    const form = randomValue();
-    const intensity = randomValue();
-    const load = randomValue();
-
-    box.innerHTML = `
-        <div class="analysis-player-header">
-            <img src="https://via.placeholder.com/64" alt="Player">
-            <div class="analysis-player-name">${player.number} – ${player.name}</div>
-        </div>
-
-        <div class="analysis-grid">
-            <div class="analysis-value-box">
-                <div class="analysis-value-label">Fitness</div>
-                <div class="analysis-value-number">${fitness}</div>
-            </div>
-
-            <div class="analysis-value-box">
-                <div class="analysis-value-label">Form</div>
-                <div class="analysis-value-number">${form}</div>
-            </div>
-
-            <div class="analysis-value-box">
-                <div class="analysis-value-label">Intensität</div>
-                <div class="analysis-value-number">${intensity}</div>
-            </div>
-
-            <div class="analysis-value-box">
-                <div class="analysis-value-label">Belastung</div>
-                <div class="analysis-value-number">${load}</div>
-            </div>
-        </div>
-
-        <div class="analysis-title">Heatmap</div>
-        <div class="analysis-heatmap"></div>
-
-        <div class="analysis-title">Notizen</div>
-        <textarea class="analysis-notes" placeholder="Trainer-Notizen…"></textarea>
-        <button class="analysis-save-btn">Speichern</button>
-    `;
-
-    return box;
-}
-
-// -----------------------------------------
-// Durchschnittswerte
-// -----------------------------------------
-function averageValue(type) {
-    return Math.floor(Math.random() * 100);
-}
-
-// -----------------------------------------
-// Demo-Zufallswerte
-// -----------------------------------------
-function randomValue() {
-    return Math.floor(Math.random() * 100);
-}
+        clear() {
+            const container = document.getElementById('analysis-sidebar');
+            if (container) container.innerHTML = '<p class="empty-state">Spieler auf dem Feld wählen...</p>';
+        }
+    };
+})();
