@@ -1,78 +1,65 @@
-// engine/arena.js - VOLLSTÄNDIG
-window.arena = {
-    canvas: null,
-    ctx: null,
-    width: 0,
-    height: 0,
-    players: [],
-    lines: [],
-    zones: [],
-    ready: false,
+(function() {
+    window.arena = {
+        canvas: null,
+        ctx: null,
+        players: [],
+        layers: { heatmap: true, tracking: true, zones: true },
+        
+        init(canvasId) {
+            this.canvas = document.getElementById(canvasId);
+            if (!this.canvas) return;
+            this.ctx = this.canvas.getContext('2d');
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+            console.log("🏟️ Arena Engine: Multi-Layer Ready");
+        },
 
-    init(canvasElement) {
-        this.canvas = canvasElement;
-        this.ctx = canvasElement.getContext("2d");
-        this.resize();
-        window.addEventListener("resize", () => this.resize());
-        this.ready = true;
-        this.render();
-    },
+        resize() {
+            this.canvas.width = this.canvas.parentElement.clientWidth;
+            this.canvas.height = this.canvas.parentElement.clientHeight;
+            this.render();
+        },
 
-    resize() {
-        if (!this.canvas) return;
-        const container = this.canvas.parentElement;
-        this.width = container.clientWidth;
-        this.height = container.clientHeight;
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
-        this.render();
-    },
+        render() {
+            const ctx = this.ctx;
+            ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.drawPitch(ctx);
+            if (this.layers.heatmap) this.drawHeatmap(ctx);
+            this.players.forEach(p => this.drawPlayer(ctx, p));
+        },
 
-    render() {
-        if (!this.ready || !this.ctx) return;
-        const ctx = this.ctx;
-        ctx.fillStyle = "#0b1220";
-        ctx.fillRect(0, 0, this.width, this.height);
-        this.drawPitchLines(ctx);
-        this.zones.forEach(z => {
-            ctx.fillStyle = z.color;
-            ctx.fillRect(z.x, z.y, z.w, z.h);
-        });
-        this.lines.forEach(l => {
-            ctx.setLineDash(l.dashed ? [10, 10] : []);
-            ctx.strokeStyle = l.color;
-            ctx.lineWidth = 3;
+        drawPitch(ctx) {
+            ctx.strokeStyle = "rgba(0, 209, 255, 0.2)";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(40, 40, this.canvas.width - 80, this.canvas.height - 80);
+            // Mittellinie
             ctx.beginPath();
-            ctx.moveTo(l.x1, l.y1);
-            ctx.lineTo(l.x2, l.y2);
+            ctx.moveTo(this.canvas.width / 2, 40);
+            ctx.lineTo(this.canvas.width / 2, this.canvas.height - 40);
             ctx.stroke();
-        });
-        this.players.forEach(p => this.drawPlayer(ctx, p));
-    },
+        },
 
-    drawPitchLines(ctx) {
-        ctx.strokeStyle = "rgba(0, 255, 150, 0.2)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(50, 50, this.width - 100, this.height - 100);
-        ctx.beginPath();
-        ctx.moveTo(this.width / 2, 50);
-        ctx.lineTo(this.width / 2, this.height - 50);
-        ctx.stroke();
-    },
+        drawPlayer(ctx, p) {
+            // Neon Glow Effekt
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = p.team === 'home' ? '#FF6A00' : '#00D1FF';
+            ctx.fillStyle = p.team === 'home' ? '#FF6A00' : '#00D1FF';
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#FFF";
+            ctx.font = "bold 12px Inter";
+            ctx.textAlign = "center";
+            ctx.fillText(p.number, p.x, p.y + 5);
+        },
 
-    drawPlayer(ctx, p) {
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = p.color;
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 20, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 12px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(p.number, p.x, p.y + 5);
-        ctx.font = "10px Arial";
-        ctx.fillText(p.name, p.x, p.y + 35);
-    }
-};
+        drawHeatmap(ctx) {
+            // Simulation einer taktischen Zone
+            ctx.fillStyle = "rgba(0, 209, 255, 0.05)";
+            ctx.fillRect(this.canvas.width * 0.6, 40, this.canvas.width * 0.3, this.canvas.height - 80);
+        }
+    };
+})();
