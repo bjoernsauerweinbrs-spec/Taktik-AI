@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 — Tactical Intelligence & Performance AI</title>
+    <title>TONI 2.0 — Tactical Intelligence AI</title>
     
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/board.css">
@@ -12,29 +12,24 @@
     <link rel="stylesheet" href="css/hologram.css">
 
     <style>
-        /* Sofort-Fix für das Grid-Layout, falls CSS-Dateien verzögert laden */
         :root {
             --bg-deep: #0B1220;
             --panel-warm: #1A2233;
             --accent-orange: #FF6A00;
             --data-cyan: #00D1FF;
         }
-
         body {
             background: var(--bg-deep);
             color: #fff;
             margin: 0;
             height: 100vh;
             display: grid;
-            grid-template-columns: 80px 1fr 340px; /* Sidebar | Stage | Analysis */
+            grid-template-columns: 80px 1fr 340px;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
         }
-
-        /* Hilfsklassen für Modul-Steuerung */
         .module-container { display: none; width: 100%; height: 100%; }
         .module-container.active { display: block; }
-        
         #stage { position: relative; overflow: hidden; }
         #main-canvas { display: block; width: 100%; height: 100%; }
     </style>
@@ -42,40 +37,32 @@
 <body>
 
     <aside class="sidebar">
-        <div class="nav-icon active" id="nav-board" onclick="switchMainView('board')" title="Analyse-Board">📊</div>
-        <div class="nav-icon" id="nav-training" onclick="switchMainView('training')" title="Trainingsbuch">📅</div>
-        <div class="nav-icon" id="nav-briefcase" onclick="switchMainView('briefcase')" title="Aktentasche">💼</div>
-        <div class="nav-icon" id="nav-sponsoring" onclick="switchMainView('sponsoring')" title="Sponsoring">💰</div>
-        <div class="nav-icon" style="margin-top: auto;" title="Einstellungen">⚙️</div>
+        <div class="nav-icon active" id="nav-board" onclick="switchMainView('board')">📊</div>
+        <div class="nav-icon" id="nav-training" onclick="switchMainView('training')">📅</div>
+        <div class="nav-icon" id="nav-briefcase" onclick="switchMainView('briefcase')">💼</div>
+        <div class="nav-icon" id="nav-sponsoring" onclick="switchMainView('sponsoring')">💰</div>
     </aside>
 
     <main id="stage">
-        
         <div class="tools-overlay" id="board-tools">
-            <button class="tool-btn" id="tool-pass" onclick="tools.set('pass')">Passweg</button>
-            <button class="tool-btn" id="tool-run" onclick="tools.set('run')">Laufweg</button>
+            <button class="tool-btn" onclick="triggerToniAnalysis()" style="border-color: var(--data-cyan); color: var(--data-cyan);">KI-SCAN</button>
+            <button class="tool-btn" onclick="AnalysisAI.fixDefenseLine()" style="border-color: #28C76F; color: #28C76F;">TONI, KORRIGIERE!</button>
+            <button class="tool-btn" onclick="tools.set('pass')">Passweg</button>
             <button class="tool-btn danger" onclick="arena.clear()">Löschen</button>
         </div>
 
         <div id="module-board" class="module-container active">
             <canvas id="main-canvas"></canvas>
         </div>
-
-        <div id="module-training" class="module-container">
-            </div>
-
-        <div id="module-briefcase" class="module-container">
-            </div>
-
-        <div id="module-sponsoring" class="module-container">
-            </div>
-
+        <div id="module-training" class="module-container"></div>
+        <div id="module-briefcase" class="module-container"></div>
+        <div id="module-sponsoring" class="module-container"></div>
     </main>
 
     <aside class="analysis-panel" id="analysis-sidebar">
         <h2>Analysezentrum</h2>
         <div id="setcard-content">
-            <p class="empty-state">Wähle ein Element für Details...</p>
+            <p class="empty-state">Wähle einen Spieler...</p>
         </div>
     </aside>
 
@@ -90,66 +77,48 @@
     <script src="engine/players.js"></script>
     <script src="engine/tools.js"></script>
     <script src="engine/dragdrop.js"></script>
-    
+    <script src="engine/analysis-ai.js"></script>
     <script src="ui/analysis-center-ui.js"></script>
     <script src="ui/aktentasche-ui.js"></script>
     <script src="ui/trainingsbuch-ui.js"></script>
-    <script src="ui/sponsoring-ui.js"></script>
-    <script src="ui/stadionzeitung-ui.js"></script>
-
     <script src="voice/voice-output.js"></script>
     <script src="voice/hologram-effects.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("⚽ TONI 2.0: Master-System wird hochgefahren...");
-
-            // 1. Arena & Engines initialisieren
             if (arena.init('main-canvas')) {
                 initDragDrop();
-                
-                // Demo-Setup: Erste Spieler auf das Feld
                 arena.players = [
-                    { id: 1, name: "David Luiz", number: 4, x: 200, y: 300, team: 'home' },
-                    { id: 2, name: "Gegner 1", number: 9, x: 500, y: 300, team: 'away' }
+                    { id: 1, name: "David Luiz", number: 4, x: 150, y: 400, team: 'home' },
+                    { id: 2, name: "Thiago", number: 3, x: 300, y: 410, team: 'home' },
+                    { id: 3, name: "Marquinhos", number: 5, x: 450, y: 405, team: 'home' },
+                    { id: 4, name: "Dani", number: 2, x: 700, y: 400, team: 'home' },
+                    { id: 5, name: "Gegner", number: 9, x: 400, y: 200, team: 'away' }
                 ];
             }
-
-            // 2. Module initialisieren
             if (window.Hologram) window.Hologram.init();
-            if (window.Aktentasche) window.Aktentasche.init();
-            
-            // 3. Willkommensgruß
-            setTimeout(() => {
-                if (window.toniSpeak) toniSpeak("Systeme bereit. Willkommen zurück, Björn.");
-            }, 1000);
         });
 
-        /**
-         * Zentrales Routing der App
-         */
+        function triggerToniAnalysis() {
+            if (window.Hologram) window.Hologram.setScanning(true);
+            setTimeout(() => {
+                const report = window.AnalysisAI.scanBoard();
+                if (window.toniSpeak) window.toniSpeak(report);
+                if (window.Hologram) window.Hologram.setScanning(false);
+            }, 1000);
+        }
+
         function switchMainView(module) {
-            // UI-Update Sidebar
             document.querySelectorAll('.nav-icon').forEach(el => el.classList.remove('active'));
             document.getElementById('nav-' + module).classList.add('active');
-
-            // Module umschalten
             document.querySelectorAll('.module-container').forEach(el => el.classList.remove('active'));
-            const activeModule = document.getElementById('module-' + module);
-            if (activeModule) activeModule.classList.add('active');
-
-            // Spezifische Modul-Logik
+            document.getElementById('module-' + module).classList.add('active');
             const tools = document.getElementById('board-tools');
-            if (module === 'board') {
-                if (tools) tools.style.display = 'flex';
-                arena.resize();
-            } else {
-                if (tools) tools.style.display = 'none';
-                
-                // Modul-Inhalte triggern
-                if (module === 'training' && window.Trainingsbuch) Trainingsbuch.show();
-                if (module === 'briefcase' && window.Aktentasche) Aktentasche.show();
-                if (module === 'sponsoring' && window.Sponsoring) Sponsoring.show();
+            if (module === 'board') { 
+                tools.style.display = 'flex'; 
+                arena.resize(); 
+            } else { 
+                tools.style.display = 'none'; 
             }
         }
     </script>
