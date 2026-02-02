@@ -1,40 +1,45 @@
 /**
- * =========================================
- * TONI 2.0 – ARENA ENGINE (INTERACTIVE)
- * Player Rendering & Click Detection
- * =========================================
+ * TONI 2.0 – ARENA ENGINE
+ * Sicherstellung der Spielfeld-Darstellung & Spieler-Interaktion
  */
 (function() {
     window.arena = {
-        canvas: null, ctx: null, players: [], mode: 'standard', 
-        
-        init(elementId) {
-            const el = document.getElementById(elementId);
-            if (!el) return false;
-            this.canvas = el;
-            this.ctx = el.getContext('2d');
+        canvas: null, ctx: null, players: [], mode: 'standard', pulse: 0,
+
+        init(id) {
+            this.canvas = document.getElementById(id);
+            if (!this.canvas) return;
+            this.ctx = this.canvas.getContext('2d');
             this.resize();
-            
-            // Klick-Erkennung für Spieler
-            this.canvas.addEventListener('mousedown', (e) => this.handleInteraction(e));
-            
             window.addEventListener('resize', () => this.resize());
-            this.startLoop();
-            return true;
+            
+            // Klick-Erkennung für Setcard-Öffnung
+            this.canvas.addEventListener('mousedown', (e) => this.handleClick(e));
+            
+            this.animate();
         },
 
-        handleInteraction(e) {
-            const rect = this.canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+        resize() {
+            const container = this.canvas.parentElement;
+            this.canvas.width = container.clientWidth;
+            this.canvas.height = container.clientHeight;
+        },
 
-            // Prüfe, ob ein Spieler berührt wurde
+        handleClick(e) {
+            const rect = this.canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+
             this.players.forEach(p => {
-                const dist = Math.hypot(p.x - x, p.y - y);
-                if (dist < 20) {
-                    if (window.showSetcard) window.showSetcard(p);
-                }
+                const dist = Math.hypot(p.x - mx, p.y - my);
+                if (dist < 20) window.showSetcard(p);
             });
+        },
+
+        animate() {
+            this.pulse = (Math.sin(Date.now() / 500) + 1) / 2;
+            this.render();
+            requestAnimationFrame(() => this.animate());
         },
 
         render() {
@@ -45,41 +50,27 @@
             this.players.forEach(p => {
                 const color = p.team === 'home' ? '#FF6A00' : '#00D1FF';
                 
-                // Spieler-Punkt (Neon-Style)
-                ctx.shadowBlur = 15; ctx.shadowColor = color;
+                // Spieler-Glow
+                ctx.shadowBlur = 10 + (this.pulse * 10); ctx.shadowColor = color;
                 ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(p.x, p.y, 18, 0, Math.PI * 2); ctx.fill();
 
-                // FIX: NAME & NUMMER (Wiederhergestellt)
-                ctx.shadowBlur = 0; ctx.fillStyle = "white";
-                ctx.font = "bold 12px Inter"; ctx.textAlign = "center";
+                // NAME & NUMMER (Wiederhergestellt)
+                ctx.shadowBlur = 0; ctx.fillStyle = "white"; ctx.textAlign = "center";
+                ctx.font = "bold 12px Inter";
                 ctx.fillText(p.number, p.x, p.y + 5);
-                
                 ctx.font = "10px Inter";
                 ctx.fillText(p.name.toUpperCase(), p.x, p.y + 35);
             });
         },
 
         drawPitch(ctx) {
-            const w = this.canvas.width; const h = this.canvas.height;
-            const pad = 60;
+            const w = this.canvas.width; const h = this.canvas.height; const pad = 60;
             ctx.strokeStyle = "rgba(0, 209, 255, 0.2)"; ctx.lineWidth = 2;
-            ctx.strokeRect(pad, pad, w - (pad * 2), h - (pad * 2));
-            // Mittellinie
-            ctx.beginPath(); ctx.moveTo(w / 2, pad); ctx.lineTo(w / 2, h - pad); ctx.stroke();
+            ctx.strokeRect(pad, pad, w - (pad * 2), h - (pad * 2)); // Außenlinie
+            ctx.beginPath(); ctx.moveTo(w/2, pad); ctx.lineTo(w/2, h-pad); ctx.stroke(); // Mitte
         },
 
-        resize() {
-            const container = this.canvas.parentElement;
-            this.canvas.width = container.clientWidth;
-            this.canvas.height = container.clientHeight;
-        },
-
-        startLoop() {
-            const loop = () => { this.render(); requestAnimationFrame(loop); };
-            requestAnimationFrame(loop);
-        }
+        setMode(m) { this.mode = m; }
     };
 })();
