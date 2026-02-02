@@ -1,95 +1,60 @@
-(function() {
-    window.ToniAI = {
-        userName: '',
-        recognition: null,
-        isListening: false,
+window.ToniAI = {
+    isListening: false,
+    recognition: null,
+    maleVoice: null,
 
-        init() {
-            this.setupContinuousVoice();
-            this.startGreeting();
-        },
+    init() {
+        this.setupVoice();
+        this.setupMic();
+        this.speak("Bom dia, Coach Björn! Aktiviere das Mikrofon in der Sidebar für die Analyse."); [cite: 2026-01-24, 2026-01-26]
+    },
 
-        setupContinuousVoice() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return;
+    setupVoice() {
+        const load = () => {
+            const voices = window.speechSynthesis.getVoices();
+            // Sucht gezielt nach männlichen Stimmen [cite: 2026-01-26]
+            this.maleVoice = voices.find(v => v.lang.includes('de') && (v.name.includes('Male') || v.name.includes('Stefan') || v.name.includes('Google Deutsch'))) || voices[0];
+        };
+        load();
+        window.speechSynthesis.onvoiceschanged = load;
+    },
 
-            this.recognition = new SpeechRecognition();
-            this.recognition.lang = 'de-DE';
-            this.recognition.continuous = true; // HIER: Mikro bleibt an!
-            this.recognition.interimResults = false;
+    speak(text) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        if(this.maleVoice) msg.voice = this.maleVoice;
+        msg.pitch = 0.85;
+        document.getElementById('setcard-content').innerHTML = `
+            <div style="background:rgba(0,209,255,0.05); border:1px solid var(--data-cyan); padding:20px; border-radius:15px;">
+                <div style="color:var(--data-cyan); font-size:9px; font-weight:bold; letter-spacing:2px; margin-bottom:10px;">TONI // AI CO-TRAINER</div>
+                <div style="line-height:1.6; font-size:14px;">${text}</div>
+            </div>
+        `;
+        window.speechSynthesis.speak(msg);
+    },
 
-            this.recognition.onresult = (event) => {
-                const transcript = event.results[event.results.length - 1][0].transcript;
-                this.processTacticalInput(transcript);
-            };
+    setupMic() {
+        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Speech) return;
+        this.recognition = new Speech();
+        this.recognition.lang = 'de-DE';
+        this.recognition.continuous = true;
+        this.recognition.onresult = (e) => {
+            const cmd = e.results[e.results.length - 1][0].transcript.toLowerCase();
+            if(cmd.includes("zentrale") || cmd.includes("koffer")) BriefcaseUI.toggle();
+            this.speak(`Verstanden: "${cmd}"`);
+        };
+    },
 
-            this.recognition.onerror = (e) => console.error("Voice Error:", e);
-        },
-
-        toggleVoice() {
-            if (this.isListening) {
-                this.recognition.stop();
-                this.isListening = false;
-            } else {
-                this.recognition.start();
-                this.isListening = true;
-            }
-            document.getElementById('voice-trigger-btn').classList.toggle('mic-active-glow', this.isListening);
-        },
-
-        // Die taktische Analyse-Logik
-        processTacticalInput(input) {
-            const low = input.toLowerCase();
-            console.log("Toni hört Taktik:", low);
-
-            // 1. Ballbewegung
-            if (low.includes("ball") && low.includes("links")) {
-                arena.moveBall('links');
-                this.speak("Ich habe den Ball nach links verschoben. Meine Kette schiebt ballorientiert ein, um das Zentrum zu schließen. Wie reagiert deine Hintermannschaft?");
-            } 
-            else if (low.includes("ball") && low.includes("rechts")) {
-                arena.moveBall('rechts');
-                this.speak("Ball ist rechts. Ich verdichte den Raum. Schau dir meine Verschiebebewegung an – stehen wir so kompakt genug?");
-            }
-            // 2. Argumentation & Überprüfung
-            else if (low.includes("steht") && low.includes("richtig")) {
-                this.analyzePositioning();
-            }
-            else {
-                // Allgemeiner Dialog (KI-gestützt)
-                this.speak("Interessanter Punkt, Björn. Aber achte auf die Halbräume. Wenn wir so weit rausschieben, öffnen wir die Mitte für einen Steckpass. Was meinst du?");
-            }
-        },
-
-        analyzePositioning() {
-            const feedback = "Björn, deine Abwehr steht etwas zu flach. Wenn der Gegner jetzt überschlägt, kommen wir nicht in den Rückwärtsgang. Ich würde die Innenverteidiger leicht versetzt staffeln. Probier das mal aus!";
-            this.speak(feedback);
-        },
-
-        say(text) {
-            if (!('speechSynthesis' in window)) return;
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.pitch = 0.9;
-            window.speechSynthesis.speak(msg);
-        },
-
-        speak(text) {
-            const container = document.getElementById('setcard-content');
-            container.innerHTML = `
-                <div class="toni-speech-bubble animate-fadeIn">
-                    <div class="toni-badge">TONI // LIVE ANALYSE</div>
-                    <div class="toni-text">${text}</div>
-                    <div class="toni-argument">Toni's Taktik-Logik: Aktiv</div>
-                </div>
-                <button id="voice-trigger-btn" class="${this.isListening ? 'mic-active-glow' : ''}" onclick="ToniAI.toggleVoice()" style="width:100%; padding:15px; border-radius:10px; border:none; background:var(--data-cyan); cursor:pointer; font-weight:bold;">
-                    ${this.isListening ? 'TONI HÖRT ZU...' : 'MIKROFON STARTEN'}
-                </button>
-            `;
-            this.say(text);
-        },
-
-        startGreeting() {
-            this.speak("Hallo Björn! Ich bin bereit. Aktiviere das Mikrofon, dann können wir uns während der Taktik-Session direkt unterhalten. Wo ist der Ball?");
+    toggleListening() {
+        const btn = document.getElementById('voice-trigger-btn');
+        const label = document.getElementById('mic-status-label');
+        if (this.isListening) {
+            this.recognition.stop(); this.isListening = false;
+            btn.classList.remove('mic-active-glow'); label.innerText = "AUS";
+        } else {
+            this.recognition.start(); this.isListening = true;
+            btn.classList.add('mic-active-glow'); label.innerText = "AKTIV";
         }
-    };
-})();
+    }
+};
