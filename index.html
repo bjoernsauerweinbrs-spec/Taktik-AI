@@ -2,8 +2,128 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 - High Professional</title>
-    <link rel="stylesheet" href="css/base.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TONI 2.0 — High Professional Taktik-AI</title>
+    <style>
+        :root {
+            --bg-deep: #0B1220;
+            --panel-warm: #1A2233;
+            --accent-orange: #FF6A00;
+            --data-cyan: #00D1FF;
+            --text-white: #FFFFFF;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-deep) !important;
+            color: var(--text-white);
+            font-family: 'Inter', -apple-system, sans-serif;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 80px 1fr 320px; /* Sidebar | Spielfeld | Analyse-Sidebar */
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            background: #080E1A;
+            border-right: 1px solid rgba(255, 106, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            z-index: 10;
+        }
+
+        .nav-icon {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: 0.3s cubic-bezier(0.12, 0, 0.39, 0);
+            font-size: 24px;
+            border: 1px solid transparent;
+        }
+
+        .nav-icon:hover, .nav-icon.active {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+            box-shadow: 0 0 15px rgba(255, 106, 0, 0.3);
+            background: rgba(255, 106, 0, 0.05);
+        }
+
+        /* Spielfeld (Zentrum) */
+        #stage {
+            position: relative;
+            background: radial-gradient(circle at center, #162033 0%, #0B1220 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #main-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        /* Analysezentrum & Setcard (Rechts) */
+        .analysis-panel {
+            background: var(--panel-warm);
+            border-left: 1px solid rgba(0, 209, 255, 0.2);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .analysis-panel h2 {
+            font-size: 18px;
+            color: var(--data-cyan);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .empty-state {
+            color: #667085;
+            font-style: italic;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        /* Taktik Werkzeuge Overlay */
+        .tools-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(11, 18, 32, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--accent-orange);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .tool-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 106, 0, 0.3);
+            color: var(--accent-orange);
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .tool-btn:hover { background: var(--accent-orange); color: white; }
+    </style>
 </head>
 <body>
 
@@ -11,17 +131,21 @@
         <div class="nav-icon active" title="Analyse">📊</div>
         <div class="nav-icon" title="Kader">👥</div>
         <div class="nav-icon" title="Aktentasche">💼</div>
+        <div class="nav-icon" title="Einstellungen">⚙️</div>
     </aside>
 
     <main id="stage">
+        <div class="tools-overlay">
+            <button class="tool-btn" onclick="arena.clear()">Löschen</button>
+            <button class="tool-btn" onclick="location.reload()">Reset</button>
+        </div>
         <canvas id="main-canvas"></canvas>
     </main>
 
     <aside class="analysis-panel" id="analysis-sidebar">
         <h2>Analysezentrum</h2>
-        <hr style="border: 0; border-top: 1px solid rgba(0,209,255,0.2); margin: 15px 0;">
-        <div id="setcard-placeholder">
-            <p style="color: #666;">Wähle einen Spieler für die Setcard-Details...</p>
+        <div id="setcard-content">
+            <p class="empty-state">Wähle einen Spieler auf dem Feld für die Setcard-Analyse aus.</p>
         </div>
     </aside>
 
@@ -29,21 +153,28 @@
     <script src="engine/arena.js"></script>
     <script src="engine/players.js"></script>
     <script src="engine/dragdrop.js"></script>
+    <script src="ui/analysis-center-ui.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialisierung mit Fehlerprüfung
-            const isOk = arena.init('main-canvas');
-            
-            if (isOk) {
-                // Testdaten
+            console.log("⚽ Toni 2.0: Initialisiere Sollzustand...");
+
+            // 1. Arena starten
+            const isArenaOk = arena.init('main-canvas');
+
+            if (isArenaOk) {
+                // 2. Drag & Drop Modul aktivieren
+                if (typeof initDragDrop === 'function') initDragDrop();
+
+                // 3. Testspieler laden (falls storage/players noch leer sind)
                 arena.players = [
-                    { name: "Max", number: 10, x: 200, y: 150 },
-                    { name: "Tim", number: 9, x: 300, y: 250 }
+                    { id: 101, name: "Max Miller", number: 10, x: 250, y: 300, team: 'home', color: '#FF6A00' },
+                    { id: 102, name: "Tim Schuster", number: 9, x: 500, y: 200, team: 'away', color: '#00D1FF' }
                 ];
                 
-                if (typeof initDragDrop === 'function') initDragDrop();
                 arena.render();
+            } else {
+                console.error("❌ Kritischer Fehler: Arena konnte nicht gestartet werden.");
             }
         });
     </script>
