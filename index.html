@@ -2,118 +2,63 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 — Tactical Hub</title>
+    <title>TONI 2.0 — Final Core</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
-<body class="clean-ui">
+<body>
 
     <aside class="sidebar-minimal">
-        <div class="main-briefcase-btn" onclick="toggleBriefcase()" title="Aktentasche öffnen">
-            💼
-            <span class="btn-label">Zentrale</span>
-        </div>
+        <div class="nav-btn" onclick="toggleBriefcase()">💼</div>
     </aside>
-
-    <div id="briefcase-overlay" class="overlay hidden">
-        <div class="overlay-content">
-            <button class="close-btn" onclick="toggleBriefcase()">✕</button>
-            <h2 class="glow-text">ZENTRALE AKTENTASCHE</h2>
-            
-            <div class="folder-grid">
-                <div class="folder-item" onclick="openSubFolder('sporttasche')">
-                    <div class="folder-icon">👟</div>
-                    <div class="folder-name">Sporttasche</div>
-                    <span class="folder-info">Training & Kader</span>
-                </div>
-                
-                <div class="folder-item" onclick="openSubFolder('analyse')">
-                    <div class="folder-icon">📊</div>
-                    <div class="folder-name">Analysezentrum</div>
-                    <span class="folder-info">Leistungsdaten</span>
-                </div>
-
-                <div class="folder-item" onclick="openSubFolder('orga')">
-                    <div class="folder-icon">🏢</div>
-                    <div class="folder-name">Geschäftszimmer</div>
-                    <span class="folder-info">Sponsoring & Media</span>
-                </div>
-            </div>
-
-            <div id="subfolder-display" class="hidden">
-                <button class="back-btn" onclick="backToMainBriefcase()">← Zurück</button>
-                <div id="subfolder-inner"></div>
-            </div>
-        </div>
-    </div>
 
     <main id="stage">
         <div class="tools-overlay">
-            <button class="tool-btn" onclick="arena.setMode('standard')">Standard</button>
-            <button class="tool-btn" onclick="arena.setMode('funinho')">Funinho</button>
+            <button onclick="arena.setMode('standard')">STANDARD</button>
+            <button onclick="arena.setMode('funinho')">FUNINHO</button>
         </div>
         <canvas id="main-canvas"></canvas>
     </main>
 
-    <aside id="side-setcard" class="side-panel hidden">
-        <div class="setcard-header">
-            <h3 id="sc-name">Spielername</h3>
-            <span id="sc-number" class="player-num-badge">00</span>
-        </div>
-        <div class="setcard-body">
-            <div class="rating-section">
-                <label>Aktuelle Form (1-10)</label>
-                <div id="sc-rating-display" class="stars">⭐⭐⭐⭐⭐</div>
-                <input type="range" id="sc-rating-input" min="1" max="10" onchange="updatePlayerRating(this.value)">
-            </div>
-            <div class="stats-preview">
-                <div class="stat-row"><span>Status:</span> <span id="sc-status">Fit</span></div>
-                <div class="stat-row"><span>Position:</span> <span id="sc-pos">IV</span></div>
-            </div>
+    <aside class="side-panel">
+        <h2>Analysezentrum</h2>
+        <div id="active-setcard">
+            <p class="empty">Spieler auf dem Feld anklicken...</p>
         </div>
     </aside>
 
+    <div id="briefcase-overlay" style="display:none;" class="briefcase-modal">
+        <button onclick="toggleBriefcase()" style="position:absolute; top:40px; right:40px;">SCHLIESSEN ✕</button>
+        <h1 style="color:#FF6A00; letter-spacing:5px;">ZENTRALE AKTENTASCHE</h1>
+        <div class="folder-grid">
+            <div class="folder-card" onclick="alert('Sporttasche geöffnet')">
+                <div style="font-size:50px;">👟</div>
+                <h3>Sporttasche</h3>
+                <p>Kader & Training</p>
+            </div>
+            <div class="folder-card">
+                <div style="font-size:50px;">📊</div>
+                <h3>Analyse</h3>
+                <p>Leistungsdaten</p>
+            </div>
+            <div class="folder-card">
+                <div style="font-size:50px;">🏢</div>
+                <h3>Geschäftszimmer</h3>
+                <p>Sponsoring</p>
+            </div>
+        </div>
+    </div>
+
     <script src="engine/arena.js"></script>
-    <script src="ui/aktentasche-ui.js"></script>
     <script>
-        let selectedPlayerId = null;
-
         function toggleBriefcase() {
-            document.getElementById('briefcase-overlay').classList.toggle('hidden');
+            const el = document.getElementById('briefcase-overlay');
+            el.style.display = (el.style.display === 'none') ? 'flex' : 'none';
         }
-
-        function openSubFolder(folder) {
-            document.querySelector('.folder-grid').classList.add('hidden');
-            const display = document.getElementById('subfolder-display');
-            display.classList.remove('hidden');
-            
-            if(folder === 'sporttasche') {
-                window.Aktentasche.renderSporttasche();
-            }
-        }
-
-        function backToMainBriefcase() {
-            document.querySelector('.folder-grid').classList.remove('hidden');
-            document.getElementById('subfolder-display').classList.add('hidden');
-        }
-
-        // Spieler-Interaktion
-        window.showSetcard = function(player) {
-            selectedPlayerId = player.id;
-            const panel = document.getElementById('side-setcard');
-            document.getElementById('sc-name').innerText = player.name;
-            document.getElementById('sc-number').innerText = player.number;
-            document.getElementById('sc-rating-input').value = player.rating || 5;
-            panel.classList.remove('hidden');
-        };
         
-        function updatePlayerRating(val) {
-            const player = arena.players.find(p => p.id === selectedPlayerId);
-            if(player) {
-                player.rating = val;
-                arena.render(); // Sofort-Update
-            }
-        }
+        // Initialisierung des Feldes
+        document.addEventListener('DOMContentLoaded', () => {
+            arena.init('main-canvas');
+        });
     </script>
 </body>
 </html>
