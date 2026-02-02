@@ -1,41 +1,58 @@
 /**
  * =========================================
  * TONI 2.0 – TACTICAL AI ENGINE
- * Geometrische Analyse & Mustererkennung
+ * Geometrische Analyse & Aktive Korrektur
  * =========================================
  */
 (function() {
     window.AnalysisAI = {
         config: {
-            gapThreshold: 120, // Max. Abstand in der Kette
-            defensiveZoneY: 0.6 // Ab wann zählt es als Abwehr (60% des Feldes)
+            gapThreshold: 120, 
+            defensiveZoneY: 0.6 
         },
 
-        // Startet den Scan des aktuellen Board-Zustands
+        // 1. ANALYSE: Scannt das Spielfeld
         scanBoard() {
-            console.log("🧠 Toni scannt das Spielfeld...");
             const players = window.arena.players;
             const homeTeam = players.filter(p => p.team === 'home');
             const awayTeam = players.filter(p => p.team === 'away');
 
-            if (homeTeam.length < 4) return "Nicht genug Spieler für eine Kettenanalyse.";
+            if (homeTeam.length < 4) return "Björn, ich brauche mindestens vier Verteidiger für eine Analyse.";
 
-            // 1. Suche nach der Abwehrkette (tiefste Spieler)
             const defenseLine = this.detectBackFour(homeTeam);
-            
-            // 2. Suche nach Lücken in der Kette
             const gaps = this.findGaps(defenseLine);
-
-            // 3. Suche nach gefährlichen Gegnern
             const threats = this.detectThreats(awayTeam, defenseLine);
 
             return this.generateReport(defenseLine, gaps, threats);
         },
 
+        // 2. AKTION: Korrigiert die Positionen aktiv
+        fixDefenseLine() {
+            const homeTeam = window.arena.players.filter(p => p.team === 'home');
+            if (homeTeam.length < 4) return;
+
+            const defenseLine = this.detectBackFour(homeTeam);
+            const canvasW = window.arena.canvas.width;
+            
+            // Berechnung der idealen Werte
+            const idealY = defenseLine.reduce((acc, p) => acc + p.y, 0) / defenseLine.length;
+            const spacing = canvasW / 5;
+
+            // Toni verschiebt die Spieler (Brasilianischer Stil: Harmonische Verteilung)
+            defenseLine.forEach((player, index) => {
+                player.x = spacing * (index + 1);
+                player.y = idealY;
+            });
+
+            if (window.toniSpeak) {
+                window.toniSpeak("Ich habe die Kette korrigiert, Björn. Jetzt stehen wir kompakt und lassen keine Schnittstellen mehr zu.");
+            }
+            
+            console.log("🛡️ Taktische Korrektur ausgeführt.");
+        },
+
         detectBackFour(team) {
-            // Sortiere Spieler nach Y (von oben nach unten) und nimm die hintersten
             const sortedByY = [...team].sort((a, b) => b.y - a.y);
-            // Die 4 Spieler mit den höchsten Y-Werten (am weitesten hinten)
             return sortedByY.slice(0, 4).sort((a, b) => a.x - b.x);
         },
 
@@ -51,25 +68,15 @@
         },
 
         detectThreats(opponents, defenseLine) {
-            // Findet Gegner, die hinter der Kette oder in Lücken lauern
             const lineY = defenseLine[0].y;
-            return opponents.filter(opp => opp.y > lineY - 50); // Gegner nahe der Kette
+            return opponents.filter(opp => opp.y > lineY - 50);
         },
 
         generateReport(line, gaps, threats) {
-            let message = "";
-
             if (gaps.length > 0) {
-                message = `Björn, ich sehe eine gefährliche Lücke in deiner Viererkette zwischen ${gaps[0].p1.name} und ${gaps[0].p2.name}. `;
-            } else {
-                message = "Deine defensive Grundordnung sieht stabil aus. Kompakt wie der Zuckerhut. ";
+                return `Ich sehe eine Lücke zwischen ${gaps[0].p1.name} und ${gaps[0].p2.name}. Soll ich die Kette korrigieren?`;
             }
-
-            if (threats.length > 0) {
-                message += `Achte auf die Nummer ${threats[0].number}, er lauert im Zwischenlinienraum.`;
-            }
-
-            return message;
+            return "Die Abwehr steht stabil. Sehr gut gearbeitet.";
         }
     };
 })();
