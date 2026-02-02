@@ -1,7 +1,7 @@
 /**
  * =========================================
- * TONI 2.0 – ARENA ENGINE (BASE SECURED)
- * Animationen, Tore & Hybrid-Modus
+ * TONI 2.0 – ARENA ENGINE (MODUS UPDATE)
+ * Fixed Funinho Goal Placement
  * =========================================
  */
 (function() {
@@ -11,7 +11,7 @@
         players: [],
         ready: false,
         pulse: 0,
-        mode: 'standard', // 'standard' oder 'funinho'
+        mode: 'standard', 
 
         init(elementId) {
             const el = document.getElementById(elementId);
@@ -27,10 +27,11 @@
 
         setMode(newMode) {
             this.mode = newMode;
-            if (window.toniSpeak) toniSpeak("Wechsle in den " + newMode + " Modus. Zeit für technische Finessen.");
+            if (window.toniSpeak) toniSpeak("Wechsle in den " + newMode + " Modus.");
         },
 
         resize() {
+            if (!this.canvas) return;
             const container = this.canvas.parentElement;
             this.canvas.width = container.clientWidth;
             this.canvas.height = container.clientHeight;
@@ -62,7 +63,6 @@
             const w = this.canvas.width;
             const h = this.canvas.height;
             const pad = 60;
-
             ctx.save();
             ctx.strokeStyle = "rgba(0, 209, 255, 0.2)";
             ctx.lineWidth = 2;
@@ -84,18 +84,29 @@
             ctx.beginPath();
             ctx.arc(w / 2, h / 2, 60, 0, Math.PI * 2);
             ctx.stroke();
-            
-            // Tore
             this.drawGoal(ctx, pad, h / 2, -15, 60);
             this.drawGoal(ctx, w - pad, h / 2, 15, 60);
         },
 
         drawFuninhoPitch(ctx, w, h, pad) {
-            const goalSize = 30;
-            this.drawGoal(ctx, pad, pad + 50, -10, goalSize);
-            this.drawGoal(ctx, pad, h - pad - 50, -10, goalSize);
-            this.drawGoal(ctx, w - pad, pad + 50, 10, goalSize);
-            this.drawGoal(ctx, w - pad, h - pad - 50, 10, goalSize);
+            const goalSize = 35;
+            // Funinho Tore: Versetzt von den Ecken nach innen (ca. 25% der Torlinie)
+            const goalOffset = h * 0.25; 
+            
+            // Links
+            this.drawGoal(ctx, pad, h / 2 - goalOffset, -10, goalSize);
+            this.drawGoal(ctx, pad, h / 2 + goalOffset, -10, goalSize);
+            // Rechts
+            this.drawGoal(ctx, w - pad, h / 2 - goalOffset, 10, goalSize);
+            this.drawGoal(ctx, w - pad, h / 2 + goalOffset, 10, goalSize);
+            
+            // Schusszonen-Markierung (Sechsmeter)
+            ctx.setLineDash([5, 10]);
+            ctx.beginPath();
+            ctx.moveTo(pad + 100, pad); ctx.lineTo(pad + 100, h - pad);
+            ctx.moveTo(w - pad - 100, pad); ctx.lineTo(w - pad - 100, h - pad);
+            ctx.stroke();
+            ctx.setLineDash([]);
         },
 
         drawGoal(ctx, x, y, depth, size) {
@@ -128,8 +139,6 @@
             ctx.textAlign = "center";
             ctx.fillText(p.number || "", p.x, p.y + 5);
             ctx.restore();
-        },
-
-        clear() { this.players = []; }
+        }
     };
 })();
