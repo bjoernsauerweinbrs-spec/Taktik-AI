@@ -1,51 +1,82 @@
-// =========================================
-// Toni 2.0 – Tools Engine (Vollständig)
-// =========================================
+/**
+ * =========================================
+ * TONI 2.0 – TACTICAL TOOLS ENGINE
+ * Pässe, Laufwege & Zonen (Multi-Layer)
+ * =========================================
+ */
+(function() {
+    window.tools = {
+        currentTool: null,
+        firstPoint: null,
 
-// Passweg hinzufügen
-function addPassLine(x1, y1, x2, y2, color = "rgba(0,150,255,0.9)") {
-    arena.lines.push({ x1, y1, x2, y2, color, width: 3, dashed: false });
-    arena.render();
-}
+        // Aktiviert ein Werkzeug
+        set(toolName) {
+            this.currentTool = toolName;
+            this.firstPoint = null; // Reset für neue Zeichnung
+            console.log("🛠️ Tool aktiv: " + toolName);
+            
+            // Visuelles Feedback für Buttons (falls vorhanden)
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.id === 'tool-' + toolName);
+            });
+        },
 
-// Laufweg hinzufügen (gestrichelt)
-function addRunLine(x1, y1, x2, y2, color = "rgba(0,255,150,0.9)") {
-    arena.lines.push({ x1, y1, x2, y2, color, width: 2, dashed: true });
-    arena.render();
-}
+        // Verarbeitet Klicks auf das Spielfeld (wird von dragdrop.js oder main gerufen)
+        handleCanvasClick(x, y) {
+            if (!this.currentTool) return;
 
-function addZone(x, y, w, h, color = "rgba(255,106,0,0.25)") {
-    arena.zones.push({ x, y, w, h, color });
-    arena.render();
-}
-
-function addMarker(x, y, size = 10, color = "rgba(255,255,0,0.9)") {
-    arena.sequences.push({ x, y, size, color });
-    arena.render();
-}
-
-function clearTools() {
-    arena.lines = [];
-    arena.zones = [];
-    arena.sequences = [];
-    arena.render();
-}
-
-// SICHERE ÜBERSCHREIBUNG FÜR GESTRICHELTE LINIEN
-// Wir warten, bis arena bereit ist
-setTimeout(() => {
-    if (window.arena && window.arena.drawLine) {
-        const originalDrawLine = arena.drawLine.bind(arena);
-
-        arena.drawLine = function(ctx, line) {
-            if (line.dashed) {
-                ctx.setLineDash([10, 10]);
-            } else {
-                ctx.setLineDash([]);
+            if (this.currentTool === 'marker') {
+                this.addMarker(x, y);
+                return;
             }
-            originalDrawLine(ctx, line);
-            ctx.setLineDash([]); // Reset für andere Zeichnungen
-        };
-        console.log("🛠️ Tools: drawLine erfolgreich erweitert.");
-    }
-}, 500);
+
+            if (!this.firstPoint) {
+                this.firstPoint = { x, y };
+                // Optional: Kleiner visueller Punkt als Start-Indikator
+            } else {
+                this.createTacticalElement(this.firstPoint, { x, y });
+                this.firstPoint = null;
+            }
+        },
+
+        createTacticalElement(p1, p2) {
+            const arena = window.arena;
+            if (!arena) return;
+
+            switch(this.currentTool) {
+                case 'pass':
+                    // Passweg: Durchgezogene Linie in Cyan
+                    arena.lines.push({
+                        x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+                        color: "#00D1FF", dashed: false, type: 'pass'
+                    });
+                    break;
+                case 'run':
+                    // Laufweg: Gestrichelte Linie in Neon-Orange
+                    arena.lines.push({
+                        x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+                        color: "#FF6A00", dashed: true, type: 'run'
+                    });
+                    break;
+                case 'zone':
+                    // Taktische Zone: Transparentes Rechteck
+                    arena.zones.push({
+                        x: Math.min(p1.x, p2.x),
+                        y: Math.min(p1.y, p2.y),
+                        w: Math.abs(p2.x - p1.x),
+                        h: Math.abs(p2.y - p1.y),
+                        color: "rgba(255, 106, 0, 0.15)"
+                    });
+                    break;
+            }
+        },
+
+        addMarker(x, y) {
+            if (!window.arena) return;
+            window.arena.zones.push({
+                x: x - 5, y: y - 5, w: 10, h: 10,
+                color: "#FFFFFF"
+            });
+        }
+    };
+})();
