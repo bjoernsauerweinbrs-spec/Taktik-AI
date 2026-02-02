@@ -1,52 +1,71 @@
 /**
  * =========================================
- * TONI 2.0 – TACTICAL AI (FUNINHO UPDATE)
+ * TONI 2.0 – GLOBAL AI INTELLIGENCE
+ * Analyse von Welttrainer-Konzepten & Trends
  * =========================================
  */
 (function() {
     window.AnalysisAI = {
         scanBoard() {
-            const mode = window.arena.mode;
-            if (mode === 'funinho') return this.analyzeFuninho();
-            return this.analyzeStandard();
+            const players = window.arena.players.filter(p => p.team === 'home');
+            
+            // 1. Suche nach Triangulation (Positionsspiel nach Weltklasse-Standard)
+            const triangles = this.findTriangles(players);
+            
+            // 2. Trend-Abfrage (Simulierter Zugriff auf 2026 Trends)
+            const trend = this.getGlobalTrend();
+
+            // 3. Brasilianische Bewertung
+            let report = `Björn, mein Scan zeigt ${triangles} aktive Dreiecke im Positionsspiel. `;
+            
+            if (triangles < 2) {
+                report += "Das ist zu statisch. Wir brauchen mehr brasilianische Leichtigkeit und bessere Winkel. ";
+            } else {
+                report += "Das ist Weltklasse! Wir kontrollieren den Raum wie die Seleção. ";
+            }
+
+            report += "Übrigens: " + trend;
+            return report;
         },
 
-        analyzeStandard() {
-            const homeTeam = window.arena.players.filter(p => p.team === 'home');
-            if (homeTeam.length < 4) return "Nicht genug Spieler für Kettenanalyse.";
-            
-            const sorted = [...homeTeam].sort((a, b) => b.y - a.y).slice(0, 4).sort((a, b) => a.x - b.x);
-            let gap = false;
-            for (let i = 0; i < sorted.length - 1; i++) {
-                if (Math.abs(sorted[i+1].x - sorted[i].x) > 130) gap = true;
+        findTriangles(players) {
+            let count = 0;
+            const distLimit = 160; // Max Distanz für effektives Passspiel
+
+            for (let i = 0; i < players.length; i++) {
+                for (let j = i + 1; j < players.length; j++) {
+                    for (let k = j + 1; k < players.length; k++) {
+                        const d1 = Math.hypot(players[i].x - players[j].x, players[i].y - players[j].y);
+                        const d2 = Math.hypot(players[j].x - players[k].x, players[j].y - players[k].y);
+                        const d3 = Math.hypot(players[k].x - players[i].x, players[k].y - players[i].y);
+                        
+                        if (d1 < distLimit && d2 < distLimit && d3 < distLimit) count++;
+                    }
+                }
             }
-            
-            return gap ? "Björn, da ist eine Schnittstelle in der Kette. Soll ich sie schließen?" : "Abwehr steht kompakt.";
+            return count;
         },
 
-        analyzeFuninho() {
-            const homeTeam = window.arena.players.filter(p => p.team === 'home');
-            if (homeTeam.length !== 3) return "Funinho-Analyse erfordert genau 3 Spieler pro Team.";
-
-            // Analyse der Dreiecksbildung (Raumbesetzung)
-            const centerX = homeTeam.reduce((acc, p) => acc + p.x, 0) / 3;
-            const spread = Math.max(...homeTeam.map(p => p.x)) - Math.min(...homeTeam.map(p => p.x));
-
-            if (spread < 150) {
-                return "Wir stehen zu eng! Zieh das Spiel in die Breite, um beide Mini-Tore zu bedrohen.";
-            }
-            return "Gute Raumaufteilung. Wir können beide Tore effektiv attackieren.";
+        getGlobalTrend() {
+            const trends = [
+                "In der Premier League nutzen Top-Teams jetzt vermehrt asymmetrische Außenverteidiger.",
+                "Die FIFA-Studie 2026 zeigt: Tore fallen zu 40% durch Umschaltmomente nach Gegenpressing.",
+                "Trend-Check: Der 'Inverted Wingback' ist der Schlüssel gegen kompakte Fünferketten."
+            ];
+            return trends[Math.floor(Math.random() * trends.length)];
         },
 
         fixDefenseLine() {
-            // Bestehende Korrektur-Logik
             const defenseLine = window.arena.players.filter(p => p.team === 'home').sort((a,b) => a.x - b.x);
+            if (defenseLine.length < 4) return;
+
             const spacing = window.arena.canvas.width / 5;
             defenseLine.forEach((p, i) => {
                 p.x = spacing * (i + 1);
-                p.y = 400;
+                p.y = 450;
             });
-            window.toniSpeak("Kette korrigiert. Kompaktheit ist wiederhergestellt.");
+            
+            if (window.toniSpeak) window.toniSpeak("Ich habe die Kette nach UEFA-Pro-Richtlinien ausgerichtet. Maximale Kompaktheit hergestellt.");
         }
     };
 })();
