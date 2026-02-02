@@ -1,39 +1,52 @@
-/**
- * TONI 2.0 – INTERACTIVE COMMAND STYLE
- */
 :root {
     --bg-deep: #0B1220;
+    --panel-warm: #1A2233;
     --accent-orange: #FF6A00;
     --data-cyan: #00D1FF;
 }
 
-/* KONTINUIERLICHES HÖREN SIGNAL */
-.mic-active-glow {
-    box-shadow: 0 0 30px var(--data-cyan);
-    background: var(--data-cyan) !important;
-    animation: voice-pulse 1.5s infinite ease-in-out;
+body.pro-layout {
+    margin: 0; padding: 0; background: var(--bg-deep); color: white;
+    display: grid; grid-template-columns: 100px 1fr 350px; /* Sidebar | Arena | Info */
+    height: 100vh; font-family: 'Inter', sans-serif; overflow: hidden;
 }
 
-@keyframes voice-pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.1); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 1; }
+/* SIDEBAR FIX */
+.sidebar-minimal {
+    background: #080E1A; border-right: 1px solid rgba(255,106,0,0.2);
+    display: flex; flex-direction: column; align-items: center; padding-top: 40px;
 }
 
-/* CHAT BUBBLE FÜR ARGUMENTATION */
-.toni-speech-bubble {
-    background: rgba(0, 209, 255, 0.05);
-    border: 1px solid var(--data-cyan);
-    padding: 20px; border-radius: 15px;
-    margin-bottom: 20px; transition: 0.3s;
+.control-unit {
+    cursor: pointer; text-align: center; margin-bottom: 40px; transition: 0.3s;
 }
+.control-unit .icon { font-size: 32px; margin-bottom: 5px; }
+.control-unit span { font-size: 10px; font-weight: bold; color: var(--text-muted); }
+.control-unit:hover { color: var(--data-cyan); transform: scale(1.1); }
 
-.toni-argument {
-    border-left: 3px solid var(--accent-orange);
-    padding-left: 15px; margin-top: 15px; font-style: italic; color: #cbd5e1;
-}
+/* MIKRO AKTIV GLOW */
+.mic-active-glow { color: var(--data-cyan) !important; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-/* BALL STYLING */
-.ball-indicator {
-    filter: drop-shadow(0 0 5px white);
+/* ARENA & ANALYSE */
+#stage { position: relative; width: 100%; height: 100%; background: radial-gradient(circle, #162033, #0B1220); }
+#main-canvas { width: 100%; height: 100%; }
+.analysis-panel { background: var(--panel-warm); border-left: 1px solid rgba(0,209,255,0.1); padding: 25px; }
+
+/* BRIEFCASE OVERLAY */
+.briefcase-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(15px);
+    z-index: 9999; display: flex; align-items: center; justify-content: center;
 }
+.briefcase-window {
+    background: var(--panel-warm); border: 1px solid var(--accent-orange);
+    width: 80%; max-width: 900px; border-radius: 20px; padding: 40px;
+}
+.hidden { display: none !important; }
+
+/* LOGIN */
+#login-screen { position: fixed; inset: 0; background: #0B1220; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+.login-box { text-align: center; padding: 50px; background: #1A2233; border-radius: 20px; border: 1px solid var(--accent-orange); }
+.login-input { width: 100%; padding: 12px; margin: 10px 0; background: #0B1220; border: 1px solid #444; color: white; border-radius: 8px; }
+.login-btn { width: 100%; padding: 15px; background: var(--accent-orange); border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; }
