@@ -11,30 +11,29 @@
     <aside class="sidebar">
         <div class="nav-icon active" id="nav-board" onclick="switchMainView('board')">📊</div>
         <div class="nav-icon" id="nav-training" onclick="switchMainView('training')">📅</div>
-        <div class="nav-icon" id="nav-global" onclick="switchMainView('global')">🌐</div>
         <div class="nav-icon" id="nav-briefcase" onclick="switchMainView('briefcase')">💼</div>
     </aside>
 
     <main id="stage">
         <div class="tools-overlay" id="board-tools">
-            <button class="tool-btn" onclick="arena.setMode('standard')">Standard</button>
-            <button class="tool-btn" onclick="arena.setMode('funinho')">Funinho</button>
-            <button class="tool-btn" onclick="triggerToniAnalysis()" style="color:var(--data-cyan);">KI-Trend-Scan</button>
-            <button class="tool-btn" onclick="AnalysisAI.fixDefenseLine()" style="color:#28C76F;">Korrektur</button>
+            <button class="tool-btn" onclick="arena.setMode('standard')">STANDARD</button>
+            <button class="tool-btn" onclick="arena.setMode('funinho')">FUNINHO</button>
+            <button class="tool-btn" onclick="triggerToniAnalysis()" style="color:var(--data-cyan);">KI-SCAN</button>
+            <button class="tool-btn" onclick="AnalysisAI.fixDefenseLine()" style="color:#28C76F;">KORREKTUR</button>
         </div>
 
-        <div id="module-board" class="module-container active">
+        <div id="module-board" class="module-container active" style="height:100%;">
             <canvas id="main-canvas"></canvas>
         </div>
-        <div id="module-training" class="module-container"></div>
-        <div id="module-briefcase" class="module-container"></div>
-        <div id="module-global" class="module-container"></div>
+        
+        <div id="module-briefcase" class="module-container" style="display:none; padding:20px;"></div>
+        <div id="module-training" class="module-container" style="display:none; padding:20px;"></div>
     </main>
 
-    <aside class="analysis-panel">
-        <h2>Analysezentrum</h2>
+    <aside class="analysis-panel" id="analysis-sidebar">
+        <h2 id="sidebar-title">Analysezentrum</h2>
         <div id="setcard-content">
-            <p class="empty-state">Wähle ein Modul für tiefergehende Daten.</p>
+            <p class="empty-state">Wähle ein Modul für Daten.</p>
         </div>
     </aside>
 
@@ -46,21 +45,32 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             arena.init('main-canvas');
-            if(window.Aktentasche) window.Aktentasche.init();
+            // Initialer Kader
+            arena.players = [{ id: 1, name: "Max Miller", number: 10, x: 400, y: 300, team: 'home' }];
         });
 
         function switchMainView(module) {
+            // UI Update Icons
             document.querySelectorAll('.nav-icon').forEach(el => el.classList.remove('active'));
-            document.getElementById('nav-' + module).classList.add('active');
+            const activeNav = document.getElementById('nav-' + module);
+            if(activeNav) activeNav.classList.add('active');
 
-            document.querySelectorAll('.module-container').forEach(el => el.classList.remove('active'));
-            document.getElementById('module-' + module).classList.add('active');
-
-            // Spezifischer Modul-Inhalt Trigger
-            if (module === 'briefcase') window.Aktentasche.show();
+            // Module verstecken/zeigen
+            document.getElementById('module-board').style.display = 'none';
+            document.getElementById('module-briefcase').style.display = 'none';
+            document.getElementById('module-training').style.display = 'none';
             
-            const tools = document.getElementById('board-tools');
-            tools.style.display = (module === 'board') ? 'flex' : 'none';
+            const activeModule = document.getElementById('module-' + module);
+            if(activeModule) activeModule.style.display = 'block';
+
+            // Cockpit nur auf dem Board zeigen
+            document.getElementById('board-tools').style.display = (module === 'board') ? 'flex' : 'none';
+
+            // Modul-Inhalte triggern
+            if (module === 'briefcase' && window.Aktentasche) {
+                window.Aktentasche.show();
+            }
+            if (module === 'board') arena.resize();
         }
 
         function triggerToniAnalysis() {
