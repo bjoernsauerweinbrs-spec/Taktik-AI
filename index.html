@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — Tactical Command</title>
+    <title>TONI 2.0 — Tactical Hub</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body>
@@ -23,16 +23,18 @@
         <div id="hologram-ui"></div>
     </main>
 
-    <aside class="analysis-panel" id="side-analysis">
-        <h2 style="color: var(--data-cyan); font-size: 14px; letter-spacing: 2px; border-bottom: 1px solid rgba(0,209,255,0.1); padding-bottom:15px;">ANALYSEZENTRUM</h2>
+    <aside class="analysis-panel">
+        <h2 style="color: var(--data-cyan); font-size: 14px; letter-spacing: 2px;">ANALYSEZENTRUM</h2>
         <div id="setcard-content" style="margin-top: 25px;">
-            <p style="color: #667085; font-style: italic; text-align:center;">Spieler auf dem Feld berühren...</p>
+            <p style="color: #667085; font-style: italic; text-align:center;">Spieler wählen...</p>
         </div>
     </aside>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
-        <button onclick="toggleBriefcase()" style="position:absolute; top:40px; right:40px; background:none; border:none; color:white; font-size:35px; cursor:pointer;">✕</button>
-        <h1 style="color: var(--accent-orange); letter-spacing: 5px;">ZENTRALE AKTENTASCHE</h1>
+        <div class="briefcase-header">
+            <h1 style="color: var(--accent-orange); letter-spacing: 5px;">ZENTRALE AKTENTASCHE</h1>
+            <button onclick="toggleBriefcase()" class="close-overlay-btn">✕</button>
+        </div>
         
         <div class="folder-grid" id="main-folders">
             <div class="folder-item" onclick="openSub('sport')">👟 <h3>Sporttasche</h3></div>
@@ -40,8 +42,7 @@
             <div class="folder-item" onclick="openSub('orga')">🏢 <h3>Geschäftszimmer</h3></div>
         </div>
 
-        <div id="sub-view" class="hidden" style="width:100%; max-width:850px; margin-top:40px;">
-            <button onclick="closeSub()" style="color: var(--data-cyan); cursor:pointer; background:none; border:none; margin-bottom:20px; font-weight:bold;">← ZURÜCK</button>
+        <div id="sub-view" class="hidden">
             <div id="sub-content"></div>
         </div>
     </div>
@@ -50,7 +51,9 @@
     <script src="ui/stadionzeitung-ui.js"></script>
     <script src="ui/briefcase-ui.js"></script>
     <script>
-        function toggleBriefcase() { document.getElementById('briefcase-overlay').classList.toggle('hidden'); }
+        function toggleBriefcase() { 
+            document.getElementById('briefcase-overlay').classList.toggle('hidden'); 
+        }
         function openSub(t) {
             document.getElementById('main-folders').classList.add('hidden');
             document.getElementById('sub-view').classList.remove('hidden');
