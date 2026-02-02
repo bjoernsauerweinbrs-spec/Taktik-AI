@@ -1,39 +1,50 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Toni 2.0 — Sollzustand</title>
-  <link rel="stylesheet" href="css/base.css" />
-  <link rel="stylesheet" href="css/board.css" />
-  <link rel="stylesheet" href="css/neon-orange.css" />
+    <meta charset="UTF-8">
+    <title>TONI 2.0 - Tactical Intelligence</title>
+    <link rel="stylesheet" href="css/neon-orange.css">
 </head>
 <body>
+    <div id="app-shell">
+        <aside class="sidebar">
+            <nav id="main-nav">
+                <div class="nav-item active" onclick="switchMode('tactic')">📊 Analyse</div>
+                <div class="nav-item" onclick="switchMode('kader')">👤 Kader</div>
+                <div class="nav-item" onclick="switchMode('briefcase')">💼 Aktentasche</div>
+            </nav>
+        </aside>
+        
+        <main id="stage">
+            <canvas id="main-canvas"></canvas>
+        </main>
 
-  <div id="app-section">
-    <header class="site-header">
-      <h1 class="logo">TONI 2.0</h1>
-      <nav class="main-nav">
-        <button onclick="location.reload()">Reset</button>
-      </nav>
-    </header>
+        <div id="voice-overlay" class="hidden">
+            <div class="listening-ring"></div>
+            <span id="voice-text">Toni hört zu...</span>
+        </div>
+    </div>
 
-    <main class="app-container">
-      <div id="board-container">
-        <canvas id="arena-canvas"></canvas>
-        <div id="taktik-tools" class="tools-panel">
-            </div>
-      </div>
-    </main>
-  </div>
-
-  <script src="js/storage.js"></script>
-  <script src="engine/arena.js"></script>
-  <script src="engine/players.js"></script>
-  <script src="engine/tools.js"></script>
-  <script src="engine/dragdrop.js"></script>
-
-  <script src="ui/taktikboard-ui.js"></script>
-  <script src="js/main.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="engine/arena.js"></script>
+    <script src="engine/players.js"></script>
+    <script src="engine/dragdrop.js"></script>
+    <script src="ui/taktikboard-ui.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialisierung ohne Konflikte
+            arena.init('main-canvas');
+            
+            // Beispieldaten laden
+            arena.players = [
+                { id: 1, name: "Schuster", number: 9, x: 200, y: 300, team: 'home' },
+                { id: 2, name: "Weber", number: 10, x: 400, y: 350, team: 'away' }
+            ];
+            
+            initDragDrop();
+            arena.render();
+        });
+    </script>
 </body>
 </html>
