@@ -1,0 +1,92 @@
+/**
+ * =========================================
+ * TONI 2.0 – TRAININGSBUCH STYLES
+ * =========================================
+ */
+
+#training-planner {
+    padding: 30px;
+    height: 100%;
+    background: radial-gradient(circle at center, #162033 0%, #0B1220 100%);
+    overflow-y: auto;
+}
+
+.planner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.acwr-indicator {
+    background: rgba(40, 199, 111, 0.1);
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: 1px solid #28C76F;
+    font-weight: bold;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+.calendar-day {
+    background: rgba(26, 34, 51, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    min-height: 150px;
+    padding: 15px;
+}
+
+.day-label {
+    display: block;
+    color: var(--data-cyan);
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.session-card {
+    background: #2E2E2E;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+.session-card h4 { margin: 5px 0 0 0; font-size: 13px; }
+
+.visual-load-curve {
+    background: rgba(11, 18, 32, 0.8);
+    border: 1px solid rgba(0, 209, 255, 0.2);
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.drill-item {
+    background: #1A2233;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    cursor: grab;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.drill-item:hover {
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 10px rgba(255, 106, 0, 0.2);
+}
+
+.periodization-info {
+    background: rgba(255, 106, 0, 0.05);
+    border: 1px solid rgba(255, 106, 0, 0.2);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
