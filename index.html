@@ -3,13 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Taktik‑AI — Interaktives Taktik‑Board</title>
-  <meta name="description" content="Interaktives Taktik‑Board mit KI‑Unterstützung" />
-  <meta name="theme-color" content="#0b1220" />
-
-  <link rel="icon" type="image/svg+xml" href="data/favicon.svg" />
-
-  <!-- Styles (css liegt im Ordner css/) -->
+  <title>Toni 2.0 — AI Taktik-Zentrale</title>
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/board.css" />
   <link rel="stylesheet" href="css/hologram.css" />
@@ -19,126 +13,75 @@
   <link rel="stylesheet" href="css/voice.css" />
 </head>
 <body>
-  <header class="site-header">
-    <div class="container">
-      <h1 class="logo">Taktik‑AI</h1>
+
+  <div id="auth-section">
+    <div class="login-box">
+      <h1>Toni 2.0 Login</h1>
+      <input type="text" id="username" placeholder="Benutzername" />
+      <input type="password" id="password" placeholder="Passwort" />
+      <div class="btn-group">
+        <button id="login-btn">Anmelden</button>
+        <button id="register-btn">Registrieren</button>
+      </div>
+      <p id="status"></p>
+    </div>
+  </div>
+
+  <div id="app-section" style="display:none;">
+    <header class="site-header">
+      <h1 class="logo">TONI 2.0</h1>
       <nav class="main-nav">
-        <a href="#board">Board</a>
-        <a href="#analysis">Analyse</a>
-        <a href="#library">Bibliothek</a>
-        <a href="#voice">Sprache</a>
+        <button id="open-board">Taktikboard</button>
+        <button id="open-aktentasche">Aktentasche</button>
+        <button id="logout-btn">Abmelden</button>
       </nav>
+    </header>
+
+    <main class="app-container">
+      <section id="board-container">
+        <canvas id="arena-canvas"></canvas>
+        <div id="taktik-tools" class="tools-panel"></div>
+      </section>
+
+      <section id="aktentasche-container" style="display:none;">
+        <nav id="aktentasche-nav"></nav>
+        <div id="aktentasche-content"></div>
+      </section>
+    </main>
+
+    <div id="voice-overlay" class="hidden">
+      <div id="voice-status">Toni hört zu...</div>
+      <div id="voice-transcript"></div>
     </div>
-  </header>
+    <div id="toni-hologram"></div>
+  </div>
 
-  <main id="app" class="app-container">
-    <section id="board" class="board-section">
-      <div id="pitch" class="pitch" aria-label="Taktikfeld"></div>
-      <aside id="tools" class="tools-panel" aria-label="Werkzeuge">
-        <h2>Werkzeuge</h2>
-        <div id="tool-list"></div>
-      </aside>
-    </section>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
 
-    <section id="analysis" class="analysis-section">
-      <h2>Analyse</h2>
-      <div id="analysis-center"></div>
-    </section>
+  <script src="engine/arena.js"></script>
+  <script src="engine/players.js"></script>
+  <script src="engine/tools.js"></script>
+  <script src="engine/sequencer.js"></script>
+  <script src="engine/dragdrop.js"></script>
 
-    <section id="library" class="library-section">
-      <h2>Aktentasche</h2>
-      <div id="aktentasche"></div>
-    </section>
+  <script src="ui/aktentasche-ui.js"></script>
+  <script src="ui/analysis-center-ui.js"></script>
+  <script src="ui/beratung-ui.js"></script>
+  <script src="ui/kader-ui.js"></script>
+  <script src="ui/sponsoring-ui.js"></script>
+  <script src="ui/sportwatch-ui.js"></script>
+  <script src="ui/stadionzeitung-ui.js"></script>
+  <script src="ui/taktikboard-ui.js"></script>
+  <script src="ui/voice-ui.js"></script>
 
-    <section id="voice" class="voice-section">
-      <h2>Spracheingabe</h2>
-      <div id="voice-status">Mikrofon: inaktiv</div>
-      <button id="voice-toggle" type="button">Sprache aktivieren</button>
-    </section>
-  </main>
+  <script src="voice/hologram-effects.js"></script>
+  <script src="voice/voice-input.js"></script>
+  <script src="voice/voice-output.js"></script>
+  <script src="voice/voice-commands.js"></script>
 
-  <footer class="site-footer">
-    <div class="container">
-      <small>© <span id="year"></span> Taktik‑AI — Alle Rechte vorbehalten</small>
-    </div>
-  </footer>
+  <script src="js/main.js"></script>
 
-  <noscript>
-    <div class="no-js-warning">JavaScript ist deaktiviert. Die Anwendung benötigt JavaScript.</div>
-  </noscript>
-
-  <!-- Core scripts (im Ordner js/) -->
-  <script defer src="js/app.js"></script>
-  <script defer src="js/auth.js"></script>
-  <script defer src="js/storage.js"></script>
-  <script defer src="js/main.js"></script>
-
-  <!-- Engine scripts (im Ordner engine/ im Repo-Root) -->
-  <script defer src="engine/arena.js"></script>
-  <script defer src="engine/dragdrop.js"></script>
-  <script defer src="engine/players.js"></script>
-  <script defer src="engine/sequencer.js"></script>
-  <script defer src="engine/tools.js"></script>
-
-  <!-- UI scripts (im Ordner ui/ im Repo-Root) -->
-  <script defer src="ui/aktentasche-ui.js"></script>
-  <script defer src="ui/analysis-center-ui.js"></script>
-  <script defer src="ui/beratung-ui.js"></script>
-  <script defer src="ui/kader-ui.js"></script>
-  <script defer src="ui/sponsoring-ui.js"></script>
-  <script defer src="ui/sportwatch-ui.js"></script>
-  <script defer src="ui/stadionzeitung-ui.js"></script>
-  <script defer src="ui/taktikboard-ui.js"></script>
-  <script defer src="ui/voice-ui.js"></script>
-
-  <!-- Voice scripts (im Ordner voice/ im Repo-Root) -->
-  <script defer src="voice/hologram-effects.js"></script>
-  <script defer src="voice/voice-commands.js"></script>
-  <script defer src="voice/voice-input.js"></script>
-  <script defer src="voice/voice-output.js"></script>
-
-  <script>
-    // Footer Jahr setzen
-    document.getElementById('year').textContent = new Date().getFullYear();
-
-    // Voice toggle (UI only)
-    const voiceToggle = document.getElementById('voice-toggle');
-    if (voiceToggle) {
-      voiceToggle.addEventListener('click', () => {
-        const status = document.getElementById('voice-status');
-        const active = status.textContent.includes('aktiv');
-        status.textContent = active ? 'Mikrofon: inaktiv' : 'Mikrofon: aktiv';
-      });
-    }
-
-    // Sicheres Laden der Spieler-Daten (data/players.sample.json im Repo-Root/data)
-    (function loadPlayers() {
-      const url = 'data/players.sample.json';
-      fetch(url)
-        .then(res => {
-          if (!res.ok) throw new Error('Netzwerkfehler: ' + res.status);
-          return res.text();
-        })
-        .then(text => {
-          try {
-            const players = JSON.parse(text);
-            window.__players = players;
-            console.log('Players geladen:', Array.isArray(players) ? players.length : Object.keys(players).length);
-          } catch (e) {
-            console.error('Ungültiges JSON in', url, e);
-          }
-        })
-        .catch(err => {
-          console.error('Fehler beim Laden der Spieler:', err);
-        });
-    })();
-
-    // DOM‑abhängige Initialisierung
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof window.initApp === 'function') {
-        try { window.initApp(); } catch (e) { console.error('initApp Fehler:', e); }
-      }
-    });
-  </script>
 </body>
 </html>
