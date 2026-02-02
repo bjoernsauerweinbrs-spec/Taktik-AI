@@ -1,43 +1,37 @@
-// engine/dragdrop.js - VOLLSTÄNDIG OHNE EXPORT
 (function() {
-    let draggedPlayer = null;
+    let selectedPlayer = null;
 
-    function initDragDrop() {
-        const canvas = document.getElementById('arena-canvas');
-        if (!canvas) return;
+    window.initDragDrop = function() {
+        const canvas = arena.canvas;
+        
+        const start = (e) => {
+            const pos = getPos(e);
+            selectedPlayer = arena.players.find(p => 
+                Math.hypot(p.x - pos.x, p.y - pos.y) < 25
+            );
+        };
 
-        canvas.addEventListener('mousedown', startDrag);
-        canvas.addEventListener('mousemove', doDrag);
-        canvas.addEventListener('mouseup', stopDrag);
-        console.log("🖱️ Drag & Drop bereit.");
-    }
+        const move = (e) => {
+            if (!selectedPlayer) return;
+            const pos = getPos(e);
+            selectedPlayer.x = pos.x;
+            selectedPlayer.y = pos.y;
+            arena.render();
+        };
 
-    function startDrag(e) {
+        const end = () => selectedPlayer = null;
+
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', end);
+        
+        canvas.addEventListener('touchstart', (e) => start(e.touches[0]));
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e.touches[0]); });
+        canvas.addEventListener('touchend', end);
+    };
+
+    function getPos(e) {
         const rect = arena.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        // Nutze PlayerEngine aus players.js
-        draggedPlayer = PlayerEngine.findPlayerAt(x, y);
-        if (draggedPlayer) {
-            console.log("Spieler gepackt:", draggedPlayer.name);
-        }
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
-
-    function doDrag(e) {
-        if (!draggedPlayer) return;
-        const rect = arena.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        draggedPlayer.x = x;
-        draggedPlayer.y = y;
-        arena.render();
-    }
-
-    function stopDrag() {
-        draggedPlayer = null;
-    }
-
-    window.initDragDrop = initDragDrop;
 })();
