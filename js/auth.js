@@ -1,55 +1,49 @@
-// public/js/auth.js
-function updateStatus(msg, isError = false) {
-  const el = document.getElementById('status');
-  if (el) {
-    el.textContent = msg;
-    el.style.color = isError ? '#b00020' : '';
-  }
-}
-
-function enterApp(username) {
-  sessionStorage.setItem('sessionUser', username);
-
-  const auth = document.getElementById('auth-section');
-  const app = document.getElementById('app-section');
-
-  if (auth) auth.style.display = 'none';
-  if (app) app.style.display = 'block';
-
-  const data = Storage.loadUserData(username);
-  const dataEl = document.getElementById('user-data');
-  if (dataEl) dataEl.value = data || '';
-
-  updateStatus(`Angemeldet als ${username}`);
-}
+// =========================================
+// Toni 2.0 – Auth Logic
+// =========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  const regBtn = document.getElementById('register-btn');
-  const loginBtn = document.getElementById('login-btn');
+    const regBtn = document.getElementById('register-btn');
+    const loginBtn = document.getElementById('login-btn');
 
-  if (regBtn) {
-    regBtn.addEventListener('click', () => {
-      const u = document.getElementById('username').value.trim();
-      const p = document.getElementById('password').value.trim();
+    if (regBtn) {
+        regBtn.addEventListener('click', () => {
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value.trim();
+            if (!u || !p) return alert("Bitte Daten eingeben!");
+            
+            window.TONI.storage.saveUser(u, p);
+            alert("Registriert! Du kannst dich jetzt einloggen.");
+        });
+    }
 
-      if (!u || !p) return updateStatus('Bitte Benutzername und Passwort eingeben.', true);
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value.trim();
 
-      Storage.saveUser(u, p);
-      updateStatus('Registrierung erfolgreich. Jetzt anmelden.');
-    });
-  }
-
-  if (loginBtn) {
-    loginBtn.addEventListener('click', () => {
-      const u = document.getElementById('username').value.trim();
-      const p = document.getElementById('password').value.trim();
-
-      const user = Storage.getUser(u);
-      if (!user || user.password !== p) {
-        return updateStatus('Login fehlgeschlagen.', true);
-      }
-
-      enterApp(u);
-    });
-  }
+            const user = window.TONI.storage.getUser(u);
+            if (user && user.password === p) {
+                enterApp(u);
+            } else {
+                alert("Login fehlgeschlagen!");
+            }
+        });
+    }
 });
+
+function enterApp(username) {
+    sessionStorage.setItem('sessionUser', username);
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('app-section').style.display = 'block';
+    
+    // UI Refresh
+    if (typeof renderArena === 'function') renderArena();
+    console.log(`Willkommen zurück, ${username}`);
+}
+
+// Logout Global
+window.appLogout = function() {
+    sessionStorage.removeItem('sessionUser');
+    location.reload();
+};
