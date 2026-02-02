@@ -1,51 +1,74 @@
 window.ToniAI = {
-    voices: [],
-    userName: 'Björn', // Standardmäßig auf Björn gesetzt [cite: 2026-01-24]
+    isListening: false,
+    recognition: null,
+    maleVoice: null,
 
     init() {
-        // Stimmen laden & männliche Stimme fixieren
-        window.speechSynthesis.onvoiceschanged = () => {
-            this.voices = window.speechSynthesis.getVoices();
-        };
+        this.setupVoice();
         this.setupMic();
-        this.speak(`Systeme online. Bom dia, Coach Björn! Dein persönlicher API-Key ist aktiv. Wie verschieben wir heute?`);
+        this.speak("Bom dia, Björn! Ich bin bereit. Aktiviere das Mikrofon in der Sidebar, dann können wir uns unterhalten.");
+    },
+
+    setupVoice() {
+        const loadVoices = () => {
+            const voices = window.speechSynthesis.getVoices();
+            // Suche gezielt nach männlichen Stimmen (Microsoft Stefan, Google Deutsch Male, etc.)
+            this.maleVoice = voices.find(v => v.lang.includes('de') && (v.name.includes('Male') || v.name.includes('Stefan') || v.name.includes('Google Deutsch'))) || voices[0];
+            console.log("Stimme gewählt:", this.maleVoice.name);
+        };
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
     },
 
     speak(text) {
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(text);
-        // Suche nach einer männlichen deutschen Stimme
-        const maleVoice = this.voices.find(v => v.lang.includes('de') && (v.name.includes('Male') || v.name.includes('Kaspar') || v.name.includes('Google')));
-        msg.voice = maleVoice || this.voices[0];
+        if(this.maleVoice) msg.voice = this.maleVoice;
         msg.pitch = 0.9;
-        window.speechSynthesis.speak(msg);
-
+        msg.rate = 1.0;
+        
         document.getElementById('setcard-content').innerHTML = `
             <div class="toni-speech-bubble animate-fadeIn">
                 <div class="toni-badge">TONI // CO-TRAINER AI</div>
                 <div class="toni-text">${text}</div>
             </div>
         `;
+        window.speechSynthesis.speak(msg);
     },
 
     setupMic() {
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!Speech) return;
-        this.rec = new Speech();
-        this.rec.lang = 'de-DE';
-        this.rec.continuous = true; // HÖRT DAUERHAFT ZU
-        
-        this.rec.onresult = (e) => {
-            const transcript = e.results[e.results.length - 1][0].transcript.toLowerCase();
-            this.handleCommand(transcript);
+        this.recognition = new Speech();
+        this.recognition.lang = 'de-DE';
+        this.recognition.continuous = true;
+        this.recognition.interimResults = false;
+
+        this.recognition.onresult = (e) => {
+            const cmd = e.results[e.results.length - 1][0].transcript.toLowerCase();
+            this.handleCommand(cmd);
         };
-        this.rec.start();
+    },
+
+    toggleListening() {
+        const btn = document.getElementById('voice-trigger-btn');
+        const label = document.getElementById('mic-status-label');
+        if (this.isListening) {
+            this.recognition.stop();
+            this.isListening = false;
+            btn.classList.remove('mic-active-glow');
+            label.innerText = "BEREIT";
+        } else {
+            this.recognition.start();
+            this.isListening = true;
+            btn.classList.add('mic-active-glow');
+            label.innerText = "HÖRT ZU";
+        }
     },
 
     handleCommand(cmd) {
-        console.log("Toni hört Taktik:", cmd);
+        if(cmd.includes("zentrale") || cmd.includes("koffer")) BriefcaseUI.toggle();
         if(cmd.includes("ball links")) arena.moveBall('links');
-        if(cmd.includes("ball rechts")) arena.moveBall('rechts');
-        if(cmd.includes("koffer") || cmd.includes("zentrale")) BriefcaseUI.toggle();
+        this.speak(`Ich habe verstanden: ${cmd}. Was ist der nächste Schritt?`);
     }
 };
