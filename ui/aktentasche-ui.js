@@ -1,41 +1,31 @@
-/**
- * =========================================
- * TONI 2.0 – BRIEFCASE MODULE (VISUAL)
- * Asset Library & Grid System
- * =========================================
- */
 (function() {
     window.Aktentasche = {
-        assets: [
-            { id: 1, name: "4-3-3 Offensiv", type: "Taktik", icon: "📋" },
-            { id: 2, name: "Sponsor: NeonEnergy", type: "Asset", icon: "🖼️" },
-            { id: 3, name: "Match-Report #04", type: "Media", icon: "📄" },
-            { id: 4, name: "Funinho 3vs3 Plan", type: "Taktik", icon: "⚽" },
-            { id: 5, name: "Stadionzeitung V1", type: "Media", icon: "📰" }
+        kader: [
+            { id: 1, name: "David Luiz", number: 4, team: 'home', rating: 8, x: 200, y: 300 },
+            { id: 2, name: "Max Miller", number: 10, team: 'home', rating: 6, x: 400, y: 250 }
         ],
 
-        init() {
-            console.log("💼 Aktentasche: Assets geladen.");
-        },
-
-        show() {
-            const container = document.getElementById('module-briefcase');
-            if (!container) return;
-
-            container.innerHTML = `
-                <div style="padding: 40px;">
-                    <h2 style="color: var(--data-cyan); margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px;">Zentrale Aktentasche</h2>
-                    <div class="asset-grid">
-                        ${this.assets.map(asset => `
-                            <div class="asset-card" onclick="alert('Asset geladen: ${asset.name}')">
-                                <div class="asset-icon">${asset.icon}</div>
-                                <div class="asset-label">${asset.name}</div>
-                                <div class="asset-tag">${asset.type}</div>
-                            </div>
-                        `).join('')}
-                    </div>
+        renderSporttasche() {
+            const target = document.getElementById('subfolder-inner');
+            target.innerHTML = `
+                <h3>Sporttasche: Kader & Spiel</h3>
+                <div class="player-list-grid">
+                    ${this.kader.map(p => `
+                        <div class="player-item">
+                            <span>#${p.number} ${p.name}</span>
+                            <button onclick="Aktentasche.sendToBoard(${p.id})">Aufs Feld</button>
+                        </div>
+                    `).join('')}
                 </div>
             `;
+        },
+
+        sendToBoard(id) {
+            const p = this.kader.find(player => player.id === id);
+            if(!arena.players.find(ap => ap.id === id)) {
+                arena.players.push(p);
+                if(window.toniSpeak) toniSpeak(p.name + " ist jetzt auf dem Feld.");
+            }
         }
     };
 })();
