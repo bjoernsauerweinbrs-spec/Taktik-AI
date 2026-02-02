@@ -1,89 +1,103 @@
-// =========================================
-// Toni 2.0 – Aktentasche UI
-// Navigation, Panels, Interaktion
-// =========================================
+/**
+ * =========================================
+ * TONI 2.0 – AKTENTASCHE (ASSET MANAGEMENT)
+ * Bibliothek, Tagging & Versionierung
+ * =========================================
+ */
+(function() {
+    window.Aktentasche = {
+        assets: [
+            { id: 1, name: "Offensiv-Pressing 4-3-3", type: "Taktik", date: "2026-02-01", tag: "Taktik", version: "v2.1" },
+            { id: 2, name: "Stadionzeitung - Ausgabe 04", type: "PDF", date: "2026-01-30", tag: "Media", version: "Final" },
+            { id: 3, name: "Hauptsponsor Logo - HighRes", type: "Image", date: "2026-01-25", tag: "Sponsor", version: "v1.0" },
+            { id: 4, name: "Standard-Situationen Eckball", type: "Taktik", date: "2026-02-02", tag: "Taktik", version: "Draft" }
+        ],
 
-function initAktentascheUI() {
-    const nav = document.getElementById("aktentasche-nav");
-    const content = document.getElementById("aktentasche-content");
+        init() {
+            console.log("💼 Aktentasche: System geladen.");
+            this.renderLibrary();
+        },
 
-    if (!nav || !content) {
-        console.warn("Aktentasche UI nicht gefunden.");
-        return;
-    }
+        // Schaltet zwischen Board und Aktentasche um
+        toggleView(active = true) {
+            const stage = document.getElementById('stage');
+            const canvas = document.getElementById('main-canvas');
+            const tools = document.querySelector('.tools-overlay');
+            
+            if (active) {
+                canvas.style.display = 'none';
+                tools.style.display = 'none';
+                this.renderLibrary();
+            } else {
+                canvas.style.display = 'block';
+                tools.style.display = 'flex';
+                const lib = document.getElementById('asset-library');
+                if (lib) lib.remove();
+            }
+        },
 
-    // Navigation erzeugen
-    nav.innerHTML = "";
-    createNavIcon("📊", "analysis");
-    createNavIcon("📰", "stadionzeitung");
-    createNavIcon("💼", "sponsoring");
-    createNavIcon("🎧", "beratung");
+        renderLibrary() {
+            let libraryContainer = document.getElementById('asset-library');
+            if (!libraryContainer) {
+                libraryContainer = document.createElement('div');
+                libraryContainer.id = 'asset-library';
+                document.getElementById('stage').appendChild(libraryContainer);
+            }
 
-    // Panels erzeugen
-    content.innerHTML = `
-        <div id="panel-analysis" class="aktentasche-panel">
-            <h2 class="panel-title">Analysezentrum</h2>
-            <div class="analysis-wrapper">
-                <!-- Inhalte werden später dynamisch ergänzt -->
-                <p>Spieler- und Team-Analyse wird hier angezeigt.</p>
-            </div>
-        </div>
+            libraryContainer.innerHTML = `
+                <div class="library-header">
+                    <h2>Asset-Bibliothek</h2>
+                    <input type="text" placeholder="Suche nach Taktiken, Tags oder Datum..." oninput="Aktentasche.filter(this.value)">
+                </div>
+                <div class="asset-grid" id="asset-grid">
+                    ${this.assets.map(asset => this.createAssetCard(asset)).join('')}
+                </div>
+            `;
+        },
 
-        <div id="panel-stadionzeitung" class="aktentasche-panel">
-            <h2 class="panel-title">Stadionzeitung</h2>
-            <p>Hier kannst du Inhalte für die Stadionzeitung erstellen.</p>
-        </div>
+        createAssetCard(asset) {
+            const icon = asset.type === "Taktik" ? "📋" : asset.type === "PDF" ? "📄" : "🖼️";
+            return `
+                <div class="asset-card" onclick="Aktentasche.showDetails(${asset.id})">
+                    <div class="asset-icon">${icon}</div>
+                    <div class="asset-info">
+                        <span class="asset-tag">${asset.tag}</span>
+                        <h4>${asset.name}</h4>
+                        <small>${asset.date} • ${asset.version}</small>
+                    </div>
+                </div>
+            `;
+        },
 
-        <div id="panel-sponsoring" class="aktentasche-panel">
-            <h2 class="panel-title">Sponsoring</h2>
-            <p>Hier verwaltest du Sponsoren, Pakete und Präsentationen.</p>
-        </div>
+        showDetails(id) {
+            const asset = this.assets.find(a => a.id === id);
+            if (!asset) return;
 
-        <div id="panel-beratung" class="aktentasche-panel">
-            <h2 class="panel-title">Beratung</h2>
-            <p>Toni unterstützt dich hier mit KI‑gestützten Empfehlungen.</p>
-        </div>
-    `;
+            const sidebar = document.getElementById('setcard-content');
+            sidebar.innerHTML = `
+                <div class="asset-detail-view" style="animation: slideInRight 0.3s ease;">
+                    <h3 style="color: #FF6A00; text-transform: uppercase;">Asset Details</h3>
+                    <div style="background: #2E2E2E; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <p><strong>Name:</strong> ${asset.name}</p>
+                        <p><strong>Typ:</strong> ${asset.type}</p>
+                        <p><strong>Letzte Änderung:</strong> ${asset.date}</p>
+                        <p><strong>Version:</strong> ${asset.version}</p>
+                    </div>
+                    <div class="action-group">
+                        <button class="holo-button-small" onclick="alert('Asset geladen')">ÖFFNEN</button>
+                        <button class="holo-button-small" onclick="alert('Teilen Link kopiert')">TEILEN</button>
+                    </div>
+                </div>
+            `;
+        },
 
-    // Standard: Analysezentrum öffnen
-    openPanel("analysis");
-}
-
-// -----------------------------------------
-// Navigation Icon erzeugen
-// -----------------------------------------
-function createNavIcon(icon, panelName) {
-    const el = document.createElement("div");
-    el.classList.add("nav-icon");
-    el.textContent = icon;
-
-    el.addEventListener("click", () => {
-        openPanel(panelName);
-        setActiveNav(el);
-    });
-
-    document.getElementById("aktentasche-nav").appendChild(el);
-}
-
-// -----------------------------------------
-// Aktives Icon markieren
-// -----------------------------------------
-function setActiveNav(activeEl) {
-    document.querySelectorAll("#aktentasche-nav .nav-icon")
-        .forEach(el => el.classList.remove("active"));
-
-    activeEl.classList.add("active");
-}
-
-// -----------------------------------------
-// Panel öffnen
-// -----------------------------------------
-function openPanel(name) {
-    document.querySelectorAll(".aktentasche-panel")
-        .forEach(panel => panel.classList.remove("active"));
-
-    const panel = document.getElementById(`panel-${name}`);
-    if (panel) {
-        panel.classList.add("active");
-    }
-}
+        filter(query) {
+            const filtered = this.assets.filter(a => 
+                a.name.toLowerCase().includes(query.toLowerCase()) || 
+                a.tag.toLowerCase().includes(query.toLowerCase())
+            );
+            const grid = document.getElementById('asset-grid');
+            grid.innerHTML = filtered.map(asset => this.createAssetCard(asset)).join('');
+        }
+    };
+})();
