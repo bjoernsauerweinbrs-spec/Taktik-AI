@@ -2,91 +2,82 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — High Professional AI</title>
+    <title>TONI 2.0 — Tactical Command</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body>
 
     <aside class="sidebar-minimal">
-        <div class="nav-btn" onclick="toggleBriefcase()">💼 <span style="font-size:10px; display:block;">ZENTRALE</span></div>
+        <div class="main-briefcase-btn" onclick="toggleBriefcase()">
+            <div style="font-size:32px;">💼</div>
+            <span style="font-size:10px; font-weight:bold;">ZENTRALE</span>
+        </div>
     </aside>
 
     <main id="stage">
+        <div class="tools-overlay">
+            <button class="tool-btn" onclick="arena.setMode('standard')">Standard</button>
+            <button class="tool-btn" onclick="arena.setMode('funinho')">Funinho</button>
+        </div>
         <canvas id="main-canvas"></canvas>
     </main>
 
-    <aside class="side-panel">
-        <h2 style="color:#00D1FF; font-size:16px;">ANALYSEZENTRUM</h2>
-        <div id="setcard-content">
-            <p class="empty-msg" style="color:#667085; font-style:italic; margin-top:40px;">Wähle einen Spieler auf dem Feld aus...</p>
+    <aside class="analysis-panel">
+        <h2 style="color: var(--data-cyan); font-size: 16px; letter-spacing: 2px;">ANALYSEZENTRUM</h2>
+        <div id="setcard-content" style="margin-top: 30px;">
+            <p style="color: #667085; font-style: italic;">Wähle einen Spieler auf dem Feld aus...</p>
         </div>
     </aside>
 
-    <div id="briefcase-overlay" style="display:none;" class="briefcase-modal">
-        <button onclick="toggleBriefcase()" class="close-btn">✕</button>
-        <div class="folder-grid">
-            <div class="folder-card" onclick="openFolder('sporttasche')">👟 <h3>Sporttasche</h3></div>
-            <div class="folder-card" onclick="alert('Analyse wird geladen...')">📊 <h3>Analyse</h3></div>
+    <div id="briefcase-overlay" class="briefcase-overlay hidden">
+        <button onclick="toggleBriefcase()" style="position:absolute; top:40px; right:40px; background:none; border:none; color:white; font-size:30px; cursor:pointer;">✕</button>
+        <h1 style="color: var(--accent-orange); letter-spacing: 5px;">ZENTRALE AKTENTASCHE</h1>
+        
+        <div class="folder-grid" id="main-folders">
+            <div class="folder-item" onclick="openFolder('sporttasche')">
+                <div style="font-size:50px;">👟</div>
+                <h3>Sporttasche</h3>
+                <p style="font-size:11px; color:#667085;">Kader & Training</p>
+            </div>
+            <div class="folder-item">
+                <div style="font-size:50px;">📊</div>
+                <h3>Analysezentrum</h3>
+                <p style="font-size:11px; color:#667085;">Leistungsdaten</p>
+            </div>
+            <div class="folder-item">
+                <div style="font-size:50px;">🏢</div>
+                <h3>Geschäftszimmer</h3>
+                <p style="font-size:11px; color:#667085;">Management</p>
+            </div>
         </div>
-        <div id="subfolder-display" style="display:none; margin-top:40px; width:100%; max-width:600px;">
-            <button onclick="closeSubFolder()" style="color:#00D1FF; background:none; border:none; cursor:pointer;">← Zurück</button>
-            <div id="subfolder-inner"></div>
+
+        <div id="subfolder-view" class="hidden" style="width:100%; max-width:800px; margin-top:40px;">
+            <button onclick="closeFolder()" style="color: var(--data-cyan); cursor:pointer; background:none; border:none; margin-bottom:20px;">← ZURÜCK</button>
+            <div id="subfolder-content"></div>
         </div>
     </div>
 
     <script src="engine/arena.js"></script>
     <script src="ui/aktentasche-ui.js"></script>
     <script>
-        let currentPlayer = null;
-
         function toggleBriefcase() {
-            const el = document.getElementById('briefcase-overlay');
-            el.style.display = (el.style.display === 'none') ? 'flex' : 'none';
+            document.getElementById('briefcase-overlay').classList.toggle('hidden');
         }
 
-        function openFolder(folder) {
-            document.querySelector('.folder-grid').style.display = 'none';
-            document.getElementById('subfolder-display').style.display = 'block';
-            if (folder === 'sporttasche') window.Aktentasche.renderSporttasche();
+        function openFolder(type) {
+            document.getElementById('main-folders').classList.add('hidden');
+            document.getElementById('subfolder-view').classList.remove('hidden');
+            if (type === 'sporttasche') window.Aktentasche.showSporttasche();
         }
 
-        function closeSubFolder() {
-            document.querySelector('.folder-grid').style.display = 'grid';
-            document.getElementById('subfolder-display').style.display = 'none';
+        function closeFolder() {
+            document.getElementById('main-folders').classList.remove('hidden');
+            document.getElementById('subfolder-view').classList.add('hidden');
         }
 
-        // SETCARD FUNKTION
-        window.showSetcard = function(player) {
-            currentPlayer = player;
-            const content = document.getElementById('setcard-content');
-            content.innerHTML = `
-                <div class="player-setcard animate-fade">
-                    <h3 style="margin:20px 0 5px 0;">${player.name}</h3>
-                    <div style="font-size:24px; color:#FF6A00;">#${player.number}</div>
-                    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:15px 0;">
-                    
-                    <div class="form-rating">
-                        <label>AKTUELLE FORM: <span id="form-val">${player.rating}</span>/10</label>
-                        <input type="range" min="1" max="10" value="${player.rating}" 
-                               oninput="updateRating(this.value)" style="width:100%; margin:15px 0;">
-                    </div>
-                    
-                    <div style="text-align:left; font-size:12px; line-height:2;">
-                        <div>STATUS: <span style="color:#28C76F;">${player.status}</span></div>
-                        <div>TEAM: HOME</div>
-                    </div>
-                </div>
-            `;
-        };
-
-        function updateRating(val) {
-            if (currentPlayer) {
-                currentPlayer.rating = parseInt(val);
-                document.getElementById('form-val').innerText = val;
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => { arena.init('main-canvas'); });
+        document.addEventListener('DOMContentLoaded', () => {
+            arena.init('main-canvas');
+        });
     </script>
 </body>
 </html>
