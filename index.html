@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — Tactical OS</title>
+    <title>TONI 2.0 — Safe Tactical OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body class="pro-layout">
@@ -18,7 +18,7 @@
     </div>
 
     <aside class="sidebar-minimal">
-        <div class="sidebar-top">
+        <div class="sidebar-content">
             <div class="control-unit" onclick="BriefcaseUI.toggle()" title="Zentrale">
                 <div class="icon">💼</div>
                 <span>ZENTRALE</span>
@@ -42,8 +42,8 @@
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
             <div class="briefcase-header">
-                <h2>AKTENTASCHE</h2>
-                <button onclick="BriefcaseUI.toggle()">✕</button>
+                <h2>ZENTRALE AKTENTASCHE</h2>
+                <button onclick="BriefcaseUI.toggle()" class="close-x">✕</button>
             </div>
             <div id="briefcase-nav" class="folder-grid">
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">👟 Sporttasche</div>
@@ -64,7 +64,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => { 
             ToniAuth.init(); 
-            arena.init('main-canvas');
+            if(window.arena) arena.init('main-canvas');
         });
     </script>
 </body>
