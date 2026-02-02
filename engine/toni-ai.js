@@ -1,122 +1,95 @@
-/**
- * TONI 2.0 – PRO VOICE ENGINE (API-DRIVEN)
- * Integration: OpenAI / ElevenLabs Streaming
- */
-
 (function() {
     window.ToniAI = {
         userName: '',
-        voiceSettings: {
-            volume: 0.9,
-            vibe: 'analytisch',
-            provider: 'openai' // Hier kann später auf 'elevenlabs' gewechselt werden
+        recognition: null,
+        isListening: false,
+
+        init() {
+            this.setupContinuousVoice();
+            this.startGreeting();
         },
 
-        // --- PROFI-SPRACHAUSGABE (API CALL) ---
-        async say(text) {
-            const apiKey = localStorage.getItem('toni2_api_key');
-            if (!apiKey) {
-                console.warn("Kein API-Key gefunden. Nutze System-Fallback.");
-                this.fallbackSay(text); // Fallback auf System-Stimme
-                return;
-            }
+        setupContinuousVoice() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return;
 
-            const processedText = this.applyPersona(text);
-            const voice = this.voiceSettings.vibe === 'matchday' ? 'onyx' : 'alloy';
+            this.recognition = new SpeechRecognition();
+            this.recognition.lang = 'de-DE';
+            this.recognition.continuous = true; // HIER: Mikro bleibt an!
+            this.recognition.interimResults = false;
 
-            try {
-                // UI-Feedback: Toni "denkt" und "spricht"
-                this.setVisualFeedback(true);
+            this.recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript;
+                this.processTacticalInput(transcript);
+            };
 
-                const response = await fetch('https://api.openai.com/v1/audio/speech', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: "tts-1",
-                        input: processedText,
-                        voice: voice,
-                        speed: this.voiceSettings.vibe === 'matchday' ? 1.1 : 0.95
-                    })
-                });
-
-                if (!response.ok) throw new Error("API-Fehler bei der Sprachausgabe");
-
-                const audioBlob = await response.blob();
-                const audioUrl = URL.createObjectURL(audioBlob);
-                const audio = new Audio(audioUrl);
-                audio.volume = this.voiceSettings.volume;
-                
-                audio.onended = () => this.setVisualFeedback(false);
-                audio.play();
-
-            } catch (error) {
-                console.error("Voice-API Error:", error);
-                this.fallbackSay(text);
-            }
+            this.recognition.onerror = (e) => console.error("Voice Error:", e);
         },
 
-        // --- FALLBACK (Falls API nicht erreichbar) ---
-        fallbackSay(text) {
-            if ('speechSynthesis' in window) {
-                const msg = new SpeechSynthesisUtterance(text);
-                msg.pitch = 0.9;
-                window.speechSynthesis.speak(msg);
+        toggleVoice() {
+            if (this.isListening) {
+                this.recognition.stop();
+                this.isListening = false;
+            } else {
+                this.recognition.start();
+                this.isListening = true;
             }
+            document.getElementById('voice-trigger-btn').classList.toggle('mic-active-glow', this.isListening);
         },
 
-        applyPersona(text) {
-            if (this.voiceSettings.vibe === 'matchday') {
-                return `Männer, Fokus jetzt! ${text} Volle Intensität!`;
-            }
-            return `In der taktischen Analyse zeigt sich: ${text}`;
-        },
+        // Die taktische Analyse-Logik
+        processTacticalInput(input) {
+            const low = input.toLowerCase();
+            console.log("Toni hört Taktik:", low);
 
-        setVisualFeedback(isSpeaking) {
-            const bubble = document.querySelector('.toni-speech-bubble');
-            if (bubble) {
-                isSpeaking ? bubble.classList.add('speaking-glow') : bubble.classList.remove('speaking-glow');
+            // 1. Ballbewegung
+            if (low.includes("ball") && low.includes("links")) {
+                arena.moveBall('links');
+                this.speak("Ich habe den Ball nach links verschoben. Meine Kette schiebt ballorientiert ein, um das Zentrum zu schließen. Wie reagiert deine Hintermannschaft?");
+            } 
+            else if (low.includes("ball") && low.includes("rechts")) {
+                arena.moveBall('rechts');
+                this.speak("Ball ist rechts. Ich verdichte den Raum. Schau dir meine Verschiebebewegung an – stehen wir so kompakt genug?");
+            }
+            // 2. Argumentation & Überprüfung
+            else if (low.includes("steht") && low.includes("richtig")) {
+                this.analyzePositioning();
+            }
+            else {
+                // Allgemeiner Dialog (KI-gestützt)
+                this.speak("Interessanter Punkt, Björn. Aber achte auf die Halbräume. Wenn wir so weit rausschieben, öffnen wir die Mitte für einen Steckpass. Was meinst du?");
             }
         },
 
-        // --- UI UPDATES ---
-        updateSetting(key, val) {
-            this.voiceSettings[key] = val;
-            if(key === 'vibe') {
-                document.querySelectorAll('.vibe-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById('vibe-' + val).classList.add('active');
-            }
+        analyzePositioning() {
+            const feedback = "Björn, deine Abwehr steht etwas zu flach. Wenn der Gegner jetzt überschlägt, kommen wir nicht in den Rückwärtsgang. Ich würde die Innenverteidiger leicht versetzt staffeln. Probier das mal aus!";
+            this.speak(feedback);
         },
 
-        renderVoiceControls() {
-            return `
-                <div class="voice-control-panel animate-fadeIn">
-                    <h4>🎙️ PROFISCHALTPRÜFUNG</h4>
-                    <div class="control-group">
-                        <label>MODUS (KLOPP vs. NAGELSMANN)</label>
-                        <div class="vibe-selector">
-                            <button id="vibe-analytisch" class="vibe-btn ${this.voiceSettings.vibe === 'analytisch' ? 'active' : ''}" onclick="ToniAI.updateSetting('vibe', 'analytisch')">ANALYTISCH</button>
-                            <button id="vibe-matchday" class="vibe-btn ${this.voiceSettings.vibe === 'matchday' ? 'active' : ''}" onclick="ToniAI.updateSetting('vibe', 'matchday')">MATCHDAY</button>
-                        </div>
-                    </div>
-                    <button class="tool-btn" style="border-color:var(--data-cyan);" onclick="ToniAI.say('Björn, ich bin bereit für die taktische Anweisung.')">STIMME TESTEN</button>
-                </div>
-            `;
+        say(text) {
+            if (!('speechSynthesis' in window)) return;
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.pitch = 0.9;
+            window.speechSynthesis.speak(msg);
         },
 
-        speak(text, html = "") {
+        speak(text) {
             const container = document.getElementById('setcard-content');
             container.innerHTML = `
-                <div class="toni-speech-bubble">
-                    <div class="toni-badge">TONI // PRO-AI VOICE</div>
+                <div class="toni-speech-bubble animate-fadeIn">
+                    <div class="toni-badge">TONI // LIVE ANALYSE</div>
                     <div class="toni-text">${text}</div>
-                    ${html}
+                    <div class="toni-argument">Toni's Taktik-Logik: Aktiv</div>
                 </div>
-                ${this.renderVoiceControls()}
+                <button id="voice-trigger-btn" class="${this.isListening ? 'mic-active-glow' : ''}" onclick="ToniAI.toggleVoice()" style="width:100%; padding:15px; border-radius:10px; border:none; background:var(--data-cyan); cursor:pointer; font-weight:bold;">
+                    ${this.isListening ? 'TONI HÖRT ZU...' : 'MIKROFON STARTEN'}
+                </button>
             `;
             this.say(text);
+        },
+
+        startGreeting() {
+            this.speak("Hallo Björn! Ich bin bereit. Aktiviere das Mikrofon, dann können wir uns während der Taktik-Session direkt unterhalten. Wo ist der Ball?");
         }
     };
 })();
