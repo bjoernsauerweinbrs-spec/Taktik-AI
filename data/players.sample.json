@@ -3,22 +3,22 @@
     "name": "Team Björn",
     "color": "red",
     "players": [
-      { "id": 1, "number": 1, "name": "Alisson", "position": "TW", "role": "Mitspielend" },
-      { "id": 2, "number": 4, "name": "David Luiz", "position": "IV", "role": "Abwehrchef" },
-      { "id": 3, "number": 10, "name": "Neymar Jr.", "position": "OM", "role": "Spielmacher" },
-      { "id": 4, "number": 9, "name": "Richarlison", "position": "ST", "role": "Knipser" },
-      { "id": 5, "number": 6, "name": "Casemiro", "position": "DM", "role": "Abräumer" },
-      { "id": 6, "number": 2, "name": "Danilo", "position": "RV", "role": "Läufer" }
+      { "id": 1, "number": 1, "name": "Alisson", "position": "TW" },
+      { "id": 2, "number": 4, "name": "David Luiz", "position": "IV" },
+      { "id": 3, "number": 5, "name": "Marquinhos", "position": "IV" },
+      { "id": 4, "number": 10, "name": "Neymar Jr", "position": "OM" },
+      { "id": 5, "number": 9, "name": "Richarlison", "position": "ST" },
+      { "id": 6, "number": 8, "name": "Paquetá", "position": "ZM" }
     ]
   },
   "awayTeam": {
     "name": "Gegner Blau",
     "color": "blue",
     "players": [
-      { "id": 101, "number": 1, "name": "Gegner TW", "position": "TW", "role": "Linie" },
-      { "id": 102, "number": 5, "name": "Gegner IV", "position": "IV", "role": "Zerstörer" },
-      { "id": 103, "number": 8, "name": "Gegner ZM", "position": "ZM", "role": "Verteiler" },
-      { "id": 104, "number": 11, "name": "Gegner ST", "position": "ST", "role": "Zielspieler" }
+      { "id": 101, "number": 1, "name": "Opponent TW", "position": "TW" },
+      { "id": 102, "number": 4, "name": "Defender L", "position": "LV" },
+      { "id": 103, "number": 5, "name": "Defender R", "position": "RV" },
+      { "id": 104, "number": 9, "name": "Striker", "position": "ST" }
     ]
   }
 }
