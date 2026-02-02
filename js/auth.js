@@ -1,49 +1,24 @@
-// =========================================
-// Toni 2.0 – Auth Logic
-// =========================================
+/**
+ * AUTH MODUL: Passwort & API-Key Sicherung
+ */
+window.ToniAuth = {
+    init() {
+        const savedKey = localStorage.getItem('toni2_api_key');
+        if (savedKey) document.getElementById('api-key-input').value = savedKey;
+    },
 
-document.addEventListener('DOMContentLoaded', () => {
-    const regBtn = document.getElementById('register-btn');
-    const loginBtn = document.getElementById('login-btn');
+    login() {
+        const pass = document.getElementById('password-input').value;
+        const key = document.getElementById('api-key-input').value;
 
-    if (regBtn) {
-        regBtn.addEventListener('click', () => {
-            const u = document.getElementById('username').value.trim();
-            const p = document.getElementById('password').value.trim();
-            if (!u || !p) return alert("Bitte Daten eingeben!");
-            
-            window.TONI.storage.saveUser(u, p);
-            alert("Registriert! Du kannst dich jetzt einloggen.");
-        });
+        if (pass === "Toni2026") { 
+            localStorage.setItem('toni2_api_key', key);
+            document.getElementById('login-screen').classList.add('hidden');
+            // Initialisiere den Rest erst NACH dem Login
+            ToniAI.init();
+            BriefcaseUI.init();
+        } else {
+            alert("Zugriff verweigert, Coach!");
+        }
     }
-
-    if (loginBtn) {
-        loginBtn.addEventListener('click', () => {
-            const u = document.getElementById('username').value.trim();
-            const p = document.getElementById('password').value.trim();
-
-            const user = window.TONI.storage.getUser(u);
-            if (user && user.password === p) {
-                enterApp(u);
-            } else {
-                alert("Login fehlgeschlagen!");
-            }
-        });
-    }
-});
-
-function enterApp(username) {
-    sessionStorage.setItem('sessionUser', username);
-    document.getElementById('auth-section').style.display = 'none';
-    document.getElementById('app-section').style.display = 'block';
-    
-    // UI Refresh
-    if (typeof renderArena === 'function') renderArena();
-    console.log(`Willkommen zurück, ${username}`);
-}
-
-// Logout Global
-window.appLogout = function() {
-    sessionStorage.removeItem('sessionUser');
-    location.reload();
 };
