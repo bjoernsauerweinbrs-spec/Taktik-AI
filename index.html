@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — Safe Tactical OS</title>
+    <title>TONI 2.0 — Tactical OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body class="pro-layout">
@@ -19,49 +19,57 @@
 
     <aside class="sidebar-minimal">
         <div class="sidebar-content">
-            <div class="control-unit" onclick="BriefcaseUI.toggle()" title="Zentrale">
-                <div class="icon">💼</div>
-                <span>ZENTRALE</span>
+            <div class="control-unit" onclick="BriefcaseUI.toggle()" style="cursor:pointer; margin-bottom:40px;">
+                <div style="font-size:32px;">💼</div>
+                <span style="font-size:10px; font-weight:bold;">ZENTRALE</span>
             </div>
-            <div id="voice-trigger-btn" class="control-unit" onclick="ToniAI.toggleListening()" title="Sprachbefehl">
-                <div class="icon">🎤</div>
-                <span id="mic-status-label">AUS</span>
+            <div id="voice-trigger-btn" class="control-unit" onclick="ToniAI.toggleListening()" style="cursor:pointer;">
+                <div style="font-size:32px;">🎤</div>
+                <span id="mic-status-label" style="font-size:10px; font-weight:bold;">AUS</span>
             </div>
         </div>
     </aside>
 
-    <main id="stage">
-        <canvas id="main-canvas"></canvas>
-    </main>
+    <main id="stage"><canvas id="main-canvas"></canvas></main>
 
-    <aside class="analysis-panel">
-        <div id="setcard-content">
-            </div>
-    </aside>
+    <aside class="analysis-panel"><div id="setcard-content"></div></aside>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
             <div class="briefcase-header">
                 <h2>ZENTRALE AKTENTASCHE</h2>
-                <button onclick="BriefcaseUI.toggle()" class="close-x">✕</button>
+                <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">✕</button>
             </div>
             <div id="briefcase-nav" class="folder-grid">
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">👟 Sporttasche</div>
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')">🏢 Geschäftszimmer</div>
             </div>
             <div id="briefcase-content" class="hidden">
-                <button onclick="BriefcaseUI.backToNav()" class="back-btn">← ZURÜCK</button>
+                <button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:var(--data-cyan); cursor:pointer; font-weight:bold; margin-bottom:20px;">← ZURÜCK</button>
                 <div id="active-content"></div>
             </div>
         </div>
     </div>
 
-    <script src="js/arena.js"></script>
-    <script src="js/briefcase.js"></script>
-    <script src="js/toni-core.js"></script>
-    <script src="js/auth.js"></script>
-
+    <script src="engine/arena.js"></script>
+    <script src="ui/briefcase-ui.js"></script>
+    <script src="engine/toni-ai.js"></script>
+    
     <script>
+        // AUTH LOGIK DIREKT HIER FÜR STABILITÄT
+        window.ToniAuth = {
+            init() {
+                const key = localStorage.getItem('toni2_api_key');
+                if (key) document.getElementById('api-key-input').value = key;
+            },
+            login() {
+                if (document.getElementById('password-input').value === "Toni2026") {
+                    localStorage.setItem('toni2_api_key', document.getElementById('api-key-input').value);
+                    document.getElementById('login-screen').classList.add('hidden');
+                    if(window.ToniAI) ToniAI.init();
+                } else { alert("Falsches Passwort!"); }
+            }
+        };
         document.addEventListener('DOMContentLoaded', () => { 
             ToniAuth.init(); 
             if(window.arena) arena.init('main-canvas');
