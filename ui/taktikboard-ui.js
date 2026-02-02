@@ -1,96 +1,68 @@
 // =========================================
-// Toni 2.0 – Taktikboard UI
-// Buttons, Tool-Auswahl, Interaktion
+// Toni 2.0 – Taktikboard UI (Vollständig)
 // =========================================
 
 let currentTool = null;
+let firstPoint = null;
 
-// -----------------------------------------
-// UI initialisieren
-// -----------------------------------------
 function initTaktikboardUI() {
     const toolsContainer = document.getElementById("taktik-tools");
     if (!toolsContainer) return;
 
-    toolsContainer.innerHTML = "";
+    toolsContainer.innerHTML = `
+        <h3>Taktik-Werkzeuge</h3>
+        <div class="tool-grid">
+            <button id="btn-pass" class="holo-button">Passweg</button>
+            <button id="btn-run" class="holo-button">Laufweg</button>
+            <button id="btn-zone" class="holo-button">Zone</button>
+            <button id="btn-marker" class="holo-button">Marker</button>
+            <button id="btn-clear" class="holo-button danger">Löschen</button>
+        </div>
+    `;
 
-    // Buttons erzeugen
-    createToolButton("Passweg", () => setTool("pass"));
-    createToolButton("Laufweg", () => setTool("run"));
-    createToolButton("Zone", () => setTool("zone"));
-    createToolButton("Marker", () => setTool("marker"));
-    createToolButton("Clear", () => clearTools());
+    // Event Listener
+    document.getElementById("btn-pass").onclick = () => setTool("pass");
+    document.getElementById("btn-run").onclick = () => setTool("run");
+    document.getElementById("btn-zone").onclick = () => setTool("zone");
+    document.getElementById("btn-marker").onclick = () => setTool("marker");
+    document.getElementById("btn-clear").onclick = () => clearTools();
 
-    // Canvas-Click für Tools aktivieren
-    arena.canvas.addEventListener("click", handleCanvasClick);
-
-    console.log("Taktikboard UI bereit.");
+    // Klick auf das Spielfeld
+    const canvas = document.getElementById("arena-canvas");
+    canvas.addEventListener("mousedown", handleBoardClick);
+    
+    console.log("🎨 Taktikboard UI initialisiert.");
 }
 
-// -----------------------------------------
-// Tool-Button erzeugen
-// -----------------------------------------
-function createToolButton(label, callback) {
-    const btn = document.createElement("button");
-    btn.textContent = label;
-    btn.classList.add("holo-button");
-    btn.addEventListener("click", callback);
-    document.getElementById("taktik-tools").appendChild(btn);
+function setTool(name) {
+    currentTool = name;
+    firstPoint = null; // Reset bei Tool-Wechsel
+    
+    // Visuelles Feedback
+    document.querySelectorAll(".holo-button").forEach(b => b.classList.remove("active"));
+    const activeBtn = document.getElementById(`btn-${name}`);
+    if (activeBtn) activeBtn.classList.add("active");
 }
 
-// -----------------------------------------
-// Tool setzen
-// -----------------------------------------
-function setTool(toolName) {
-    currentTool = toolName;
-    console.log("Tool aktiviert:", toolName);
-}
-
-// -----------------------------------------
-// Canvas-Klicks verarbeiten
-// -----------------------------------------
-let firstPoint = null;
-
-function handleCanvasClick(e) {
+function handleBoardClick(e) {
     if (!currentTool) return;
 
     const rect = arena.canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    switch (currentTool) {
-
-        case "pass":
-            if (!firstPoint) {
-                firstPoint = { x, y };
-            } else {
-                addPassLine(firstPoint.x, firstPoint.y, x, y);
-                firstPoint = null;
-            }
-            break;
-
-        case "run":
-            if (!firstPoint) {
-                firstPoint = { x, y };
-            } else {
-                addRunLine(firstPoint.x, firstPoint.y, x, y);
-                firstPoint = null;
-            }
-            break;
-
-        case "zone":
-            if (!firstPoint) {
-                firstPoint = { x, y };
-            } else {
-                const w = x - firstPoint.x;
-                const h = y - firstPoint.y;
-                addZone(firstPoint.x, firstPoint.y, w, h);
-                firstPoint = null;
-            }
-            break;
-
-        case "marker":
-            addMarker(x, y);
-            break;
+    if (currentTool === "marker") {
+        addMarker(x, y);
+    } else if (!firstPoint) {
+        firstPoint = { x, y };
+    } else {
+        if (currentTool === "pass") addPassLine(firstPoint.x, firstPoint.y, x, y);
+        if (currentTool === "run") addRunLine(firstPoint.x, firstPoint.y, x, y);
+        if (currentTool === "zone") {
+            const w = x - firstPoint.x;
+            const h = y - firstPoint.y;
+            addZone(firstPoint.x, firstPoint.y, w, h);
+        }
+        firstPoint = null;
     }
 }
