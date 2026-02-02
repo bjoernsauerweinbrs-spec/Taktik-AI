@@ -1,4 +1,3 @@
-// KEIN EXPORT HIER! Direkt mit window.ToniAI starten
 window.ToniAI = {
     isListening: false,
     recognition: null,
