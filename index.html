@@ -2,10 +2,11 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — Pro Coaching OS</title>
+    <title>TONI 2.0 — High-Class Coaching OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body>
+
     <aside class="sidebar-minimal">
         <div class="main-briefcase-btn" onclick="BriefcaseUI.toggle()">
             <div style="font-size:35px;">💼</div>
@@ -15,34 +16,34 @@
 
     <main id="stage">
         <div class="tools-overlay">
-            <button class="tool-btn" onclick="arena.setMode('standard')">Standard</button>
-            <button class="tool-btn" onclick="arena.setMode('funinho')">Funinho</button>
+            <button class="tool-btn" onclick="arena.setMode('standard')">STANDARD</button>
+            <button class="tool-btn" onclick="arena.setMode('funinho')">FUNINHO</button>
         </div>
         <canvas id="main-canvas"></canvas>
-        <div id="hologram-ui" onclick="ToniAI.speak('Björn, ich analysiere die aktuelle Feldposition.')"></div>
+        <div id="hologram-ui"></div>
     </main>
 
     <aside class="analysis-panel">
-        <h2 class="panel-title">ANALYSEZENTRUM</h2>
-        <div id="setcard-content">
-            <p class="empty-msg">Wähle einen Spieler...</p>
+        <h2 style="color: var(--cyan); font-size: 14px; letter-spacing: 2px;">ANALYSEZENTRUM</h2>
+        <div id="setcard-content" style="margin-top: 25px;">
+            <p style="color: #667085; font-style: italic; text-align:center;">Spieler auf dem Feld berühren...</p>
         </div>
     </aside>
 
-    <div id="briefcase-overlay" class="briefcase-overlay" style="display: none;">
+    <div id="briefcase-overlay" class="briefcase-overlay" style="display:none;">
         <div class="briefcase-header">
-            <h1 class="glow-text">ZENTRALE AKTENTASCHE</h1>
-            <button onclick="BriefcaseUI.toggle()" class="close-btn">✕</button>
+            <h1 class="glow-text" style="color: var(--orange);">ZENTRALE AKTENTASCHE</h1>
+            <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:white; font-size:30px; cursor:pointer;">✕</button>
         </div>
         
         <div class="folder-grid" id="briefcase-main-nav">
-            <div class="folder-item" onclick="BriefcaseUI.switchSektor('sporttasche')">👟 <h3>Sporttasche</h3><span>Kader, Training, Spieltag</span></div>
+            <div class="folder-item" onclick="BriefcaseUI.switchSektor('sporttasche')">👟 <h3>Sporttasche</h3><span>Kader, Training, Plan</span></div>
             <div class="folder-item" onclick="BriefcaseUI.switchSektor('medical')">⌚ <h3>Medical Hub</h3><span>Bio-Metriken</span></div>
-            <div class="folder-item" onclick="BriefcaseUI.switchSektor('orga')">🏢 <h3>Geschäftszimmer</h3><span>Redaktion & Media</span></div>
+            <div class="folder-item" onclick="BriefcaseUI.switchSektor('orga')">🏢 <h3>Geschäftszimmer</h3><span>Redaktion</span></div>
         </div>
 
-        <div id="briefcase-content" class="hidden">
-            <button onclick="BriefcaseUI.backToMain()" class="back-btn">← ZURÜCK</button>
+        <div id="briefcase-content" class="hidden" style="width:100%; max-width:900px; margin-top:40px;">
+            <button onclick="BriefcaseUI.backToMain()" style="color: var(--cyan); cursor:pointer; background:none; border:none; font-weight:bold; margin-bottom:20px;">← ZURÜCK</button>
             <div id="active-sektor-content"></div>
         </div>
     </div>
@@ -52,7 +53,7 @@
     <script src="ui/briefcase-ui.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => { 
-            arena.init('main-canvas');
+            arena.init('main-canvas'); 
             BriefcaseUI.init();
         });
     </script>
