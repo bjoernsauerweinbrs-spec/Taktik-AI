@@ -1,5 +1,5 @@
 /**
- * TONI 2.0 – MASTER STYLE
+ * TONI 2.0 – MASTER STYLE (TOTAL FINISH)
  */
 :root {
     --bg-deep: #0B1220;
@@ -7,14 +7,14 @@
     --accent-orange: #FF6A00;
     --data-cyan: #00D1FF;
     --success-green: #28C76F;
-    --text-muted: #667085;
+    --text-white: #FFFFFF;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     background-color: var(--bg-deep);
-    color: white;
+    color: var(--text-white);
     font-family: 'Inter', sans-serif;
     height: 100vh; width: 100vw;
     display: grid;
@@ -24,36 +24,44 @@ body {
 
 /* SIDEBAR */
 .sidebar-minimal { background: #080E1A; border-right: 1px solid rgba(255,106,0,0.2); display: flex; flex-direction: column; align-items: center; padding-top: 30px; }
-.main-briefcase-btn { cursor: pointer; text-align: center; color: var(--accent-orange); padding: 15px; border-radius: 15px; }
+.main-briefcase-btn { cursor: pointer; text-align: center; color: var(--accent-orange); transition: 0.3s; padding: 15px; border-radius: 15px; }
+.main-briefcase-btn:hover { transform: scale(1.1); }
 
 /* ARENA */
 #stage { position: relative; width: 100%; height: 100%; background: radial-gradient(circle, #162033, #0B1220); }
 #main-canvas { display: block; width: 100%; height: 100%; }
 
-/* TONI SPEECH BUBBLE */
+/* ANALYSE & TONI SPEECH */
 .analysis-panel { background: var(--panel-warm); border-left: 1px solid rgba(0,209,255,0.1); padding: 25px; }
+
 .toni-speech-bubble {
     background: rgba(0, 209, 255, 0.05); border: 1px solid var(--data-cyan);
     padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 209, 255, 0.15);
 }
-.toni-badge { color: var(--data-cyan); font-size: 10px; font-weight: 900; letter-spacing: 2px; margin-bottom: 12px; }
+
+.toni-badge { color: var(--data-cyan); font-size: 9px; font-weight: 900; letter-spacing: 2px; margin-bottom: 12px; }
 .toni-text { font-size: 15px; line-height: 1.6; color: #fff; }
 
-.tool-btn {
-    background: transparent; border: 1px solid #444; color: white;
-    padding: 12px 15px; border-radius: 12px; cursor: pointer;
-    font-size: 12px; font-weight: bold; width: 100%; margin-top: 15px; transition: 0.3s;
+/* CHAT INPUT AREA */
+#toni-chat-area input {
+    background: #0B1220; border: 1px solid #333; color: white;
+    padding: 12px; border-radius: 10px; flex: 1; outline: none; font-size: 13px;
 }
-.tool-btn:hover { border-color: var(--data-cyan); color: var(--data-cyan); transform: scale(1.02); }
+#toni-chat-area input:focus { border-color: var(--data-cyan); }
+
+#voice-trigger-btn {
+    background: var(--data-cyan); border: none; color: black;
+    width: 45px; border-radius: 10px; cursor: pointer; font-size: 18px;
+    transition: 0.3s;
+}
 
 /* OVERLAYS */
 .briefcase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11,18,32,0.98); backdrop-filter: blur(30px); z-index: 5000; display: flex; flex-direction: column; padding: 60px; }
 .hidden { display: none !important; }
 
 /* ANIMATIONS */
-.animate-fadeIn { animation: fadeIn 0.6s ease forwards; }
+.animate-fadeIn { animation: fadeIn 0.5s ease forwards; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* SPIELFELD-LINIEN */
-#hologram-ui { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; border: 2px solid var(--data-cyan); border-radius: 50%; box-shadow: 0 0 20px var(--data-cyan); animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+.pulse-animation { animation: pulseIcon 1.5s infinite; }
+@keyframes pulseIcon { 0% { box-shadow: 0 0 0 0 rgba(0, 209, 255, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(0, 209, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 209, 255, 0); } }
