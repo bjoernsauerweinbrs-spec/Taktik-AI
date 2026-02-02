@@ -2,49 +2,69 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — Pro Coaching OS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TONI 2.0 — Tactical Intelligence OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
     <link rel="stylesheet" href="css/voice.css">
+    <link rel="stylesheet" href="css/board.css">
 </head>
 <body class="pro-layout">
 
     <div id="login-screen">
         <div class="login-box">
-            <h1>TONI 2.0</h1>
+            <h1 style="color:var(--accent-orange);">TONI 2.0</h1>
+            <p style="font-size:10px; letter-spacing:2px; margin-bottom:20px;">BRAZILIAN STYLE TACTICS</p>
             <input id="password-input" type="password" class="login-input" placeholder="Passwort (Toni2026)">
             <input id="api-key-input" type="password" class="login-input" placeholder="API-Key">
-            <button class="login-btn" onclick="ToniAuth.login()">SYSTEM STARTEN</button>
+            <button class="login-btn" onclick="ToniAuth.login()">SYSTEM INITIALISIEREN</button>
         </div>
     </div>
 
     <aside class="sidebar-minimal">
         <div class="sidebar-content">
-            <div class="control-unit" onclick="BriefcaseUI.toggle()">
-                <div style="font-size:32px;">💼</div>
+            <div class="control-unit" onclick="BriefcaseUI.toggle()" title="Zentrale Aktentasche">
+                <div class="icon">💼</div>
                 <span>ZENTRALE</span>
             </div>
-            <div id="voice-trigger-btn" class="control-unit" onclick="ToniAI.toggleListening()">
-                <div style="font-size:32px;">🎤</div>
+            <div id="voice-trigger-btn" class="control-unit" onclick="ToniAI.toggleListening()" title="Mikrofon einschalten">
+                <div class="icon">🎤</div>
                 <span id="mic-status-label">BEREIT</span>
             </div>
         </div>
     </aside>
 
-    <main id="stage"><canvas id="main-canvas"></canvas></main>
-    <aside class="analysis-panel"><div id="setcard-content"></div></aside>
+    <main id="stage">
+        <canvas id="main-canvas"></canvas>
+    </main>
+
+    <aside class="analysis-panel" id="side-analysis">
+        <div id="setcard-content">
+            </div>
+    </aside>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
-            <h2>ZENTRALE AKTENTASCHE</h2>
-            <div class="folder-grid" id="briefcase-nav">
-                <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">👟 Sporttasche</div>
-                <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')">🏢 Geschäftszimmer</div>
+            <div class="briefcase-header">
+                <h2>TACTICAL CENTER</h2>
+                <button onclick="BriefcaseUI.toggle()" class="close-x">✕</button>
+            </div>
+            <div id="briefcase-nav" class="folder-grid">
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">
+                    <span class="emoji">👟</span>
+                    <b>SPORTTASCHE</b>
+                    <p>Teamliste & Kader</p>
+                </div>
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')">
+                    <span class="emoji">🏢</span>
+                    <b>GESCHÄFTSZIMMER</b>
+                    <p>Stadionzeitung & Orga</p>
+                </div>
             </div>
             <div id="briefcase-content" class="hidden">
-                <div id="active-content"></div>
-                <button onclick="BriefcaseUI.backToNav()">← ZURÜCK</button>
+                <button onclick="BriefcaseUI.backToNav()" class="back-btn">← ZURÜCK ZUR AUSWAHL</button>
+                <div id="active-content" class="content-scroll-area">
+                    </div>
             </div>
-            <button onclick="BriefcaseUI.toggle()" style="margin-top:20px;">X</button>
         </div>
     </div>
 
@@ -53,18 +73,24 @@
     <script src="engine/toni-ai.js"></script>
     
     <script>
+        // AUTH-LOGIK: Verhindert Redirection-Loops [cite: 2026-02-02, 2026-01-26]
         window.ToniAuth = {
             init() {
-                const k = localStorage.getItem('toni_key');
-                if(k) document.getElementById('api-key-input').value = k;
+                const savedKey = localStorage.getItem('toni_api_key');
+                if (savedKey) document.getElementById('api-key-input').value = savedKey;
             },
             login() {
-                if(document.getElementById('password-input').value === "Toni2026") {
-                    localStorage.setItem('toni_key', document.getElementById('api-key-input').value);
+                const pass = document.getElementById('password-input').value;
+                const apiKey = document.getElementById('api-key-input').value;
+                if (pass === "Toni2026") {
+                    localStorage.setItem('toni_api_key', apiKey);
                     document.getElementById('login-screen').classList.add('hidden');
-                    if(window.ToniAI) ToniAI.init();
-                    if(window.arena) arena.init('main-canvas');
-                } else { alert("Passwort falsch!"); }
+                    // Toni erwacht [cite: 2026-01-25, 2026-01-26]
+                    if (window.ToniAI) ToniAI.init();
+                    if (window.arena) arena.init('main-canvas');
+                } else {
+                    alert("Zugriff verweigert. Passwort inkorrekt.");
+                }
             }
         };
         document.addEventListener('DOMContentLoaded', () => ToniAuth.init());
