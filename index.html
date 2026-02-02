@@ -2,79 +2,117 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — High Professional AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TONI 2.0 — Tactical Hub</title>
     <link rel="stylesheet" href="css/toni-style.css">
-    <link rel="stylesheet" href="css/hologram.css">
 </head>
-<body>
+<body class="clean-ui">
 
-    <aside class="sidebar">
-        <div class="nav-icon active" id="nav-board" onclick="switchMainView('board')" title="Taktik-Board">📊</div>
-        <div class="nav-icon" id="nav-training" onclick="switchMainView('training')" title="Trainingsbuch">📅</div>
-        <div class="nav-icon" id="nav-briefcase" onclick="switchMainView('briefcase')" title="Aktentasche">💼</div>
-        <div class="nav-icon" id="nav-sponsoring" onclick="switchMainView('sponsoring')" title="Sponsoring">💰</div>
+    <aside class="sidebar-minimal">
+        <div class="main-briefcase-btn" onclick="toggleBriefcase()" title="Aktentasche öffnen">
+            💼
+            <span class="btn-label">Zentrale</span>
+        </div>
     </aside>
 
-    <main id="stage">
-        <div class="tools-overlay" id="board-tools">
-            <button class="tool-btn" onclick="arena.setMode('standard')">STANDARD</button>
-            <button class="tool-btn" onclick="arena.setMode('funinho')">FUNINHO</button>
-            <button class="tool-btn" onclick="triggerToniAnalysis()" style="color:var(--data-cyan);">KI-SCAN</button>
-            <button class="tool-btn" onclick="AnalysisAI.fixDefenseLine()" style="color:#28C76F;">KORREKTUR</button>
-        </div>
+    <div id="briefcase-overlay" class="overlay hidden">
+        <div class="overlay-content">
+            <button class="close-btn" onclick="toggleBriefcase()">✕</button>
+            <h2 class="glow-text">ZENTRALE AKTENTASCHE</h2>
+            
+            <div class="folder-grid">
+                <div class="folder-item" onclick="openSubFolder('sporttasche')">
+                    <div class="folder-icon">👟</div>
+                    <div class="folder-name">Sporttasche</div>
+                    <span class="folder-info">Training & Kader</span>
+                </div>
+                
+                <div class="folder-item" onclick="openSubFolder('analyse')">
+                    <div class="folder-icon">📊</div>
+                    <div class="folder-name">Analysezentrum</div>
+                    <span class="folder-info">Leistungsdaten</span>
+                </div>
 
-        <div id="module-board" class="module-container active" style="height:100%;">
-            <canvas id="main-canvas"></canvas>
+                <div class="folder-item" onclick="openSubFolder('orga')">
+                    <div class="folder-icon">🏢</div>
+                    <div class="folder-name">Geschäftszimmer</div>
+                    <span class="folder-info">Sponsoring & Media</span>
+                </div>
+            </div>
+
+            <div id="subfolder-display" class="hidden">
+                <button class="back-btn" onclick="backToMainBriefcase()">← Zurück</button>
+                <div id="subfolder-inner"></div>
+            </div>
         </div>
-        <div id="module-briefcase" class="module-container" style="display:none;"></div>
-        <div id="module-training" class="module-container" style="display:none;"></div>
-        <div id="module-sponsoring" class="module-container" style="display:none;"></div>
+    </div>
+
+    <main id="stage">
+        <div class="tools-overlay">
+            <button class="tool-btn" onclick="arena.setMode('standard')">Standard</button>
+            <button class="tool-btn" onclick="arena.setMode('funinho')">Funinho</button>
+        </div>
+        <canvas id="main-canvas"></canvas>
     </main>
 
-    <aside class="analysis-panel" id="analysis-sidebar">
-        <h2 id="sidebar-title">Analysezentrum</h2>
-        <div id="setcard-content">
-            <p class="empty-state">Wähle ein Modul für Daten.</p>
+    <aside id="side-setcard" class="side-panel hidden">
+        <div class="setcard-header">
+            <h3 id="sc-name">Spielername</h3>
+            <span id="sc-number" class="player-num-badge">00</span>
+        </div>
+        <div class="setcard-body">
+            <div class="rating-section">
+                <label>Aktuelle Form (1-10)</label>
+                <div id="sc-rating-display" class="stars">⭐⭐⭐⭐⭐</div>
+                <input type="range" id="sc-rating-input" min="1" max="10" onchange="updatePlayerRating(this.value)">
+            </div>
+            <div class="stats-preview">
+                <div class="stat-row"><span>Status:</span> <span id="sc-status">Fit</span></div>
+                <div class="stat-row"><span>Position:</span> <span id="sc-pos">IV</span></div>
+            </div>
         </div>
     </aside>
 
     <script src="engine/arena.js"></script>
-    <script src="engine/analysis-ai.js"></script>
     <script src="ui/aktentasche-ui.js"></script>
-    <script src="ui/sponsoring-ui.js"></script>
-    <script src="voice/voice-output.js"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            arena.init('main-canvas');
-            arena.players = [{ id: 1, name: "David Luiz", number: 4, x: 400, y: 300, team: 'home' }];
-        });
+        let selectedPlayerId = null;
 
-        function switchMainView(module) {
-            // UI Update Icons
-            document.querySelectorAll('.nav-icon').forEach(el => el.classList.remove('active'));
-            if(document.getElementById('nav-' + module)) document.getElementById('nav-' + module).classList.add('active');
-
-            // Alle Module verstecken
-            document.querySelectorAll('.module-container').forEach(el => el.style.display = 'none');
-            
-            // Aktives Modul zeigen
-            const activeModule = document.getElementById('module-' + module);
-            if(activeModule) activeModule.style.display = 'block';
-
-            // Cockpit Sichtbarkeit
-            document.getElementById('board-tools').style.display = (module === 'board') ? 'flex' : 'none';
-
-            // Modul-Inhalte triggern
-            if (module === 'briefcase' && window.Aktentasche) window.Aktentasche.show();
-            if (module === 'sponsoring' && window.Sponsoring) window.Sponsoring.show();
-            
-            if (module === 'board') arena.resize();
+        function toggleBriefcase() {
+            document.getElementById('briefcase-overlay').classList.toggle('hidden');
         }
 
-        function triggerToniAnalysis() {
-            const report = AnalysisAI.scanBoard();
-            if (window.toniSpeak) toniSpeak(report);
+        function openSubFolder(folder) {
+            document.querySelector('.folder-grid').classList.add('hidden');
+            const display = document.getElementById('subfolder-display');
+            display.classList.remove('hidden');
+            
+            if(folder === 'sporttasche') {
+                window.Aktentasche.renderSporttasche();
+            }
+        }
+
+        function backToMainBriefcase() {
+            document.querySelector('.folder-grid').classList.remove('hidden');
+            document.getElementById('subfolder-display').classList.add('hidden');
+        }
+
+        // Spieler-Interaktion
+        window.showSetcard = function(player) {
+            selectedPlayerId = player.id;
+            const panel = document.getElementById('side-setcard');
+            document.getElementById('sc-name').innerText = player.name;
+            document.getElementById('sc-number').innerText = player.number;
+            document.getElementById('sc-rating-input').value = player.rating || 5;
+            panel.classList.remove('hidden');
+        };
+        
+        function updatePlayerRating(val) {
+            const player = arena.players.find(p => p.id === selectedPlayerId);
+            if(player) {
+                player.rating = val;
+                arena.render(); // Sofort-Update
+            }
         }
     </script>
 </body>
