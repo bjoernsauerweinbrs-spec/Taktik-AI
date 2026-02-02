@@ -1,51 +1,39 @@
 /**
- * TONI 2.0 – MASTER STYLE (VOICE & PERFORMANCE UPDATE)
+ * TONI 2.0 – INTERACTIVE COMMAND STYLE
  */
 :root {
     --bg-deep: #0B1220;
-    --panel-warm: #1A2233;
     --accent-orange: #FF6A00;
     --data-cyan: #00D1FF;
-    --success-green: #28C76F;
 }
 
-/* --- VOICE CONTROL PANEL --- */
-.voice-control-panel {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(0, 209, 255, 0.1);
-    padding: 20px; border-radius: 15px; margin-top: 20px;
+/* KONTINUIERLICHES HÖREN SIGNAL */
+.mic-active-glow {
+    box-shadow: 0 0 30px var(--data-cyan);
+    background: var(--data-cyan) !important;
+    animation: voice-pulse 1.5s infinite ease-in-out;
 }
 
-.voice-control-panel h4 {
-    font-size: 10px; color: var(--data-cyan); 
-    letter-spacing: 2px; margin-bottom: 15px; text-transform: uppercase;
+@keyframes voice-pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
-.control-group { margin-bottom: 15px; }
-.control-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
-
-.voice-slider {
-    width: 100%; height: 4px; background: #333; border-radius: 2px;
-    appearance: none; outline: none; accent-color: var(--data-cyan);
+/* CHAT BUBBLE FÜR ARGUMENTATION */
+.toni-speech-bubble {
+    background: rgba(0, 209, 255, 0.05);
+    border: 1px solid var(--data-cyan);
+    padding: 20px; border-radius: 15px;
+    margin-bottom: 20px; transition: 0.3s;
 }
 
-.vibe-selector {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;
+.toni-argument {
+    border-left: 3px solid var(--accent-orange);
+    padding-left: 15px; margin-top: 15px; font-style: italic; color: #cbd5e1;
 }
 
-.vibe-btn {
-    background: transparent; border: 1px solid #444; color: white;
-    padding: 8px; border-radius: 8px; font-size: 10px; cursor: pointer;
-    transition: 0.3s; font-weight: bold;
-}
-
-.vibe-btn.active {
-    border-color: var(--accent-orange); color: var(--accent-orange);
-    background: rgba(255, 106, 0, 0.1);
-}
-
-/* Animation für pulsierendes Sprechen */
-.speaking-glow {
-    box-shadow: 0 0 20px var(--data-cyan);
-    border-color: var(--data-cyan) !important;
+/* BALL STYLING */
+.ball-indicator {
+    filter: drop-shadow(0 0 5px white);
 }
