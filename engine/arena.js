@@ -1,6 +1,6 @@
 (function() {
     window.arena = {
-        canvas: null, ctx: null, players: [], mode: 'standard', pulse: 0,
+        canvas: null, ctx: null, players: [], mode: 'standard',
         init(id) {
             this.canvas = document.getElementById(id); this.ctx = this.canvas.getContext('2d');
             this.resize(); window.addEventListener('resize', () => this.resize());
