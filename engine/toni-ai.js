@@ -6,13 +6,13 @@ window.ToniAI = {
     init() {
         this.setupVoice();
         this.setupMic();
-        this.speak("Bom dia, Coach Björn! Systeme sind online. Nutze das Mikrofon links für die Analyse."); [cite: 2026-01-24, 2026-01-26]
+        this.speak("Bom dia, Coach Björn! Systeme sind online. Nutze das Mikrofon links für die Analyse.");
     },
 
     setupVoice() {
         const load = () => {
             const voices = window.speechSynthesis.getVoices();
-            // Sucht nach männlicher Stimme [cite: 2026-01-26]
+            // Sucht nach männlicher Stimme
             this.maleVoice = voices.find(v => v.lang.includes('de') && (v.name.includes('Stefan') || v.name.includes('Google Deutsch') || v.name.includes('Male'))) || voices[0];
         };
         load();
