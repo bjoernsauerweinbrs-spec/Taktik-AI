@@ -1,94 +1,107 @@
 /**
- * TONI 2.0 – VOICE ENGINE & PERSONA CONTROL
+ * TONI 2.0 – PRO VOICE ENGINE (API-DRIVEN)
+ * Integration: OpenAI / ElevenLabs Streaming
  */
 
 (function() {
     window.ToniAI = {
         userName: '',
         voiceSettings: {
-            volume: 0.8,
-            rate: 1.0,
-            pitch: 0.9,
-            vibe: 'analytisch' // 'analytisch' (Nagelsmann) vs 'matchday' (Klopp)
+            volume: 0.9,
+            vibe: 'analytisch',
+            provider: 'openai' // Hier kann später auf 'elevenlabs' gewechselt werden
         },
 
-        init() {
-            this.startGreeting();
-            console.log("🎙️ Toni Voice-Engine: Bereit für Anweisungen.");
-        },
-
-        // --- DIE PERSONA-LOGIK (SSML Simulation) ---
-        applyPersona(text) {
-            let processed = text;
-            if (this.voiceSettings.vibe === 'matchday') {
-                // Klopp-Style: Kürzer, energetischer, Pausen für Effekt
-                this.voiceSettings.rate = 1.1;
-                this.voiceSettings.pitch = 1.0;
-                processed = "Männer, hört zu! " + processed + " Gebt alles!";
-            } else {
-                // Nagelsmann-Style: Sachlich, präzise, tiefere Stimme
-                this.voiceSettings.rate = 0.95;
-                this.voiceSettings.pitch = 0.85;
-                processed = "In der Analyse zeigt sich: " + processed;
+        // --- PROFI-SPRACHAUSGABE (API CALL) ---
+        async say(text) {
+            const apiKey = localStorage.getItem('toni2_api_key');
+            if (!apiKey) {
+                console.warn("Kein API-Key gefunden. Nutze System-Fallback.");
+                this.fallbackSay(text); // Fallback auf System-Stimme
+                return;
             }
-            return processed;
-        },
-
-        say(text) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
 
             const processedText = this.applyPersona(text);
-            const msg = new SpeechSynthesisUtterance(processedText);
-            
-            const voices = window.speechSynthesis.getVoices();
-            msg.voice = voices.find(v => v.lang === 'de-DE' && v.name.includes('Male')) || voices[0];
-            
-            msg.volume = this.voiceSettings.volume;
-            msg.rate = this.voiceSettings.rate;
-            msg.pitch = this.voiceSettings.pitch;
+            const voice = this.voiceSettings.vibe === 'matchday' ? 'onyx' : 'alloy';
 
-            // UI-Feedback beim Sprechen
-            msg.onstart = () => document.querySelector('.toni-speech-bubble')?.classList.add('speaking-glow');
-            msg.onend = () => document.querySelector('.toni-speech-bubble')?.classList.remove('speaking-glow');
+            try {
+                // UI-Feedback: Toni "denkt" und "spricht"
+                this.setVisualFeedback(true);
 
-            window.speechSynthesis.speak(msg);
+                const response = await fetch('https://api.openai.com/v1/audio/speech', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: "tts-1",
+                        input: processedText,
+                        voice: voice,
+                        speed: this.voiceSettings.vibe === 'matchday' ? 1.1 : 0.95
+                    })
+                });
+
+                if (!response.ok) throw new Error("API-Fehler bei der Sprachausgabe");
+
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                audio.volume = this.voiceSettings.volume;
+                
+                audio.onended = () => this.setVisualFeedback(false);
+                audio.play();
+
+            } catch (error) {
+                console.error("Voice-API Error:", error);
+                this.fallbackSay(text);
+            }
         },
 
-        // --- UI ACTIONS ---
+        // --- FALLBACK (Falls API nicht erreichbar) ---
+        fallbackSay(text) {
+            if ('speechSynthesis' in window) {
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.pitch = 0.9;
+                window.speechSynthesis.speak(msg);
+            }
+        },
+
+        applyPersona(text) {
+            if (this.voiceSettings.vibe === 'matchday') {
+                return `Männer, Fokus jetzt! ${text} Volle Intensität!`;
+            }
+            return `In der taktischen Analyse zeigt sich: ${text}`;
+        },
+
+        setVisualFeedback(isSpeaking) {
+            const bubble = document.querySelector('.toni-speech-bubble');
+            if (bubble) {
+                isSpeaking ? bubble.classList.add('speaking-glow') : bubble.classList.remove('speaking-glow');
+            }
+        },
+
+        // --- UI UPDATES ---
         updateSetting(key, val) {
-            this.voiceSettings[key] = parseFloat(val);
+            this.voiceSettings[key] = val;
             if(key === 'vibe') {
                 document.querySelectorAll('.vibe-btn').forEach(b => b.classList.remove('active'));
                 document.getElementById('vibe-' + val).classList.add('active');
-                this.voiceSettings.vibe = val;
             }
         },
 
-        testVoice() {
-            this.say("Björn, das ist ein Test der aktuellen Sprachausgabe. Intensität ist alles!");
-        },
-
-        // --- DYNAMISCHE UI ERZEUGUNG ---
         renderVoiceControls() {
             return `
                 <div class="voice-control-panel animate-fadeIn">
-                    <h4>🎙️ Voice-Command-Center</h4>
-                    
+                    <h4>🎙️ PROFISCHALTPRÜFUNG</h4>
                     <div class="control-group">
-                        <label>LAUTSTÄRKE</label>
-                        <input type="range" class="voice-slider" min="0" max="1" step="0.1" value="${this.voiceSettings.volume}" oninput="ToniAI.updateSetting('volume', this.value)">
-                    </div>
-
-                    <div class="control-group">
-                        <label>PERSONA-MODUS</label>
+                        <label>MODUS (KLOPP vs. NAGELSMANN)</label>
                         <div class="vibe-selector">
-                            <button id="vibe-analytisch" class="vibe-btn ${this.voiceSettings.vibe === 'analytisch' ? 'active' : ''}" onclick="ToniAI.updateSetting('vibe', 'analytisch')">ANALYTISCH (NGLS)</button>
-                            <button id="vibe-matchday" class="vibe-btn ${this.voiceSettings.vibe === 'matchday' ? 'active' : ''}" onclick="ToniAI.updateSetting('vibe', 'matchday')">MATCHDAY (KLPP)</button>
+                            <button id="vibe-analytisch" class="vibe-btn ${this.voiceSettings.vibe === 'analytisch' ? 'active' : ''}" onclick="ToniAI.updateSetting('vibe', 'analytisch')">ANALYTISCH</button>
+                            <button id="vibe-matchday" class="vibe-btn ${this.voiceSettings.vibe === 'matchday' ? 'active' : ''}" onclick="ToniAI.updateSetting('vibe', 'matchday')">MATCHDAY</button>
                         </div>
                     </div>
-
-                    <button class="tool-btn" style="border-color:var(--success-green); color:var(--success-green);" onclick="ToniAI.testVoice()">STIMME TESTEN</button>
+                    <button class="tool-btn" style="border-color:var(--data-cyan);" onclick="ToniAI.say('Björn, ich bin bereit für die taktische Anweisung.')">STIMME TESTEN</button>
                 </div>
             `;
         },
@@ -97,17 +110,13 @@
             const container = document.getElementById('setcard-content');
             container.innerHTML = `
                 <div class="toni-speech-bubble">
-                    <div class="toni-badge">TONI // CO-TRAINER AI</div>
+                    <div class="toni-badge">TONI // PRO-AI VOICE</div>
                     <div class="toni-text">${text}</div>
                     ${html}
                 </div>
                 ${this.renderVoiceControls()}
             `;
             this.say(text);
-        },
-
-        startGreeting() {
-            this.speak("Hallo! Ich bin Toni, dein Co-Trainer. Wie lautet dein Name?");
         }
     };
 })();
