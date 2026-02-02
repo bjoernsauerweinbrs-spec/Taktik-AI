@@ -2,117 +2,70 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 — World-Class Intelligence</title>
-    
+    <title>TONI 2.0 — High Professional AI</title>
     <link rel="stylesheet" href="css/toni-style.css">
     <link rel="stylesheet" href="css/hologram.css">
 </head>
 <body>
 
     <aside class="sidebar">
-        <div class="nav-icon active" id="nav-board" onclick="switchMainView('board')" title="Taktik-Board">📊</div>
-        <div class="nav-icon" id="nav-training" onclick="switchMainView('training')" title="Trainingsbuch">📅</div>
-        <div class="nav-icon" id="nav-global" onclick="switchMainView('global')" title="Global Knowledge">🌐</div>
-        <div class="nav-icon" id="nav-briefcase" onclick="switchMainView('briefcase')" title="Aktentasche">💼</div>
+        <div class="nav-icon active" id="nav-board" onclick="switchMainView('board')">📊</div>
+        <div class="nav-icon" id="nav-training" onclick="switchMainView('training')">📅</div>
+        <div class="nav-icon" id="nav-global" onclick="switchMainView('global')">🌐</div>
+        <div class="nav-icon" id="nav-briefcase" onclick="switchMainView('briefcase')">💼</div>
     </aside>
 
     <main id="stage">
         <div class="tools-overlay" id="board-tools">
-            <button class="tool-btn" onclick="triggerToniAnalysis()">KI-TREND-SCAN</button>
-            <button class="tool-btn" onclick="arena.setMode('funinho')">FUNINHO</button>
-            <button class="tool-btn" onclick="AnalysisAI.fixDefenseLine()" style="color:var(--success-green);">KORRIGIERE KETTE</button>
-            <button class="tool-btn danger" onclick="arena.clear()">RESET</button>
+            <button class="tool-btn" onclick="arena.setMode('standard')">Standard</button>
+            <button class="tool-btn" onclick="arena.setMode('funinho')">Funinho</button>
+            <button class="tool-btn" onclick="triggerToniAnalysis()" style="color:var(--data-cyan);">KI-Trend-Scan</button>
+            <button class="tool-btn" onclick="AnalysisAI.fixDefenseLine()" style="color:#28C76F;">Korrektur</button>
         </div>
 
         <div id="module-board" class="module-container active">
             <canvas id="main-canvas"></canvas>
         </div>
-
-        <div id="module-global" class="module-container" style="padding:40px;">
-            <h2 style="color: var(--data-cyan);">Global Tactical Insights</h2>
-            <div id="global-content">Wird geladen...</div>
-        </div>
-
         <div id="module-training" class="module-container"></div>
         <div id="module-briefcase" class="module-container"></div>
+        <div id="module-global" class="module-container"></div>
     </main>
 
-    <aside class="analysis-panel" id="analysis-sidebar">
+    <aside class="analysis-panel">
         <h2>Analysezentrum</h2>
         <div id="setcard-content">
-            <p class="empty-state">System bereit für Weltklasse-Analyse.</p>
+            <p class="empty-state">Wähle ein Modul für tiefergehende Daten.</p>
         </div>
     </aside>
 
-    <div id="hologram-container">
-        <div class="holo-ring"></div>
-        <div class="holo-core"></div>
-        <div id="hologram-status">Toni Standby</div>
-    </div>
-
-    <script src="js/storage.js"></script>
     <script src="engine/arena.js"></script>
-    <script src="engine/players.js"></script>
-    <script src="engine/tools.js"></script>
-    <script src="engine/dragdrop.js"></script>
     <script src="engine/analysis-ai.js"></script>
-    
+    <script src="ui/aktentasche-ui.js"></script>
     <script src="voice/voice-output.js"></script>
-    <script src="voice/hologram-effects.js"></script>
 
     <script>
-        /**
-         * MASTER INITIALIZATION
-         */
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("⚽ TONI 2.0: Clean System Boot...");
-
-            if (arena.init('main-canvas')) {
-                initDragDrop();
-                
-                // Start-Kader laden
-                arena.players = [
-                    { id: 1, name: "David Luiz", number: 4, x: 180, y: 450, team: 'home' },
-                    { id: 2, name: "Marquinhos", number: 5, x: 320, y: 460, team: 'home' },
-                    { id: 3, name: "Thiago", number: 3, x: 480, y: 460, team: 'home' },
-                    { id: 4, name: "Dani", number: 2, x: 620, y: 450, team: 'home' }
-                ];
-            }
-
-            if (window.Hologram) window.Hologram.init();
-            
-            // Willkommensgruß
-            setTimeout(() => {
-                if (window.toniSpeak) toniSpeak("System bereinigt und optimiert, Björn. Wir sind bereit für Weltklasse-Niveau.");
-            }, 1000);
+            arena.init('main-canvas');
+            if(window.Aktentasche) window.Aktentasche.init();
         });
-
-        function triggerToniAnalysis() {
-            if (window.Hologram) window.Hologram.setScanning(true);
-            setTimeout(() => {
-                const report = AnalysisAI.scanBoard();
-                if (window.toniSpeak) toniSpeak(report);
-                if (window.Hologram) window.Hologram.setScanning(false);
-            }, 1500);
-        }
 
         function switchMainView(module) {
             document.querySelectorAll('.nav-icon').forEach(el => el.classList.remove('active'));
-            const icon = document.getElementById('nav-' + module);
-            if (icon) icon.classList.add('active');
+            document.getElementById('nav-' + module).classList.add('active');
 
             document.querySelectorAll('.module-container').forEach(el => el.classList.remove('active'));
-            const target = document.getElementById('module-' + module);
-            if (target) target.classList.add('active');
+            document.getElementById('module-' + module).classList.add('active');
 
+            // Spezifischer Modul-Inhalt Trigger
+            if (module === 'briefcase') window.Aktentasche.show();
+            
             const tools = document.getElementById('board-tools');
-            if (module === 'board') {
-                tools.style.display = 'flex';
-                arena.resize();
-            } else {
-                tools.style.display = 'none';
-            }
+            tools.style.display = (module === 'board') ? 'flex' : 'none';
+        }
+
+        function triggerToniAnalysis() {
+            const report = AnalysisAI.scanBoard();
+            if (window.toniSpeak) toniSpeak(report);
         }
     </script>
 </body>
