@@ -1,68 +1,63 @@
-:root {
-    --bg-deep: #0B1220;
-    --panel-warm: #1A2233;
-    --accent-orange: #FF6A00;
-    --data-cyan: #00D1FF;
-}
+(function() {
+    window.arena = {
+        canvas: null,
+        ctx: null,
+        players: [],
+        ready: false,
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+        init(id) {
+            // SICHERHEITS-CHECK: Finde das Element, egal ob ID oder Objekt
+            const el = (typeof id === 'string') ? document.getElementById(id) : id;
+            
+            if (!el || el.tagName !== 'CANVAS') {
+                console.error("❌ Arena-Fehler: Ungültiges Canvas-Element bei ID:", id);
+                return false;
+            }
 
-body {
-    background: var(--bg-deep);
-    color: #fff;
-    font-family: 'Inter', sans-serif;
-    height: 100vh;
-    display: grid;
-    grid-template-columns: 80px 1fr 300px; /* Sidebar | Field | Analysis */
-    overflow: hidden;
-}
+            this.canvas = el;
+            this.ctx = el.getContext('2d');
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+            this.ready = true;
+            this.render();
+            console.log("🏟️ Arena Engine initialisiert.");
+            return true;
+        },
 
-/* Sidebar */
-.sidebar {
-    background: #080E1A;
-    border-right: 1px solid rgba(255, 106, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 0;
-}
+        resize() {
+            if (!this.canvas) return;
+            const container = this.canvas.parentElement;
+            this.canvas.width = container.clientWidth;
+            this.canvas.height = container.clientHeight;
+            this.render();
+        },
 
-.nav-icon {
-    width: 50px;
-    height: 50px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    border-radius: 12px;
-    transition: 0.2s;
-    font-size: 20px;
-    border: 1px solid transparent;
-}
+        render() {
+            if (!this.ready) return;
+            const ctx = this.ctx;
+            ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.drawPitch(ctx);
+            this.players.forEach(p => this.drawPlayer(ctx, p));
+        },
 
-.nav-icon:hover, .nav-icon.active {
-    border-color: var(--accent-orange);
-    color: var(--accent-orange);
-    box-shadow: 0 0 10px rgba(255, 106, 0, 0.3);
-}
+        drawPitch(ctx) {
+            ctx.strokeStyle = "rgba(0, 209, 255, 0.1)";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(50, 50, this.canvas.width - 100, this.canvas.height - 100);
+        },
 
-/* Main Arena */
-#stage {
-    position: relative;
-    background: radial-gradient(circle at center, #162033 0%, #0B1220 100%);
-}
-
-#main-canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-/* Right Panel (Analyse/Setcard) */
-.analysis-panel {
-    background: var(--panel-warm);
-    border-left: 1px solid rgba(0, 209, 255, 0.2);
-    padding: 20px;
-    overflow-y: auto;
-}
+        drawPlayer(ctx, p) {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#FF6A00";
+            ctx.fillStyle = "#FF6A00";
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 12px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(p.number, p.x, p.y + 5);
+        }
+    };
+})();
