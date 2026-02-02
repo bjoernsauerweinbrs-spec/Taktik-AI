@@ -2,28 +2,29 @@
     window.Stadionzeitung = {
         currentPage: 0,
         pages: [
-            { title: "COVER STORY", content: "<h1>DERBY-FIEBER</h1><p>Björn's Taktik gegen den Erzrivalen.</p><div class='image-placeholder'>[HELDEN-FOTO]</div>" },
-            { title: "TONI'S TAKTIK", content: "<h3>DIE ANALYSE</h3><p>Wir nutzen heute das Funinho-Prinzip für maximale Raumausbeute.</p><ul><li>Schnelles Umschalten</li><li>4-Kette hochschieben</li></ul>" },
-            { title: "KADER & SPONSOREN", content: "<h3>TEAM-STATUS</h3><p>David Luiz ist in Bestform (HR: 65).</p><hr><h4>UNSERE PARTNER</h4><div class='sponsor-box'>NEON ENERGY DRINK</div>" }
+            { h: "THE ARENA TIMES", c: "<h1>DERBY-HELDEN</h1><p>Björn's Taktik-Analyse für das heutige Match.</p><div style='height:200px; background:#eee; margin:20px 0;'>[TEAM-FOTO]</div>" },
+            { h: "TONI'S TAKTIK-CHECK", c: "<h3>RAUMDEUTUNG</h3><p>Wir agieren heute im Funinho-Style. Fokus auf die Halbräume.</p><p>Toni sagt: 'Die Kette muss höher stehen!'</p>" },
+            { h: "SPONSOREN & PARTNER", c: "<h3>UNSERE UNTERSTÜTZER</h3><div style='display:grid; grid-template-columns:1fr 1fr; gap:20px;'><div>[SPONSOR A]</div><div>[SPONSOR B]</div></div>" }
         ],
-        open() { this.render(); },
-        nextPage() { if(this.currentPage < this.pages.length - 1) { this.currentPage++; this.render(); }},
-        prevPage() { if(this.currentPage > 0) { this.currentPage--; this.render(); }},
+        open() { this.currentPage = 0; this.render(); },
         render() {
             const target = document.getElementById('active-sektor-content');
-            const page = this.pages[this.currentPage];
+            const p = this.pages[this.currentPage];
             target.innerHTML = `
-                <div class="newspaper-container animate-flip">
-                    <div class="page-info">Seite ${this.currentPage + 1} von ${this.pages.length}</div>
-                    <div class="newspaper-page">
-                        <h2>${page.title}</h2>
-                        <div class="page-inner-content" contenteditable="true">${page.content}</div>
+                <div class="newspaper-container">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <button onclick="Stadionzeitung.prev()" class="tool-btn">◀</button>
+                        <span style="color:#000;">SEITE ${this.currentPage + 1} / 3</span>
+                        <button onclick="Stadionzeitung.next()" class="tool-btn">▶</button>
                     </div>
-                    <div class="page-controls">
-                        <button onclick="Stadionzeitung.prevPage()">◀ ZURÜCK</button>
-                        <button onclick="Stadionzeitung.nextPage()">VOR ▶</button>
+                    <div class="newspaper-page" contenteditable="true">
+                        <small>${p.h}</small>
+                        <div>${p.c}</div>
                     </div>
+                    <button onclick="window.print()" style="margin-top:20px;">💾 PDF EXPORT</button>
                 </div>`;
-        }
+        },
+        next() { if(this.currentPage < 2) { this.currentPage++; this.render(); } },
+        prev() { if(this.currentPage > 0) { this.currentPage--; this.render(); } }
     };
 })();
