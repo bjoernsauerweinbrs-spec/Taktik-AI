@@ -3,260 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 — Tactical Intelligence & Performance</title>
+    <title>TONI 2.0 — Tactical Intelligence & Performance AI</title>
     
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/board.css">
+    <link rel="stylesheet" href="css/aktentasche.css">
+    <link rel="stylesheet" href="css/trainingsbuch.css">
+    <link rel="stylesheet" href="css/hologram.css">
+
     <style>
+        /* Sofort-Fix für das Grid-Layout, falls CSS-Dateien verzögert laden */
         :root {
             --bg-deep: #0B1220;
             --panel-warm: #1A2233;
             --accent-orange: #FF6A00;
             --data-cyan: #00D1FF;
-            --text-white: #FFFFFF;
-            --success-green: #28C76F;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--bg-deep) !important;
-            color: var(--text-white);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-deep);
+            color: #fff;
+            margin: 0;
             height: 100vh;
             display: grid;
-            grid-template-columns: 80px 1fr 340px; /* Sidebar | Main Stage | Analysis */
+            grid-template-columns: 80px 1fr 340px; /* Sidebar | Stage | Analysis */
+            font-family: 'Inter', sans-serif;
             overflow: hidden;
         }
 
-        /* --- SIDEBAR NAVIGATION --- */
-        .sidebar {
-            background: #080E1A;
-            border-right: 1px solid rgba(255, 106, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 25px 0;
-            z-index: 100;
-        }
-
-        .nav-icon {
-            width: 50px;
-            height: 50px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            border-radius: 14px;
-            transition: 0.3s cubic-bezier(0.12, 0, 0.39, 0);
-            font-size: 24px;
-            border: 1px solid transparent;
-            color: #667085;
-        }
-
-        .nav-icon:hover, .nav-icon.active {
-            border-color: var(--accent-orange);
-            color: var(--accent-orange);
-            box-shadow: 0 0 15px rgba(255, 106, 0, 0.3);
-            background: rgba(255, 106, 0, 0.05);
-        }
-
-        /* --- MAIN STAGE (Spielfeld, Bibliothek, Planner) --- */
-        #stage {
-            position: relative;
-            background: radial-gradient(circle at center, #162033 0%, #0B1220 100%);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        #main-canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            cursor: crosshair;
-        }
-
-        /* Overlay für Taktik-Tools */
-        .tools-overlay {
-            position: absolute;
-            top: 25px;
-            left: 25px;
-            background: rgba(11, 18, 32, 0.9);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--accent-orange);
-            padding: 12px;
-            border-radius: 10px;
-            display: flex;
-            gap: 12px;
-            z-index: 50;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .tool-btn {
-            background: rgba(255, 106, 0, 0.1);
-            border: 1px solid rgba(255, 106, 0, 0.4);
-            color: var(--accent-orange);
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: 0.2s;
-        }
-
-        .tool-btn:hover, .tool-btn.active {
-            background: var(--accent-orange);
-            color: white;
-            box-shadow: 0 0 10px var(--accent-orange);
-        }
-
-        /* --- RECHTES PANEL (Analyse & Setcard) --- */
-        .analysis-panel {
-            background: var(--panel-warm);
-            border-left: 1px solid rgba(0, 209, 255, 0.2);
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.3);
-        }
-
-        .analysis-panel h2 {
-            font-size: 20px;
-            color: var(--data-cyan);
-            margin-bottom: 25px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            border-bottom: 1px solid rgba(0, 209, 255, 0.1);
-            padding-bottom: 10px;
-        }
-
-        .empty-state {
-            color: #667085;
-            font-style: italic;
-            text-align: center;
-            margin-top: 60px;
-            line-height: 1.6;
-        }
-
-        /* --- MODUL CONTAINER (Hidden by default) --- */
-        #asset-library, #training-planner {
-            display: none;
-            width: 100%;
-            height: 100%;
-        }
+        /* Hilfsklassen für Modul-Steuerung */
+        .module-container { display: none; width: 100%; height: 100%; }
+        .module-container.active { display: block; }
+        
+        #stage { position: relative; overflow: hidden; }
+        #main-canvas { display: block; width: 100%; height: 100%; }
     </style>
-    
-    <link rel="stylesheet" href="css/aktentasche.css">
-    <link rel="stylesheet" href="css/trainingsbuch.css">
 </head>
 <body>
 
     <aside class="sidebar">
-        <div class="nav-icon active" onclick="switchMainView('board', this)" title="Analyse-Board">📊</div>
-        <div class="nav-icon" onclick="switchMainView('training', this)" title="Trainingsbuch">📅</div>
-        <div class="nav-icon" onclick="switchMainView('briefcase', this)" title="Aktentasche">💼</div>
-        <div class="nav-icon" title="Kader / Setcards">👥</div>
-        <div class="nav-icon" title="Sponsoring" style="margin-top: auto;">💰</div>
+        <div class="nav-icon active" id="nav-board" onclick="switchMainView('board')" title="Analyse-Board">📊</div>
+        <div class="nav-icon" id="nav-training" onclick="switchMainView('training')" title="Trainingsbuch">📅</div>
+        <div class="nav-icon" id="nav-briefcase" onclick="switchMainView('briefcase')" title="Aktentasche">💼</div>
+        <div class="nav-icon" id="nav-sponsoring" onclick="switchMainView('sponsoring')" title="Sponsoring">💰</div>
+        <div class="nav-icon" style="margin-top: auto;" title="Einstellungen">⚙️</div>
     </aside>
 
     <main id="stage">
+        
         <div class="tools-overlay" id="board-tools">
-            <button class="tool-btn" id="tool-pass" onclick="setTool('pass')">Passweg</button>
-            <button class="tool-btn" id="tool-run" onclick="setTool('run')">Laufweg</button>
+            <button class="tool-btn" id="tool-pass" onclick="tools.set('pass')">Passweg</button>
+            <button class="tool-btn" id="tool-run" onclick="tools.set('run')">Laufweg</button>
             <button class="tool-btn danger" onclick="arena.clear()">Löschen</button>
         </div>
 
-        <canvas id="main-canvas"></canvas>
+        <div id="module-board" class="module-container active">
+            <canvas id="main-canvas"></canvas>
+        </div>
 
-        <div id="asset-library-container"></div>
-        <div id="training-planner-container"></div>
+        <div id="module-training" class="module-container">
+            </div>
+
+        <div id="module-briefcase" class="module-container">
+            </div>
+
+        <div id="module-sponsoring" class="module-container">
+            </div>
+
     </main>
 
     <aside class="analysis-panel" id="analysis-sidebar">
         <h2>Analysezentrum</h2>
         <div id="setcard-content">
-            <p class="empty-state">Wähle einen Spieler auf dem Feld aus, um die KI-gestützte Setcard-Analyse zu starten.</p>
+            <p class="empty-state">Wähle ein Element für Details...</p>
         </div>
     </aside>
+
+    <div id="hologram-container">
+        <div class="holo-ring"></div>
+        <div class="holo-core"></div>
+        <div id="hologram-status">Toni Standby</div>
+    </div>
 
     <script src="js/storage.js"></script>
     <script src="engine/arena.js"></script>
     <script src="engine/players.js"></script>
+    <script src="engine/tools.js"></script>
     <script src="engine/dragdrop.js"></script>
     
     <script src="ui/analysis-center-ui.js"></script>
     <script src="ui/aktentasche-ui.js"></script>
     <script src="ui/trainingsbuch-ui.js"></script>
+    <script src="ui/sponsoring-ui.js"></script>
+    <script src="ui/stadionzeitung-ui.js"></script>
+
+    <script src="voice/voice-output.js"></script>
+    <script src="voice/hologram-effects.js"></script>
 
     <script>
-        /**
-         * TONI 2.0 – MASTER INITIALIZATION
-         * Behebt getContext-Fehler und steuert den Modus-Wechsel.
-         */
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("⚽ TONI 2.0: Systemstart...");
+            console.log("⚽ TONI 2.0: Master-System wird hochgefahren...");
 
-            // 1. Arena-Initialisierung (Safe-Check gegen null-Pointer)
-            const isArenaReady = arena.init('main-canvas');
-
-            if (isArenaReady) {
-                // 2. Drag & Drop für Spieler aktivieren
-                if (typeof initDragDrop === 'function') initDragDrop();
-
-                // 3. Kader-Daten in die Engine laden (Beispiel-Initialisierung)
-                arena.players = [
-                    { id: 10, name: "Max Miller", number: 10, x: 250, y: 350, team: 'home' },
-                    { id: 9, name: "Tim Schuster", number: 9, x: 550, y: 250, team: 'away' }
-                ];
+            // 1. Arena & Engines initialisieren
+            if (arena.init('main-canvas')) {
+                initDragDrop();
                 
-                arena.render();
-                console.log("✅ Arena bereit & Spieler positioniert.");
+                // Demo-Setup: Erste Spieler auf das Feld
+                arena.players = [
+                    { id: 1, name: "David Luiz", number: 4, x: 200, y: 300, team: 'home' },
+                    { id: 2, name: "Gegner 1", number: 9, x: 500, y: 300, team: 'away' }
+                ];
             }
+
+            // 2. Module initialisieren
+            if (window.Hologram) window.Hologram.init();
+            if (window.Aktentasche) window.Aktentasche.init();
+            
+            // 3. Willkommensgruß
+            setTimeout(() => {
+                if (window.toniSpeak) toniSpeak("Systeme bereit. Willkommen zurück, Björn.");
+            }, 1000);
         });
 
         /**
-         * Modus-Umschalter (Zentrales Routing)
-         * Steuert die Sichtbarkeit der Module im 3-Spalten-Grid.
+         * Zentrales Routing der App
          */
-        function switchMainView(view, btnElement) {
-            // UI-Highlighting
-            document.querySelectorAll('.nav-icon').forEach(icon => icon.classList.remove('active'));
-            btnElement.classList.add('active');
+        function switchMainView(module) {
+            // UI-Update Sidebar
+            document.querySelectorAll('.nav-icon').forEach(el => el.classList.remove('active'));
+            document.getElementById('nav-' + module).classList.add('active');
 
-            // Elemente referenzieren
-            const canvas = document.getElementById('main-canvas');
+            // Module umschalten
+            document.querySelectorAll('.module-container').forEach(el => el.classList.remove('active'));
+            const activeModule = document.getElementById('module-' + module);
+            if (activeModule) activeModule.classList.add('active');
+
+            // Spezifische Modul-Logik
             const tools = document.getElementById('board-tools');
-            const sidebarContent = document.getElementById('setcard-content');
-
-            // Reset: Alles verstecken (außer Sidebar-Grundgerüst)
-            canvas.style.display = 'none';
-            if (tools) tools.style.display = 'none';
-            if (window.Aktentasche) Aktentasche.toggleView(false); 
-            // Trainingsbuch-Planner ebenfalls resetten...
-
-            // Modus-Aktivierung
-            if (view === 'board') {
-                canvas.style.display = 'block';
+            if (module === 'board') {
                 if (tools) tools.style.display = 'flex';
                 arena.resize();
-                sidebarContent.innerHTML = '<p class="empty-state">Board-Modus aktiv. Wähle einen Spieler.</p>';
-            } 
-            else if (view === 'briefcase') {
-                if (window.Aktentasche) Aktentasche.show();
-            } 
-            else if (view === 'training') {
-                if (window.Trainingsbuch) Trainingsbuch.show();
+            } else {
+                if (tools) tools.style.display = 'none';
+                
+                // Modul-Inhalte triggern
+                if (module === 'training' && window.Trainingsbuch) Trainingsbuch.show();
+                if (module === 'briefcase' && window.Aktentasche) Aktentasche.show();
+                if (module === 'sponsoring' && window.Sponsoring) Sponsoring.show();
             }
-        }
-
-        // Taktik-Tool Auswahl (Shortcut)
-        function setTool(toolName) {
-            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            const activeBtn = document.getElementById('tool-' + toolName);
-            if (activeBtn) activeBtn.classList.add('active');
-            // Hier folgt die Integration mit tools.js
-            console.log("Tool aktiviert:", toolName);
         }
     </script>
 </body>
