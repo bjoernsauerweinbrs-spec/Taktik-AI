@@ -1,40 +1,56 @@
 /**
- * =========================================
- * TONI 2.0 – SPORTTASCHE & KADER
- * Kader-Management innerhalb der Aktentasche
- * =========================================
+ * TONI 2.0 – AKTENTASCHE CONTENT
+ * Kader-Management & Setcard-Trigger
  */
 (function() {
     window.Aktentasche = {
-        // Beispiel-Kader [cite: 2026-01-24]
         kader: [
-            { id: 1, name: "David Luiz", number: 4, rating: 8, status: "Fit", x: 200, y: 300, team: 'home' },
-            { id: 2, name: "Max Miller", number: 10, rating: 6, status: "Angeschlagen", x: 400, y: 250, team: 'home' }
+            { id: 1, name: "David Luiz", number: 4, rating: 8, status: "Fit", pos: "IV", x: 200, y: 300, team: 'home' },
+            { id: 2, name: "Max Miller", number: 10, rating: 6, status: "Angeschlagen", pos: "OM", x: 400, y: 350, team: 'home' }
         ],
 
-        renderSporttasche() {
-            const target = document.getElementById('subfolder-inner');
+        showSporttasche() {
+            const target = document.getElementById('subfolder-content');
             target.innerHTML = `
-                <h3 style="color: #FF6A00; margin-bottom: 20px;">SPORTTASCHE: Kader & Spiel</h3>
-                <div class="kader-list">
+                <div class="player-grid-selection" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                     ${this.kader.map(p => `
-                        <div class="kader-item" style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; margin-bottom:5px; border-radius:5px;">
-                            <span>#${p.number} ${p.name} (Form: ${p.rating}/10)</span>
-                            <button onclick="Aktentasche.sendToBoard(${p.id})" style="background:#00D1FF; border:none; color:black; padding:2px 10px; border-radius:3px; cursor:pointer;">AUFS FELD</button>
+                        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                            <span>#${p.number} ${p.name}</span>
+                            <button onclick="window.Aktentasche.toBoard(${p.id})" style="background:#28C76F; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-weight:bold;">AUFS FELD</button>
                         </div>
                     `).join('')}
                 </div>
             `;
         },
 
-        sendToBoard(playerId) {
-            const player = this.kader.find(p => p.id === playerId);
-            // Verhindere Dopplungen
-            if (!window.arena.players.find(p => p.id === playerId)) {
-                window.arena.players.push({ ...player });
-                if (window.toggleBriefcase) window.toggleBriefcase(); // Schließe Koffer
-                if (window.toniSpeak) toniSpeak(player.name + " ist bereit für den Einsatz.");
+        toBoard(id) {
+            const p = this.kader.find(item => item.id === id);
+            if (!arena.players.find(ap => ap.id === id)) {
+                arena.players.push(p);
+                window.toggleBriefcase();
             }
         }
+    };
+
+    // SETCARD FUNKTION (Wird vom Arena-Click getriggert)
+    window.showSetcard = function(player) {
+        const side = document.getElementById('setcard-content');
+        side.innerHTML = `
+            <div class="setcard-ui">
+                <h3 style="color:#FF6A00;">${player.name}</h3>
+                <div style="font-size:30px; margin:10px 0;">#${player.number}</div>
+                <div style="font-size:12px; color:#667085; margin-bottom:20px;">Position: ${player.pos}</div>
+                
+                <label style="font-size:11px; text-transform:uppercase;">Aktuelle Form: <b>${player.rating}/10</b></label>
+                <input type="range" min="1" max="10" value="${player.rating}" oninput="updatePlayerForm(${player.id}, this.value)">
+                
+                <div style="margin-top:20px; font-size:12px;">Status: <span style="color:#28C76F;">${player.status}</span></div>
+            </div>
+        `;
+    };
+
+    window.updatePlayerForm = function(id, val) {
+        const p = arena.players.find(ap => ap.id === id);
+        if (p) p.rating = val;
     };
 })();
