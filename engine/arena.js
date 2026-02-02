@@ -1,6 +1,5 @@
 // =========================================
-// Toni 2.0 – Arena Engine
-// Spielfeld-Rendering, Canvas-Setup, Grundlogik
+// Toni 2.0 – Arena Engine (Core)
 // =========================================
 
 let arena = {
@@ -15,10 +14,8 @@ let arena = {
     ready: false
 };
 
-// -----------------------------------------
-// Initialisierung
-// -----------------------------------------
 function initArena(canvasElement) {
+    if (!canvasElement) return;
     arena.canvas = canvasElement;
     arena.ctx = canvasElement.getContext("2d");
 
@@ -27,18 +24,15 @@ function initArena(canvasElement) {
 
     arena.ready = true;
     renderArena();
-
-    console.log("Arena initialisiert.");
+    console.log("🏟️ Arena Engine bereit.");
 }
 
-// -----------------------------------------
-// Canvas an Fenstergröße anpassen
-// -----------------------------------------
 function resizeArena() {
     if (!arena.canvas) return;
-
-    arena.width = window.innerWidth;
-    arena.height = window.innerHeight;
+    // Container-Größe für Flexibilität nutzen
+    const container = arena.canvas.parentElement;
+    arena.width = container.clientWidth || window.innerWidth;
+    arena.height = container.clientHeight || window.innerHeight;
 
     arena.canvas.width = arena.width;
     arena.canvas.height = arena.height;
@@ -46,100 +40,52 @@ function resizeArena() {
     renderArena();
 }
 
-// -----------------------------------------
-// Haupt-Render-Funktion
-// -----------------------------------------
 function renderArena() {
-    if (!arena.ready) return;
-
+    if (!arena.ready || !arena.ctx) return;
     const ctx = arena.ctx;
 
-    // Hintergrund
-    ctx.fillStyle = "#0f0f0f";
+    // Hintergrund (Deep Dark)
+    ctx.fillStyle = "#0b1220";
     ctx.fillRect(0, 0, arena.width, arena.height);
 
-    // Spielfeld-Linien
     drawPitchLines(ctx);
 
-    // Zonen
-    arena.zones.forEach(zone => drawZone(ctx, zone));
-
-    // Linien (Pässe, Laufwege)
-    arena.lines.forEach(line => drawLine(ctx, line));
-
-    // Spieler
-    arena.players.forEach(player => drawPlayer(ctx, player));
-
-    // Sequenzen
-    arena.sequences.forEach(step => drawSequenceStep(ctx, step));
+    // Ebenen-Rendering
+    if (arena.zones) arena.zones.forEach(z => drawZone(ctx, z));
+    if (arena.lines) arena.lines.forEach(l => drawLine(ctx, l));
+    if (arena.players) arena.players.forEach(p => drawPlayer(ctx, p));
+    if (arena.sequences) arena.sequences.forEach(s => drawSequenceStep(ctx, s));
 }
 
-// -----------------------------------------
-// Spielfeld-Linien (Grundlayout)
-// -----------------------------------------
 function drawPitchLines(ctx) {
-    ctx.strokeStyle = "rgba(255,255,255,0.2)";
+    ctx.strokeStyle = "rgba(0, 255, 150, 0.15)";
     ctx.lineWidth = 2;
-
-    // Außenlinien
+    // Außenlinie
     ctx.strokeRect(50, 50, arena.width - 100, arena.height - 100);
-
     // Mittellinie
     ctx.beginPath();
     ctx.moveTo(arena.width / 2, 50);
     ctx.lineTo(arena.width / 2, arena.height - 50);
     ctx.stroke();
-
-    // Mittelkreis
-    ctx.beginPath();
-    ctx.arc(arena.width / 2, arena.height / 2, 80, 0, Math.PI * 2);
-    ctx.stroke();
 }
 
-// -----------------------------------------
-// Spieler zeichnen
-// -----------------------------------------
 function drawPlayer(ctx, player) {
-    ctx.fillStyle = player.color || "rgba(255,106,0,0.8)";
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = player.color || "#ff6a00";
+    
+    ctx.fillStyle = player.color || "rgba(255, 106, 0, 0.9)";
     ctx.beginPath();
-    ctx.arc(player.x, player.y, 22, 0, Math.PI * 2);
+    ctx.arc(player.x, player.y, 20, 0, Math.PI * 2);
     ctx.fill();
 
-    // Nummer
+    ctx.shadowBlur = 0; // Schatten für Text aus
     ctx.fillStyle = "#fff";
-    ctx.font = "bold 16px Inter";
+    ctx.font = "bold 14px Inter, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(player.number || "?", player.x, player.y);
-}
-
-// -----------------------------------------
-// Linien zeichnen
-// -----------------------------------------
-function drawLine(ctx, line) {
-    ctx.strokeStyle = line.color || "rgba(255,106,0,0.8)";
-    ctx.lineWidth = line.width || 3;
-
-    ctx.beginPath();
-    ctx.moveTo(line.x1, line.y1);
-    ctx.lineTo(line.x2, line.y2);
-    ctx.stroke();
-}
-
-// -----------------------------------------
-// Zonen zeichnen
-// -----------------------------------------
-function drawZone(ctx, zone) {
-    ctx.fillStyle = zone.color || "rgba(255,106,0,0.2)";
-    ctx.fillRect(zone.x, zone.y, zone.w, zone.h);
-}
-
-// -----------------------------------------
-// Sequenz-Schritte zeichnen
-// -----------------------------------------
-function drawSequenceStep(ctx, step) {
-    ctx.fillStyle = step.color || "rgba(255,106,0,0.6)";
-    ctx.beginPath();
-    ctx.arc(step.x, step.y, step.size || 12, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillText(player.number || "0", player.x, player.y);
+    
+    // Name unter dem Spieler
+    ctx.font = "10px Inter";
+    ctx.fillText(player.name || "", player.x, player.y + 30);
 }
