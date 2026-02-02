@@ -1,83 +1,24 @@
-[
-    {
-        "id": "p1",
-        "name": "Max Müller",
-        "number": 6,
-        "position": "DM",
-        "x": 400,
-        "y": 500,
-        "color": "rgba(255,106,0,0.85)"
-    },
-    {
-        "id": "p2",
-        "name": "Leon Becker",
-        "number": 8,
-        "position": "CM",
-        "x": 600,
-        "y": 500,
-        "color": "rgba(255,106,0,0.85)"
-    },
-    {
-        "id": "p3",
-        "name": "Jonas Weber",
-        "number": 10,
-        "position": "AM",
-        "x": 700,
-        "y": 400,
-        "color": "rgba(255,106,0,0.85)"
-    },
-    {
-        "id": "p4",
-        "name": "Tim Schuster",
-        "number": 9,
-        "position": "ST",
-        "x": 800,
-        "y": 300,
-        "color": "rgba(255,106,0,0.85)"
-    },
-    {
-        "id": "p5",
-        "name": "Felix Hartmann",
-        "number": 4,
-        "position": "CB",
-        "x": 300,
-        "y": 600,
-        "color": "rgba(255,106,0,0.85)"
-    },
-    {
-        "id": "p6",
-        "name": "Lukas Brandt",
-        "number": 5,
-        "position": "CB",
-        "x": 500,
-        "y": 600,
-        "color": "rgba(255,106,0,0.85)"
-    },
-    {
-        "id": "p7",
-        "name": "David König",
-        "number": 2,
-        "position": "RB",
-        "x": 650,
-        "y": 650,
-        "color": "rgba(255,106,0,0.85)"
-    },
-    {
-        "id": "p8",
-        "name": "Jan Richter",
-        "number": 3,
-        "position": "LB",
-        "x": 150,
-        "y": 650,
-        "color": "rgba(255,106,0,0.85)"
-    },
-    {
-        "id": "p9",
-        "name": "Paul Schneider",
-        "number": 1,
-        "position": "GK",
-        "x": 300,
-        "y": 750,
-        "color": "rgba(255,106,0,0.85)"
-    }
-]
+{
+  "homeTeam": {
+    "name": "Team Björn",
+    "color": "red",
+    "players": [
+      { "id": 1, "number": 1, "name": "Alisson", "position": "TW", "role": "Mitspielend" },
+      { "id": 2, "number": 4, "name": "David Luiz", "position": "IV", "role": "Abwehrchef" },
+      { "id": 3, "number": 10, "name": "Neymar Jr.", "position": "OM", "role": "Spielmacher" },
+      { "id": 4, "number": 9, "name": "Richarlison", "position": "ST", "role": "Knipser" },
+      { "id": 5, "number": 6, "name": "Casemiro", "position": "DM", "role": "Abräumer" },
+      { "id": 6, "number": 2, "name": "Danilo", "position": "RV", "role": "Läufer" }
+    ]
+  },
+  "awayTeam": {
+    "name": "Gegner Blau",
+    "color": "blue",
+    "players": [
+      { "id": 101, "number": 1, "name": "Gegner TW", "position": "TW", "role": "Linie" },
+      { "id": 102, "number": 5, "name": "Gegner IV", "position": "IV", "role": "Zerstörer" },
+      { "id": 103, "number": 8, "name": "Gegner ZM", "position": "ZM", "role": "Verteiler" },
+      { "id": 104, "number": 11, "name": "Gegner ST", "position": "ST", "role": "Zielspieler" }
+    ]
+  }
+}
