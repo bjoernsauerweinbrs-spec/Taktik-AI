@@ -1,81 +1,62 @@
 /**
- * BRIEFCASE MODUL: Verwaltung der Sektoren & Kader [cite: 2026-02-02]
+ * BRIEFCASE ERWEITERUNG: Trainingsbuch & Adaptive Logik [cite: 2026-01-29, 2026-02-02]
  */
-window.BriefcaseUI = {
-    kader: [],
-
-    init() {
-        // Lädt gespeicherten Kader oder setzt Standard (David Luiz) [cite: 2025-11-19, 2026-01-24]
-        const saved = localStorage.getItem('toni2_kader');
-        this.kader = saved ? JSON.parse(saved) : [
-            { id: 1, name: "David Luiz", number: 4, pos: "IV", team: 'home', x: 200, y: 300 }
-        ];
-    },
-
-    // Öffnet/Schließt den Koffer
-    toggle() {
-        const overlay = document.getElementById('briefcase-overlay');
-        overlay.classList.toggle('hidden');
-    },
-
-    // Wechselt zwischen den Ordnern (Sport, Medical, Orga, Analyse) [cite: 2026-02-02]
-    switchSektor(sektor) {
-        document.getElementById('briefcase-nav').classList.add('hidden');
-        document.getElementById('briefcase-content').classList.remove('hidden');
-        
-        const target = document.getElementById('active-content');
-        
-        if (sektor === 'sport') this.renderSport(target);
-        if (sektor === 'orga') this.renderOrga(target);
-        if (sektor === 'medical') target.innerHTML = "<h3>⌚ Medical Hub</h3><p>Bio-Daten werden synchronisiert...</p>";
-        if (sektor === 'analyse') target.innerHTML = "<h3>📊 Analyse</h3><p>Historische Taktiken werden geladen...</p>";
-    },
-
-    // Zurück zur Ordner-Übersicht
-    backToNav() {
-        document.getElementById('briefcase-nav').classList.remove('hidden');
-        document.getElementById('briefcase-content').classList.add('hidden');
-    },
-
-    // Sektor: Sporttasche (Kader-Management) [cite: 2026-02-02]
-    renderSport(container) {
-        container.innerHTML = `
-            <div class="animate-fadeIn">
-                <h2 style="color:var(--accent-orange); margin-bottom:20px;">👟 Sporttasche: Kader</h2>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                    ${this.kader.map(p => `
-                        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span>#${p.number} <b>${p.name}</b> (${p.pos})</span>
-                            <button onclick="BriefcaseUI.toBoard(${p.id})" style="background:var(--success-green); border:none; color:white; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold;">AUFS FELD</button>
-                        </div>
-                    `).join('')}
-                </div>
-                <div style="margin-top:30px; padding:20px; border:1px dashed #444; border-radius:15px; text-align:center;">
-                    <p style="color:var(--text-muted);">+ Weiteren Spieler hinzufügen (Coming Soon)</p>
-                </div>
+window.BriefcaseUI.renderSport = function(container) {
+    container.innerHTML = `
+        <div class="animate-fadeIn">
+            <h2 style="color:var(--accent-orange); margin-bottom:20px;">👟 Sporttasche</h2>
+            
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <button onclick="BriefcaseUI.renderKaderSub()" class="vibe-btn active">KADERLISTE</button>
+                <button onclick="BriefcaseUI.renderTrainingBook()" class="vibe-btn">TRAININGSBUCH</button>
             </div>
-        `;
-    },
+            
+            <div id="sport-sub-content"></div>
+        </div>
+    `;
+    this.renderKaderSub(); // Startet mit der Kaderansicht
+};
 
-    // Sektor: Geschäftszimmer (Stadionzeitung) [cite: 2026-02-02]
-    renderOrga(container) {
-        container.innerHTML = `
-            <div class="animate-fadeIn" style="text-align:center; padding:40px;">
-                <div style="font-size:60px; margin-bottom:20px;">📰</div>
-                <h2 style="margin-bottom:10px;">STADIONZEITUNG EDITOR</h2>
-                <p style="color:var(--text-muted); margin-bottom:30px;">Erstelle das Matchday-Programm mit Tonis Taktik-Checks.</p>
-                <button onclick="window.Stadionzeitung.render()" style="background:white; color:black; border:none; padding:15px 40px; border-radius:30px; font-weight:bold; cursor:pointer;">REDAKTION ÖFFNEN</button>
+window.BriefcaseUI.renderTrainingBook = function() {
+    const target = document.getElementById('sport-sub-content');
+    const level = ToniAI.config.niveau || 'Basis'; // Nutzt das erkannte Niveau [cite: 2026-01-29]
+
+    target.innerHTML = `
+        <div class="animate-fadeIn">
+            <div style="background:rgba(0,209,255,0.05); border:1px solid var(--data-cyan); padding:20px; border-radius:15px; margin-bottom:20px;">
+                <h4 style="color:var(--data-cyan); margin-bottom:10px;">AKTUELLER FOKUS: ${ToniAI.config.goal || 'Allgemein'}</h4>
+                <p style="font-size:12px; color:var(--text-muted);">Niveau: ${level} // Taktik-Vorgabe: Jogo Bonito [cite: 2026-01-25, 2026-01-29]</p>
             </div>
-        `;
-    },
 
-    // Schickt Spieler auf das Board [cite: 2026-01-23, 2026-01-24]
-    toBoard(id) {
-        const player = this.kader.find(p => p.id === id);
-        if (player && !arena.players.find(ap => ap.id === id)) {
-            arena.players.push({ ...player });
-            ToniAI.speak(`${player.name} ist jetzt auf seiner Position bereit.`); [cite: 2026-01-26]
-            this.toggle(); // Schließt den Koffer automatisch
-        }
-    }
+            <button onclick="BriefcaseUI.generateDrill()" class="login-btn" style="margin-bottom:20px;">
+                ✨ ÜBUNG VORSCHLAGEN (AI GENERATED)
+            </button>
+
+            <div id="drill-output" class="hidden"></div>
+        </div>
+    `;
+};
+
+window.BriefcaseUI.generateDrill = function() {
+    const output = document.getElementById('drill-output');
+    output.classList.remove('hidden');
+    
+    // Übung basierend auf Niveau und brasilianischem Style [cite: 2026-01-25, 2026-01-29]
+    const drill = {
+        title: "Rondo-Ginga: 4 gegen 2 auf engstem Raum",
+        description: "Maximale Technik und Spielfreude. Die roten Spieler (Heim) müssen den Ball mit maximal zwei Kontakten halten, während die blauen (Gegner) pressen [cite: 2026-01-25].",
+        coaching: "Fokus auf die Hüftbewegung (Ginga) beim Passspiel. Schnellere Ballzirkulation als beim letzten Mal, Björn!" [cite: 2026-01-24, 2026-01-25]
+    };
+
+    output.innerHTML = `
+        <div class="toni-speech-bubble" style="background:rgba(255,255,255,0.02);">
+            <strong style="color:var(--accent-orange); display:block; margin-bottom:10px;">${drill.title}</strong>
+            <p style="font-size:13px; line-height:1.5;">${drill.description}</p>
+            <div class="toni-argument" style="margin-top:15px;">
+                <b>COACHING-POINT:</b> ${drill.coaching}
+            </div>
+        </div>
+    `;
+    
+    ToniAI.speak(`Björn, ich habe eine Übung für das ${ToniAI.config.niveau}-Niveau erstellt. Wir trainieren heute die brasilianische Technik im ${arena.mode}-Modus.`); [cite: 2026-01-24, 2026-01-26, 2026-01-29]
 };
