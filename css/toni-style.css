@@ -1,10 +1,8 @@
 /**
  * =========================================
- * TONI 2.0 – THE GLOBAL MASTER STYLE (V2)
- * Clean Layout & Briefcase Grid
+ * TONI 2.0 – THE GLOBAL MASTER STYLE (FIXED)
  * =========================================
  */
-
 :root {
     --bg-deep: #0B1220;
     --panel-warm: #1A2233;
@@ -13,20 +11,74 @@
     --text-white: #FFFFFF;
 }
 
-/* --- HORIZONTALE STEUERUNG (Cockpit-Look) --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: var(--bg-deep) !important;
+    color: var(--text-white);
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    grid-template-columns: 80px 1fr 340px; /* Sidebar | Spielfeld | Analyse */
+    overflow: hidden;
+}
+
+/* SIDEBAR FIX */
+.sidebar {
+    background: #080E1A;
+    border-right: 1px solid rgba(255, 106, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    height: 100%;
+}
+
+.nav-icon {
+    width: 50px; height: 50px;
+    margin-bottom: 25px;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer; border-radius: 12px;
+    font-size: 24px; color: #667085;
+    transition: 0.3s;
+    border: 1px solid transparent;
+}
+
+.nav-icon.active {
+    color: var(--accent-orange);
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 15px rgba(255, 106, 0, 0.3);
+}
+
+/* STAGE & CANVAS FIX (Das war das Problem im Screenshot) */
+#stage { 
+    position: relative; 
+    height: 100%; 
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#main-canvas { 
+    flex-grow: 1;
+    width: 100% !important; 
+    height: 100% !important; 
+    display: block;
+}
+
+/* COCKPIT BAR */
 .tools-overlay {
     position: absolute;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    flex-direction: row; /* Wichtig: Horizontal nebeneinander! */
-    gap: 12px;
-    background: rgba(11, 18, 32, 0.8);
-    backdrop-filter: blur(15px);
-    padding: 8px 15px;
+    gap: 10px;
+    background: rgba(11, 18, 32, 0.9);
+    padding: 10px 20px;
     border-radius: 40px;
-    border: 1px solid rgba(0, 209, 255, 0.2);
+    border: 1px solid var(--accent-orange);
     z-index: 100;
 }
 
@@ -39,55 +91,39 @@
     font-size: 11px;
     font-weight: bold;
     cursor: pointer;
+}
+
+/* ANALYSIS PANEL */
+.analysis-panel {
+    background: var(--panel-warm);
+    border-left: 1px solid rgba(0, 209, 255, 0.2);
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.analysis-panel h2 {
+    color: var(--data-cyan);
+    font-size: 18px;
     text-transform: uppercase;
-    transition: 0.3s;
+    margin-bottom: 20px;
 }
 
-.tool-btn:hover {
-    background: var(--accent-orange);
-    color: white;
-    box-shadow: 0 0 15px rgba(255, 106, 0, 0.4);
-}
-
-/* --- AKTENTASCHE ASSET GRID --- */
+/* ASSET GRID */
 .asset-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 20px;
-    padding: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
 }
 
 .asset-card {
-    background: rgba(26, 34, 51, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
     text-align: center;
     cursor: pointer;
-    transition: 0.3s;
+    border: 1px solid transparent;
 }
 
-.asset-card:hover {
-    border-color: var(--data-cyan);
-    transform: translateY(-5px);
-    background: rgba(0, 209, 255, 0.05);
-}
-
-.asset-icon {
-    font-size: 32px;
-    margin-bottom: 10px;
-}
-
-.asset-label {
-    font-size: 13px;
-    font-weight: bold;
-    color: var(--text-white);
-}
-
-.asset-tag {
-    font-size: 10px;
-    color: var(--data-cyan);
-    text-transform: uppercase;
-    display: block;
-    margin-top: 5px;
-}
+.asset-card:hover { border-color: var(--data-cyan); }
