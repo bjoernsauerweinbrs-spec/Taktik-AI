@@ -1,79 +1,43 @@
-// =========================================
-// Toni 2.0 – Drag & Drop Engine
-// Spieler bewegen per Maus oder Touch
-// =========================================
+// engine/dragdrop.js - VOLLSTÄNDIG OHNE EXPORT
+(function() {
+    let draggedPlayer = null;
 
-let dragState = {
-    active: false,
-    player: null,
-    offsetX: 0,
-    offsetY: 0
-};
+    function initDragDrop() {
+        const canvas = document.getElementById('arena-canvas');
+        if (!canvas) return;
 
-// -----------------------------------------
-// Event Listener initialisieren
-// -----------------------------------------
-window.addEventListener("mousedown", startDrag);
-window.addEventListener("mousemove", dragMove);
-window.addEventListener("mouseup", endDrag);
-
-window.addEventListener("touchstart", startDrag, { passive: false });
-window.addEventListener("touchmove", dragMove, { passive: false });
-window.addEventListener("touchend", endDrag);
-
-// -----------------------------------------
-// Drag starten
-// -----------------------------------------
-function startDrag(e) {
-    const pos = getPointerPosition(e);
-
-    const player = getPlayerAtPosition(pos.x, pos.y);
-    if (!player) return;
-
-    dragState.active = true;
-    dragState.player = player;
-    dragState.offsetX = pos.x - player.x;
-    dragState.offsetY = pos.y - player.y;
-
-    e.preventDefault();
-}
-
-// -----------------------------------------
-// Drag bewegen
-// -----------------------------------------
-function dragMove(e) {
-    if (!dragState.active || !dragState.player) return;
-
-    const pos = getPointerPosition(e);
-
-    dragState.player.x = pos.x - dragState.offsetX;
-    dragState.player.y = pos.y - dragState.offsetY;
-
-    renderArena();
-    e.preventDefault();
-}
-
-// -----------------------------------------
-// Drag beenden
-// -----------------------------------------
-function endDrag() {
-    dragState.active = false;
-    dragState.player = null;
-}
-
-// -----------------------------------------
-// Maus- oder Touch-Position ermitteln
-// -----------------------------------------
-function getPointerPosition(e) {
-    let x, y;
-
-    if (e.touches && e.touches.length > 0) {
-        x = e.touches[0].clientX;
-        y = e.touches[0].clientY;
-    } else {
-        x = e.clientX;
-        y = e.clientY;
+        canvas.addEventListener('mousedown', startDrag);
+        canvas.addEventListener('mousemove', doDrag);
+        canvas.addEventListener('mouseup', stopDrag);
+        console.log("🖱️ Drag & Drop bereit.");
     }
 
-    return { x, y };
-}
+    function startDrag(e) {
+        const rect = arena.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        // Nutze PlayerEngine aus players.js
+        draggedPlayer = PlayerEngine.findPlayerAt(x, y);
+        if (draggedPlayer) {
+            console.log("Spieler gepackt:", draggedPlayer.name);
+        }
+    }
+
+    function doDrag(e) {
+        if (!draggedPlayer) return;
+        const rect = arena.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        draggedPlayer.x = x;
+        draggedPlayer.y = y;
+        arena.render();
+    }
+
+    function stopDrag() {
+        draggedPlayer = null;
+    }
+
+    window.initDragDrop = initDragDrop;
+})();
