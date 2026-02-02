@@ -1,57 +1,83 @@
+/**
+ * TONI 2.0 – INTELLIGENCE & ONBOARDING
+ * Persona: Mix aus Klopp & Nagelsmann (Männlich, Energetisch, Taktik-Fokus)
+ */
+
 (function() {
     window.ToniAI = {
-        config: { niveau: '', goal: '' },
+        userName: '',
 
-        // Simulation der globalen Informationsbeschaffung
-        async fetchGlobalIntel() {
-            console.log("🌐 Toni scannt: DFB-Akademie, CBF Brasil, Premier League Insights...");
-            return new Promise(r => setTimeout(r, 1200));
+        // Sprachausgabe (Männliche Stimme)
+        say(text) {
+            if ('speechSynthesis' in window) {
+                const msg = new SpeechSynthesisUtterance(text);
+                const voices = window.speechSynthesis.getVoices();
+                // Versuche eine deutsche männliche Stimme zu finden
+                msg.voice = voices.find(v => v.lang === 'de-DE' && (v.name.includes('Male') || v.name.includes('Google'))) || voices[0];
+                msg.pitch = 0.9; // Etwas tiefer für Nagelsmann-Vibe
+                msg.rate = 1.0; 
+                window.speechSynthesis.speak(msg);
+            }
         },
 
-        async speak(text, options = []) {
+        async speak(text, htmlContent = "") {
             const container = document.getElementById('setcard-content');
-            let actionHtml = options.map(opt => `<button class="tool-btn" onclick="${opt.action}">${opt.label}</button>`).join('');
-            
             container.innerHTML = `
-                <div class="toni-speech-bubble">
-                    <div style="color:var(--data-cyan); font-size:9px; font-weight:900; letter-spacing:2px; margin-bottom:10px;">TONI // AI CO-TRAINER</div>
-                    <div style="font-size:14px; line-height:1.6;">${text}</div>
-                    <div style="margin-top:20px;">${actionHtml}</div>
+                <div class="toni-speech-bubble animate-fadeIn">
+                    <div class="toni-badge">TONI // CO-TRAINER AI</div>
+                    <div class="toni-text">${text}</div>
+                    <div id="toni-interaction-area">${htmlContent}</div>
                 </div>
             `;
+            this.say(text.replace(/<[^>]*>/g, '')); // Spricht den reinen Text
         },
 
-        async startOnboarding() {
-            await this.fetchGlobalIntel();
-            this.speak(
-                "Bom dia, Björn! Ich habe mich gerade weltweit über die neuesten Trainingsmethoden erkundigt. Mein System ist bereit. Bevor wir starten: Auf welchem Niveau trainierst du heute?",
-                [
-                    { label: "Profi / U19 Elite", action: "ToniAI.setLevel('Profi')" },
-                    { label: "Leistungsbereich", action: "ToniAI.setLevel('Leistung')" },
-                    { label: "Breitensport / Kids", action: "ToniAI.setLevel('Basis')" }
-                ]
-            );
+        // Schritt 1: Die Begrüßung
+        startGreeting() {
+            const introText = "Hallo! Ich bin Toni, dein persönlicher Co-Trainer. Ich stehe dir in der täglichen Arbeit eines Trainers oder Managers zur Seite, um Weltklasse-Lösungen zu finden. Wie ist dein Name?";
+            const html = `
+                <div style="margin-top:15px; display:flex; gap:10px;">
+                    <input id="trainer-name-input" type="text" placeholder="Dein Name..." style="flex:1; padding:10px; border-radius:8px; border:none; background:#0B1220; color:white;">
+                    <button class="tool-btn" onclick="ToniAI.handleName()" style="width:auto; margin:0; background:var(--data-cyan); color:black;">OK</button>
+                </div>
+            `;
+            this.speak(introText, html);
         },
 
-        setLevel(lvl) {
-            this.config.niveau = lvl;
-            this.speak(
-                `Hervorragend, ${lvl}-Niveau. Und was ist unser primärer Fokus für die heutige Taktik-Session?`,
-                [
-                    { label: "Taktische Disziplin", action: "ToniAI.finishSetup('Taktik')" },
-                    { label: "Funinho & Spielintelligenz", action: "ToniAI.finishSetup('Funinho')" },
-                    { label: "Brasilianischer Style / Technik", action: "ToniAI.finishSetup('Style')" }
-                ]
-            );
+        // Schritt 2: Kennenlernen & Erklärung
+        handleName() {
+            const name = document.getElementById('trainer-name-input').value;
+            if(!name) return;
+            this.userName = name;
+            const text = `Schön dich kennenzulernen, ${this.userName}! Lass uns direkt auf den Platz gehen. Ich erkläre dir kurz, was das KI-Taktikboard und Toni 2.0 für dich tun können.`;
+            const html = `<button class="tool-btn" onclick="ToniAI.explainCapabilities()">WAS KANNST DU?</button>`;
+            this.speak(text, html);
         },
 
-        finishSetup(goal) {
-            this.config.goal = goal;
-            localStorage.setItem('toni2_trainer_profile', JSON.stringify(this.config));
-            this.speak(
-                "Alles klar, Björn. Hier ist dein Briefing für das Board:<br><br>● <b>Rote Spieler:</b> Dein Team. Bewege sie frei.<br>● <b>Blaue Spieler:</b> Der Gegner. Ich simuliere ihre Reaktion.<br>● <b>Spielfeld:</b> Nutze die 16m-Zonen für das Stellungsspiel.<br><br>Lass uns gewinnen!",
-                [{ label: "VERSTANDEN - ZUR ZENTRALE", action: "BriefcaseUI.toggle()" }]
-            );
+        // Schritt 3: Die Fähigkeiten
+        explainCapabilities() {
+            const text = "Toni 2.0 ist dein digitales Cockpit. Du kannst hier dein komplettes Training planen, Übungen aus meiner globalen Datenbank ziehen und deine Spieltags-Taktik bis ins Detail simulieren. Ich analysiere die Belastung deiner Spieler in Echtzeit, damit wir am Wochenende mit maximaler Intensität pressen können!";
+            const html = `<button class="tool-btn" onclick="ToniAI.explainStorage()">WO WERDEN MEINE DATEN GESPEICHERT?</button>`;
+            this.speak(text, html);
+        },
+
+        // Schritt 4: Lokale Speicherung
+        explainStorage() {
+            const text = "Ganz wichtig: Deine Privatsphäre hat Priorität. Alles, was wir hier erarbeiten – dein Kader, deine Taktiken, deine Notizen – wird ausschließlich lokal auf deinem Gerät gespeichert. Kein Cloud-Zwang, volle Kontrolle für dich.";
+            const html = `<button class="tool-btn" onclick="ToniAI.finalCall()">STARTEN WIR!</button>`;
+            this.speak(text, html);
+        },
+
+        // Schritt 5: Start-Auswahl
+        finalCall() {
+            const text = `Womit wollen wir heute starten, ${this.userName}? Du kannst dich entweder selbst durch die Zentrale klicken, oder du sagst mir einfach, was du machen willst – dann öffne ich die entsprechende Seite für dich.`;
+            const html = `
+                <div style="display:grid; grid-template-columns:1fr; gap:10px;">
+                    <button class="tool-btn" onclick="BriefcaseUI.toggle()">KLICK-MODUS (ZENTRALE ÖFFNEN)</button>
+                    <button class="tool-btn" style="border-color:var(--accent-orange);" onclick="alert('Sprachsteuerung aktiviert...')">SAGEN, WAS ICH WILL (VOICE)</button>
+                </div>
+            `;
+            this.speak(text, html);
         }
     };
 })();
