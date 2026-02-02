@@ -4,7 +4,7 @@
     --accent-orange: #FF6A00;
     --data-cyan: #00D1FF;
 }
-
+ 
 body.pro-layout {
     margin: 0; padding: 0; background: var(--bg-deep); color: white;
     display: grid; grid-template-columns: 100px 1fr 350px; /* SIDEBAR | ARENA | ANALYSE */
