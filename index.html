@@ -1,61 +1,30 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>TONI 2.0 — High-Class Coaching OS</title>
+    <meta charset="UTF-8"><title>TONI 2.0 — Coaching OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body>
-
-    <aside class="sidebar-minimal">
-        <div class="main-briefcase-btn" onclick="BriefcaseUI.toggle()">
-            <div style="font-size:35px;">💼</div>
-            <span style="font-size:10px; font-weight:bold;">ZENTRALE</span>
-        </div>
-    </aside>
-
+    <aside class="sidebar-minimal"><div class="main-briefcase-btn" onclick="BriefcaseUI.toggle()">💼<br><small>ZENTRALE</small></div></aside>
     <main id="stage">
-        <div class="tools-overlay">
-            <button class="tool-btn" onclick="arena.setMode('standard')">STANDARD</button>
-            <button class="tool-btn" onclick="arena.setMode('funinho')">FUNINHO</button>
-        </div>
-        <canvas id="main-canvas"></canvas>
-        <div id="hologram-ui"></div>
+        <div class="tools-overlay"><button class="tool-btn" onclick="arena.setMode('standard')">Standard</button><button class="tool-btn" onclick="arena.setMode('funinho')">Funinho</button></div>
+        <canvas id="main-canvas"></canvas><div id="hologram-ui"></div>
     </main>
-
-    <aside class="analysis-panel">
-        <h2 style="color: var(--cyan); font-size: 14px; letter-spacing: 2px;">ANALYSEZENTRUM</h2>
-        <div id="setcard-content" style="margin-top: 25px;">
-            <p style="color: #667085; font-style: italic; text-align:center;">Spieler auf dem Feld berühren...</p>
+    <aside class="analysis-panel"><h2 style="color:var(--data-cyan); font-size:14px;">ANALYSEZENTRUM</h2><div id="setcard-content"><p style="color:#667085; font-style:italic;">Spieler wählen...</p></div></aside>
+    <div id="briefcase-overlay" class="briefcase-overlay hidden">
+        <div style="display:flex; justify-content:space-between; width:100%; max-width:1000px; margin-bottom:40px;">
+            <h1 style="color:var(--accent-orange);">ZENTRALE AKTENTASCHE</h1><button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:white; font-size:30px; cursor:pointer;">✕</button>
         </div>
-    </aside>
-
-    <div id="briefcase-overlay" class="briefcase-overlay" style="display:none;">
-        <div class="briefcase-header">
-            <h1 class="glow-text" style="color: var(--orange);">ZENTRALE AKTENTASCHE</h1>
-            <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:white; font-size:30px; cursor:pointer;">✕</button>
-        </div>
-        
         <div class="folder-grid" id="briefcase-main-nav">
-            <div class="folder-item" onclick="BriefcaseUI.switchSektor('sporttasche')">👟 <h3>Sporttasche</h3><span>Kader, Training, Plan</span></div>
-            <div class="folder-item" onclick="BriefcaseUI.switchSektor('medical')">⌚ <h3>Medical Hub</h3><span>Bio-Metriken</span></div>
-            <div class="folder-item" onclick="BriefcaseUI.switchSektor('orga')">🏢 <h3>Geschäftszimmer</h3><span>Redaktion</span></div>
+            <div class="nav-card" onclick="BriefcaseUI.switchSektor('sporttasche')">👟 <h3>Sporttasche</h3></div>
+            <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')">🏢 <h3>Geschäftszimmer</h3></div>
         </div>
-
-        <div id="briefcase-content" class="hidden" style="width:100%; max-width:900px; margin-top:40px;">
-            <button onclick="BriefcaseUI.backToMain()" style="color: var(--cyan); cursor:pointer; background:none; border:none; font-weight:bold; margin-bottom:20px;">← ZURÜCK</button>
-            <div id="active-sektor-content"></div>
+        <div id="briefcase-content" class="hidden" style="width:100%; max-width:1000px;">
+            <button onclick="document.getElementById('briefcase-main-nav').classList.remove('hidden'); document.getElementById('briefcase-content').classList.add('hidden');">← Zurück</button>
+            <div id="active-sektor-content" style="margin-top:30px;"></div>
         </div>
     </div>
-
-    <script src="engine/arena.js"></script>
-    <script src="ui/stadionzeitung-ui.js"></script>
-    <script src="ui/briefcase-ui.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => { 
-            arena.init('main-canvas'); 
-            BriefcaseUI.init();
-        });
-    </script>
+    <script src="engine/arena.js"></script><script src="ui/stadionzeitung-ui.js"></script><script src="ui/briefcase-ui.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', () => { arena.init('main-canvas'); BriefcaseUI.init(); });</script>
 </body>
 </html>
