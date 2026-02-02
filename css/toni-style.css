@@ -1,6 +1,5 @@
 /**
- * TONI 2.0 – THE GLOBAL MASTER STYLE (TOTAL FINISH)
- * Projekt: Björn's Tactical OS
+ * TONI 2.0 – MASTER STYLE
  */
 :root {
     --bg-deep: #0B1220;
@@ -9,7 +8,6 @@
     --data-cyan: #00D1FF;
     --success-green: #28C76F;
     --text-muted: #667085;
-    --glass: rgba(26, 34, 51, 0.9);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,82 +15,45 @@
 body {
     background-color: var(--bg-deep);
     color: white;
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Inter', sans-serif;
     height: 100vh; width: 100vw;
     display: grid;
-    grid-template-columns: 80px 1fr 340px; /* Sidebar | Arena | Analyse */
+    grid-template-columns: 80px 1fr 340px; 
     overflow: hidden;
 }
 
-/* SIDEBAR & NAV */
-.sidebar-minimal {
-    background: #080E1A; border-right: 1px solid rgba(255,106,0,0.2);
-    display: flex; flex-direction: column; align-items: center; padding-top: 30px;
-}
-.main-briefcase-btn {
-    cursor: pointer; text-align: center; color: var(--accent-orange);
-    transition: 0.3s; padding: 15px; border-radius: 15px;
-}
-.main-briefcase-btn:hover { background: rgba(255,106,0,0.1); transform: scale(1.1); }
+/* SIDEBAR */
+.sidebar-minimal { background: #080E1A; border-right: 1px solid rgba(255,106,0,0.2); display: flex; flex-direction: column; align-items: center; padding-top: 30px; }
+.main-briefcase-btn { cursor: pointer; text-align: center; color: var(--accent-orange); padding: 15px; border-radius: 15px; }
 
-/* ARENA STAGE */
+/* ARENA */
 #stage { position: relative; width: 100%; height: 100%; background: radial-gradient(circle, #162033, #0B1220); }
-#main-canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+#main-canvas { display: block; width: 100%; height: 100%; }
 
-.tools-overlay {
-    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 10px; background: var(--glass);
-    padding: 10px 20px; border-radius: 40px; border: 1px solid var(--accent-orange);
-    backdrop-filter: blur(10px); z-index: 100;
-}
-
-/* ANALYSEZENTRUM & TONI SPEECH */
-.analysis-panel { background: var(--panel-warm); border-left: 1px solid rgba(0,209,255,0.1); padding: 25px; overflow-y: auto; }
-
+/* TONI SPEECH BUBBLE */
+.analysis-panel { background: var(--panel-warm); border-left: 1px solid rgba(0,209,255,0.1); padding: 25px; }
 .toni-speech-bubble {
     background: rgba(0, 209, 255, 0.05); border: 1px solid var(--data-cyan);
-    padding: 20px; border-radius: 15px; margin-bottom: 25px;
-    box-shadow: 0 10px 30px rgba(0, 209, 255, 0.1); animation: slideIn 0.5s ease;
+    padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 209, 255, 0.15);
 }
+.toni-badge { color: var(--data-cyan); font-size: 10px; font-weight: 900; letter-spacing: 2px; margin-bottom: 12px; }
+.toni-text { font-size: 15px; line-height: 1.6; color: #fff; }
 
 .tool-btn {
     background: transparent; border: 1px solid #444; color: white;
-    padding: 10px 15px; border-radius: 20px; cursor: pointer;
-    font-size: 11px; font-weight: bold; width: 100%; margin-top: 10px;
-    transition: 0.2s;
+    padding: 12px 15px; border-radius: 12px; cursor: pointer;
+    font-size: 12px; font-weight: bold; width: 100%; margin-top: 15px; transition: 0.3s;
 }
-.tool-btn:hover { border-color: var(--data-cyan); color: var(--data-cyan); }
+.tool-btn:hover { border-color: var(--data-cyan); color: var(--data-cyan); transform: scale(1.02); }
 
-/* BRIEFCASE OVERLAY */
-.briefcase-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(11,18,32,0.98); backdrop-filter: blur(30px);
-    z-index: 5000; display: flex; flex-direction: column; padding: 60px;
-}
+/* OVERLAYS */
+.briefcase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11,18,32,0.98); backdrop-filter: blur(30px); z-index: 5000; display: flex; flex-direction: column; padding: 60px; }
 .hidden { display: none !important; }
 
-.nav-card {
-    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1);
-    padding: 40px; border-radius: 25px; text-align: center; cursor: pointer;
-    transition: 0.3s;
-}
-.nav-card:hover { border-color: var(--accent-orange); background: rgba(255,106,0,0.05); transform: translateY(-5px); }
+/* ANIMATIONS */
+.animate-fadeIn { animation: fadeIn 0.6s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* STADIONZEITUNG PRO */
-.newspaper-container { width: 100%; max-width: 800px; margin: 0 auto; }
-.newspaper-page {
-    background: #fff; color: #1a1a1a; padding: 60px; min-height: 800px;
-    font-family: 'Georgia', serif; border-radius: 2px; box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-}
-.newspaper-page h1 { font-size: 50px; font-weight: 900; border-bottom: 5px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-
-/* HOLOGRAMM */
-#hologram-ui {
-    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-    width: 65px; height: 65px; border: 2px solid var(--data-cyan);
-    border-radius: 50%; box-shadow: 0 0 25px var(--data-cyan);
-    animation: pulse 2s infinite ease-in-out; cursor: pointer;
-}
-
-@keyframes pulse { 0% { opacity: 0.5; transform: translateX(-50%) scale(0.9); } 50% { opacity: 1; transform: translateX(-50%) scale(1.1); } 100% { opacity: 0.5; transform: translateX(-50%) scale(0.9); } }
-@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+/* SPIELFELD-LINIEN */
+#hologram-ui { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; border: 2px solid var(--data-cyan); border-radius: 50%; box-shadow: 0 0 20px var(--data-cyan); animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
