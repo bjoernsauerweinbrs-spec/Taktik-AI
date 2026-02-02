@@ -1,30 +1,93 @@
-/* Horizontaler Glas-Look für die Werkzeuge */
+/**
+ * =========================================
+ * TONI 2.0 – THE GLOBAL MASTER STYLE (V2)
+ * Clean Layout & Briefcase Grid
+ * =========================================
+ */
+
+:root {
+    --bg-deep: #0B1220;
+    --panel-warm: #1A2233;
+    --accent-orange: #FF6A00;
+    --data-cyan: #00D1FF;
+    --text-white: #FFFFFF;
+}
+
+/* --- HORIZONTALE STEUERUNG (Cockpit-Look) --- */
 .tools-overlay {
     position: absolute;
     top: 20px;
     left: 50%;
-    transform: translateX(-50%); /* Zentriert über dem Spielfeld */
+    transform: translateX(-50%);
     display: flex;
-    flex-direction: row; /* Horizontal statt vertikal */
-    gap: 15px;
-    background: rgba(11, 18, 32, 0.7);
+    flex-direction: row; /* Wichtig: Horizontal nebeneinander! */
+    gap: 12px;
+    background: rgba(11, 18, 32, 0.8);
     backdrop-filter: blur(15px);
-    padding: 10px 20px;
-    border-radius: 50px; /* Abgerundeter Capsule-Look */
-    border: 1px solid rgba(0, 209, 255, 0.3);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    padding: 8px 15px;
+    border-radius: 40px;
+    border: 1px solid rgba(0, 209, 255, 0.2);
+    z-index: 100;
 }
 
 .tool-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 106, 0, 0.3);
+    color: var(--accent-orange);
+    padding: 6px 14px;
     border-radius: 20px;
-    padding: 8px 18px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    border: 1px solid transparent;
-    transition: 0.3s all ease;
+    transition: 0.3s;
 }
 
 .tool-btn:hover {
+    background: var(--accent-orange);
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 106, 0, 0.4);
+}
+
+/* --- AKTENTASCHE ASSET GRID --- */
+.asset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.asset-card {
+    background: rgba(26, 34, 51, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.asset-card:hover {
     border-color: var(--data-cyan);
-    background: rgba(0, 209, 255, 0.1);
+    transform: translateY(-5px);
+    background: rgba(0, 209, 255, 0.05);
+}
+
+.asset-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.asset-label {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text-white);
+}
+
+.asset-tag {
+    font-size: 10px;
+    color: var(--data-cyan);
+    text-transform: uppercase;
+    display: block;
+    margin-top: 5px;
 }
