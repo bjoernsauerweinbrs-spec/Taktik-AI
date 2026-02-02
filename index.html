@@ -1,93 +1,33 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <title>TONI 2.0 — Tactical Hub</title>
-    <link rel="stylesheet" href="css/toni-style.css">
-</head>
-<body>
-
-    <aside class="sidebar-minimal">
-        <div class="main-briefcase-btn" onclick="toggleBriefcase()">
-            <div style="font-size:35px;">💼</div>
-            <span style="font-size:10px; font-weight:bold; letter-spacing:1px; margin-top:5px;">ZENTRALE</span>
-        </div>
-    </aside>
-
-    <main id="stage">
-        <div class="tools-overlay">
-            <button class="tool-btn" onclick="arena.setMode('standard')">STANDARD-MODE</button>
-            <button class="tool-btn" onclick="arena.setMode('funinho')">FUNINHO-MODE</button>
-        </div>
-        <canvas id="main-canvas"></canvas>
-        <div id="hologram-ui"></div>
-    </main>
-
-    <aside class="analysis-panel" id="side-analysis">
-        <h2 style="color: var(--data-cyan); font-size: 14px; letter-spacing: 2px; border-bottom: 1px solid rgba(0,209,255,0.1); padding-bottom:15px;">ANALYSEZENTRUM</h2>
-        <div id="setcard-content" style="margin-top: 25px;">
-            <p style="color: #667085; font-style: italic; font-size: 13px; text-align:center;">Spieler auf dem Feld berühren...</p>
-        </div>
-    </aside>
-
-    <div id="briefcase-overlay" class="briefcase-overlay hidden">
-        <button onclick="toggleBriefcase()" style="position:absolute; top:40px; right:40px; background:none; border:none; color:white; font-size:35px; cursor:pointer;">✕</button>
-        <h1 style="color: var(--accent-orange); letter-spacing: 8px;">ZENTRALE AKTENTASCHE</h1>
-        
-        <div class="folder-grid" id="main-folders">
-            <div class="folder-item" onclick="openSub('sport')">
-                <div style="font-size:55px;">👟</div>
-                <h3 style="margin-top:15px;">Sporttasche</h3>
-                <span style="font-size:11px; color:var(--data-cyan);">KADER & TRAINING</span>
-            </div>
-            <div class="folder-item" onclick="openSub('medical')">
-                <div style="font-size:55px;">⌚</div>
-                <h3 style="margin-top:15px;">Medical Hub</h3>
-                <span style="font-size:11px; color:var(--data-cyan);">BIO & ERNÄHRUNG</span>
-            </div>
-            <div class="folder-item" onclick="openSub('orga')">
-                <div style="font-size:55px;">🏢</div>
-                <h3 style="margin-top:15px;">Geschäftszimmer</h3>
-                <span style="font-size:11px; color:var(--data-cyan);">REDAKTION & MEDIA</span>
-            </div>
-            <div class="folder-item" onclick="alert('KI-Archiv wird geladen...')">
-                <div style="font-size:55px;">📊</div>
-                <h3 style="margin-top:15px;">Analyse</h3>
-                <span style="font-size:11px; color:var(--data-cyan);">HISTORIE</span>
-            </div>
-        </div>
-
-        <div id="sub-view" class="hidden" style="width:100%; max-width:900px; margin-top:40px;">
-            <button onclick="closeSub()" style="color: var(--data-cyan); cursor:pointer; background:none; border:none; margin-bottom:20px; font-weight:bold;">← ZURÜCK</button>
-            <div id="sub-content"></div>
-        </div>
-    </div>
-
-    <script src="engine/arena.js"></script>
-    <script src="ui/stadionzeitung-ui.js"></script>
-    <script src="ui/briefcase-ui.js"></script>
-    
-    <script>
-        function toggleBriefcase() { document.getElementById('briefcase-overlay').classList.toggle('hidden'); }
-        
-        function openSub(type) {
-            document.getElementById('main-folders').classList.add('hidden');
-            document.getElementById('sub-view').classList.remove('hidden');
-            if(type === 'sport') window.BriefcaseUI.renderSport();
-            if(type === 'medical') window.BriefcaseUI.renderMedical();
-            if(type === 'orga') window.BriefcaseUI.renderOrga();
-        }
-
-        function closeSub() {
-            document.getElementById('main-folders').classList.remove('hidden');
-            document.getElementById('sub-view').classList.add('hidden');
-        }
-
-        document.addEventListener('DOMContentLoaded', () => { 
-            arena.init('main-canvas'); 
-            // Automatische Kader-Synchronisierung
-            BriefcaseUI.initKader();
-        });
-    </script>
-</body>
-</html>
+(function() {
+    window.Stadionzeitung = {
+        draft: { title: "MATCHDAY REPORT", opponent: "Gegner FC", blocks: [] },
+        init() {
+            const saved = localStorage.getItem('toni2_stadionzeitung');
+            if (saved) this.draft = JSON.parse(saved);
+            else this.createInitialTemplate();
+        },
+        createInitialTemplate() {
+            this.draft.blocks = [{ id: 1, type: 'cover', content: 'FOKUS AUF DEN SIEG' }];
+            this.save();
+        },
+        save() { localStorage.setItem('toni2_stadionzeitung', JSON.stringify(this.draft)); },
+        render() {
+            const target = document.getElementById('sub-content');
+            if(!target) return;
+            target.innerHTML = `
+                <div class="newspaper-editor">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                        <h2 style="color:var(--accent-orange);">📰 REDAKTION</h2>
+                        <button onclick="Stadionzeitung.exportPDF()" class="tool-btn" style="background:var(--success-green); color:white;">💾 PDF SPEICHERN</button>
+                    </div>
+                    <div class="newspaper-canvas">
+                        <h1 contenteditable="true">${this.draft.title}</h1>
+                        ${this.draft.blocks.map(b => `<div class="page-block" contenteditable="true">${b.content}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+        },
+        exportPDF() { window.print(); }
+    };
+    window.Stadionzeitung.init();
+})();
