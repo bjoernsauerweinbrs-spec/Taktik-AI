@@ -1,57 +1,43 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>TONI 2.0 — Pro Tactical OS</title>
+    <meta charset="UTF-8"><title>TONI 2.0 — Login</title>
     <link rel="stylesheet" href="css/toni-style.css">
 </head>
 <body>
-    <aside class="sidebar-minimal">
-        <div class="main-briefcase-btn" onclick="BriefcaseUI.toggle()">💼</div>
-    </aside>
 
+    <div id="login-screen">
+        <div class="login-box">
+            <h1>TONI 2.0</h1>
+            <p>TACTICAL INTELLIGENCE // LOGIN</p>
+            <input id="password-input" type="password" class="login-input" placeholder="Passwort">
+            <input id="api-key-input" type="password" class="login-input" placeholder="Dein API-Key (OpenAI/Gemini)">
+            <button class="login-btn" onclick="ToniAI.handleLogin()">SYSTEM STARTEN</button>
+        </div>
+    </div>
+
+    <aside class="sidebar-minimal"><div class="main-briefcase-btn" onclick="BriefcaseUI.toggle()">💼</div></aside>
     <main id="stage">
         <canvas id="main-canvas"></canvas>
         <div id="hologram-ui"></div>
     </main>
-
-    <aside class="analysis-panel" id="side-analysis">
-        <div id="setcard-content">
-            </div>
-    </aside>
+    <aside class="analysis-panel" id="side-analysis"><div id="setcard-content"></div></aside>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
-        <div style="display:flex; justify-content:space-between; width:100%; max-width:1000px; margin-bottom:40px;">
+        <div style="display:flex; justify-content:space-between; width:100%; max-width:1000px;">
             <h1 style="color:var(--accent-orange);">ZENTRALE AKTENTASCHE</h1>
             <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:white; font-size:30px; cursor:pointer;">✕</button>
         </div>
-        <div id="briefcase-nav" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:20px; width:100%; max-width:1000px;">
-            <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')"><h3>Sporttasche</h3></div>
-            <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')"><h3>Geschäftszimmer</h3></div>
         </div>
-        <div id="briefcase-content" class="hidden" style="width:100%; max-width:1000px;">
-            <button onclick="document.getElementById('briefcase-nav').classList.remove('hidden'); document.getElementById('briefcase-content').classList.add('hidden');" style="color:var(--data-cyan); background:none; border:none; cursor:pointer; font-weight:bold;">← ZURÜCK</button>
-            <div id="active-content"></div>
-        </div>
-    </div>
 
     <script src="engine/arena.js"></script>
-    <script src="ui/stadionzeitung-ui.js"></script>
-    <script src="ui/briefcase-ui.js"></script>
+    <script src="engine/toni-brain.js"></script>
     <script src="engine/toni-ai.js"></script>
-    
+    <script src="ui/briefcase-ui.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => { 
-            // 1. Spielfeld laden
-            if(window.arena) arena.init('main-canvas'); 
-            // 2. Koffer initialisieren
-            if(window.BriefcaseUI) BriefcaseUI.init();
-            // 3. Toni AI starten
-            if(window.ToniAI && typeof ToniAI.init === 'function') {
-                ToniAI.init();
-            } else {
-                console.error("❌ ToniAI.init konnte nicht gefunden werden.");
-            }
+            arena.init('main-canvas'); 
+            ToniAI.init();
         });
     </script>
 </body>
