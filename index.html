@@ -19,22 +19,19 @@
 
     <aside class="sidebar-minimal">
         <div class="sidebar-content">
-            <div class="control-unit" onclick="BriefcaseUI.toggle()" title="Zentrale">
-                <div class="icon">💼</div>
-                <span>ZENTRALE</span>
+            <div class="control-unit" onclick="BriefcaseUI.toggle()" style="cursor:pointer; margin-bottom:40px;">
+                <div style="font-size:32px;">💼</div>
+                <span style="font-size:10px; font-weight:bold;">ZENTRALE</span>
             </div>
-            <div id="voice-trigger-btn" class="control-unit" onclick="ToniAI.toggleListening()" title="Sprachbefehl">
-                <div class="icon">🎤</div>
-                <span id="mic-status-label">AUS</span>
+            <div id="voice-trigger-btn" class="control-unit" onclick="ToniAI.toggleListening()" style="cursor:pointer;">
+                <div style="font-size:32px;">🎤</div>
+                <span id="mic-status-label" style="font-size:10px; font-weight:bold;">AUS</span>
             </div>
         </div>
     </aside>
 
     <main id="stage"><canvas id="main-canvas"></canvas></main>
-
-    <aside class="analysis-panel" id="side-analysis">
-        <div id="setcard-content"></div>
-    </aside>
+    <aside class="analysis-panel"><div id="setcard-content"></div></aside>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
@@ -58,7 +55,6 @@
     <script src="engine/toni-ai.js"></script>
     
     <script>
-        // AUTH DIREKT HIER FÜR MAXIMALE STABILITÄT
         window.ToniAuth = {
             init() {
                 const key = localStorage.getItem('toni2_api_key');
@@ -69,7 +65,7 @@
                     localStorage.setItem('toni2_api_key', document.getElementById('api-key-input').value);
                     document.getElementById('login-screen').classList.add('hidden');
                     if(window.ToniAI) ToniAI.init();
-                } else { alert("Falsches Passwort!"); }
+                } else { alert("Passwort inkorrekt!"); }
             }
         };
         document.addEventListener('DOMContentLoaded', () => { 
