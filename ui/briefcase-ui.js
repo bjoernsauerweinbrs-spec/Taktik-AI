@@ -107,7 +107,11 @@ window.BriefcaseUI = {
 
     handleClubLogo: function(e) {
         const reader = new FileReader();
-        reader.onload = (ex) => { this.clubData.logo = ex.target.result; };
+        reader.onload = (ex) => { 
+            this.clubData.logo = ex.target.result; 
+            localStorage.setItem('toni_club_config', JSON.stringify(this.clubData));
+            this.renderSystem();
+        };
         reader.readAsDataURL(e.target.files[0]);
     },
 
@@ -119,7 +123,7 @@ window.BriefcaseUI = {
         if(window.ToniAI) ToniAI.speak("Daten gespeichert. Wir greifen jetzt in der " + this.clubData.league + " an, Coach!");
     },
 
-    // --- SPONSORING (CONSULTING) ---
+    // --- SPONSORING (CONSULTING HOENEß/WATZKE) ---
     renderSponsoring: function() {
         document.getElementById('active-content').innerHTML = `
             <div style="padding:15px;">
@@ -131,9 +135,6 @@ window.BriefcaseUI = {
                     <button class="tactic-btn" onclick="BriefcaseUI.askConsultant('preise')">PREIS-CHECK</button>
                     <button class="tactic-btn" onclick="BriefcaseUI.askConsultant('konzept')">AKQUISE-KONZEPT</button>
                 </div>
-                <div style="margin-top:20px; padding:10px; border:1px solid #333; font-size:0.65rem; color:#888;">
-                    Inventar: Trikot (Brust/Ärmel), Bandenwerbung, Spieltags-Präsentator, Stadionheft-Anzeigen.
-                </div>
             </div>`;
     },
 
@@ -141,7 +142,7 @@ window.BriefcaseUI = {
         const box = document.getElementById('consulting-box');
         box.innerHTML = "Analysiere Marktwerte...";
         let prompt = type === 'preise' 
-            ? `Kalkuliere realistische Werbepreise für die ${this.clubData.league} (Trikot, Heft, Banden). Sei präzise wie Uli Hoeneß.`
+            ? `Kalkuliere realistische Werbepreise für die ${this.clubData.league} (Trikot, Heft, Banden). Antworte als Manager Toni.`
             : `Erstelle ein Sponsoring-Akquise Konzept für den Verein ${this.clubData.name}.`;
         if(window.ToniAI) {
             ToniAI.processCommand(prompt);
@@ -152,66 +153,93 @@ window.BriefcaseUI = {
         }
     },
 
-    // --- STADIONHEFT (4 SEITEN HOCHGLANZ) ---
+    // --- STADIONMAGAZIN (4 SEITEN HIGH-END LAYOUT) ---
     renderTemplates: function() {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const topP = players.sort((a,b) => b.rating - a.rating)[0] || {name: "Profi"};
+        const topP = players.sort((a,b) => b.rating - a.rating)[0] || {name: "STAR-SPIELER", rating: 0};
         const currentMatch = JSON.parse(localStorage.getItem('toni_current_matchplan')) || { formation: '4-3-3' };
         
         document.getElementById('active-content').innerHTML = `
-            <div style="padding:10px;">
-                <h4 style="color:#fff; margin-bottom:15px;">MAGAZIN-EDITOR: ${this.clubData.name} INSIDE</h4>
-                <div id="magazin-container" style="background:#fff; color:#000; padding:40px; font-family:'Helvetica', sans-serif; overflow-y:auto; height:450px; border-radius:5px;">
-                    
-                    <div class="mag-page" style="height:550px; border:12px solid #000; padding:20px; position:relative; margin-bottom:60px; display:flex; flex-direction:column; justify-content:space-between;">
-                        <div>
-                            <div style="display:flex; justify-content:space-between;">
-                                <h1 style="font-size:3.5rem; font-weight:900; line-height:0.8; margin:0;">STADION<br>MAGAZIN</h1>
-                                ${this.clubData.logo ? `<img src="${this.clubData.logo}" style="height:70px;">` : `<div style="font-weight:900; border:4px solid #000; padding:5px;">FC TONI</div>`}
-                            </div>
-                            <h2 style="margin-top:20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:4px;">${this.clubData.name}</h2>
+            <style>
+                .mag-view { background: #222; padding: 20px; overflow-y: auto; height: 500px; }
+                .mag-page { 
+                    width: 148mm; height: 210mm; background: #fff; color: #000;
+                    margin: 0 auto 50px auto; box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+                    position: relative; overflow: hidden; display: flex; flex-direction: column;
+                }
+                .mag-header { height: 60%; background: #000; position: relative; color: #fff; overflow: hidden; }
+                .mag-logo-box { position: absolute; top: 30px; left: 30px; width: 100px; height: 100px; border: 4px solid #ff9500; background: #fff; z-index: 5; display: flex; align-items: center; justify-content: center; }
+                .mag-title { position: absolute; bottom: 20px; left: 20px; font-size: 5rem; font-weight: 900; line-height: 0.8; letter-spacing: -5px; }
+                .mag-sidebar { position: absolute; right: 0; top: 0; bottom: 0; width: 40px; background: #ff9500; writing-mode: vertical-rl; text-align: center; font-weight: 900; font-size: 0.8rem; color: #000; }
+                .mag-content { padding: 30px; flex-grow: 1; display: flex; flex-direction: column; }
+                .mag-pitch { height: 180px; background: #0b2d0b; border: 2px solid #fff; position: relative; border-radius: 5px; margin: 15px 0; }
+                @media print { .mag-view { background: none; padding: 0; } .mag-page { box-shadow: none; margin: 0; page-break-after: always; } }
+            </style>
+
+            <div class="mag-view">
+                <div class="mag-page">
+                    <div class="mag-header">
+                        <div class="mag-logo-box">
+                            ${this.clubData.logo ? `<img src="${this.clubData.logo}" style="width:100%;">` : '<span style="color:#000;font-weight:900;">CLUB</span>'}
                         </div>
-                        <div style="background:#000; height:200px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:2rem; font-weight:900;">MATCH-DAY</div>
-                        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                            <span style="font-size:0.8rem;">AUSGABE: ${new Date().toLocaleDateString()}</span>
-                            <span style="font-size:1.5rem; font-weight:900;">${this.clubData.league}</span>
+                        <div style="position:absolute; top:40px; right:60px; text-align:right; font-weight:900; color:#ff9500;">
+                            MATCHDAY MAG<br>${new Date().toLocaleDateString()}
+                        </div>
+                        <div class="mag-title">INSIDE<br>ARENA.</div>
+                        <div class="mag-sidebar">OFFIZIELLES ORGAN DES ${this.clubData.name}</div>
+                    </div>
+                    <div class="mag-content">
+                        <h2 style="font-size:1.5rem; margin:0; text-transform:uppercase;">${this.clubData.name}</h2>
+                        <p style="color:#ff9500; font-weight:bold; margin:5px 0;">LIGA: ${this.clubData.league}</p>
+                        <div style="margin-top:auto; border-top:2px solid #000; padding-top:10px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-weight:900;">PREIS: 0.00€</span>
+                            <span style="font-size:0.7rem;">HEUTE GEGEN: [GEGNER]</span>
                         </div>
                     </div>
-
-                    <div class="mag-page" style="height:550px; border-top:2px solid #eee; padding-top:20px; margin-bottom:60px;">
-                        <h3 style="border-bottom:4px solid #000; padding-bottom:10px; text-transform:uppercase;">Vorwort des Trainers</h3>
-                        <p style="font-size:0.9rem; line-height:1.6; text-align:justify;">
-                            "Willkommen in der Arena! Heute gegen den Tabellennachbarn zählt jedes Prozent. Wir haben die Intensität gesteigert. Unsere taktische Ausrichtung ist klar auf Dominanz ausgelegt. Coach ${this.clubData.coach} und ich haben das Team perfekt eingestellt. Lassen Sie uns die Punkte hierbehalten!"
-                        </p>
-                        <p style="font-weight:bold; margin-top:20px;">- Ihr Toni (Co-Trainer)</p>
-                        <div style="margin-top:40px; padding:20px; background:#f0f0f0;">
-                            <b>TOP PLAYER IM FOKUS:</b><br>${topP.name} (Stärke: ${topP.rating})
-                        </div>
-                    </div>
-
-                    <div class="mag-page" style="height:550px; border-top:2px solid #eee; padding-top:20px; margin-bottom:60px;">
-                        <h3 style="text-transform:uppercase;">Taktik-Analyse</h3>
-                        <div style="position:relative; width:100%; height:220px; background:#e8e8e8; border:2px solid #000; margin:20px 0; display:flex; align-items:center; justify-content:center;">
-                            <div style="border:2px solid rgba(0,0,0,0.1); width:80%; height:80%;"></div>
-                            <span style="position:absolute; background:#fff; padding:5px 15px; font-weight:900; border:2px solid #000;">${currentMatch.formation}</span>
-                        </div>
-                        <p style="font-size:0.85rem;"><b>MATCH-PLAN:</b> Raumkontrolle in der defensiven Zone, schnelles Umschalten über die Flügel. Wir erwarten einen tiefstehenden Gegner.</p>
-                    </div>
-
-                    <div class="mag-page" style="height:550px; border-top:2px solid #eee; padding-top:20px;">
-                        <h3 style="text-transform:uppercase;">Partner & Sponsoren</h3>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;">
-                            <div style="border:1px solid #ccc; height:100px; display:flex; align-items:center; justify-content:center; color:#ccc;">HAUPTSPONSOR</div>
-                            <div style="border:1px solid #ccc; height:100px; display:flex; align-items:center; justify-content:center; color:#ccc;">AUSRÜSTER</div>
-                            <div style="border:1px solid #ccc; height:100px; display:flex; align-items:center; justify-content:center; color:#ccc;">REGIONALPARTNER</div>
-                            <div style="border:1px solid #ccc; height:100px; display:flex; align-items:center; justify-content:center; color:#ccc;">STADIONWERBUNG</div>
-                        </div>
-                        <p style="font-size:0.7rem; color:#666; margin-top:40px;">Wollen auch Sie Teil des FC TONI 2.0 Netzwerks werden? Melden Sie sich in der Geschäftsstelle!</p>
-                    </div>
-
                 </div>
-                <button class="login-btn" style="width:100%; margin-top:20px; background:#ff9500; color:#000; font-weight:900;" onclick="window.print()">DRUCKEN / SPEICHERN (PDF)</button>
-            </div>`;
+
+                <div class="mag-page" style="padding:40px;">
+                    <h3 style="border-bottom:5px solid #ff9500; padding-bottom:10px; text-transform:uppercase; font-weight:900;">Wort des Coaches</h3>
+                    <p style="font-size:1rem; line-height:1.6; font-style:italic; font-family:serif;">
+                        "Männer, heute zählt nur die absolute Hingabe. Wir haben die ${this.clubData.league} analysiert. Coach ${this.clubData.coach} und ich fordern volle Intensität. Wir spielen für unsere Fans!"
+                    </p>
+                    <div style="margin-top:40px; display:grid; grid-template-columns:1fr 1.5fr; gap:30px;">
+                        <div>
+                            <div style="height:150px; background:#eee; border:1px solid #000; display:flex; align-items:center; justify-content:center;">
+                                <i class="fas fa-user-shield fa-4x" style="color:#ccc;"></i>
+                            </div>
+                            <p style="font-size:0.7rem; text-align:center; font-weight:900; margin-top:10px;">TOP-PERFORMER<br>${topP.name}</p>
+                        </div>
+                        <div style="font-size:0.8rem;">
+                            <b>TAKTIK-FOKUS:</b><br>
+                            Wir agieren heute im ${currentMatch.formation}. Fokus auf schnelle Umschaltmomente und Raumkontrolle.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mag-page" style="padding:40px; background:#f4f4f4;">
+                    <h3 style="text-transform:uppercase; font-weight:900;">Analyse & Formation</h3>
+                    <div class="mag-pitch">
+                        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:rgba(255,255,255,0.1); font-size:4rem; font-weight:900;">${currentMatch.formation}</div>
+                    </div>
+                    <p style="font-size:0.8rem;"><b>INTERNATIONALE STANDARDS:</b> Unsere Datenanalyse zeigt, dass wir über die Halbräume gefährlich werden müssen.</p>
+                </div>
+
+                <div class="mag-page" style="padding:40px;">
+                    <h3 style="border-bottom:5px solid #000; padding-bottom:10px; text-transform:uppercase; font-weight:900;">Partner & Business</h3>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;">
+                        <div style="border:2px dashed #ccc; height:100px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:#999;">ANZEIGENFLÄCHE 1</div>
+                        <div style="border:2px dashed #ccc; height:100px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:#999;">ANZEIGENFLÄCHE 2</div>
+                    </div>
+                    <div style="margin-top:auto; padding:20px; background:#000; color:#fff; text-align:center;">
+                        <div style="font-weight:900;">WERDEN SIE PARTNER</div>
+                        <div style="font-size:0.6rem;">KONTAKT@${this.clubData.name.replace(/\s/g, '').toUpperCase()}.DE</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="login-btn" style="width:100%; margin-top:20px; background:#ff9500; color:#000; font-weight:900;" onclick="window.print()">STADIONHEFT EXPORTIEREN (PDF)</button>
+        `;
     },
 
     // --- SPORTTASCHE ---
@@ -220,7 +248,7 @@ window.BriefcaseUI = {
         document.getElementById('active-content').innerHTML = `<div style="padding:10px;"><button class="login-btn" style="width:100%; margin-bottom:20px; background:#ff9500; color:#000;" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUER PRO-PLAYER</button><div class="pro-player-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:10px;">${players.map(p => `<div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background:#151515; border:1px solid #333; padding:15px; border-radius:10px; text-align:center; cursor:pointer;"><div style="font-size:1.2rem; font-weight:900; color:#ff9500;">#${p.number||0}</div><b style="font-size:0.8rem; color:#fff;">${p.name}</b></div>`).join('')}</div></div>`;
     },
 
-    // --- TRAINER-NIVEAU ÜBUNGEN ---
+    // --- TRAINING ---
     renderTraining: function() {
         document.getElementById('active-content').innerHTML = `
             <div style="padding:15px;">
