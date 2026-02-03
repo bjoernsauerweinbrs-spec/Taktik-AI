@@ -1,7 +1,7 @@
 window.arena = {
     canvas: null,
     ctx: null,
-    players: [], // Hier landen die aktiven Spieler-Objekte
+    players: [],
 
     init(canvasId) {
         this.canvas = document.getElementById(canvasId);
@@ -12,7 +12,6 @@ window.arena = {
         this.render();
         
         window.addEventListener('resize', () => this.resize());
-        console.log("Arena: Taktik-Board mit Kader-Sync bereit.");
     },
 
     resize() {
@@ -20,19 +19,16 @@ window.arena = {
         this.canvas.height = this.canvas.parentElement.clientHeight;
     },
 
-    // Lädt die Spieler aus der Sporttasche und platziert sie
     loadPlayersFromStorage() {
         const savedPlayers = JSON.parse(localStorage.getItem('toni_players')) || [];
         this.players = savedPlayers.map((p, index) => ({
             id: p.id,
             name: p.name,
             number: p.number || "??",
-            // Startpositionen (leicht versetzt, damit sie nicht übereinander liegen)
-            x: 100 + (index * 40) % 200,
-            y: 100 + (index * 50) % 300,
+            x: 100 + (index * 45) % (this.canvas.width / 3),
+            y: 100 + (index * 60) % (this.canvas.height - 150),
             radius: 18,
-            color: '#FF3B30', // Toni's Team ist ROT
-            isSelected: false
+            color: '#FF3B30'
         }));
     },
 
@@ -40,51 +36,72 @@ window.arena = {
         const ctx = this.ctx;
         const w = this.canvas.width;
         const h = this.canvas.height;
+        const pad = 30; // Spielfeldrand
 
-        // Rasen
-        ctx.fillStyle = '#1a1a1a';
+        // Hintergrund & Rasenstruktur
+        ctx.fillStyle = '#111';
         ctx.fillRect(0, 0, w, h);
-
-        // Linien
-        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(20, 20, w - 40, h - 40);
         
-        // Mittellinie
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 2;
+
+        // Außenlinien
+        ctx.strokeRect(pad, pad, w - pad * 2, h - pad * 2);
+
+        // Mittellinie & Kreis
         ctx.beginPath();
-        ctx.moveTo(w / 2, 20);
-        ctx.lineTo(w / 2, h - 20);
+        ctx.moveTo(w / 2, pad);
+        ctx.lineTo(w / 2, h - pad);
         ctx.stroke();
 
-        // Mittelkreis
         ctx.beginPath();
-        ctx.arc(w / 2, h / 2, 60, 0, Math.PI * 2);
+        ctx.arc(w / 2, h / 2, h * 0.15, 0, Math.PI * 2);
         ctx.stroke();
+
+        // --- TORE & STRAFRÄUME (NEU OPTIMIERT) ---
+        const areaH = h * 0.5;
+        const areaW = w * 0.15;
+
+        // Links (Heim)
+        ctx.strokeRect(pad, (h - areaH) / 2, areaW, areaH); // Strafraum
+        ctx.strokeRect(pad - 10, (h - 80) / 2, 10, 80); // Tor-Box außen
+
+        // Rechts (Gast)
+        ctx.strokeRect(w - pad - areaW, (h - areaH) / 2, areaW, areaH); // Strafraum
+        ctx.strokeRect(w - pad, (h - 80) / 2, 10, 80); // Tor-Box außen
+
+        // Elfmeterpunkte
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.beginPath();
+        ctx.arc(pad + areaW * 0.7, h / 2, 3, 0, Math.PI * 2);
+        ctx.arc(w - pad - areaW * 0.7, h / 2, 3, 0, Math.PI * 2);
+        ctx.fill();
     },
 
     drawPlayers() {
         this.players.forEach(p => {
             const ctx = this.ctx;
             
-            // Spieler-Kreis
+            // Spieler-Glow
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = p.color;
+            
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.fillStyle = p.color;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = p.color;
             ctx.fill();
+            
             ctx.shadowBlur = 0;
 
-            // Nummer
+            // Nummer & Name (Professionell)
             ctx.fillStyle = "#fff";
             ctx.font = "bold 12px Inter";
             ctx.textAlign = "center";
             ctx.fillText(p.number, p.x, p.y + 5);
-
-            // Name unter dem Spieler
-            ctx.font = "10px Inter";
-            ctx.fillStyle = "rgba(255,255,255,0.7)";
-            ctx.fillText(p.name.toUpperCase(), p.x, p.y + 30);
+            
+            ctx.font = "9px Inter";
+            ctx.fillStyle = "rgba(255,255,255,0.6)";
+            ctx.fillText(p.name.toUpperCase(), p.x, p.y + 32);
         });
     },
 
@@ -95,17 +112,8 @@ window.arena = {
         requestAnimationFrame(() => this.render());
     },
 
-    // Funktion für Toni, um Formationen zu schieben
     animateFormation(type) {
-        console.log("Toni schiebt Formation:", type);
-        const w = this.canvas.width;
-        const h = this.canvas.height;
-
-        // Beispiel-Logik für 4-3-3 (sehr vereinfacht)
-        this.players.forEach((p, i) => {
-            if(i === 0) { p.x = 60; p.y = h/2; } // TW
-            else if(i < 5) { p.x = 150; p.y = (h/5) * i; } // Abwehr
-            else { p.x = 300; p.y = (h/2); } // Rest sammeln
-        });
+        this.loadPlayersFromStorage(); // Re-Sync vor Animation
+        // Taktik-Logik folgt in der Besprechung...
     }
 };
