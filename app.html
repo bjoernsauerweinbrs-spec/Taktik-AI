@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Sidebar Fix: Vertikale Anordnung der Werkzeuge */
+        /* Sidebar Fix: Vertikale Anordnung */
         .sidebar {
             display: flex;
             flex-direction: column;
@@ -16,7 +16,9 @@
             padding-top: 25px;
             background: #0a0a0a;
             border-right: 1px solid #222;
-            width: 80px; /* Feste Breite für Stabilität */
+            width: 90px;
+            min-width: 90px;
+            z-index: 100;
         }
 
         .nav-item {
@@ -25,17 +27,17 @@
             align-items: center;
             cursor: pointer;
             color: #888;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
-        /* Taktik-Steuerung in der Sidebar */
-        #tactic-controls {
+        /* Taktik-Steuerung KOMPAKT in der Sidebar */
+        #sidebar-tactic-controls {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            width: 85%;
-            margin-top: 20px;
-            padding-top: 20px;
+            gap: 8px;
+            width: 80%;
+            margin-top: 15px;
+            padding-top: 15px;
             border-top: 1px solid #222;
         }
 
@@ -44,13 +46,14 @@
             background: rgba(255, 149, 0, 0.05);
             border: 1px solid #ff9500;
             color: #fff;
-            padding: 8px 2px;
-            font-size: 0.55rem;
-            border-radius: 4px;
+            padding: 6px 2px;
+            font-size: 0.5rem;
+            border-radius: 3px;
             cursor: pointer;
             text-transform: uppercase;
             font-weight: 900;
-            transition: 0.3s;
+            transition: 0.2s;
+            white-space: nowrap;
         }
 
         .tactic-btn:hover {
@@ -60,24 +63,22 @@
 
         .tactic-btn.reset {
             border-color: #555;
-            color: #888;
+            color: #777;
         }
 
-        /* Spielfeld-Zentrierung */
+        /* Absolut freies Spielfeld */
         .arena-column {
             background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-            flex-grow: 1; /* Nimmt den restlichen Platz ein */
+            position: relative;
+            flex-grow: 1;
         }
 
         #tactic-board {
-            width: auto;
-            height: auto;
-            max-width: 95%;
-            max-height: 95%;
+            max-width: 98%;
+            max-height: 98%;
         }
     </style>
 </head>
@@ -86,16 +87,16 @@
 <div class="app-container">
     <aside class="sidebar">
         <div class="nav-item" onclick="BriefcaseUI.toggle()">
-            <i class="fas fa-briefcase" style="font-size:22px; color:#ff9500;"></i>
-            <span style="font-size: 0.55rem; margin-top: 5px;">ZENTRALE</span>
+            <i class="fas fa-briefcase" style="font-size:20px; color:#ff9500;"></i>
+            <span style="font-size: 0.5rem; margin-top: 4px;">ZENTRALE</span>
         </div>
 
         <div class="nav-item">
-            <i class="fas fa-microphone-alt" style="font-size:22px;"></i>
-            <span style="font-size: 0.55rem; margin-top: 5px;">LIVE AI</span>
+            <i class="fas fa-microphone-alt" style="font-size:20px;"></i>
+            <span style="font-size: 0.5rem; margin-top: 4px;">LIVE AI</span>
         </div>
 
-        <div id="tactic-controls">
+        <div id="sidebar-tactic-controls">
             <button class="tactic-btn" onclick="arena.applyTacticalPattern('pressing')">🔥 PRESSING</button>
             <button class="tactic-btn" onclick="arena.applyTacticalPattern('overload')">🚀 ÜBERZAHL</button>
             <button class="tactic-btn" onclick="arena.applyTacticalPattern('compact')">🛡️ KOMPAKT</button>
@@ -110,7 +111,6 @@
     <section class="chat-column">
         <div class="feed-header">LIVE-FEED</div>
         <div id="chat-messages" class="chat-area"></div>
-
         <div class="voice-advisor-label">TONI VOICE ADVISOR</div>
         <div class="chat-input-container">
             <input type="text" id="chat-input" placeholder="Taktik fragen...">
