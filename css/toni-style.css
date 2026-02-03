@@ -5,43 +5,34 @@
 
 body { margin: 0; background: var(--bg-deep); color: white; font-family: 'Inter', sans-serif; display: grid; grid-template-columns: 100px 1fr 350px; height: 100vh; overflow: hidden; }
 
-/* SIDEBAR & LOGIN */
-#login-screen { position: fixed; inset: 0; background: var(--bg-deep); z-index: 10000; display: flex; align-items: center; justify-content: center; text-align: center; }
-.login-input { display: block; width: 300px; padding: 15px; margin: 10px auto; background: #080E1A; border: 1px solid #333; color: white; border-radius: 5px; }
-.login-btn { width: 300px; padding: 15px; background: var(--accent-orange); border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 5px; }
-.sidebar-minimal { background: #080E1A; border-right: 1px solid rgba(255,106,0,0.2); display: flex; flex-direction: column; align-items: center; }
-.control-unit { cursor: pointer; margin-top: 40px; text-align: center; color: #8E8E93; transition: 0.3s; }
-.control-unit:hover { color: var(--data-cyan); }
-
-/* BOARD & ANALYSE */
-#stage { width: 100%; height: 100%; }
-#main-canvas { width: 100%; height: 100%; display: block; }
-.analysis-panel { background: var(--panel-warm); border-left: 1px solid rgba(0,209,255,0.1); padding: 25px; overflow-y: auto; }
-.toni-speech-bubble { background: rgba(0,209,255,0.05); border: 1px solid var(--data-cyan); padding: 20px; border-radius: 15px; line-height: 1.5; font-size: 14px; }
-
-/* TABS & SETCARD */
-.setcard-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-.tab-system { background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px; display: flex; }
-.tab-btn { background: none; border: none; color: #8E8E93; padding: 10px 20px; cursor: pointer; font-weight: bold; font-size: 11px; }
-.tab-btn.active { background: var(--accent-orange); color: white; border-radius: 6px; }
-
-.trainer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.trainer-box { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
-.trainer-box h4 { margin: 0 0 15px 0; font-size: 12px; color: var(--data-cyan); letter-spacing: 1px; }
-.trainer-box label { display: block; font-size: 10px; margin-bottom: 5px; color: #8E8E93; }
-.trainer-box input, .trainer-box select { width: 100%; background: #080E1A; border: 1px solid #333; color: white; padding: 8px; border-radius: 4px; margin-bottom: 15px; }
-.full-width { grid-column: span 2; }
-
-/* FIFA CARD CSS (Wie zuvor, optimiert) */
-.fifa-card-container { display: flex; gap: 30px; }
-.fifa-card { width: 230px; height: 340px; background: var(--gold); padding: 5px; clip-path: polygon(0% 15%, 15% 0%, 85% 0%, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0% 85%); }
-.card-inner { background: #1a1a1a; height: 100%; clip-path: inherit; padding: 20px; text-align: center; position: relative; }
-.card-rating { position: absolute; left: 15px; top: 25px; font-size: 38px; font-weight: 900; color: #f8b500; }
-.card-pos { position: absolute; left: 15px; top: 70px; font-size: 16px; color: #f8b500; }
-.card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 15px; font-size: 12px; }
-.card-stats span { font-weight: bold; color: #f8b500; }
-
-.analysis-trigger-btn { width: 100%; background: var(--data-cyan); border: none; color: #000; padding: 15px; border-radius: 5px; font-weight: 900; cursor: pointer; letter-spacing: 1px; }
-.action-btn { background: var(--accent-orange); border: none; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-.back-btn { background: none; border: 1px solid var(--data-cyan); color: var(--data-cyan); padding: 8px 15px; cursor: pointer; border-radius: 5px; }
+/* OVERLAY STRUCTURE */
+.briefcase-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
+.briefcase-window { background: var(--panel-warm); border: 1px solid var(--accent-orange); width: 95%; height: 90%; padding: 30px; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
 .hidden { display: none !important; }
+
+/* DASHBOARD NAV */
+.folder-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-top: 50px; }
+.nav-card { background: rgba(255,255,255,0.03); padding: 80px 20px; text-align: center; border-radius: 15px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+.nav-card:hover { border-color: var(--accent-orange); transform: translateY(-5px); }
+.nav-icon { font-size: 60px; display: block; margin-bottom: 20px; }
+
+/* CONTENT SECTORS */
+.content-header { display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+.analysis-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 100%; }
+.dashboard-card { background: rgba(0,0,0,0.2); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+.big-stat { font-size: 60px; font-weight: 900; color: var(--gold); }
+.big-stat span { font-size: 20px; color: white; }
+
+/* UTILS */
+.action-btn { background: var(--accent-orange); border: none; color: white; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+.back-btn { background: none; border: 1px solid var(--data-cyan); color: var(--data-cyan); padding: 10px 20px; cursor: pointer; border-radius: 8px; }
+.orga-box { width: 100%; height: 200px; background: #080E1A; border: 1px solid #333; color: white; padding: 15px; border-radius: 10px; }
+.player-entry { padding: 15px; background: rgba(255,255,255,0.03); margin-bottom: 10px; border-radius: 8px; cursor: pointer; }
+
+/* SIDEBAR & LOGIN (Gesichert) */
+.sidebar-minimal { background: #080E1A; border-right: 1px solid rgba(255,106,0,0.2); display: flex; flex-direction: column; align-items: center; }
+.control-unit { cursor: pointer; margin-top: 40px; text-align: center; }
+#login-screen { position: fixed; inset: 0; background: var(--bg-deep); z-index: 10000; display: flex; align-items: center; justify-content: center; }
+.login-box { text-align: center; }
+.login-input { display: block; width: 300px; padding: 15px; margin: 10px auto; background: #080E1A; border: 1px solid #333; color: white; border-radius: 5px; }
+.login-btn { width: 300px; padding: 15px; background: var(--accent-orange); border: none; color: white; font-weight: bold; border-radius: 5px; cursor: pointer; }
