@@ -1,96 +1,49 @@
 window.ToniAI = {
     init() {
-        console.log("Toni 2.0 Gehirn initialisiert.");
         this.setupVoiceCommands();
         this.welcomeMessage();
     },
 
     welcomeMessage() {
-        const provider = localStorage.getItem('toni_api_provider') || "Basis";
-        this.addChatMessage("Toni", `Ola Björn! Modus ${provider.toUpperCase()} ist bereit. Was recherchieren wir heute?`, "bot-msg");
+        this.addChatMessage("Toni", "Ola Björn! Falls Ollama am Mac noch hakt, schau in die Hilfe im System-Ordner.", "bot-msg");
     },
 
     async processCommand(text) {
         this.addChatMessage("Björn", text, "user-msg");
         const provider = localStorage.getItem('toni_api_provider') || "free";
         const apiKey = localStorage.getItem('toni_api_key');
-        const input = text.toLowerCase();
 
-        // Lokale Taktik-Befehle (Ohne KI)
-        if (input.includes("formation") || input.includes("aufstellung")) {
-            const type = input.includes("352") ? "352" : "433";
-            const res = `Tudo bem! Ich stelle auf ${type} um. Schau auf das Feld!`;
-            this.addChatMessage("Toni", res, "bot-msg");
-            window.BriefcaseUI.applyFormation(type);
-            this.speak(res);
+        if (provider === "free") {
+            this.localFallback("Björn, Basis-Modus aktiv: Flügelspiel ist heute der Schlüssel!");
             return;
         }
 
-        // KI-Recherche
-        if (provider === "free" || (!apiKey && provider !== "llama" && provider !== "free")) {
-            this.localFallback("Björn, im Basis-Modus ohne Key empfehle ich: Kompakt stehen und Flügelspiel forcieren!");
-            return;
-        }
-
-        this.addChatMessage("Toni", `⚡ Recherche via ${provider.toUpperCase()}...`, "bot-msg");
+        this.addChatMessage("Toni", `⚡ Verbindung zu ${provider.toUpperCase()}...`, "bot-msg");
 
         try {
             let apiUrl = "";
-            let headers = { "Content-Type": "application/json" };
             let body = {};
+            let headers = { "Content-Type": "application/json" };
 
             if (provider === "openai") {
                 apiUrl = 'https://api.openai.com/v1/chat/completions';
                 headers["Authorization"] = `Bearer ${apiKey}`;
-                body = {
-                    model: "gpt-4o-mini",
-                    messages: [
-                        { role: "system", content: "Du bist Toni, ein brasilianischer Fußball-Experte für Trainer Björn. Antworte kurz, präzise und mit Ginga-Flair." },
-                        { role: "user", content: text }
-                    ]
-                };
-            } 
-            else if (provider === "gemini") {
-                apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
-                body = { contents: [{ parts: [{ text: `Du bist Fußball-Experte Toni. Antworte Björn auf: ${text}` }] }] };
-            }
-            else if (provider === "llama") {
-                apiUrl = 'http://localhost:11434/api/generate';
-                body = {
-                    model: "llama3",
-                    prompt: `Antworte als Fußball-Experte Toni kurz und knackig: ${text}`,
-                    stream: false
-                };
+                body = { model: "gpt-4o-mini", messages: [{role: "system", content: "Taktik-Experte Toni."}, {role: "user", content: text}] };
+            } else if (provider === "llama") {
+                apiUrl = 'http://127.0.0.1:11434/api/generate';
+                body = { model: "llama3", prompt: `Toni antwortet: ${text}`, stream: false };
             }
 
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify(body)
-            });
-
-            if (!response.ok) {
-                if(response.status === 429) throw new Error("LIMIT_REACHED");
-                throw new Error("SERVER_OFFLINE");
-            }
+            const response = await fetch(apiUrl, { method: 'POST', headers: headers, body: JSON.stringify(body) });
+            if (!response.ok) throw new Error("OFFLINE");
 
             const data = await response.json();
-            let reply = "";
-            
-            if (provider === "openai") reply = data.choices[0].message.content;
-            else if (provider === "gemini") reply = data.candidates[0].content.parts[0].text;
-            else if (provider === "llama") reply = data.response;
+            const reply = provider === "openai" ? data.choices[0].message.content : data.response;
 
             this.addChatMessage("Toni", reply, "bot-msg");
             this.speak(reply);
-
-        } catch (error) {
-            let errorMsg = "Björn, Verbindung zum Anbieter fehlgeschlagen.";
-            if(error.message === "LIMIT_REACHED") errorMsg = "Björn, das Guthaben/Limit dieses Anbieters ist leer.";
-            if(provider === "llama") errorMsg = "Björn, Llama (Ollama) ist offline. Bitte starte das Programm auf deinem Rechner!";
-            
-            this.addChatMessage("Toni", errorMsg, "bot-msg");
-            this.speak(errorMsg);
+        } catch (e) {
+            this.addChatMessage("Toni", "Björn, Verbindung fehlgeschlagen. Prüfe die Hilfe im System-Ordner!", "bot-msg");
         }
     },
 
@@ -112,20 +65,7 @@ window.ToniAI = {
     speak(text) {
         if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'de-DE';
-        utterance.pitch = 0.85;
-        window.speechSynthesis.speak(utterance);
-    },
-
-    toggleListening() {
-        this.isListening = !this.isListening;
-        const micIcon = document.getElementById('mic-icon');
-        if (micIcon) {
-            micIcon.style.color = this.isListening ? "#FF3B30" : "";
-            if(this.isListening) micIcon.classList.add('pulse');
-            else micIcon.classList.remove('pulse');
-        }
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
     },
 
     setupVoiceCommands() {
