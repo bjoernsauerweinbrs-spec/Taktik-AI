@@ -3,116 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 — High-Performance Trainer OS</title>
-    <link rel="stylesheet" href="css/toni-style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>TONI 2.0 - Authentifizierung</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+        
+        /* Video Container */
+        #video-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; transition: transform 1.5s ease, filter 1.5s ease;
+        }
+        
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Overlay für Lesbarkeit nach dem Video */
+        #video-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2; opacity: 0; transition: opacity 1.5s ease;
+        }
+
+        /* Login Box */
+        .login-box {
+            position: relative;
+            z-index: 10;
+            background: rgba(20, 20, 20, 0.8);
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid var(--accent-orange);
+            text-align: center;
+            width: 320px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1s ease;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Status: Video beendet */
+        .video-finished #video-container { transform: scale(1.05); filter: blur(8px); }
+        .video-finished #video-overlay { opacity: 1; }
+        .video-finished .login-box { opacity: 1; transform: translateY(0); }
+
+        .skip-intro {
+            position: fixed; bottom: 20px; right: 20px; z-index: 20;
+            color: #fff; font-size: 0.7rem; cursor: pointer; opacity: 0.5;
+        }
+    </style>
 </head>
-<body class="pro-layout">
+<body>
 
-    <div id="login-screen">
+    <div id="video-container">
+        <video id="intro-video" autoplay muted playsinline>
+            <source src="assets/intro.mp4" type="video/mp4">
+        </video>
+    </div>
+    
+    <div id="video-overlay"></div>
+
+    <div class="login-container">
         <div class="login-box">
-            <h1 class="glow-text">TONI 2.0</h1>
-            <p class="cyber-subtitle">SYSTEM ACCESS REQUIRED</p>
-            <div class="login-form">
-                <input id="password-input" type="password" class="login-input" placeholder="PASSWORT">
-                <button class="login-btn" onclick="window.ToniAuth.login()">INITIALISIEREN</button>
-            </div>
-            <p style="color: rgba(255,255,255,0.3); font-size: 0.7rem; margin-top: 20px;">
-                Hinweis: API-Key Konfiguration im System-Ordner der Zentrale möglich.
-            </p>
+            <h2 style="color:var(--accent-orange); letter-spacing: 2px;">TONI 2.0</h2>
+            <p style="color:#888; font-size: 0.8rem; margin-bottom: 25px;">ZENTRALE AUTHENTIFIZIERUNG</p>
+            <input type="password" id="pass-input" placeholder="PASSWORT" class="login-input" style="width:100%; margin-bottom: 15px;">
+            <button onclick="checkPass()" class="login-btn" style="width:100%;">ACCESS</button>
         </div>
     </div>
 
-    <div id="main-system" class="hidden">
-        <div class="pro-layout-container">
-            
-            <aside class="sidebar-minimal">
-                <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
-                    <div class="icon">💼</div><span>ZENTRALE</span>
-                </div>
-                <div class="control-unit" onclick="window.ToniAI.toggleListening()">
-                    <div class="icon" id="mic-icon">🎤</div><span>LIVE AI</span>
-                </div>
-            </aside>
+    <div class="skip-intro" onclick="finishIntro()">SKIP INTRO <i class="fas fa-forward"></i></div>
 
-            <main id="stage-container">
-                <div id="stage">
-                    <canvas id="main-canvas"></canvas>
-                </div>
-            </main>
-
-            <aside class="analysis-panel">
-                <div id="panel-header">
-                    <h3>LIVE-FEED</h3>
-                </div>
-                
-                <div id="setcard-content">
-                    <div class="toni-speech-bubble">
-                        <b>Toni:</b> Ola Björn! System bereit. Denke daran, meinen API-Key im <b>System-Ordner</b> zu hinterlegen, damit ich für dich im Netz recherchieren kann.
-                    </div>
-                </div>
-
-                <div id="toni-live-chat" class="chat-container">
-                    <div class="chat-header">TONI VOICE ADVISOR</div>
-                    <div id="chat-messages" class="chat-messages"></div>
-                    <div class="chat-input-area">
-                        <input type="text" id="chat-input" placeholder="Taktik fragen...">
-                        <button id="send-btn">➔</button>
-                    </div>
-                </div>
-            </aside>
-
-        </div>
-    </div>
-
-    <div id="briefcase-overlay" class="briefcase-overlay hidden">
-        <div class="briefcase-window">
-            
-            <div id="briefcase-nav">
-                <div class="nav-grid">
-                    <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">
-                        <span class="nav-icon">👟</span><b>SPORTTASCHE</b>
-                    </div>
-                    <div class="nav-card" onclick="BriefcaseUI.switchSektor('marketing')">
-                        <span class="nav-icon">📢</span><b>MARKETING</b>
-                    </div>
-                    <div class="nav-card" onclick="BriefcaseUI.switchSektor('system')">
-                        <span class="nav-icon">📁</span><b>SYSTEM-ORDNER</b>
-                    </div>
-                </div>
-                <button onclick="BriefcaseUI.toggle()" class="login-btn" style="margin-top:40px; background:#444; width: auto; padding: 10px 30px;">ZENTRALE SCHLIESSEN</button>
-            </div>
-
-            <div id="briefcase-content" class="hidden">
-                <div class="content-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:15px;">
-                    <button onclick="BriefcaseUI.backToNav()" class="login-btn" style="width:auto; padding:10px 20px; background: var(--panel-dark); border: 1px solid #444;">← ZURÜCK</button>
-                    <h2 id="sector-title" style="margin:0; color:var(--accent-orange); font-size:1.2rem; letter-spacing: 1px;">SEKTOR</h2>
-                    <button onclick="BriefcaseUI.toggle()" class="login-btn" style="width:auto; background:#444; padding:10px 20px;">BEENDEN</button>
-                </div>
-                <div id="active-content"></div>
-            </div>
-        </div>
-    </div>
-
-    <script src="engine/arena.js"></script>
-    <script src="ui/briefcase-ui.js"></script>
-    <script src="engine/toni-ai.js"></script>
     <script>
-        window.ToniAuth = {
-            login() {
-                const pw = document.getElementById('password-input').value;
-                if(pw === "Toni2026") {
-                    document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('main-system').classList.remove('hidden');
-                    setTimeout(() => { 
-                        if(window.arena) arena.init('main-canvas'); 
-                        if(window.ToniAI) ToniAI.init();
-                    }, 100);
-                } else {
-                    alert("Zugriff verweigert.");
-                }
+        const video = document.getElementById('intro-video');
+        
+        // Automatischer Übergang nach 10 Sekunden (oder wenn Video endet)
+        video.onended = finishIntro;
+        setTimeout(finishIntro, 10000); 
+
+        function finishIntro() {
+            document.body.classList.add('video-finished');
+            video.pause(); // Hält das Video im Standbild an
+            document.querySelector('.skip-intro').style.display = 'none';
+        }
+
+        function checkPass() {
+            const pass = document.getElementById('pass-input').value;
+            if(pass === "1234") { // Dein Passwort
+                window.location.href = "app.html";
+            } else {
+                alert("Zugriff verweigert.");
             }
-        };
+        }
     </script>
 </body>
 </html>
