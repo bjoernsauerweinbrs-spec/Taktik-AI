@@ -17,13 +17,13 @@ window.BriefcaseUI = {
         content.classList.remove('hidden');
 
         if (sektor === 'sport') {
-            title.innerText = "👟 SPORTTASCHE";
+            title.innerText = "👟 SPORTTASCHE: KADER";
             this.renderSporttasche();
         } else if (sektor === 'marketing') {
-            title.innerText = "📢 MARKETING";
+            title.innerText = "📢 MARKETING: A5 MAGAZIN";
             this.renderMarketing();
         } else if (sektor === 'analyse') {
-            title.innerText = "📊 ANALYSE";
+            title.innerText = "⚙️ SYSTEM-EINSTELLUNGEN";
             this.renderAnalysezentrum();
         }
     },
@@ -44,104 +44,76 @@ window.BriefcaseUI = {
                         `).join('')}
                     </div>
                 </div>
+                <div class="taktik-sidebar">
+                    <h3 style="color:var(--accent-orange);">FORMATIONEN</h3>
+                    <button class="login-btn" style="width:100%; margin-bottom:10px;" onclick="BriefcaseUI.applyFormation('433')">4-3-3 GINGA</button>
+                    <button class="login-btn" style="width:100%; margin-bottom:10px;" onclick="BriefcaseUI.applyFormation('352')">3-5-2 KOMPAKT</button>
+                </div>
             </div>`;
     },
 
     renderMarketing() {
         const target = document.getElementById('active-content');
         target.innerHTML = `
-            <div class="marketing-tabs" style="margin-bottom:20px; display:flex; gap:10px;">
-                <button class="login-btn" style="width:auto;" onclick="BriefcaseUI.toggleMarketing('zeitung')">📄 A5 MAGAZIN EDITOR</button>
-                <button class="login-btn" style="width:auto; background:#222;" onclick="BriefcaseUI.toggleMarketing('sponsoring')">💰 SPONSOREN</button>
+            <div style="margin-bottom:20px; display:flex; gap:10px;">
+                <button class="login-btn" style="width:auto; background:var(--accent-orange);">📄 DIN A5 EDITOR</button>
             </div>
-            
-            <div id="m-zeitung" class="magazine-view" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
-                
-                <div class="mag-page" style="background:#fff; color:#000; border:1px solid #ddd; display:flex; flex-direction:column;">
+            <div id="m-zeitung" class="magazine-view">
+                <div class="mag-page">
                     <div style="background:#000; color:#fff; text-align:center; padding:10px; border-bottom:5px solid var(--accent-orange);">
-                        <h1 contenteditable="true" style="margin:0; font-size:1.2rem;">FC TONI 2.0</h1>
-                        <small>MATCHDAY MAG | NR. 1</small>
+                        <h1 contenteditable="true" style="margin:0; font-size:1.1rem;">FC TONI 2.0</h1>
                     </div>
-                    <div style="flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                        <div style="width:80px; height:80px; border:3px solid #000; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
-                            <b style="font-size:0.7rem;">LOGO</b>
-                        </div>
-                        <h2 contenteditable="true" style="text-align:center; font-size:1.1rem; font-style:italic;">"Brasilianischer Zauber am Spieltag"</h2>
+                    <div style="flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column; border:1px solid #eee; margin:10px 0;">
+                        <span contenteditable="true" style="font-weight:900;">[ DEIN LOGO ]</span>
                     </div>
-                    <div style="background:#f9f9f9; padding:10px; border-top:1px solid #eee;">
-                        <b contenteditable="true" style="font-size:0.8rem;">HEUTE: FC TONI vs. BOT-UNITED</b>
+                    <div contenteditable="true" style="font-size:0.8rem; text-align:center; font-style:italic;">"Brasilianische Taktik für Profis"</div>
+                </div>
+                <div class="mag-page">
+                    <h3 style="border-bottom:2px solid #000; font-size:1rem;">🎤 TRAINER-TALK</h3>
+                    <div contenteditable="true" style="font-size:0.8rem; line-height:1.5;">
+                        Willkommen Björn! Hier kannst du deine heutige Ansprache direkt eintippen. Das Format ist perfekt auf DIN A5 optimiert.
                     </div>
                 </div>
-
-                <div class="mag-page" style="background:#fff; color:#000; border:1px solid #ddd;">
-                    <h3 style="border-bottom:2px solid #000; font-size:1rem;">🎤 TRAINER-WORT</h3>
-                    <p contenteditable="true" style="font-size:0.8rem; line-height:1.5;">
-                        Willkommen Björn! Heute zählen nur die drei Punkte. Wir haben an der Taktik gefeilt und sind bereit.
-                        <br><br>
-                        Klicke hier, um deine Ansprache für die Fans zu schreiben. Halte sie kurz und motivierend für das A5 Format!
-                    </p>
-                    <div style="margin-top:20px; padding:10px; background:#f0f0f0; font-size:0.75rem;">
-                        <b>GEHEIMTIPP:</b> "Achtet auf die Flügel!"
-                    </div>
-                </div>
-
-                <div class="mag-page" style="background:#fff; color:#000; border:1px solid #ddd;">
+                <div class="mag-page">
                     <h3 style="border-bottom:2px solid #000; font-size:1rem;">📊 ANALYSE</h3>
-                    <p contenteditable="true" style="font-size:0.8rem;">Die Formkurve zeigt nach oben. Unsere km-Leistung war im letzten Spiel überragend.</p>
-                    <div style="margin-top:auto;">
-                        <table style="width:100%; font-size:0.7rem;">
-                            <tr style="background:#eee;"><td><b>POS</b></td><td><b>TEAM</b></td><td><b>PKT</b></td></tr>
-                            <tr contenteditable="true"><td>1.</td><td>FC TONI 2.0</td><td>24</td></tr>
-                            <tr contenteditable="true"><td>2.</td><td>GEGNER X</td><td>21</td></tr>
-                        </table>
-                    </div>
+                    <div contenteditable="true" style="font-size:0.8rem;">Letztes Spiel: 3:0 Sieg. Die km-Leistung war hervorragend.</div>
                 </div>
-
-                <div class="mag-page" style="background:#fff; color:#000; border:1px solid #ddd; display:flex; flex-direction:column;">
+                <div class="mag-page">
                     <h3 style="text-align:center; font-size:1rem;">🤝 PARTNER</h3>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; flex:1;">
-                        <div contenteditable="true" style="border:1px dashed #ccc; padding:5px; font-size:0.6rem; text-align:center;">DEIN SPONSOR</div>
-                        <div contenteditable="true" style="border:1px dashed #ccc; padding:5px; font-size:0.6rem; text-align:center;">LOKALER PARTNER</div>
+                        <div contenteditable="true" style="border:1px dashed #ccc; padding:5px; font-size:0.6rem; text-align:center;">SPONSOR 1</div>
+                        <div contenteditable="true" style="border:1px dashed #ccc; padding:5px; font-size:0.6rem; text-align:center;">SPONSOR 2</div>
                     </div>
-                    
                     <div style="background:#000; color:#00D1FF; padding:10px; border-radius:5px; text-align:center; margin-top:10px;">
-                        <b style="font-size:0.8rem; color:#fff;">POWERED BY TONI 2.0</b><br>
-                        <p style="font-size:0.6rem; margin:3px 0;">Das digitale Gehirn für Trainer Björn.</p>
+                        <b style="font-size:0.7rem; color:#fff;">POWERED BY TONI 2.0</b><br>
+                        <small style="font-size:0.5rem;">PERFEKT FÜR TRAINER & MANAGER</small>
                     </div>
                 </div>
-                
                 <button class="login-btn" style="grid-column: span 2; background:var(--accent-orange);" onclick="window.print()">🖨️ DIN A5 DRUCK STARTEN</button>
-            </div>
-            
-            <div id="m-sponsoring" class="hidden">
-                <div class="sponsoring-tool">
-                    <h4>SPONSOREN-RECHNER</h4>
-                    <select id="s-package" class="login-input" onchange="BriefcaseUI.calcSponsor()">
-                        <option value="0">Modul wählen...</option>
-                        <option value="400">A5 Anzeige</option>
-                        <option value="1000">Trikot</option>
-                    </select>
-                    <div id="s-result" class="toni-speech-bubble" style="margin-top:20px;">Berechnung aktiv...</div>
-                </div>
             </div>`;
     },
 
-    toggleMarketing(view) {
-        document.getElementById('m-zeitung').classList.toggle('hidden', view === 'sponsoring');
-        document.getElementById('m-sponsoring').classList.toggle('hidden', view === 'zeitung');
-    },
-
-    calcSponsor() {
-        const val = document.getElementById('s-package').value;
-        document.getElementById('s-result').innerHTML = `Empfehlung: <b>${val} €</b>. Björn, das passt perfekt ins Budget!`;
-    },
-
     renderAnalysezentrum() {
-        document.getElementById('active-content').innerHTML = `<h3>Matrix online.</h3>`;
+        const currentKey = localStorage.getItem('toni_api_key') || "";
+        document.getElementById('active-content').innerHTML = `
+            <div style="max-width:500px; background:rgba(255,255,255,0.05); padding:30px; border-radius:15px; border:1px solid var(--accent-orange);">
+                <h4 style="color:var(--accent-orange);">KI-KONFIGURATION</h4>
+                <p style="font-size:0.8rem;">Hinterlege deinen API-Key für echte Web-Recherche.</p>
+                <input type="password" id="api-key-input" class="login-input" style="width:100%; margin:20px 0;" value="${currentKey}" placeholder="OpenAI / Gemini Key...">
+                <button class="login-btn" onclick="BriefcaseUI.saveApiKey()">KEY SPEICHERN</button>
+                <p id="save-status" style="margin-top:15px; font-size:0.8rem; color:var(--data-cyan);"></p>
+            </div>`;
     },
 
-    openSetcard(id) {
-        this.switchSektor('sport');
+    saveApiKey() {
+        const val = document.getElementById('api-key-input').value;
+        localStorage.setItem('toni_api_key', val);
+        document.getElementById('save-status').innerText = "✅ System bereit für Web-Abfragen!";
+    },
+
+    applyFormation(type) {
+        if(window.arena) arena.animateFormation(type);
+        this.toggle();
     },
 
     addPlayerPrompt() {
@@ -152,5 +124,9 @@ window.BriefcaseUI = {
             localStorage.setItem('toni_players', JSON.stringify(pl));
             this.renderSporttasche();
         }
+    },
+
+    openSetcard(id) {
+        this.switchSektor('sport');
     }
 };
