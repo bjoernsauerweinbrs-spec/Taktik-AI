@@ -2,103 +2,59 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 — Tactical Intelligence OS</title>
+    <title>TONI 2.0 — Tactical Intelligence</title>
     <link rel="stylesheet" href="css/toni-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        /* Kurzer Safety-Style, falls CSS-Datei im Cache hängt */
-        .hidden { display: none !important; }
-    </style>
 </head>
-<body class="pro-layout">
+<body>
 
     <div id="login-screen">
         <div class="login-box">
-            <h1 style="color:var(--accent-orange); font-size: 3rem; margin-bottom: 5px;">TONI 2.0</h1>
-            <p style="letter-spacing: 3px; font-size: 10px; margin-bottom: 30px; color: var(--data-cyan);">BRAZILIAN STYLE TACTICS</p>
-            <input id="password-input" type="password" class="login-input" placeholder="Passwort (Toni2026)">
-            <button class="login-btn" onclick="ToniAuth.login()">SYSTEM INITIALISIEREN</button>
+            <h1 style="color:var(--accent-orange); font-size:3rem;">TONI 2.0</h1>
+            <p style="color:var(--data-cyan); letter-spacing:2px; margin-bottom:30px;">SYSTEM ACCESS REQUIRED</p>
+            <input id="password-input" type="password" class="login-input" placeholder="Passwort">
+            <button class="login-btn" onclick="ToniAuth.login()">LOGIN</button>
         </div>
     </div>
 
     <aside class="sidebar-minimal">
         <div class="sidebar-content">
-            <div class="control-unit" onclick="BriefcaseUI.toggle()" title="Zentrale Aktentasche">
-                <div class="icon">💼</div>
-                <span>ZENTRALE</span>
-            </div>
-            <div id="voice-trigger-btn" class="control-unit" onclick="ToniAI.toggleListening()" title="Sprachbefehl">
-                <div class="icon">🎤</div>
-                <span id="mic-status-label">BEREIT</span>
-            </div>
+            <div class="control-unit" onclick="BriefcaseUI.toggle()"><div>💼</div><span>ZENTRALE</span></div>
+            <div class="control-unit" onclick="ToniAI.toggleListening()"><div>🎤</div><span>AI</span></div>
         </div>
     </aside>
 
-    <main id="stage">
-        <canvas id="main-canvas"></canvas>
-    </main>
+    <main id="stage"><canvas id="main-canvas"></canvas></main>
 
-    <aside class="analysis-panel" id="side-analysis">
-        <div id="setcard-content">
-            <div class="toni-speech-bubble">
-                <b>Toni:</b> Bom dia, Björn! Ich warte auf deine Anweisungen. Öffne die Sporttasche für die Kader-Analyse.
-            </div>
-        </div>
+    <aside class="analysis-panel">
+        <div class="toni-speech-bubble">Willkommen Björn. Eröffne die Sitzung über die Zentrale.</div>
     </aside>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
             <div id="briefcase-nav" class="folder-grid">
-                <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">
-                    <div style="font-size: 50px;">👟</div>
-                    <b>SPORTTASCHE</b>
-                    <p>Kader, FIFA-Setcards & Export</p>
-                </div>
-                <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')">
-                    <div style="font-size: 50px;">🏢</div>
-                    <b>GESCHÄFTSZIMMER</b>
-                    <p>Stadionzeitung & Orga</p>
-                </div>
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')"><span>👟</span><b>SPORTTASCHE</b></div>
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')"><span>🏢</span><b>GESCHÄFTSZIMMER</b></div>
             </div>
-
             <div id="briefcase-content" class="hidden">
-                <div id="active-content">
-                    </div>
+                <button onclick="BriefcaseUI.backToNav()" class="back-btn">← MENÜ</button>
+                <div id="active-content"></div>
             </div>
-
-            <button class="close-overlay-btn" onclick="BriefcaseUI.toggle()">FENSTER SCHLIESSEN [X]</button>
+            <button onclick="BriefcaseUI.toggle()" class="close-btn">SCHLIESSEN [X]</button>
         </div>
     </div>
 
     <script src="engine/arena.js"></script>
     <script src="ui/briefcase-ui.js"></script>
-    <script src="engine/toni-ai.js"></script>
-    
     <script>
-        // Authentifizierung & Systemstart
         window.ToniAuth = {
             login() {
-                const pass = document.getElementById('password-input').value;
-                if (pass === "Toni2026") {
+                if(document.getElementById('password-input').value === "Toni2026") {
                     document.getElementById('login-screen').classList.add('hidden');
-                    
-                    // Initialisiere Arena und KI nach dem Login
-                    if (window.arena) window.arena.init('main-canvas');
-                    if (window.ToniAI && typeof window.ToniAI.init === 'function') {
-                        window.ToniAI.init();
-                    }
-                    console.log("System Status: Online");
-                } else {
-                    alert("Zugriff verweigert!");
-                }
+                    if(window.arena) arena.init('main-canvas');
+                } else { alert("Falsch!"); }
             }
         };
-
-        // Überprüfung beim Laden der Seite
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("Toni 2.0 geladen. Warte auf Login...");
-        });
     </script>
 </body>
 </html>
