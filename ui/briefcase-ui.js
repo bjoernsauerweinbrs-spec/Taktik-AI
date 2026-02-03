@@ -1,110 +1,186 @@
+// Wir definieren das Objekt direkt am window, damit app.html es sicher findet
 window.BriefcaseUI = {
-    // ... (init, toggle, backToNav bleiben wie im Ist-Zustand gesichert)
+    init() {
+        let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
+        if (pl.length === 0) {
+            pl.push({
+                id: 'muster_1', name: 'David Luiz (Muster)', number: '4', pos: 'IV',
+                rating: 85, pace: 75, shooting: 60, passing: 82, ginga: 90, defense: 88, stamina: 80, pulse: 72, status: 'Fit', isMuster: true
+            });
+            localStorage.setItem('toni_players', JSON.stringify(pl));
+        }
+    },
+
+    toggle() {
+        const overlay = document.getElementById('briefcase-overlay');
+        if (overlay) {
+            overlay.classList.toggle('hidden');
+            if (!overlay.classList.contains('hidden')) {
+                this.backToNav();
+            }
+        } else {
+            console.error("Fehler: briefcase-overlay nicht gefunden!");
+        }
+    },
+
+    backToNav() {
+        const nav = document.getElementById('briefcase-nav');
+        const content = document.getElementById('briefcase-content');
+        const title = document.getElementById('sector-title');
+        if(!nav || !content) return;
+
+        nav.classList.remove('hidden');
+        content.classList.add('hidden');
+        title.innerText = "ZENTRALE AKTTENTASCHE";
+        this.renderFolderGrid();
+    },
+
+    renderFolderGrid() {
+        const nav = document.getElementById('briefcase-nav');
+        const folders = [
+            { id: 'taktik', name: 'TAKTIKEN', icon: 'fa-project-diagram', color: '#ff9500' },
+            { id: 'sport', name: 'SPIELER', icon: 'fa-users', color: '#ff9500' },
+            { id: 'training', name: 'TRAINING', icon: 'fa-dumbbell', color: '#ff9500' },
+            { id: 'matchplan', name: 'MATCHPLANS', icon: 'fa-clipboard-list', color: '#00d1ff' },
+            { id: 'media', name: 'MEDIA', icon: 'fa-photo-video', color: '#00d1ff' },
+            { id: 'sponsoring', name: 'SPONSORING', icon: 'fa-handshake', color: '#00d1ff' },
+            { id: 'templates', name: 'TEMPLATES', icon: 'fa-file-invoice', color: '#888' },
+            { id: 'reports', name: 'REPORTS', icon: 'fa-chart-line', color: '#888' },
+            { id: 'system', name: 'SYSTEM', icon: 'fa-cogs', color: '#888' }
+        ];
+
+        nav.innerHTML = `
+            <div class="folder-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px;">
+                ${folders.map(f => `
+                    <div class="folder-card" onclick="BriefcaseUI.switchSektor('${f.id}')" 
+                         style="background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 25px; border-radius: 12px; text-align: center; cursor: pointer;">
+                        <i class="fas ${f.icon}" style="font-size: 2rem; color: ${f.color}; margin-bottom: 10px; display: block;"></i>
+                        <span style="font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; color: #fff;">${f.name}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    },
+
+    switchSektor(sektor) {
+        const nav = document.getElementById('briefcase-nav');
+        const content = document.getElementById('briefcase-content');
+        const title = document.getElementById('sector-title');
+        
+        nav.classList.add('hidden');
+        content.classList.remove('hidden');
+        title.innerHTML = `<button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:#ff9500; cursor:pointer; margin-right:10px;"><i class="fas fa-arrow-left"></i></button> ${sektor.toUpperCase()}`;
+
+        if (sektor === 'sport') this.renderSporttasche();
+        else if (sektor === 'system') this.renderSystem();
+        else this.renderPlaceholder(sektor);
+    },
+
+    renderSporttasche() {
+        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        document.getElementById('active-content').innerHTML = `
+            <div style="padding: 10px;">
+                <button class="login-btn" style="width: 100%; margin-bottom: 20px; background:#ff9500; color:#000;" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUEN SPIELER HINZUFÜGEN</button>
+                <div class="pro-player-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
+                    ${players.map(p => `
+                        <div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background: #151515; border: 1px solid #333; padding: 15px; border-radius: 10px; text-align: center; cursor:pointer;">
+                            <div style="font-size: 1.2rem; font-weight: 900; color: #ff9500;">#${p.number}</div>
+                            <b style="font-size: 0.8rem; color: #fff;">${p.name}</b>
+                        </div>`).join('')}
+                </div>
+            </div>`;
+    },
 
     openFIFAcard(id) {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const p = players.find(x => x.id == id);
         if(!p) return;
 
-        // Falls Werte fehlen, Standard setzen
-        const pac = p.pace || 50;
-        const sho = p.shooting || 50;
-        const pas = p.passing || 50;
-        const gin = p.ginga || 50;
-        const def = p.defense || 50;
-        const sta = p.stamina || 50;
+        const pac = p.pace || 50; const sho = p.shooting || 50; const pas = p.passing || 50;
+        const gin = p.ginga || 50; const def = p.defense || 50; const sta = p.stamina || 50;
 
         document.getElementById('active-content').innerHTML = `
-            <div class="fifa-card-layout" style="display: flex; gap: 40px; background: #0a0a0a; padding: 30px; border-radius: 20px; border: 1px solid #333;">
-                
-                <div class="card-visual" style="width: 260px; height: 380px; background: linear-gradient(145deg, #d4af37, #b8860b); border-radius: 15px; padding: 20px; color: #111; position: relative; box-shadow: 0 0 20px rgba(212,175,55,0.3); font-family: 'DIN Condensed', sans-serif;">
-                    <div style="display: flex; flex-direction: column; align-items: center;">
-                        <div id="card-rating" style="font-size: 4.5rem; font-weight: 900; line-height: 1;">${p.rating || 80}</div>
-                        <div id="card-pos" style="font-size: 1.5rem; font-weight: bold; margin-top: -5px; text-transform: uppercase;">${p.pos || 'IV'}</div>
-                        
-                        <div style="width: 140px; height: 140px; background: rgba(0,0,0,0.1); border-radius: 50%; margin: 15px 0; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-user" style="font-size: 5rem; color: rgba(0,0,0,0.2);"></i>
-                        </div>
-                        
-                        <div id="card-name" style="font-size: 1.8rem; font-weight: 900; text-transform: uppercase; border-bottom: 2px solid rgba(0,0,0,0.1); width: 100%; text-align: center; padding-bottom: 5px;">${p.name}</div>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; width: 100%; margin-top: 15px; font-size: 1.2rem; font-weight: bold; line-height: 1.2;">
-                            <div style="padding-left: 20px;">
-                                <div id="v-pac">${pac} PAC</div>
-                                <div id="v-sho">${sho} SHO</div>
-                                <div id="v-pas">${pas} PAS</div>
-                            </div>
-                            <div style="border-left: 2px solid rgba(0,0,0,0.1); padding-left: 20px;">
-                                <div id="v-gin">${gin} GIN</div>
-                                <div id="v-def">${def} DEF</div>
-                                <div id="v-sta">${sta} STA</div>
-                            </div>
-                        </div>
+            <div style="display: flex; gap: 30px; background: #000; padding: 25px; border-radius: 15px; border: 1px solid #ff9500;">
+                <div id="card-preview" style="width: 220px; height: 320px; background: linear-gradient(145deg, #d4af37, #b8860b); border-radius: 10px; padding: 20px; color: #111; text-align: center;">
+                    <div id="v-rating" style="font-size: 4rem; font-weight: 900; line-height:1;">${p.rating || 80}</div>
+                    <div style="font-weight:bold; text-transform:uppercase;">${p.pos || 'IV'}</div>
+                    <div style="font-size: 1.5rem; font-weight: 900; margin-top: 80px; text-transform: uppercase; border-bottom: 2px solid rgba(0,0,0,0.1);">${p.name}</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; margin-top: 10px; font-weight: bold; font-size: 0.9rem; text-align: left; padding-left: 10px;">
+                        <div><span id="c-pac">${pac}</span> PAC</div>
+                        <div><span id="c-gin">${gin}</span> GIN</div>
+                        <div><span id="c-sho">${sho}</span> SHO</div>
+                        <div><span id="c-def">${def}</span> DEF</div>
+                        <div><span id="c-pas">${pas}</span> PAS</div>
+                        <div><span id="c-sta">${sta}</span> STA</div>
                     </div>
                 </div>
-
-                <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 15px;">
-                    <h2 style="color:var(--accent-orange); margin:0;">ATTRIBUT-EDITOR</h2>
-                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div>
-                            <label>GESCHWINDIGKEIT (PAC)</label><input type="range" id="r-pac" min="10" max="99" value="${pac}" oninput="BriefcaseUI.liveSync('${id}')">
-                            <label>SCHIESSEN (SHO)</label><input type="range" id="r-sho" min="10" max="99" value="${sho}" oninput="BriefcaseUI.liveSync('${id}')">
-                            <label>PASSEN (PAS)</label><input type="range" id="r-pas" min="10" max="99" value="${pas}" oninput="BriefcaseUI.liveSync('${id}')">
-                        </div>
-                        <div>
-                            <label>GINGA / TECHNIK (GIN)</label><input type="range" id="r-gin" min="10" max="99" value="${gin}" oninput="BriefcaseUI.liveSync('${id}')">
-                            <label>DEFENSIVE (DEF)</label><input type="range" id="r-def" min="10" max="99" value="${def}" oninput="BriefcaseUI.liveSync('${id}')">
-                            <label>AUSDAUER (STA)</label><input type="range" id="r-sta" min="10" max="99" value="${sta}" oninput="BriefcaseUI.liveSync('${id}')">
-                        </div>
-                    </div>
-                    
-                    <div style="background: rgba(255,59,48,0.1); padding: 15px; border-radius: 10px; border: 1px solid #ff3b30; display: flex; justify-content: space-between; align-items: center;">
-                        <b>❤️ LIVE PULS ÜBERWACHUNG</b>
-                        <input type="number" id="r-pulse" value="${p.pulse || 70}" style="width:80px; background:#000; color:#fff; border:1px solid #444; text-align:center; font-size: 1.2rem;" onchange="BriefcaseUI.liveSync('${id}')">
-                    </div>
-
-                    <button class="login-btn" style="height: 60px; background: var(--accent-orange); color:#000; font-size: 1.2rem;" onclick="BriefcaseUI.renderSporttasche()">FERTIG & SPEICHERN</button>
+                <div style="flex-grow: 1;">
+                    <label>PAC</label><input type="range" id="i-pac" value="${pac}" oninput="BriefcaseUI.sync('${id}')">
+                    <label>SHO</label><input type="range" id="i-sho" value="${sho}" oninput="BriefcaseUI.sync('${id}')">
+                    <label>PAS</label><input type="range" id="i-pas" value="${pas}" oninput="BriefcaseUI.sync('${id}')">
+                    <label>GIN</label><input type="range" id="i-gin" value="${gin}" oninput="BriefcaseUI.sync('${id}')">
+                    <label>DEF</label><input type="range" id="i-def" value="${def}" oninput="BriefcaseUI.sync('${id}')">
+                    <label>STA</label><input type="range" id="i-sta" value="${sta}" oninput="BriefcaseUI.sync('${id}')">
+                    <button class="login-btn" style="width:100%; margin-top:15px;" onclick="BriefcaseUI.renderSporttasche()">SPEICHERN</button>
                 </div>
-            </div>
-        `;
+            </div>`;
     },
 
-    liveSync(id) {
-        // Werte aus den Reglern lesen
-        const pac = document.getElementById('r-pac').value;
-        const sho = document.getElementById('r-sho').value;
-        const pas = document.getElementById('r-pas').value;
-        const gin = document.getElementById('r-gin').value;
-        const def = document.getElementById('r-def').value;
-        const sta = document.getElementById('r-sta').value;
-        const pulse = document.getElementById('r-pulse').value;
+    sync(id) {
+        const vals = {
+            pace: document.getElementById('i-pac').value,
+            shooting: document.getElementById('i-sho').value,
+            passing: document.getElementById('i-pas').value,
+            ginga: document.getElementById('i-gin').value,
+            defense: document.getElementById('i-def').value,
+            stamina: document.getElementById('i-sta').value
+        };
+        document.getElementById('c-pac').innerText = vals.pace;
+        document.getElementById('c-sho').innerText = vals.shooting;
+        document.getElementById('c-pas').innerText = vals.passing;
+        document.getElementById('c-gin').innerText = vals.ginga;
+        document.getElementById('c-def').innerText = vals.defense;
+        document.getElementById('c-sta').innerText = vals.stamina;
 
-        // Visualisierung auf der Karte links aktualisieren
-        document.getElementById('v-pac').innerText = pac + " PAC";
-        document.getElementById('v-sho').innerText = sho + " SHO";
-        document.getElementById('v-pas').innerText = pas + " PAS";
-        document.getElementById('v-gin').innerText = gin + " GIN";
-        document.getElementById('v-def').innerText = def + " DEF";
-        document.getElementById('v-sta').innerText = sta + " STA";
+        const rating = Math.round((Object.values(vals).reduce((a,b)=>parseInt(a)+parseInt(b))) / 6);
+        document.getElementById('v-rating').innerText = rating;
 
-        // Rating berechnen (Durchschnitt)
-        const rating = Math.round((parseInt(pac) + parseInt(sho) + parseInt(pas) + parseInt(gin) + parseInt(def) + parseInt(sta)) / 6);
-        document.getElementById('card-rating').innerText = rating;
-
-        // In Datenbank speichern
         let players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const i = players.findIndex(x => x.id == id);
         if(i !== -1) {
-            players[i].pace = pac; players[i].shooting = sho; players[i].passing = pas;
-            players[i].ginga = gin; players[i].defense = def; players[i].stamina = sta;
-            players[i].pulse = pulse; players[i].rating = rating;
+            Object.assign(players[i], vals);
+            players[i].rating = rating;
             localStorage.setItem('toni_players', JSON.stringify(players));
-            
-            // Puls-Check für Toni
-            if(pulse > 160 && window.ToniAI) {
-                window.ToniAI.addChatMessage("Toni", `Coach Björn! Puls-Alarm bei ${players[i].name}!`, "bot-msg");
-            }
         }
     },
-    // ... restliche Funktionen bleiben erhalten
+
+    renderSystem() {
+        const currentKey = localStorage.getItem('toni_api_key') || "";
+        document.getElementById('active-content').innerHTML = `
+            <div style="padding: 20px; border: 1px solid #333; border-radius: 10px; background: rgba(255,255,255,0.02);">
+                <h4 style="color:#fff;">KI-SETUP (API-KEY)</h4>
+                <input type="password" id="api-key-input" class="login-input" style="width:100%; background:#000; color:#fff; border:1px solid #444; padding:10px;" value="${currentKey}" placeholder="API-Key hier...">
+                <button class="login-btn" style="width:100%; margin-top:15px; background:#ff9500; color:#000;" onclick="BriefcaseUI.saveSettings()">SPEICHERN</button>
+            </div>`;
+    },
+
+    saveSettings() {
+        localStorage.setItem('toni_api_key', document.getElementById('api-key-input').value);
+        alert("API-Key gesichert!");
+    },
+
+    renderPlaceholder(s) { document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px; color:#555;">Bereich ${s.toUpperCase()} folgt.</div>`; },
+
+    addPlayerPrompt() {
+        const n = prompt("Name:"); const num = prompt("Nummer:");
+        if(n && num) {
+            let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
+            pl.push({ id: Date.now(), name: n, number: num, rating: 50, pace: 50, shooting: 50, passing: 50, ginga: 50, defense: 50, stamina: 50 });
+            localStorage.setItem('toni_players', JSON.stringify(pl));
+            this.renderSporttasche();
+        }
+    }
 };
+
+// Start
+BriefcaseUI.init();
