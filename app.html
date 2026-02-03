@@ -6,6 +6,74 @@
     <title>TONI 2.0 - High-Performance Taktik</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Spezifische Korrektur für die Sidebar-Integration */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding-top: 20px;
+            background: #0a0a0a;
+            border-right: 1px solid #222;
+        }
+
+        #tactic-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 85%;
+            margin-top: 30px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+
+        .tactic-btn {
+            width: 100%;
+            background: rgba(255, 149, 0, 0.05);
+            border: 1px solid #ff9500;
+            color: #fff;
+            padding: 10px 5px;
+            font-size: 0.6rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .tactic-btn:hover {
+            background: #ff9500;
+            color: #000;
+        }
+
+        .tactic-btn.reset {
+            border-color: #888;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .tactic-btn.reset:hover {
+            background: #444;
+            color: #fff;
+        }
+
+        /* Spielfeld-Zentrierung ohne störende Buttons */
+        .arena-column {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: #111;
+        }
+
+        #tactic-board {
+            max-width: 95%;
+            max-height: 95%;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+    </style>
 </head>
 <body>
 
@@ -19,15 +87,16 @@
             <i class="fas fa-microphone-alt" style="font-size:24px;"></i>
             <span>LIVE AI</span>
         </div>
-    </aside>
 
-    <main class="arena-column">
         <div id="tactic-controls">
             <button class="tactic-btn" onclick="arena.applyTacticalPattern('pressing')">🔥 PRESSING</button>
             <button class="tactic-btn" onclick="arena.applyTacticalPattern('overload')">🚀 ÜBERZAHL</button>
             <button class="tactic-btn" onclick="arena.applyTacticalPattern('compact')">🛡️ KOMPAKT</button>
             <button class="tactic-btn reset" onclick="arena.resetBoard()">🔄 RESET</button>
         </div>
+    </aside>
+
+    <main class="arena-column">
         <canvas id="tactic-board"></canvas>
     </main>
 
