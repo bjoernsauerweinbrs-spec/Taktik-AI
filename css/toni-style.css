@@ -1,129 +1,116 @@
-:root { 
-    --bg-deep: #05080F; 
-    --panel-dark: #0D1421; 
-    --accent-orange: #FF6A00; 
-    --data-cyan: #00D1FF; 
-    --gold: linear-gradient(135deg, #fceabb 0%, #f8b500 50%, #fceabb 100%); 
+:root {
+    --bg-deep: #05080F;
+    --panel-dark: #0D1421;
+    --accent-orange: #FF6A00;
+    --data-cyan: #00D1FF;
+    --gold-grad: linear-gradient(135deg, #fceabb 0%, #f8b500 50%, #fceabb 100%);
+    --red-team: #FF3B30;
+    --text-main: #FFFFFF;
+    --text-dim: #A0AEC0;
 }
 
+/* GLOBAL RESET */
 * { box-sizing: border-box; }
-
 body, html { 
     margin: 0; padding: 0; width: 100%; height: 100%; 
-    overflow: hidden; background: var(--bg-deep); color: #fff; 
-    font-family: 'Inter', sans-serif; 
+    background: var(--bg-deep); color: var(--text-main); 
+    font-family: 'Inter', sans-serif; overflow: hidden; 
 }
 
-/* --- GRID SYSTEM MASTER --- */
-body.pro-layout { 
-    display: grid; 
-    grid-template-columns: 100px 1fr 350px; 
-    grid-template-rows: 100vh; 
+/* --- SEKTION A: ANMELDESEITE (ISOLIERT) --- */
+#login-screen {
+    position: fixed; inset: 0; 
+    background: radial-gradient(circle at center, #111d35 0%, #05080f 100%);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10000;
 }
 
-/* --- LOGIN SCREEN (Repariert & Zentriert) --- */
-#login-screen { 
-    position: fixed; inset: 0; background: var(--bg-deep); 
-    z-index: 99999; display: flex; align-items: center; 
-    justify-content: center; flex-direction: column; 
+.login-box {
+    background: rgba(13, 20, 33, 0.95);
+    padding: 60px; border-radius: 30px;
+    border: 2px solid var(--accent-orange);
+    text-align: center;
+    box-shadow: 0 0 80px rgba(255, 106, 0, 0.2);
 }
 
-.login-box { 
-    text-align: center; padding: 60px; border: 2px solid var(--accent-orange); 
-    border-radius: 25px; background: #0D1421; 
-    box-shadow: 0 0 60px rgba(255, 106, 0, 0.2); 
+.glow-text {
+    font-size: 4rem; font-weight: 900; margin: 0;
+    color: var(--accent-orange);
+    text-shadow: 0 0 25px rgba(255, 106, 0, 0.5);
 }
 
-.glow-text { 
-    color: var(--accent-orange); font-size: 4rem; margin: 0; 
-    text-shadow: 0 0 20px rgba(255, 106, 0, 0.5); 
+.cyber-subtitle {
+    color: var(--data-cyan); letter-spacing: 6px; 
+    font-size: 0.8rem; margin-bottom: 40px;
 }
 
-.login-input { 
-    width: 300px; padding: 15px; margin: 20px 0; background: #000; 
-    border: 1px solid #333; color: #fff; text-align: center; border-radius: 10px; 
+.login-input {
+    display: block; width: 320px; padding: 18px;
+    background: #000; border: 1px solid #333;
+    color: white; border-radius: 10px; text-align: center;
+    font-size: 1.1rem; margin-bottom: 20px;
 }
 
-.login-btn { 
-    width: 300px; padding: 15px; background: var(--accent-orange); 
-    border: none; color: #fff; font-weight: 900; border-radius: 10px; cursor: pointer; 
+.login-btn {
+    width: 320px; padding: 18px; background: var(--accent-orange);
+    color: white; font-weight: 900; border: none;
+    border-radius: 10px; cursor: pointer; transition: 0.3s;
 }
 
-/* --- SIDEBAR & ARENA --- */
+.login-btn:hover { background: #e65f00; transform: scale(1.02); }
+
+/* --- SEKTION B: DAS HAUPTSYSTEM (GRID) --- */
+.pro-layout {
+    display: grid;
+    grid-template-columns: 100px 1fr 350px;
+    grid-template-rows: 100vh;
+    width: 100vw; height: 100vh;
+}
+
+/* SIDEBAR */
 .sidebar-minimal { 
-    background: #020408; border-right: 1px solid rgba(255, 106, 0, 0.3); 
-    display: flex; flex-direction: column; align-items: center; 
+    background: #020408; border-right: 1px solid rgba(255,106,0,0.3); 
+    display: flex; flex-direction: column; align-items: center;
 }
+.control-unit { cursor: pointer; margin-top: 40px; text-align: center; color: var(--text-dim); }
+.control-unit .icon { font-size: 32px; margin-bottom: 8px; }
 
-.control-unit { margin-top: 40px; text-align: center; cursor: pointer; color: #888; }
-
-#stage-container { 
-    height: 100vh; display: flex; align-items: center; 
-    justify-content: center; background: radial-gradient(circle, #111d35 0%, #05080f 100%); 
+/* ARENA CONTAINER (MITTE) */
+#stage-container {
+    height: 100vh; width: 100%; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    padding: 30px; background: #05080F;
 }
-
 #stage { width: 100%; height: 100%; position: relative; }
+#main-canvas { width: 100%; height: 100%; display: block; border: 1px solid #222; }
 
-#main-canvas { width: 100%; height: 100%; display: block; }
-
-/* --- TONI LIVE CHAT (FESTE POSITION) --- */
-.chat-container { 
-    position: fixed; bottom: 20px; right: 370px; 
-    width: 320px; height: 400px; background: #0A0F1A; 
-    border: 1px solid var(--data-cyan); border-radius: 15px; 
-    display: flex; flex-direction: column; z-index: 1000; 
+/* ANALYSE FEED (RECHTS) */
+.analysis-panel { 
+    background: var(--panel-dark); border-left: 1px solid rgba(0,209,255,0.1); 
+    padding: 25px; overflow-y: auto;
 }
 
-.chat-header { 
-    background: var(--data-cyan); color: #000; padding: 10px; 
-    font-weight: 900; border-radius: 14px 14px 0 0; 
-    display: flex; justify-content: space-between;
+/* LIVE CHAT */
+.chat-container {
+    position: fixed; bottom: 25px; right: 375px;
+    width: 330px; height: 420px; background: #0A0F1A;
+    border: 1px solid var(--data-cyan); border-radius: 15px;
+    display: flex; flex-direction: column; z-index: 500;
 }
-
+.chat-header { background: var(--data-cyan); color: #000; padding: 12px; font-weight: 900; border-radius: 14px 14px 0 0; }
 .chat-messages { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; }
 
-.user-msg { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 10px; margin-bottom: 10px; text-align: right; }
-.bot-msg { background: rgba(0, 209, 255, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid var(--data-cyan); }
-
-.chat-input-area { display: flex; padding: 10px; border-top: 1px solid #222; }
-.chat-input-area input { flex: 1; background: #000; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 5px; }
-
-/* --- ZENTRALE & SEKTOREN --- */
+/* AKTENTASCHE & SEKTOREN */
 .briefcase-overlay { 
-    position: fixed; inset: 0; background: rgba(0,0,0,0.95); 
-    z-index: 9998; display: flex; align-items: center; 
-    justify-content: center; backdrop-filter: blur(15px); 
+    position: fixed; inset: 0; background: rgba(0,0,0,0.96); 
+    z-index: 9000; display: flex; align-items: center; justify-content: center; 
+    backdrop-filter: blur(15px); 
 }
-
 .briefcase-window { 
-    background: #0D1421; border: 2px solid var(--accent-orange); 
+    background: var(--panel-dark); border: 2px solid var(--accent-orange); 
     width: 90%; height: 85%; padding: 40px; border-radius: 25px; 
-    overflow-y: auto; position: relative;
 }
 
-.folder-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 40px; }
-
-.nav-card { 
-    background: rgba(255, 255, 255, 0.02); padding: 50px; text-align: center; 
-    border-radius: 20px; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.05); 
-}
-
-.nav-card:hover { border-color: var(--accent-orange); background: rgba(255, 106, 0, 0.05); }
-
-/* --- SETCARDS & ANALYSE --- */
-.fifa-card-pro { 
-    width: 260px; height: 380px; background: var(--gold); 
-    border-radius: 15px; padding: 10px; color: #000; 
-}
-
-.tab-pill-box { display: flex; gap: 10px; margin-bottom: 20px; }
-.tab-pill { 
-    flex: 1; padding: 12px; background: rgba(255, 255, 255, 0.05); 
-    border: none; color: #fff; cursor: pointer; border-radius: 8px; 
-}
-.tab-pill.active { background: var(--accent-orange); }
-
-.analysis-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.dashboard-card { background: rgba(0,0,0,0.3); padding: 25px; border-radius: 15px; border: 1px solid #222; }
-
+/* HELPERS */
 .hidden { display: none !important; }
+.toni-speech-bubble { background: rgba(0,209,255,0.07); border: 1px solid var(--data-cyan); padding: 15px; border-radius: 12px; font-size: 0.9rem; }
