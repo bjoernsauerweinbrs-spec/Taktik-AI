@@ -16,86 +16,81 @@ body, html {
     font-family: 'Inter', sans-serif; overflow: hidden; 
 }
 
-/* --- SEKTION A: ANMELDESEITE (STRENG ISOLIERT) --- */
+/* --- ANMELDESEITE (STRENG ISOLIERT) --- */
 #login-screen {
     position: fixed; inset: 0; 
     background: radial-gradient(circle at center, #112540 0%, #05080f 100%);
     display: flex; align-items: center; justify-content: center;
-    z-index: 100000; /* Muss über allem liegen */
+    z-index: 100000;
 }
 
 .login-box {
     background: rgba(13, 20, 33, 0.98);
-    padding: 60px; border-radius: 30px;
-    border: 2px solid var(--accent-orange);
-    text-align: center;
-    box-shadow: 0 0 100px rgba(255, 106, 0, 0.3);
+    padding: 60px; border-radius: 30px; border: 2px solid var(--accent-orange);
+    text-align: center; box-shadow: 0 0 100px rgba(255, 106, 0, 0.3);
 }
 
 .glow-text {
     font-size: 4rem; font-weight: 900; margin: 0;
-    color: var(--accent-orange);
-    text-shadow: 0 0 25px rgba(255, 106, 0, 0.5);
+    color: var(--accent-orange); text-shadow: 0 0 25px rgba(255, 106, 0, 0.5);
 }
 
-.cyber-subtitle {
-    color: var(--data-cyan); letter-spacing: 6px; 
-    font-size: 0.8rem; margin-bottom: 40px;
-}
+.cyber-subtitle { color: var(--data-cyan); letter-spacing: 6px; font-size: 0.8rem; margin-bottom: 40px; }
 
 .login-input {
-    display: block; width: 320px; padding: 18px;
-    background: #000; border: 1px solid #333;
-    color: white; border-radius: 10px; text-align: center;
-    font-size: 1.1rem; margin-bottom: 20px;
+    display: block; width: 320px; padding: 18px; background: #000;
+    border: 1px solid #333; color: white; border-radius: 10px;
+    text-align: center; font-size: 1.1rem; margin-bottom: 20px;
 }
 
 .login-btn {
     width: 320px; padding: 18px; background: var(--accent-orange);
-    color: white; font-weight: 900; border: none;
-    border-radius: 10px; cursor: pointer; transition: 0.3s;
-    display: inline-block; /* Sicherstellen, dass er klickbar ist */
+    color: white; font-weight: 900; border: none; border-radius: 10px;
+    cursor: pointer; transition: 0.3s; display: inline-block;
 }
 
-.login-btn:hover { background: #e65f00; transform: scale(1.02); }
-
-/* --- SEKTION B: DAS HAUPTSYSTEM (GRID FIX) --- */
+/* --- HAUPTSYSTEM GRID --- */
 body.pro-layout {
-    display: grid;
-    grid-template-columns: 80px 1fr 320px;
-    grid-template-rows: 100vh;
+    display: grid !important;
+    grid-template-columns: 100px 1fr 350px !important;
+    grid-template-rows: 100vh !important;
     width: 100vw; height: 100vh;
 }
 
+/* SIDEBAR REPARATUR */
 .sidebar-minimal { 
-    background: #020408; border-right: 1px solid rgba(255,106,0,0.3); 
+    grid-column: 1;
+    background: #020408; 
+    border-right: 1px solid rgba(255,106,0,0.3); 
     display: flex; flex-direction: column; align-items: center;
+    padding-top: 20px;
     z-index: 100;
 }
 
-.control-unit { cursor: pointer; margin-top: 40px; text-align: center; color: var(--text-dim); }
-.control-unit .icon { font-size: 32px; margin-bottom: 8px; }
+.control-unit { cursor: pointer; margin-bottom: 40px; text-align: center; color: var(--text-dim); }
+.control-unit .icon { font-size: 32px; margin-bottom: 8px; display: block; }
 
-/* ARENA OPTIMIERUNG: BOARD FÜLLT DEN RAUM */
+/* ARENA OPTIMIERUNG */
 #stage-container {
+    grid-column: 2;
     height: 100vh; width: 100%; position: relative;
     display: flex; align-items: center; justify-content: center;
-    padding: 10px; background: #05080F;
-    overflow: hidden;
+    background: #05080F; overflow: hidden;
 }
 
-#stage { width: 98%; height: 95%; position: relative; display: flex; align-items: center; justify-content: center; }
-#main-canvas { width: 100%; height: 100%; display: block; border: 1px solid #222; }
+#stage { width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; }
+#main-canvas { width: 100%; height: 100%; display: block; object-fit: contain; }
 
 .analysis-panel { 
+    grid-column: 3;
     background: var(--panel-dark); border-left: 1px solid rgba(255,255,255,0.05); 
     padding: 25px; overflow-y: auto; z-index: 10;
 }
 
-/* --- TONI LIVE CHAT --- */
+/* TONI LIVE CHAT (RECHTE ECKE) */
 .chat-container {
-    position: fixed; bottom: 20px; right: 335px;
-    width: 300px; height: 380px; background: rgba(10, 15, 26, 0.95);
+    position: fixed; bottom: 20px; right: 370px;
+    width: 320px; height: 400px; background: rgba(10, 15, 26, 0.95);
     border: 1px solid var(--data-cyan); border-radius: 15px;
     display: flex; flex-direction: column; z-index: 1000;
     backdrop-filter: blur(10px);
@@ -105,7 +100,7 @@ body.pro-layout {
 .bot-msg { background: rgba(0, 209, 255, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid var(--data-cyan); }
 .user-msg { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 10px; margin-bottom: 10px; text-align: right; }
 
-/* --- AKTENTASCHE & SEKTOREN --- */
+/* AKTENTASCHE & SEKTOREN */
 .briefcase-overlay { 
     position: fixed; inset: 0; background: rgba(0,0,0,0.96); 
     z-index: 90000; display: flex; align-items: center; justify-content: center; 
@@ -116,45 +111,26 @@ body.pro-layout {
     width: 95%; height: 90%; padding: 40px; border-radius: 25px; overflow-y: auto;
 }
 
-/* --- SPORTTASCHE & AMPELSYSTEM --- */
-.pro-player-list {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 15px; margin-top: 20px;
-}
-.p-card {
-    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s;
-}
+/* SPORTTASCHE & AMPELSYSTEM */
+.pro-player-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+.p-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; }
 .p-card.Anwesend { border-left: 5px solid #4CD964; }
 .p-card.Abwesend { border-left: 5px solid #FFCC00; opacity: 0.7; }
 .p-card.Verletzt { border-left: 5px solid #FF3B30; }
 .p-stars { color: #f8b500; margin-top: 5px; }
 
-/* --- STADIONZEITUNG (MAGAZIN) --- */
-.magazine-view {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 20px;
-}
-.mag-page {
-    background: #fff; color: #000; aspect-ratio: 1 / 1.41;
-    padding: 30px; border-radius: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    display: flex; flex-direction: column; border-top: 10px solid var(--panel-dark);
-}
+/* STADIONZEITUNG */
+.magazine-view { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 20px; }
+.mag-page { background: #fff; color: #000; aspect-ratio: 1 / 1.41; padding: 30px; border-radius: 5px; display: flex; flex-direction: column; border-top: 10px solid var(--panel-dark); }
 .mag-page b { font-size: 1.4rem; color: var(--accent-orange); border-bottom: 2px solid #eee; margin-bottom: 15px; display: block; }
 .mag-area { flex: 1; border: 1px dashed #ccc; padding: 15px; font-family: 'Georgia', serif; resize: none; font-size: 0.9rem; }
 
-/* --- SPONSOREN-AGENTUR --- */
-.sponsoring-tool {
-    background: rgba(0, 209, 255, 0.05); padding: 40px;
-    border-radius: 20px; border: 1px solid var(--data-cyan);
-}
-
-/* --- HELPERS --- */
+/* HELPERS */
 .hidden { display: none !important; }
 .toni-speech-bubble { background: rgba(0,209,255,0.07); border: 1px solid var(--data-cyan); padding: 15px; border-radius: 12px; }
 
-/* --- DRUCK-MODUS --- */
 @media print {
     body * { visibility: hidden; }
     .magazine-view, .mag-page, .mag-page * { visibility: visible; }
-    .mag-page { page-break-after: always; width: 100%; box-shadow: none; border: none; }
+    .mag-page { page-break-after: always; width: 100%; border: none; }
 }
