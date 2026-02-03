@@ -1,59 +1,78 @@
 window.ToniAI = {
     isListening: false,
-    recognition: null,
     
     init() {
-        console.log("Toni AI: Systemstart... Brasilianischer Style aktiv.");
+        console.log("Toni 2.0: KI-Schnittstelle aktiv. Warte auf Björns Befehle.");
         this.setupVoiceCommands();
         this.welcomeMessage();
     },
 
     welcomeMessage() {
-        const msg = "Ola Björn! Toni 2.0 ist bereit. Dein Board ist frei, der Kader geladen. Wie gehen wir heute taktisch vor? Soll ich die Jungs ins 4-3-3 schieben?";
+        const msg = "Ola Björn! Toni 2.0 ist einsatzbereit. Ich habe das Web im Blick. Was möchtest du heute analysieren oder welche Formation soll ich einstellen?";
         this.addChatMessage("Toni", msg, "bot-msg");
     },
 
-    toggleListening() {
-        this.isListening = !this.isListening;
-        const micIcon = document.getElementById('mic-icon');
-        if (this.isListening) {
-            micIcon.style.color = "#FF3B30";
-            micIcon.classList.add('pulse');
-            console.log("Toni hört zu...");
-            // Hier würde die Web Speech API starten
-        } else {
-            micIcon.style.color = "";
-            micIcon.classList.remove('pulse');
-        }
-    },
-
-    // Die Logik, wie Toni auf Björn reagiert
     async processCommand(text) {
         this.addChatMessage("Björn", text, "user-msg");
-        
-        let response = "";
         const input = text.toLowerCase();
+        const apiKey = localStorage.getItem('toni_api_key');
 
+        // 1. Taktik-Befehle (Lokal ohne API)
         if (input.includes("formation") || input.includes("aufstellung")) {
-            response = "Kein Problem, Björn! Ich schiebe die Jungs in die Formation. Schau aufs Board!";
-            window.BriefcaseUI.applyFormation(input.includes("352") ? "352" : "433");
-        } 
-        else if (input.includes("zeitung") || input.includes("marketing")) {
-            response = "Die Stadionzeitung für den FC Toni 2.0 sieht spitze aus. Soll ich noch mehr Werbung für unser Board machen?";
-            window.BriefcaseUI.switchSektor('marketing');
-        }
-        else if (input.includes("kader") || input.includes("spieler")) {
-            response = "Ich öffne dir die Sporttasche. Wer ist heute fit für den brasilianischen Zauber?";
-            window.BriefcaseUI.switchSektor('sport');
-        }
-        else {
-            response = "Verstanden, Björn. Ich analysiere das... Als dein Berater sage ich: Wir brauchen mehr Ballbesitz im Mittelfeld!";
+            const type = input.includes("352") ? "352" : "433";
+            const response = `Com certeza! Ich schiebe die Jungs ins ${type}. Schau auf das Board, Björn!`;
+            this.addChatMessage("Toni", response, "bot-msg");
+            window.BriefcaseUI.applyFormation(type);
+            this.speak(response);
+            return;
         }
 
-        setTimeout(() => {
-            this.addChatMessage("Toni", response, "bot-msg");
-            this.speak(response);
-        }, 600);
+        // 2. Web-Recherche (Mit API-Key)
+        if (apiKey && apiKey.trim() !== "") {
+            this.addChatMessage("Toni", "⚡ Recherchiere Live-Web-Daten... Analysiere Taktik-Trends...", "bot-msg");
+            
+            try {
+                // Beispiel-Anbindung an ein LLM (Standard-Endpoint)
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4o", 
+                        messages: [
+                            { 
+                                role: "system", 
+                                content: "Du bist Toni, ein brasilianischer Fußball-Taktik-Experte. Du arbeitest für Trainer Björn. Antworte präzise, fachlich fundiert, mit Fokus auf Technik und Ginga-Style. Du hast Zugriff auf das Internet 2026." 
+                            },
+                            { role: "user", content: text }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                if (data.choices && data.choices[0]) {
+                    const aiReply = data.choices[0].message.content;
+                    this.addChatMessage("Toni", aiReply, "bot-msg");
+                    this.speak(aiReply);
+                } else {
+                    throw new Error("API Antwort fehlerhaft");
+                }
+
+            } catch (error) {
+                console.error("KI-Fehler:", error);
+                const errorMsg = "Björn, ich habe Probleme mit der Internetverbindung. Prüfe bitte deinen API-Key in der Zentrale.";
+                this.addChatMessage("Toni", errorMsg, "bot-msg");
+                this.speak(errorMsg);
+            }
+        } 
+        // 3. Fallback (Kein API-Key)
+        else {
+            const fallback = "Björn, für eine echte Web-Analyse brauche ich meinen API-Key in den Einstellungen. Aber mein Gefühl sagt: Wir müssen heute über die Flügel zaubern!";
+            this.addChatMessage("Toni", fallback, "bot-msg");
+            this.speak(fallback);
+        }
     },
 
     addChatMessage(sender, text, type) {
@@ -69,11 +88,24 @@ window.ToniAI = {
 
     speak(text) {
         if (!window.speechSynthesis) return;
+        // Stoppt laufende Sprachausgabe
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'de-DE';
-        utterance.pitch = 0.9; // Etwas tiefer, männlich
+        utterance.pitch = 0.85; // Männlicherer, tieferer Klang
         utterance.rate = 1.0;
         window.speechSynthesis.speak(utterance);
+    },
+
+    toggleListening() {
+        this.isListening = !this.isListening;
+        const micIcon = document.getElementById('mic-icon');
+        if (micIcon) {
+            micIcon.style.color = this.isListening ? "#FF3B30" : "";
+            if(this.isListening) micIcon.classList.add('pulse');
+            else micIcon.classList.remove('pulse');
+        }
+        console.log("Mikrofon Status:", this.isListening);
     },
 
     setupVoiceCommands() {
@@ -82,22 +114,21 @@ window.ToniAI = {
         
         if (btn && input) {
             btn.onclick = () => {
-                if (input.value.trim() !== "") {
-                    this.processCommand(input.value);
+                const val = input.value.trim();
+                if (val !== "") {
+                    this.processCommand(val);
                     input.value = "";
                 }
             };
             input.onkeypress = (e) => {
-                if (e.key === 'Enter' && input.value.trim() !== "") {
-                    this.processCommand(input.value);
-                    input.value = "";
+                if (e.key === 'Enter') {
+                    const val = input.value.trim();
+                    if (val !== "") {
+                        this.processCommand(val);
+                        input.value = "";
+                    }
                 }
             };
         }
     }
 };
-
-// Initialisierung bei Systemstart
-document.addEventListener('DOMContentLoaded', () => {
-    // Toni wartet kurz auf das System-Login
-});
