@@ -1,77 +1,102 @@
 window.ToniAI = {
-    isListening: false,
-    
     init() {
-        console.log("Toni 2.0: KI-Schnittstelle aktiv.");
+        console.log("Toni 2.0 Gehirn initialisiert.");
         this.setupVoiceCommands();
         this.welcomeMessage();
     },
 
     welcomeMessage() {
-        const msg = "Ola Björn! Ich bin bereit. Hast du meinen Key im System-Ordner hinterlegt? Sobald der drin ist, kann ich für dich das Netz scannen!";
-        this.addChatMessage("Toni", msg, "bot-msg");
+        const provider = localStorage.getItem('toni_api_provider') || "Basis";
+        this.addChatMessage("Toni", `Ola Björn! Modus ${provider.toUpperCase()} ist bereit. Was recherchieren wir heute?`, "bot-msg");
     },
 
     async processCommand(text) {
         this.addChatMessage("Björn", text, "user-msg");
-        const input = text.toLowerCase();
+        const provider = localStorage.getItem('toni_api_provider') || "free";
         const apiKey = localStorage.getItem('toni_api_key');
+        const input = text.toLowerCase();
 
-        // FORMATIONEN (Immer lokal verfügbar)
+        // Lokale Taktik-Befehle (Ohne KI)
         if (input.includes("formation") || input.includes("aufstellung")) {
             const type = input.includes("352") ? "352" : "433";
-            const response = `Com certeza! Ich schiebe die Jungs ins ${type}. Schau auf das Board!`;
-            this.addChatMessage("Toni", response, "bot-msg");
+            const res = `Tudo bem! Ich stelle auf ${type} um. Schau auf das Feld!`;
+            this.addChatMessage("Toni", res, "bot-msg");
             window.BriefcaseUI.applyFormation(type);
-            this.speak(response);
+            this.speak(res);
             return;
         }
 
-        // WEB-RECHERCHE MIT API
-        if (apiKey && apiKey.length > 10) {
-            this.addChatMessage("Toni", "⚡ Ich verbinde mich mit dem Taktik-Netzwerk...", "bot-msg");
-            
-            try {
-                // Wir nutzen hier den OpenAI-Standard (funktioniert auch mit vielen anderen KIs)
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: "gpt-4o-mini", // Kostengünstig und schnell
-                        messages: [
-                            { role: "system", content: "Du bist Toni, ein brasilianischer Fußball-Experte für Trainer Björn. Antworte kurz, fachlich und mit Ginga-Flair." },
-                            { role: "user", content: text }
-                        ]
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || "API-Fehler");
-                }
-
-                const data = await response.json();
-                const aiReply = data.choices[0].message.content;
-                this.addChatMessage("Toni", aiReply, "bot-msg");
-                this.speak(aiReply);
-
-            } catch (error) {
-                console.error("Detaillierter Fehler:", error);
-                let userError = "Björn, Verbindung zum Netz fehlgeschlagen.";
-                if(error.message.includes("401")) userError = "Björn, der API-Key im System-Ordner scheint ungültig zu sein.";
-                if(error.message.includes("429")) userError = "Björn, mein Kontingent im Netz ist erschöpft (Limit erreicht).";
-                
-                this.addChatMessage("Toni", userError, "bot-msg");
-                this.speak(userError);
-            }
-        } else {
-            const noKey = "Björn, ohne gültigen Key im System-Ordner kann ich nicht recherchieren. Ich nutze jetzt mein Basis-Wissen: Wir sollten offensiv agieren!";
-            this.addChatMessage("Toni", noKey, "bot-msg");
-            this.speak(noKey);
+        // KI-Recherche
+        if (provider === "free" || (!apiKey && provider !== "llama" && provider !== "free")) {
+            this.localFallback("Björn, im Basis-Modus ohne Key empfehle ich: Kompakt stehen und Flügelspiel forcieren!");
+            return;
         }
+
+        this.addChatMessage("Toni", `⚡ Recherche via ${provider.toUpperCase()}...`, "bot-msg");
+
+        try {
+            let apiUrl = "";
+            let headers = { "Content-Type": "application/json" };
+            let body = {};
+
+            if (provider === "openai") {
+                apiUrl = 'https://api.openai.com/v1/chat/completions';
+                headers["Authorization"] = `Bearer ${apiKey}`;
+                body = {
+                    model: "gpt-4o-mini",
+                    messages: [
+                        { role: "system", content: "Du bist Toni, ein brasilianischer Fußball-Experte für Trainer Björn. Antworte kurz, präzise und mit Ginga-Flair." },
+                        { role: "user", content: text }
+                    ]
+                };
+            } 
+            else if (provider === "gemini") {
+                apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+                body = { contents: [{ parts: [{ text: `Du bist Fußball-Experte Toni. Antworte Björn auf: ${text}` }] }] };
+            }
+            else if (provider === "llama") {
+                apiUrl = 'http://localhost:11434/api/generate';
+                body = {
+                    model: "llama3",
+                    prompt: `Antworte als Fußball-Experte Toni kurz und knackig: ${text}`,
+                    stream: false
+                };
+            }
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                if(response.status === 429) throw new Error("LIMIT_REACHED");
+                throw new Error("SERVER_OFFLINE");
+            }
+
+            const data = await response.json();
+            let reply = "";
+            
+            if (provider === "openai") reply = data.choices[0].message.content;
+            else if (provider === "gemini") reply = data.candidates[0].content.parts[0].text;
+            else if (provider === "llama") reply = data.response;
+
+            this.addChatMessage("Toni", reply, "bot-msg");
+            this.speak(reply);
+
+        } catch (error) {
+            let errorMsg = "Björn, Verbindung zum Anbieter fehlgeschlagen.";
+            if(error.message === "LIMIT_REACHED") errorMsg = "Björn, das Guthaben/Limit dieses Anbieters ist leer.";
+            if(provider === "llama") errorMsg = "Björn, Llama (Ollama) ist offline. Bitte starte das Programm auf deinem Rechner!";
+            
+            this.addChatMessage("Toni", errorMsg, "bot-msg");
+            this.speak(errorMsg);
+        }
+    },
+
+    localFallback(msg) {
+        this.addChatMessage("Toni", msg, "bot-msg");
+        this.speak(msg);
     },
 
     addChatMessage(sender, text, type) {
@@ -89,8 +114,18 @@ window.ToniAI = {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'de-DE';
-        utterance.pitch = 0.8;
+        utterance.pitch = 0.85;
         window.speechSynthesis.speak(utterance);
+    },
+
+    toggleListening() {
+        this.isListening = !this.isListening;
+        const micIcon = document.getElementById('mic-icon');
+        if (micIcon) {
+            micIcon.style.color = this.isListening ? "#FF3B30" : "";
+            if(this.isListening) micIcon.classList.add('pulse');
+            else micIcon.classList.remove('pulse');
+        }
     },
 
     setupVoiceCommands() {
