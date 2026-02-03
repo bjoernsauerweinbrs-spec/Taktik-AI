@@ -12,70 +12,110 @@ window.BriefcaseUI = {
         content.classList.remove('hidden');
 
         if (sektor === 'sport') {
-            this.renderSquadList();
+            this.renderAnalysisCenter();
         } else if (sektor === 'orga') {
-            target.innerHTML = `
-                <h3>🏢 GESCHÄFTSZIMMER</h3>
-                <p style="font-size:12px; color:var(--data-cyan);">STADIONZEITUNG & ORGANISATION</p>
-                <textarea id="stadion-notes" class="orga-box" style="width:100%; height:300px; margin-top:15px;"></textarea>
-                <button onclick="BriefcaseUI.saveOrga()" class="action-btn" style="margin-top:10px;">NOTIZ SPEICHERN</button>
-            `;
-            const saved = localStorage.getItem('toni_orga_notes');
-            if(saved) document.getElementById('stadion-notes').value = saved;
+            this.renderOrga();
         }
     },
 
-    renderSquadList() {
+    // ANALYSEZENTRUM: Die zentrale Schnittstelle
+    renderAnalysisCenter() {
         const target = document.getElementById('active-content');
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [
-            {id: 1, name: "David Luiz", pos: "IV", pac: 70, sho: 65, pas: 80, dri: 72, def: 85, phy: 88},
-            {id: 2, name: "Neuer Spieler", pos: "ST", pac: 50, sho: 50, pas: 50, dri: 50, def: 50, phy: 50}
-        ];
+        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        
+        // Berechnung Durchschnittswerte für das Team
+        const avgOvr = players.length > 0 ? Math.round(players.reduce((acc, p) => acc + this.calcOvr(p), 0) / players.length) : 0;
 
         let html = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3>👟 SPORTTASCHE // KADER</h3>
-                <button onclick="BriefcaseUI.addPlayerPrompt()" class="action-btn" style="background:var(--data-cyan)">+ SPIELER HINZUFÜGEN</button>
+            <div class="analysis-header">
+                <div>
+                    <h3>📊 ANALYSEZENTRUM</h3>
+                    <p style="color:var(--data-cyan)">TEAM-STATUS: ${avgOvr} OVR | KADERGRÖSSE: ${players.length}</p>
+                </div>
+                <button onclick="BriefcaseUI.showAddPlayerForm()" class="action-btn">+ NEUER SPIELER</button>
             </div>
-            <div class="player-grid-view">`;
+            
+            <div id="dynamic-sub-content">
+                <div class="player-grid-view">`;
         
         players.forEach(p => {
+            const ovr = this.calcOvr(p);
             html += `
                 <div class="player-card red-border">
-                    <div style="flex:1;" onclick="BriefcaseUI.openSetcard(${p.id})"><b>${p.name}</b> (${p.pos})</div>
-                    <button onclick="BriefcaseUI.removePlayer(${p.id})" style="background:none; border:none; color:red; cursor:pointer;">✖</button>
+                    <div style="flex:1" onclick="BriefcaseUI.openSetcard(${p.id})">
+                        <span class="p-number">#${p.number}</span> 
+                        <b>${p.name}</b> 
+                        <span class="p-pos">${p.pos}</span>
+                    </div>
+                    <div class="p-ovr-small">${ovr}</div>
+                    <button onclick="BriefcaseUI.removePlayer(${p.id})" class="delete-btn">✖</button>
                 </div>`;
         });
-        html += `</div>`;
+        
+        html += `</div></div>`;
         target.innerHTML = html;
     },
 
-    addPlayerPrompt() {
-        const name = prompt("Name des Spielers:");
-        if(!name) return;
+    calcOvr(p) {
+        return Math.round((p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6);
+    },
+
+    // FORMULAR FÜR NEUE SPIELER (Name, Nummer, Position)
+    showAddPlayerForm() {
+        const sub = document.getElementById('dynamic-sub-content');
+        sub.innerHTML = `
+            <div class="form-container">
+                <h4>SPIELER-DATENSATZ ANLEGEN</h4>
+                <div class="edit-grid">
+                    <label>NAME</label><input type="text" id="new-name" placeholder="z.B. David Luiz">
+                    <label>NUMMER</label><input type="number" id="new-number" placeholder="4">
+                    <label>POSITION</label>
+                    <select id="new-pos">
+                        <option value="TW">Torwart</option><option value="IV">Innenverteidiger</option>
+                        <option value="LV">Linksverteidiger</option><option value="RV">Rechtsverteidiger</option>
+                        <option value="ZDM">Zentrales Mittelfeld</option><option value="ST">Stürmer</option>
+                    </select>
+                </div>
+                <div style="margin-top:20px; display:flex; gap:10px;">
+                    <button onclick="BriefcaseUI.saveNewPlayer()" class="action-btn">SPEICHERN</button>
+                    <button onclick="BriefcaseUI.renderAnalysisCenter()" class="action-btn" style="background:#444">ABBRECHEN</button>
+                </div>
+            </div>
+        `;
+    },
+
+    saveNewPlayer() {
+        const name = document.getElementById('new-name').value;
+        const number = document.getElementById('new-number').value;
+        const pos = document.getElementById('new-pos').value;
+        if(!name || !number) return alert("Bitte alle Felder füllen!");
+
         let players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        players.push({id: Date.now(), name: name, pos: "ZDM", pac: 50, sho: 50, pas: 50, dri: 50, def: 50, phy: 50});
+        players.push({
+            id: Date.now(), name, number, pos, 
+            pac: 50, sho: 50, pas: 50, dri: 50, def: 50, phy: 50,
+            notes: "", status: "Anwesend"
+        });
         localStorage.setItem('toni_players', JSON.stringify(players));
-        this.renderSquadList();
+        this.renderAnalysisCenter();
     },
 
     removePlayer(id) {
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        if(!confirm("Spieler wirklich löschen?")) return;
+        let players = JSON.parse(localStorage.getItem('toni_players'));
         players = players.filter(p => p.id !== id);
         localStorage.setItem('toni_players', JSON.stringify(players));
-        this.renderSquadList();
+        this.renderAnalysisCenter();
     },
 
     openSetcard(id) {
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        let players = JSON.parse(localStorage.getItem('toni_players'));
         const p = players.find(player => player.id === id);
+        const ovr = this.calcOvr(p);
         const target = document.getElementById('active-content');
         
-        // Berechnung des Gesamtwerts (OVR)
-        const ovr = Math.round((p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6);
-
         target.innerHTML = `
-            <button onclick="BriefcaseUI.switchSektor('sport')" class="back-btn">← ZURÜCK</button>
+            <button onclick="BriefcaseUI.renderAnalysisCenter()" class="back-btn">← ZURÜCK ZUR ANALYSE</button>
             <div class="fifa-card-container">
                 <div class="fifa-card gold">
                     <div class="card-inner">
@@ -91,46 +131,54 @@ window.BriefcaseUI = {
                     </div>
                 </div>
                 <div class="card-controls">
-                    <h3>WERTE BEARBEITEN</h3>
+                    <h3>SETCARD BEARBEITEN #&nbsp;${p.number}</h3>
                     <div class="edit-grid">
                         ${['pac','sho','pas','dri','def','phy'].map(stat => `
                             <label>${stat.toUpperCase()}</label>
                             <input type="number" value="${p[stat]}" min="1" max="99" 
-                                   onchange="BriefcaseUI.updateStat(${p.id}, '${stat}', this.value)">
+                                   onchange="BriefcaseUI.updateLiveStat(${p.id}, '${stat}', this.value)">
                         `).join('')}
                     </div>
-                    <label style="margin-top:20px;">ERNÄHRUNGSPLAN / NOTIZEN</label>
+                    <label style="margin-top:20px;">ERNÄHRUNG & FITNESS</label>
                     <textarea id="player-note-${p.id}" placeholder="Notizen...">${p.notes || ''}</textarea>
-                    <button class="action-btn" style="width:100%; margin-top:10px;" onclick="BriefcaseUI.savePlayer(${p.id})">ÄNDERUNGEN SPEICHERN</button>
+                    <button class="action-btn" style="width:100%; margin-top:10px;" onclick="BriefcaseUI.saveSetcard(${p.id})">DATEN SICHERN</button>
                 </div>
             </div>
         `;
     },
 
-    updateStat(id, stat, value) {
+    updateLiveStat(id, stat, value) {
         let players = JSON.parse(localStorage.getItem('toni_players'));
         const p = players.find(player => player.id === id);
         p[stat] = parseInt(value);
         localStorage.setItem('toni_players', JSON.stringify(players));
-        
-        // Live-Update des OVR auf der Karte
-        const newOvr = Math.round((p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6);
+        const newOvr = this.calcOvr(p);
         document.getElementById('display-ovr').innerText = newOvr;
         document.getElementById(`val-${stat}`).innerText = value;
     },
 
-    savePlayer(id) {
+    saveSetcard(id) {
         let players = JSON.parse(localStorage.getItem('toni_players'));
         const p = players.find(player => player.id === id);
         p.notes = document.getElementById(`player-note-${id}`).value;
         localStorage.setItem('toni_players', JSON.stringify(players));
-        alert("Daten gespeichert!");
+        alert("Setcard für " + p.name + " gespeichert.");
+    },
+
+    renderOrga() {
+        const target = document.getElementById('active-content');
+        target.innerHTML = `
+            <h3>🏢 GESCHÄFTSZIMMER</h3>
+            <textarea id="stadion-notes" class="orga-box" style="width:100%; height:350px; margin-top:15px;"></textarea>
+            <button onclick="BriefcaseUI.saveOrga()" class="action-btn" style="margin-top:10px;">STADIONZEITUNG SPEICHERN</button>
+        `;
+        const saved = localStorage.getItem('toni_orga_notes');
+        if(saved) document.getElementById('stadion-notes').value = saved;
     },
 
     saveOrga() {
-        const text = document.getElementById('stadion-notes').value;
-        localStorage.setItem('toni_orga_notes', text);
-        alert("Geschäftszimmer aktualisiert!");
+        localStorage.setItem('toni_orga_notes', document.getElementById('stadion-notes').value);
+        alert("Organisationstext gespeichert.");
     },
 
     backToNav() {
