@@ -22,31 +22,16 @@ body, html {
     display: flex; align-items: center; justify-content: center;
     z-index: 100000;
 }
-
-#login-screen.hidden { display: none !important; }
-
 .login-box {
     background: rgba(13, 20, 33, 0.98); padding: 60px; border-radius: 30px;
     border: 2px solid var(--accent-orange); text-align: center;
     box-shadow: 0 0 100px rgba(255, 106, 0, 0.3);
 }
-
 .glow-text { font-size: 4rem; font-weight: 900; color: var(--accent-orange); text-shadow: 0 0 25px rgba(255, 106, 0, 0.5); margin: 0; }
-.cyber-subtitle { color: var(--data-cyan); letter-spacing: 6px; font-size: 0.8rem; margin-bottom: 40px; }
+.login-input { display: block; width: 320px; padding: 18px; background: #000; border: 1px solid #333; color: white; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+.login-btn { width: 320px; padding: 18px; background: var(--accent-orange); color: white; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; }
 
-.login-input { 
-    display: block; width: 320px; padding: 18px; background: #000; 
-    border: 1px solid #333; color: white; border-radius: 10px; 
-    text-align: center; font-size: 1.1rem; margin-bottom: 20px; 
-}
-
-.login-btn { 
-    width: 320px; padding: 18px; background: var(--accent-orange); 
-    color: white; font-weight: 900; border: none; border-radius: 10px; 
-    cursor: pointer; transition: 0.3s; 
-}
-
-/* --- HAUPTSYSTEM (DAS DREI-SPALTEN-GRID) --- */
+/* --- HAUPTSYSTEM (DAS DREI-SÄULEN-GRID) --- */
 .pro-layout-container {
     display: grid !important;
     grid-template-columns: 100px 1fr 350px !important;
@@ -59,29 +44,31 @@ body, html {
     grid-column: 1; background: #020408; border-right: 1px solid rgba(255,106,0,0.3); 
     display: flex; flex-direction: column; align-items: center; padding-top: 40px;
 }
-.control-unit { cursor: pointer; margin-bottom: 40px; text-align: center; color: var(--text-dim); }
+.control-unit { cursor: pointer; margin-bottom: 40px; text-align: center; color: var(--text-dim); transition: 0.3s; }
+.control-unit:hover { color: var(--accent-orange); }
 .control-unit .icon { font-size: 32px; display: block; margin-bottom: 8px; }
 
-/* 2. ARENA (MITTE - KOMPLETT FREI) */
+/* 2. ARENA (MITTE - MAXIMALE GRÖSSE) --- */
 #stage-container {
     grid-column: 2; height: 100vh; width: 100%; background: #05080F;
     display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 10px;
 }
-#stage { width: 100%; height: 100%; position: relative; }
+#stage { width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; }
 #main-canvas { width: 100%; height: 100%; display: block; object-fit: contain; }
 
-/* 3. RECHTE SPALTE (LIVE-FEED & CHAT) */
+/* 3. RECHTE SPALTE (ANALYSE + CHAT VERANKERUNG) --- */
 .analysis-panel { 
     grid-column: 3; background: var(--panel-dark); border-left: 1px solid rgba(255,255,255,0.05); 
-    display: flex; flex-direction: column; height: 100vh;
+    display: flex; flex-direction: column; height: 100vh; padding: 0;
 }
 #panel-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 #setcard-content { flex: 1; padding: 20px; overflow-y: auto; color: var(--text-dim); }
 
-/* CHAT INTEGRATION (FEST IN DER RECHTEN SPALTE) */
+/* TONI VOICE ADVISOR (FEST UNTEN RECHTS) */
 .chat-container {
-    height: 400px; background: rgba(0,0,0,0.4); border-top: 2px solid var(--data-cyan);
     display: flex !important; flex-direction: column;
+    height: 400px; background: rgba(0,0,0,0.4); border-top: 2px solid var(--data-cyan);
+    margin-top: auto; position: relative !important; width: 100% !important;
 }
 .chat-header { background: var(--data-cyan); color: #000; padding: 12px; font-weight: 900; font-size: 0.8rem; text-align: center; }
 .chat-messages { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; }
@@ -93,28 +80,42 @@ body, html {
 .briefcase-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 90000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
 .briefcase-window { background: var(--panel-dark); border: 2px solid var(--accent-orange); width: 95%; height: 90%; padding: 40px; border-radius: 25px; overflow-y: auto; position: relative; }
 
-/* NAV GRID */
-.nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.nav-card { background: rgba(255,255,255,0.03); padding: 40px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
-.nav-card:hover { border-color: var(--accent-orange); background: rgba(255,106,0,0.05); }
-.nav-icon { font-size: 40px; display: block; margin-bottom: 10px; }
-
-/* KADER & STADIONZEITUNG */
+/* KADER-DESIGN (AMPELSYSTEM) */
 .pro-player-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-.p-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; }
+.p-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
 .p-card.Anwesend { border-left: 5px solid #4CD964; }
+.p-card.Abwesend { border-left: 5px solid #FFCC00; opacity: 0.7; }
 .p-card.Verletzt { border-left: 5px solid #FF3B30; }
 
-.magazine-view { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 20px; }
-.mag-page { background: #fff; color: #000; aspect-ratio: 1 / 1.41; padding: 30px; border-radius: 5px; display: flex; flex-direction: column; border-top: 10px solid var(--panel-dark); }
-.mag-area { flex: 1; border: 1px dashed #ccc; padding: 15px; font-family: 'Georgia', serif; resize: none; color: #333; }
+/* --- STADIONZEITUNG (DIN A5 HOCHKANT) --- */
+.magazine-view { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; padding: 20px; }
+.mag-page { 
+    background: #fff; color: #000; 
+    width: 148mm; height: 210mm; /* DIN A5 Verhältnis */
+    padding: 15mm; border-radius: 2px; display: flex; flex-direction: column; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-top: 8px solid var(--panel-dark);
+}
+.mag-area { 
+    flex: 1; border: 1px dashed #ccc; padding: 10px; font-family: 'Georgia', serif; 
+    resize: none; color: #333; font-size: 0.9rem; line-height: 1.5; background: transparent; 
+}
 
 /* HELPERS */
 .hidden { display: none !important; }
 .toni-speech-bubble { background: rgba(0,209,255,0.07); border: 1px solid var(--data-cyan); padding: 15px; border-radius: 12px; }
 
+/* --- DIN A5 DRUCK-STEUERUNG --- */
 @media print {
+    @page { size: A5 portrait; margin: 0; }
     body * { visibility: hidden; }
-    .magazine-view, .mag-page, .mag-page * { visibility: visible; }
-    .mag-page { page-break-after: always; width: 100%; border: none; }
+    .magazine-view, .mag-page, .mag-page * { visibility: visible !important; }
+    .magazine-view { display: block !important; position: absolute; left: 0; top: 0; }
+    .mag-page { 
+        page-break-after: always !important; 
+        box-shadow: none !important; 
+        border: none !important; 
+        width: 100% !important; 
+        height: 100% !important; 
+    }
+    .login-btn, .marketing-tabs, .close-overlay-btn { display: none !important; }
 }
