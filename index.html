@@ -7,61 +7,24 @@
     <link rel="stylesheet" href="style.css">
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
-        
-        #video-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1; transition: transform 2s ease, filter 2s ease;
-        }
-        
+        #video-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; transition: transform 2s ease, filter 2s ease; }
         video { width: 100%; height: 100%; object-fit: cover; background: #000; }
-
-        #video-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 2; opacity: 0; transition: opacity 2s ease;
-        }
-
-        .login-container {
-            position: relative; z-index: 10;
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; width: 100%;
-        }
-
-        .login-box {
-            background: rgba(10, 10, 10, 0.9);
-            padding: 40px; border-radius: 15px; border: 2px solid #ff9500;
-            text-align: center; width: 320px;
-            opacity: 0; transform: translateY(30px);
-            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 50px rgba(0,0,0,1);
-        }
-
+        #video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2; opacity: 0; transition: opacity 2s ease; }
+        .login-container { position: relative; z-index: 10; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100%; }
+        .login-box { background: rgba(10, 10, 10, 0.9); padding: 40px; border-radius: 15px; border: 2px solid #ff9500; text-align: center; width: 320px; opacity: 0; transform: translateY(30px); transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 50px rgba(0,0,0,1); }
         .video-finished #video-container { transform: scale(1.1); filter: blur(12px) brightness(0.5); }
         .video-finished #video-overlay { opacity: 1; }
         .video-finished .login-box { opacity: 1; transform: translateY(0); }
-
-        .login-input {
-            width: 100%; background: #000; color: #fff; border: 1px solid #333;
-            padding: 12px; margin-bottom: 20px; border-radius: 5px; outline: none; text-align: center;
-        }
-        .login-input:focus { border-color: #ff9500; }
-
-        .login-btn {
-            width: 100%; background: #ff9500; color: #000; border: none;
-            padding: 15px; font-weight: 900; cursor: pointer; border-radius: 5px;
-            text-transform: uppercase; letter-spacing: 2px;
-        }
-
-        .skip-intro {
-            position: fixed; bottom: 20px; right: 20px; z-index: 20;
-            color: #fff; font-size: 0.7rem; cursor: pointer; opacity: 0.3;
-        }
+        .login-input { width: 100%; background: #000; color: #fff; border: 1px solid #333; padding: 12px; margin-bottom: 20px; border-radius: 5px; outline: none; text-align: center; }
+        .login-btn { width: 100%; background: #ff9500; color: #000; border: none; padding: 15px; font-weight: 900; cursor: pointer; border-radius: 5px; text-transform: uppercase; letter-spacing: 2px; }
+        .skip-intro { position: fixed; bottom: 20px; right: 20px; z-index: 20; color: #fff; font-size: 0.7rem; cursor: pointer; opacity: 0.3; }
     </style>
 </head>
 <body>
 
     <div id="video-container">
         <video id="intro-video" autoplay muted playsinline>
-            <source src="https://github.com/bjoernsauerweinbrs-spec/Taktik-AI/assets/196013238/574ba85c-1965-4200-a43c-662589e44026" type="video/mp4">
+            <source src="intro.mp4" type="video/mp4">
         </video>
     </div>
     
@@ -71,7 +34,6 @@
         <div class="login-box">
             <h2 style="color:#ff9500; letter-spacing: 4px; margin:0 0 5px 0;">TONI 2.0</h2>
             <p style="color:#666; font-size: 0.65rem; margin-bottom: 30px; text-transform: uppercase;">Analysis Center Login</p>
-            
             <input type="password" id="pass-input" placeholder="PASSWORT" class="login-input">
             <button onclick="checkPass()" class="login-btn">Initialisieren</button>
         </div>
@@ -82,10 +44,8 @@
     <script>
         const video = document.getElementById('intro-video');
         
-        // Automatischer Übergang wenn das Video endet
+        // Video-Timing
         video.onended = finishIntro;
-
-        // Sicherheits-Timeout (falls das Video nicht laden kann, zeigt er nach 8 Sek trotzdem den Login)
         setTimeout(finishIntro, 9000); 
 
         function finishIntro() {
@@ -96,8 +56,7 @@
         }
 
         function checkPass() {
-            const pass = document.getElementById('pass-input').value;
-            if(pass === "1234") { 
+            if(document.getElementById('pass-input').value === "1234") { 
                 window.location.href = "app.html";
             } else {
                 alert("ZUGRIFF VERWEIGERT");
