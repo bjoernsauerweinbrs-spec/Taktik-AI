@@ -8,21 +8,18 @@
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
         
-        /* Video Hintergrund */
         #video-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 1; transition: transform 2s ease, filter 2s ease;
         }
         
-        video { width: 100%; height: 100%; object-fit: cover; }
+        video { width: 100%; height: 100%; object-fit: cover; background: #000; }
 
-        /* Overlay für den Übergang */
         #video-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 2; opacity: 0; transition: opacity 2s ease;
         }
 
-        /* Login Box */
         .login-container {
             position: relative; z-index: 10;
             display: flex; justify-content: center; align-items: center;
@@ -38,7 +35,6 @@
             box-shadow: 0 0 50px rgba(0,0,0,1);
         }
 
-        /* Video beendet -> Login erscheint */
         .video-finished #video-container { transform: scale(1.1); filter: blur(12px) brightness(0.5); }
         .video-finished #video-overlay { opacity: 1; }
         .video-finished .login-box { opacity: 1; transform: translateY(0); }
@@ -65,7 +61,7 @@
 
     <div id="video-container">
         <video id="intro-video" autoplay muted playsinline>
-            <source src="https://github.com/user-attachments/assets/574ba85c-1965-4200-a43c-662589e44026" type="video/mp4">
+            <source src="https://github.com/bjoernsauerweinbrs-spec/Taktik-AI/assets/196013238/574ba85c-1965-4200-a43c-662589e44026" type="video/mp4">
         </video>
     </div>
     
@@ -86,12 +82,16 @@
     <script>
         const video = document.getElementById('intro-video');
         
-        // Video-Dauer ca. 8-9 Sekunden laut deinem Upload
-        setTimeout(finishIntro, 8500); 
+        // Automatischer Übergang wenn das Video endet
+        video.onended = finishIntro;
+
+        // Sicherheits-Timeout (falls das Video nicht laden kann, zeigt er nach 8 Sek trotzdem den Login)
+        setTimeout(finishIntro, 9000); 
 
         function finishIntro() {
+            if(document.body.classList.contains('video-finished')) return;
             document.body.classList.add('video-finished');
-            video.pause(); // Hält das Video als Standbild im Hintergrund fest
+            video.pause(); 
             document.querySelector('.skip-intro').style.display = 'none';
         }
 
@@ -101,83 +101,6 @@
                 window.location.href = "app.html";
             } else {
                 alert("ZUGRIFF VERWEIGERT");
-            }
-        }
-    </script>
-</body>
-</html>
-            z-index: 10;
-            background: rgba(20, 20, 20, 0.8);
-            padding: 40px;
-            border-radius: 15px;
-            border: 1px solid var(--accent-orange);
-            text-align: center;
-            width: 320px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 1s ease;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-        }
-
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            width: 100%;
-        }
-
-        /* Status: Video beendet */
-        .video-finished #video-container { transform: scale(1.05); filter: blur(8px); }
-        .video-finished #video-overlay { opacity: 1; }
-        .video-finished .login-box { opacity: 1; transform: translateY(0); }
-
-        .skip-intro {
-            position: fixed; bottom: 20px; right: 20px; z-index: 20;
-            color: #fff; font-size: 0.7rem; cursor: pointer; opacity: 0.5;
-        }
-    </style>
-</head>
-<body>
-
-    <div id="video-container">
-        <video id="intro-video" autoplay muted playsinline>
-            <source src="assets/intro.mp4" type="video/mp4">
-        </video>
-    </div>
-    
-    <div id="video-overlay"></div>
-
-    <div class="login-container">
-        <div class="login-box">
-            <h2 style="color:var(--accent-orange); letter-spacing: 2px;">TONI 2.0</h2>
-            <p style="color:#888; font-size: 0.8rem; margin-bottom: 25px;">ZENTRALE AUTHENTIFIZIERUNG</p>
-            <input type="password" id="pass-input" placeholder="PASSWORT" class="login-input" style="width:100%; margin-bottom: 15px;">
-            <button onclick="checkPass()" class="login-btn" style="width:100%;">ACCESS</button>
-        </div>
-    </div>
-
-    <div class="skip-intro" onclick="finishIntro()">SKIP INTRO <i class="fas fa-forward"></i></div>
-
-    <script>
-        const video = document.getElementById('intro-video');
-        
-        // Automatischer Übergang nach 10 Sekunden (oder wenn Video endet)
-        video.onended = finishIntro;
-        setTimeout(finishIntro, 10000); 
-
-        function finishIntro() {
-            document.body.classList.add('video-finished');
-            video.pause(); // Hält das Video im Standbild an
-            document.querySelector('.skip-intro').style.display = 'none';
-        }
-
-        function checkPass() {
-            const pass = document.getElementById('pass-input').value;
-            if(pass === "1234") { // Dein Passwort
-                window.location.href = "app.html";
-            } else {
-                alert("Zugriff verweigert.");
             }
         }
     </script>
