@@ -17,6 +17,9 @@
                 <input id="password-input" type="password" class="login-input" placeholder="PASSWORT">
                 <button class="login-btn" onclick="window.ToniAuth.login()">INITIALISIEREN</button>
             </div>
+            <p style="color: rgba(255,255,255,0.3); font-size: 0.7rem; margin-top: 20px;">
+                Hinweis: API-Key Konfiguration im System-Ordner der Zentrale möglich.
+            </p>
         </div>
     </div>
 
@@ -44,7 +47,9 @@
                 </div>
                 
                 <div id="setcard-content">
-                    <div class="toni-speech-bubble">System bereit, Björn. Taktik-Zentrale ist online.</div>
+                    <div class="toni-speech-bubble">
+                        <b>Toni:</b> Ola Björn! System bereit. Denke daran, meinen API-Key im <b>System-Ordner</b> zu hinterlegen, damit ich für dich im Netz recherchieren kann.
+                    </div>
                 </div>
 
                 <div id="toni-live-chat" class="chat-container">
@@ -62,6 +67,7 @@
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
+            
             <div id="briefcase-nav">
                 <div class="nav-grid">
                     <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">
@@ -70,16 +76,18 @@
                     <div class="nav-card" onclick="BriefcaseUI.switchSektor('marketing')">
                         <span class="nav-icon">📢</span><b>MARKETING</b>
                     </div>
-                    <div class="nav-card" onclick="BriefcaseUI.switchSektor('analyse')">
-                        <span class="nav-icon">📊</span><b>ANALYSE</b>
+                    <div class="nav-card" onclick="BriefcaseUI.switchSektor('system')">
+                        <span class="nav-icon">📁</span><b>SYSTEM-ORDNER</b>
                     </div>
                 </div>
+                <button onclick="BriefcaseUI.toggle()" class="login-btn" style="margin-top:40px; background:#444; width: auto; padding: 10px 30px;">ZENTRALE SCHLIESSEN</button>
             </div>
+
             <div id="briefcase-content" class="hidden">
-                <div class="content-header">
-                    <button onclick="BriefcaseUI.backToNav()" class="login-btn" style="width: auto;">← ZURÜCK</button>
-                    <h2 id="sector-title">SEKTOR</h2>
-                    <button onclick="BriefcaseUI.toggle()" class="login-btn" style="width: auto; background: #444;">[X]</button>
+                <div class="content-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:15px;">
+                    <button onclick="BriefcaseUI.backToNav()" class="login-btn" style="width:auto; padding:10px 20px; background: var(--panel-dark); border: 1px solid #444;">← ZURÜCK</button>
+                    <h2 id="sector-title" style="margin:0; color:var(--accent-orange); font-size:1.2rem; letter-spacing: 1px;">SEKTOR</h2>
+                    <button onclick="BriefcaseUI.toggle()" class="login-btn" style="width:auto; background:#444; padding:10px 20px;">BEENDEN</button>
                 </div>
                 <div id="active-content"></div>
             </div>
