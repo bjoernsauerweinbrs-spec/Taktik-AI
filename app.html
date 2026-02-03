@@ -1,104 +1,170 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 - Taktik & Ginga</title>
-    <link rel="stylesheet" href="style.css"> <script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
-</head>
-<body>
+:root {
+    --bg-dark: #0a0a0a;
+    --sidebar-bg: #111;
+    --accent-orange: #ff9500;
+    --data-cyan: #00d1ff;
+    --text-main: #e0e0e0;
+    --border-color: #222;
+}
 
-<div class="app-container">
-    
-    <aside class="sidebar">
-        <div class="logo-area">
-            <h2>TONI 2.0</h2>
-            <small>Co-Trainer Pro</small>
-        </div>
-        
-        <nav class="main-nav">
-            <button class="nav-btn active"><i class="fas fa-chalkboard"></i> Taktik-Board</button>
-            <button class="nav-btn" onclick="BriefcaseUI.toggle()">
-                <i class="fas fa-briefcase"></i> AKTTENTASCHE
-            </button>
-        </nav>
-        
-        <div class="trainer-info">
-            <i class="fas fa-user-tie"></i> <span id="trainer-display-name">Coach</span>
-        </div>
-    </aside>
+body, html {
+    margin: 0; padding: 0;
+    height: 100%; width: 100%;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    overflow: hidden;
+}
 
-    <main class="main-column arena-column" style="position: relative;">
-        <div class="column-header">
-            <i class="fas fa-futbol"></i> TAKTIK-ARENA
-        </div>
-        
-        <div id="tactic-controls">
-            <button class="tactic-btn" onclick="arena.applyTacticalPattern('pressing')">🔥 PRESSING</button>
-            <button class="tactic-btn" onclick="arena.applyTacticalPattern('overload')">🚀 ÜBERZAHL</button>
-            <button class="tactic-btn" onclick="arena.applyTacticalPattern('compact')">🛡️ KOMPAKT</button>
-            <button class="tactic-btn reset" onclick="arena.resetBoard()">🔄 RESET</button>
-        </div>
+.app-container {
+    display: grid;
+    grid-template-columns: 240px 1fr 350px; /* Die drei Spalten */
+    height: 100vh;
+}
 
-        <canvas id="tactic-board"></canvas>
-    </main>
+/* SIDEBAR */
+.sidebar {
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
 
-    <section class="main-column chat-column">
-        <div class="column-header">
-            <i class="fas fa-comment-dots"></i> TONI (CO-TRAINER)
-        </div>
-        
-        <div id="chat-messages" class="chat-area">
-            </div>
-        
-        <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Anweisung an Toni...">
-            <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
-        </div>
-    </section>
+.logo-area h2 { color: var(--accent-orange); margin: 0; }
+.main-nav { margin-top: 40px; flex-grow: 1; }
 
-</div>
+.nav-btn {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 15px;
+    text-align: left;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
 
-<div id="briefcase-overlay" class="hidden">
-    <div class="briefcase-window">
-        <div class="briefcase-header">
-            <h2 id="sector-title">ZENTRALE AKTTENTASCHE</h2>
-            <button onclick="BriefcaseUI.toggle()">X</button>
-        </div>
-        
-        <div id="briefcase-nav" class="folder-grid">
-            <div class="folder" onclick="BriefcaseUI.switchSektor('sport')">
-                <i class="fas fa-vest"></i><span>SPORTTASCHE</span>
-            </div>
-            <div class="folder" onclick="BriefcaseUI.switchSektor('marketing')">
-                <i class="fas fa-ad"></i><span>MARKETING</span>
-            </div>
-            <div class="folder" onclick="BriefcaseUI.switchSektor('system')">
-                <i class="fas fa-cogs"></i><span>SYSTEM</span>
-            </div>
-        </div>
+.nav-btn.active, .nav-btn:hover {
+    background: rgba(255, 149, 0, 0.1);
+    color: var(--accent-orange);
+}
 
-        <div id="briefcase-content" class="hidden">
-            <button class="back-btn" onclick="BriefcaseUI.backToNav()">← Zurück</button>
-            <div id="active-content"></div>
-        </div>
-    </div>
-</div>
+/* ARENA & SPIELFELD */
+.arena-column {
+    position: relative;
+    background: #000;
+}
 
-<script src="ui/briefcase-ui.js"></script>
-<script src="engine/arena.js"></script>
-<script src="engine/toni-ai.js"></script>
+#tactic-board {
+    width: 100%;
+    height: calc(100% - 60px);
+    display: block;
+}
 
-<script>
-    // Initialisierung beim Laden
-    window.onload = () => {
-        arena.init('tactic-board');
-        ToniAI.init();
-        
-        const name = localStorage.getItem('trainer_name');
-        if(name) document.getElementById('trainer-display-name').innerText = name;
-    };
-</script>
+#tactic-controls {
+    position: absolute;
+    left: 20px;
+    top: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-</body>
-</html>
+.tactic-btn {
+    background: rgba(0,0,0,0.8);
+    border: 1px solid #444;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: 0.2s;
+}
+
+.tactic-btn:hover { transform: scale(1.05); border-color: var(--accent-orange); }
+
+/* CHAT SPALTE */
+.chat-column {
+    background: var(--sidebar-bg);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-area {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.bot-msg { background: #222; padding: 12px; border-radius: 12px 12px 12px 0; font-size: 0.85rem; border-left: 3px solid var(--accent-orange); }
+.user-msg { background: #333; padding: 12px; border-radius: 12px 12px 0 12px; font-size: 0.85rem; align-self: flex-end; border-right: 3px solid var(--data-cyan); }
+
+.chat-input-area {
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+}
+
+#chat-input {
+    flex-grow: 1;
+    background: #000;
+    border: 1px solid #333;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* OVERLAY (AKTTENTASCHE) */
+#briefcase-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.briefcase-window {
+    width: 80%; height: 80%;
+    background: #111;
+    border: 1px solid var(--accent-orange);
+    border-radius: 20px;
+    padding: 30px;
+    position: relative;
+}
+
+.hidden { display: none !important; }
+
+/* KADER LISTE DESIGN */
+.pro-player-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.p-card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.column-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: bold;
+    color: var(--accent-orange);
+}
