@@ -17,13 +17,13 @@ window.BriefcaseUI = {
         content.classList.remove('hidden');
 
         if (sektor === 'sport') {
-            title.innerText = "👟 SPORTTASCHE: KADER & TRAINING";
+            title.innerText = "👟 SPORTTASCHE";
             this.renderSporttasche();
         } else if (sektor === 'marketing') {
-            title.innerText = "📢 MARKETING: A5 STADIONZEITUNG";
+            title.innerText = "📢 MARKETING";
             this.renderMarketing();
         } else if (sektor === 'system') {
-            title.innerText = "📁 SYSTEM-ORDNER & KI-HILFE";
+            title.innerText = "📁 SYSTEM-ORDNER";
             this.renderSystemOrdner();
         }
     },
@@ -37,26 +37,18 @@ window.BriefcaseUI = {
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                 <div class="sponsoring-tool" style="border-color: var(--data-cyan); background: rgba(0,209,255,0.02); padding: 25px; border-radius: 15px;">
                     <h4 style="color: var(--data-cyan); margin-top:0;">🔑 KI-KONFIGURATION</h4>
-                    <label style="font-size:0.7rem; color:#aaa;">ANBIETER:</label>
                     <select id="api-provider" class="login-input" style="width:100%; margin-bottom:15px; background:#111;">
                         <option value="openai" ${currentProvider === 'openai' ? 'selected' : ''}>OpenAI (Cloud)</option>
-                        <option value="gemini" ${currentProvider === 'gemini' ? 'selected' : ''}>Google Gemini (Cloud)</option>
-                        <option value="llama" ${currentProvider === 'llama' ? 'selected' : ''}>Ollama / Llama (LOKAL)</option>
+                        <option value="llama" ${currentProvider === 'llama' ? 'selected' : ''}>Gemma 3 (LOKAL - MacBook)</option>
                         <option value="free" ${currentProvider === 'free' ? 'selected' : ''}>Toni Basis</option>
                     </select>
-                    <label style="font-size:0.7rem; color:#aaa;">API-KEY:</label>
                     <input type="password" id="api-key-input" class="login-input" style="width:100%;" value="${currentKey}" placeholder="Key einfügen...">
-                    <button class="login-btn" style="width:100%; margin-top:15px; background: var(--data-cyan); color: #000;" onclick="BriefcaseUI.saveSettings()">KONFIGURATION SPEICHERN</button>
+                    <button class="login-btn" style="width:100%; margin-top:15px;" onclick="BriefcaseUI.saveSettings()">SPEICHERN</button>
                     <p id="save-status" style="margin-top:10px; font-size:0.8rem; font-weight:bold;"></p>
                 </div>
-                
                 <div class="sponsoring-tool" style="border-color: #ffcc00; background: rgba(255,204,0,0.05); padding: 25px; border-radius: 15px;">
-                    <h4 style="color: #ffcc00; margin-top:0;">ℹ️ HILFE: LOKALE KI (OLLAMA)</h4>
-                    <div style="font-size:0.75rem; line-height:1.4; color:#ddd;">
-                        <p><b>MacBook:</b> Terminal öffnen & <br><code>launchctl setenv OLLAMA_ORIGINS "*"</code><br> eingeben. Ollama danach neu starten.</p>
-                        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:10px 0;">
-                        <p><b>Windows:</b> In Umgebungsvariablen <code>OLLAMA_ORIGINS</code> mit Wert <code>*</code> hinzufügen. Ollama neu starten.</p>
-                    </div>
+                    <h4 style="color: #ffcc00; margin-top:0;">ℹ️ MAC-HILFE (OLLAMA)</h4>
+                    <p style="font-size:0.75rem;">Mac-Terminal Befehl:<br><code>launchctl setenv OLLAMA_ORIGINS "*"</code><br>Danach Ollama & Browser neu starten!</p>
                 </div>
             </div>
         `;
@@ -69,18 +61,16 @@ window.BriefcaseUI = {
     },
 
     renderMarketing() {
-        const target = document.getElementById('active-content');
-        target.innerHTML = `<div class="magazine-view">
-            <div class="mag-page"><h1 contenteditable="true">FC TONI 2.0</h1></div>
-            <div class="mag-page"><h3>TRAINER TALK</h3><p contenteditable="true">Heute zaubern wir...</p></div>
-            <button class="login-btn" onclick="window.print()">DIN A5 DRUCK</button>
-        </div>`;
+        document.getElementById('active-content').innerHTML = `
+            <div class="magazine-view">
+                <div class="mag-page"><h1 contenteditable="true">FC TONI 2.0</h1></div>
+                <button class="login-btn" onclick="window.print()">A5 DRUCK</button>
+            </div>`;
     },
 
     renderSporttasche() {
         document.getElementById('active-content').innerHTML = `
-            <button class="login-btn" style="width:auto;" onclick="BriefcaseUI.addPlayerPrompt()">+ SPIELER HINZUFÜGEN</button>
-            <p>Hier starten wir gleich das Kader-Brainstorming.</p>`;
+            <button class="login-btn" style="width:auto;" onclick="BriefcaseUI.addPlayerPrompt()">+ SPIELER HINZUFÜGEN</button>`;
     },
 
     addPlayerPrompt() {
@@ -91,10 +81,5 @@ window.BriefcaseUI = {
             localStorage.setItem('toni_players', JSON.stringify(pl));
             this.renderSporttasche();
         }
-    },
-
-    applyFormation(type) {
-        if(window.arena) arena.animateFormation(type);
-        this.toggle();
     }
 };
