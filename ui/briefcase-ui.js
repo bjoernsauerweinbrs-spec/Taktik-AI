@@ -13,7 +13,7 @@ window.BriefcaseUI = {
         }
     },
 
-    // --- GLOBALER TAG-KATALOG (VOKABULAR) ---
+    // --- GLOBALER TAG-KATALOG ---
     tagCatalog: [
         { id: 'SHOT_ON_TARGET', alias: 'TOR/ABSCHLUSS', impact: { shooting: 5, mental: 2 }, live: true },
         { id: 'PROGRESSIVE_PASS', alias: 'RAUMGEWINN-PASS', impact: { passing: 4, tactic: 2 }, live: true },
@@ -72,12 +72,62 @@ window.BriefcaseUI = {
         document.getElementById('sector-title').innerHTML = '<button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:#ff9500; cursor:pointer; margin-right:10px;"><i class="fas fa-arrow-left"></i></button> ' + sektor.toUpperCase();
         
         if (sektor === 'sport') this.renderSporttasche();
+        else if (sektor === 'matchplan') this.renderMatchplans();
         else if (sektor === 'reports') this.renderReports();
         else if (sektor === 'templates') this.renderTemplates();
         else if (sektor === 'media') this.renderMedia();
         else if (sektor === 'system') this.renderSystem();
         else if (sektor === 'sponsoring') this.renderSponsoring();
         else this.renderPlaceholder(sektor);
+    },
+
+    // --- NEW: MATCHPLANS ---
+    renderMatchplans: function() {
+        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const currentMatchplan = JSON.parse(localStorage.getItem('toni_current_matchplan')) || { formation: '4-3-3' };
+
+        document.getElementById('active-content').innerHTML = `
+            <div style="padding: 15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h4 style="color:#fff; margin:0;">SPIELTAGS-SETUP</h4>
+                    <select id="formation-select" onchange="BriefcaseUI.saveMatchplan()" style="background:#000; color:#ff9500; border:1px solid #ff9500; padding:5px; border-radius:5px;">
+                        <option value="4-3-3" ${currentMatchplan.formation === '4-3-3' ? 'selected' : ''}>4-3-3 (Ginga Style)</option>
+                        <option value="4-4-2" ${currentMatchplan.formation === '4-4-2' ? 'selected' : ''}>4-4-2 (Kompakt)</option>
+                        <option value="3-5-2" ${currentMatchplan.formation === '3-5-2' ? 'selected' : ''}>3-5-2 (Dominanz)</option>
+                    </select>
+                </div>
+                <div style="background:rgba(255,255,255,0.02); border:1px solid #333; border-radius:10px; padding:15px;">
+                    <p style="font-size:0.7rem; color:#888;">NOMINIERTE STARTELF:</p>
+                    <div id="starting-xi-list" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom:20px;">
+                        ${players.slice(0, 11).map(p => `
+                            <div style="background:#1a1a1a; padding:10px; border-left:3px solid #ff9500; border-radius:5px; font-size:0.75rem;">
+                                #${p.number} <b>${p.name}</b> (${p.pos})
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="login-btn" style="width:100%; background:#ff9500; color:#000; font-weight:900;" onclick="BriefcaseUI.transferToBoard()">AUF BOARD AKTIVIEREN</button>
+                    <button class="login-btn" style="width:100%; margin-top:10px; background:#333;" onclick="BriefcaseUI.generateTacticalBriefing()">TONI ANALYSIS</button>
+                </div>
+            </div>`;
+    },
+
+    saveMatchplan: function() {
+        const formation = document.getElementById('formation-select').value;
+        localStorage.setItem('toni_current_matchplan', JSON.stringify({ formation: formation }));
+    },
+
+    transferToBoard: function() {
+        const formation = document.getElementById('formation-select').value;
+        if(window.arena) {
+            arena.applyTacticalPattern(formation.toLowerCase().replace(/-/g, '')); 
+            this.toggle();
+            if(window.ToniAI) ToniAI.speak("Coach, die Spieler rücken in die " + formation + " Formation. Wir sind bereit.");
+        }
+    },
+
+    generateTacticalBriefing: function() {
+        const formation = document.getElementById('formation-select').value;
+        if(window.ToniAI) ToniAI.processCommand("Analysiere kurz die taktischen Vorteile der " + formation + " Formation.");
     },
 
     // --- REPORTS ---
@@ -97,7 +147,7 @@ window.BriefcaseUI = {
             </div>`;
     },
 
-    // --- TEMPLATES (STADIONZEITUNG) ---
+    // --- TEMPLATES ---
     renderTemplates: function() {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const topPlayer = players.sort((a,b) => b.rating - a.rating)[0] || {name: "Kader leer", rating: 0};
@@ -112,7 +162,7 @@ window.BriefcaseUI = {
                         </div>
                         <div style="flex:1.5; font-size:0.7rem;">
                             <b>COACH KOMMENTAR:</b><br>
-                            "Die heutige Analyse zeigt enorme Fortschritte im Bereich PROGRESSIVE_PASS."
+                            "Die heutige Analyse zeigt enorme Fortschritte im Bereich GINGA-STYLE."
                         </div>
                     </div>
                 </div>
@@ -120,7 +170,7 @@ window.BriefcaseUI = {
             </div>`;
     },
 
-    // --- MEDIA / TAGGING ---
+    // --- MEDIA ---
     renderMedia: function() {
         document.getElementById('active-content').innerHTML = `
             <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; padding: 10px;">
@@ -146,7 +196,7 @@ window.BriefcaseUI = {
         log.prepend(entry);
     },
 
-    // --- SPORTTASCHE & FIFA CARD ---
+    // --- SPORTTASCHE ---
     renderSporttasche: function() {
         var players = JSON.parse(localStorage.getItem('toni_players')) || [];
         document.getElementById('active-content').innerHTML = `
@@ -240,7 +290,14 @@ window.BriefcaseUI = {
     },
 
     renderSponsoring: function() {
-        document.getElementById('active-content').innerHTML = `<div style="padding:20px; color:#fff;">Sponsoring-Check aktiv.</div>`;
+        document.getElementById('active-content').innerHTML = `
+            <div style="padding:20px; text-align:center;">
+                <h4 style="color:#fff;">SPONSORING PARTNER</h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;">
+                    <div style="background:#fff; height:60px; border-radius:5px; display:flex; align-items:center; justify-content:center; color:#000; font-weight:900;">LOGO 1</div>
+                    <div style="background:#fff; height:60px; border-radius:5px; display:flex; align-items:center; justify-content:center; color:#000; font-weight:900;">LOGO 2</div>
+                </div>
+            </div>`;
     },
 
     renderPlaceholder: function(s) { document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px;">Sektor ${s} folgt.</div>`; },
