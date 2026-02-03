@@ -14,17 +14,15 @@ window.BriefcaseUI = {
     },
 
     // --- GLOBALER TAG-KATALOG (VOKABULAR) ---
-    // Tags sind sprachneutral und quantifizierbar
     tagCatalog: [
         { id: 'SHOT_ON_TARGET', alias: 'TOR/ABSCHLUSS', impact: { shooting: 5, mental: 2 }, live: true },
         { id: 'PROGRESSIVE_PASS', alias: 'RAUMGEWINN-PASS', impact: { passing: 4, tactic: 2 }, live: true },
         { id: 'SKILL_BREAKTHROUGH', alias: 'DRIBBLING-DURCHBRUCH', impact: { ginga: 3, technique: 2 }, live: false },
         { id: 'TURNOVER_PASS', alias: 'FEHLPASS', impact: { passing: -2 }, live: false },
-        { id: 'PRESSING_RECOVERY', alias: 'PRESSING-ERFOLG', impact: { tactic: 3, defense: 2 }, live: true },
-        { id: 'DECISION_ERROR', alias: 'ENTSCHEIDUNGSFEHLER', impact: { tactic: -3, mental: -2 }, live: false }
+        { id: 'PRESSING_RECOVERY', alias: 'PRESSING-ERFOLG', impact: { tactic: 3, defense: 2 }, live: true }
     ],
 
-    // --- NAVIGATION & UI CONTROLS ---
+    // --- NAVIGATION & UI ---
     toggle: function() {
         var overlay = document.getElementById('briefcase-overlay');
         if (overlay) {
@@ -74,33 +72,62 @@ window.BriefcaseUI = {
         document.getElementById('sector-title').innerHTML = '<button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:#ff9500; cursor:pointer; margin-right:10px;"><i class="fas fa-arrow-left"></i></button> ' + sektor.toUpperCase();
         
         if (sektor === 'sport') this.renderSporttasche();
+        else if (sektor === 'reports') this.renderReports();
+        else if (sektor === 'media') this.renderMedia();
         else if (sektor === 'system') this.renderSystem();
         else if (sektor === 'sponsoring') this.renderSponsoring();
-        else if (sektor === 'media') this.renderMedia();
         else this.renderPlaceholder(sektor);
     },
 
-    // --- MEDIA / VIDEO TAGGING (NEU: GLOBAL VOKABULAR) ---
+    // --- NEU: REPORTS (ANALYSE ZENTRUM) ---
+    renderReports: function() {
+        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const avgRating = players.length > 0 ? Math.round(players.reduce((a,b) => a + (b.rating || 0), 0) / players.length) : 0;
+        
+        document.getElementById('active-content').innerHTML = `
+            <div style="padding: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div style="background: rgba(0,209,255,0.05); border: 1px solid #00d1ff; padding: 20px; border-radius: 15px; text-align:center;">
+                        <h4 style="margin:0; color:#00d1ff;">TEAM GINGA-INDEX</h4>
+                        <div style="font-size: 3rem; font-weight: 900; color:#fff;">${avgRating}%</div>
+                        <small style="color:#888;">Live-Durchschnitt aus Kaderdaten</small>
+                    </div>
+                    <div style="background: rgba(255,149,0,0.05); border: 1px solid #ff9500; padding: 20px; border-radius: 15px;">
+                        <h4 style="margin:0; color:#ff9500;">MATCH-PERFORMANCE</h4>
+                        <canvas id="report-mini-chart" style="height:60px; width:100%; margin-top:10px;"></canvas>
+                        <small style="color:#888;">Trend: +2.4% zur Vorwoche</small>
+                    </div>
+                </div>
+
+                <h4 style="color:#fff; border-bottom:1px solid #333; padding-bottom:10px;">TOP-PERFORMER (GLOBAL TAGS)</h4>
+                <div style="max-height:200px; overflow-y:auto; background:rgba(255,255,255,0.02); border-radius:10px; padding:10px;">
+                    ${players.sort((a,b) => b.rating - a.rating).map(p => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #222;">
+                            <span>#${p.number} <b>${p.name}</b></span>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <span style="font-size:0.7rem; color:#4cd964;">PAS: ${p.passing || 50}</span>
+                                <span style="background:var(--accent-orange); color:#000; padding:2px 8px; border-radius:10px; font-weight:bold; font-size:0.8rem;">${p.rating}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button class="login-btn" style="width:100%; margin-top:20px; background:#888;" onclick="alert('PDF Export wird vorbereitet...')">SNAPSHOT FÜR STADIONZEITUNG SPEICHERN</button>
+            </div>`;
+    },
+
+    // --- MEDIA / TAGGING ---
     renderMedia: function() {
         document.getElementById('active-content').innerHTML = `
             <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; padding: 10px;">
                 <div style="background:#000; border: 1px solid #333; border-radius: 10px; overflow:hidden;">
-                    <div style="height:250px; display:flex; align-items:center; justify-content:center; background:#111; color:#444;">
-                        <i class="fas fa-play-circle" style="font-size:4rem;"></i>
-                    </div>
+                    <div style="height:250px; display:flex; align-items:center; justify-content:center; background:#111; color:#444;"><i class="fas fa-play-circle" style="font-size:4rem;"></i></div>
                     <div style="padding:10px; background:#1a1a1a; display:flex; gap:10px; overflow-x:auto; border-top:1px solid #333;">
-                        ${this.tagCatalog.map(t => `
-                            <button onclick="BriefcaseUI.logTag('${t.id}')" style="white-space:nowrap; background:#333; color:#fff; border:none; padding:5px 10px; border-radius:5px; font-size:0.6rem; cursor:pointer;">
-                                ${t.alias} ${t.live ? '⚡' : '⏳'}
-                            </button>
-                        `).join('')}
+                        ${this.tagCatalog.map(t => `<button onclick="BriefcaseUI.logTag('${t.id}')" style="white-space:nowrap; background:#333; color:#fff; border:none; padding:5px 10px; border-radius:5px; font-size:0.6rem; cursor:pointer;">${t.alias} ${t.live ? '⚡' : '⏳'}</button>`).join('')}
                     </div>
                 </div>
                 <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px;">
                     <h4 style="margin:0 0 10px 0; font-size:0.8rem; color:#ff9500;">TAG-PROTOKOLL</h4>
-                    <div id="tag-log" style="font-size:0.7rem; color:#888; height:200px; overflow-y:auto;">
-                        Keine Tags in dieser Sitzung.
-                    </div>
+                    <div id="tag-log" style="font-size:0.7rem; color:#888; height:200px; overflow-y:auto;">Keine Tags aufgezeichnet.</div>
                 </div>
             </div>`;
     },
@@ -109,68 +136,54 @@ window.BriefcaseUI = {
         const tag = this.tagCatalog.find(t => t.id === tagId);
         const log = document.getElementById('tag-log');
         const timestamp = new Date().toLocaleTimeString();
-        
         const entry = document.createElement('div');
         entry.style.marginBottom = "5px";
         entry.innerHTML = `[${timestamp}] <b>${tag.id}</b> (${tag.alias})`;
         if(log.innerHTML.includes("Keine Tags")) log.innerHTML = "";
         log.prepend(entry);
-
         if(tag.live && window.ToniAI) {
             window.ToniAI.addChatMessage("Toni", `Live-Analyse: ${tag.alias} registriert. Score-Engine angepasst.`, "bot-msg");
         }
     },
 
-    // --- SPIELER-VERWALTUNG & FIFA-CARD ---
+    // --- SPORTTASCHE & FIFA CARD ---
     renderSporttasche: function() {
         var players = JSON.parse(localStorage.getItem('toni_players')) || [];
         document.getElementById('active-content').innerHTML = `
             <div style="padding: 10px;">
                 <button class="login-btn" style="width: 100%; margin-bottom: 20px; background:#ff9500; color:#000;" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUEN SPIELER HINZUFÜGEN</button>
                 <div class="pro-player-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
-                    ${players.map(p => `
-                        <div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background: #151515; border: 1px solid #333; padding: 15px; border-radius: 10px; text-align: center; cursor:pointer;">
-                            <div style="font-size: 1.2rem; font-weight: 900; color: #ff9500;">#${p.number || '0'}</div>
-                            <b style="font-size: 0.8rem; color: #fff;">${p.name}</b>
-                        </div>`).join('')}
+                    ${players.map(p => `<div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background:#151515; border:1px solid #333; padding:15px; border-radius:10px; text-align:center; cursor:pointer;"><div style="font-size:1.2rem; font-weight:900; color:#ff9500;">#${p.number||0}</div><b style="font-size:0.8rem; color:#fff;">${p.name}</b></div>`).join('')}
                 </div>
             </div>`;
     },
 
     openFIFAcard: function(id) {
         var players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        var p = players.find(function(x) { return x.id == id; });
+        var p = players.find(x => x.id == id);
         if(!p) return;
-
-        var currentPins = JSON.parse(localStorage.getItem('toni_player_pins')) || {};
-        var playerPin = currentPins[id] ? currentPins[id].pin : "Nicht generiert";
-        var photoSrc = p.photo || 'https://via.placeholder.com/110?text=Foto';
-
+        var pins = JSON.parse(localStorage.getItem('toni_player_pins')) || {};
+        var pin = pins[id] ? pins[id].pin : "Nicht generiert";
+        
         document.getElementById('active-content').innerHTML = `
-            <div style="display: grid; grid-template-columns: 240px 1fr; gap: 30px; background: #000; padding: 25px; border-radius: 15px; border: 1px solid #ff9500;">
-                <div id="card-preview" style="width: 240px; height: 360px; background: linear-gradient(145deg, #d4af37, #b8860b); border-radius: 10px; padding: 20px; color: #111; text-align: center;">
-                    <div id="v-rating" style="font-size: 4rem; font-weight: 900; line-height:1;">${p.rating || 80}</div>
-                    <div style="font-weight:bold; text-transform:uppercase;">${p.pos || 'IV'}</div>
-                    <div onclick="document.getElementById('photo-upload').click()" style="width:110px; height:110px; margin: 10px auto; border-radius:50%; background:#333; overflow:hidden; border:2px solid rgba(0,0,0,0.2); cursor:pointer;">
-                        <img id="v-photo" src="${photoSrc}" style="width:100%; height:100%; object-fit:cover;">
+            <div style="display: grid; grid-template-columns: 240px 1fr; gap: 30px; background:#000; padding: 25px; border-radius:15px; border:1px solid #ff9500;">
+                <div style="width:240px; height:360px; background:linear-gradient(145deg, #d4af37, #b8860b); border-radius:10px; padding:20px; color:#111; text-align:center;">
+                    <div id="v-rating" style="font-size:4rem; font-weight:900;">${p.rating||80}</div>
+                    <div style="font-weight:bold;">${p.pos||'IV'}</div>
+                    <div onclick="document.getElementById('photo-upload').click()" style="width:110px; height:110px; margin:10px auto; border-radius:50%; background:#333; overflow:hidden; border:2px solid rgba(0,0,0,0.2); cursor:pointer;">
+                        <img id="v-photo" src="${p.photo||'https://via.placeholder.com/110'}" style="width:100%; height:100%; object-fit:cover;">
                     </div>
-                    <input type="file" id="photo-upload" style="display:none;" accept="image/*" onchange="BriefcaseUI.handlePhoto(event, '${id}')">
-                    <div style="font-size: 1.3rem; font-weight: 900; text-transform: uppercase;">${p.name}</div>
-                    <div style="font-size: 0.65rem; margin-top:10px; background:rgba(0,0,0,0.1); padding:5px; border-radius:5px;">
-                        PLAYER-PIN: <b style="letter-spacing:1px;">${playerPin}</b>
-                    </div>
+                    <input type="file" id="photo-upload" style="display:none;" onchange="BriefcaseUI.handlePhoto(event,'${id}')">
+                    <div style="font-size:1.3rem; font-weight:900;">${p.name}</div>
+                    <div style="font-size:0.65rem; margin-top:10px; background:rgba(0,0,0,0.1); padding:5px; border-radius:5px;">PLAYER-PIN: <b>${pin}</b></div>
                 </div>
-
-                <div style="flex-grow: 1;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h3 style="color:#ff9500; margin:0;">ANALYSIS CENTER</h3>
-                        <button class="login-btn" style="width:auto; padding:5px 15px; font-size:0.7rem;" onclick="BriefcaseUI.generatePin('${id}')">NEUE PIN</button>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 10px;">
+                <div>
+                    <h3 style="color:#ff9500; margin:0;">ANALYSIS CENTER</h3>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;">
                         <div>
                             <label style="font-size:0.7rem; color:#888;">PAC</label><input type="range" id="i-pac" value="${p.pace||50}" oninput="BriefcaseUI.sync('${id}')">
                             <label style="font-size:0.7rem; color:#888;">GIN</label><input type="range" id="i-gin" value="${p.ginga||50}" oninput="BriefcaseUI.sync('${id}')">
-                            <label style="font-size:0.7rem; color:#888;">PULS</label><input type="number" id="i-pulse" value="${p.pulse||70}" style="width:100%; background:#000; color:#fff; border:1px solid #444;" onchange="BriefcaseUI.sync('${id}')">
+                            <label style="font-size:0.7rem; color:#888;">PULS</label><input type="number" id="i-pulse" value="${p.pulse||70}" style="width:100%; background:#000; color:#fff;" onchange="BriefcaseUI.sync('${id}')">
                         </div>
                         <div>
                             <label style="font-size:0.7rem; color:#888;">SHO</label><input type="range" id="i-sho" value="${p.shooting||50}" oninput="BriefcaseUI.sync('${id}')">
@@ -178,38 +191,14 @@ window.BriefcaseUI = {
                             <label style="font-size:0.7rem; color:#888;">STA</label><input type="range" id="i-sta" value="${p.stamina||50}" oninput="BriefcaseUI.sync('${id}')">
                         </div>
                     </div>
-                    <button class="login-btn" style="width:100%; margin-top:15px;" onclick="BriefcaseUI.renderSporttasche()">ÄNDERUNGEN SPEICHERN</button>
+                    <button class="login-btn" style="width:100%; margin-top:20px;" onclick="BriefcaseUI.renderSporttasche()">FERTIG</button>
                 </div>
             </div>`;
     },
 
-    handlePhoto: function(event, id) {
-        var file = event.target.files[0];
-        if(!file) return;
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var dataUrl = e.target.result;
-            document.getElementById('v-photo').src = dataUrl;
-            let players = JSON.parse(localStorage.getItem('toni_players')) || [];
-            const i = players.findIndex(x => x.id == id);
-            if(i !== -1) {
-                players[i].photo = dataUrl;
-                localStorage.setItem('toni_players', JSON.stringify(players));
-            }
-        };
-        reader.readAsDataURL(file);
-    },
-
-    generatePin: function(playerId) {
-        const pin = Math.floor(100000 + Math.random() * 900000);
-        let pins = JSON.parse(localStorage.getItem('toni_player_pins')) || {};
-        pins[playerId] = { pin: pin, expires: Date.now() + (30 * 24 * 60 * 60 * 1000) };
-        localStorage.setItem('toni_player_pins', JSON.stringify(pins));
-        this.openFIFAcard(playerId); 
-    },
-
+    // --- HELPER FUNKTIONEN ---
     sync: function(id) {
-        var vals = {
+        var v = {
             pace: document.getElementById('i-pac').value,
             shooting: document.getElementById('i-sho').value,
             ginga: document.getElementById('i-gin').value,
@@ -217,59 +206,60 @@ window.BriefcaseUI = {
             stamina: document.getElementById('i-sta').value,
             pulse: document.getElementById('i-pulse').value
         };
-        var rating = Math.round((parseInt(vals.pace) + parseInt(vals.shooting) + parseInt(vals.ginga) + parseInt(vals.defense) + parseInt(vals.stamina)) / 5);
-        document.getElementById('v-rating').innerText = rating;
-
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const i = players.findIndex(x => x.id == id);
-        if(i !== -1) {
-            Object.assign(players[i], vals);
-            players[i].rating = rating;
-            localStorage.setItem('toni_players', JSON.stringify(players));
-        }
+        var r = Math.round((parseInt(v.pace)+parseInt(v.shooting)+parseInt(v.ginga)+parseInt(v.defense)+parseInt(v.stamina))/5);
+        document.getElementById('v-rating').innerText = r;
+        let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const i = pl.findIndex(x => x.id == id);
+        if(i !== -1) { Object.assign(pl[i], v); pl[i].rating = r; localStorage.setItem('toni_players', JSON.stringify(pl)); }
     },
 
-    // --- SPONSORING & SYSTEM (UNVERÄNDERT) ---
-    renderSponsoring: function() {
-        document.getElementById('active-content').innerHTML = `
-            <div style="padding: 20px;">
-                <h3 style="color:#00d1ff;">PARTNER-BOARD & COMPLIANCE</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top:20px;">
-                    <div style="background:white; color:black; padding:40px; border-radius:15px; text-align:center;">
-                        <div style="font-weight:900; font-size:2rem;">MUSTER LOGO</div>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.03); border:1px solid #444; padding:20px; border-radius:15px;">
-                        <h4 style="margin-top:0; color:#ffcc00;">AUTO-CHECK</h4>
-                        <ul style="font-size:0.8rem; color:#ccc; list-style:none; padding:0;">
-                            <li><i class="fas fa-check" style="color:green;"></i> Kontrastverhältnis: 4.8:1</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>`;
+    handlePhoto: function(e, id) {
+        var f = e.target.files[0]; if(!f) return;
+        var r = new FileReader(); r.onload = function(ex) {
+            document.getElementById('v-photo').src = ex.target.result;
+            let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
+            const i = pl.findIndex(x => x.id == id); if(i !== -1) { pl[i].photo = ex.target.result; localStorage.setItem('toni_players', JSON.stringify(pl)); }
+        }; r.readAsDataURL(f);
+    },
+
+    generatePin: function(pid) {
+        const pin = Math.floor(100000 + Math.random() * 900000);
+        let pins = JSON.parse(localStorage.getItem('toni_player_pins')) || {};
+        pins[pid] = { pin: pin, expires: Date.now() + 2592000000 };
+        localStorage.setItem('toni_player_pins', JSON.stringify(pins));
+        this.openFIFAcard(pid);
     },
 
     renderSystem: function() {
-        var currentKey = localStorage.getItem('toni_api_key') || "";
-        var currentProvider = localStorage.getItem('toni_api_provider') || "llama";
+        var k = localStorage.getItem('toni_api_key') || "";
+        var pr = localStorage.getItem('toni_api_provider') || "llama";
         document.getElementById('active-content').innerHTML = `
-            <div style="padding: 20px; border: 1px solid #333; border-radius: 15px; background: rgba(255,255,255,0.02);">
-                <h4 style="color:#fff; margin-bottom:15px;">KI-SETUP & PROVIDER</h4>
-                <div style="margin-bottom:10px;"><select id="api-provider" style="width:100%; background:#000; color:#fff; border:1px solid #444; padding:10px; border-radius:5px;">
-                    <option value="llama" ${currentProvider==='llama'?'selected':''}>Gemma 3 (Ollama)</option>
-                    <option value="openai" ${currentProvider==='openai'?'selected':''}>OpenAI</option>
-                </select></div>
-                <input type="password" id="api-key-input" style="width:100%; background:#000; color:#fff; border:1px solid #444; padding:10px; border-radius:5px;" value="${currentKey}">
-                <button class="login-btn" style="width:100%; margin-top:15px; background:#ff9500; color:#000; font-weight:bold;" onclick="BriefcaseUI.saveSettings()">SPEICHERN</button>
+            <div style="padding:20px; background:rgba(255,255,255,0.02); border-radius:15px; border:1px solid #333;">
+                <h4 style="color:#fff;">SYSTEM-SETUP</h4>
+                <select id="api-provider" style="width:100%; background:#000; color:#fff; padding:10px; border:1px solid #444; margin-bottom:10px;">
+                    <option value="llama" ${pr==='llama'?'selected':''}>Gemma 3 (Ollama)</option>
+                    <option value="openai" ${pr==='openai'?'selected':''}>OpenAI</option>
+                </select>
+                <input type="password" id="api-key-input" style="width:100%; background:#000; color:#fff; padding:10px; border:1px solid #444;" value="${k}">
+                <button class="login-btn" style="width:100%; margin-top:15px; background:#ff9500; color:#000;" onclick="BriefcaseUI.saveSettings()">SPEICHERN</button>
             </div>`;
     },
 
     saveSettings: function() {
         localStorage.setItem('toni_api_key', document.getElementById('api-key-input').value);
         localStorage.setItem('toni_api_provider', document.getElementById('api-provider').value);
-        alert("KI-Konfiguration gesichert!");
+        alert("System-Konfiguration gesichert!");
     },
 
-    renderPlaceholder: function(s) { document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px; color:#555;">Bereich ${s.toUpperCase()} wird vorbereitet.</div>`; },
+    renderSponsoring: function() {
+        document.getElementById('active-content').innerHTML = `
+            <div style="padding:20px;">
+                <h3 style="color:#00d1ff;">PARTNER-BOARD</h3>
+                <div style="background:white; color:black; padding:30px; border-radius:15px; text-align:center; font-weight:bold;">LOGO-SLOT</div>
+            </div>`;
+    },
+
+    renderPlaceholder: function(s) { document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px; color:#555;">Sektor ${s.toUpperCase()} wird vorbereitet.</div>`; },
 
     addPlayerPrompt: function() {
         var n = prompt("Name:"); var num = prompt("Nummer:");
