@@ -125,7 +125,7 @@ window.BriefcaseUI = {
         if(window.ToniAI) ToniAI.processCommand("Analysiere kurz die taktischen Vorteile der " + formation + " Formation.");
     },
 
-    // --- SPONSORING (NEW INTERACTIVE) ---
+    // --- SPONSORING (INTERACTIVE) ---
     renderSponsoring: function() {
         const sponsors = JSON.parse(localStorage.getItem('toni_sponsors')) || [
             { id: 1, name: 'Hauptsponsor', logo: '' },
@@ -158,17 +158,19 @@ window.BriefcaseUI = {
                 sponsors[idx].logo = ex.target.result;
                 localStorage.setItem('toni_sponsors', JSON.stringify(sponsors));
                 this.renderSponsoring();
-                if(window.ToniAI) ToniAI.speak("Partner-Logo wurde im System aktualisiert.");
+                if(window.ToniAI) ToniAI.speak("Partner-Logo wurde im System aktualisiert, Coach.");
             }
         }; reader.readAsDataURL(file);
     },
 
-    // --- TEMPLATES ---
+    // --- TEMPLATES (SYNCED WITH MATCHPLAN & SPONSOR) ---
     renderTemplates: function() {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const sponsors = JSON.parse(localStorage.getItem('toni_sponsors')) || [];
         const mainSponsor = sponsors.find(s => s.id === 1 && s.logo);
+        const currentMatch = JSON.parse(localStorage.getItem('toni_current_matchplan')) || { formation: 'Keine' };
         const topPlayer = players.sort((a,b) => b.rating - a.rating)[0] || {name: "Kader leer", rating: 0};
+        
         document.getElementById('active-content').innerHTML = `
             <div style="padding: 15px;">
                 <div id="print-area" style="background: #fff; color: #000; padding: 25px; border-radius: 5px; font-family: 'serif'; min-height:300px; position:relative;">
@@ -181,59 +183,71 @@ window.BriefcaseUI = {
                         </div>
                         <div style="flex:1.5; font-size:0.75rem;">
                             <b>COACH ANALYSE:</b><br>
-                            "Die Ginga-Werte der Startelf zeigen heute eine exzellente Balance."
+                            "Wir setzen heute auf volle Ginga-Power und maximale Kontrolle."
                             <div style="margin-top:20px; padding:10px; border:1px dashed #ccc;">
-                                <b>NEXT MATCH FORMATION:</b><br>
-                                ${JSON.parse(localStorage.getItem('toni_current_matchplan'))?.formation || '4-3-3'}
+                                <b>MATCH-FORMATION:</b><br>
+                                <span style="font-size:1.2rem; font-weight:900;">${currentMatch.formation}</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <button class="login-btn" style="width:100%; margin-top:20px; background:#ff9500; color:#000;" onclick="window.print()">STADIONZEITUNG DRUCKEN (PDF)</button>
+                <button class="login-btn" style="width:100%; margin-top:20px; background:#ff9500; color:#000;" onclick="window.print()">STADIONZEITUNG DRUCKEN</button>
             </div>`;
     },
 
-    // --- REPORTS, MEDIA, SPORTTASCHE, SYSTEM (UNVERÄNDERT) ---
+    // --- REPORTS ---
     renderReports: function() {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const avgRating = players.length > 0 ? Math.round(players.reduce((a,b) => a + (b.rating || 0), 0) / players.length) : 0;
         document.getElementById('active-content').innerHTML = `<div style="padding:15px;"><div style="background:rgba(0,209,255,0.05); border:1px solid #00d1ff; padding:20px; border-radius:15px; text-align:center; margin-bottom:20px;"><h4 style="margin:0; color:#00d1ff;">TEAM GINGA-INDEX</h4><div style="font-size:3rem; font-weight:900; color:#fff;">${avgRating}%</div></div><h4 style="color:#fff;">RANKING</h4><div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px;">${players.sort((a,b)=>b.rating-a.rating).map(p => `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #222;"><span>${p.name}</span><b style="color:#ff9500;">${p.rating}</b></div>`).join('')}</div></div>`;
     },
+
+    // --- MEDIA ---
     renderMedia: function() {
         document.getElementById('active-content').innerHTML = `<div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px; padding:10px;"><div style="background:#000; border:1px solid #333; border-radius:10px; overflow:hidden;"><div style="height:250px; display:flex; align-items:center; justify-content:center; background:#111; color:#444;"><i class="fas fa-play-circle" style="font-size:4rem;"></i></div><div style="padding:10px; background:#1a1a1a; display:flex; gap:10px; overflow-x:auto;">${this.tagCatalog.map(t => `<button onclick="BriefcaseUI.logTag('${t.id}')" style="white-space:nowrap; background:#333; color:#fff; border:none; padding:5px 10px; border-radius:5px; font-size:0.6rem;">${t.alias}</button>`).join('')}</div></div><div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px;"><h4 style="margin:0 0 10px 0; font-size:0.8rem; color:#ff9500;">TAG-LOG</h4><div id="tag-log" style="font-size:0.7rem; color:#888; height:200px; overflow-y:auto;">Warte...</div></div></div>`;
     },
+
     logTag: function(tagId) {
         const tag = this.tagCatalog.find(t => t.id === tagId); const log = document.getElementById('tag-log');
         const entry = document.createElement('div'); entry.innerHTML = `[${new Date().toLocaleTimeString()}] <b>${tag.id}</b>`;
         if(log.innerHTML.includes("Warte")) log.innerHTML = ""; log.prepend(entry);
     },
+
+    // --- SPORTTASCHE ---
     renderSporttasche: function() {
         var players = JSON.parse(localStorage.getItem('toni_players')) || [];
         document.getElementById('active-content').innerHTML = `<div style="padding:10px;"><button class="login-btn" style="width:100%; margin-bottom:20px; background:#ff9500; color:#000;" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUEN SPIELER</button><div class="pro-player-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:10px;">${players.map(p => `<div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background:#151515; border:1px solid #333; padding:15px; border-radius:10px; text-align:center; cursor:pointer;"><div style="font-size:1.2rem; font-weight:900; color:#ff9500;">#${p.number||0}</div><b style="font-size:0.8rem; color:#fff;">${p.name}</b></div>`).join('')}</div></div>`;
     },
+
     openFIFAcard: function(id) {
         var players = JSON.parse(localStorage.getItem('toni_players')) || []; var p = players.find(x => x.id == id); if(!p) return;
         var pins = JSON.parse(localStorage.getItem('toni_player_pins')) || {}; var pin = pins[id] ? pins[id].pin : "Keine PIN";
         document.getElementById('active-content').innerHTML = `<div style="display:grid; grid-template-columns:240px 1fr; gap:30px; background:#000; padding:25px; border-radius:15px; border:1px solid #ff9500;"><div style="width:240px; height:360px; background:linear-gradient(145deg, #d4af37, #b8860b); border-radius:10px; padding:20px; color:#111; text-align:center;"><div id="v-rating" style="font-size:4rem; font-weight:900;">${p.rating||80}</div><div style="font-weight:bold;">${p.pos||'IV'}</div><div onclick="document.getElementById('photo-upload').click()" style="width:110px; height:110px; margin:10px auto; border-radius:50%; background:#333; overflow:hidden; border:2px solid rgba(0,0,0,0.2); cursor:pointer;"><img id="v-photo" src="${p.photo||'https://via.placeholder.com/110'}" style="width:100%; height:100%; object-fit:cover;"></div><input type="file" id="photo-upload" style="display:none;" onchange="BriefcaseUI.handlePhoto(event,'${id}')"><div style="font-size:1.3rem; font-weight:900;">${p.name}</div><div style="font-size:0.6rem; margin-top:5px; background:rgba(0,0,0,0.1); padding:5px;">PIN: ${pin}</div></div><div><h3 style="color:#ff9500; margin:0;">ANALYSIS</h3><div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;"><div><label>PAC</label><input type="range" id="i-pac" value="${p.pace||50}" oninput="BriefcaseUI.sync('${id}')"><label>GIN</label><input type="range" id="i-gin" value="${p.ginga||50}" oninput="BriefcaseUI.sync('${id}')"></div><div><label>SHO</label><input type="range" id="i-sho" value="${p.shooting||50}" oninput="BriefcaseUI.sync('${id}')"><label>DEF</label><input type="range" id="i-def" value="${p.defense||50}" oninput="BriefcaseUI.sync('${id}')"></div></div><button class="login-btn" style="width:100%; margin-top:20px;" onclick="BriefcaseUI.renderSporttasche()">FERTIG</button></div></div>`;
     },
+
     sync: function(id) {
         var v = { pace: document.getElementById('i-pac').value, shooting: document.getElementById('i-sho').value, ginga: document.getElementById('i-gin').value, defense: document.getElementById('i-def').value, stamina: 50, pulse: 70 };
         var r = Math.round((parseInt(v.pace)+parseInt(v.shooting)+parseInt(v.ginga)+parseInt(v.defense))/4);
         document.getElementById('v-rating').innerText = r; let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
         const i = pl.findIndex(x => x.id == id); if(i !== -1) { Object.assign(pl[i], v); pl[i].rating = r; localStorage.setItem('toni_players', JSON.stringify(pl)); }
     },
+
     handlePhoto: function(e, id) {
         var f = e.target.files[0]; if(!f) return; var r = new FileReader(); r.onload = function(ex) {
             document.getElementById('v-photo').src = ex.target.result;
             let pl = JSON.parse(localStorage.getItem('toni_players')) || []; const i = pl.findIndex(x => x.id == id); if(i !== -1) { pl[i].photo = ex.target.result; localStorage.setItem('toni_players', JSON.stringify(pl)); }
         }; r.readAsDataURL(f);
     },
+
     renderSystem: function() {
         var k = localStorage.getItem('toni_api_key') || ""; var pr = localStorage.getItem('toni_api_provider') || "llama";
         document.getElementById('active-content').innerHTML = `<div style="padding:20px; background:rgba(255,255,255,0.02); border-radius:15px; border:1px solid #333;"><h4 style="color:#fff;">SYSTEM</h4><select id="api-provider" style="width:100%; background:#000; color:#fff; padding:10px; margin-bottom:10px;"><option value="llama" ${pr==='llama'?'selected':''}>Gemma 3 (Ollama)</option><option value="openai" ${pr==='openai'?'selected':''}>OpenAI</option></select><input type="password" id="api-key-input" style="width:100%; background:#000; color:#fff; padding:10px;" value="${k}"><button class="login-btn" style="width:100%; margin-top:15px; background:#ff9500; color:#000;" onclick="BriefcaseUI.saveSettings()">SPEICHERN</button></div>`;
     },
+
     saveSettings: function() { localStorage.setItem('toni_api_key', document.getElementById('api-key-input').value); localStorage.setItem('toni_api_provider', document.getElementById('api-provider').value); alert("Gesichert!"); },
+
     renderPlaceholder: function(s) { document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px;">Sektor ${s} folgt.</div>`; },
+
     addPlayerPrompt: function() {
         var n = prompt("Name:"); var num = prompt("Nummer:"); if(n && num) {
             var pl = JSON.parse(localStorage.getItem('toni_players')) || [];
