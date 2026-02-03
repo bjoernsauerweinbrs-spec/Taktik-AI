@@ -1,0 +1,219 @@
+/* GRUNDLAGEN & FARBEN */
+:root {
+    --bg-main: #0a0a0a;
+    --sidebar-w: 80px;
+    --chat-w: 350px;
+    --accent-blue: #00d1ff;
+    --accent-orange: #ff9500;
+    --border-soft: #222;
+    --text-muted: #888;
+}
+
+body, html { 
+    margin: 0; padding: 0; 
+    height: 100%; width: 100%;
+    font-family: 'Inter', -apple-system, sans-serif; 
+    background: var(--bg-main); 
+    color: white; 
+    overflow: hidden; 
+}
+
+.app-container { 
+    display: flex; 
+    height: 100vh; 
+    width: 100vw;
+}
+
+/* 1. SPALTE: SIDEBAR (LINKS) */
+.sidebar { 
+    width: var(--sidebar-w); 
+    border-right: 1px solid var(--border-soft); 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    padding-top: 20px; 
+    gap: 40px; 
+    background: #0d0d0d;
+}
+
+.nav-item { 
+    text-align: center; 
+    cursor: pointer; 
+    font-size: 10px; 
+    color: var(--text-muted); 
+    transition: 0.3s;
+}
+
+.nav-item:hover { color: var(--accent-orange); }
+.nav-item i { display: block; margin-bottom: 8px; font-size: 24px; }
+
+/* 2. SPALTE: ARENA (MITTE) */
+.arena-column { 
+    flex-grow: 1; 
+    position: relative; 
+    background: #111; 
+    border-right: 1px solid var(--border-soft); 
+}
+
+#tactic-board { 
+    width: 100%; 
+    height: 100%; 
+    display: block; 
+}
+
+/* TAKTIK-BUTTONS (SCHWEBEND ÜBER ARENA) */
+#tactic-controls { 
+    position: absolute; 
+    left: 20px; 
+    top: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    z-index: 100; 
+}
+
+.tactic-btn { 
+    background: rgba(0,0,0,0.7); 
+    border: 1px solid #444; 
+    color: white; 
+    padding: 10px 15px; 
+    border-radius: 5px; 
+    font-size: 11px; 
+    font-weight: bold;
+    cursor: pointer; 
+    transition: 0.2s;
+    backdrop-filter: blur(5px);
+}
+
+.tactic-btn:hover { 
+    border-color: var(--accent-orange); 
+    color: var(--accent-orange);
+    transform: translateX(5px);
+}
+
+.tactic-btn.reset { border-color: #666; color: #aaa; }
+
+/* 3. SPALTE: CHAT/FEED (RECHTS) */
+.chat-column { 
+    width: var(--chat-w); 
+    display: flex; 
+    flex-direction: column; 
+    padding: 0; 
+    background: #0a0a0a; 
+}
+
+.feed-header { 
+    padding: 20px;
+    font-weight: bold; 
+    letter-spacing: 2px; 
+    border-bottom: 1px solid var(--border-soft);
+    color: var(--accent-blue);
+}
+
+.chat-area { 
+    flex-grow: 1; 
+    overflow-y: auto; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px; 
+    padding: 20px;
+}
+
+/* CHAT-BLASEN */
+.bot-msg { 
+    border: 1px solid var(--accent-blue); 
+    padding: 15px; 
+    border-radius: 10px 10px 10px 0; 
+    font-size: 13px; 
+    background: rgba(0,209,255,0.05); 
+    line-height: 1.4;
+}
+
+.user-msg { 
+    border: 1px solid #444; 
+    padding: 15px; 
+    border-radius: 10px 10px 0 10px; 
+    font-size: 13px; 
+    background: #1a1a1a; 
+    align-self: flex-end;
+}
+
+.voice-advisor-label { 
+    background: var(--accent-blue); 
+    color: black; 
+    font-weight: bold; 
+    padding: 6px; 
+    font-size: 10px; 
+    text-align: center; 
+}
+
+.chat-input-container { 
+    display: flex; 
+    background: #000; 
+    border-top: 1px solid var(--border-soft); 
+    padding: 15px; 
+}
+
+#chat-input { 
+    flex-grow: 1; 
+    background: #151515; 
+    border: 1px solid #333; 
+    color: white; 
+    padding: 10px; 
+    border-radius: 4px;
+    outline: none;
+}
+
+#send-btn { 
+    background: var(--accent-blue); 
+    border: none; 
+    color: black; 
+    cursor: pointer; 
+    padding: 0 15px; 
+    margin-left: 10px;
+    border-radius: 4px;
+}
+
+/* AKTTENTASCHE / OVERLAY */
+.hidden { display: none !important; }
+
+#briefcase-overlay { 
+    position: fixed; 
+    top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.95); 
+    z-index: 2000; 
+    display: flex; align-items: center; justify-content: center; 
+}
+
+.briefcase-window { 
+    width: 85%; height: 85%; 
+    border: 1px solid var(--accent-orange); 
+    border-radius: 15px; 
+    background: #0d0d0d; 
+    padding: 30px; 
+    display: flex;
+    flex-direction: column;
+}
+
+.folder-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.folder {
+    background: #151515;
+    border: 1px solid #333;
+    padding: 40px;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.folder:hover { border-color: var(--accent-orange); background: rgba(255,149,0,0.05); }
+
+/* SCROLLBARS */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
