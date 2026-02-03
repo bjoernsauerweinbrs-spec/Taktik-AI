@@ -1,33 +1,84 @@
 :root {
     --bg-deep: #05080F;
-    --panel-dark: #0D1421;
     --accent-orange: #FF6A00;
     --data-cyan: #00D1FF;
-    --gold-grad: linear-gradient(135deg, #fceabb 0%, #f8b500 50%, #fceabb 100%);
-    --red-team: #FF3B30;
-    --text-main: #FFFFFF;
-    --text-dim: #A0AEC0;
 }
 
-/* --- GLOBAL RESET --- */
-* { box-sizing: border-box; }
-body, html { 
-    margin: 0; padding: 0; width: 100%; height: 100%; 
-    background: var(--bg-deep); color: var(--text-main); 
-    font-family: 'Inter', sans-serif; overflow: hidden; 
+/* --- DAS RADIKALE GRID --- */
+body.pro-layout {
+    display: grid !important;
+    grid-template-columns: 80px 1fr 320px !important;
+    grid-template-rows: 100vh !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    overflow: hidden !important;
 }
 
-/* --- SEKTION A: ANMELDESEITE (STRENG ISOLIERT) --- */
+/* ARENA: WIR ERZWINGEN DIE GRÖSSE */
+#stage-container {
+    grid-column: 2 !important; /* Explizit in die Mitte */
+    height: 100vh !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #05080F !important;
+    padding: 0 !important;
+}
+
+#stage {
+    width: 95% !important;
+    height: 90% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#main-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    display: block !important;
+    border: 2px solid #222 !important;
+}
+
+/* CHAT: WEIT WEG VOM BOARD */
+.chat-container {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 340px !important; /* Ganz nah an das rechte Panel */
+    width: 300px !important;
+    height: 350px !important;
+    z-index: 999 !important;
+    background: rgba(10, 15, 26, 0.98) !important;
+    border: 1px solid var(--data-cyan) !important;
+}
+
+/* SIDEBAR & PANEL SICHERUNG */
+.sidebar-minimal { grid-column: 1 !important; background: #020408; z-index: 1000; }
+.analysis-panel { grid-column: 3 !important; background: #0D1421; z-index: 1000; padding: 20px; }
+
+/* LOGIN SCREEN (Muss über allem liegen) */
 #login-screen {
-    position: fixed; inset: 0; 
-    background: radial-gradient(circle at center, #112540 0%, #05080f 100%);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 100000;
+    position: fixed !important; inset: 0 !important;
+    background: var(--bg-deep) !important;
+    z-index: 100000 !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
 }
 
-.login-box {
-    background: rgba(13, 20, 33, 0.98);
-    padding: 60px; border-radius: 30px;
+/* --- DER REST DER DATEI (STADIONZEITUNG & KADER) --- */
+.briefcase-overlay { position: fixed !important; inset: 0 !important; z-index: 90000 !important; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; }
+.briefcase-window { background: #0D1421; border: 2px solid var(--accent-orange); width: 95%; height: 90%; padding: 40px; border-radius: 25px; overflow-y: auto; }
+.pro-player-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+.p-card { background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 12px; border-left: 5px solid #444; }
+.p-card.Anwesend { border-left-color: #4CD964; }
+.p-card.Verletzt { border-left-color: #FF3B30; }
+.magazine-view { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.mag-page { background: #fff; color: #000; aspect-ratio: 1/1.41; padding: 20px; }
+.hidden { display: none !important; }
+.login-btn { padding: 15px; background: var(--accent-orange); color: white; border: none; cursor: pointer; font-weight: bold; }-radius: 30px;
     border: 2px solid var(--accent-orange);
     text-align: center;
     box-shadow: 0 0 100px rgba(255, 106, 0, 0.3);
