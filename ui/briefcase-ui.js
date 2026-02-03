@@ -21,6 +21,14 @@ window.BriefcaseUI = {
         if(!localStorage.getItem('toni_club_config')) {
             localStorage.setItem('toni_club_config', JSON.stringify(this.clubData));
         }
+        // Initialer Seiten-Speicher für das Magazin
+        if (!this.magazinPages) {
+            this.magazinPages = [
+                { id: 'p1', title: 'INSIDE ARENA.', type: 'cover', content: 'MATCHDAY MAG' },
+                { id: 'p2', title: 'Wort des Coaches', type: 'text', content: 'Heute zählt nur die absolute Hingabe...' },
+                { id: 'p3', title: 'Analyse & Formation', type: 'taktik', content: 'Fokus auf Raumkontrolle.' }
+            ];
+        }
     },
 
     // --- NAVIGATION ---
@@ -123,7 +131,7 @@ window.BriefcaseUI = {
         if(window.ToniAI) ToniAI.speak("Daten gespeichert. Wir greifen jetzt in der " + this.clubData.league + " an, Coach!");
     },
 
-    // --- SPONSORING (CONSULTING HOENEß/WATZKE) ---
+    // --- SPONSORING (CONSULTING) ---
     renderSponsoring: function() {
         document.getElementById('active-content').innerHTML = `
             <div style="padding:15px;">
@@ -153,93 +161,87 @@ window.BriefcaseUI = {
         }
     },
 
-    // --- STADIONMAGAZIN (4 SEITEN HIGH-END LAYOUT) ---
+    // --- STADIONHEFT (INTERAKTIV & SEITEN-MANAGEMENT) ---
     renderTemplates: function() {
-        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const topP = players.sort((a,b) => b.rating - a.rating)[0] || {name: "STAR-SPIELER", rating: 0};
         const currentMatch = JSON.parse(localStorage.getItem('toni_current_matchplan')) || { formation: '4-3-3' };
         
+        const renderPage = (p, index) => {
+            let layoutExtra = '';
+            if (p.type === 'cover') {
+                layoutExtra = `<div style="background:#000; height:180px; margin:20px 0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; font-weight:900;">MATCH DAY</div>`;
+            } else if (p.type === 'taktik') {
+                layoutExtra = `<div style="height:160px; background:#0b2d0b; border:2px solid #fff; margin:20px 0; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; position:relative;">
+                                <div style="border:1px solid rgba(255,255,255,0.2); width:80%; height:80%;"></div>
+                                <span style="position:absolute; background:#fff; color:#000; padding:5px 15px; font-size:1.2rem;">${currentMatch.formation}</span>
+                               </div>`;
+            }
+
+            return `
+                <div class="mag-page-wrapper" style="position:relative; margin-bottom:60px;">
+                    <div class="no-print" style="position:absolute; left:-60px; top:0; display:flex; flex-direction:column; gap:10px;">
+                        <button onclick="BriefcaseUI.removeMagPage(${index})" title="Seite löschen" style="background:#ff4444; color:#fff; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                        <button onclick="BriefcaseUI.addMagPage(${index})" title="Seite danach einfügen" style="background:#00d1ff; color:#fff; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer;"><i class="fas fa-plus"></i></button>
+                    </div>
+
+                    <div class="mag-page" style="background:#fff; color:#000; padding:45px; font-family:sans-serif; width:148mm; min-height:210mm; margin:0 auto; box-shadow:0 20px 50px rgba(0,0,0,0.5); display:flex; flex-direction:column;">
+                        <div style="display:flex; justify-content:space-between; border-bottom:3px solid #000; padding-bottom:5px; margin-bottom:20px;">
+                            <span style="font-weight:900; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px;">${this.clubData.name} Inside</span>
+                            <span style="font-size:0.75rem;">SEITE ${index + 1}</span>
+                        </div>
+                        
+                        <h2 contenteditable="true" style="font-size:3.5rem; font-weight:900; line-height:0.8; margin:0; letter-spacing:-3px; text-transform:uppercase;">${p.title}</h2>
+                        ${layoutExtra}
+                        <div contenteditable="true" style="font-size:1.1rem; line-height:1.6; text-align:justify; margin-top:15px; flex-grow:1; outline:none; border:1px dashed transparent;" onfocus="this.style.border='1px dashed #ccc'" onblur="this.style.border='1px dashed transparent'">
+                            ${p.content}
+                        </div>
+                        
+                        <div style="border-top:1px solid #eee; margin-top:20px; padding-top:10px; font-size:0.6rem; color:#999; display:flex; justify-content:space-between;">
+                            <span>OFFIZIELLES STADIONMAGAZIN</span>
+                            <span>${new Date().toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                </div>`;
+        };
+
         document.getElementById('active-content').innerHTML = `
             <style>
-                .mag-view { background: #222; padding: 20px; overflow-y: auto; height: 500px; }
-                .mag-page { 
-                    width: 148mm; height: 210mm; background: #fff; color: #000;
-                    margin: 0 auto 50px auto; box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-                    position: relative; overflow: hidden; display: flex; flex-direction: column;
+                @media print { 
+                    .no-print, #sector-title, #briefcase-nav, .login-btn:not(#print-btn) { display: none !important; } 
+                    body { background: white !important; padding:0 !important; } 
+                    .mag-page { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; height: 100vh !important; page-break-after: always !important; }
+                    .mag-page-wrapper { margin: 0 !important; }
                 }
-                .mag-header { height: 60%; background: #000; position: relative; color: #fff; overflow: hidden; }
-                .mag-logo-box { position: absolute; top: 30px; left: 30px; width: 100px; height: 100px; border: 4px solid #ff9500; background: #fff; z-index: 5; display: flex; align-items: center; justify-content: center; }
-                .mag-title { position: absolute; bottom: 20px; left: 20px; font-size: 5rem; font-weight: 900; line-height: 0.8; letter-spacing: -5px; }
-                .mag-sidebar { position: absolute; right: 0; top: 0; bottom: 0; width: 40px; background: #ff9500; writing-mode: vertical-rl; text-align: center; font-weight: 900; font-size: 0.8rem; color: #000; }
-                .mag-content { padding: 30px; flex-grow: 1; display: flex; flex-direction: column; }
-                .mag-pitch { height: 180px; background: #0b2d0b; border: 2px solid #fff; position: relative; border-radius: 5px; margin: 15px 0; }
-                @media print { .mag-view { background: none; padding: 0; } .mag-page { box-shadow: none; margin: 0; page-break-after: always; } }
+                .mag-page:hover { border: 1px solid #ff9500; }
             </style>
-
-            <div class="mag-view">
-                <div class="mag-page">
-                    <div class="mag-header">
-                        <div class="mag-logo-box">
-                            ${this.clubData.logo ? `<img src="${this.clubData.logo}" style="width:100%;">` : '<span style="color:#000;font-weight:900;">CLUB</span>'}
-                        </div>
-                        <div style="position:absolute; top:40px; right:60px; text-align:right; font-weight:900; color:#ff9500;">
-                            MATCHDAY MAG<br>${new Date().toLocaleDateString()}
-                        </div>
-                        <div class="mag-title">INSIDE<br>ARENA.</div>
-                        <div class="mag-sidebar">OFFIZIELLES ORGAN DES ${this.clubData.name}</div>
-                    </div>
-                    <div class="mag-content">
-                        <h2 style="font-size:1.5rem; margin:0; text-transform:uppercase;">${this.clubData.name}</h2>
-                        <p style="color:#ff9500; font-weight:bold; margin:5px 0;">LIGA: ${this.clubData.league}</p>
-                        <div style="margin-top:auto; border-top:2px solid #000; padding-top:10px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-weight:900;">PREIS: 0.00€</span>
-                            <span style="font-size:0.7rem;">HEUTE GEGEN: [GEGNER]</span>
-                        </div>
-                    </div>
+            <div style="padding:20px; background:#1a1a1a; height:500px; overflow-y:auto; scroll-behavior: smooth;">
+                <p style="color:#ff9500; font-size:0.8rem; text-align:center; margin-bottom:20px;"><i class="fas fa-info-circle"></i> Bearbeite Texte direkt auf der Seite. Nutze die Buttons links für das Seiten-Management.</p>
+                <div id="magazin-canvas">
+                    ${this.magazinPages.map((p, i) => renderPage(p, i)).join('')}
                 </div>
-
-                <div class="mag-page" style="padding:40px;">
-                    <h3 style="border-bottom:5px solid #ff9500; padding-bottom:10px; text-transform:uppercase; font-weight:900;">Wort des Coaches</h3>
-                    <p style="font-size:1rem; line-height:1.6; font-style:italic; font-family:serif;">
-                        "Männer, heute zählt nur die absolute Hingabe. Wir haben die ${this.clubData.league} analysiert. Coach ${this.clubData.coach} und ich fordern volle Intensität. Wir spielen für unsere Fans!"
-                    </p>
-                    <div style="margin-top:40px; display:grid; grid-template-columns:1fr 1.5fr; gap:30px;">
-                        <div>
-                            <div style="height:150px; background:#eee; border:1px solid #000; display:flex; align-items:center; justify-content:center;">
-                                <i class="fas fa-user-shield fa-4x" style="color:#ccc;"></i>
-                            </div>
-                            <p style="font-size:0.7rem; text-align:center; font-weight:900; margin-top:10px;">TOP-PERFORMER<br>${topP.name}</p>
-                        </div>
-                        <div style="font-size:0.8rem;">
-                            <b>TAKTIK-FOKUS:</b><br>
-                            Wir agieren heute im ${currentMatch.formation}. Fokus auf schnelle Umschaltmomente und Raumkontrolle.
-                        </div>
-                    </div>
+                <div style="text-align:center; padding:40px;">
+                    <button id="print-btn" class="login-btn" style="background:#ff9500; color:#000; width:350px; height:60px; font-size:1.2rem;" onclick="window.print()">
+                        <i class="fas fa-print"></i> MAGAZIN DRUCKEN / PDF EXPORT
+                    </button>
                 </div>
+            </div>`;
+    },
 
-                <div class="mag-page" style="padding:40px; background:#f4f4f4;">
-                    <h3 style="text-transform:uppercase; font-weight:900;">Analyse & Formation</h3>
-                    <div class="mag-pitch">
-                        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:rgba(255,255,255,0.1); font-size:4rem; font-weight:900;">${currentMatch.formation}</div>
-                    </div>
-                    <p style="font-size:0.8rem;"><b>INTERNATIONALE STANDARDS:</b> Unsere Datenanalyse zeigt, dass wir über die Halbräume gefährlich werden müssen.</p>
-                </div>
+    addMagPage: function(index) {
+        this.magazinPages.splice(index + 1, 0, { 
+            id: Date.now(), 
+            title: 'NEUE SEITE.', 
+            type: 'text', 
+            content: 'Schreibe hier deine Analyse oder füge Spieltags-Informationen ein...' 
+        });
+        this.renderTemplates();
+        if(window.ToniAI) ToniAI.speak("Ich habe eine neue Seite eingefügt, Coach.");
+    },
 
-                <div class="mag-page" style="padding:40px;">
-                    <h3 style="border-bottom:5px solid #000; padding-bottom:10px; text-transform:uppercase; font-weight:900;">Partner & Business</h3>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;">
-                        <div style="border:2px dashed #ccc; height:100px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:#999;">ANZEIGENFLÄCHE 1</div>
-                        <div style="border:2px dashed #ccc; height:100px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:#999;">ANZEIGENFLÄCHE 2</div>
-                    </div>
-                    <div style="margin-top:auto; padding:20px; background:#000; color:#fff; text-align:center;">
-                        <div style="font-weight:900;">WERDEN SIE PARTNER</div>
-                        <div style="font-size:0.6rem;">KONTAKT@${this.clubData.name.replace(/\s/g, '').toUpperCase()}.DE</div>
-                    </div>
-                </div>
-            </div>
-            
-            <button class="login-btn" style="width:100%; margin-top:20px; background:#ff9500; color:#000; font-weight:900;" onclick="window.print()">STADIONHEFT EXPORTIEREN (PDF)</button>
-        `;
+    removeMagPage: function(index) {
+        if (this.magazinPages.length <= 1) return;
+        this.magazinPages.splice(index, 1);
+        this.renderTemplates();
+        if(window.ToniAI) ToniAI.speak("Seite wurde aus dem Entwurf gelöscht.");
     },
 
     // --- SPORTTASCHE ---
