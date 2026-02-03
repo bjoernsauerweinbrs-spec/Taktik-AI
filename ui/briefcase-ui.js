@@ -49,6 +49,7 @@ window.BriefcaseUI = {
                     <h3 style="color:var(--accent-orange);">TAKTIK-BOARDS</h3>
                     <button class="login-btn" style="width:100%; margin-bottom:10px;" onclick="BriefcaseUI.applyFormation('433')">4-3-3 GLEITEN</button>
                     <button class="login-btn" style="width:100%; margin-bottom:10px;" onclick="BriefcaseUI.applyFormation('352')">3-5-2 GLEITEN</button>
+                    <button class="login-btn" style="width:100%; background:#444;" onclick="arena.resetBoard()">FELD LEEREN</button>
                 </div>
             </div>`;
     },
@@ -58,8 +59,8 @@ window.BriefcaseUI = {
         
         // Mustertexte für die Zeitung
         const musterClub = "FC TONI 2.0 — HIGH-TECH SOCCER";
-        const musterTalk = "Willkommen in der neuen Ära, Björn! Wir setzen heute auf brasilianische Technik und absolute Disziplin. Heute zählt nur der Sieg. Gruß, Trainer Björn.";
-        const musterBericht = "Das letzte Spiel war ein Lehrstück in Sachen Effizienz. Die 4-3-3 Formation hat die Räume perfekt genutzt und den Gegner kontrolliert.";
+        const musterTalk = "Willkommen in der neuen Ära, Björn! Wir setzen heute auf brasilianische Technik und absolute Disziplin. Jeder Spieler ist ein Zahnrad in unserem Erfolg. Heute zählt nur der Sieg. Gruß, Trainer Björn.";
+        const musterBericht = "Das letzte Spiel war ein Lehrstück in Sachen Effizienz. Die 4-3-3 Formation hat die Räume perfekt genutzt und den Gegner über weite Strecken kontrolliert. Ein verdienter 3:0-Heimsieg!";
 
         target.innerHTML = `
             <div style="margin-bottom:20px; display:flex; gap:10px;">
@@ -95,14 +96,26 @@ window.BriefcaseUI = {
                 </div>
 
                 <div class="mag-page">
-                    <b>🤝 SPONSOREN & PARTNER</b>
+                    <b>🤝 SPONSOREN & TONI 2.0</b>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; flex:1; margin-top:15px;">
                         <div style="border:1px solid #eee; padding:10px; text-align:center; font-size:0.6rem; background:#fafafa;">GINGA SPORTS</div>
                         <div style="border:1px solid #eee; padding:10px; text-align:center; font-size:0.6rem; background:#fafafa;">DATA-FUTURES</div>
                         <div style="border:1px solid #eee; padding:10px; text-align:center; font-size:0.6rem; background:#fafafa;">BJÖRNS COFFEE</div>
                         <div style="border:1px solid #eee; padding:10px; text-align:center; font-size:0.6rem; background:#fafafa;">TONI OS AI</div>
                     </div>
-                    <p style="margin-top:auto; font-size:0.7rem; text-align:center; border-top:1px solid #eee; padding-top:10px;">Created for Trainer Björn</p>
+                    <div style="text-align:center; margin-top:20px; padding:15px; background:#000; border-radius:10px; box-shadow:0 0 10px rgba(0,209,255,0.3);">
+                        <div style="font-family:monospace; font-size:0.8rem; line-height:0.8; color:#00D1FF; text-shadow:0 0 5px rgba(0,209,255,0.7);">
+                            █████████<br>
+                            ██▄█ █▄███<br>
+                            ███ █ ███<br>
+                            ██▄█ █▄███<br>
+                            █████████
+                        </div>
+                        <p style="color:#FFF; font-size:0.7rem; margin-top:10px;">
+                            <b style="color:#FF6A00;">TONI 2.0:</b> Das digitale Board für Trainer & Manager.<br>
+                            Taktik, Kader, Analyse – alles in Echtzeit.
+                        </p>
+                    </div>
                 </div>
                 
                 <button class="login-btn" style="grid-column: span 2; background: #FF6A00;" onclick="window.print()">ZEITUNG JETZT DRUCKEN</button>
@@ -143,7 +156,7 @@ window.BriefcaseUI = {
     },
 
     openSetcard(id) {
-        let players = JSON.parse(localStorage.getItem('toni_players'));
+        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const p = players.find(x => x.id === id);
         document.getElementById('active-content').innerHTML = `
             <button onclick="BriefcaseUI.switchSektor('sport')" class="login-btn" style="width:auto;">← ZURÜCK ZUM KADER</button>
