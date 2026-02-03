@@ -64,12 +64,45 @@ window.BriefcaseUI = {
         title.innerHTML = `<button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:var(--accent-orange); cursor:pointer; margin-right:10px;"><i class="fas fa-arrow-left"></i></button> ${sektor.toUpperCase()}`;
 
         if (sektor === 'sport') this.renderSporttasche();
+        else if (sektor === 'system') this.renderSystem();
         else if (sektor === 'training') this.renderTraining();
         else if (sektor === 'matchplan') this.renderMatchplan();
         else if (sektor === 'media') this.renderMedia();
         else if (sektor === 'sponsoring') this.renderSponsoring();
-        else if (sektor === 'system') this.renderSystem();
         else this.renderPlaceholder(sektor);
+    },
+
+    // --- SYSTEM (FIXED API KEY INPUT) ---
+    renderSystem() {
+        const currentProvider = localStorage.getItem('toni_api_provider') || "llama";
+        const currentKey = localStorage.getItem('toni_api_key') || "";
+        document.getElementById('active-content').innerHTML = `
+            <div style="padding: 20px; border: 1px solid #333; border-radius: 15px; background: rgba(255,255,255,0.02);">
+                <h4 style="color:#fff; margin-top:0;">KI-SETUP & API-SCHLÜSSEL</h4>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; font-size:0.7rem; color:#888; margin-bottom:5px;">PROVIDER</label>
+                    <select id="api-provider" class="login-input" style="width:100%; background:#000; color:#fff; border:1px solid #444; padding:10px; border-radius:5px;">
+                        <option value="llama" ${currentProvider==='llama'?'selected':''}>Gemma 3 (MacBook / Ollama)</option>
+                        <option value="openai" ${currentProvider==='openai'?'selected':''}>OpenAI (GPT-4o)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; font-size:0.7rem; color:#888; margin-bottom:5px;">API-KEY</label>
+                    <input type="password" id="api-key-input" class="login-input" style="width:100%; background:#000; color:#fff; border:1px solid #444; padding:10px; border-radius:5px;" value="${currentKey}" placeholder="Schlüssel hier einfügen...">
+                </div>
+                <button class="login-btn" style="width:100%; height:45px; background:var(--accent-orange); color:#000; font-weight:bold;" onclick="BriefcaseUI.saveSettings()">KONFIGURATION SPEICHERN</button>
+                <div style="margin-top:15px; font-size:0.65rem; color:#666; line-height:1.4;">
+                    <i class="fas fa-info-circle"></i> Wenn du Ollama nutzt, stelle sicher, dass es auf deinem Mac im Hintergrund läuft.
+                </div>
+            </div>`;
+    },
+
+    saveSettings() {
+        const key = document.getElementById('api-key-input').value;
+        const prov = document.getElementById('api-provider').value;
+        localStorage.setItem('toni_api_key', key);
+        localStorage.setItem('toni_api_provider', prov);
+        alert("System-Einstellungen erfolgreich gesichert!");
     },
 
     // --- FIFA-STYLE SETCARD ---
@@ -80,84 +113,57 @@ window.BriefcaseUI = {
 
         document.getElementById('active-content').innerHTML = `
             <div class="fifa-card-container" style="display: grid; grid-template-columns: 200px 1fr; gap: 30px; background: linear-gradient(135deg, #1a1a1a 0%, #000 100%); padding: 30px; border-radius: 20px; border: 2px solid var(--accent-orange); color: white;">
-                <div style="background: #222; border: 2px solid var(--accent-orange); border-radius: 15px; padding: 20px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                    <div style="font-size: 4rem; font-weight: 900; line-height: 1; color: var(--accent-orange);">${p.rating || 80}</div>
+                <div style="background: #222; border: 2px solid var(--accent-orange); border-radius: 15px; padding: 20px; text-align: center;">
+                    <div style="font-size: 4rem; font-weight: 900; color: var(--accent-orange);">${p.rating || 80}</div>
                     <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;">${p.pos || 'ST'}</div>
                     <div style="width: 100%; height: 120px; background: #333; border-radius: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center;">
                         <i class="fas fa-user" style="font-size: 4rem; color: #555;"></i>
                     </div>
-                    <div style="font-size: 1.1rem; font-weight: bold; text-transform: uppercase;">${p.name}</div>
+                    <div style="font-size: 1.1rem; font-weight: bold;">${p.name}</div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.7rem; margin-top: 15px; border-top: 1px solid #444; padding-top: 10px;">
                         <div>PAC ${p.pace||50}</div><div>SHO ${p.shooting||50}</div>
                         <div>PAS ${p.passing||50}</div><div>DEF ${p.defense||50}</div>
-                        <div>GIN ${p.ginga||50}</div><div>STA ${p.stamina||50}</div>
                     </div>
                 </div>
-
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <h2 style="margin:0; color:var(--accent-orange);">SPIELER-DETAILS</h2>
-                        <div style="text-align: right; background: rgba(255,59,48,0.1); padding: 10px; border-radius: 10px; border: 1px solid #ff3b30;">
-                            <small style="display:block; font-size: 0.6rem; color: #888;">AKTUELLER PULS</small>
-                            <b style="font-size: 1.5rem; color: #ff3b30;">❤️ ${p.pulse || 70} BPM</b>
-                        </div>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px;">
+                <div>
+                    <h2 style="margin:0; color:var(--accent-orange);">${p.name} (#${p.number})</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                         <div>
                             <label style="font-size:0.7rem;">PACE</label><input type="range" value="${p.pace||50}" onchange="BriefcaseUI.updateVal('${id}', 'pace', this.value)">
-                            <label style="font-size:0.7rem;">SHOOTING</label><input type="range" value="${p.shooting||50}" onchange="BriefcaseUI.updateVal('${id}', 'shooting', this.value)">
-                            <label style="font-size:0.7rem;">PASSING</label><input type="range" value="${p.passing||50}" onchange="BriefcaseUI.updateVal('${id}', 'passing', this.value)">
+                            <label style="font-size:0.7rem;">GINGA</label><input type="range" value="${p.ginga||50}" onchange="BriefcaseUI.updateVal('${id}', 'ginga', this.value)">
+                            <label style="font-size:0.7rem;">PULS</label><input type="number" value="${p.pulse||70}" style="width:100%; background:#000; border:1px solid #444; color:#fff;" onchange="BriefcaseUI.updateVal('${id}', 'pulse', this.value)">
                         </div>
                         <div>
-                            <label style="font-size:0.7rem;">GINGA-SCORE</label><input type="range" value="${p.ginga||50}" onchange="BriefcaseUI.updateVal('${id}', 'ginga', this.value)">
-                            <label style="font-size:0.7rem;">PULS (LIVE)</label><input type="number" value="${p.pulse||70}" style="width:100%; background:#000; color:#fff; border:1px solid #444;" onchange="BriefcaseUI.updateVal('${id}', 'pulse', this.value)">
+                            <label style="font-size:0.7rem;">STAMINA</label><input type="range" value="${p.stamina||50}" onchange="BriefcaseUI.updateVal('${id}', 'stamina', this.value)">
                             <label style="font-size:0.7rem;">STATUS</label>
                             <select onchange="BriefcaseUI.updateVal('${id}', 'status', this.value)" style="width:100%; background:#000; color:#fff;">
                                 <option value="Fit" ${p.status==='Fit'?'selected':''}>Fit</option>
-                                <option value="Verletzt" ${p.status==='Verletzt'?'selected':''}>Verletzt</option>
+                                <option value="Angeschlagen" ${p.status==='Angeschlagen'?'selected':''}>Angeschlagen</option>
                             </select>
                         </div>
                     </div>
-                    <button class="login-btn" style="width:100%; height: 50px;" onclick="BriefcaseUI.renderSporttasche()">ÄNDERUNGEN SPEICHERN</button>
+                    <button class="login-btn" style="margin-top:20px; width:100%;" onclick="BriefcaseUI.renderSporttasche()">FERTIG</button>
                 </div>
-            </div>
-        `;
+            </div>`;
     },
 
-    // --- SPONSORING KACHEL ---
-    renderSponsoring() {
-        document.getElementById('active-content').innerHTML = `
-            <div style="padding: 20px;">
-                <h3 style="color:var(--data-cyan);">VEREINS-PARTNER & SPONSORING</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
-                    <div class="sponsoring-tool" style="border: 2px dashed #444; padding: 30px; text-align: center; border-radius: 15px; cursor: pointer;">
-                        <i class="fas fa-plus" style="font-size: 2rem; color: #444; margin-bottom: 10px;"></i><br>
-                        <b>NEUEN PARTNER HINZUFÜGEN</b>
-                    </div>
-                    <div style="background: white; color: black; padding: 20px; border-radius: 15px; text-align: center;">
-                        <div style="height: 60px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.5rem; letter-spacing: -1px;">MUSTER LOGO</div>
-                        <div style="border-top: 1px solid #eee; margin-top: 10px; padding-top: 10px; font-size: 0.7rem;">HAUPTSPONSOR | VERTRAG BIS 2027</div>
-                    </div>
-                </div>
-            </div>
-        `;
-    },
-
-    // --- BESTEHENDE FUNKTIONEN (VORHANDEN) ---
+    // --- SPORTTASCHE / SPONSORING / ETC (ERHALTEN) ---
     renderSporttasche() {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         document.getElementById('active-content').innerHTML = `
             <div style="padding: 10px;">
                 <button class="login-btn" style="width: 100%; margin-bottom: 20px;" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUEN SPIELER HINZUFÜGEN</button>
                 <div class="pro-player-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
-                    ${players.map(p => `
-                        <div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background: #151515; border: 1px solid ${p.pulse > 160 ? '#ff3b30' : '#333'}; padding: 15px; border-radius: 10px; text-align: center; cursor:pointer;">
-                            <div style="font-size: 1.2rem; font-weight: 900; color: var(--accent-orange);">#${p.number}</div>
-                            <b style="font-size: 0.8rem; color: #fff;">${p.name}</b>
-                        </div>`).join('')}
+                    ${players.map(p => `<div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background:#151515; border:1px solid #333; padding:15px; border-radius:10px; text-align:center; cursor:pointer;">
+                        <div style="font-size:1.2rem; font-weight:900; color:var(--accent-orange);">#${p.number}</div>
+                        <b style="color:#fff;">${p.name}</b>
+                    </div>`).join('')}
                 </div>
             </div>`;
+    },
+
+    renderSponsoring() {
+        document.getElementById('active-content').innerHTML = `<div style="padding:20px;"><h3 style="color:var(--data-cyan);">PARTNER-BOARD</h3><div style="background:white; color:black; padding:30px; border-radius:15px; text-align:center; font-weight:bold; font-size:2rem;">LOGO HIER</div></div>`;
     },
 
     updateVal(id, key, val) {
@@ -165,24 +171,22 @@ window.BriefcaseUI = {
         const i = players.findIndex(x => x.id == id);
         if(i !== -1) {
             players[i][key] = val;
-            // Rating Neuberechnung
-            const p = players[i];
-            const avg = (parseInt(p.pace||50) + parseInt(p.shooting||50) + parseInt(p.passing||50) + parseInt(p.defense||50) + parseInt(p.ginga||50)) / 5;
-            players[i].rating = Math.round(avg);
+            if (key === 'pulse' && val > 160 && window.ToniAI) {
+                const msg = `Coach! Achtung bei ${players[i].name}. Puls: ${val}!`;
+                window.ToniAI.addChatMessage("Toni", msg, "bot-msg");
+                window.ToniAI.speak(msg);
+            }
             localStorage.setItem('toni_players', JSON.stringify(players));
         }
     },
 
-    renderTraining() { this.renderPlaceholder('training'); },
-    renderMatchplan() { this.renderPlaceholder('matchplan'); },
-    renderMedia() { this.renderPlaceholder('media'); },
-    renderSystem() { this.renderPlaceholder('system'); },
     renderPlaceholder(sektor) { document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px; color:#555;"><p>Bereich ${sektor.toUpperCase()} wird vorbereitet.</p></div>`; },
+    
     addPlayerPrompt() {
         const name = prompt("Name:"); const num = prompt("Nummer:");
         if(name && num) {
             let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
-            pl.push({ id: Date.now(), name: name, number: num, rating: 50, pace: 50, pulse: 70, status: 'Fit' });
+            pl.push({ id: Date.now(), name: name, number: num, rating: 50, pulse: 70 });
             localStorage.setItem('toni_players', JSON.stringify(pl));
             this.renderSporttasche();
         }
