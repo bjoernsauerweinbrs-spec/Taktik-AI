@@ -6,12 +6,12 @@
     <link rel="stylesheet" href="css/toni-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
-<body>
- 
+<body class="pro-layout">
+
     <div id="login-screen">
         <div class="login-box">
             <h1>TONI 2.0</h1>
-            <input id="password-input" type="password" class="login-input" placeholder="Passwort">
+            <input id="password-input" type="password" class="login-input" placeholder="Passwort (Toni2026)">
             <button class="login-btn" onclick="ToniAuth.login()">SYSTEM STARTEN</button>
         </div>
     </div>
@@ -27,7 +27,11 @@
         </div>
     </aside>
 
-    <main id="stage"><canvas id="main-canvas"></canvas></main>
+    <main id="stage-container">
+        <div id="stage">
+            <canvas id="main-canvas"></canvas>
+        </div>
+    </main>
 
     <aside class="analysis-panel">
         <div id="setcard-content">
@@ -39,22 +43,15 @@
         <div class="briefcase-window">
             <div id="briefcase-nav" class="folder-grid">
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">
-                    <span class="nav-icon">👟</span>
-                    <b>SPORTTASCHE</b>
-                    <p>Kader, Training & Board</p>
+                    <span class="nav-icon">👟</span><b>SPORTTASCHE</b>
                 </div>
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('marketing')">
-                    <span class="nav-icon">📢</span>
-                    <b>MARKETING</b>
-                    <p>Sponsoren & Stadionzeitung</p>
+                    <span class="nav-icon">📢</span><b>MARKETING</b>
                 </div>
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('analyse')">
-                    <span class="nav-icon">📊</span>
-                    <b>ANALYSEZENTRUM</b>
-                    <p>Tiefen-Daten & Toni-Check</p>
+                    <span class="nav-icon">📊</span><b>ANALYSE</b>
                 </div>
             </div>
-
             <div id="briefcase-content" class="hidden">
                 <div class="content-header">
                     <button onclick="BriefcaseUI.backToNav()" class="back-btn">← ZURÜCK</button>
@@ -74,7 +71,9 @@
             login() {
                 if(document.getElementById('password-input').value === "Toni2026") {
                     document.getElementById('login-screen').classList.add('hidden');
-                    if(window.arena) window.arena.init('main-canvas');
+                    setTimeout(() => {
+                        if(window.arena) window.arena.init('main-canvas');
+                    }, 100);
                 } else { alert("Zugriff verweigert."); }
             }
         };
