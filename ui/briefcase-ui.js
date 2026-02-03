@@ -1,5 +1,4 @@
 window.BriefcaseUI = {
-    // Initialisierung des Kaders mit einem Muster-Spieler, falls leer
     init() {
         let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
         if (pl.length === 0) {
@@ -14,6 +13,7 @@ window.BriefcaseUI = {
                 ginga: 90,
                 defense: 88,
                 stamina: 80,
+                pulse: 72, // Ruhepuls/Startwert
                 status: 'Fit',
                 isMuster: true
             });
@@ -31,6 +31,7 @@ window.BriefcaseUI = {
         }
     },
 
+    // FIX: Der Zurück-Button und die Grid-Anzeige
     backToNav() {
         const nav = document.getElementById('briefcase-nav');
         const content = document.getElementById('briefcase-content');
@@ -42,7 +43,6 @@ window.BriefcaseUI = {
         this.renderFolderGrid();
     },
 
-    // Das neue 9-Ordner-System laut Brainstorming
     renderFolderGrid() {
         const nav = document.getElementById('briefcase-nav');
         const folders = [
@@ -61,7 +61,7 @@ window.BriefcaseUI = {
             <div class="folder-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px;">
                 ${folders.map(f => `
                     <div class="folder-card" onclick="BriefcaseUI.switchSektor('${f.id}')" 
-                         style="background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 25px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s;">
+                         style="background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 25px; border-radius: 12px; text-align: center; cursor: pointer;">
                         <i class="fas ${f.icon}" style="font-size: 2rem; color: ${f.color}; margin-bottom: 10px; display: block;"></i>
                         <span style="font-size: 0.75rem; font-weight: bold; letter-spacing: 1px;">${f.name}</span>
                     </div>
@@ -77,7 +77,7 @@ window.BriefcaseUI = {
         
         nav.classList.add('hidden');
         content.classList.remove('hidden');
-        title.innerText = sektor.toUpperCase();
+        title.innerHTML = `<button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:var(--accent-orange); cursor:pointer; margin-right:10px;"><i class="fas fa-arrow-left"></i></button> ${sektor.toUpperCase()}`;
 
         if (sektor === 'sport') this.renderSporttasche();
         else if (sektor === 'system') this.renderSystem();
@@ -93,10 +93,10 @@ window.BriefcaseUI = {
                 <button class="login-btn" style="width: 100%; margin-bottom: 20px;" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUEN SPIELER HINZUFÜGEN</button>
                 <div class="pro-player-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
                     ${players.map(p => `
-                        <div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="position: relative; background: #151515; border: 1px solid ${p.isMuster ? 'var(--accent-orange)' : '#333'}; padding: 15px; border-radius: 10px; text-align: center;">
-                            <div style="font-size: 1.2rem; font-weight: 900; color: var(--accent-orange);">#${p.number}</div>
-                            <div style="font-weight: bold; margin: 5px 0;">${p.name}</div>
-                            <div style="font-size: 0.7rem; color: #888;">${p.pos} | Rating: ${p.rating || '--'}</div>
+                        <div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background: #151515; border: 1px solid ${p.pulse > 160 ? '#ff3b30' : '#333'}; padding: 15px; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 1.2rem; font-weight: 900; color: ${p.pulse > 160 ? '#ff3b30' : 'var(--accent-orange)'};">#${p.number}</div>
+                            <b style="font-size: 0.8rem;">${p.name}</b>
+                            <div style="font-size: 0.65rem; color: ${p.pulse > 160 ? '#ff3b30' : '#888'}; margin-top:5px;">❤️ ${p.pulse || 70} BPM</div>
                         </div>
                     `).join('')}
                 </div>
@@ -111,31 +111,35 @@ window.BriefcaseUI = {
 
         document.getElementById('active-content').innerHTML = `
             <div class="fifa-card-overlay" style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; border: 1px solid var(--accent-orange);">
-                <div style="display: flex; gap: 20px; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                    <div style="font-size: 3rem; font-weight: 900; color: var(--accent-orange);">${p.rating || 80}</div>
-                    <div>
-                        <h2 style="margin: 0;">${p.name}</h2>
-                        <span style="color: #888;">${p.pos} | #${p.number}</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                    <div style="display: flex; gap: 20px; align-items: center;">
+                        <div style="font-size: 3rem; font-weight: 900; color: var(--accent-orange);">${p.rating || 80}</div>
+                        <div><h2 style="margin: 0;">${p.name}</h2><span style="color: #888;">${p.pos} | #${p.number}</span></div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.8rem; color: #888;">BELASTUNG</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${p.pulse > 160 ? '#ff3b30' : '#4cd964'};">❤️ ${p.pulse || 70}</div>
                     </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                     <div>
-                        <label>PACE</label><input type="range" id="f-pace" value="${p.pace||50}" onchange="BriefcaseUI.updateVal('${id}', 'pace', this.value)">
-                        <label>PASSING</label><input type="range" id="f-pass" value="${p.passing||50}" onchange="BriefcaseUI.updateVal('${id}', 'passing', this.value)">
-                        <label>GINGA</label><input type="range" id="f-ginga" value="${p.ginga||50}" onchange="BriefcaseUI.updateVal('${id}', 'ginga', this.value)">
+                        <label style="font-size:0.7rem;">PACE</label><input type="range" value="${p.pace||50}" onchange="BriefcaseUI.updateVal('${id}', 'pace', this.value)">
+                        <label style="font-size:0.7rem;">GINGA</label><input type="range" value="${p.ginga||50}" onchange="BriefcaseUI.updateVal('${id}', 'ginga', this.value)">
+                        <label style="font-size:0.7rem;">PULS (BPM)</label>
+                        <input type="number" value="${p.pulse||70}" style="width:100%; background:#000; color:#fff; border:1px solid #444;" onchange="BriefcaseUI.updateVal('${id}', 'pulse', this.value)">
                     </div>
                     <div>
-                        <label>DEFENSE</label><input type="range" id="f-def" value="${p.defense||50}" onchange="BriefcaseUI.updateVal('${id}', 'defense', this.value)">
-                        <label>STAMINA</label><input type="range" id="f-stam" value="${p.stamina||50}" onchange="BriefcaseUI.updateVal('${id}', 'stamina', this.value)">
-                        <label>STATUS</label>
-                        <select id="f-status" onchange="BriefcaseUI.updateVal('${id}', 'status', this.value)" style="width:100%; background:#000; color:#fff; border:1px solid #444;">
+                        <label style="font-size:0.7rem;">DEFENSE</label><input type="range" value="${p.defense||50}" onchange="BriefcaseUI.updateVal('${id}', 'defense', this.value)">
+                        <label style="font-size:0.7rem;">STAMINA</label><input type="range" value="${p.stamina||50}" onchange="BriefcaseUI.updateVal('${id}', 'stamina', this.value)">
+                        <label style="font-size:0.7rem;">STATUS</label>
+                        <select onchange="BriefcaseUI.updateVal('${id}', 'status', this.value)" style="width:100%; background:#000; color:#fff; border:1px solid #444;">
                             <option value="Fit" ${p.status==='Fit'?'selected':''}>Fit</option>
                             <option value="Angeschlagen" ${p.status==='Angeschlagen'?'selected':''}>Angeschlagen</option>
                         </select>
                     </div>
                 </div>
-                <button class="login-btn" style="margin-top: 20px;" onclick="BriefcaseUI.renderSporttasche()">FERTIG & SPEICHERN</button>
+                <button class="login-btn" style="margin-top: 20px; width:100%;" onclick="BriefcaseUI.renderSporttasche()">ÄNDERUNGEN ÜBERNEHMEN</button>
             </div>
         `;
     },
@@ -145,30 +149,33 @@ window.BriefcaseUI = {
         const i = players.findIndex(x => x.id == id);
         if(i !== -1) {
             players[i][key] = val;
-            // Einfache Rating-Berechnung (Durchschnitt)
+            
+            // Puls-Check für Toni
+            if (key === 'pulse' && val > 160) {
+                if (window.ToniAI) {
+                    const warn = `Coach Björn! Achtung bei ${players[i].name}. Der Puls ist bei ${val}! Er braucht eine Pause, sonst riskieren wir eine Verletzung!`;
+                    window.ToniAI.addChatMessage("Toni", warn, "bot-msg");
+                    window.ToniAI.speak(warn);
+                }
+            }
+
+            // Rating-Update
             const p = players[i];
-            const avg = (parseInt(p.pace||0) + parseInt(p.passing||0) + parseInt(p.ginga||0) + parseInt(p.defense||0) + parseInt(p.stamina||0)) / 5;
+            const avg = (parseInt(p.pace||50) + parseInt(p.ginga||50) + parseInt(p.defense||50) + parseInt(p.stamina||50)) / 4;
             players[i].rating = Math.round(avg);
+            
             localStorage.setItem('toni_players', JSON.stringify(players));
             if(window.arena) window.arena.loadPlayersFromStorage();
         }
     },
 
+    // ... (restliche Funktionen addPlayerPrompt, renderSystem, renderPlaceholder bleiben erhalten)
     addPlayerPrompt() {
         const name = prompt("Name des Spielers:");
         const num = prompt("Rückennummer:");
-        const pos = prompt("Position (z.B. ST, IV, TW):");
-        
         if(name && num) {
             let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
-            pl.push({
-                id: Date.now(),
-                name: name,
-                number: num,
-                pos: pos || '??',
-                rating: 50, pace: 50, passing: 50, ginga: 50, defense: 50, stamina: 50,
-                status: 'Fit'
-            });
+            pl.push({ id: Date.now(), name: name, number: num, pos: '??', rating: 50, pace: 50, ginga: 50, defense: 50, stamina: 50, pulse: 70, status: 'Fit' });
             localStorage.setItem('toni_players', JSON.stringify(pl));
             this.renderSporttasche();
         }
@@ -193,18 +200,12 @@ window.BriefcaseUI = {
     saveSettings() {
         localStorage.setItem('toni_api_key', document.getElementById('api-key-input').value);
         localStorage.setItem('toni_api_provider', document.getElementById('api-provider').value);
-        alert("System-Einstellungen gesichert.");
+        alert("Einstellungen gesichert.");
     },
 
     renderPlaceholder(sektor) {
-        document.getElementById('active-content').innerHTML = `
-            <div style="text-align:center; padding:50px; color:#555;">
-                <i class="fas fa-tools" style="font-size:3rem; margin-bottom:20px;"></i>
-                <p>Der Bereich <b>${sektor.toUpperCase()}</b> wird im nächsten Schritt ausgebaut.</p>
-            </div>
-        `;
+        document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px; color:#555;"><p>Bereich <b>${sektor.toUpperCase()}</b> wird vorbereitet.</p></div>`;
     }
 };
 
-// Initialisierung starten
 BriefcaseUI.init();
