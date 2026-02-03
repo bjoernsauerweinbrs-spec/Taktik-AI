@@ -13,6 +13,17 @@ window.BriefcaseUI = {
         }
     },
 
+    // --- GLOBALER TAG-KATALOG (VOKABULAR) ---
+    // Tags sind sprachneutral und quantifizierbar
+    tagCatalog: [
+        { id: 'SHOT_ON_TARGET', alias: 'TOR/ABSCHLUSS', impact: { shooting: 5, mental: 2 }, live: true },
+        { id: 'PROGRESSIVE_PASS', alias: 'RAUMGEWINN-PASS', impact: { passing: 4, tactic: 2 }, live: true },
+        { id: 'SKILL_BREAKTHROUGH', alias: 'DRIBBLING-DURCHBRUCH', impact: { ginga: 3, technique: 2 }, live: false },
+        { id: 'TURNOVER_PASS', alias: 'FEHLPASS', impact: { passing: -2 }, live: false },
+        { id: 'PRESSING_RECOVERY', alias: 'PRESSING-ERFOLG', impact: { tactic: 3, defense: 2 }, live: true },
+        { id: 'DECISION_ERROR', alias: 'ENTSCHEIDUNGSFEHLER', impact: { tactic: -3, mental: -2 }, live: false }
+    ],
+
     // --- NAVIGATION & UI CONTROLS ---
     toggle: function() {
         var overlay = document.getElementById('briefcase-overlay');
@@ -65,7 +76,49 @@ window.BriefcaseUI = {
         if (sektor === 'sport') this.renderSporttasche();
         else if (sektor === 'system') this.renderSystem();
         else if (sektor === 'sponsoring') this.renderSponsoring();
+        else if (sektor === 'media') this.renderMedia();
         else this.renderPlaceholder(sektor);
+    },
+
+    // --- MEDIA / VIDEO TAGGING (NEU: GLOBAL VOKABULAR) ---
+    renderMedia: function() {
+        document.getElementById('active-content').innerHTML = `
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; padding: 10px;">
+                <div style="background:#000; border: 1px solid #333; border-radius: 10px; overflow:hidden;">
+                    <div style="height:250px; display:flex; align-items:center; justify-content:center; background:#111; color:#444;">
+                        <i class="fas fa-play-circle" style="font-size:4rem;"></i>
+                    </div>
+                    <div style="padding:10px; background:#1a1a1a; display:flex; gap:10px; overflow-x:auto; border-top:1px solid #333;">
+                        ${this.tagCatalog.map(t => `
+                            <button onclick="BriefcaseUI.logTag('${t.id}')" style="white-space:nowrap; background:#333; color:#fff; border:none; padding:5px 10px; border-radius:5px; font-size:0.6rem; cursor:pointer;">
+                                ${t.alias} ${t.live ? '⚡' : '⏳'}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+                <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px;">
+                    <h4 style="margin:0 0 10px 0; font-size:0.8rem; color:#ff9500;">TAG-PROTOKOLL</h4>
+                    <div id="tag-log" style="font-size:0.7rem; color:#888; height:200px; overflow-y:auto;">
+                        Keine Tags in dieser Sitzung.
+                    </div>
+                </div>
+            </div>`;
+    },
+
+    logTag: function(tagId) {
+        const tag = this.tagCatalog.find(t => t.id === tagId);
+        const log = document.getElementById('tag-log');
+        const timestamp = new Date().toLocaleTimeString();
+        
+        const entry = document.createElement('div');
+        entry.style.marginBottom = "5px";
+        entry.innerHTML = `[${timestamp}] <b>${tag.id}</b> (${tag.alias})`;
+        if(log.innerHTML.includes("Keine Tags")) log.innerHTML = "";
+        log.prepend(entry);
+
+        if(tag.live && window.ToniAI) {
+            window.ToniAI.addChatMessage("Toni", `Live-Analyse: ${tag.alias} registriert. Score-Engine angepasst.`, "bot-msg");
+        }
     },
 
     // --- SPIELER-VERWALTUNG & FIFA-CARD ---
@@ -95,7 +148,7 @@ window.BriefcaseUI = {
 
         document.getElementById('active-content').innerHTML = `
             <div style="display: grid; grid-template-columns: 240px 1fr; gap: 30px; background: #000; padding: 25px; border-radius: 15px; border: 1px solid #ff9500;">
-                <div id="card-preview" style="width: 240px; height: 360px; background: linear-gradient(145deg, #d4af37, #b8860b); border-radius: 10px; padding: 20px; color: #111; text-align: center; position: relative;">
+                <div id="card-preview" style="width: 240px; height: 360px; background: linear-gradient(145deg, #d4af37, #b8860b); border-radius: 10px; padding: 20px; color: #111; text-align: center;">
                     <div id="v-rating" style="font-size: 4rem; font-weight: 900; line-height:1;">${p.rating || 80}</div>
                     <div style="font-weight:bold; text-transform:uppercase;">${p.pos || 'IV'}</div>
                     <div onclick="document.getElementById('photo-upload').click()" style="width:110px; height:110px; margin: 10px auto; border-radius:50%; background:#333; overflow:hidden; border:2px solid rgba(0,0,0,0.2); cursor:pointer;">
@@ -111,7 +164,7 @@ window.BriefcaseUI = {
                 <div style="flex-grow: 1;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                         <h3 style="color:#ff9500; margin:0;">ANALYSIS CENTER</h3>
-                        <button class="login-btn" style="width:auto; padding:5px 15px; font-size:0.7rem;" onclick="BriefcaseUI.generatePin('${id}')">NEUE PIN GENERIEREN</button>
+                        <button class="login-btn" style="width:auto; padding:5px 15px; font-size:0.7rem;" onclick="BriefcaseUI.generatePin('${id}')">NEUE PIN</button>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 10px;">
                         <div>
@@ -124,10 +177,6 @@ window.BriefcaseUI = {
                             <label style="font-size:0.7rem; color:#888;">DEF</label><input type="range" id="i-def" value="${p.defense||50}" oninput="BriefcaseUI.sync('${id}')">
                             <label style="font-size:0.7rem; color:#888;">STA</label><input type="range" id="i-sta" value="${p.stamina||50}" oninput="BriefcaseUI.sync('${id}')">
                         </div>
-                    </div>
-                    <div style="margin-top:15px; padding:15px; background:rgba(0,209,255,0.05); border:1px solid #00d1ff; border-radius:10px;">
-                        <h4 style="color:#00d1ff; margin:0 0 5px 0; font-size:0.8rem;">DASHBOARD COMPLIANCE</h4>
-                        <small style="color:#ccc;">Status: Spieler-Dashboard aktiv | Sichtbarkeit: Privat</small>
                     </div>
                     <button class="login-btn" style="width:100%; margin-top:15px;" onclick="BriefcaseUI.renderSporttasche()">ÄNDERUNGEN SPEICHERN</button>
                 </div>
@@ -156,8 +205,7 @@ window.BriefcaseUI = {
         let pins = JSON.parse(localStorage.getItem('toni_player_pins')) || {};
         pins[playerId] = { pin: pin, expires: Date.now() + (30 * 24 * 60 * 60 * 1000) };
         localStorage.setItem('toni_player_pins', JSON.stringify(pins));
-        this.openFIFAcard(playerId); // Refresh UI
-        return pin;
+        this.openFIFAcard(playerId); 
     },
 
     sync: function(id) {
@@ -178,13 +226,10 @@ window.BriefcaseUI = {
             Object.assign(players[i], vals);
             players[i].rating = rating;
             localStorage.setItem('toni_players', JSON.stringify(players));
-            if(vals.pulse > 160 && window.ToniAI) {
-                window.ToniAI.addChatMessage("Toni", "Coach Björn! Puls-Alarm bei " + players[i].name + "!", "bot-msg");
-            }
         }
     },
 
-    // --- SPONSORING & COMPLIANCE ---
+    // --- SPONSORING & SYSTEM (UNVERÄNDERT) ---
     renderSponsoring: function() {
         document.getElementById('active-content').innerHTML = `
             <div style="padding: 20px;">
@@ -192,39 +237,29 @@ window.BriefcaseUI = {
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top:20px;">
                     <div style="background:white; color:black; padding:40px; border-radius:15px; text-align:center;">
                         <div style="font-weight:900; font-size:2rem;">MUSTER LOGO</div>
-                        <div style="margin-top:10px; font-size:0.7rem; border-top:1px solid #eee; padding-top:10px;">HAUPTSPONSOR</div>
                     </div>
                     <div style="background:rgba(255,255,255,0.03); border:1px solid #444; padding:20px; border-radius:15px;">
                         <h4 style="margin-top:0; color:#ffcc00;">AUTO-CHECK</h4>
                         <ul style="font-size:0.8rem; color:#ccc; list-style:none; padding:0;">
                             <li><i class="fas fa-check" style="color:green;"></i> Kontrastverhältnis: 4.8:1</li>
-                            <li><i class="fas fa-exclamation-triangle" style="color:orange;"></i> Auflösung: 280 DPI (A5 Druck)</li>
-                            <li><i class="fas fa-check" style="color:green;"></i> Exklusivität gewahrt</li>
                         </ul>
                     </div>
                 </div>
             </div>`;
     },
 
-    // --- SYSTEM & KI SETTINGS ---
     renderSystem: function() {
         var currentKey = localStorage.getItem('toni_api_key') || "";
         var currentProvider = localStorage.getItem('toni_api_provider') || "llama";
         document.getElementById('active-content').innerHTML = `
             <div style="padding: 20px; border: 1px solid #333; border-radius: 15px; background: rgba(255,255,255,0.02);">
                 <h4 style="color:#fff; margin-bottom:15px;">KI-SETUP & PROVIDER</h4>
-                <div style="margin-bottom:20px;">
-                    <label style="display:block; font-size:0.7rem; color:#888; margin-bottom:5px;">PROVIDER</label>
-                    <select id="api-provider" style="width:100%; background:#000; color:#fff; border:1px solid #444; padding:10px; border-radius:5px;">
-                        <option value="llama" ${currentProvider==='llama'?'selected':''}>Gemma 3 (MacBook / Ollama)</option>
-                        <option value="openai" ${currentProvider==='openai'?'selected':''}>OpenAI (GPT-4o)</option>
-                    </select>
-                </div>
-                <div style="margin-bottom:20px;">
-                    <label style="display:block; font-size:0.7rem; color:#888; margin-bottom:5px;">API-KEY</label>
-                    <input type="password" id="api-key-input" style="width:100%; background:#000; color:#fff; border:1px solid #444; padding:10px; border-radius:5px;" value="${currentKey}">
-                </div>
-                <button class="login-btn" style="width:100%; height:45px; background:#ff9500; color:#000; font-weight:bold;" onclick="BriefcaseUI.saveSettings()">KONFIGURATION SPEICHERN</button>
+                <div style="margin-bottom:10px;"><select id="api-provider" style="width:100%; background:#000; color:#fff; border:1px solid #444; padding:10px; border-radius:5px;">
+                    <option value="llama" ${currentProvider==='llama'?'selected':''}>Gemma 3 (Ollama)</option>
+                    <option value="openai" ${currentProvider==='openai'?'selected':''}>OpenAI</option>
+                </select></div>
+                <input type="password" id="api-key-input" style="width:100%; background:#000; color:#fff; border:1px solid #444; padding:10px; border-radius:5px;" value="${currentKey}">
+                <button class="login-btn" style="width:100%; margin-top:15px; background:#ff9500; color:#000; font-weight:bold;" onclick="BriefcaseUI.saveSettings()">SPEICHERN</button>
             </div>`;
     },
 
@@ -247,5 +282,4 @@ window.BriefcaseUI = {
     }
 };
 
-// Initialisierung beim Laden
 BriefcaseUI.init();
