@@ -1,61 +1,103 @@
 window.ToniAI = {
     isListening: false,
     recognition: null,
-    synth: window.speechSynthesis,
-
+    
     init() {
-        this.setupMic();
-        const input = document.getElementById('chat-input');
-        if(input) {
-            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') this.process(input.value); });
-        }
-        document.getElementById('send-btn').onclick = () => this.process(input.value);
+        console.log("Toni AI: Systemstart... Brasilianischer Style aktiv.");
+        this.setupVoiceCommands();
+        this.welcomeMessage();
     },
 
-    setupMic() {
-        if (!('webkitSpeechRecognition' in window)) return;
-        this.recognition = new webkitSpeechRecognition();
-        this.recognition.lang = 'de-DE';
-        this.recognition.onresult = (e) => { this.process(e.results[0][0].transcript); };
-        this.recognition.onend = () => { this.isListening = false; document.getElementById('voice-indicator').classList.remove('active'); };
+    welcomeMessage() {
+        const msg = "Ola Björn! Toni 2.0 ist bereit. Dein Board ist frei, der Kader geladen. Wie gehen wir heute taktisch vor? Soll ich die Jungs ins 4-3-3 schieben?";
+        this.addChatMessage("Toni", msg, "bot-msg");
     },
 
     toggleListening() {
-        if(this.isListening) { this.recognition.stop(); }
-        else { this.isListening = true; this.recognition.start(); document.getElementById('voice-indicator').classList.add('active'); }
+        this.isListening = !this.isListening;
+        const micIcon = document.getElementById('mic-icon');
+        if (this.isListening) {
+            micIcon.style.color = "#FF3B30";
+            micIcon.classList.add('pulse');
+            console.log("Toni hört zu...");
+            // Hier würde die Web Speech API starten
+        } else {
+            micIcon.style.color = "";
+            micIcon.classList.remove('pulse');
+        }
     },
 
-    process(txt) {
-        if(!txt) return;
-        this.addChat('user', txt);
-        document.getElementById('chat-input').value = '';
+    // Die Logik, wie Toni auf Björn reagiert
+    async processCommand(text) {
+        this.addChatMessage("Björn", text, "user-msg");
         
-        let resp = "Björn, ich analysiere das im Brazilian Style. Wir sollten den Fokus auf Technik legen.";
-        if(txt.toLowerCase().includes('hallo')) resp = "Hallo Björn! Wie kann ich dich heute beim Training unterstützen?";
-        
+        let response = "";
+        const input = text.toLowerCase();
+
+        if (input.includes("formation") || input.includes("aufstellung")) {
+            response = "Kein Problem, Björn! Ich schiebe die Jungs in die Formation. Schau aufs Board!";
+            window.BriefcaseUI.applyFormation(input.includes("352") ? "352" : "433");
+        } 
+        else if (input.includes("zeitung") || input.includes("marketing")) {
+            response = "Die Stadionzeitung für den FC Toni 2.0 sieht spitze aus. Soll ich noch mehr Werbung für unser Board machen?";
+            window.BriefcaseUI.switchSektor('marketing');
+        }
+        else if (input.includes("kader") || input.includes("spieler")) {
+            response = "Ich öffne dir die Sporttasche. Wer ist heute fit für den brasilianischen Zauber?";
+            window.BriefcaseUI.switchSektor('sport');
+        }
+        else {
+            response = "Verstanden, Björn. Ich analysiere das... Als dein Berater sage ich: Wir brauchen mehr Ballbesitz im Mittelfeld!";
+        }
+
         setTimeout(() => {
-            this.addChat('bot', resp);
-            this.speak(resp);
-        }, 500);
+            this.addChatMessage("Toni", response, "bot-msg");
+            this.speak(response);
+        }, 600);
     },
 
-    addChat(role, txt) {
-        const c = document.getElementById('chat-messages');
-        const m = document.createElement('p');
-        m.className = role === 'user' ? 'user-msg' : 'bot-msg';
-        m.innerText = txt;
-        c.appendChild(m);
-        c.scrollTop = c.scrollHeight;
+    addChatMessage(sender, text, type) {
+        const container = document.getElementById('chat-messages');
+        if (!container) return;
+        
+        const msgDiv = document.createElement('div');
+        msgDiv.className = type;
+        msgDiv.innerHTML = `<b>${sender}:</b><br>${text}`;
+        container.appendChild(msgDiv);
+        container.scrollTop = container.scrollHeight;
     },
 
-    speak(txt) {
-        this.synth.cancel();
-        const u = new SpeechSynthesisUtterance(txt);
-        u.lang = 'de-DE';
-        const voices = this.synth.getVoices();
-        const male = voices.find(v => v.name.includes('Stefan') || v.name.includes('Google Deutsch') || v.name.includes('Yannick'));
-        if(male) u.voice = male;
-        u.pitch = 0.9;
-        this.synth.speak(u);
+    speak(text) {
+        if (!window.speechSynthesis) return;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'de-DE';
+        utterance.pitch = 0.9; // Etwas tiefer, männlich
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+    },
+
+    setupVoiceCommands() {
+        const btn = document.getElementById('send-btn');
+        const input = document.getElementById('chat-input');
+        
+        if (btn && input) {
+            btn.onclick = () => {
+                if (input.value.trim() !== "") {
+                    this.processCommand(input.value);
+                    input.value = "";
+                }
+            };
+            input.onkeypress = (e) => {
+                if (e.key === 'Enter' && input.value.trim() !== "") {
+                    this.processCommand(input.value);
+                    input.value = "";
+                }
+            };
+        }
     }
 };
+
+// Initialisierung bei Systemstart
+document.addEventListener('DOMContentLoaded', () => {
+    // Toni wartet kurz auf das System-Login
+});
