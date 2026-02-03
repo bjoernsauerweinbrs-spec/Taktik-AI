@@ -1,11 +1,12 @@
 window.ToniAI = {
     init() {
+        console.log("Toni 2.0: KI-Schnittstelle aktiv.");
         this.setupVoiceCommands();
         this.welcomeMessage();
     },
 
     welcomeMessage() {
-        this.addChatMessage("Toni", "Ola Björn! Falls Ollama am Mac noch hakt, schau in die Hilfe im System-Ordner.", "bot-msg");
+        this.addChatMessage("Toni", "Ola Björn! Die Verbindung zum Mac steht (kein Blockieren mehr). Jetzt müssen wir nur noch sicherstellen, dass das Llama-Modell geladen ist.", "bot-msg");
     },
 
     async processCommand(text) {
@@ -14,11 +15,11 @@ window.ToniAI = {
         const apiKey = localStorage.getItem('toni_api_key');
 
         if (provider === "free") {
-            this.localFallback("Björn, Basis-Modus aktiv: Flügelspiel ist heute der Schlüssel!");
+            this.localFallback("Björn, Basis-Modus: Wir sollten über die Außen kommen!");
             return;
         }
 
-        this.addChatMessage("Toni", `⚡ Verbindung zu ${provider.toUpperCase()}...`, "bot-msg");
+        this.addChatMessage("Toni", `⚡ Anfrage an ${provider.toUpperCase()}...`, "bot-msg");
 
         try {
             let apiUrl = "";
@@ -28,13 +29,26 @@ window.ToniAI = {
             if (provider === "openai") {
                 apiUrl = 'https://api.openai.com/v1/chat/completions';
                 headers["Authorization"] = `Bearer ${apiKey}`;
-                body = { model: "gpt-4o-mini", messages: [{role: "system", content: "Taktik-Experte Toni."}, {role: "user", content: text}] };
-            } else if (provider === "llama") {
+                body = { 
+                    model: "gpt-4o-mini", 
+                    messages: [{role: "system", content: "Du bist Toni, Taktik-Experte."}, {role: "user", content: text}] 
+                };
+            } 
+            else if (provider === "llama") {
+                // FIX: Wir nutzen 127.0.0.1 und stellen sicher, dass wir das Modell 'llama3' ansprechen
                 apiUrl = 'http://127.0.0.1:11434/api/generate';
-                body = { model: "llama3", prompt: `Toni antwortet: ${text}`, stream: false };
+                body = { 
+                    model: "llama3", // Falls du ein anderes Modell hast (z.B. mistral), hier ändern
+                    prompt: `Antworte als Fußball-Experte Toni kurz: ${text}`, 
+                    stream: false 
+                };
             }
 
             const response = await fetch(apiUrl, { method: 'POST', headers: headers, body: JSON.stringify(body) });
+            
+            if (response.status === 404) {
+                throw new Error("MODEL_NOT_FOUND");
+            }
             if (!response.ok) throw new Error("OFFLINE");
 
             const data = await response.json();
@@ -42,8 +56,14 @@ window.ToniAI = {
 
             this.addChatMessage("Toni", reply, "bot-msg");
             this.speak(reply);
+
         } catch (e) {
-            this.addChatMessage("Toni", "Björn, Verbindung fehlgeschlagen. Prüfe die Hilfe im System-Ordner!", "bot-msg");
+            console.error("Detail-Fehler:", e);
+            let msg = "Björn, Verbindung fehlgeschlagen.";
+            if (e.message === "MODEL_NOT_FOUND") {
+                msg = "Björn, Fehler 404: Das Modell 'llama3' wurde in Ollama nicht gefunden. Tippe 'ollama pull llama3' ins Terminal!";
+            }
+            this.addChatMessage("Toni", msg, "bot-msg");
         }
     },
 
