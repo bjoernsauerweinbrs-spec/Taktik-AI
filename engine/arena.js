@@ -3,14 +3,16 @@ window.arena = {
     ctx: null,
     players: [],      // Dein Team (Rot)
     opponents: [],    // Gegner (Blau - Fix 11)
+    draggedPlayer: null,
 
     init(canvasId) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
         this.resize();
-        this.loadPlayersFromStorage(); // Deine Spieler laden
-        this.initOpponents();          // 11 Gegner erstellen
+        this.loadPlayersFromStorage();
+        this.initOpponents();
+        this.setupEventListeners();
         this.render();
         
         window.addEventListener('resize', () => this.resize());
@@ -21,34 +23,72 @@ window.arena = {
         this.canvas.height = this.canvas.parentElement.clientHeight;
     },
 
-    // DEIN TEAM: Lädt alle Spieler aus der Sporttasche (Sporttasche = Deine Jungs)
     loadPlayersFromStorage() {
         const savedPlayers = JSON.parse(localStorage.getItem('toni_players')) || [];
+        // Nur neue Spieler hinzufügen, bestehende Positionen behalten
+        const currentPos = this.players.reduce((acc, p) => { acc[p.id] = {x: p.x, y: p.y}; return acc; }, {});
+        
         this.players = savedPlayers.map((p, index) => ({
             id: p.id,
             name: p.name,
             number: p.number || "??",
-            x: 100 + (index * 40) % 150, // Startposition links
-            y: 80 + (index * 45) % (this.canvas.height - 150),
+            x: currentPos[p.id] ? currentPos[p.id].x : 100 + (index * 40) % 150,
+            y: currentPos[p.id] ? currentPos[p.id].y : 80 + (index * 45) % (this.canvas.height - 150),
             radius: 18,
-            color: '#FF3B30' // ROT
+            color: '#FF3B30'
         }));
     },
 
-    // GEGNER: Erstellt exakt 11 blaue Spieler
     initOpponents() {
         this.opponents = [];
         for (let i = 1; i <= 11; i++) {
             this.opponents.push({
                 id: 'opp_' + i,
                 number: i,
-                // Startpositionen auf der rechten Seite (Gegner-Hälfte)
-                x: this.canvas.width - 150 - (i * 10) % 100,
-                y: 80 + (i * 45) % (this.canvas.height - 150),
+                x: this.canvas.width - 200 - (i * 10) % 100,
+                y: 100 + (i * 50) % (this.canvas.height - 200),
                 radius: 18,
-                color: '#007AFF' // BLAU
+                color: '#007AFF'
             });
         }
+    },
+
+    setupEventListeners() {
+        const getPos = (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            return {
+                x: (e.clientX || e.touches[0].clientX) - rect.left,
+                y: (e.clientY || e.touches[0].clientY) - rect.top
+            };
+        };
+
+        const startDrag = (e) => {
+            const pos = getPos(e);
+            // Suche in beiden Teams (Rot zuerst, dann Blau)
+            const allPlayers = [...this.players, ...this.opponents];
+            this.draggedPlayer = allPlayers.find(p => {
+                const dist = Math.hypot(p.x - pos.x, p.y - pos.y);
+                return dist < p.radius;
+            });
+        };
+
+        const doDrag = (e) => {
+            if (this.draggedPlayer) {
+                const pos = getPos(e);
+                this.draggedPlayer.x = pos.x;
+                this.draggedPlayer.y = pos.y;
+            }
+        };
+
+        const stopDrag = () => { this.draggedPlayer = null; };
+
+        this.canvas.addEventListener('mousedown', startDrag);
+        this.canvas.addEventListener('mousemove', doDrag);
+        window.addEventListener('mouseup', stopDrag);
+        
+        this.canvas.addEventListener('touchstart', startDrag);
+        this.canvas.addEventListener('touchmove', doDrag);
+        window.addEventListener('touchend', stopDrag);
     },
 
     drawPitch() {
@@ -57,14 +97,11 @@ window.arena = {
         const h = this.canvas.height;
         const pad = 40;
 
-        // Rasen
         ctx.fillStyle = '#111';
         ctx.fillRect(0, 0, w, h);
-        
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.lineWidth = 2;
 
-        // Außenlinien & Mitte
         ctx.strokeRect(pad, pad, w - pad * 2, h - pad * 2);
         ctx.beginPath();
         ctx.moveTo(w / 2, pad);
@@ -74,32 +111,27 @@ window.arena = {
         ctx.arc(w / 2, h / 2, 70, 0, Math.PI * 2);
         ctx.stroke();
 
-        // TORE (Links & Rechts)
         ctx.lineWidth = 3;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        // Tor links
-        ctx.strokeRect(pad - 15, h / 2 - 40, 15, 80);
-        // Tor rechts
-        ctx.strokeRect(w - pad, h / 2 - 40, 15, 80);
-
-        // STRAFRÄUME
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.strokeRect(pad - 15, h / 2 - 40, 15, 80); // Tor L
+        ctx.strokeRect(w - pad, h / 2 - 40, 15, 80);    // Tor R
+        
         ctx.lineWidth = 1.5;
-        ctx.strokeRect(pad, h / 2 - 100, 100, 200); // Links
-        ctx.strokeRect(w - pad - 100, h / 2 - 100, 100, 200); // Rechts
+        ctx.strokeRect(pad, h / 2 - 100, 100, 200); // Strafraum L
+        ctx.strokeRect(w - pad - 100, h / 2 - 100, 100, 200); // Strafraum R
     },
 
     drawTeam(teamList) {
         const ctx = this.ctx;
         teamList.forEach(p => {
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = p.color;
-            
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.fillStyle = p.color;
+            ctx.shadowBlur = this.draggedPlayer === p ? 25 : 10;
+            ctx.shadowColor = p.color;
             ctx.fill();
-            
             ctx.shadowBlur = 0;
+
             ctx.fillStyle = "#fff";
             ctx.font = "bold 11px Inter";
             ctx.textAlign = "center";
@@ -116,14 +148,12 @@ window.arena = {
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawPitch();
-        this.drawTeam(this.players);   // Deine Roten
-        this.drawTeam(this.opponents); // Die Blauen 11er
+        this.drawTeam(this.opponents); // Erst Gegner (unten)
+        this.drawTeam(this.players);   // Dann dein Team (oben)
         requestAnimationFrame(() => this.render());
     },
 
-    // Toni's Taktik-Move (Nur Beispiel)
     animateFormation(type) {
-        this.loadPlayersFromStorage();
-        // Hier folgen später die Gleit-Formationen
+        // Hier folgen die automatischen Formationen (Gingastyle)
     }
 };
