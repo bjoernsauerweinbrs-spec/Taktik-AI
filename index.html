@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 — Tactical Intelligence OS</title>
+    <title>TONI 2.0 — High-Performance Trainer OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
@@ -48,7 +48,10 @@
             </aside>
 
             <div id="toni-live-chat" class="chat-container">
-                <div class="chat-header"><span>TONI VOICE ADVISOR</span><div id="voice-indicator"></div></div>
+                <div class="chat-header">
+                    <span>TONI VOICE ADVISOR</span>
+                    <div id="voice-indicator" class="voice-wave"></div>
+                </div>
                 <div id="chat-messages" class="chat-messages"></div>
                 <div class="chat-input-area">
                     <input type="text" id="chat-input" placeholder="Nachricht an Toni...">
@@ -61,12 +64,15 @@
             <div id="briefcase-nav" class="folder-grid">
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">
                     <span class="nav-icon">👟</span><b>SPORTTASCHE</b>
+                    <p>Kader & Training</p>
                 </div>
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('marketing')">
                     <span class="nav-icon">📢</span><b>MARKETING</b>
+                    <p>Zeitung & Sponsoren</p>
                 </div>
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('analyse')">
                     <span class="nav-icon">📊</span><b>ANALYSE</b>
+                    <p>Performance & Matrix</p>
                 </div>
             </div>
             <div id="briefcase-content" class="hidden">
@@ -76,7 +82,7 @@
                 </div>
                 <div id="active-content"></div>
             </div>
-            <button class="close-overlay-btn" onclick="BriefcaseUI.toggle()">[X] SCHLIESSEN</button>
+            <button class="close-overlay-btn" onclick="BriefcaseUI.toggle()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; cursor:pointer; font-size:20px;">[X] SCHLIESSEN</button>
         </div>
     </div>
 
@@ -88,11 +94,8 @@
             login() {
                 const pw = document.getElementById('password-input').value;
                 if(pw === "Toni2026") {
-                    // Verstecke Login, zeige Hauptsystem
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('main-system').classList.remove('hidden');
-                    
-                    // Initialisiere die Engine
                     setTimeout(() => { 
                         if(window.arena) arena.init('main-canvas'); 
                         if(window.ToniAI) ToniAI.init();
