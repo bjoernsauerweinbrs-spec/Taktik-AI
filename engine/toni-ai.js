@@ -4,17 +4,10 @@ window.ToniAI = {
         this.welcomeMessage();
     },
 
-    // Die professionelle Begrüßung laut Protokoll
     welcomeMessage() {
         const name = localStorage.getItem('trainer_name');
-        let msg = "";
-
-        if (!name) {
-            msg = "Ola! Ich bin Toni, dein neuer Co-Trainer. Ich freue mich sehr auf die Zusammenarbeit und darauf, gemeinsam mit dir die taktische Marschroute zu entwickeln. Bevor wir loslegen: Wie darf ich dich ansprechen, Coach?";
-        } else {
-            msg = `Beleza, Coach ${name}! Ich bin bereit. Die Jungs warten auf deine Anweisungen. Womit starten wir die Analyse?`;
-        }
-
+        let msg = name ? `Beleza, Coach ${name}! Ich bin bereit. Wo setzen wir heute taktisch an?` 
+                       : "Ola! Ich bin Toni, dein Co-Trainer. Ich freue mich auf die Zusammenarbeit! Wie darf ich dich ansprechen, Coach?";
         this.addChatMessage("Toni", msg, "bot-msg");
         setTimeout(() => this.speak(msg), 1000);
     },
@@ -25,45 +18,52 @@ window.ToniAI = {
         const provider = localStorage.getItem('toni_api_provider') || "llama";
         const apiKey = localStorage.getItem('toni_api_key');
 
-        // Erst-Kontakt Logik: Name lernen und zur Sporttasche führen
         if (!name) {
             localStorage.setItem('trainer_name', text);
-            const reply = `Hallo Coach ${text}! Freut mich sehr. Da wir heute das erste Mal zusammen am Taktikboard stehen, ist der erste wichtige Schritt, unseren Kader zu erfassen. Bitte geh in die Aktentasche und öffne die Sporttasche, um die Spieler anzulegen. Nur so kann ich eine fundierte Analyse erstellen. Hast du dazu Fragen?`;
+            const reply = `Hallo Coach ${text}! Erster Schritt: Leg unseren Kader in der Sporttasche an (Aktentasche), damit ich die Jungs auf das Board schieben kann!`;
             this.addChatMessage("Toni", reply, "bot-msg");
             this.speak(reply);
             return;
         }
 
-        // Standard-Antwort, falls die KI-Verbindung noch hakt (Kein "Was geht ab" mehr!)
-        const fallbackMsg = `Coach ${name}, ich habe gerade eine Störung in der Datenleitung zu Gemma 3. Aber fachlich ist klar: Wir müssen als Erstes die Liste in der Sporttasche vervollständigen, damit das Board mit Leben gefüllt wird. Schau bitte kurz im System-Ordner nach dem Rechten.`;
+        const input = text.toLowerCase();
+        // Spezial-Logik für Taktik-Verschiebung
+        if (input.includes("verschieben") || input.includes("taktik") || input.includes("ginga")) {
+            this.addChatMessage("Toni", "Coach, ich optimiere die Abstände. Wir schieben die Kette jetzt höher ins Pressing!", "bot-msg");
+            if (window.arena && window.arena.players.length > 0) {
+                window.arena.players.forEach((p, i) => {
+                    window.arena.glideTo(p.id, 250 + (i*15), 100 + (i*40)); // Beispiel-Verschiebung
+                });
+            }
+            return;
+        }
 
         this.addChatMessage("Toni", `⚡ Analysiere für Coach ${name}...`, "bot-msg");
 
         try {
-            const systemPrompt = `Du bist Toni, Co-Trainer von Coach ${name}. Dein Stil ist eine Mischung aus Jürgen Klopp (leidenschaftlich, motivierend) und Julian Nagelsmann (taktisch brillant, präzise). Du sprichst IMMER Deutsch. Deine oberste Priorität ist die Professionalität. Du weist den Trainer freundlich darauf hin, dass die Sporttasche (Kaderpflege) das wichtigste Werkzeug ist. Antworte fachlich fundiert und kurz.`;
-
-            let apiUrl = "", body = {}, headers = {"Content-Type": "application/json"};
+            const systemPrompt = `Du bist Toni, Co-Trainer von Coach ${name}. Dein Stil ist eine Mischung aus Klopp und Nagelsmann. Antworte immer auf Deutsch, fachmännisch und motivierend.`;
+            let apiUrl = "", body = {};
 
             if (provider === "llama") {
                 apiUrl = 'http://127.0.0.1:11434/api/generate';
                 body = { model: "gemma3:1b", prompt: `System: ${systemPrompt}\nUser: ${text}\nAntwort:`, stream: false };
             } else {
                 apiUrl = 'https://api.openai.com/v1/chat/completions';
-                headers["Authorization"] = `Bearer ${apiKey}`;
-                body = { model: "gpt-4o-mini", messages: [{role: "system", content: systemPrompt}, {role: "user", content: text}] };
+                body = { model: "gpt-4o-mini", messages: [{role:"system", content:systemPrompt}, {role:"user", content:text}] };
             }
 
-            const response = await fetch(apiUrl, { method: 'POST', headers: headers, body: JSON.stringify(body) });
+            const response = await fetch(apiUrl, { 
+                method: 'POST', 
+                headers: {"Content-Type": "application/json", "Authorization": `Bearer ${apiKey}`}, 
+                body: JSON.stringify(body) 
+            });
             const data = await response.json();
             const reply = provider === "llama" ? data.response : data.choices[0].message.content;
 
-            if (!reply) throw new Error("Empty response");
-
             this.addChatMessage("Toni", reply, "bot-msg");
             this.speak(reply);
-
         } catch (e) {
-            this.localFallback(fallbackMsg);
+            this.localFallback(`Coach ${name}, ich habe gerade eine Funkstörung zu Gemma 3. Aber fachlich gilt: Die Sporttasche muss gepflegt sein!`);
         }
     },
 
@@ -85,16 +85,9 @@ window.ToniAI = {
     speak(text) {
         if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        
-        // Männliche Stimme erzwingen
-        const voices = window.speechSynthesis.getVoices();
-        const proVoice = voices.find(v => v.lang.includes('de') && (v.name.includes('Stefan') || v.name.includes('Conrad') || v.name.includes('Male')));
-        if (proVoice) utterance.voice = proVoice;
-
-        utterance.pitch = 0.85; // Tieferer Grundton
-        utterance.rate = 0.95;  // Leicht langsamer für mehr Autorität
-        window.speechSynthesis.speak(utterance);
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'de-DE'; u.pitch = 0.85;
+        window.speechSynthesis.speak(u);
     },
 
     setupVoiceCommands() {
