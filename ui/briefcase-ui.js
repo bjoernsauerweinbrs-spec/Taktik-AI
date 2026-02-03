@@ -73,12 +73,47 @@ window.BriefcaseUI = {
         
         if (sektor === 'sport') this.renderSporttasche();
         else if (sektor === 'matchplan') this.renderMatchplans();
+        else if (sektor === 'training') this.renderTraining();
         else if (sektor === 'reports') this.renderReports();
         else if (sektor === 'templates') this.renderTemplates();
         else if (sektor === 'media') this.renderMedia();
         else if (sektor === 'system') this.renderSystem();
         else if (sektor === 'sponsoring') this.renderSponsoring();
         else this.renderPlaceholder(sektor);
+    },
+
+    // --- TRAINING (AI POWERED) ---
+    renderTraining: function() {
+        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const weakPlayer = players.sort((a,b) => a.ginga - b.ginga)[0] || {name: "Kader"};
+        document.getElementById('active-content').innerHTML = `
+            <div style="padding: 15px;">
+                <h4 style="color:#fff; margin:0 0 10px 0;">AI-TRAININGS-GENERATOR</h4>
+                <div style="background:rgba(255,149,0,0.1); border:1px solid #ff9500; padding:15px; border-radius:10px; margin-bottom:20px;">
+                    <p style="font-size:0.7rem; color:#fff; margin:0;">
+                        <b>STATUS:</b> Toni analysiert Fokus auf <b style="color:#ff9500;">${weakPlayer.name}</b> (Ginga: ${weakPlayer.ginga}).
+                    </p>
+                </div>
+                <div id="training-suggestion-box" style="min-height:120px; background:rgba(255,255,255,0.02); border:1px solid #333; border-radius:10px; padding:15px; font-size:0.75rem; color:#ccc; line-height:1.4;">
+                    <i class="fas fa-robot" style="margin-right:10px;"></i> Bereit für die Web-Analyse der besten brasilianischen Drills...
+                </div>
+                <button class="login-btn" style="width:100%; margin-top:20px; background:#ff9500; color:#000; font-weight:900;" onclick="BriefcaseUI.askToniForExercises()">ÜBUNGEN GENERIEREN</button>
+            </div>`;
+    },
+
+    askToniForExercises: function() {
+        const box = document.getElementById('training-suggestion-box');
+        box.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Toni scannt das Web nach High-Performance Übungen...';
+        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const stats = players.map(p => `${p.name}(Ginga:${p.ginga})`).join(', ');
+        const prompt = `Coach, ich analysiere unseren Kader: ${stats}. Ich suche jetzt im Web nach zwei brasilianischen Trainings-Drills, um unsere Technik zu pushen. Antworte als Toni.`;
+        if(window.ToniAI) {
+            ToniAI.processCommand(prompt);
+            setTimeout(() => {
+                const msgs = document.querySelectorAll('.bot-msg');
+                if(msgs.length > 0) box.innerHTML = msgs[msgs.length-1].innerHTML;
+            }, 3500);
+        }
     },
 
     // --- MATCHPLANS ---
@@ -163,7 +198,7 @@ window.BriefcaseUI = {
         }; reader.readAsDataURL(file);
     },
 
-    // --- TEMPLATES (SYNCED WITH MATCHPLAN & SPONSOR) ---
+    // --- TEMPLATES ---
     renderTemplates: function() {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const sponsors = JSON.parse(localStorage.getItem('toni_sponsors')) || [];
