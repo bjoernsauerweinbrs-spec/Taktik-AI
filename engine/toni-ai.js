@@ -6,8 +6,7 @@ window.ToniAI = {
 
     welcomeMessage() {
         const name = localStorage.getItem('trainer_name');
-        let msg = name ? `Beleza, Coach ${name}! Ich bin bereit. Wo setzen wir heute taktisch an?` 
-                       : "Ola! Ich bin Toni, dein Co-Trainer. Ich freue mich auf die Zusammenarbeit! Wie darf ich dich ansprechen, Coach?";
+        let msg = name ? `Beleza, Coach ${name}! Spielfeld ist markiert, Tore stehen. Was ist der Plan?` : "Ola! Ich bin Toni. Wie darf ich dich nennen, Coach?";
         this.addChatMessage("Toni", msg, "bot-msg");
         setTimeout(() => this.speak(msg), 1000);
     },
@@ -15,42 +14,29 @@ window.ToniAI = {
     async processCommand(text) {
         this.addChatMessage("Coach", text, "user-msg");
         const name = localStorage.getItem('trainer_name');
-        const provider = localStorage.getItem('toni_api_provider') || "llama";
         const apiKey = localStorage.getItem('toni_api_key');
 
         if (!name) {
             localStorage.setItem('trainer_name', text);
-            const reply = `Hallo Coach ${text}! Erster Schritt: Leg unseren Kader in der Sporttasche an (Aktentasche), damit ich die Jungs auf das Board schieben kann!`;
-            this.addChatMessage("Toni", reply, "bot-msg");
-            this.speak(reply);
+            this.addChatMessage("Toni", `Alles klar, Coach ${text}! Leg unseren Kader in der Sporttasche an.`, "bot-msg");
             return;
         }
 
         const input = text.toLowerCase();
-        // Spezial-Logik für Taktik-Verschiebung
-        if (input.includes("verschieben") || input.includes("taktik") || input.includes("ginga")) {
-            this.addChatMessage("Toni", "Coach, ich optimiere die Abstände. Wir schieben die Kette jetzt höher ins Pressing!", "bot-msg");
-            if (window.arena && window.arena.players.length > 0) {
-                window.arena.players.forEach((p, i) => {
-                    window.arena.glideTo(p.id, 250 + (i*15), 100 + (i*40)); // Beispiel-Verschiebung
-                });
-            }
+        if (input.includes("pressing") || input.includes("verschieben")) {
+            window.arena.applyTacticalPattern('pressing');
             return;
         }
 
-        this.addChatMessage("Toni", `⚡ Analysiere für Coach ${name}...`, "bot-msg");
-
         try {
-            const systemPrompt = `Du bist Toni, Co-Trainer von Coach ${name}. Dein Stil ist eine Mischung aus Klopp und Nagelsmann. Antworte immer auf Deutsch, fachmännisch und motivierend.`;
-            let apiUrl = "", body = {};
-
-            if (provider === "llama") {
-                apiUrl = 'http://127.0.0.1:11434/api/generate';
-                body = { model: "gemma3:1b", prompt: `System: ${systemPrompt}\nUser: ${text}\nAntwort:`, stream: false };
-            } else {
-                apiUrl = 'https://api.openai.com/v1/chat/completions';
-                body = { model: "gpt-4o-mini", messages: [{role:"system", content:systemPrompt}, {role:"user", content:text}] };
-            }
+            const provider = localStorage.getItem('toni_api_provider') || "llama";
+            let apiUrl = provider === "llama" ? 'http://127.0.0.1:11434/api/generate' : 'https://api.openai.com/v1/chat/completions';
+            
+            const system = `Du bist Toni, Co-Trainer von Coach ${name}. Experte für Taktik und brasilianischen Style. Antworte kurz, präzise und auf Deutsch.`;
+            
+            const body = provider === "llama" 
+                ? { model: "gemma3:1b", prompt: `System: ${system}\nUser: ${text}\nAntwort:`, stream: false }
+                : { model: "gpt-4o-mini", messages: [{role:"system", content:system}, {role:"user", content:text}] };
 
             const response = await fetch(apiUrl, { 
                 method: 'POST', 
@@ -63,14 +49,11 @@ window.ToniAI = {
             this.addChatMessage("Toni", reply, "bot-msg");
             this.speak(reply);
         } catch (e) {
-            this.localFallback(`Coach ${name}, ich habe gerade eine Funkstörung zu Gemma 3. Aber fachlich gilt: Die Sporttasche muss gepflegt sein!`);
+            this.localFallback(`Coach, meine Verbindung zu Gemma 3 klemmt. Aber taktisch gesehen: Wir brauchen Zug zum Tor!`);
         }
     },
 
-    localFallback(msg) {
-        this.addChatMessage("Toni", msg, "bot-msg");
-        this.speak(msg);
-    },
+    localFallback(msg) { this.addChatMessage("Toni", msg, "bot-msg"); this.speak(msg); },
 
     addChatMessage(sender, text, type) {
         const container = document.getElementById('chat-messages');
@@ -86,7 +69,7 @@ window.ToniAI = {
         if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'de-DE'; u.pitch = 0.85;
+        u.lang = 'de-DE'; u.pitch = 0.9;
         window.speechSynthesis.speak(u);
     },
 
