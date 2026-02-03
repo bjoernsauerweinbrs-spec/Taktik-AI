@@ -15,24 +15,31 @@ body, html {
     font-family: 'Inter', sans-serif; overflow: hidden; 
 }
 
-/* --- LOGIN (UNVERÄNDERT) --- */
+/* --- ANMELDESEITE (ISOLIERT) --- */
 #login-screen {
-    position: fixed; inset: 0; background: radial-gradient(circle at center, #112540 0%, #05080f 100%);
-    display: flex; align-items: center; justify-content: center; z-index: 100000;
+    position: fixed; inset: 0; 
+    background: radial-gradient(circle at center, #112540 0%, #05080f 100%);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100000;
 }
-.login-box { background: rgba(13, 20, 33, 0.98); padding: 60px; border-radius: 30px; border: 2px solid var(--accent-orange); text-align: center; }
+.login-box {
+    background: rgba(13, 20, 33, 0.98); padding: 60px; border-radius: 30px;
+    border: 2px solid var(--accent-orange); text-align: center;
+    box-shadow: 0 0 100px rgba(255, 106, 0, 0.3);
+}
 .glow-text { font-size: 4rem; font-weight: 900; color: var(--accent-orange); text-shadow: 0 0 25px rgba(255, 106, 0, 0.5); margin: 0; }
 .login-input { display: block; width: 320px; padding: 18px; background: #000; border: 1px solid #333; color: white; border-radius: 10px; margin-bottom: 20px; text-align: center; }
 .login-btn { width: 320px; padding: 18px; background: var(--accent-orange); color: white; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; }
 
-/* --- HAUPTSYSTEM GRID (DIE DREI SÄULEN) --- */
+/* --- HAUPTSYSTEM: DIE DREI SÄULEN --- */
 body.pro-layout {
     display: grid !important;
     grid-template-columns: 100px 1fr 350px !important;
     grid-template-rows: 100vh !important;
+    width: 100vw; height: 100vh;
 }
 
-/* 1. SIDEBAR */
+/* 1. SIDEBAR (LINKS) */
 .sidebar-minimal { 
     grid-column: 1; background: #020408; border-right: 1px solid rgba(255,106,0,0.3); 
     display: flex; flex-direction: column; align-items: center; padding-top: 40px;
@@ -40,7 +47,7 @@ body.pro-layout {
 .control-unit { cursor: pointer; margin-bottom: 40px; text-align: center; color: var(--text-dim); }
 .control-unit .icon { font-size: 32px; display: block; margin-bottom: 8px; }
 
-/* 2. ARENA (KOMPLETT FREI) */
+/* 2. ARENA (MITTE - KOMPLETT FREI) */
 #stage-container {
     grid-column: 2; height: 100vh; width: 100%; background: #05080F;
     display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 20px;
@@ -48,27 +55,31 @@ body.pro-layout {
 #stage { width: 100%; height: 100%; position: relative; }
 #main-canvas { width: 100%; height: 100%; display: block; object-fit: contain; }
 
-/* 3. RECHTES PANEL (JETZT MIT INTEGRIERTEM CHAT) */
+/* 3. RECHTES PANEL (INTEGRIERTER FEED & CHAT) */
 .analysis-panel { 
     grid-column: 3; background: var(--panel-dark); border-left: 1px solid rgba(255,255,255,0.05); 
-    display: flex; flex-direction: column; height: 100vh; padding: 0; /* Padding auf 0 für Chat-Integration */
+    display: flex; flex-direction: column; height: 100vh; padding: 0;
 }
 #panel-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-#setcard-content { flex: 1; padding: 20px; overflow-y: auto; }
+#setcard-content { flex: 1; padding: 20px; overflow-y: auto; color: var(--text-dim); }
 
-/* INTEGRIERTER CHAT (RECHTS UNTEN) */
+/* TONI VOICE ADVISOR (FIXIERT IM RECHTEN PANEL) */
 .chat-container {
-    height: 450px; background: rgba(0,0,0,0.3); border-top: 2px solid var(--data-cyan);
-    display: flex; flex-direction: column; position: relative !important; bottom: 0 !important; right: 0 !important; width: 100% !important;
+    display: flex !important; flex-direction: column;
+    height: 450px; background: rgba(0,0,0,0.4); border-top: 2px solid var(--data-cyan);
+    margin-top: auto; position: relative !important; width: 100% !important;
 }
 .chat-header { background: var(--data-cyan); color: #000; padding: 12px; font-weight: 900; font-size: 0.8rem; text-align: center; }
 .chat-messages { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; }
 .bot-msg { background: rgba(0, 209, 255, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid var(--data-cyan); }
 .user-msg { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 10px; margin-bottom: 10px; text-align: right; }
 
-/* AKTENTASCHE & SEKTOREN (UNVERÄNDERT) */
+/* --- AKTENTASCHE & SEKTOREN --- */
 .briefcase-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 90000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
 .briefcase-window { background: var(--panel-dark); border: 2px solid var(--accent-orange); width: 95%; height: 90%; padding: 40px; border-radius: 25px; overflow-y: auto; }
+
+/* SPORTTASCHE & KADER */
+.pro-player-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
 .p-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; }
 .p-card.Anwesend { border-left: 5px solid #4CD964; }
 .p-card.Verletzt { border-left: 5px solid #FF3B30; }
@@ -77,7 +88,14 @@ body.pro-layout {
 .magazine-view { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 20px; }
 .mag-page { background: #fff; color: #000; aspect-ratio: 1 / 1.41; padding: 30px; border-radius: 5px; display: flex; flex-direction: column; border-top: 10px solid var(--panel-dark); }
 .mag-page b { font-size: 1.4rem; color: var(--accent-orange); border-bottom: 2px solid #eee; margin-bottom: 15px; display: block; }
-.mag-area { flex: 1; border: 1px dashed #ccc; padding: 15px; font-family: 'Georgia', serif; resize: none; font-size: 0.9rem; }
+.mag-area { flex: 1; border: 1px dashed #ccc; padding: 15px; font-family: 'Georgia', serif; resize: none; font-size: 0.9rem; color: #333; }
 
+/* HELPERS */
 .hidden { display: none !important; }
 .toni-speech-bubble { background: rgba(0,209,255,0.07); border: 1px solid var(--data-cyan); padding: 15px; border-radius: 12px; }
+
+@media print {
+    body * { visibility: hidden; }
+    .magazine-view, .mag-page, .mag-page * { visibility: visible; }
+    .mag-page { page-break-after: always; width: 100%; border: none; }
+}
