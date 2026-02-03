@@ -9,7 +9,7 @@
     --text-dim: #A0AEC0;
 }
 
-/* GLOBAL RESET */
+/* --- GLOBAL RESET & BASE --- */
 * { box-sizing: border-box; }
 body, html { 
     margin: 0; padding: 0; width: 100%; height: 100%; 
@@ -67,30 +67,28 @@ body, html {
     width: 100vw; height: 100vh;
 }
 
-/* SIDEBAR */
 .sidebar-minimal { 
     background: #020408; border-right: 1px solid rgba(255,106,0,0.3); 
     display: flex; flex-direction: column; align-items: center;
 }
+
 .control-unit { cursor: pointer; margin-top: 40px; text-align: center; color: var(--text-dim); }
 .control-unit .icon { font-size: 32px; margin-bottom: 8px; }
 
-/* ARENA CONTAINER (MITTE) */
 #stage-container {
     height: 100vh; width: 100%; position: relative;
     display: flex; align-items: center; justify-content: center;
     padding: 30px; background: #05080F;
 }
-#stage { width: 100%; height: 100%; position: relative; }
+
 #main-canvas { width: 100%; height: 100%; display: block; border: 1px solid #222; }
 
-/* ANALYSE FEED (RECHTS) */
 .analysis-panel { 
     background: var(--panel-dark); border-left: 1px solid rgba(0,209,255,0.1); 
     padding: 25px; overflow-y: auto;
 }
 
-/* LIVE CHAT */
+/* --- TONI LIVE CHAT --- */
 .chat-container {
     position: fixed; bottom: 25px; right: 375px;
     width: 330px; height: 420px; background: #0A0F1A;
@@ -99,8 +97,10 @@ body, html {
 }
 .chat-header { background: var(--data-cyan); color: #000; padding: 12px; font-weight: 900; border-radius: 14px 14px 0 0; }
 .chat-messages { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; }
+.bot-msg { background: rgba(0, 209, 255, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid var(--data-cyan); }
+.user-msg { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 10px; margin-bottom: 10px; text-align: right; }
 
-/* AKTENTASCHE & SEKTOREN */
+/* --- AKTENTASCHE & SEKTOREN --- */
 .briefcase-overlay { 
     position: fixed; inset: 0; background: rgba(0,0,0,0.96); 
     z-index: 9000; display: flex; align-items: center; justify-content: center; 
@@ -108,9 +108,48 @@ body, html {
 }
 .briefcase-window { 
     background: var(--panel-dark); border: 2px solid var(--accent-orange); 
-    width: 90%; height: 85%; padding: 40px; border-radius: 25px; 
+    width: 95%; height: 90%; padding: 40px; border-radius: 25px; overflow-y: auto;
 }
 
-/* HELPERS */
+/* --- SPORTTASCHE & AMPELSYSTEM --- */
+.pro-player-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px; margin-top: 20px;
+}
+.p-card {
+    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s;
+}
+.p-card.Anwesend { border-left: 5px solid #4CD964; }
+.p-card.Abwesend { border-left: 5px solid #FFCC00; opacity: 0.7; }
+.p-card.Verletzt { border-left: 5px solid #FF3B30; }
+.p-stars { color: #f8b500; margin-top: 5px; }
+
+/* --- STADIONZEITUNG (MAGAZIN) --- */
+.magazine-view {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 20px;
+}
+.mag-page {
+    background: #fff; color: #000; aspect-ratio: 1 / 1.41;
+    padding: 30px; border-radius: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; border-top: 10px solid var(--panel-dark);
+}
+.mag-page b { font-size: 1.4rem; color: var(--accent-orange); border-bottom: 2px solid #eee; margin-bottom: 15px; display: block; }
+.mag-area { flex: 1; border: 1px dashed #ccc; padding: 15px; font-family: 'Georgia', serif; resize: none; }
+
+/* --- SPONSOREN-AGENTUR --- */
+.sponsoring-tool {
+    background: rgba(0, 209, 255, 0.05); padding: 40px;
+    border-radius: 20px; border: 1px solid var(--data-cyan);
+}
+
+/* --- HELPERS --- */
 .hidden { display: none !important; }
-.toni-speech-bubble { background: rgba(0,209,255,0.07); border: 1px solid var(--data-cyan); padding: 15px; border-radius: 12px; font-size: 0.9rem; }
+.toni-speech-bubble { background: rgba(0,209,255,0.07); border: 1px solid var(--data-cyan); padding: 15px; border-radius: 12px; }
+
+/* --- DRUCK-MODUS --- */
+@media print {
+    body * { visibility: hidden; }
+    .magazine-view, .mag-page, .mag-page * { visibility: visible; }
+    .mag-page { page-break-after: always; width: 100%; box-shadow: none; border: none; }
+}
