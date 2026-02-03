@@ -7,71 +7,79 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Spezifische Korrektur für die Sidebar-Integration */
+        /* Optimierung der Sidebar für die Button-Integration */
         .sidebar {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
-            padding-top: 20px;
+            gap: 25px;
+            padding-top: 25px;
             background: #0a0a0a;
             border-right: 1px solid #222;
+            z-index: 100;
         }
 
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            color: #888;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover, .nav-item.active { color: var(--accent-orange); }
+
+        /* Taktik-Steuerung unter dem Mikrofon */
         #tactic-controls {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            width: 85%;
-            margin-top: 30px;
-            border-top: 1px solid #333;
+            gap: 12px;
+            width: 80%;
+            margin-top: 10px;
             padding-top: 20px;
+            border-top: 1px solid #222;
         }
 
         .tactic-btn {
             width: 100%;
             background: rgba(255, 149, 0, 0.05);
-            border: 1px solid #ff9500;
+            border: 1px solid var(--accent-orange);
             color: #fff;
-            padding: 10px 5px;
-            font-size: 0.6rem;
-            border-radius: 5px;
+            padding: 8px 2px;
+            font-size: 0.55rem;
+            border-radius: 4px;
             cursor: pointer;
             text-transform: uppercase;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            font-weight: 900;
+            transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .tactic-btn:hover {
-            background: #ff9500;
+            background: var(--accent-orange);
             color: #000;
+            transform: scale(1.05);
         }
 
         .tactic-btn.reset {
-            border-color: #888;
+            border-color: #555;
             color: #888;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
-        .tactic-btn.reset:hover {
-            background: #444;
-            color: #fff;
-        }
-
-        /* Spielfeld-Zentrierung ohne störende Buttons */
+        /* Spielfeld-Layout */
         .arena-column {
-            position: relative;
+            background: #111;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-            background: #111;
+            position: relative;
         }
 
         #tactic-board {
-            max-width: 95%;
-            max-height: 95%;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            max-width: 98%;
+            max-height: 98%;
         }
     </style>
 </head>
@@ -80,12 +88,13 @@
 <div class="app-container">
     <aside class="sidebar">
         <div class="nav-item" onclick="BriefcaseUI.toggle()">
-            <i class="fas fa-briefcase" style="font-size:24px; color:var(--accent-orange);"></i>
-            <span>ZENTRALE</span>
+            <i class="fas fa-briefcase" style="font-size:22px; color:var(--accent-orange);"></i>
+            <span style="font-size: 0.6rem; margin-top: 5px;">ZENTRALE</span>
         </div>
+
         <div class="nav-item">
-            <i class="fas fa-microphone-alt" style="font-size:24px;"></i>
-            <span>LIVE AI</span>
+            <i class="fas fa-microphone-alt" style="font-size:22px;"></i>
+            <span style="font-size: 0.6rem; margin-top: 5px;">LIVE AI</span>
         </div>
 
         <div id="tactic-controls">
@@ -118,9 +127,7 @@
             <h2 id="sector-title" style="margin:0; color:var(--accent-orange);">ZENTRALE</h2>
             <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">&times;</button>
         </div>
-        
         <div id="briefcase-nav"></div>
-        
         <div id="briefcase-content" class="hidden">
             <div id="active-content"></div>
         </div>
