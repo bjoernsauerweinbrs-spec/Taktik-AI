@@ -3,113 +3,74 @@ window.BriefcaseUI = {
         const overlay = document.getElementById('briefcase-overlay');
         if (overlay) overlay.classList.toggle('hidden');
     },
- 
+
     switchSektor(sektor) {
         const nav = document.getElementById('briefcase-nav');
         const content = document.getElementById('briefcase-content');
         const target = document.getElementById('active-content');
-        const title = document.getElementById('sector-title');
-
+        
         nav.classList.add('hidden');
         content.classList.remove('hidden');
 
-        if (sektor === 'sport') {
-            title.innerText = "👟 SPORTTASCHE";
-            this.renderSporttasche();
-        } else if (sektor === 'marketing') {
-            title.innerText = "📢 MARKETING & ORGA";
-            this.renderMarketing();
-        } else if (sektor === 'analyse') {
-            title.innerText = "📊 ANALYSEZENTRUM";
-            this.renderAnalysezentrum();
-        }
+        if (sektor === 'sport') { this.renderSporttasche(); }
+        else if (sektor === 'marketing') { this.renderMarketing(); }
+        else if (sektor === 'analyse') { this.renderAnalysezentrum(); }
     },
 
-    // --- SEKTOR: SPORTTASCHE ---
     renderSporttasche() {
         const target = document.getElementById('active-content');
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         let html = `
-            <div class="sport-grid">
-                <div class="squad-list">
-                    <h3>KADER-VERWALTUNG</h3>
-                    <button onclick="BriefcaseUI.addPlayerPrompt()" class="action-btn">+ SPIELER ANLEGEN</button>
-                    <div class="player-list-scroll">`;
+            <button onclick="BriefcaseUI.addPlayerPrompt()" class="action-btn" style="margin-bottom:20px;">+ SPIELER ANLEGEN</button>
+            <div class="player-list">`;
         players.forEach(p => {
             html += `
                 <div class="player-entry" onclick="BriefcaseUI.openSetcard(${p.id})">
-                    <b>#${p.number}</b> ${p.name} <span>${p.pos}</span>
+                    <b>#${p.number || '0'}</b> ${p.name} <span>${p.pos || 'ZDM'}</span>
                 </div>`;
         });
-        html += `</div></div>
-                <div class="board-controls">
-                    <h3>BOARD-TOOLS</h3>
-                    <button class="board-btn" onclick="arena.resetBoard()">Spielfeld leeren</button>
-                    <button class="board-btn">Formation: 4-3-3</button>
-                    <button class="board-btn">Formation: 3-5-2</button>
-                </div>
-            </div>`;
+        html += `</div>`;
         target.innerHTML = html;
     },
 
-    // --- SEKTOR: MARKETING ---
-    renderMarketing() {
+    // FIX: Setcard-Funktion wiederhergestellt
+    openSetcard(id) {
+        let players = JSON.parse(localStorage.getItem('toni_players'));
+        const p = players.find(player => player.id === id);
         const target = document.getElementById('active-content');
+        const ovr = Math.round(((p.pac||50)+(p.sho||50)+(p.pas||50)+(p.dri||50)+(p.def||50)+(p.phy||50))/6);
+
         target.innerHTML = `
-            <div class="marketing-grid">
-                <div class="marketing-box">
-                    <h3>📰 STADIONZEITUNG</h3>
-                    <textarea id="orga-notes" class="orga-box" placeholder="Schreibe hier den Leitartikel..."></textarea>
-                    <button onclick="BriefcaseUI.saveOrga()" class="action-btn">TEXT SPEICHERN</button>
+            <button onclick="BriefcaseUI.switchSektor('sport')" class="back-btn">← ZURÜCK</button>
+            <div style="display:flex; gap:30px;">
+                <div class="fifa-card" style="width:230px; height:340px; background:var(--gold); border-radius:10px; padding:5px; position:relative;">
+                    <div style="background:#1a1a1a; height:100%; padding:20px; text-align:center;">
+                        <div style="font-size:40px; font-weight:900; color:#f8b500;">${ovr}</div>
+                        <div style="font-size:80px;">👤</div>
+                        <div style="font-weight:bold; border-bottom:2px solid #f8b500; margin-bottom:10px;">${p.name.toUpperCase()}</div>
+                    </div>
                 </div>
-                <div class="marketing-box">
-                    <h3>🤝 SPONSOREN-HUB</h3>
-                    <div class="sponsor-placeholder">Platzhalter: Sponsoren-Logos</div>
-                    <p style="font-size:12px; color:gray;">Toni's Tipp: Brazilian Style Marketing steigert den Markenwert um 20%.</p>
+                <div class="edit-area">
+                    <h3>TRAINER-ANALYSE</h3>
+                    <p>Psychologie, Physis und Taktik-Werte hier bearbeiten...</p>
                 </div>
             </div>`;
-        const saved = localStorage.getItem('toni_orga_notes');
-        if(saved) document.getElementById('orga-notes').value = saved;
     },
 
-    // --- SEKTOR: ANALYSEZENTRUM ---
     renderAnalysezentrum() {
-        const target = document.getElementById('active-content');
-        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        
-        // Berechnung Team-Durchschnitt
-        const avgOvr = players.length > 0 ? Math.round(players.reduce((acc, p) => acc + ((p.pac||50)+(p.sho||50)+(p.pas||50)+(p.dri||50)+(p.def||50)+(p.phy||50))/6, 0) / players.length) : 0;
-
-        target.innerHTML = `
-            <div class="analysis-dashboard">
-                <div class="dashboard-card health">
-                    <h4>TEAM-GESUNDHEIT</h4>
-                    <div class="big-stat">${avgOvr} <span>OVR</span></div>
-                    <p>Kader: ${players.length} Spieler aktiv</p>
-                </div>
-                <div class="dashboard-card brain">
-                    <h4>TONI'S TIEFENANALYSE</h4>
-                    <div id="toni-deep-advice">Wähle einen Spieler in der Sporttasche für eine Detail-Analyse aus.</div>
-                </div>
-                <div class="dashboard-card charts">
-                    <h4>FORM-KURVE</h4>
-                    <div class="chart-placeholder">Grafik-Engine wird geladen...</div>
-                </div>
-            </div>`;
+        document.getElementById('active-content').innerHTML = `<h3>📊 ANALYSEZENTRUM</h3><p>Hier laufen alle Daten zusammen.</p>`;
     },
 
-    // Hilfsfunktionen
-    saveOrga() {
-        localStorage.setItem('toni_orga_notes', document.getElementById('orga-notes').value);
-        alert("Marketing-Daten gesichert.");
+    renderMarketing() {
+        document.getElementById('active-content').innerHTML = `<h3>📢 MARKETING</h3><p>Sponsoren und Stadionzeitung.</p>`;
     },
 
     addPlayerPrompt() {
         const name = prompt("Name:");
-        const num = prompt("Nummer:");
+        const num = prompt("Rückennummer:");
         if(!name || !num) return;
         let players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        players.push({id: Date.now(), name, number: num, pos: "IV", pac:50, sho:50, pas:50, dri:50, def:50, phy:50});
+        players.push({id: Date.now(), name, number: num, pos: "ZDM", pac:50, sho:50, pas:50, dri:50, def:50, phy:50});
         localStorage.setItem('toni_players', JSON.stringify(players));
         this.renderSporttasche();
     },
