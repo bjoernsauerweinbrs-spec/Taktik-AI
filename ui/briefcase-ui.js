@@ -37,39 +37,25 @@ window.BriefcaseUI = {
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                 <div class="sponsoring-tool" style="border-color: var(--data-cyan); background: rgba(0,209,255,0.02); padding: 25px; border-radius: 15px;">
                     <h4 style="color: var(--data-cyan); margin-top:0;">🔑 KI-SETUP</h4>
-                    
-                    <label style="font-size:0.7rem; color:#aaa; display:block; margin-bottom:5px;">ANBIETER:</label>
                     <select id="api-provider" class="login-input" style="width:100%; margin-bottom:15px; background:#111; border:1px solid #444;">
                         <option value="llama" ${currentProvider === 'llama' ? 'selected' : ''}>Gemma 3 (MacBook)</option>
                         <option value="openai" ${currentProvider === 'openai' ? 'selected' : ''}>OpenAI (Cloud)</option>
-                        <option value="gemini" ${currentProvider === 'gemini' ? 'selected' : ''}>Google Gemini</option>
                     </select>
-
-                    <label style="font-size:0.7rem; color:#aaa; display:block; margin-bottom:5px;">API-KEY (für Cloud-Anbieter):</label>
                     <input type="password" id="api-key-input" class="login-input" style="width:100%; margin-bottom:15px;" value="${currentKey}" placeholder="sk-...">
-                    
                     <button class="login-btn" style="width:100%; background: var(--accent-orange); color:#000;" onclick="BriefcaseUI.saveSettings()">KONFIGURATION SPEICHERN</button>
                     <p id="save-status" style="margin-top:10px; font-size:0.8rem; font-weight:bold; color:#4CD964;"></p>
                 </div>
-                
                 <div class="sponsoring-tool" style="border-color: #ffcc00; background: rgba(255,204,0,0.05); padding: 25px; border-radius: 15px;">
                     <h4 style="color: #ffcc00; margin-top:0;">ℹ️ MAC OLLAMA HILFE</h4>
-                    <p style="font-size:0.75rem; line-height:1.4;">
-                        Falls Gemma 3 nicht antwortet, öffne das Mac-Terminal:<br><br>
-                        <code>launchctl setenv OLLAMA_ORIGINS "*"</code><br><br>
-                        Danach Ollama & Browser neu starten!
-                    </p>
+                    <p style="font-size:0.75rem;">Terminal: <code>launchctl setenv OLLAMA_ORIGINS "*"</code><br>Danach Ollama neu starten!</p>
                 </div>
-            </div>
-        `;
+            </div>`;
     },
 
     saveSettings() {
-        const key = document.getElementById('api-key-input').value;
-        const prov = document.getElementById('api-provider').value;
-        localStorage.setItem('toni_api_key', key);
-        localStorage.setItem('toni_api_provider', prov);
-        document.getElementById('save-status').innerText = "✅ Gespeichert! Toni ist bereit.";
+        localStorage.setItem('toni_api_key', document.getElementById('api-key-input').value);
+        localStorage.setItem('toni_api_provider', document.getElementById('api-provider').value);
+        document.getElementById('save-status').innerText = "✅ Gespeichert!";
     },
 
     renderSporttasche() {
@@ -88,9 +74,8 @@ window.BriefcaseUI = {
                     `).join('')}
                 </div>
                 <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px; border:1px solid #333;">
-                    <h4 style="margin:0 0 10px 0;">Board-Steuerung</h4>
+                    <h4 style="margin:0 0 10px 0;">Formation</h4>
                     <button class="login-btn" onclick="BriefcaseUI.applyFormation('433')">4-3-3 GINGA</button>
-                    <button class="login-btn" style="margin-top:10px;" onclick="BriefcaseUI.applyFormation('352')">3-5-2 KOMPAKT</button>
                 </div>
             </div>`;
     },
@@ -101,15 +86,11 @@ window.BriefcaseUI = {
         if(!p) return;
         document.getElementById('active-content').innerHTML = `
             <div style="background:rgba(255,255,255,0.05); padding:30px; border-radius:15px; border:1px solid var(--accent-orange); max-width:500px;">
-                <h3 style="color:var(--accent-orange); margin-top:0;">SPIELER-MATRIX: ${p.name}</h3>
-                <label style="display:block; margin-top:15px;">NUMMER</label>
+                <h3 style="color:var(--accent-orange); margin-top:0;">SPIELER: ${p.name}</h3>
+                <label>Nummer</label>
                 <input type="number" id="edit-num" class="login-input" value="${p.number||''}">
-                <label style="display:block; margin-top:15px;">GINGA-RATING (1-5)</label>
-                <input type="range" id="edit-rate" min="1" max="5" value="${p.rating||3}" style="width:100%;">
-                <div style="margin-top:25px; display:flex; gap:10px;">
-                    <button class="login-btn" onclick="BriefcaseUI.savePlayer('${id}')">SPEICHERN</button>
-                    <button class="login-btn" style="background:#444;" onclick="BriefcaseUI.renderSporttasche()">ZURÜCK</button>
-                </div>
+                <button class="login-btn" style="margin-top:20px;" onclick="BriefcaseUI.savePlayer('${id}')">SPEICHERN</button>
+                <button class="login-btn" style="background:#444; margin-top:10px;" onclick="BriefcaseUI.renderSporttasche()">ZURÜCK</button>
             </div>`;
     },
 
@@ -117,25 +98,22 @@ window.BriefcaseUI = {
         let players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const i = players.findIndex(x => x.id == id);
         players[i].number = document.getElementById('edit-num').value;
-        players[i].rating = document.getElementById('edit-rate').value;
         localStorage.setItem('toni_players', JSON.stringify(players));
+        if(window.arena) window.arena.loadPlayersFromStorage(); // UPDATE BOARD
         this.renderSporttasche();
     },
 
     renderMarketing() {
-        document.getElementById('active-content').innerHTML = `
-            <div class="magazine-view">
-                <div class="mag-page"><h1>FC TONI 2.0</h1><p>STADIONZEITUNG</p></div>
-                <button class="login-btn" style="grid-column: span 2;" onclick="window.print()">🖨️ A5 DRUCK</button>
-            </div>`;
+        document.getElementById('active-content').innerHTML = `<h1>MARKETING</h1><button onclick="window.print()">DRUCK</button>`;
     },
 
     addPlayerPrompt() {
-        const n = prompt("Name des Spielers:");
+        const n = prompt("Name:");
         if(n) {
             let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
             pl.push({id:Date.now(), name:n, rating:3});
             localStorage.setItem('toni_players', JSON.stringify(pl));
+            if(window.arena) window.arena.loadPlayersFromStorage(); // UPDATE BOARD
             this.renderSporttasche();
         }
     },
