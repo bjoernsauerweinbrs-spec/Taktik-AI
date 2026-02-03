@@ -12,47 +12,156 @@ window.BriefcaseUI = {
     switchSektor(sektor) {
         const nav = document.getElementById('briefcase-nav');
         const content = document.getElementById('briefcase-content');
-        const target = document.getElementById('active-content');
         const title = document.getElementById('sector-title');
-
         nav.classList.add('hidden');
         content.classList.remove('hidden');
 
         if (sektor === 'sport') {
-            title.innerText = "👟 SPORTTASCHE";
+            title.innerText = "👟 SPORTTASCHE: KADER & PERFORMANCE";
             this.renderSporttasche();
         } else if (sektor === 'marketing') {
-            title.innerText = "📢 MARKETING";
+            title.innerText = "📢 MARKETING: ZEITUNG & SPONSOREN";
             this.renderMarketing();
         } else if (sektor === 'analyse') {
-            title.innerText = "📊 ANALYSEZENTRUM";
+            title.innerText = "📊 ANALYSEZENTRUM: TIEFEN-MATRIX";
             this.renderAnalysezentrum();
         }
     },
 
+    // --- SEKTOR 1: SPORTTASCHE (Kader, Status, Uhr-Daten) ---
     renderSporttasche() {
         const target = document.getElementById('active-content');
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        
         target.innerHTML = `
-            <div style="display:grid; grid-template-columns: 1fr 300px; gap:20px;">
-                <div class="player-list-area">
-                    <h3>KADER</h3>
-                    <div class="pro-scroll-list">
+            <div class="sport-layout">
+                <div class="player-management">
+                    <button class="login-btn" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUER SPIELER</button>
+                    <div class="pro-player-list">
                         ${players.map(p => `
-                            <div class="player-row-pro" onclick="BriefcaseUI.openSetcard(${p.id})">
-                                <b>#${p.number}</b> ${p.name} <span>${p.pos}</span>
+                            <div class="p-card ${p.status || 'Anwesend'}" onclick="BriefcaseUI.openSetcard(${p.id})">
+                                <div class="p-status-dot"></div>
+                                <b>#${p.number} ${p.name}</b>
+                                <span>${p.status || 'Anwesend'}</span>
+                                <div class="p-stars"> ${'★'.repeat(p.rating_t || 0)}${'☆'.repeat(5 - (p.rating_t || 0))}</div>
                             </div>
                         `).join('')}
                     </div>
-                    <button class="login-btn" style="width:auto; padding:10px 20px; margin-top:20px;" onclick="BriefcaseUI.addPlayerPrompt()">+ SPIELER HINZUFÜGEN</button>
                 </div>
-                <div class="taktik-area">
+                <div class="taktik-sidebar">
                     <h3>FORMATIONEN</h3>
-                    <button class="login-btn" style="width:100%; margin-bottom:10px;" onclick="BriefcaseUI.applyFormation('433')">4 - 3 - 3</button>
-                    <button class="login-btn" style="width:100%; margin-bottom:10px;" onclick="BriefcaseUI.applyFormation('352')">3 - 5 - 2</button>
-                    <button class="login-btn" style="width:100%; background:#444;" onclick="arena.resetBoard()">FELD LEEREN</button>
+                    <button class="board-btn" onclick="BriefcaseUI.applyFormation('433')">4-3-3 GLEITEN</button>
+                    <button class="board-btn" onclick="BriefcaseUI.applyFormation('352')">3-5-2 GLEITEN</button>
                 </div>
             </div>`;
+    },
+
+    // --- SEKTOR 2: MARKETING (Stadionzeitung & Sponsoring) ---
+    renderMarketing() {
+        const target = document.getElementById('active-content');
+        target.innerHTML = `
+            <div class="marketing-tabs">
+                <button class="tab-pill active" id="tab-zeitung" onclick="BriefcaseUI.toggleMarketing('zeitung')">STADIONZEITUNG (4 SEITEN)</button>
+                <button class="tab-pill" id="tab-sponsoring" onclick="BriefcaseUI.toggleMarketing('sponsoring')">SPONSOREN-AGENTUR</button>
+            </div>
+            <div id="m-zeitung" class="magazine-view">
+                <div class="mag-page"><b>SEITE 1: COVER</b><br><small>Logo & Top-Sponsoren</small><input type="text" placeholder="Vereinsname" class="mag-input"></div>
+                <div class="mag-page"><b>SEITE 2: TRAINER-TALK</b><br><textarea placeholder="Dein Grußwort..." class="mag-area"></textarea></div>
+                <div class="mag-page"><b>SEITE 3: RÜCKBLICK</b><br><textarea placeholder="Spielbericht & Tabelle" class="mag-area"></textarea></div>
+                <div class="mag-page"><b>SEITE 4: DANKSAGUNG</b><br><small>Sponsoren-Wall</small></div>
+                <button class="login-btn" onclick="window.print()">ALS PDF / DRUCK EXPORTIEREN</button>
+            </div>
+            <div id="m-sponsoring" class="hidden">
+                <div class="sponsoring-tool">
+                    <h4>TONI'S PAKET-RECHNER</h4>
+                    <select id="s-package" onchange="BriefcaseUI.calcSponsor()">
+                        <option value="0">Paket wählen...</option>
+                        <option value="500">Bandenwerbung (Saison)</option>
+                        <option value="1200">Trikot-Branding</option>
+                        <option value="300">Stadionzeitung Anzeige</option>
+                        <option value="800">Turnier-Patenschaft</option>
+                    </select>
+                    <div id="s-result" class="toni-speech-bubble" style="margin-top:20px;">Wähle ein Modul. Ich berechne den fairen Marktwert.</div>
+                </div>
+            </div>`;
+    },
+
+    toggleMarketing(view) {
+        document.getElementById('m-zeitung').classList.toggle('hidden', view === 'sponsoring');
+        document.getElementById('m-sponsoring').classList.toggle('hidden', view === 'zeitung');
+        document.getElementById('tab-zeitung').classList.toggle('active', view === 'zeitung');
+        document.getElementById('tab-sponsoring').classList.toggle('active', view === 'sponsoring');
+    },
+
+    calcSponsor() {
+        const val = document.getElementById('s-package').value;
+        const res = document.getElementById('s-result');
+        if(val == 0) return;
+        res.innerHTML = `<b>Toni's Empfehlung:</b> Basierend auf regionalen Daten empfehle ich einen Preis von <b>${val} €</b>. <br><br><i>Argument: "Durch das Kinderturnier erreichen wir direkt 200+ Familien der Region."</i>`;
+    },
+
+    // --- SEKTOR 3: ANALYSE (Team-Matrix) ---
+    renderAnalysezentrum() {
+        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const avgRating = players.length > 0 ? (players.reduce((acc, p) => acc + (p.rating_t || 0), 0) / players.length).toFixed(1) : 0;
+        
+        document.getElementById('active-content').innerHTML = `
+            <div class="analysis-grid">
+                <div class="a-card"><h4>TEAM-PERFORMANCE</h4><div style="font-size:40px; color:var(--accent-orange);">${avgRating} / 5 ★</div></div>
+                <div class="a-card"><h4>BELASTUNGS-CHECK</h4><p>Toni prüft km-Daten & Pulswerte aus der Sporttasche...</p></div>
+            </div>`;
+    },
+
+    // --- SETCARD: DER DETAIIL-BEREICH (Soll-Erfüllung) ---
+    openSetcard(id) {
+        let players = JSON.parse(localStorage.getItem('toni_players'));
+        const p = players.find(x => x.id === id);
+        const target = document.getElementById('active-content');
+        
+        target.innerHTML = `
+            <div class="setcard-header">
+                <button onclick="BriefcaseUI.switchSektor('sport')" class="back-btn-ui">← ZURÜCK</button>
+                <div class="tab-pill-box">
+                    <button onclick="BriefcaseUI.toggleTab('front')" id="t-front" class="tab-pill active">STRECKBRIEF</button>
+                    <button onclick="BriefcaseUI.toggleTab('back')" id="t-back" class="tab-pill">TRAINER-ANALYSE (UHR-DATEN)</button>
+                </div>
+            </div>
+            <div id="sc-front" class="sc-content">
+                <h3>${p.name} (#${p.number})</h3>
+                <label>STATUS:</label>
+                <select onchange="BriefcaseUI.upd(${p.id}, 'status', this.value)">
+                    <option ${p.status==='Anwesend'?'selected':''}>Anwesend</option>
+                    <option ${p.status==='Abwesend'?'selected':''}>Abwesend</option>
+                    <option ${p.status==='Verletzt'?'selected':''}>Verletzt</option>
+                </select>
+                <br><br>
+                <label>TRAININGS-BEWERTUNG:</label>
+                <input type="range" min="1" max="5" value="${p.rating_t || 3}" onchange="BriefcaseUI.upd(${p.id}, 'rating_t', this.value)">
+            </div>
+            <div id="sc-back" class="sc-content hidden">
+                <h4>⌚ SPORTUHR-IMPORT (MANUELL)</h4>
+                <label>DURCHSCHNITTSPULS (HF):</label>
+                <input type="number" value="${p.hr || 0}" onchange="BriefcaseUI.upd(${p.id}, 'hr', this.value)">
+                <label>LAUFLEISTUNG (KM):</label>
+                <input type="number" step="0.1" value="${p.km || 0}" onchange="BriefcaseUI.upd(${p.id}, 'km', this.value)">
+                <div class="toni-speech-bubble" style="margin-top:20px;">
+                    <b>Toni's Analyse:</b> ${p.km > 10 ? 'Hohe Belastung! Morgen Regeneration.' : 'Gute Basiswerte.'}
+                </div>
+            </div>`;
+    },
+
+    toggleTab(view) {
+        document.getElementById('sc-front').classList.toggle('hidden', view === 'back');
+        document.getElementById('sc-back').classList.toggle('hidden', view === 'front');
+        document.getElementById('t-front').classList.toggle('active', view === 'front');
+        document.getElementById('t-back').classList.toggle('active', view === 'back');
+    },
+
+    upd(id, key, val) {
+        let players = JSON.parse(localStorage.getItem('toni_players'));
+        const p = players.find(x => x.id === id);
+        p[key] = isNaN(val) ? val : parseFloat(val);
+        localStorage.setItem('toni_players', JSON.stringify(players));
     },
 
     applyFormation(type) {
@@ -64,69 +173,11 @@ window.BriefcaseUI = {
         this.toggle(); 
     },
 
-    openSetcard(id) {
-        const p = (JSON.parse(localStorage.getItem('toni_players'))).find(x => x.id === id);
-        const target = document.getElementById('active-content');
-        const ovr = Math.round(((p.pac||50)+(p.sho||50)+(p.pas||50)+(p.dri||50)+(p.def||50)+(p.phy||50))/6);
-        target.innerHTML = `
-            <div class="tab-pill-box">
-                <button onclick="BriefcaseUI.toggleTab('front')" id="t-front" class="tab-pill active">FIFA-LOOK</button>
-                <button onclick="BriefcaseUI.toggleTab('back')" id="t-back" class="tab-pill">TRAINER-ANALYSE</button>
-            </div>
-            <div id="sc-front" class="sc-side-box">
-                <div class="fifa-card-pro">
-                    <div style="background:#111; height:100%; border-radius:10px; padding:20px; text-align:center; color:#f8b500;">
-                        <div style="font-size:40px; font-weight:900;">${ovr}</div>
-                        <div style="font-size:60px;">👤</div>
-                        <div style="font-weight:900; color:#fff;">${p.name.toUpperCase()}</div>
-                    </div>
-                </div>
-                <div class="stats-edit-grid">
-                    <label>PAC</label><input type="number" value="${p.pac}" onchange="BriefcaseUI.upd(${p.id},'pac',this.value)">
-                    <label>PHY</label><input type="number" value="${p.phy}" onchange="BriefcaseUI.upd(${p.id},'phy',this.value)">
-                </div>
-            </div>
-            <div id="sc-back" class="sc-side-box hidden">
-                <div class="analysis-box">
-                    <h4>🧠 PSYCHOLOGIE & TONI'S RAT</h4>
-                    <p id="toni-secret-tip">Klicke auf Analyse, um Toni's Meinung zu hören.</p>
-                    <button class="login-btn" onclick="BriefcaseUI.getToniAdvice(${p.id})">ANALYSE STARTEN</button>
-                </div>
-            </div>
-            <button onclick="BriefcaseUI.switchSektor('sport')" class="login-btn" style="margin-top:20px; background:#444;">ZURÜCK</button>`;
-    },
-
-    toggleTab(s) {
-        document.getElementById('sc-front').classList.toggle('hidden', s==='back');
-        document.getElementById('sc-back').classList.toggle('hidden', s==='front');
-        document.getElementById('t-front').classList.toggle('active', s==='front');
-        document.getElementById('t-back').classList.toggle('active', s==='back');
-    },
-
-    upd(id,s,v) {
-        let pl = JSON.parse(localStorage.getItem('toni_players'));
-        pl.find(x=>x.id===id)[s] = parseInt(v);
-        localStorage.setItem('toni_players', JSON.stringify(pl));
-    },
-
-    getToniAdvice(id) {
-        const tips = ["Brazilian Style: Mehr Ginga im Dribbling!", "Fokus auf die Defensive heute.", "Motivation hoch halten!"];
-        document.getElementById('toni-secret-tip').innerText = tips[Math.floor(Math.random()*tips.length)];
-    },
-
-    renderMarketing() {
-        document.getElementById('active-content').innerHTML = `<h3>📢 MARKETING & SPONSOREN</h3><textarea id="m-text" class="login-input" style="width:100%; height:200px; text-align:left;">${localStorage.getItem('toni_m')||''}</textarea><button class="login-btn" onclick="localStorage.setItem('toni_m', document.getElementById('m-text').value); alert('Gesichert!')">SPEICHERN</button>`;
-    },
-
-    renderAnalysezentrum() {
-        document.getElementById('active-content').innerHTML = `<div class="analysis-dashboard"><div class="dashboard-card"><h4>TEAM-STRENGTH</h4><div style="font-size:50px; color:#f8b500;">84%</div></div><div class="dashboard-card"><h4>BELASTUNG</h4><p>Alle Spieler im grünen Bereich.</p></div></div>`;
-    },
-
     addPlayerPrompt() {
         const n = prompt("Name:"), num = prompt("Nummer:");
         if(!n || !num) return;
         let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
-        pl.push({id:Date.now(), name:n, number:num, pos:"ZDM", pac:50, phy:50});
+        pl.push({id:Date.now(), name:n, number:num, pos:"ZDM", status:"Anwesend", rating_t:3});
         localStorage.setItem('toni_players', JSON.stringify(pl));
         this.renderSporttasche();
     }
