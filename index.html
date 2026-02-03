@@ -2,7 +2,8 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 — Trainer OS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TONI 2.0 — Trainer OS Master</title>
     <link rel="stylesheet" href="css/toni-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
@@ -10,19 +11,22 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <h1>TONI 2.0</h1>
-            <input id="password-input" type="password" class="login-input" placeholder="Passwort (Toni2026)">
-            <button class="login-btn" onclick="ToniAuth.login()">SYSTEM STARTEN</button>
+            <h1 class="glow-text">TONI 2.0</h1>
+            <p class="subtitle">TACTICAL INTELLIGENCE SYSTEM</p>
+            <input id="password-input" type="password" class="login-input" placeholder="Passwort">
+            <button class="login-btn" onclick="ToniAuth.login()">SYSTEM INITIALISIEREN</button>
         </div>
     </div>
 
     <aside class="sidebar-minimal">
         <div class="sidebar-content">
             <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
-                <div class="icon">💼</div><span>ZENTRALE</span>
+                <div class="icon">💼</div>
+                <span>ZENTRALE</span>
             </div>
             <div class="control-unit" onclick="window.ToniAI.toggleListening()">
-                <div class="icon">🎤</div><span>AI</span>
+                <div class="icon" id="mic-icon">🎤</div>
+                <span id="mic-status-label">LIVE AI</span>
             </div>
         </div>
     </aside>
@@ -34,32 +38,59 @@
     </main>
 
     <aside class="analysis-panel">
+        <div id="panel-header">
+            <h3>ANALYSE-FEED</h3>
+            <div class="status-dot"></div>
+        </div>
         <div id="setcard-content">
-            <div class="toni-speech-bubble">Bereit, Björn. Alle Systeme laufen synchron.</div>
+            <div class="toni-speech-bubble">
+                System bereit, Björn. Ich warte auf deine Anweisungen.
+            </div>
         </div>
     </aside>
+
+    <div id="toni-live-chat" class="chat-container">
+        <div class="chat-header">
+            <span>TONI LIVE ADVICE</span>
+            <div class="voice-wave" id="voice-indicator"></div>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+            <p class="bot-msg">Hallo Björn, ich stehe bereit. Du kannst schreiben oder das Mikrofon nutzen.</p>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Frage Toni...">
+            <button id="send-btn">➔</button>
+        </div>
+    </div>
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
             <div id="briefcase-nav" class="folder-grid">
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">
-                    <span class="nav-icon">👟</span><b>SPORTTASCHE</b>
+                    <span class="nav-icon">👟</span>
+                    <b>SPORTTASCHE</b>
+                    <p>Kader & Training</p>
                 </div>
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('marketing')">
-                    <span class="nav-icon">📢</span><b>MARKETING</b>
+                    <span class="nav-icon">📢</span>
+                    <b>MARKETING</b>
+                    <p>Sponsoren & Orga</p>
                 </div>
                 <div class="nav-card" onclick="BriefcaseUI.switchSektor('analyse')">
-                    <span class="nav-icon">📊</span><b>ANALYSE</b>
+                    <span class="nav-icon">📊</span>
+                    <b>ANALYSEZENTRUM</b>
+                    <p>Tiefenanalyse & Graphen</p>
                 </div>
             </div>
+
             <div id="briefcase-content" class="hidden">
                 <div class="content-header">
-                    <button onclick="BriefcaseUI.backToNav()" class="back-btn">← ZURÜCK</button>
+                    <button onclick="BriefcaseUI.backToNav()" class="back-btn-ui">← HAUPTMENÜ</button>
                     <h2 id="sector-title">SEKTOR</h2>
                 </div>
                 <div id="active-content"></div>
             </div>
-            <button class="close-overlay-btn" onclick="BriefcaseUI.toggle()">SCHLIESSEN [X]</button>
+            <button class="close-overlay-btn" onclick="BriefcaseUI.toggle()">X</button>
         </div>
     </div>
 
@@ -69,12 +100,12 @@
     <script>
         window.ToniAuth = {
             login() {
-                if(document.getElementById('password-input').value === "Toni2026") {
+                const pw = document.getElementById('password-input').value;
+                if(pw === "Toni2026") {
                     document.getElementById('login-screen').classList.add('hidden');
-                    setTimeout(() => {
-                        if(window.arena) window.arena.init('main-canvas');
-                    }, 100);
-                } else { alert("Zugriff verweigert."); }
+                    // Verzögerter Start für sauberes Rendering
+                    setTimeout(() => { if(window.arena) arena.init('main-canvas'); }, 150);
+                } else { alert("Zugriff verweigert!"); }
             }
         };
     </script>
