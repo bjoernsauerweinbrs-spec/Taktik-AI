@@ -2,13 +2,13 @@ window.ToniAI = {
     isListening: false,
     
     init() {
-        console.log("Toni 2.0: KI-Schnittstelle aktiv. Warte auf Björns Befehle.");
+        console.log("Toni 2.0: KI-Schnittstelle aktiv.");
         this.setupVoiceCommands();
         this.welcomeMessage();
     },
 
     welcomeMessage() {
-        const msg = "Ola Björn! Toni 2.0 ist einsatzbereit. Ich habe das Web im Blick. Was möchtest du heute analysieren oder welche Formation soll ich einstellen?";
+        const msg = "Ola Björn! Ich bin bereit. Hast du meinen Key im System-Ordner hinterlegt? Sobald der drin ist, kann ich für dich das Netz scannen!";
         this.addChatMessage("Toni", msg, "bot-msg");
     },
 
@@ -17,22 +17,22 @@ window.ToniAI = {
         const input = text.toLowerCase();
         const apiKey = localStorage.getItem('toni_api_key');
 
-        // 1. Taktik-Befehle (Lokal ohne API)
+        // FORMATIONEN (Immer lokal verfügbar)
         if (input.includes("formation") || input.includes("aufstellung")) {
             const type = input.includes("352") ? "352" : "433";
-            const response = `Com certeza! Ich schiebe die Jungs ins ${type}. Schau auf das Board, Björn!`;
+            const response = `Com certeza! Ich schiebe die Jungs ins ${type}. Schau auf das Board!`;
             this.addChatMessage("Toni", response, "bot-msg");
             window.BriefcaseUI.applyFormation(type);
             this.speak(response);
             return;
         }
 
-        // 2. Web-Recherche (Mit API-Key)
-        if (apiKey && apiKey.trim() !== "") {
-            this.addChatMessage("Toni", "⚡ Recherchiere Live-Web-Daten... Analysiere Taktik-Trends...", "bot-msg");
+        // WEB-RECHERCHE MIT API
+        if (apiKey && apiKey.length > 10) {
+            this.addChatMessage("Toni", "⚡ Ich verbinde mich mit dem Taktik-Netzwerk...", "bot-msg");
             
             try {
-                // Beispiel-Anbindung an ein LLM (Standard-Endpoint)
+                // Wir nutzen hier den OpenAI-Standard (funktioniert auch mit vielen anderen KIs)
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -40,45 +40,43 @@ window.ToniAI = {
                         'Authorization': `Bearer ${apiKey}`
                     },
                     body: JSON.stringify({
-                        model: "gpt-4o", 
+                        model: "gpt-4o-mini", // Kostengünstig und schnell
                         messages: [
-                            { 
-                                role: "system", 
-                                content: "Du bist Toni, ein brasilianischer Fußball-Taktik-Experte. Du arbeitest für Trainer Björn. Antworte präzise, fachlich fundiert, mit Fokus auf Technik und Ginga-Style. Du hast Zugriff auf das Internet 2026." 
-                            },
+                            { role: "system", content: "Du bist Toni, ein brasilianischer Fußball-Experte für Trainer Björn. Antworte kurz, fachlich und mit Ginga-Flair." },
                             { role: "user", content: text }
                         ]
                     })
                 });
 
-                const data = await response.json();
-                if (data.choices && data.choices[0]) {
-                    const aiReply = data.choices[0].message.content;
-                    this.addChatMessage("Toni", aiReply, "bot-msg");
-                    this.speak(aiReply);
-                } else {
-                    throw new Error("API Antwort fehlerhaft");
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || "API-Fehler");
                 }
 
+                const data = await response.json();
+                const aiReply = data.choices[0].message.content;
+                this.addChatMessage("Toni", aiReply, "bot-msg");
+                this.speak(aiReply);
+
             } catch (error) {
-                console.error("KI-Fehler:", error);
-                const errorMsg = "Björn, ich habe Probleme mit der Internetverbindung. Prüfe bitte deinen API-Key in der Zentrale.";
-                this.addChatMessage("Toni", errorMsg, "bot-msg");
-                this.speak(errorMsg);
+                console.error("Detaillierter Fehler:", error);
+                let userError = "Björn, Verbindung zum Netz fehlgeschlagen.";
+                if(error.message.includes("401")) userError = "Björn, der API-Key im System-Ordner scheint ungültig zu sein.";
+                if(error.message.includes("429")) userError = "Björn, mein Kontingent im Netz ist erschöpft (Limit erreicht).";
+                
+                this.addChatMessage("Toni", userError, "bot-msg");
+                this.speak(userError);
             }
-        } 
-        // 3. Fallback (Kein API-Key)
-        else {
-            const fallback = "Björn, für eine echte Web-Analyse brauche ich meinen API-Key in den Einstellungen. Aber mein Gefühl sagt: Wir müssen heute über die Flügel zaubern!";
-            this.addChatMessage("Toni", fallback, "bot-msg");
-            this.speak(fallback);
+        } else {
+            const noKey = "Björn, ohne gültigen Key im System-Ordner kann ich nicht recherchieren. Ich nutze jetzt mein Basis-Wissen: Wir sollten offensiv agieren!";
+            this.addChatMessage("Toni", noKey, "bot-msg");
+            this.speak(noKey);
         }
     },
 
     addChatMessage(sender, text, type) {
         const container = document.getElementById('chat-messages');
         if (!container) return;
-        
         const msgDiv = document.createElement('div');
         msgDiv.className = type;
         msgDiv.innerHTML = `<b>${sender}:</b><br>${text}`;
@@ -88,47 +86,19 @@ window.ToniAI = {
 
     speak(text) {
         if (!window.speechSynthesis) return;
-        // Stoppt laufende Sprachausgabe
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'de-DE';
-        utterance.pitch = 0.85; // Männlicherer, tieferer Klang
-        utterance.rate = 1.0;
+        utterance.pitch = 0.8;
         window.speechSynthesis.speak(utterance);
-    },
-
-    toggleListening() {
-        this.isListening = !this.isListening;
-        const micIcon = document.getElementById('mic-icon');
-        if (micIcon) {
-            micIcon.style.color = this.isListening ? "#FF3B30" : "";
-            if(this.isListening) micIcon.classList.add('pulse');
-            else micIcon.classList.remove('pulse');
-        }
-        console.log("Mikrofon Status:", this.isListening);
     },
 
     setupVoiceCommands() {
         const btn = document.getElementById('send-btn');
         const input = document.getElementById('chat-input');
-        
         if (btn && input) {
-            btn.onclick = () => {
-                const val = input.value.trim();
-                if (val !== "") {
-                    this.processCommand(val);
-                    input.value = "";
-                }
-            };
-            input.onkeypress = (e) => {
-                if (e.key === 'Enter') {
-                    const val = input.value.trim();
-                    if (val !== "") {
-                        this.processCommand(val);
-                        input.value = "";
-                    }
-                }
-            };
+            btn.onclick = () => { if(input.value.trim()){ this.processCommand(input.value); input.value=""; }};
+            input.onkeypress = (e) => { if(e.key === 'Enter' && input.value.trim()){ this.processCommand(input.value); input.value=""; }};
         }
     }
 };
