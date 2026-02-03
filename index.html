@@ -2,44 +2,67 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0</title>
+    <title>TONI 2.0 — Trainer OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
-<body class="pro-layout">
+<body>
 
     <div id="login-screen">
         <div class="login-box">
             <h1>TONI 2.0</h1>
-            <input id="password-input" type="password" class="login-input" placeholder="Passwort (Toni2026)">
-            <button class="login-btn" onclick="ToniAuth.login()">LOGIN</button>
+            <input id="password-input" type="password" class="login-input" placeholder="Passwort">
+            <button class="login-btn" onclick="ToniAuth.login()">SYSTEM STARTEN</button>
         </div>
     </div>
 
     <aside class="sidebar-minimal">
         <div class="sidebar-content">
-            <div class="control-unit" onclick="window.BriefcaseUI.toggle()" style="cursor:pointer; margin-bottom:40px;">
-                <div style="font-size:30px;">💼</div>
-                <span>ZENTRALE</span>
+            <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
+                <div class="icon">💼</div><span>ZENTRALE</span>
             </div>
-            <div class="control-unit" onclick="window.ToniAI.toggleListening()" style="cursor:pointer;">
-                <div style="font-size:30px;">🎤</div>
-                <span id="mic-status-label">AI</span>
+            <div class="control-unit" onclick="window.ToniAI.toggleListening()">
+                <div class="icon">🎤</div><span>AI</span>
             </div>
         </div>
     </aside>
 
     <main id="stage"><canvas id="main-canvas"></canvas></main>
 
+    <aside class="analysis-panel">
+        <div id="setcard-content">
+            <div class="toni-speech-bubble">Bereit, Björn. Alle Systeme laufen synchron.</div>
+        </div>
+    </aside>
+
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
             <div id="briefcase-nav" class="folder-grid">
-                <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">👟 SPORTTASCHE</div>
-                <div class="nav-card" onclick="BriefcaseUI.switchSektor('orga')">🏢 GESCHÄFTSZIMMER</div>
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">
+                    <span class="nav-icon">👟</span>
+                    <b>SPORTTASCHE</b>
+                    <p>Kader, Training & Board</p>
+                </div>
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('marketing')">
+                    <span class="nav-icon">📢</span>
+                    <b>MARKETING</b>
+                    <p>Sponsoren & Stadionzeitung</p>
+                </div>
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('analyse')">
+                    <span class="nav-icon">📊</span>
+                    <b>ANALYSEZENTRUM</b>
+                    <p>Tiefen-Daten & Toni-Check</p>
+                </div>
             </div>
+
             <div id="briefcase-content" class="hidden">
+                <div class="content-header">
+                    <button onclick="BriefcaseUI.backToNav()" class="back-btn">← ZURÜCK</button>
+                    <h2 id="sector-title">SEKTOR</h2>
+                </div>
                 <div id="active-content"></div>
             </div>
-            <button onclick="BriefcaseUI.toggle()" style="margin-top:20px; cursor:pointer;">X SCHLIESSEN</button>
+            <button class="close-overlay-btn" onclick="BriefcaseUI.toggle()">SCHLIESSEN [X]</button>
         </div>
     </div>
 
@@ -51,9 +74,8 @@
             login() {
                 if(document.getElementById('password-input').value === "Toni2026") {
                     document.getElementById('login-screen').classList.add('hidden');
-                    if(window.arena) arena.init('main-canvas');
-                    if(window.ToniAI) ToniAI.init();
-                } else { alert("Falsch!"); }
+                    if(window.arena) window.arena.init('main-canvas');
+                } else { alert("Zugriff verweigert."); }
             }
         };
     </script>
