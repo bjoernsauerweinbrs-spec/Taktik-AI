@@ -1,13 +1,22 @@
 window.BriefcaseUI = {
+    // Schaltet das Sichtbarkeits-Flag des Overlays um
     toggle() {
+        console.log("Aktentasche getriggert");
         const overlay = document.getElementById('briefcase-overlay');
-        if (overlay) overlay.classList.toggle('hidden');
+        if (overlay) {
+            overlay.classList.toggle('hidden');
+        } else {
+            console.error("Fehler: briefcase-overlay Element nicht gefunden!");
+        }
     },
 
     async switchSektor(sektor) {
         const nav = document.getElementById('briefcase-nav');
         const content = document.getElementById('briefcase-content');
         const target = document.getElementById('active-content');
+        
+        if(!nav || !content || !target) return;
+
         nav.classList.add('hidden');
         content.classList.remove('hidden');
 
@@ -44,6 +53,7 @@ window.BriefcaseUI = {
         let players = JSON.parse(localStorage.getItem('toni_players'));
         const p = players.find(player => player.id === id);
         const target = document.getElementById('active-content');
+        // Berechnung OVR aus den 6 FIFA-Stats
         const ovr = Math.round((p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6);
 
         target.innerHTML = `
@@ -83,25 +93,23 @@ window.BriefcaseUI = {
             <div id="setcard-back" class="setcard-side hidden">
                 <div class="trainer-grid">
                     <div class="trainer-box">
-                        <h4>🏃 PHYSIS & SPORTUHR</h4>
-                        <label>HF MAX (PULS)</label><input type="number" value="${p.hr || 0}" onchange="BriefcaseUI.updateStat(${p.id}, 'hr', this.value)">
-                        <label>LAUFLEISTUNG (KM)</label><input type="number" step="0.1" value="${p.dist || 0}" onchange="BriefcaseUI.updateStat(${p.id}, 'dist', this.value)">
+                        <h4>🏃 PHYSIS</h4>
+                        <label>PULS (HF)</label><input type="number" value="${p.hr || 0}" onchange="BriefcaseUI.updateStat(${p.id}, 'hr', this.value)">
+                        <label>DISTANZ (KM)</label><input type="number" step="0.1" value="${p.dist || 0}" onchange="BriefcaseUI.updateStat(${p.id}, 'dist', this.value)">
                     </div>
                     <div class="trainer-box">
-                        <h4>🧠 PSYCHOLOGIE & MOTIVATION</h4>
-                        <label>EINDRUCK / MENTALER STATUS</label>
+                        <h4>🧠 MOTIVATION</h4>
+                        <label>STATUS</label>
                         <select onchange="BriefcaseUI.updateStat(${p.id}, 'mental_status', this.value)">
                             <option ${p.mental_status==='Fokussiert'?'selected':''}>Fokussiert</option>
-                            <option ${p.mental_status==='Lethargisch'?'selected':''}>Lethargisch</option>
                             <option ${p.mental_status==='Frustriert'?'selected':''}>Frustriert</option>
-                            <option ${p.mental_status==='Übermotiviert'?'selected':''}>Übermotiviert</option>
+                            <option ${p.mental_status==='Lethargisch'?'selected':''}>Lethargisch</option>
                         </select>
-                        <label>MOTIVATION (0-100)</label>
+                        <label>LEVEL (0-100)</label>
                         <input type="range" value="${p.motivation || 50}" onchange="BriefcaseUI.updateStat(${p.id}, 'motivation', this.value)">
                     </div>
-                    <div class="trainer-box full-width">
-                        <h4>📋 TONI'S EXPERTEN-ANALYSE</h4>
-                        <button class="analysis-trigger-btn" onclick="BriefcaseUI.triggerToniAnalysis(${p.id})">ANALYSE STARTEN</button>
+                    <div class="trainer-box full-width" style="text-align:center;">
+                        <button class="analysis-trigger-btn" onclick="BriefcaseUI.triggerToniAnalysis(${p.id})">TONI UM RAT FRAGEN</button>
                     </div>
                 </div>
             </div>
@@ -127,21 +135,10 @@ window.BriefcaseUI = {
         const p = players.find(player => player.id === id);
         const panel = document.getElementById('setcard-content');
         
-        let advice = "";
-        if(p.mental_status === 'Frustriert') {
-            advice = `Björn, David Luiz wirkt frustriert. Such das Einzelgespräch, statt Druck auszuüben. Erinnere ihn an seine Führungsrolle im 'Brazilian Style'.`;
-        } else if(p.mental_status === 'Lethargisch') {
-            advice = `Der Spieler wirkt geistig abwesend. Kurze, intensive Spielformen im Training könnten seinen Fokus zurückbringen.`;
-        } else {
-            advice = `Die mentale Verfassung von ${p.name} ist stabil. Er ist bereit für taktische Sonderaufgaben.`;
-        }
-
-        panel.innerHTML = `
-            <div class="toni-speech-bubble">
-                <small>TONI // ANALYSE FÜR #${p.number}</small><br><br>
-                <b>STATUS:</b> ${p.mental_status}<br>
-                <b>TIPP:</b> ${advice}
-            </div>`;
+        let advice = "Björn, basierend auf den Daten ist der Spieler bereit.";
+        if(p.mental_status === 'Frustriert') advice = "Er braucht Zuspruch. Erinnere ihn an seine Stärken im Brazilian Style.";
+        
+        panel.innerHTML = `<div class="toni-speech-bubble"><small>TONI'S TIPP</small><br><br>${advice}</div>`;
     },
 
     renderOrga() {
@@ -175,5 +172,10 @@ window.BriefcaseUI = {
         players.push({id: Date.now(), name, number, pos, pac:50, sho:50, pas:50, dri:50, def:50, phy:50, hr:0, dist:0, mental_status:'Fokussiert'});
         localStorage.setItem('toni_players', JSON.stringify(players));
         this.renderAnalysisCenter();
+    },
+
+    backToNav() {
+        document.getElementById('briefcase-nav').classList.remove('hidden');
+        document.getElementById('briefcase-content').classList.add('hidden');
     }
 };
