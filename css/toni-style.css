@@ -8,64 +8,81 @@
     --text-muted: #8E8E93;
 }
 
+* { box-sizing: border-box; }
+
 body {
     margin: 0; padding: 0; background: var(--bg-deep); color: white;
-    font-family: 'Inter', sans-serif; height: 100vh;
+    font-family: 'Inter', -apple-system, sans-serif; height: 100vh;
     display: grid; grid-template-columns: 100px 1fr 350px;
     overflow: hidden;
 }
 
-/* SIDEBAR */
+/* SIDEBAR - Fixierte Icons */
 .sidebar-minimal {
     background: #080E1A; border-right: 1px solid rgba(255,106,0,0.2);
     display: flex; flex-direction: column; align-items: center; z-index: 100;
 }
-.sidebar-content { padding-top: 40px; text-align: center; }
-.control-unit { cursor: pointer; margin-bottom: 40px; transition: 0.3s; color: white; }
-.control-unit .icon { font-size: 32px; margin-bottom: 5px; }
-.control-unit span { font-size: 9px; font-weight: bold; display: block; letter-spacing: 1px; }
-.control-unit:hover { color: var(--data-cyan); transform: scale(1.1); }
+.sidebar-content { padding-top: 40px; width: 100%; }
+.control-unit { 
+    cursor: pointer; margin-bottom: 40px; transition: 0.3s; 
+    color: white; text-align: center; width: 100%;
+}
+.control-unit div { font-size: 32px; margin-bottom: 8px; }
+.control-unit span { font-size: 10px; font-weight: bold; display: block; letter-spacing: 1px; color: var(--text-muted); }
+.control-unit:hover { color: var(--data-cyan); transform: scale(1.05); }
+.control-unit:hover span { color: var(--data-cyan); }
 
-/* ARENA & ANALYSE */
-#stage { position: relative; width: 100%; height: 100%; background: radial-gradient(circle, #162033, #0B1220); }
-.analysis-panel { background: var(--panel-warm); border-left: 1px solid rgba(0,209,255,0.1); padding: 25px; overflow-y: auto; }
+/* ARENA BOARD */
+#stage { 
+    position: relative; width: 100%; height: 100%; 
+    background: #0B1220; cursor: crosshair;
+}
+#main-canvas { width: 100%; height: 100%; display: block; }
 
-/* AKTENTASCHE OVERLAY */
+/* ANALYSIS PANEL (TONI'S BRAIN) */
+.analysis-panel { 
+    background: var(--panel-warm); border-left: 1px solid rgba(0,209,255,0.1); 
+    padding: 25px; overflow-y: auto; display: flex; flex-direction: column;
+}
+.toni-speech-bubble {
+    background: rgba(0,209,255,0.05); border: 1px solid var(--data-cyan);
+    padding: 20px; border-radius: 15px; margin-top: 20px; line-height: 1.6;
+}
+
+/* AKTENTASCHE (ZENTRALE) */
 .briefcase-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999;
-    display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999;
+    display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px);
 }
 .briefcase-window {
     background: var(--panel-warm); border: 1px solid var(--accent-orange);
-    width: 85%; height: 80%; padding: 40px; border-radius: 20px;
-    display: flex; flex-direction: column;
+    width: 85%; height: 85%; padding: 40px; border-radius: 20px;
+    display: flex; flex-direction: column; position: relative;
 }
-.folder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 40px; }
+.folder-grid { 
+    display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 30px; 
+}
 .nav-card {
-    background: rgba(255,255,255,0.03); padding: 40px; border-radius: 15px;
+    background: rgba(255,255,255,0.03); padding: 50px 20px; border-radius: 15px;
     text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
 }
-.nav-card:hover { border-color: var(--accent-orange); background: rgba(255,106,0,0.05); }
+.nav-card:hover { border-color: var(--accent-orange); background: rgba(255,106,0,0.08); }
+.nav-card b { display: block; margin-top: 15px; font-size: 18px; color: var(--accent-orange); }
 
-/* TEAMLISTE STYLE */
-.player-grid-view { display: flex; gap: 30px; margin-top: 20px; overflow-y: auto; }
-.team-section { flex: 1; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px; }
-.team-title { margin-bottom: 15px; font-size: 12px; letter-spacing: 2px; }
-.red-accent { color: var(--red-team); }
-.blue-accent { color: var(--blue-team); }
-
-.player-card {
-    display: flex; align-items: center; padding: 12px; margin-bottom: 8px;
-    background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer;
-    border-left: 4px solid transparent; transition: 0.2s;
+/* SCROLLBARE LISTEN (KADER) */
+#active-content {
+    flex: 1; overflow-y: auto; margin-top: 20px; padding-right: 15px;
 }
-.player-card:hover { background: rgba(255,255,255,0.08); }
+.team-section { margin-bottom: 40px; }
+.player-card {
+    display: flex; align-items: center; padding: 15px; background: rgba(255,255,255,0.03);
+    margin-bottom: 10px; border-radius: 10px; cursor: pointer; border-left: 4px solid transparent;
+}
+.player-card:hover { background: rgba(255,255,255,0.08); border-left-color: var(--accent-orange); }
 .red-border { border-left-color: var(--red-team); }
 .blue-border { border-left-color: var(--blue-team); }
 
-.p-number { font-weight: bold; width: 30px; color: var(--accent-orange); }
-.p-name { flex: 1; font-weight: 500; }
-.p-pos { font-size: 10px; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; }
-
+/* UTILS */
 .hidden { display: none !important; }
+.back-btn { background: none; border: 1px solid var(--data-cyan); color: var(--data-cyan); padding: 10px 20px; cursor: pointer; border-radius: 5px; margin-bottom: 20px; }
 #login-screen { position: fixed; inset: 0; background: var(--bg-deep); z-index: 10000; display: flex; align-items: center; justify-content: center; }
