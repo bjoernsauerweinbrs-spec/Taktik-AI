@@ -20,14 +20,14 @@
         </div>
     </div>
 
-    <div id="main-system" class="hidden" style="width: 100vw; height: 100vh;">
-        <div class="pro-layout" style="display: grid; grid-template-columns: 100px 1fr 350px; width: 100%; height: 100%;">
+    <div id="main-system" class="hidden">
+        <div class="pro-layout-container">
             
             <aside class="sidebar-minimal">
-                <div class="control-unit" onclick="window.BriefcaseUI.toggle()" style="margin-top: 40px;">
+                <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
                     <div class="icon">💼</div><span>ZENTRALE</span>
                 </div>
-                <div class="control-unit" onclick="window.ToniAI.toggleListening()" style="margin-top: 40px;">
+                <div class="control-unit" onclick="window.ToniAI.toggleListening()">
                     <div class="icon" id="mic-icon">🎤</div><span>LIVE AI</span>
                 </div>
             </aside>
@@ -39,43 +39,47 @@
             </main>
 
             <aside class="analysis-panel">
-                <div id="panel-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px;">
-                    <h3 style="margin:0; color:var(--data-cyan);">LIVE-FEED</h3>
+                <div id="panel-header">
+                    <h3>LIVE-FEED</h3>
                 </div>
+                
                 <div id="setcard-content">
-                    <div class="toni-speech-bubble">System bereit, Björn. Alle Taktik-Sektoren sind geladen. Warte auf Eingabe.</div>
+                    <div class="toni-speech-bubble">System bereit, Björn. Taktik-Zentrale ist online.</div>
+                </div>
+
+                <div id="toni-live-chat" class="chat-container">
+                    <div class="chat-header">TONI VOICE ADVISOR</div>
+                    <div id="chat-messages" class="chat-messages"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Taktik fragen...">
+                        <button id="send-btn">➔</button>
+                    </div>
                 </div>
             </aside>
 
-            <div id="toni-live-chat" class="chat-container">
-                <div class="chat-header">
-                    <span>TONI VOICE ADVISOR</span>
-                </div>
-                <div id="chat-messages" class="chat-messages"></div>
-                <div class="chat-input-area" style="padding: 10px; display: flex; gap: 5px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <input type="text" id="chat-input" style="flex:1; background:#000; border:1px solid #333; color:white; padding:8px; border-radius:5px;" placeholder="Taktik fragen...">
-                    <button id="send-btn" style="background:var(--accent-orange); border:none; color:white; padding:8px 12px; border-radius:5px; cursor:pointer;">➔</button>
-                </div>
-            </div>
+        </div>
+    </div>
 
-        </div> </div> <div id="briefcase-overlay" class="briefcase-overlay hidden">
+    <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
-            <div id="briefcase-nav" class="pro-player-list" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-                <div class="p-card Anwesend" onclick="BriefcaseUI.switchSektor('sport')" style="padding: 40px;">
-                    <div style="font-size: 40px;">👟</div><h3>SPORTTASCHE</h3>
-                </div>
-                <div class="p-card Anwesend" onclick="BriefcaseUI.switchSektor('marketing')" style="padding: 40px;">
-                    <div style="font-size: 40px;">📢</div><h3>MARKETING</h3>
-                </div>
-                <div class="p-card Anwesend" onclick="BriefcaseUI.switchSektor('analyse')" style="padding: 40px;">
-                    <div style="font-size: 40px;">📊</div><h3>ANALYSE</h3>
+            <div id="briefcase-nav">
+                <div class="nav-grid">
+                    <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">
+                        <span class="nav-icon">👟</span><b>SPORTTASCHE</b>
+                    </div>
+                    <div class="nav-card" onclick="BriefcaseUI.switchSektor('marketing')">
+                        <span class="nav-icon">📢</span><b>MARKETING</b>
+                    </div>
+                    <div class="nav-card" onclick="BriefcaseUI.switchSektor('analyse')">
+                        <span class="nav-icon">📊</span><b>ANALYSE</b>
+                    </div>
                 </div>
             </div>
             <div id="briefcase-content" class="hidden">
-                <div class="content-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                    <button onclick="BriefcaseUI.backToNav()" class="login-btn" style="width: auto; padding: 10px 20px;">← ZURÜCK</button>
-                    <h2 id="sector-title" style="margin:0; color:var(--accent-orange);">SEKTOR</h2>
-                    <button onclick="BriefcaseUI.toggle()" class="login-btn" style="width: auto; background: #444; padding: 10px 20px;">SCHLIESSEN</button>
+                <div class="content-header">
+                    <button onclick="BriefcaseUI.backToNav()" class="login-btn" style="width: auto;">← ZURÜCK</button>
+                    <h2 id="sector-title">SEKTOR</h2>
+                    <button onclick="BriefcaseUI.toggle()" class="login-btn" style="width: auto; background: #444;">[X]</button>
                 </div>
                 <div id="active-content"></div>
             </div>
