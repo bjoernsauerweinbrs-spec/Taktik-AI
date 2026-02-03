@@ -1,91 +1,113 @@
 window.BriefcaseUI = {
-    // Öffnet/Schließt die Aktentasche
     toggle() {
         const overlay = document.getElementById('briefcase-overlay');
-        if (overlay) {
-            overlay.classList.toggle('hidden');
-        }
+        if (overlay) overlay.classList.toggle('hidden');
     },
 
-    // Schaltet zwischen Sporttasche und Geschäftszimmer um
     async switchSektor(sektor) {
         const nav = document.getElementById('briefcase-nav');
         const content = document.getElementById('briefcase-content');
         const target = document.getElementById('active-content');
-
-        if (!nav || !content || !target) return;
 
         nav.classList.add('hidden');
         content.classList.remove('hidden');
 
         if (sektor === 'sport') {
             target.innerHTML = `
-                <div class="squad-header">
-                    <h3>👟 SPORTTASCHE // KADERPLANUNG</h3>
-                    <p>Wähle einen Spieler aus, um ihn auf das Feld zu setzen.</p>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3>👟 SPORTTASCHE // KADER</h3>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="BriefcaseUI.exportData()" class="action-btn">💾 SICHERN</button>
+                        <button onclick="document.getElementById('import-trigger').click()" class="action-btn">📂 LADEN</button>
+                        <input type="file" id="import-trigger" hidden onchange="BriefcaseUI.importData(event)">
+                    </div>
                 </div>
-                <div id="player-list-container" class="player-grid-view">
-                    Lade Teamdaten...
-                </div>
+                <div id="player-list-container">Lade Teamdaten...</div>
             `;
             await this.loadSquad();
         } else if (sektor === 'orga') {
             target.innerHTML = `
-                <div class="squad-header">
-                    <h3>🏢 GESCHÄFTSZIMMER</h3>
-                    <p>Stadionzeitung und organisatorische Abläufe.</p>
-                </div>
-                <div class="orga-placeholder">System bereit für Redaktionsschluss.</div>
+                <h3>🏢 GESCHÄFTSZIMMER</h3>
+                <textarea id="stadion-notes" style="width:100%; height:300px; background:#080E1A; color:white; border:1px solid #333; padding:15px; border-radius:10px;" placeholder="Hier kannst du Texte für die Stadionzeitung oder Orga-Abläufe schreiben..."></textarea>
+                <button onclick="BriefcaseUI.saveOrga()" style="margin-top:10px;" class="action-btn">NOTIZ SPEICHERN</button>
             `;
+            const saved = localStorage.getItem('toni_orga_notes');
+            if(saved) document.getElementById('stadion-notes').value = saved;
         }
     },
 
-    // Lädt die players.sample.json und trennt Rot von Blau [cite: 2026-01-25]
     async loadSquad() {
         const container = document.getElementById('player-list-container');
         try {
             const resp = await fetch('data/players.sample.json');
-            if (!resp.ok) throw new Error("Datei nicht gefunden");
             const data = await resp.json();
-            
-            let html = "";
+            let html = "<div class='player-grid-view'>";
 
-            // DEIN TEAM (ROT) [cite: 2026-01-25]
+            // HOME TEAM (ROT)
             html += `<div class="team-section">
-                        <h4 class="team-title red-accent">🔴 MEIN TEAM (HOME)</h4>
-                        <div class="player-list">`;
+                        <h4 style="color:var(--red-team)">🔴 MEIN TEAM</h4>`;
             data.homeTeam.players.forEach(p => {
-                html += `
-                    <div class="player-card red-border" onclick="arena.addPlayer('${p.name}', 'red', '${p.position}')">
-                        <span class="p-number">#${p.number}</span>
-                        <span class="p-name">${p.name}</span>
-                        <span class="p-pos">${p.position}</span>
-                    </div>`;
+                html += `<div class="player-card red-border" onclick="arena.addPlayer('${p.name}', 'red', '${p.position}')">
+                            <b>#${p.number}</b> ${p.name} <small>(${p.position})</small>
+                         </div>`;
             });
-            html += `</div></div>`;
+            html += `</div>`;
 
-            // GEGNER (BLAU) [cite: 2026-01-25]
+            // AWAY TEAM (BLAU - Nur als Nummern/Platzhalter)
             html += `<div class="team-section">
-                        <h4 class="team-title blue-accent">🔵 GEGNER (AWAY)</h4>
-                        <div class="player-list">`;
+                        <h4 style="color:var(--blue-team)">🔵 GEGNER</h4>`;
             data.awayTeam.players.forEach(p => {
-                html += `
-                    <div class="player-card blue-border" onclick="arena.addPlayer('${p.name}', 'blue', '${p.position}')">
-                        <span class="p-number">#${p.number}</span>
-                        <span class="p-name">${p.name}</span>
-                        <span class="p-pos">${p.position}</span>
-                    </div>`;
+                html += `<div class="player-card blue-border" onclick="arena.addPlayer('Gegner ${p.number}', 'blue', '${p.position}')">
+                            <b>#${p.number}</b> Gegner <small>(${p.position})</small>
+                         </div>`;
             });
             html += `</div></div>`;
-
             container.innerHTML = html;
         } catch (e) {
-            container.innerHTML = `<div class="error-msg">Fehler beim Laden des Kaders: data/players.sample.json fehlt oder ist fehlerhaft.</div>`;
-            console.error(e);
+            container.innerHTML = "Fehler beim Laden der Kaderdaten.";
         }
     },
 
-    // Zurück zur Hauptübersicht der Aktentasche
+    saveOrga() {
+        const text = document.getElementById('stadion-notes').value;
+        localStorage.setItem('toni_orga_notes', text);
+        alert("Notiz im Browser-Speicher gesichert!");
+    },
+
+    // EXPORT: Erzeugt eine JSON-Datei für deinen Mac
+    exportData() {
+        const data = {
+            timestamp: new Date().toISOString(),
+            board: window.arena.items,
+            orga: localStorage.getItem('toni_orga_notes')
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Toni2.0_Taktik_${new Date().toLocaleDateString()}.json`;
+        a.click();
+    },
+
+    // IMPORT: Lädt die Datei von deinem Mac hoch
+    importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = JSON.parse(e.target.result);
+            if (data.board) {
+                window.arena.items = data.board;
+                window.arena.render();
+            }
+            if (data.orga) {
+                localStorage.setItem('toni_orga_notes', data.orga);
+            }
+            alert("Taktik erfolgreich geladen!");
+        };
+        reader.readAsText(file);
+    },
+
     backToNav() {
         document.getElementById('briefcase-nav').classList.remove('hidden');
         document.getElementById('briefcase-content').classList.add('hidden');
