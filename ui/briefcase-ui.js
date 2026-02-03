@@ -3,7 +3,7 @@ window.BriefcaseUI = {
         const overlay = document.getElementById('briefcase-overlay');
         if (overlay) overlay.classList.toggle('hidden');
     },
-
+ 
     switchSektor(sektor) {
         const nav = document.getElementById('briefcase-nav');
         const content = document.getElementById('briefcase-content');
