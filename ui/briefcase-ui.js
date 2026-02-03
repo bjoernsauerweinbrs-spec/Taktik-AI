@@ -1,7 +1,7 @@
 window.BriefcaseUI = {
     // --- INITIALISIERUNG ---
     init: function() {
-        console.log("BriefcaseUI wird initialisiert...");
+        console.log("BriefcaseUI Master-Update initialisiert...");
         let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
         if (pl.length === 0) {
             pl.push({
@@ -17,7 +17,7 @@ window.BriefcaseUI = {
     tagCatalog: [
         { id: 'SHOT_ON_TARGET', alias: 'TOR/ABSCHLUSS', impact: { shooting: 5, mental: 2 }, live: true },
         { id: 'PROGRESSIVE_PASS', alias: 'RAUMGEWINN-PASS', impact: { passing: 4, tactic: 2 }, live: true },
-        { id: 'SKILL_BREAKTHROUGH', alias: 'DRIBBLING-DURCHBRUCH', impact: { ginga: 3, technique: 2 }, live: false },
+        { id: 'SKILL_BREAKTHROUGH', alias: 'DRIBBLING-DURCHBRUCH', impact: { technique: 2 }, live: false },
         { id: 'TURNOVER_PASS', alias: 'FEHLPASS', impact: { passing: -2 }, live: false },
         { id: 'PRESSING_RECOVERY', alias: 'PRESSING-ERFOLG', impact: { tactic: 3, defense: 2 }, live: true }
     ],
@@ -82,37 +82,37 @@ window.BriefcaseUI = {
         else this.renderPlaceholder(sektor);
     },
 
-    // --- TRAINING (AI POWERED) ---
+    // --- TRAINING (INTERNATIONAL AI ENGINE) ---
     renderTraining: function() {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const weakPlayer = players.sort((a,b) => a.ginga - b.ginga)[0] || {name: "Kader"};
+        const focusPlayer = players.sort((a,b) => a.rating - b.rating)[0] || {name: "Team"};
         document.getElementById('active-content').innerHTML = `
             <div style="padding: 15px;">
-                <h4 style="color:#fff; margin:0 0 10px 0;">AI-TRAININGS-GENERATOR</h4>
-                <div style="background:rgba(255,149,0,0.1); border:1px solid #ff9500; padding:15px; border-radius:10px; margin-bottom:20px;">
+                <h4 style="color:#fff; margin:0 0 10px 0;">GLOBAL TRAINING ANALYZER</h4>
+                <div style="background:rgba(0,209,255,0.1); border:1px solid #00d1ff; padding:15px; border-radius:10px; margin-bottom:20px;">
                     <p style="font-size:0.7rem; color:#fff; margin:0;">
-                        <b>STATUS:</b> Toni analysiert Fokus auf <b style="color:#ff9500;">${weakPlayer.name}</b> (Ginga: ${weakPlayer.ginga}).
+                        <b>FOKUS:</b> Analyse internationaler Top-Level Übungen für <b style="color:#00d1ff;">${focusPlayer.name}</b>.
                     </p>
                 </div>
-                <div id="training-suggestion-box" style="min-height:120px; background:rgba(255,255,255,0.02); border:1px solid #333; border-radius:10px; padding:15px; font-size:0.75rem; color:#ccc; line-height:1.4;">
-                    <i class="fas fa-robot" style="margin-right:10px;"></i> Bereit für die Web-Analyse der besten brasilianischen Drills...
+                <div id="training-suggestion-box" style="min-height:120px; background:rgba(255,255,255,0.02); border:1px solid #333; border-radius:10px; padding:15px; font-size:0.75rem; color:#ccc; line-height:1.5;">
+                    <i class="fas fa-globe-europe" style="margin-right:10px;"></i> Bereit für den Scan moderner Trainingsmethoden (PL, LaLiga, Bundesliga)...
                 </div>
-                <button class="login-btn" style="width:100%; margin-top:20px; background:#ff9500; color:#000; font-weight:900;" onclick="BriefcaseUI.askToniForExercises()">ÜBUNGEN GENERIEREN</button>
+                <button class="login-btn" style="width:100%; margin-top:20px; background:#00d1ff; color:#000; font-weight:900;" onclick="BriefcaseUI.askToniForInternationalExercises()">ÜBUNGEN RECHARCHIEREN</button>
             </div>`;
     },
 
-    askToniForExercises: function() {
+    askToniForInternationalExercises: function() {
         const box = document.getElementById('training-suggestion-box');
-        box.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Toni scannt das Web nach High-Performance Übungen...';
+        box.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Toni durchsucht internationale Datenbanken nach Elite-Übungen...';
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const stats = players.map(p => `${p.name}(Ginga:${p.ginga})`).join(', ');
-        const prompt = `Coach, ich analysiere unseren Kader: ${stats}. Ich suche jetzt im Web nach zwei brasilianischen Trainings-Drills, um unsere Technik zu pushen. Antworte als Toni.`;
+        const stats = players.map(p => `${p.name}(Rating:${p.rating}, Pos:${p.pos})`).join(', ');
+        const prompt = `Coach, ich analysiere unseren Kader international: ${stats}. Suche im Internet nach den 2 effektivsten modernen Trainingsübungen für dieses Niveau. Berücksichtige aktuelle Trends aus den Top-Ligen. Antworte als Toni (männlich, kompetent).`;
         if(window.ToniAI) {
             ToniAI.processCommand(prompt);
             setTimeout(() => {
                 const msgs = document.querySelectorAll('.bot-msg');
                 if(msgs.length > 0) box.innerHTML = msgs[msgs.length-1].innerHTML;
-            }, 3500);
+            }, 4000);
         }
     },
 
@@ -125,18 +125,18 @@ window.BriefcaseUI = {
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <h4 style="color:#fff; margin:0;">SPIELTAGS-SETUP</h4>
                     <select id="formation-select" onchange="BriefcaseUI.saveMatchplan()" style="background:#000; color:#ff9500; border:1px solid #ff9500; padding:5px; border-radius:5px;">
-                        <option value="4-3-3" ${currentMatchplan.formation === '4-3-3' ? 'selected' : ''}>4-3-3 (Ginga Style)</option>
-                        <option value="4-4-2" ${currentMatchplan.formation === '4-4-2' ? 'selected' : ''}>4-4-2 (Kompakt)</option>
-                        <option value="3-5-2" ${currentMatchplan.formation === '3-5-2' ? 'selected' : ''}>3-5-2 (Dominanz)</option>
+                        <option value="4-3-3" ${currentMatchplan.formation === '4-3-3' ? 'selected' : ''}>4-3-3 (Offensiv)</option>
+                        <option value="4-2-3-1" ${currentMatchplan.formation === '4-2-3-1' ? 'selected' : ''}>4-2-3-1 (Modern)</option>
+                        <option value="3-4-3" ${currentMatchplan.formation === '3-4-3' ? 'selected' : ''}>3-4-3 (Flügelspiel)</option>
+                        <option value="5-3-2" ${currentMatchplan.formation === '5-3-2' ? 'selected' : ''}>5-3-2 (Defensiv)</option>
                     </select>
                 </div>
                 <div style="background:rgba(255,255,255,0.02); border:1px solid #333; border-radius:10px; padding:15px;">
-                    <p style="font-size:0.7rem; color:#888;">NOMINIERTE STARTELF:</p>
+                    <p style="font-size:0.7rem; color:#888;">AKTUELLER KADER FÜR DIE STARTELF:</p>
                     <div id="starting-xi-list" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom:20px;">
                         ${players.slice(0, 11).map(p => `<div style="background:#1a1a1a; padding:10px; border-left:3px solid #ff9500; border-radius:5px; font-size:0.75rem;">#${p.number} <b>${p.name}</b> (${p.pos})</div>`).join('')}
                     </div>
-                    <button class="login-btn" style="width:100%; background:#ff9500; color:#000; font-weight:900;" onclick="BriefcaseUI.transferToBoard()">AUF BOARD AKTIVIEREN</button>
-                    <button class="login-btn" style="width:100%; margin-top:10px; background:#333;" onclick="BriefcaseUI.generateTacticalBriefing()">TONI ANALYSIS</button>
+                    <button class="login-btn" style="width:100%; background:#ff9500; color:#000; font-weight:900;" onclick="BriefcaseUI.transferToBoard()">BOARD SYNCHRONISIEREN</button>
                 </div>
             </div>`;
     },
@@ -144,6 +144,7 @@ window.BriefcaseUI = {
     saveMatchplan: function() {
         const formation = document.getElementById('formation-select').value;
         localStorage.setItem('toni_current_matchplan', JSON.stringify({ formation: formation }));
+        if(window.ToniAI) ToniAI.speak("Formation auf " + formation + " aktualisiert, Coach.");
     },
 
     transferToBoard: function() {
@@ -151,16 +152,11 @@ window.BriefcaseUI = {
         if(window.arena) {
             arena.applyTacticalPattern(formation.toLowerCase().replace(/-/g, '')); 
             this.toggle();
-            if(window.ToniAI) ToniAI.speak("Coach, die Spieler rücken in die " + formation + " Formation. Wir sind bereit.");
+            if(window.ToniAI) ToniAI.speak("Formation synchronisiert. Die Spieler nehmen ihre internationalen Positionen ein.");
         }
     },
 
-    generateTacticalBriefing: function() {
-        const formation = document.getElementById('formation-select').value;
-        if(window.ToniAI) ToniAI.processCommand("Analysiere kurz die taktischen Vorteile der " + formation + " Formation.");
-    },
-
-    // --- SPONSORING (INTERACTIVE) ---
+    // --- SPONSORING ---
     renderSponsoring: function() {
         const sponsors = JSON.parse(localStorage.getItem('toni_sponsors')) || [
             { id: 1, name: 'Hauptsponsor', logo: '' },
@@ -168,14 +164,14 @@ window.BriefcaseUI = {
         ];
         document.getElementById('active-content').innerHTML = `
             <div style="padding: 15px;">
-                <h4 style="color:#fff; margin-bottom:10px;">PARTNER & SPONSOREN</h4>
+                <h4 style="color:#fff; margin-bottom:10px;">CLUB PARTNER</h4>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px;">
                     ${sponsors.map(s => `
                         <div style="background:rgba(255,255,255,0.02); border:1px solid #333; border-radius:10px; padding:15px; text-align:center;">
                             <div style="height:60px; background:rgba(255,255,255,0.05); border-radius:5px; margin-bottom:10px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
                                 ${s.logo ? `<img src="${s.logo}" style="max-height:100%; max-width:100%;">` : `<i class="fas fa-handshake" style="color:#333; font-size:1.5rem;"></i>`}
                             </div>
-                            <button class="login-btn" style="font-size:0.55rem; padding:5px;" onclick="document.getElementById('upload-spon-${s.id}').click()">UPLOAD</button>
+                            <button class="login-btn" style="font-size:0.55rem; padding:5px; background:#444;" onclick="document.getElementById('upload-spon-${s.id}').click()">LOGO UPLOAD</button>
                             <input type="file" id="upload-spon-${s.id}" style="display:none;" onchange="BriefcaseUI.handleSponsorLogo(event, ${s.id})">
                         </div>
                     `).join('')}
@@ -193,7 +189,7 @@ window.BriefcaseUI = {
                 sponsors[idx].logo = ex.target.result;
                 localStorage.setItem('toni_sponsors', JSON.stringify(sponsors));
                 this.renderSponsoring();
-                if(window.ToniAI) ToniAI.speak("Partner-Logo wurde im System aktualisiert, Coach.");
+                if(window.ToniAI) ToniAI.speak("Club-Partner Logo erfolgreich im System registriert.");
             }
         }; reader.readAsDataURL(file);
     },
@@ -203,30 +199,29 @@ window.BriefcaseUI = {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const sponsors = JSON.parse(localStorage.getItem('toni_sponsors')) || [];
         const mainSponsor = sponsors.find(s => s.id === 1 && s.logo);
-        const currentMatch = JSON.parse(localStorage.getItem('toni_current_matchplan')) || { formation: 'Keine' };
-        const topPlayer = players.sort((a,b) => b.rating - a.rating)[0] || {name: "Kader leer", rating: 0};
+        const currentMatch = JSON.parse(localStorage.getItem('toni_current_matchplan')) || { formation: 'Standart' };
+        const topPlayer = players.sort((a,b) => b.rating - a.rating)[0] || {name: "Kader", rating: 0};
         
         document.getElementById('active-content').innerHTML = `
             <div style="padding: 15px;">
-                <div id="print-area" style="background: #fff; color: #000; padding: 25px; border-radius: 5px; font-family: 'serif'; min-height:300px; position:relative;">
-                    ${mainSponsor ? `<img src="${mainSponsor.logo}" style="position:absolute; top:10px; right:10px; max-height:40px;">` : ''}
-                    <h2 style="text-align:center; border-bottom:2px solid #000; margin-top:0;">STADIONZEITUNG</h2>
-                    <div style="display:flex; gap:15px; margin-top:20px;">
-                        <div style="flex:1; text-align:center; border-right:1px solid #ddd;">
-                            <img src="${topPlayer.photo || 'https://via.placeholder.com/80'}" style="width:100px; height:100px; border-radius:5px; border:1px solid #000; object-fit:cover;">
-                            <p style="font-size:0.8rem; margin-top:10px;"><b>STAR DES TAGES</b><br>${topPlayer.name}</p>
+                <div id="print-area" style="background: #fff; color: #000; padding: 25px; border-radius: 5px; font-family: 'Helvetica', sans-serif; min-height:300px; position:relative; border:1px solid #ddd;">
+                    ${mainSponsor ? `<img src="${mainSponsor.logo}" style="position:absolute; top:15px; right:15px; max-height:35px;">` : ''}
+                    <h2 style="text-align:center; border-bottom:3px solid #000; padding-bottom:10px; margin-top:0; font-weight:900;">MATCHDAY REPORT</h2>
+                    <div style="display:flex; gap:20px; margin-top:25px;">
+                        <div style="flex:1; text-align:center;">
+                            <img src="${topPlayer.photo || 'https://via.placeholder.com/80'}" style="width:110px; height:110px; border-radius:5px; border:2px solid #000; object-fit:cover;">
+                            <p style="font-size:0.75rem; margin-top:10px; text-transform:uppercase;"><b>Top Performer</b><br>${topPlayer.name}</p>
                         </div>
-                        <div style="flex:1.5; font-size:0.75rem;">
-                            <b>COACH ANALYSE:</b><br>
-                            "Wir setzen heute auf volle Ginga-Power und maximale Kontrolle."
-                            <div style="margin-top:20px; padding:10px; border:1px dashed #ccc;">
-                                <b>MATCH-FORMATION:</b><br>
-                                <span style="font-size:1.2rem; font-weight:900;">${currentMatch.formation}</span>
+                        <div style="flex:1.5; font-size:0.8rem; border-left:1px solid #eee; padding-left:15px;">
+                            <p><b>TAKTIK-FOKUS:</b><br>Internationale Raumkontrolle und progressives Aufbauspiel.</p>
+                            <div style="margin-top:25px; padding:15px; background:#f9f9f9; border-radius:5px;">
+                                <span style="font-size:0.6rem; color:#666;">GEWÄHLTES SYSTEM:</span><br>
+                                <span style="font-size:1.5rem; font-weight:900;">${currentMatch.formation}</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <button class="login-btn" style="width:100%; margin-top:20px; background:#ff9500; color:#000;" onclick="window.print()">STADIONZEITUNG DRUCKEN</button>
+                <button class="login-btn" style="width:100%; margin-top:20px; background:#ff9500; color:#000;" onclick="window.print()">A5 PDF EXPORT</button>
             </div>`;
     },
 
@@ -234,59 +229,57 @@ window.BriefcaseUI = {
     renderReports: function() {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const avgRating = players.length > 0 ? Math.round(players.reduce((a,b) => a + (b.rating || 0), 0) / players.length) : 0;
-        document.getElementById('active-content').innerHTML = `<div style="padding:15px;"><div style="background:rgba(0,209,255,0.05); border:1px solid #00d1ff; padding:20px; border-radius:15px; text-align:center; margin-bottom:20px;"><h4 style="margin:0; color:#00d1ff;">TEAM GINGA-INDEX</h4><div style="font-size:3rem; font-weight:900; color:#fff;">${avgRating}%</div></div><h4 style="color:#fff;">RANKING</h4><div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px;">${players.sort((a,b)=>b.rating-a.rating).map(p => `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #222;"><span>${p.name}</span><b style="color:#ff9500;">${p.rating}</b></div>`).join('')}</div></div>`;
+        document.getElementById('active-content').innerHTML = `
+            <div style="padding: 15px;">
+                <div style="background: rgba(0,209,255,0.05); border: 1px solid #00d1ff; padding: 20px; border-radius: 15px; text-align:center; margin-bottom:20px;">
+                    <h4 style="margin:0; color:#00d1ff;">GLOBAL PERFORMANCE INDEX</h4>
+                    <div style="font-size: 3rem; font-weight: 900; color:#fff;">${avgRating}%</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px;">
+                    ${players.sort((a,b)=>b.rating-a.rating).map(p => `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #222; font-size:0.8rem;"><span>${p.name}</span><b style="color:#ff9500;">${p.rating}</b></div>`).join('')}
+                </div>
+            </div>`;
     },
 
-    // --- MEDIA ---
+    // --- MEDIA, SPORTTASCHE, SYSTEM (KONSTRUKT ERHALTEN) ---
     renderMedia: function() {
-        document.getElementById('active-content').innerHTML = `<div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px; padding:10px;"><div style="background:#000; border:1px solid #333; border-radius:10px; overflow:hidden;"><div style="height:250px; display:flex; align-items:center; justify-content:center; background:#111; color:#444;"><i class="fas fa-play-circle" style="font-size:4rem;"></i></div><div style="padding:10px; background:#1a1a1a; display:flex; gap:10px; overflow-x:auto;">${this.tagCatalog.map(t => `<button onclick="BriefcaseUI.logTag('${t.id}')" style="white-space:nowrap; background:#333; color:#fff; border:none; padding:5px 10px; border-radius:5px; font-size:0.6rem;">${t.alias}</button>`).join('')}</div></div><div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px;"><h4 style="margin:0 0 10px 0; font-size:0.8rem; color:#ff9500;">TAG-LOG</h4><div id="tag-log" style="font-size:0.7rem; color:#888; height:200px; overflow-y:auto;">Warte...</div></div></div>`;
+        document.getElementById('active-content').innerHTML = `<div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px; padding:10px;"><div style="background:#000; border: 1px solid #333; border-radius:10px; overflow:hidden;"><div style="height:250px; display:flex; align-items:center; justify-content:center; background:#111; color:#444;"><i class="fas fa-play-circle" style="font-size:4rem;"></i></div><div style="padding:10px; background:#1a1a1a; display:flex; gap:10px; overflow-x:auto;">${this.tagCatalog.map(t => `<button onclick="BriefcaseUI.logTag('${t.id}')" style="white-space:nowrap; background:#333; color:#fff; border:none; padding:5px 10px; border-radius:5px; font-size:0.6rem;">${t.alias}</button>`).join('')}</div></div><div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px;"><h4 style="margin:0 0 10px 0; font-size:0.8rem; color:#ff9500;">LIVE LOG</h4><div id="tag-log" style="font-size:0.7rem; color:#888; height:200px; overflow-y:auto;">Scan aktiv...</div></div></div>`;
     },
-
     logTag: function(tagId) {
         const tag = this.tagCatalog.find(t => t.id === tagId); const log = document.getElementById('tag-log');
         const entry = document.createElement('div'); entry.innerHTML = `[${new Date().toLocaleTimeString()}] <b>${tag.id}</b>`;
-        if(log.innerHTML.includes("Warte")) log.innerHTML = ""; log.prepend(entry);
+        if(log.innerHTML.includes("Scan")) log.innerHTML = ""; log.prepend(entry);
     },
-
-    // --- SPORTTASCHE ---
     renderSporttasche: function() {
         var players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        document.getElementById('active-content').innerHTML = `<div style="padding:10px;"><button class="login-btn" style="width:100%; margin-bottom:20px; background:#ff9500; color:#000;" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUEN SPIELER</button><div class="pro-player-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:10px;">${players.map(p => `<div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background:#151515; border:1px solid #333; padding:15px; border-radius:10px; text-align:center; cursor:pointer;"><div style="font-size:1.2rem; font-weight:900; color:#ff9500;">#${p.number||0}</div><b style="font-size:0.8rem; color:#fff;">${p.name}</b></div>`).join('')}</div></div>`;
+        document.getElementById('active-content').innerHTML = `<div style="padding:10px;"><button class="login-btn" style="width:100%; margin-bottom:20px; background:#ff9500; color:#000;" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUER PRO-PLAYER</button><div class="pro-player-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:10px;">${players.map(p => `<div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background:#151515; border:1px solid #333; padding:15px; border-radius:10px; text-align:center; cursor:pointer;"><div style="font-size:1.2rem; font-weight:900; color:#ff9500;">#${p.number||0}</div><b style="font-size:0.8rem; color:#fff;">${p.name}</b></div>`).join('')}</div></div>`;
     },
-
     openFIFAcard: function(id) {
         var players = JSON.parse(localStorage.getItem('toni_players')) || []; var p = players.find(x => x.id == id); if(!p) return;
-        var pins = JSON.parse(localStorage.getItem('toni_player_pins')) || {}; var pin = pins[id] ? pins[id].pin : "Keine PIN";
-        document.getElementById('active-content').innerHTML = `<div style="display:grid; grid-template-columns:240px 1fr; gap:30px; background:#000; padding:25px; border-radius:15px; border:1px solid #ff9500;"><div style="width:240px; height:360px; background:linear-gradient(145deg, #d4af37, #b8860b); border-radius:10px; padding:20px; color:#111; text-align:center;"><div id="v-rating" style="font-size:4rem; font-weight:900;">${p.rating||80}</div><div style="font-weight:bold;">${p.pos||'IV'}</div><div onclick="document.getElementById('photo-upload').click()" style="width:110px; height:110px; margin:10px auto; border-radius:50%; background:#333; overflow:hidden; border:2px solid rgba(0,0,0,0.2); cursor:pointer;"><img id="v-photo" src="${p.photo||'https://via.placeholder.com/110'}" style="width:100%; height:100%; object-fit:cover;"></div><input type="file" id="photo-upload" style="display:none;" onchange="BriefcaseUI.handlePhoto(event,'${id}')"><div style="font-size:1.3rem; font-weight:900;">${p.name}</div><div style="font-size:0.6rem; margin-top:5px; background:rgba(0,0,0,0.1); padding:5px;">PIN: ${pin}</div></div><div><h3 style="color:#ff9500; margin:0;">ANALYSIS</h3><div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;"><div><label>PAC</label><input type="range" id="i-pac" value="${p.pace||50}" oninput="BriefcaseUI.sync('${id}')"><label>GIN</label><input type="range" id="i-gin" value="${p.ginga||50}" oninput="BriefcaseUI.sync('${id}')"></div><div><label>SHO</label><input type="range" id="i-sho" value="${p.shooting||50}" oninput="BriefcaseUI.sync('${id}')"><label>DEF</label><input type="range" id="i-def" value="${p.defense||50}" oninput="BriefcaseUI.sync('${id}')"></div></div><button class="login-btn" style="width:100%; margin-top:20px;" onclick="BriefcaseUI.renderSporttasche()">FERTIG</button></div></div>`;
+        document.getElementById('active-content').innerHTML = `<div style="display:grid; grid-template-columns:240px 1fr; gap:30px; background:#000; padding:25px; border-radius:15px; border:1px solid #ff9500;"><div style="width:240px; height:360px; background:linear-gradient(145deg, #d4af37, #b8860b); border-radius:10px; padding:20px; color:#111; text-align:center;"><div id="v-rating" style="font-size:4rem; font-weight:900;">${p.rating||80}</div><div style="font-weight:bold;">${p.pos||'IV'}</div><div onclick="document.getElementById('photo-upload').click()" style="width:110px; height:110px; margin:10px auto; border-radius:50%; background:#333; overflow:hidden; border:2px solid rgba(0,0,0,0.2); cursor:pointer;"><img id="v-photo" src="${p.photo||'https://via.placeholder.com/110'}" style="width:100%; height:100%; object-fit:cover;"></div><input type="file" id="photo-upload" style="display:none;" onchange="BriefcaseUI.handlePhoto(event,'${id}')"><div style="font-size:1.3rem; font-weight:900;">${p.name}</div></div><div><h3 style="color:#ff9500; margin:0;">GLOBAL ANALYSIS</h3><div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;"><div><label>PAC</label><input type="range" id="i-pac" value="${p.pace||50}" oninput="BriefcaseUI.sync('${id}')"><label>SHO</label><input type="range" id="i-sho" value="${p.shooting||50}" oninput="BriefcaseUI.sync('${id}')"></div><div><label>PAS</label><input type="range" id="i-pas" value="${p.passing||50}" oninput="BriefcaseUI.sync('${id}')"><label>DEF</label><input type="range" id="i-def" value="${p.defense||50}" oninput="BriefcaseUI.sync('${id}')"></div></div><button class="login-btn" style="width:100%; margin-top:20px;" onclick="BriefcaseUI.renderSporttasche()">FERTIG</button></div></div>`;
     },
-
     sync: function(id) {
-        var v = { pace: document.getElementById('i-pac').value, shooting: document.getElementById('i-sho').value, ginga: document.getElementById('i-gin').value, defense: document.getElementById('i-def').value, stamina: 50, pulse: 70 };
-        var r = Math.round((parseInt(v.pace)+parseInt(v.shooting)+parseInt(v.ginga)+parseInt(v.defense))/4);
+        var v = { pace: document.getElementById('i-pac').value, shooting: document.getElementById('i-sho').value, passing: document.getElementById('i-pas').value, defense: document.getElementById('i-def').value };
+        var r = Math.round((parseInt(v.pace)+parseInt(v.shooting)+parseInt(v.passing)+parseInt(v.defense))/4);
         document.getElementById('v-rating').innerText = r; let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
         const i = pl.findIndex(x => x.id == id); if(i !== -1) { Object.assign(pl[i], v); pl[i].rating = r; localStorage.setItem('toni_players', JSON.stringify(pl)); }
     },
-
     handlePhoto: function(e, id) {
         var f = e.target.files[0]; if(!f) return; var r = new FileReader(); r.onload = function(ex) {
             document.getElementById('v-photo').src = ex.target.result;
             let pl = JSON.parse(localStorage.getItem('toni_players')) || []; const i = pl.findIndex(x => x.id == id); if(i !== -1) { pl[i].photo = ex.target.result; localStorage.setItem('toni_players', JSON.stringify(pl)); }
         }; r.readAsDataURL(f);
     },
-
     renderSystem: function() {
         var k = localStorage.getItem('toni_api_key') || ""; var pr = localStorage.getItem('toni_api_provider') || "llama";
-        document.getElementById('active-content').innerHTML = `<div style="padding:20px; background:rgba(255,255,255,0.02); border-radius:15px; border:1px solid #333;"><h4 style="color:#fff;">SYSTEM</h4><select id="api-provider" style="width:100%; background:#000; color:#fff; padding:10px; margin-bottom:10px;"><option value="llama" ${pr==='llama'?'selected':''}>Gemma 3 (Ollama)</option><option value="openai" ${pr==='openai'?'selected':''}>OpenAI</option></select><input type="password" id="api-key-input" style="width:100%; background:#000; color:#fff; padding:10px;" value="${k}"><button class="login-btn" style="width:100%; margin-top:15px; background:#ff9500; color:#000;" onclick="BriefcaseUI.saveSettings()">SPEICHERN</button></div>`;
+        document.getElementById('active-content').innerHTML = `<div style="padding:20px; background:rgba(255,255,255,0.02); border-radius:15px; border:1px solid #333;"><h4 style="color:#fff;">CORE SYSTEM</h4><select id="api-provider" style="width:100%; background:#000; color:#fff; padding:10px; margin-bottom:10px;"><option value="llama" ${pr==='llama'?'selected':''}>Gemma 3 (Ollama)</option><option value="openai" ${pr==='openai'?'selected':''}>OpenAI</option></select><input type="password" id="api-key-input" style="width:100%; background:#000; color:#fff; padding:10px;" value="${k}"><button class="login-btn" style="width:100%; margin-top:15px; background:#ff9500; color:#000;" onclick="BriefcaseUI.saveSettings()">KONFIGURATION SPEICHERN</button></div>`;
     },
-
-    saveSettings: function() { localStorage.setItem('toni_api_key', document.getElementById('api-key-input').value); localStorage.setItem('toni_api_provider', document.getElementById('api-provider').value); alert("Gesichert!"); },
-
-    renderPlaceholder: function(s) { document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px;">Sektor ${s} folgt.</div>`; },
-
+    saveSettings: function() { localStorage.setItem('toni_api_key', document.getElementById('api-key-input').value); localStorage.setItem('toni_api_provider', document.getElementById('api-provider').value); alert("System konfiguriert!"); },
+    renderPlaceholder: function(s) { document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px; color:#444;">Sektor ${s} wird internationalisiert...</div>`; },
     addPlayerPrompt: function() {
-        var n = prompt("Name:"); var num = prompt("Nummer:"); if(n && num) {
+        var n = prompt("Pro-Player Name:"); var num = prompt("Rückennummer:"); if(n && num) {
             var pl = JSON.parse(localStorage.getItem('toni_players')) || [];
-            pl.push({ id: Date.now(), name: n, number: num, rating: 50, pace: 50, shooting: 50, ginga: 50, defense: 50, stamina: 50, pulse: 70 });
+            pl.push({ id: Date.now(), name: n, number: num, rating: 50, pace: 50, shooting: 50, passing: 50, defense: 50 });
             localStorage.setItem('toni_players', JSON.stringify(pl)); this.renderSporttasche();
         }
     }
