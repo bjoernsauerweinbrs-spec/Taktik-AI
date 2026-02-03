@@ -3,63 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 — High-Performance Trainer OS</title>
+    <title>TONI 2.0 — Tactical Intelligence OS</title>
     <link rel="stylesheet" href="css/toni-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
-<body class="pro-layout">
+<body>
 
     <div id="login-screen">
         <div class="login-box">
             <h1 class="glow-text">TONI 2.0</h1>
-            <p class="cyber-subtitle">TACTICAL INTELLIGENCE SYSTEM</p>
-            <input id="password-input" type="password" class="login-input" placeholder="PASSWORT">
-            <button class="login-btn" onclick="ToniAuth.login()">SYSTEM STARTEN</button>
+            <p class="cyber-subtitle">SYSTEM ACCESS REQUIRED</p>
+            <div class="login-form">
+                <input id="password-input" type="password" class="login-input" placeholder="PASSWORT">
+                <button class="login-btn" onclick="ToniAuth.login()">INITIALISIEREN</button>
+            </div>
         </div>
     </div>
 
-    <aside class="sidebar-minimal">
-        <div class="sidebar-content">
-            <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
-                <div class="icon">💼</div><span>ZENTRALE</span>
+    <div id="main-system" class="hidden">
+        <div class="pro-layout">
+            
+            <aside class="sidebar-minimal">
+                <div class="sidebar-content">
+                    <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
+                        <div class="icon">💼</div><span>ZENTRALE</span>
+                    </div>
+                    <div class="control-unit" onclick="window.ToniAI.toggleListening()">
+                        <div class="icon" id="mic-icon">🎤</div><span id="mic-status-label">LIVE AI</span>
+                    </div>
+                </div>
+            </aside>
+
+            <main id="stage-container">
+                <div id="stage">
+                    <canvas id="main-canvas"></canvas>
+                </div>
+            </main>
+
+            <aside class="analysis-panel">
+                <div id="panel-header"><h3>LIVE-FEED</h3><div class="status-dot"></div></div>
+                <div id="setcard-content">
+                    <div class="toni-speech-bubble">System bereit, Björn. Alle Taktik-Sektoren sind geladen.</div>
+                </div>
+            </aside>
+
+            <div id="toni-live-chat" class="chat-container">
+                <div class="chat-header"><span>TONI VOICE ADVISOR</span><div id="voice-indicator"></div></div>
+                <div id="chat-messages" class="chat-messages"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Nachricht an Toni...">
+                    <button id="send-btn">➔</button>
+                </div>
             </div>
-            <div class="control-unit" onclick="window.ToniAI.toggleListening()">
-                <div class="icon" id="mic-icon">🎤</div><span id="mic-status-label">LIVE AI</span>
-            </div>
-        </div>
-    </aside>
 
-    <main id="stage-container">
-        <div id="stage">
-            <canvas id="main-canvas"></canvas>
-        </div>
-    </main>
-
-    <aside class="analysis-panel">
-        <div id="panel-header"><h3>LIVE-FEED</h3><div class="status-dot"></div></div>
-        <div id="setcard-content">
-            <div class="toni-speech-bubble">Bereit, Björn. Alle taktischen Sektoren sind online.</div>
-        </div>
-    </aside>
-
-    <div id="toni-live-chat" class="chat-container">
-        <div class="chat-header"><span>TONI VOICE ADVISOR</span><div id="voice-indicator"></div></div>
-        <div id="chat-messages" class="chat-messages"></div>
-        <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Nachricht an Toni...">
-            <button id="send-btn">➔</button>
-        </div>
-    </div>
-
-    <div id="briefcase-overlay" class="briefcase-overlay hidden">
+        </div> </div> <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
             <div id="briefcase-nav" class="folder-grid">
-                <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')"><span class="nav-icon">👟</span><b>SPORTTASCHE</b></div>
-                <div class="nav-card" onclick="BriefcaseUI.switchSektor('marketing')"><span class="nav-icon">📢</span><b>MARKETING</b></div>
-                <div class="nav-card" onclick="BriefcaseUI.switchSektor('analyse')"><span class="nav-icon">📊</span><b>ANALYSE</b></div>
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('sport')">
+                    <span class="nav-icon">👟</span><b>SPORTTASCHE</b>
+                </div>
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('marketing')">
+                    <span class="nav-icon">📢</span><b>MARKETING</b>
+                </div>
+                <div class="nav-card" onclick="BriefcaseUI.switchSektor('analyse')">
+                    <span class="nav-icon">📊</span><b>ANALYSE</b>
+                </div>
             </div>
             <div id="briefcase-content" class="hidden">
-                <div class="content-header"><button onclick="BriefcaseUI.backToNav()" class="back-btn-ui">← ZURÜCK</button><h2 id="sector-title">SEKTOR</h2></div>
+                <div class="content-header">
+                    <button onclick="BriefcaseUI.backToNav()" class="back-btn-ui">← ZURÜCK</button>
+                    <h2 id="sector-title">SEKTOR</h2>
+                </div>
                 <div id="active-content"></div>
             </div>
             <button class="close-overlay-btn" onclick="BriefcaseUI.toggle()">[X] SCHLIESSEN</button>
@@ -72,10 +86,20 @@
     <script>
         window.ToniAuth = {
             login() {
-                if(document.getElementById('password-input').value === "Toni2026") {
-                    document.getElementById('login-screen').classList.add('hidden');
-                    setTimeout(() => { if(window.arena) arena.init('main-canvas'); }, 100);
-                } else { alert("Zugriff verweigert."); }
+                const pw = document.getElementById('password-input').value;
+                if(pw === "Toni2026") {
+                    // Verstecke Login, zeige Hauptsystem
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('main-system').classList.remove('hidden');
+                    
+                    // Initialisiere die Engine
+                    setTimeout(() => { 
+                        if(window.arena) arena.init('main-canvas'); 
+                        if(window.ToniAI) ToniAI.init();
+                    }, 100);
+                } else {
+                    alert("Zugriff verweigert.");
+                }
             }
         };
     </script>
