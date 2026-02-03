@@ -6,7 +6,8 @@ window.ToniAI = {
     },
 
     welcomeMessage() {
-        this.addChatMessage("Toni", "Ola Björn! Die Verbindung zum Mac steht (kein Blockieren mehr). Jetzt müssen wir nur noch sicherstellen, dass das Llama-Modell geladen ist.", "bot-msg");
+        const provider = localStorage.getItem('toni_api_provider') || "Basis";
+        this.addChatMessage("Toni", `Ola Björn! Verbindung steht. Modus: ${provider.toUpperCase()} (Gemma 3).`, "bot-msg");
     },
 
     async processCommand(text) {
@@ -15,11 +16,11 @@ window.ToniAI = {
         const apiKey = localStorage.getItem('toni_api_key');
 
         if (provider === "free") {
-            this.localFallback("Björn, Basis-Modus: Wir sollten über die Außen kommen!");
+            this.localFallback("Björn, Basis-Modus: Fokus auf das Flügelspiel!");
             return;
         }
 
-        this.addChatMessage("Toni", `⚡ Anfrage an ${provider.toUpperCase()}...`, "bot-msg");
+        this.addChatMessage("Toni", `⚡ Recherche via ${provider.toUpperCase()}...`, "bot-msg");
 
         try {
             let apiUrl = "";
@@ -35,11 +36,11 @@ window.ToniAI = {
                 };
             } 
             else if (provider === "llama") {
-                // FIX: Wir nutzen 127.0.0.1 und stellen sicher, dass wir das Modell 'llama3' ansprechen
+                // Lokale Verbindung zum MacBook Ollama Server
                 apiUrl = 'http://127.0.0.1:11434/api/generate';
                 body = { 
-                    model: "llama3", // Falls du ein anderes Modell hast (z.B. mistral), hier ändern
-                    prompt: `Antworte als Fußball-Experte Toni kurz: ${text}`, 
+                    model: "gemma3:1b", // EXAKT ANGEPASST AN DEIN BILD
+                    prompt: `Antworte als brasilianischer Fußball-Experte Toni kurz auf deutsch: ${text}`, 
                     stream: false 
                 };
             }
@@ -61,7 +62,9 @@ window.ToniAI = {
             console.error("Detail-Fehler:", e);
             let msg = "Björn, Verbindung fehlgeschlagen.";
             if (e.message === "MODEL_NOT_FOUND") {
-                msg = "Björn, Fehler 404: Das Modell 'llama3' wurde in Ollama nicht gefunden. Tippe 'ollama pull llama3' ins Terminal!";
+                msg = "Björn, Fehler 404: Das Modell gemma3:1b wurde nicht gefunden. Prüfe den Namen in der Ollama App!";
+            } else if (provider === "llama") {
+                msg = "Björn, ist OLLAMA_ORIGINS='*' am Mac gesetzt? Starte Ollama danach einmal neu.";
             }
             this.addChatMessage("Toni", msg, "bot-msg");
         }
