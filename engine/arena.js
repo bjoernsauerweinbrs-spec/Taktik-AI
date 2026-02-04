@@ -23,9 +23,11 @@ window.arena = {
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
+        // Initialisierung: Seed nur wenn absolut leer, sonst normaler Reset
         this.checkAndSeedEliteSquad();
         this.resetBoard();
         
+        // Sicherheit: Einmaliges Rendern nach 100ms
         setTimeout(() => this.render(), 100);
     },
 
@@ -38,8 +40,8 @@ window.arena = {
             console.log("TONI 2.0: Initialisiere International Elite Squad (11+5)...");
             const elite = [
                 // STARTELF (11)
-                { id: 'p1', name: 'Manuel Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 62, spo2: 99 }, proKpis: { vmax: 2, rsa: 80 }, formHistory: [88, 89, 90] },
-                { id: 'p2', name: 'Virgil van Dijk', number: 4, pos: 'IV', rating: 88, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 65, spo2: 98 }, proKpis: { vmax: 3, rsa: 85 }, formHistory: [85, 86, 88] },
+                { id: 'p1', name: 'Manuel Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 62, spo2: 99 }, proKpis: { vmax: 2, rsa: 80 } },
+                { id: 'p2', name: 'Virgil van Dijk', number: 4, pos: 'IV', rating: 88, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 65, spo2: 98 }, proKpis: { vmax: 3, rsa: 85 } },
                 { id: 'p3', name: 'Ruben Dias', number: 3, pos: 'IV', rating: 87, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 68, spo2: 98 }, proKpis: { vmax: 2, rsa: 82 } },
                 { id: 'p4', name: 'Alphonso Davies', number: 19, pos: 'LV', rating: 85, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 58, spo2: 99 }, proKpis: { vmax: 3, rsa: 92 } },
                 { id: 'p5', name: 'Trent Alexander-Arnold', number: 66, pos: 'RV', rating: 86, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 61, spo2: 98 }, proKpis: { vmax: 2, rsa: 87 } },
@@ -47,8 +49,8 @@ window.arena = {
                 { id: 'p7', name: 'Kevin De Bruyne', number: 17, pos: 'ZM', rating: 91, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 64, spo2: 98 }, proKpis: { vmax: 2, rsa: 88 } },
                 { id: 'p8', name: 'Jude Bellingham', number: 5, pos: 'ZM', rating: 88, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 60, spo2: 99 }, proKpis: { vmax: 3, rsa: 90 } },
                 { id: 'p9', name: 'Mohamed Salah', number: 11, pos: 'RM', rating: 89, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 59, spo2: 99 }, proKpis: { vmax: 3, rsa: 88 } },
-                { id: 'p10', name: 'Kylian Mbappé', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 56, spo2: 99 }, proKpis: { vmax: 3, rsa: 85 }, formHistory: [91, 92, 92] },
-                { id: 'p11', name: 'Erling Haaland', number: 9, pos: 'ST', rating: 91, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 63, spo2: 98 }, proKpis: { vmax: 3, rsa: 82 }, formHistory: [89, 90, 91] },
+                { id: 'p10', name: 'Kylian Mbappé', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 56, spo2: 99 }, proKpis: { vmax: 3, rsa: 85 } },
+                { id: 'p11', name: 'Erling Haaland', number: 9, pos: 'ST', rating: 91, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 63, spo2: 98 }, proKpis: { vmax: 3, rsa: 82 } },
                 // BANK (5)
                 { id: 'p12', name: 'Thomas Müller', number: 25, pos: 'ST', rating: 84, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 60, spo2: 99 } },
                 { id: 'p13', name: 'Leroy Sané', number: 10, pos: 'RM', rating: 85, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 62, spo2: 98 } },
@@ -88,7 +90,7 @@ window.arena = {
             });
         });
 
-        // Bank (Orange / Bench) - 5 Spieler
+        // Bank (Orange / Bench) - 5 Spieler an der Seitenlinie
         const bench = squad.filter(p => p.isNominated && !p.isStarter && (p.isPresent !== false)).slice(0, 5);
         bench.forEach((p, i) => {
             this.players.push({
@@ -211,7 +213,6 @@ window.arena = {
         
         if(p.team !== 'away') {
             ctx.font = "bold 11px Inter"; 
-            // Hier wird jetzt der VOLLSTÄNDIGE Name gezeichnet
             ctx.fillText(p.name || 'PRO', p.x, p.y + p.radius + 14);
         }
     },
