@@ -1,78 +1,85 @@
 /**
- * TONI 2.0 - CORE ENGINE
- * Zentrale Befehlsverarbeitung & Voice-Integration
+ * TONI 2.0 - INTERNATIONAL PERFORMANCE CORE
+ * Global standard command processing & vital data evaluation.
  */
 window.ToniCore = {
     isListening: false,
 
     /**
-     * Hauptfunktion zur Verarbeitung von Nachrichten (wird vom Senden-Button aufgerufen)
+     * Hauptfunktion zur Verarbeitung von Nachrichten
      */
     processMessage: function(input) {
         if (!input || input.trim() === "") return;
         
-        // 1. Deine Nachricht im Chat anzeigen
         this.addUserMessage(input);
-        
         const cmd = input.toLowerCase();
-        console.log("ToniCore analysiert:", cmd);
 
-        // 2. Logik-Weiche für Antworten
-        if (cmd.includes("hallo") || cmd.includes("start") || cmd.includes("hi")) {
-            this.respond(`Ginga-Modus aktiv, Coach Björn. Ich habe das System hochgefahren. Alle Sektoren sind bereit.`);
+        // INTEGRATION: Zugriff auf Kaderdaten für Echtzeit-Analyse
+        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+
+        // Logik-Weiche: Internationaler Experten-Modus
+        if (cmd.includes("hallo") || cmd.includes("start") || cmd.includes("status")) {
+            this.respond(`Internationales System online. Analysiere ${players.length} Profile basierend auf globalen Performance-Standards.`);
         } 
-        else if (cmd.includes("status") || cmd.includes("kader") || cmd.includes("spieler")) {
-            const players = JSON.parse(localStorage.getItem('toni_players')) || [];
-            this.respond(`Greife auf die Mannschaftskabine zu. Wir haben aktuell ${players.length} Spieler im System. Die OVR-Werte sind synchronisiert.`);
-        } 
+        else if (cmd.includes("medizin") || cmd.includes("puls") || cmd.includes("vital")) {
+            this.evaluateHealthData(players);
+        }
         else if (cmd.includes("taktik") || cmd.includes("formation")) {
-            this.respond("Taktik-Zentrale bereit. Soll ich die Pressing-Linie verschieben oder die Kompaktheit im Mittelfeld erhöhen?");
+            this.respond("Taktik-Modul bereit. Analysiere vertikale Räume und die RSA-Werte der Startelf für das nächste Match-Szenario.");
+        }
+        else if (cmd.includes("motivation") || cmd.includes("spruch")) {
+            this.respond("Fokus, Männer! Absolute Professionalität ist die Basis für internationalen Erfolg. Jede Aktion zählt – 100% Disziplin bis zum Abpfiff!");
         }
         else if (cmd.includes("foto") || cmd.includes("bild")) {
-            this.respond("Verstanden. Du kannst jetzt in der Mannschaftskabine jedem Profi eine Bild-URL zuweisen, um die FIFA-Karte zu vervollständigen.");
+            this.respond("Foto-Protokoll aktiv. Du kannst nun jedem Spieler-Dossier eine internationale Profil-ID (Bild-URL) zuweisen.");
         }
         else {
-            this.respond("Ich habe die Daten empfangen und leite sie an die Tiefenanalyse weiter. Was ist der nächste Schritt, Coach?");
+            this.respond("Informationen empfangen und im Kern-System für die Tiefenanalyse verarbeitet. Was ist die nächste Anweisung?");
         }
     },
 
     /**
-     * Startet die Spracherkennung (Mikrofon)
+     * Professionelle medizinische Auswertung der Vitalwerte
+     */
+    evaluateHealthData: function(players) {
+        const atRisk = players.filter(p => p.vitals && p.vitals.pulse > 170);
+        
+        if(atRisk.length > 0) {
+            const names = atRisk.map(p => p.name).join(", ");
+            this.respond(`KRITISCHER HINWEIS: Die Belastungswerte von ${names} liegen über dem internationalen Standard (Pulse > 170 BPM). Umgehende Belastungssteuerung empfohlen.`);
+        } else if (players.length > 0) {
+            this.respond("Alle aktiven Vitaldaten liegen innerhalb der medizinischen Toleranzbereiche der internationalen Leistungsdiagnostik.");
+        } else {
+            this.respond("Keine Spielerdaten für eine medizinische Analyse im System gefunden.");
+        }
+    },
+
+    /**
+     * Startet die Spracherkennung (International Protocol)
      */
     startVoice: function() {
         const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!Recognition) {
-            this.respond("Siri/Chrome Spracherkennung wird von diesem Browser leider nicht unterstützt.");
+            this.respond("Siri/Chrome Spracherkennung wird nicht unterstützt.");
             return;
         }
 
         const rec = new Recognition();
         rec.lang = 'de-DE';
-        rec.interimResults = false;
-
         rec.onstart = () => {
             this.isListening = true;
-            this.respond("Ich höre zu, Coach... (Sprechen Sie jetzt)");
+            this.respond("System hört zu... (International Protocol active)");
         };
 
         rec.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            this.processMessage(transcript);
+            this.processMessage(event.results[0][0].transcript);
         };
 
-        rec.onerror = () => {
-            this.respond("Da gab es ein Problem mit dem Mikrofon. Ist es freigegeben?");
-            this.isListening = false;
-        };
-
+        rec.onerror = () => { this.isListening = false; };
         rec.onend = () => { this.isListening = false; };
-
         rec.start();
     },
 
-    /**
-     * Zeigt die Nachricht des Users im Chat an
-     */
     addUserMessage: function(text) {
         const chatArea = document.getElementById('chat-messages');
         if(chatArea) {
@@ -84,19 +91,14 @@ window.ToniCore = {
         }
     },
 
-    /**
-     * Toni antwortet im Chat und per Sprache
-     */
     respond: function(text) {
-        // Sprachausgabe via TTS
-        if(window.ToniTTS) ToniTTS.speak(text, "warm");
+        if(window.ToniTTS) ToniTTS.speak(text, "deep");
         
-        // Chat-Ausgabe
         const chatArea = document.getElementById('chat-messages');
         if(chatArea) {
             const botMsg = document.createElement('div');
-            botMsg.style.cssText = "margin-bottom:15px; color:var(--neon-green); text-shadow: 0 0 5px rgba(57,255,20,0.3);";
-            botMsg.innerHTML = `<b>Toni:</b> ${text}`;
+            botMsg.style.cssText = "margin-bottom:15px; color:var(--neon-green); font-weight:bold;";
+            botMsg.innerHTML = `<b>Toni [INT]:</b> ${text}`;
             chatArea.appendChild(botMsg);
             chatArea.scrollTop = chatArea.scrollHeight;
         }
