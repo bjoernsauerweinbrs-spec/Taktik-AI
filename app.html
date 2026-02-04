@@ -3,56 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 - High-Performance Taktik-Zentrale</title>
+    <title>TONI 2.0 - High-Performance Ginga Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
 <div class="pro-layout-container">
+    
     <aside class="sidebar-minimal">
-        <div class="control-unit" onclick="BriefcaseUI.toggle()" title="Zentrale">
-            <i class="fas fa-briefcase icon"></i>
-            <span style="font-size: 0.5rem; font-weight: 900;">ZENTRALE</span>
+        <div class="control-unit" onclick="BriefcaseUI.toggle()" title="Zentrale Aktentasche">
+            <i class="fas fa-briefcase"></i>
+            <span style="font-size: 0.5rem; font-weight: 900; color: var(--neon-green);">ZENTRALE</span>
         </div>
 
-        <div class="control-unit" onclick="ToniTTS.test()" title="Toni Voice">
-            <i class="fas fa-microphone-alt icon"></i>
-            <span style="font-size: 0.5rem; font-weight: 900;">LIVE AI</span>
+        <div class="control-unit" onclick="ToniTTS.speak('System-Check abgeschlossen. Ginga-Modus aktiv.')" title="Toni Voice">
+            <i class="fas fa-microphone-alt"></i>
+            <span style="font-size: 0.5rem; font-weight: 900;">TONI LIVE</span>
         </div>
+
+        <hr style="width: 40%; border: 0.5px solid rgba(57, 255, 20, 0.2); margin-bottom: 25px;">
 
         <div id="sidebar-tactic-controls">
-            <button class="tactic-btn" onclick="arena.applyTacticalPattern('pressing')">🔥 PRESSING</button>
-            <button class="tactic-btn" onclick="arena.applyTacticalPattern('overload')">🚀 ÜBERZAHL</button>
-            <button class="tactic-btn" onclick="arena.applyTacticalPattern('compact')">🛡️ KOMPAKT</button>
-            <button class="tactic-btn reset" onclick="arena.resetBoard()">🔄 RESET</button>
+            <button class="control-unit" style="background:none; border:none;" onclick="arena.applyTacticalPattern('pressing')" title="Pressing">
+                <i class="fas fa-fire" style="color: var(--accent-orange);"></i>
+            </button>
+            <button class="control-unit" style="background:none; border:none;" onclick="arena.applyTacticalPattern('compact')" title="Kompakt">
+                <i class="fas fa-shield-alt" style="color: var(--data-cyan);"></i>
+            </button>
+            <button class="control-unit" style="background:none; border:none;" onclick="arena.resetBoard()" title="Reset">
+                <i class="fas fa-undo" style="color: var(--text-dim);"></i>
+            </button>
         </div>
     </aside>
 
     <main id="stage-container">
-        <div id="stage">
-            <canvas id="main-canvas"></canvas>
-        </div>
+        <canvas id="main-canvas"></canvas>
     </main>
 
     <section class="analysis-panel">
-        <div id="panel-header">
-            <h2 style="font-size: 0.8rem; letter-spacing: 2px; color: var(--accent-orange); margin: 0;">PERFORMANCE FEED</h2>
+        <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <h2 style="font-size: 0.7rem; letter-spacing: 3px; color: var(--neon-green); margin: 0;">PERFORMANCE FEED</h2>
         </div>
         
-        <div id="setcard-content">
-            <div class="kpi-card">
-                <span style="font-size:0.6rem; color:var(--text-dim);">SYSTEM-STATUS</span>
-                <div style="font-size:0.8rem; font-weight:bold; color:var(--status-fit);">ANALYSIS ONLINE</div>
+        <div id="setcard-content" style="padding: 20px;">
+            <div style="background: rgba(57, 255, 20, 0.05); padding: 15px; border-radius: 10px; border-left: 3px solid var(--neon-green);">
+                <span style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">AKTUELLER MODUS</span>
+                <div style="font-size:0.8rem; font-weight:bold; color:#fff; letter-spacing:1px;">GINGA DEEP ANALYSIS</div>
             </div>
         </div>
 
         <div class="chat-container">
-            <div class="chat-header">TONI VOICE ADVISOR</div>
-            <div id="chat-messages" class="chat-messages"></div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" class="login-input" style="width:100%; margin:0; padding:10px; font-size:0.8rem; text-align:left;" placeholder="Taktik fragen...">
-                <button id="send-btn" class="login-btn" style="width:50px; padding:0; margin:0;"><i class="fas fa-arrow-right"></i></button>
+            <div style="padding: 15px; font-size: 0.65rem; font-weight: 900; letter-spacing: 2px; color: var(--text-dim);">TONI VOICE ADVISOR</div>
+            <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; font-size: 0.85rem;"></div>
+            <div style="padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.3);">
+                <input type="text" id="chat-input" style="flex: 1; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 5px; outline: none;" placeholder="Taktischen Rat einholen...">
+                <button id="send-btn" style="background: var(--neon-green); border: none; width: 40px; border-radius: 5px; cursor: pointer;"><i class="fas fa-paper-plane" style="color:#000;"></i></button>
             </div>
         </div>
     </section>
@@ -61,7 +67,7 @@
 <div id="briefcase-overlay" class="briefcase-overlay hidden">
     <div class="briefcase-window">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:20px;">
-            <h2 id="sector-title" style="margin:0; color:var(--accent-orange); letter-spacing:3px; font-size:1.2rem;">ZENTRALE</h2>
+            <h2 id="sector-title" style="margin:0; color:var(--neon-green); letter-spacing:3px; font-size:1.2rem;">ZENTRALE</h2>
             <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:#fff; font-size:2rem; cursor:pointer;">&times;</button>
         </div>
         
@@ -82,53 +88,39 @@
 <script src="ui/sektoren/sektor-templates.js"></script>
 
 <script src="ui/briefcase-main.js"></script>
+
 <script src="engine/arena.js"></script>
 
 <script>
     window.addEventListener('load', function() {
-        console.log("Toni 2.0 Engine: Booting...");
+        console.log("Toni 2.0 Engine: Booting Neon-Ginga Environment...");
         
-        // 1. Arena & Grid-System
+        // Initialisierung
         if(window.arena) arena.init('main-canvas');
+        if(window.BriefcaseUI) BriefcaseUI.init();
 
-        // 2. Datenbank-Hygiene (Musterprofi-Check gegen undefined)
-        if (!localStorage.getItem('toni_players')) {
-            const initialKader = [{
-                id: Date.now(),
-                name: "Musterprofi",
-                number: "10",
-                pos: "ZM",
-                status: "FIT",
-                weight: 78,
-                height: 182
-            }];
-            localStorage.setItem('toni_players', JSON.stringify(initialKader));
-            console.log("Database: Musterprofi initialisiert.");
-        }
-        
-        // 3. Chat-Funktionalität
+        // Chat-Handling
         const input = document.getElementById('chat-input');
         const sendBtn = document.getElementById('send-btn');
 
-        function sendMessage() {
+        function sendToToni() {
             const val = input.value;
             if(val && window.ToniCore) {
-                const msgArea = document.getElementById('chat-messages');
-                msgArea.innerHTML += `<div class="user-msg">${val}</div>`;
+                document.getElementById('chat-messages').innerHTML += `<div style="margin-bottom:15px; color:var(--data-cyan);"><b>Coach:</b> ${val}</div>`;
                 ToniCore.processCommand(val);
                 input.value = '';
-                msgArea.scrollTop = msgArea.scrollHeight;
+                const area = document.getElementById('chat-messages');
+                area.scrollTop = area.scrollHeight;
             }
         }
 
-        sendBtn.addEventListener('click', sendMessage);
-        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
+        sendBtn.addEventListener('click', sendToToni);
+        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendToToni(); });
 
-        // 4. Toni Begrüßung (verzögert für UI-Aufbau)
+        // Welcome Sequence
         setTimeout(() => {
-            const coach = BriefcaseUI.clubData?.coach || "Björn";
             if(window.ToniTTS) {
-                ToniTTS.speak(`System bereit. Willkommen im Analysezentrum, Coach ${coach}.`, "warm");
+                ToniTTS.speak("System-Update erfolgreich abgeschlossen. Coach Björn, die Neon-Arena ist bereit für die Tiefen-Analyse.", "warm");
             }
         }, 1500);
     });
