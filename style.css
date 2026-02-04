@@ -24,6 +24,11 @@ body, html {
     overflow: hidden; 
 }
 
+/* Custom Scrollbar für den Pro-Look */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: 10px; }
+
 /* 2. HAUPT-GRID (SCREEN) */
 .pro-layout-container {
     display: grid;
@@ -104,33 +109,52 @@ body, html {
 
 .briefcase-window { 
     background: var(--panel-dark); 
-    border: 2px solid var(--neon-green); 
+    border: 1px solid rgba(255,255,255,0.1); 
     width: 94%; height: 90%; 
     border-radius: 24px; padding: 40px; 
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 0 50px rgba(57, 255, 20, 0.3);
+    box-shadow: 0 0 80px rgba(0,0,0,0.5);
 }
 
-/* 7. FIFA CARDS & PRO COMPONENTS */
+/* 7. FIFA CARDS & ELITE GLOW */
 .fifa-card {
-    background: linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 100%);
-    border: 1px solid var(--accent-gold);
-    border-radius: 15px; padding: 20px; 
-    position: relative; cursor: pointer; text-align: center;
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 15px; 
+    position: relative; 
+    cursor: pointer; 
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
 }
-.fifa-card:hover { transform: translateY(-5px); border-color: var(--neon-green); }
 
-/* Foto-Upload Dropzone */
-.drop-zone {
-    border: 2px dashed #444;
-    transition: 0.3s;
+/* Hover-Effekt für alle Karten */
+.fifa-card:hover { 
+    transform: translateY(-8px) scale(1.02);
+    z-index: 10;
 }
-.drop-zone:hover {
-    border-color: var(--neon-green);
-    background: rgba(57, 255, 20, 0.05);
+
+/* Der Neon-Glow für die Startelf (S) */
+.fifa-card[style*="var(--neon-green)"] {
+    box-shadow: 0 0 25px rgba(57, 255, 20, 0.25), inset 0 0 20px rgba(57, 255, 20, 0.05);
+    border-width: 2px !important;
 }
+
+/* Der Gold-Glow für die Bank (B) */
+.fifa-card[style*="var(--accent-gold)"] {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2), inset 0 0 15px rgba(212, 175, 55, 0.05);
+}
+
+/* Glas-Reflektion Effekt */
+.fifa-card::before {
+    content: "";
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
+    transform: rotate(45deg);
+    transition: 0.6s;
+}
+.fifa-card:hover::before { left: 100%; }
 
 /* 8. INPUTS & BUTTONS */
 .login-input {
@@ -143,64 +167,29 @@ body, html {
     background: var(--neon-green); color: #000; border: none;
     padding: 15px; border-radius: 8px; font-weight: 900;
     cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+    transition: 0.3s;
 }
+.login-btn:hover { background: #fff; box-shadow: 0 0 20px var(--neon-green); }
 
 .tactic-btn {
     background: transparent; border: 1px solid var(--text-dim);
     color: var(--text-dim); padding: 8px 15px; border-radius: 5px;
     cursor: pointer; font-size: 0.7rem; font-weight: 700;
+    transition: 0.2s;
 }
+.tactic-btn:hover { border-color: #fff; color: #fff; }
 
 /* 9. A4 PRO PRINT ENGINE */
 .only-print { display: none; }
 
 @media print {
-    /* 1. Reset Screen UI */
     body { background: #fff !important; color: #000 !important; }
     .pro-layout-container, .sidebar-minimal, .analysis-panel, .briefcase-overlay, .no-print {
         display: none !important;
     }
-
-    /* 2. Container setup */
-    #a4-print-layout {
-        display: block !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        background: #fff !important;
-    }
-
-    /* 3. Page Formatting */
-    .print-page {
-        padding: 15mm;
-        background: #fff !important;
-        color: #000 !important;
-    }
-
-    /* 4. Drill Card Layout */
-    .drill-card-print {
-        border: 1px solid #eee;
-        margin-bottom: 25px;
-        padding: 15px;
-        display: grid;
-        grid-template-columns: 100mm 1fr; /* Bild-Spalte | Text-Spalte */
-        gap: 20px;
-        page-break-inside: avoid; /* Keine Übung in der Mitte zerschneiden */
-    }
-
-    .drill-image-print {
-        width: 100%;
-        border: 1px solid #000;
-        filter: grayscale(10%); /* Professioneller Look, spart Tinte */
-    }
-
+    #a4-print-layout { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
+    .print-page { padding: 15mm; background: #fff !important; color: #000 !important; }
     h1, h2, h3 { color: #000 !important; text-transform: uppercase; }
-    
-    * { 
-        -webkit-print-color-adjust: exact !important; 
-        print-color-adjust: exact !important; 
-    }
 }
 
 /* ANIMATIONS */
