@@ -1,93 +1,121 @@
 /**
- * TONI 2.0 - MATCHDAY MAGAZINE ENGINE
- * Professionelles Stadionheft-Template (DIN A5 Layout)
+ * TONI 2.0 - MATCHDAY MAGAZINE ENGINE PRO
+ * DIN A5 Layout mit automatischer Kader-Integration
  */
 window.SektorTemplates = {
-    // Standard-Daten für das Muster-Heft
     magazineData: {
         clubName: "FC TONI 2.0",
         opponent: "FC Bayern München",
         matchDate: "08. Februar 2026",
         stadium: "Ginga Arena",
-        coachName: "Björn", // Wird normalerweise aus dem User-Profil gezogen
+        coachName: "Björn",
         logoUrl: "https://via.placeholder.com/100/39FF14/000000?text=T2.0",
         sponsors: [
-            { id: 1, name: "Neon Energy Drink", logo: "⚡" },
-            { id: 2, name: "Ginga Sports Gear", logo: "⚽" }
+            { id: 1, name: "Neon Energy", logo: "⚡" },
+            { id: 2, name: "Global Logistics", logo: "📦" },
+            { id: 3, name: "Björn's Taktik-Store", logo: "👔" }
         ]
     },
 
     render: function() {
+        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        
         document.getElementById('active-content').innerHTML = `
             <div style="padding:30px; animation: fadeIn 0.4s ease-out;">
-                <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; margin-bottom:30px; border:1px dashed var(--neon-green);">
-                    <h3 style="font-size:0.8rem; color:var(--neon-green); margin-bottom:15px;">EDITOR-MODUS</h3>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <button class="login-btn" style="width:auto; padding:8px 15px; font-size:0.7rem;" onclick="SektorTemplates.editClubInfo()">VEREINSDATEN ÄNDERN</button>
-                        <button class="login-btn" style="width:auto; padding:8px 15px; font-size:0.7rem; background:var(--accent-gold);" onclick="SektorTemplates.addSponsor()">SPONSOR HINZUFÜGEN</button>
-                        <button class="login-btn" style="width:auto; padding:8px 15px; font-size:0.7rem; background:#fff; color:#000;" onclick="window.print()">ALS PDF DRUCKEN</button>
+                
+                <div class="no-print" style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; margin-bottom:30px; border:1px solid var(--neon-green);">
+                    <h3 style="font-size:0.8rem; color:var(--neon-green); margin-bottom:15px; letter-spacing:2px;">MAGAZIN EDITOR</h3>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <button class="login-btn" style="width:auto; padding:10px 20px; font-size:0.7rem;" onclick="SektorTemplates.editClubInfo()">DATEN ANPASSEN</button>
+                        <button class="login-btn" style="width:auto; padding:10px 20px; font-size:0.7rem; background:var(--accent-gold); color:#000;" onclick="SektorTemplates.addSponsor()">NEUER SPONSOR</button>
+                        <button class="login-btn" style="width:auto; padding:10px 20px; font-size:0.7rem; background:#fff; color:#000;" onclick="window.print()">
+                            <i class="fas fa-print"></i> HEFT DRUCKEN (DIN A5)
+                        </button>
                     </div>
                 </div>
 
-                <div id="magazine-preview" style="background:#fff; color:#000; width:100%; max-width:500px; margin:0 auto; padding:40px; box-shadow:0 0 50px rgba(0,0,0,0.5); min-height:700px; position:relative;">
+                <div id="magazine-container" style="display: flex; flex-direction: column; gap: 40px; align-items: center;">
                     
-                    <div style="text-align:center; border: 5px solid #000; padding:20px; position:relative;">
-                        <div style="background:#000; color:var(--neon-green); display:inline-block; padding:5px 15px; font-weight:900; position:absolute; top:-15px; left:50%; transform:translateX(-50%);">MATCHDAY</div>
-                        <img src="${this.magazineData.logoUrl}" style="width:80px; margin:20px 0;">
-                        <h1 style="font-size:2.5rem; margin:10px 0; font-family:'Inter Black', sans-serif;">${this.magazineData.clubName}</h1>
-                        <p style="font-weight:bold; letter-spacing:2px;">vs. ${this.magazineData.opponent}</p>
-                    </div>
+                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; min-height:210mm; padding:20mm; box-shadow:0 15px 40px rgba(0,0,0,0.5); position:relative;">
+                        <div style="border: 8px solid #000; height:100%; padding:20px; display:flex; flex-direction:column; justify-content:space-between; align-items:center;">
+                            <div style="text-align:center;">
+                                <div style="background:#000; color:var(--neon-green); padding:5px 20px; font-weight:900; letter-spacing:3px; margin-bottom:30px;">OFFIZIELLES STADIONMAGAZIN</div>
+                                <img src="${this.magazineData.logoUrl}" style="width:120px; filter: grayscale(1);">
+                            </div>
+                            
+                            <div style="text-align:center;">
+                                <h1 style="font-size:3.5rem; line-height:0.9; font-weight:900; margin:20px 0;">${this.magazineData.clubName}</h1>
+                                <div style="font-size:1.5rem; font-weight:bold; margin:10px 0;">VS.</div>
+                                <h2 style="font-size:2rem; text-transform:uppercase; color:#444;">${this.magazineData.opponent}</h2>
+                            </div>
 
-                    <div style="margin-top:40px;">
-                        <h3 style="border-bottom:2px solid #000; padding-bottom:5px; font-size:1.1rem;">DAS WORT VOM COACH</h3>
-                        <p style="font-size:0.85rem; line-height:1.5; margin-top:10px; font-style:italic;">
-                            "Herzlich Willkommen in der ${this.magazineData.stadium}! Heute gegen ${this.magazineData.opponent} zählt nur volle Konzentration. Wir haben die Tiefenanalyse genutzt, um uns perfekt vorzubereiten. Ginga-Style auf dem Platz!"
-                        </p>
-                        <p style="text-align:right; font-weight:900; margin-top:5px;">– Coach ${this.magazineData.coachName}</p>
-                    </div>
-
-                    <div style="margin-top:50px; border-top:1px solid #ddd; padding-top:20px;">
-                        <p style="font-size:0.6rem; color:#888; text-align:center; margin-bottom:10px;">UNSERE PARTNER</p>
-                        <div style="display:flex; justify-content:center; gap:20px;">
-                            ${this.magazineData.sponsors.map(s => `
-                                <div style="text-align:center;">
-                                    <div style="font-size:1.5rem;">${s.logo}</div>
-                                    <div style="font-size:0.5rem; font-weight:bold;">${s.name}</div>
-                                    <button class="hidden-print" onclick="SektorTemplates.removeSponsor(${s.id})" style="font-size:0.5rem; color:red; border:none; background:none; cursor:pointer;">Löschen</button>
-                                </div>
-                            `).join('')}
+                            <div style="text-align:center; width:100%;">
+                                <p style="border-top:2px solid #000; border-bottom:2px solid #000; padding:10px 0; font-weight:bold; letter-spacing:1px;">
+                                    ${this.magazineData.matchDate.toUpperCase()} | ${this.magazineData.stadium.toUpperCase()}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <div style="position:absolute; bottom:20px; left:0; width:100%; text-align:center; font-size:0.6rem; color:#aaa;">
-                        Erstellt mit TONI 2.0 Performance Engine | ${this.magazineData.matchDate}
+                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; min-height:210mm; padding:20mm; box-shadow:0 15px 40px rgba(0,0,0,0.5); position:relative;">
+                        <h3 style="border-bottom:4px solid #000; padding-bottom:10px; font-size:1.8rem; font-weight:900;">UNSERE ELF</h3>
+                        <p style="font-size:0.9rem; margin:10px 0; font-weight:bold; color:var(--accent-orange);">CHEF-COACH: ${this.magazineData.coachName.toUpperCase()}</p>
+                        
+                        <div style="margin-top:30px;">
+                            <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                                <thead style="background:#f0f0f0;">
+                                    <tr>
+                                        <th style="padding:10px; text-align:left;">NR</th>
+                                        <th style="padding:10px; text-align:left;">NAME</th>
+                                        <th style="padding:10px; text-align:left;">POS</th>
+                                        <th style="padding:10px; text-align:right;">STATUS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${players.map(p => `
+                                        <tr style="border-bottom:1px solid #eee;">
+                                            <td style="padding:8px; font-weight:bold;">${p.number || '10'}</td>
+                                            <td style="padding:8px;">${p.name.toUpperCase()}</td>
+                                            <td style="padding:8px; color:#666;">${p.pos || 'ZM'}</td>
+                                            <td style="padding:8px; text-align:right; font-size:0.7rem;">${p.status === 'FIT' ? '✓ EINSATZBEREIT' : '✕ NICHT IM KADER'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="position:absolute; bottom:20mm; left:20mm; right:20mm; border-top:1px solid #000; padding-top:15px;">
+                            <p style="font-size:0.6rem; text-align:center; color:#888; margin-bottom:10px;">TOP-PARTNER DES SPIELTAGS</p>
+                            <div style="display:flex; justify-content:center; gap:25px;">
+                                ${this.magazineData.sponsors.map(s => `
+                                    <div style="text-align:center;">
+                                        <div style="font-size:1.4rem;">${s.logo}</div>
+                                        <div style="font-size:0.55rem; font-weight:bold;">${s.name.toUpperCase()}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>`;
     },
 
     editClubInfo: function() {
-        const newName = prompt("Vereinsname ändern:", this.magazineData.clubName);
-        const newOpponent = prompt("Gegner ändern:", this.magazineData.opponent);
-        if(newName) this.magazineData.clubName = newName;
-        if(newOpponent) this.magazineData.opponent = newOpponent;
+        const newClub = prompt("Vereinsname:", this.magazineData.clubName);
+        const newOpp = prompt("Gegner:", this.magazineData.opponent);
+        const newDate = prompt("Datum & Uhrzeit:", this.magazineData.matchDate);
+        if(newClub) this.magazineData.clubName = newClub;
+        if(newOpp) this.magazineData.opponent = newOpp;
+        if(newDate) this.magazineData.matchDate = newDate;
         this.render();
     },
 
     addSponsor: function() {
-        const sName = prompt("Name des Sponsors:");
-        if(sName) {
-            this.magazineData.sponsors.push({
-                id: Date.now(),
-                name: sName,
-                logo: "🏢"
-            });
+        const name = prompt("Name der Partnerfirma:");
+        if(name) {
+            this.magazineData.sponsors.push({ id: Date.now(), name: name, logo: "🏢" });
             this.render();
         }
-    },
-
-    removeSponsor: function(id) {
-        this.magazineData.sponsors = this.magazineData.sponsors.filter(s => s.id !== id);
-        this.render();
     }
 };
