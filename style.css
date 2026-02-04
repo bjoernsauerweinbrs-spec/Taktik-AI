@@ -1,4 +1,4 @@
-/* --- TONI 2.0 MASTER CSS: NEON-GINGA FULL LAYOUT --- */
+/* --- TONI 2.0 MASTER CSS: NEON-GINGA FULL LAYOUT & PRINT ENGINE --- */
 :root {
     --bg-deep: #05080F;
     --panel-dark: #0D1421;
@@ -8,8 +8,11 @@
     --data-cyan: #00D1FF;
     --text-main: #FFFFFF;
     --text-dim: #A0AEC0;
+    --status-fit: #4CD964;
+    --status-error: #FF3B30;
 }
 
+/* 1. BASIS & RESET */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body, html { 
@@ -20,7 +23,7 @@ body, html {
     overflow: hidden; 
 }
 
-/* HAUPT-GRID */
+/* 2. HAUPT-GRID (SCREEN) */
 .pro-layout-container {
     display: grid;
     grid-template-columns: 90px 1fr 380px;
@@ -30,7 +33,7 @@ body, html {
     z-index: 1;
 }
 
-/* SIDEBAR */
+/* 3. SIDEBAR NAVIGATION */
 .sidebar-minimal { 
     background: #020408; 
     border-right: 1px solid rgba(57, 255, 20, 0.3); 
@@ -41,23 +44,34 @@ body, html {
     z-index: 10;
 }
 
-/* ARENA (Zentrales Board) */
+.control-unit { 
+    cursor: pointer; 
+    margin-bottom: 35px; 
+    text-align: center; 
+    color: var(--text-dim); 
+    transition: 0.3s ease; 
+}
+.control-unit:hover { color: var(--neon-green); transform: scale(1.1); }
+.control-unit i { font-size: 26px; display: block; margin-bottom: 5px; }
+
+/* 4. ARENA (Zentrales Board) */
 #stage-container {
     background: radial-gradient(circle, #0A1A0A 0%, #000 100%);
     display: flex; 
     justify-content: center; 
     align-items: center;
     position: relative;
-    z-index: 2; /* Arena liegt auf Ebene 2 */
+    z-index: 2;
 }
 
 #main-canvas { 
     width: 98% !important; 
     height: 95% !important; 
     border: 2px solid var(--neon-green);
+    box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
 }
 
-/* RECHTE SPALTE */
+/* 5. RECHTE ANALYSE-SPALTE */
 .analysis-panel { 
     background: var(--panel-dark); 
     border-left: 1px solid rgba(255,255,255,0.05); 
@@ -67,18 +81,26 @@ body, html {
     z-index: 3;
 }
 
-/* --- FIX: ZENTRALE OVERLAY --- */
+.chat-container {
+    flex: 1;
+    background: rgba(0,0,0,0.4); 
+    border-top: 2px solid var(--neon-green);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 6. ZENTRALE OVERLAY (AKTENTASCHE) */
 .briefcase-overlay { 
     position: fixed; 
     top: 0; 
     left: 0; 
     width: 100vw; 
     height: 100vh; 
-    background: rgba(0, 0, 0, 0.92); 
-    display: none; /* Steuerung erfolgt via JS display: flex */
+    background: rgba(0, 0, 0, 0.94); 
+    display: none; 
     align-items: center; 
     justify-content: center; 
-    z-index: 99999 !important; /* MUSS HIER ÜBER ALLEM STEHEN */
+    z-index: 99999 !important; 
     backdrop-filter: blur(20px);
 }
 
@@ -91,9 +113,10 @@ body, html {
     padding: 40px; 
     overflow-y: auto;
     position: relative;
+    box-shadow: 0 0 50px rgba(57, 255, 20, 0.2);
 }
 
-/* FIFA CARDS */
+/* 7. FIFA CARDS SYSTEM */
 .pro-player-list { 
     display: grid; 
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
@@ -108,12 +131,59 @@ body, html {
     position: relative;
     cursor: pointer;
     text-align: center;
-    transition: 0.3s ease;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .fifa-card:hover { 
     transform: translateY(-10px); 
     border-color: var(--neon-green); 
+    box-shadow: 0 10px 30px rgba(57, 255, 20, 0.2);
 }
 
 .hidden { display: none !important; }
+
+/* 8. TONI 2.0 PRINT ENGINE (DIN A5 STADIONHEFT) */
+@media print {
+    /* Alles ausblenden, was nicht zum Heft gehört */
+    body, .pro-layout-container, .sidebar-minimal, .analysis-panel, .no-print, .briefcase-overlay {
+        visibility: hidden !important;
+        background: none !important;
+    }
+
+    /* Das Magazin-Dokument zwingend einblenden */
+    #magazine-container, #magazine-container * {
+        visibility: visible !important;
+        color: #000 !important;
+    }
+
+    #magazine-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        display: block !important;
+    }
+
+    /* Magazin-Seiten Formatierung */
+    .mag-page {
+        margin: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always !important;
+        border: none !important;
+        width: 148mm !important;
+        height: 210mm !important;
+        background: #fff !important;
+        display: block !important;
+    }
+
+    /* Buttons und Editor-Elemente im Heft löschen */
+    button, .hidden-print {
+        display: none !important;
+    }
+
+    /* Farben im Druck erzwingen */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
