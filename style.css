@@ -1,56 +1,74 @@
-/* --- TONI 2.0 MASTER CSS: NEON-FIFA EDITION --- */
+/* --- TONI 2.0 MASTER CSS: Z-INDEX & OVERLAY FIX --- */
 :root {
     --bg-deep: #05080F;
     --panel-dark: #0D1421;
     --accent-orange: #FF6A00;
     --accent-gold: #D4AF37;
     --neon-green: #39FF14;
+    --data-cyan: #00D1FF;
     --text-main: #FFFFFF;
     --text-dim: #A0AEC0;
+    --status-fit: #4CD964;
+    --status-error: #FF3B30;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body, html { width: 100%; height: 100%; background: var(--bg-deep); color: var(--text-main); font-family: 'Inter', sans-serif; overflow: hidden; }
 
-/* FIX: Maximiertes Layout */
+/* GRID SYSTEM */
 .pro-layout-container {
     display: grid;
-    grid-template-columns: 90px 1fr 380px; /* Sidebar | Arena | Chat */
-    width: 100vw; height: 100vh;
+    grid-template-columns: 90px 1fr 380px;
+    height: 100vh;
+    width: 100vw;
 }
 
-/* SIDEBAR NAVIGATION */
+/* SIDEBAR */
 .sidebar-minimal { 
-    background: #020408; border-right: 1px solid rgba(57, 255, 20, 0.3); 
-    display: flex; flex-direction: column; align-items: center; padding-top: 20px;
+    background: #020408; border-right: 1px solid rgba(57, 255, 20, 0.2); 
+    display: flex; flex-direction: column; align-items: center; padding-top: 25px;
+    z-index: 10;
 }
 
-/* ARENA (DAS BOARD MUSS DEN RAUM FÜLLEN) */
-#stage-container {
-    background: radial-gradient(circle, #0A1A0A 0%, #000 100%);
-    width: 100%; height: 100%;
-    display: flex; justify-content: center; align-items: center;
-}
-#main-canvas { 
-    width: 98% !important; height: 95% !important; 
-    border: 3px solid var(--neon-green);
-    box-shadow: 0 0 40px rgba(57, 255, 20, 0.2);
+.control-unit { cursor: pointer; margin-bottom: 35px; text-align: center; color: var(--text-dim); transition: 0.3s; }
+.control-unit:hover { color: var(--neon-green); transform: scale(1.1); }
+.control-unit i { font-size: 26px; display: block; margin-bottom: 5px; }
+
+/* ARENA */
+#stage-container { background: #000; display: flex; justify-content: center; align-items: center; position: relative; }
+#main-canvas { width: 98% !important; height: 95% !important; border: 2px solid var(--neon-green); z-index: 1; }
+
+/* RECHTE SPALTE */
+.analysis-panel { background: var(--panel-dark); border-left: 1px solid rgba(255,255,255,0.05); z-index: 5; }
+
+/* --- DER FIX: ZENTRALE OVERLAY --- */
+.briefcase-overlay { 
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100vw; height: 100vh; 
+    background: rgba(0, 0, 0, 0.85); 
+    display: none; /* Wird per JS auf 'flex' gesetzt */
+    align-items: center; justify-content: center; 
+    z-index: 99999 !important; /* Über allem anderen */
+    backdrop-filter: blur(15px); /* Macht Spielfeld unscharf */
 }
 
-/* ANALYSE & CHAT PANEL */
-.analysis-panel { 
-    background: var(--panel-dark); border-left: 1px solid rgba(255,255,255,0.05); 
-    display: flex; flex-direction: column; height: 100vh;
+.briefcase-window { 
+    background: var(--panel-dark); 
+    border: 2px solid var(--neon-green); 
+    width: 90%; height: 85%; 
+    border-radius: 20px; padding: 40px; 
+    overflow-y: auto;
+    box-shadow: 0 0 50px rgba(57, 255, 20, 0.2);
 }
 
-/* FIFA CARDS IN DER KABINE */
+/* FIFA CARDS */
+.pro-player-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
 .fifa-card {
     background: linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 100%);
-    border: 2px solid var(--accent-gold); border-radius: 15px;
-    padding: 25px; position: relative; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: pointer; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid var(--accent-gold); border-radius: 12px;
+    padding: 20px; position: relative; cursor: pointer; transition: 0.3s;
 }
-.fifa-card:hover { transform: translateY(-10px); border-color: var(--neon-green); }
-.rating-num { font-size: 2.2rem; font-weight: 900; color: #fff; position: absolute; top: 15px; left: 15px; }
+.fifa-card:hover { transform: translateY(-5px); border-color: var(--neon-green); }
 
 .hidden { display: none !important; }
