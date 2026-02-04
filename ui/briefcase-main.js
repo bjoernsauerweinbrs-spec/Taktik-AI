@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - ZENTRALE STEUEREINHEIT (ULTIMATE FIX)
- * Verknüpft alle Sektoren und behebt den Lade-Hänger.
+ * TONI 2.0 - ZENTRALE STEUEREINHEIT (PRO-ROUTING)
+ * Steuerung der Sektoren inklusive neuem Trainingsbetrieb.
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -25,11 +25,9 @@ window.BriefcaseUI = {
             
             this.backToNav();
             if(window.ToniTTS) ToniTTS.speak("Zentrale geöffnet.", "warm");
-            console.log("Zentrale: Sichtbar geschaltet.");
         } else {
             overlay.style.display = 'none';
             overlay.classList.add('hidden');
-            console.log("Zentrale: Ausgeblendet.");
         }
     },
 
@@ -49,19 +47,21 @@ window.BriefcaseUI = {
         const nav = document.getElementById('briefcase-nav');
         if(!nav) return;
 
+        // Erweiterte Ordner-Struktur für professionellen Trainingsbetrieb
         const folders = [
             { id: 'sport', name: 'MANNSCHAFTSKABINE', icon: 'fa-users', color: 'var(--accent-gold)' },
-            { id: 'analyse', name: 'TIEFENANALYSE', icon: 'fa-chart-line', color: 'var(--neon-green)' },
-            { id: 'system', name: 'SYSTEM-SETUP', icon: 'fa-cogs', color: '#888' },
-            { id: 'templates', name: 'STADIONHEFT', icon: 'fa-book-open', color: '#fff' }
+            { id: 'training', name: 'TRAININGSBETRIEB', icon: 'fa-whistle', color: 'var(--accent-orange)' },
+            { id: 'analyse', name: 'PERFORMANCE LAB', icon: 'fa-chart-line', color: 'var(--neon-green)' },
+            { id: 'templates', name: 'STADIONHEFT', icon: 'fa-book-open', color: '#fff' },
+            { id: 'system', name: 'SYSTEM-SETUP', icon: 'fa-cogs', color: '#888' }
         ];
 
         nav.innerHTML = `
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; padding: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; padding: 20px;">
                 ${folders.map(f => `
                     <div class="fifa-card" onclick="BriefcaseUI.switchSektor('${f.id}')" style="padding: 50px 20px; text-align: center; cursor: pointer;">
                         <i class="fas ${f.icon}" style="font-size: 3rem; color: ${f.color}; margin-bottom: 25px; display: block;"></i>
-                        <span style="font-weight: 900; letter-spacing: 2px; font-size: 0.9rem; color:#fff;">${f.name}</span>
+                        <span style="font-weight: 900; letter-spacing: 2px; font-size: 0.8rem; color:#fff;">${f.name}</span>
                     </div>
                 `).join('')}
             </div>
@@ -89,6 +89,9 @@ window.BriefcaseUI = {
         if (sektor === 'sport' && window.SektorSporttasche) {
             window.SektorSporttasche.render();
         } 
+        else if (sektor === 'training' && window.SektorTraining) {
+            window.SektorTraining.render();
+        }
         else if (sektor === 'analyse' && window.SektorAnalyse) {
             window.SektorAnalyse.render();
         } 
