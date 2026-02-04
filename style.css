@@ -1,112 +1,56 @@
-/* --- TONI 2.0 MASTER CSS: NEON-GINGA EDITION --- */
+/* --- TONI 2.0 MASTER CSS: NEON-FIFA EDITION --- */
 :root {
     --bg-deep: #05080F;
     --panel-dark: #0D1421;
     --accent-orange: #FF6A00;
     --accent-gold: #D4AF37;
     --neon-green: #39FF14;
-    --data-cyan: #00D1FF;
     --text-main: #FFFFFF;
     --text-dim: #A0AEC0;
-    --status-fit: #4CD964;
-    --status-warn: #FFCC00;
-    --status-error: #FF3B30;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+body, html { width: 100%; height: 100%; background: var(--bg-deep); color: var(--text-main); font-family: 'Inter', sans-serif; overflow: hidden; }
 
-body, html { 
-    width: 100%; height: 100%; 
-    background: var(--bg-deep); color: var(--text-main); 
-    font-family: 'Inter', sans-serif; overflow: hidden; 
-}
-
-/* DAS HAUPT-GRID */
+/* FIX: Maximiertes Layout */
 .pro-layout-container {
     display: grid;
-    grid-template-columns: 90px 1fr 380px;
-    grid-template-rows: 100vh;
-    width: 100vw;
-    height: 100vh;
+    grid-template-columns: 90px 1fr 380px; /* Sidebar | Arena | Chat */
+    width: 100vw; height: 100vh;
 }
 
-/* SIDEBAR */
+/* SIDEBAR NAVIGATION */
 .sidebar-minimal { 
-    background: #020408; 
-    border-right: 1px solid rgba(57, 255, 20, 0.2); 
-    display: flex; flex-direction: column; align-items: center; padding-top: 25px;
-    z-index: 100;
+    background: #020408; border-right: 1px solid rgba(57, 255, 20, 0.3); 
+    display: flex; flex-direction: column; align-items: center; padding-top: 20px;
 }
 
-.control-unit { 
-    cursor: pointer; margin-bottom: 35px; text-align: center; 
-    color: var(--text-dim); transition: 0.3s; 
-}
-.control-unit:hover { color: var(--neon-green); transform: scale(1.1); }
-.control-unit i { font-size: 26px; display: block; margin-bottom: 5px; }
-
-/* ARENA CONTAINER */
+/* ARENA (DAS BOARD MUSS DEN RAUM FÜLLEN) */
 #stage-container {
     background: radial-gradient(circle, #0A1A0A 0%, #000 100%);
+    width: 100%; height: 100%;
     display: flex; justify-content: center; align-items: center;
-    position: relative; overflow: hidden;
 }
-
 #main-canvas { 
-    width: 95% !important; height: 90% !important; 
-    border: 2px solid var(--neon-green);
-    box-shadow: 0 0 30px rgba(57, 255, 20, 0.15);
+    width: 98% !important; height: 95% !important; 
+    border: 3px solid var(--neon-green);
+    box-shadow: 0 0 40px rgba(57, 255, 20, 0.2);
 }
 
 /* ANALYSE & CHAT PANEL */
 .analysis-panel { 
-    background: var(--panel-dark); 
-    border-left: 1px solid rgba(255,255,255,0.05); 
+    background: var(--panel-dark); border-left: 1px solid rgba(255,255,255,0.05); 
     display: flex; flex-direction: column; height: 100vh;
 }
 
-.chat-container {
-    flex: 1; background: rgba(0,0,0,0.4); 
-    border-top: 2px solid var(--neon-green);
-    display: flex; flex-direction: column;
-}
-
-/* FIFA KABINE & CARDS */
-.briefcase-overlay { 
-    position: fixed; inset: 0; background: rgba(0,0,0,0.96); 
-    z-index: 9999; display: flex; align-items: center; justify-content: center; 
-    backdrop-filter: blur(15px);
-}
-.briefcase-window { 
-    background: var(--panel-dark); border: 1px solid var(--accent-gold); 
-    width: 95%; height: 90%; border-radius: 20px; padding: 40px; 
-    overflow-y: auto;
-}
-
-.pro-player-list { 
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 30px; 
-}
-
+/* FIFA CARDS IN DER KABINE */
 .fifa-card {
     background: linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 100%);
-    border: 2px solid var(--accent-gold);
-    border-radius: 15px; padding: 25px; position: relative;
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: pointer; text-align: center;
+    border: 2px solid var(--accent-gold); border-radius: 15px;
+    padding: 25px; position: relative; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
-.fifa-card:hover { transform: translateY(-10px); border-color: var(--neon-green); box-shadow: 0 10px 30px rgba(57, 255, 20, 0.3); }
-
-.rating-box { position: absolute; top: 15px; left: 15px; text-align: center; }
-.rating-num { font-size: 2.2rem; font-weight: 900; color: #fff; }
-.rating-pos { font-size: 0.9rem; font-weight: bold; color: var(--accent-gold); }
-
-.status-dot { position: absolute; top: 15px; right: 15px; width: 12px; height: 12px; border-radius: 50%; }
-
-.ginga-bg {
-    position: absolute; bottom: -5px; right: 5px;
-    font-size: 3.5rem; font-weight: 900; color: rgba(255,255,255,0.03);
-    font-style: italic; pointer-events: none;
-}
+.fifa-card:hover { transform: translateY(-10px); border-color: var(--neon-green); }
+.rating-num { font-size: 2.2rem; font-weight: 900; color: #fff; position: absolute; top: 15px; left: 15px; }
 
 .hidden { display: none !important; }
-button:active { transform: scale(0.95); }
