@@ -82,6 +82,7 @@ window.SektorTraining = {
     },
 
     renderAttendanceList: function(squad) {
+        if (squad.length === 0) return "<p style='font-size:0.7rem; color:var(--text-dim);'>Kader ist leer.</p>";
         return squad.map(p => {
             const isAtTraining = p.isPresent;
             return `
@@ -106,22 +107,25 @@ window.SektorTraining = {
 
     startSession: function() {
         if(window.arena) {
-            window.arena.resetBoard(); // Lädt nominierte & anwesende Spieler
+            window.arena.resetBoard(); 
             if(window.BriefcaseUI) window.BriefcaseUI.toggle();
-            if(window.ToniTTS) ToniTTS.speak("Trainingsaufbau wird auf das Board übertragen.", "warm");
+            if(window.ToniTTS) ToniTTS.speak("Trainings-Szenario wird auf das Board übertragen.", "warm");
         }
     },
 
     addDrillToPlan: function() {
-        const name = document.getElementById('drill-name').value;
-        const desc = document.getElementById('drill-desc').value;
+        const nameInput = document.getElementById('drill-name');
+        const descInput = document.getElementById('drill-desc');
+        const name = nameInput.value.trim();
+        const desc = descInput.value.trim();
+        
         if(!name) return alert("Bitte Namen für die Übung eingeben.");
 
         const snapshot = window.arena ? window.arena.getSnapshot() : null;
         this.sessionPlan.push({ name, desc, snapshot });
         
-        document.getElementById('drill-name').value = "";
-        document.getElementById('drill-desc').value = "";
+        nameInput.value = "";
+        descInput.value = "";
         this.render();
         this.preparePrintLayout();
     },
@@ -130,8 +134,8 @@ window.SektorTraining = {
         if(this.sessionPlan.length === 0) return "<span style='color:#444'>Plan ist leer...</span>";
         return this.sessionPlan.map((d, i) => `
             <div style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                <span>${i+1}. ${d.name}</span>
-                <i class="fas fa-trash" style="color:var(--status-error); cursor:pointer; font-size:0.7rem;" onclick="SektorTraining.removeDrill(${i})"></i>
+                <span style="font-size:0.7rem;">${i+1}. ${d.name}</span>
+                <i class="fas fa-trash" style="color:var(--status-error); cursor:pointer; font-size:0.6rem;" onclick="SektorTraining.removeDrill(${i})"></i>
             </div>
         `).join('');
     },
@@ -146,28 +150,35 @@ window.SektorTraining = {
         const printArea = document.getElementById('a4-print-layout');
         if(!printArea) return;
         
-        const config = JSON.parse(localStorage.getItem('toni_club_config')) || { name: "Pro Club", coach: "Coach" };
+        const date = new Date().toLocaleDateString('de-DE');
 
         printArea.innerHTML = `
-            <div style="padding:20mm; font-family:Inter, sans-serif; color:#000; background:#fff;">
+            <div class="print-page" style="padding:20mm; font-family:Inter, sans-serif; color:#000; background:#fff;">
                 <div style="display:flex; justify-content:space-between; border-bottom:4px solid #000; padding-bottom:10px; margin-bottom:30px;">
-                    <h1 style="margin:0; font-size:24pt;">TRAININGSPLAN</h1>
-                    <div style="text-align:right; font-weight:bold;">
-                        ${config.name.toUpperCase()}<br>COACH: ${config.coach.toUpperCase()}
+                    <div>
+                        <h1 style="margin:0; font-size:24pt;">TRAININGSPLAN</h1>
+                        <p style="margin:0; font-size:10pt; font-weight:bold; color:#666;">INTERNATIONAL PERFORMANCE STANDARDS</p>
+                    </div>
+                    <div style="text-align:right;">
+                        <p style="margin:0; font-size:12pt; font-weight:900;">COACH BJÖRN</p>
+                        <p style="margin:0; font-size:10pt;">DATUM: ${date}</p>
                     </div>
                 </div>
                 ${this.sessionPlan.map((d, i) => `
-                    <div style="margin-bottom:40px; page-break-inside: avoid;">
-                        <h2 style="font-size:16pt; margin-bottom:10px;">${i+1}. ${d.name.toUpperCase()}</h2>
-                        <div style="display:grid; grid-template-columns: 100mm 1fr; gap:15px;">
-                            <img src="${d.snapshot}" style="width:100%; border:1px solid #000;">
-                            <div style="font-size:10pt; line-height:1.4;">
-                                <strong>ABLAUF / COACHING:</strong><br>
-                                ${d.desc.replace(/\n/g, '<br>')}
-                            </div>
+                    <div class="drill-card-print">
+                        <div>
+                            <img src="${d.snapshot}" class="drill-image-print">
+                        </div>
+                        <div style="font-size:10pt; line-height:1.4;">
+                            <h2 style="font-size:16pt; margin:0 0 10px 0; border-bottom:2px solid #000; padding-bottom:5px;">${i+1}. ${d.name.toUpperCase()}</h2>
+                            <strong>ABLAUF / COACHING:</strong><br>
+                            ${d.desc.replace(/\n/g, '<br>')}
                         </div>
                     </div>
                 `).join('')}
+                <div style="position:fixed; bottom:10mm; left:20mm; right:20mm; border-top:1px solid #eee; padding-top:5px; font-size:8pt; color:#aaa; text-align:center;">
+                    Generiert durch TONI 2.0 AI Assistant - Vertrauliches Trainingsmaterial
+                </div>
             </div>
         `;
     }
