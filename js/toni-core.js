@@ -1,82 +1,98 @@
 /**
- * TONI 2.0 - CORE ENGINE
- * Verarbeitet Onboarding, KI-Anfragen und adaptive Logik.
+ * TONI 2.0 - INTERNATIONAL TACTICAL CORE (PRO-EDITION 2026)
+ * Das Gehirn des Performance Centers. Steuert Board-Logik, 
+ * Sprach-Interface und KI-Analysen (Ollama/OpenAI).
  */
 window.ToniCore = {
     isProcessing: false,
+    recognition: null,
 
     /**
-     * Verarbeitet die Nachricht des Nutzers
+     * Haupt-Verarbeitung der Eingabe (Sprache oder Text)
      */
     processMessage: async function(text) {
         if (!text || this.isProcessing) return;
         this.isProcessing = true;
 
-        // 1. Prüfen, ob es sich um Onboarding-Daten handelt
-        if (this.detectOnboarding(text)) {
+        this.updateStatus("ANALYSIERE...", "var(--accent-orange)");
+        this.addUserMessage(text);
+
+        const input = text.toLowerCase();
+
+        // 1. TAKTISCHE SOFORT-BEFEHLE (Lokale Board-Steuerung ohne KI-Latenz)
+        if (input.includes("viererkette") || input.includes("4er kette")) {
+            this.executeBoardAction(() => {
+                // Koordinaten für eine klassische Viererkette (0.0 - 1.0)
+                const coords = [
+                    {pos: "TW", x: 0.1, y: 0.5},
+                    {pos: "LV", x: 0.25, y: 0.15}, {pos: "IV", x: 0.25, y: 0.38}, 
+                    {pos: "IV", x: 0.25, y: 0.62}, {pos: "RV", x: 0.25, y: 0.85}
+                ];
+                window.arena.applyTacticalPositions(coords);
+                this.finalizeResponse("Ich formiere die Viererkette. Achte auf die Abstände in der horizontalen Verschiebung.");
+            });
+        } 
+        else if (input.includes("schieb") && (input.includes("vor") || input.includes("hoch"))) {
+            this.executeBoardAction(() => {
+                window.arena.shiftTeam('forward');
+                this.finalizeResponse("Das Team rückt auf. Wir forcieren das Gegenpressing nach internationalem Elite-Standard.");
+            });
+        }
+        else if (input.includes("reset") || input.includes("anfang")) {
+            this.executeBoardAction(() => {
+                window.arena.resetBoard();
+                this.finalizeResponse("Spielfeld zurückgesetzt. Ball liegt am Anstoßpunkt.");
+            });
+        }
+
+        // 2. ONBOARDING-CHECK
+        else if (this.detectOnboarding(input)) {
             await this.handleOnboarding(text);
-        } else {
-            // Normale taktische Anfrage
+        } 
+
+        // 3. KOMPLEXE TAKTIK-ANFRAGE (KI-Modul)
+        else {
             await this.handleTacticalQuery(text);
         }
 
         this.isProcessing = false;
+        this.updateStatus("SYSTEM BEREIT [PRO]", "var(--neon-green)");
     },
 
     /**
-     * Erkennt, ob der Nutzer gerade seine Daten (Name, Verein, Liga) angibt
+     * Führt Board-Aktionen sicher aus
      */
+    executeBoardAction: function(callback) {
+        if (window.arena && typeof window.arena.render === 'function') {
+            callback();
+        } else {
+            this.finalizeResponse("Board-Engine noch nicht bereit. Bitte Spielfeld laden.");
+        }
+    },
+
     detectOnboarding: function(text) {
-        const keywords = ["verein", "club", "liga", "klasse", "name", "heiße", "trainer"];
-        const lowerText = text.toLowerCase();
-        return keywords.some(key => lowerText.includes(key)) && lowerText.length < 150;
+        const keywords = ["verein", "club", "liga", "name", "heiße", "trainer"];
+        return keywords.some(key => text.includes(key)) && text.length < 150;
     },
 
-    /**
-     * Extrahiert Daten aus dem Onboarding-Gespräch und speichert sie
-     */
     handleOnboarding: async function(text) {
-        if(window.ToniTTS) ToniTTS.speak("Einen Moment, Coach. Ich konfiguriere mein System auf deine Vorgaben.", "warm");
-
-        // Simulation einer einfachen Extraktion (kann später durch KI verfeinert werden)
         const currentConfig = JSON.parse(localStorage.getItem('toni_club_config')) || {};
-        
-        // Beispielhafte Logik: "Ich bin Björn vom FC Toni aus der Bundesliga"
-        const words = text.split(" ");
-        
-        // Wir triggern hier eine kurze Denkpause für Toni
-        setTimeout(() => {
-            const config = {
-                name: currentConfig.name || "Dein Verein",
-                coach: currentConfig.coach || "Coach",
-                league: currentConfig.league || "Pro-Level"
-            };
-
-            // Speichern und im System-Modul reflektieren
-            localStorage.setItem('toni_club_config', JSON.stringify(config));
-            if(window.BriefcaseUI) window.BriefcaseUI.clubData = config;
-
-            const response = `Alles klar! Ich habe das System auf den ${config.name} in der ${config.league} eingestellt. Ich freue mich auf die Arbeit, Coach ${config.coach}. Wie gehen wir das heutige Training an?`;
-            
-            this.addToChat("Toni", response);
-            if(window.ToniTTS) ToniTTS.speak(response, "deep");
-        }, 1500);
+        const config = {
+            name: currentConfig.name || "Dein Verein",
+            coach: "Björn", // Dein Name ist gesetzt
+            league: currentConfig.league || "Elite-League"
+        };
+        localStorage.setItem('toni_club_config', JSON.stringify(config));
+        this.finalizeResponse(`System auf ${config.name} konfiguriert. Willkommen zurück, Coach Björn. Analyse-Einheit aktiv.`);
     },
 
-    /**
-     * Verarbeitet taktische Fragen über den gewählten KI-Provider (Ollama/OpenAI)
-     */
     handleTacticalQuery: async function(text) {
         const provider = localStorage.getItem('toni_api_provider') || "llama";
         const apiKey = localStorage.getItem('toni_api_key');
 
-        this.addToChat("Toni", "Analysiere Spielsituation...");
-
         if (provider === "llama") {
-            // OLLAMA LOKALE ABFRAGE (Standard 127.0.0.1:11434)
-            this.queryOllama(text);
+            await this.queryOllama(text);
         } else {
-            // OPENAI CLOUD ABFRAGE
             this.queryOpenAI(text, apiKey);
         }
     },
@@ -85,42 +101,96 @@ window.ToniCore = {
         try {
             const response = await fetch('http://localhost:11434/api/generate', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: 'gemma', // oder dein bevorzugtes Modell
-                    prompt: `Du bist Toni, ein internationaler Fußball-Experte. Antworte kurz und präzise auf Deutsch. Frage: ${prompt}`,
+                    model: 'gemma', // Empfohlen für Taktik-Präzision
+                    prompt: `Context: Du bist TONI, ein weltweiter Elite-Fußballanalyst. Björn ist der Coach. 
+                             Das Feld hat ein 5m Raster. Wir nutzen 11 Starter und 5 Subs. 
+                             Frage: ${prompt}. Antworte fachmännisch, kurz und präzise.`,
                     stream: false
                 })
             });
+
+            if (!response.ok) throw new Error("API Offline");
             const data = await response.json();
-            this.finalizeResponse(data.response);
+            
+            // FIX für "undefined": Sicherstellen, dass data.response existiert
+            const answer = data.response || data.message || "Analyse abgeschlossen, aber Daten-Cluster unvollständig.";
+            this.finalizeResponse(answer);
+
         } catch (e) {
-            this.handleError("Ollama nicht erreichbar. Läuft der Server auf Port 11434?");
+            console.error("TONI Core Error:", e);
+            this.handleError("Verbindung zum KI-Kern (Ollama) fehlgeschlagen. Läuft der Server auf Port 11434?");
         }
     },
 
-    queryOpenAI: async function(prompt, key) {
-        // Platzhalter für OpenAI Fetch-Logik
-        this.finalizeResponse("OpenAI Verbindung wird initialisiert... (API-Key Check)");
+    queryOpenAI: function(prompt, key) {
+        this.finalizeResponse("OpenAI Cloud-Analyse wird initialisiert. (Feature-Release 2026)");
     },
 
     finalizeResponse: function(answer) {
-        this.addToChat("Toni", answer);
+        this.addToChat("Toni [PRO]", answer);
         if(window.ToniTTS) ToniTTS.speak(answer, "warm");
     },
 
-    addToChat: function(sender, msg) {
+    addUserMessage: function(text) {
+        this.addToChat("Coach Björn", text, true);
+    },
+
+    addToChat: function(sender, msg, isUser = false) {
         const chatBox = document.getElementById('chat-messages');
-        if(chatBox) {
-            const div = document.createElement('div');
-            div.style.marginBottom = "15px";
-            div.innerHTML = `<b style="color:var(--neon-green)">${sender}:</b> <span style="color:#fff">${msg}</span>`;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
+        if(!chatBox) return;
+
+        const div = document.createElement('div');
+        div.style.cssText = `margin-bottom:15px; animation: fadeIn 0.3s; text-align: ${isUser ? 'right' : 'left'}`;
+        div.innerHTML = `
+            <b style="color:${isUser ? 'var(--text-dim)' : 'var(--neon-green)'}">${sender}:</b> 
+            <span style="color:#fff; display:block; background:${isUser ? 'rgba(255,255,255,0.05)' : 'transparent'}; padding:5px; border-radius:5px;">
+                ${msg}
+            </span>`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    },
+
+    updateStatus: function(text, color) {
+        const statusText = document.getElementById('toni-status-text');
+        if(statusText) {
+            statusText.innerText = text;
+            statusText.style.color = color;
         }
     },
 
     handleError: function(err) {
-        this.addToChat("System", err);
-        if(window.ToniTTS) ToniTTS.speak("Da gibt es ein Verbindungsproblem, Coach.", "warm");
+        this.addToChat("SYSTEM", err);
+        if(window.ToniTTS) ToniTTS.speak("Coach, wir haben ein Daten-Leck. Verbindung prüfen.", "warm");
+    },
+
+    /**
+     * TONI LIVE: Spracherkennung aktivieren
+     */
+    startVoice: function() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return this.handleError("Browser unterstützt kein Voice-Interface.");
+
+        if (!this.recognition) {
+            this.recognition = new SpeechRecognition();
+            this.recognition.lang = 'de-DE';
+            this.recognition.continuous = false;
+            this.recognition.interimResults = false;
+
+            this.recognition.onstart = () => this.updateStatus("TONI HÖRT ZU...", "var(--accent-orange)");
+            this.recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                this.processMessage(transcript);
+            };
+            this.recognition.onerror = (e) => this.updateStatus("SYSTEM FEHLER", "var(--status-error)");
+            this.recognition.onend = () => this.updateStatus("SYSTEM BEREIT [PRO]", "var(--neon-green)");
+        }
+
+        try {
+            this.recognition.start();
+        } catch (e) {
+            console.log("Recognition bereits aktiv.");
+        }
     }
 };
