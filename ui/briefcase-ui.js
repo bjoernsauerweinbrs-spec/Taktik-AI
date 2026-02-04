@@ -22,7 +22,7 @@ window.BriefcaseUI = {
             localStorage.setItem('toni_club_config', JSON.stringify(this.clubData));
         }
         
-        // Magazin-Seiten aus dem Speicher laden oder Standard erstellen
+        // Magazin-Seiten laden
         this.magazinPages = JSON.parse(localStorage.getItem('toni_magazin_draft')) || [
             { id: 'p1', title: 'INSIDE ARENA.', type: 'cover', content: 'MATCHDAY MAG - Klicken zum Bearbeiten' },
             { id: 'p2', title: 'Wort des Coaches', type: 'text', content: 'Heute zählt nur die absolute Hingabe...' },
@@ -46,7 +46,7 @@ window.BriefcaseUI = {
         if(!nav || !content) return;
         nav.classList.remove('hidden');
         content.classList.add('hidden');
-        title.innerText = "ZENTRALE AKTTENTASCHE";
+        title.innerText = "ZENTRALE AKTENTASCHE";
         this.renderFolderGrid();
     },
 
@@ -65,13 +65,12 @@ window.BriefcaseUI = {
             { id: 'system', name: 'SYSTEM', icon: 'fa-cogs', color: '#888' }
         ];
         nav.innerHTML = '<div class="folder-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px;">' +
-            folders.map(function(f) {
-                return '<div class="folder-card" onclick="BriefcaseUI.switchSektor(\'' + f.id + '\')" ' +
-                    'style="background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 25px; border-radius: 12px; text-align: center; cursor: pointer;">' +
-                    '<i class="fas ' + f.icon + '" style="font-size: 2rem; color: ' + f.color + '; margin-bottom: 10px; display: block;"></i>' +
-                    '<span style="font-size: 0.75rem; font-weight: bold; color: #fff;">' + f.name + '</span>' +
-                    '</div>';
-            }).join('') + '</div>';
+            folders.map(f => `
+                <div class="folder-card" onclick="BriefcaseUI.switchSektor('${f.id}')" 
+                    style="background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 25px; border-radius: 12px; text-align: center; cursor: pointer;">
+                    <i class="fas ${f.icon}" style="font-size: 2rem; color: ${f.color}; margin-bottom: 10px; display: block;"></i>
+                    <span style="font-size: 0.75rem; font-weight: bold; color: #fff;">${f.name}</span>
+                </div>`).join('') + '</div>';
     },
 
     switchSektor: function(sektor) {
@@ -80,11 +79,10 @@ window.BriefcaseUI = {
         document.getElementById('sector-title').innerHTML = '<button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:#ff9500; cursor:pointer; margin-right:10px;"><i class="fas fa-arrow-left"></i></button> ' + sektor.toUpperCase();
         
         if (sektor === 'sport') this.renderSporttasche();
-        else if (sektor === 'matchplan') this.renderMatchplans();
-        else if (sektor === 'training') this.renderTraining();
-        else if (sektor === 'sponsoring') this.renderSponsoring();
         else if (sektor === 'templates') this.renderTemplates();
         else if (sektor === 'system') this.renderSystem();
+        else if (sektor === 'sponsoring') this.renderSponsoring();
+        else if (sektor === 'training') this.renderTraining();
         else if (sektor === 'reports') this.renderReports();
         else this.renderPlaceholder(sektor);
     },
@@ -98,7 +96,7 @@ window.BriefcaseUI = {
         document.getElementById('active-content').innerHTML = `
             <div style="padding:20px; background:#0a0a0a; border:1px solid #333; border-radius:15px; overflow-y:auto; max-height:450px;">
                 <h3 style="color:#ff9500; margin:0 0 15px 0; font-size:1rem; border-bottom:1px solid #222; padding-bottom:5px;">CLUB-KONFIGURATION</h3>
-                <div style="display:grid; gap:15px; margin-bottom:25px;">
+                <div style="display:grid; gap:10px; margin-bottom:25px;">
                     <div><label style="font-size:0.65rem; color:#888;">VEREIN</label>
                     <input type="text" id="set-club" value="${c.name}" class="login-input" style="text-align:left; margin:5px 0 0 0;"></div>
                     <div><label style="font-size:0.65rem; color:#888;">TRAINER / MANAGER</label>
@@ -123,22 +121,22 @@ window.BriefcaseUI = {
                     <div><label style="font-size:0.65rem; color:#888;">API KEY / ENDPUNKT</label>
                     <input type="password" id="api-key-input" value="${apiKey}" class="login-input" style="text-align:left; margin:5px 0 0 0;" placeholder="Key hier einfügen..."></div>
                 </div>
-                <button class="login-btn" style="margin-top:20px; background:#ff9500; color:#000; font-weight:900;" onclick="BriefcaseUI.saveFullSettings()">ALLES SPEICHERN</button>
+                <button class="login-btn" style="margin-top:20px; background:#ff9500; color:#000; font-weight:900;" onclick="BriefcaseUI.saveFullSettings()">UPDATE SPEICHERN</button>
             </div>`;
     },
 
     saveFullSettings: function() {
-        // Club Daten sichern
         this.clubData.name = document.getElementById('set-club').value;
         this.clubData.coach = document.getElementById('set-coach').value;
         this.clubData.league = document.getElementById('set-league').value;
         localStorage.setItem('toni_club_config', JSON.stringify(this.clubData));
 
-        // API Daten sichern
         localStorage.setItem('toni_api_key', document.getElementById('api-key-input').value);
         localStorage.setItem('toni_api_provider', document.getElementById('api-provider').value);
         
-        if(window.ToniAI) ToniAI.speak("Konfiguration aktualisiert, Coach Björn.", "deep");
+        if(window.ToniAI) {
+            ToniAI.speak("Alles klar Coach " + this.clubData.coach + ". Die Daten für " + this.clubData.name + " sind gesichert.", "deep");
+        }
         this.renderSystem();
     },
 
@@ -150,36 +148,6 @@ window.BriefcaseUI = {
             this.renderSystem();
         };
         reader.readAsDataURL(e.target.files[0]);
-    },
-
-    // --- SPONSORING ---
-    renderSponsoring: function() {
-        document.getElementById('active-content').innerHTML = `
-            <div style="padding:15px;">
-                <h4 style="color:#fff; margin-bottom:10px;">SPONSORING & VERMARKTUNG</h4>
-                <div id="consulting-box" style="background:#111; padding:15px; border-radius:10px; border-left:4px solid #ff9500; font-size:0.75rem; color:#ccc; line-height:1.5;">
-                    Bereit für die Analyse. Ich kalkuliere Preise und Strategien basierend auf der ${this.clubData.league}.
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;">
-                    <button class="tactic-btn" onclick="BriefcaseUI.askConsultant('preise')">PREIS-CHECK</button>
-                    <button class="tactic-btn" onclick="BriefcaseUI.askConsultant('konzept')">AKQUISE-KONZEPT</button>
-                </div>
-            </div>`;
-    },
-
-    askConsultant: function(type) {
-        const box = document.getElementById('consulting-box');
-        box.innerHTML = "Analysiere Marktwerte...";
-        let prompt = type === 'preise' 
-            ? `Kalkuliere realistische Werbepreise für die ${this.clubData.league} (Trikot, Heft, Banden). Antworte als Manager Toni.`
-            : `Erstelle ein Sponsoring-Akquise Konzept für den Verein ${this.clubData.name}.`;
-        if(window.ToniAI) {
-            ToniAI.processCommand(prompt);
-            setTimeout(() => {
-                const msgs = document.querySelectorAll('.bot-msg');
-                if(msgs.length > 0) box.innerHTML = msgs[msgs.length-1].innerHTML;
-            }, 3500);
-        }
     },
 
     // --- STADIONHEFT EDITOR ---
@@ -209,16 +177,10 @@ window.BriefcaseUI = {
                             <span style="font-weight:900; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px;">${this.clubData.name} Inside</span>
                             <span style="font-size:0.75rem;">SEITE ${index + 1}</span>
                         </div>
-                        
                         <h2 contenteditable="true" onblur="BriefcaseUI.saveMagDraft(${index}, 'title', this.innerText)" style="font-size:3.5rem; font-weight:900; line-height:0.8; margin:0; letter-spacing:-3px; text-transform:uppercase;">${p.title}</h2>
                         ${layoutExtra}
                         <div contenteditable="true" onblur="BriefcaseUI.saveMagDraft(${index}, 'content', this.innerText)" style="font-size:1.1rem; line-height:1.6; text-align:justify; margin-top:15px; flex-grow:1; outline:none; border:1px dashed transparent;">
                             ${p.content}
-                        </div>
-                        
-                        <div style="border-top:1px solid #eee; margin-top:20px; padding-top:10px; font-size:0.6rem; color:#999; display:flex; justify-content:space-between;">
-                            <span>OFFIZIELLES STADIONMAGAZIN</span>
-                            <span>${new Date().toLocaleDateString()}</span>
                         </div>
                     </div>
                 </div>`;
@@ -233,9 +195,7 @@ window.BriefcaseUI = {
                 }
             </style>
             <div style="padding:20px; background:#1a1a1a; height:500px; overflow-y:auto; scroll-behavior: smooth;">
-                <div id="magazin-canvas">
-                    ${this.magazinPages.map((p, i) => renderPage(p, i)).join('')}
-                </div>
+                <div id="magazin-canvas">${this.magazinPages.map((p, i) => renderPage(p, i)).join('')}</div>
                 <div style="text-align:center; padding:40px;">
                     <button id="print-btn" class="login-btn" style="background:#ff9500; color:#000; width:350px; height:60px; font-size:1.2rem;" onclick="window.print()">
                         <i class="fas fa-print"></i> PDF EXPORT
@@ -267,38 +227,56 @@ window.BriefcaseUI = {
     // --- SPORTTASCHE ---
     renderSporttasche: function() {
         var players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        document.getElementById('active-content').innerHTML = `<div style="padding:10px;"><button class="login-btn" style="width:100%; margin-bottom:20px; background:#ff9500; color:#000;" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUER PRO-PLAYER</button><div class="pro-player-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:10px;">${players.map(p => `<div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background:#151515; border:1px solid #333; padding:15px; border-radius:10px; text-align:center; cursor:pointer;"><div style="font-size:1.2rem; font-weight:900; color:#ff9500;">#${p.number||0}</div><b style="font-size:0.8rem; color:#fff;">${p.name}</b></div>`).join('')}</div></div>`;
-    },
-
-    // --- TRAINING ---
-    renderTraining: function() {
         document.getElementById('active-content').innerHTML = `
-            <div style="padding:15px;">
-                <h4 style="color:#fff;">INTERNATIONALES TRAINING</h4>
-                <div id="drill-box" style="background:#111; padding:15px; border-radius:10px; border-left:4px solid #00d1ff; font-size:0.75rem; color:#ccc;">
-                    Datenbank-Analyse für ${this.clubData.league} aktiv...
+            <div style="padding:10px;">
+                <button class="login-btn" style="width:100%; margin-bottom:20px; background:#ff9500; color:#000;" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUER PRO-PLAYER</button>
+                <div class="pro-player-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:10px;">
+                    ${players.map(p => `<div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background:#151515; border:1px solid #333; padding:15px; border-radius:10px; text-align:center; cursor:pointer;"><div style="font-size:1.2rem; font-weight:900; color:#ff9500;">#${p.number||0}</div><b style="font-size:0.8rem; color:#fff;">${p.name}</b></div>`).join('')}
                 </div>
-                <button class="tactic-btn" style="margin-top:15px;" onclick="BriefcaseUI.askConsultant('training')">ÜBUNGEN RECHARCHIEREN</button>
             </div>`;
     },
 
     openFIFAcard: function(id) {
         var players = JSON.parse(localStorage.getItem('toni_players')) || []; var p = players.find(x => x.id == id); if(!p) return;
-        document.getElementById('active-content').innerHTML = `<div style="display:grid; grid-template-columns:240px 1fr; gap:30px; background:#000; padding:25px; border-radius:15px; border:1px solid #ff9500;"><div style="width:240px; height:360px; background:linear-gradient(145deg, #d4af37, #b8860b); border-radius:10px; padding:20px; color:#111; text-align:center;"><div id="v-rating" style="font-size:4rem; font-weight:900;">${p.rating||80}</div><div style="font-weight:bold;">${p.pos||'ZM'}</div><div style="width:110px; height:110px; margin:10px auto; border-radius:50%; background:#333; overflow:hidden;"><img id="v-photo" src="${p.photo||''}" style="width:100%; height:100%; object-fit:cover;"></div><div style="font-size:1.3rem; font-weight:900;">${p.name}</div></div><div><h3 style="color:#ff9500; margin:0;">ANALYSIS</h3><button class="login-btn" style="width:100%; margin-top:20px;" onclick="BriefcaseUI.renderSporttasche()">ZURÜCK</button></div></div>`;
+        document.getElementById('active-content').innerHTML = `
+            <div style="display:grid; grid-template-columns:240px 1fr; gap:30px; background:#000; padding:25px; border-radius:15px; border:1px solid #ff9500;">
+                <div style="width:240px; height:360px; background:linear-gradient(145deg, #d4af37, #b8860b); border-radius:10px; padding:20px; color:#111; text-align:center;">
+                    <div style="font-size:4rem; font-weight:900;">${p.rating||80}</div>
+                    <div style="width:110px; height:110px; margin:10px auto; border-radius:50%; background:#333; overflow:hidden;">
+                        ${p.photo ? `<img src="${p.photo}" style="width:100%; height:100%; object-fit:cover;">` : '<i class="fas fa-user fa-4x" style="color:#ccc; margin-top:20px;"></i>'}
+                    </div>
+                    <div style="font-size:1.3rem; font-weight:900;">${p.name}</div>
+                </div>
+                <div><h3 style="color:#ff9500; margin:0;">ANALYSIS</h3><button class="login-btn" style="width:100%; margin-top:20px;" onclick="BriefcaseUI.renderSporttasche()">ZURÜCK</button></div>
+            </div>`;
+    },
+
+    renderTraining: function() {
+        document.getElementById('active-content').innerHTML = `
+            <div style="padding:15px;">
+                <h4 style="color:#fff;">INTERNATIONALES TRAINING</h4>
+                <div id="drill-box" style="background:#111; padding:15px; border-radius:10px; border-left:4px solid #00d1ff; font-size:0.75rem; color:#ccc;">Datenbank-Analyse für ${this.clubData.league} aktiv...</div>
+                <button class="tactic-btn" style="margin-top:15px;" onclick="BriefcaseUI.askConsultant('training')">ÜBUNGEN RECHARCHIEREN</button>
+            </div>`;
     },
 
     renderReports: function() {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const avg = players.length > 0 ? Math.round(players.reduce((a,b) => a + (b.rating || 0), 0) / players.length) : 0;
-        document.getElementById('active-content').innerHTML = `<div style="padding:15px;"><div style="background:rgba(0,209,255,0.05); border:1px solid #00d1ff; padding:20px; border-radius:15px; text-align:center; margin-bottom:20px;"><h4 style="margin:0; color:#00d1ff;">GLOBAL INDEX</h4><div style="font-size:3rem; font-weight:900; color:#fff;">${avg}%</div></div><div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px;">${players.sort((a,b)=>b.rating-a.rating).map(p => `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #222; font-size:0.8rem;"><span>${p.name}</span><b style="color:#ff9500;">${p.rating}</b></div>`).join('')}</div></div>`;
+        document.getElementById('active-content').innerHTML = `
+            <div style="padding:15px;">
+                <div style="background:rgba(0,209,255,0.05); border:1px solid #00d1ff; padding:20px; border-radius:15px; text-align:center; margin-bottom:20px;">
+                    <h4 style="margin:0; color:#00d1ff;">GLOBAL INDEX</h4><div style="font-size:3rem; font-weight:900; color:#fff;">${avg}%</div>
+                </div>
+            </div>`;
     },
 
     renderPlaceholder: function(s) { document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px; color:#444;">Sektor ${s} folgt...</div>`; },
-
+    
     addPlayerPrompt: function() {
         var n = prompt("Name:"); var num = prompt("Nummer:"); if(n && num) {
             var pl = JSON.parse(localStorage.getItem('toni_players')) || [];
-            pl.push({ id: Date.now(), name: n, number: num, rating: 50, pace: 50, shooting: 50, passing: 50, defense: 50 });
+            pl.push({ id: Date.now(), name: n, number: num, rating: 50, photo: '' });
             localStorage.setItem('toni_players', JSON.stringify(pl)); this.renderSporttasche();
         }
     }
