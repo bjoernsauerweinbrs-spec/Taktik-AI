@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - CORE ENGINE (PRO-TACTICAL EDITION)
- * Verarbeitet Onboarding, KI-Anfragen (Ollama/OpenAI) und adaptive Board-Logik.
+ * Verarbeitet Onboarding, KI-Anfragen, Board-Logik und die neue Trainingsmappe.
  */
 window.ToniCore = {
     isProcessing: false,
@@ -34,7 +34,12 @@ window.ToniCore = {
         if (this.detectOnboarding(text)) {
             await this.handleOnboarding(text);
         } 
-        // 2. Lokale Taktik-Befehle (Sofort-Ausführung ohne KI-Verzögerung)
+        // 2. Trainingsmappe: Speichern (z.B. "Speichere Übung A")
+        else if (cmd.includes("speichere") || cmd.includes("sichern")) {
+            const name = text.split(/speichere|sichern/i)[1]?.trim() || "Unbenannte Übung";
+            this.saveCurrentDrill(name);
+        }
+        // 3. Lokale Taktik-Befehle
         else if (cmd.includes("viererkette") || cmd.includes("4er kette")) {
             this.executeFormation("viererkette", "Ich formiere die Viererkette. Fokus auf die Abstände.");
         }
@@ -45,17 +50,49 @@ window.ToniCore = {
             if(window.arena) window.arena.shiftTeam("forward");
             this.finalizeResponse("Team rückt auf. Wir erhöhen den Pressing-Druck.");
         }
-        // 3. Medizin-Check
+        // 4. Medizin-Check
         else if (cmd.includes("medizin") || cmd.includes("vital") || cmd.includes("puls")) {
             this.evaluateHealthData();
         }
-        // 4. Allgemeine taktische KI-Anfrage
+        // 5. Motivationsspruch generieren
+        else if (cmd.includes("motivation") || cmd.includes("ansprache")) {
+            await this.generateMotivation();
+        }
+        // 6. Allgemeine taktische KI-Anfrage
         else {
             await this.handleTacticalQuery(text);
         }
 
         this.isProcessing = false;
         this.updateStatus("SYSTEM BEREIT [PRO]", "var(--neon-green)");
+    },
+
+    /**
+     * Speichert den aktuellen Board-Zustand in der Trainingsmappe
+     */
+    saveCurrentDrill: function(name) {
+        if(!window.arena) return;
+        
+        const drillData = {
+            name: name,
+            date: new Date().toISOString(),
+            players: window.arena.players.map(p => ({id: p.id, x: p.x, y: p.y, team: p.team})),
+            objects: window.arena.trainingObjects.map(o => ({type: o.type, x: o.x, y: o.y}))
+        };
+
+        let archive = JSON.parse(localStorage.getItem('toni_drills')) || [];
+        archive.push(drillData);
+        localStorage.setItem('toni_drills', JSON.stringify(archive));
+
+        this.finalizeResponse(`Übung "${name}" wurde erfolgreich in der Trainingsmappe archiviert.`);
+    },
+
+    /**
+     * Generiert einen Motivationsspruch via KI
+     */
+    generateMotivation: async function() {
+        const prompt = "Generiere einen kurzen, mitreißenden Motivationsspruch für ein Fußballteam vor einem wichtigen Spiel. Internationaler Stil.";
+        await this.queryOllama(prompt);
     },
 
     detectOnboarding: function(text) {
@@ -68,7 +105,6 @@ window.ToniCore = {
         if(window.ToniTTS) ToniTTS.speak("Einen Moment, Coach. Ich konfiguriere mein System.", "warm");
         const currentConfig = JSON.parse(localStorage.getItem('toni_club_config')) || {};
         
-        // Logik zur Extraktion (vereinfacht)
         setTimeout(() => {
             const config = {
                 name: text.includes("von") ? text.split("von")[1].trim() : (currentConfig.name || "Dein Verein"),
