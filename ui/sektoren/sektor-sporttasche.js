@@ -15,7 +15,7 @@ window.SektorSporttasche = {
         }
         
         document.getElementById('active-content').innerHTML = `
-            <div style="padding:20px;">
+            <div style="padding:20px; animation: fadeIn 0.4s ease-out;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
                     <div>
                         <h2 style="color:var(--accent-gold); letter-spacing:3px; margin:0; text-shadow: 0 0 15px rgba(212,175,55,0.3);">MANNSCHAFTSKABINE</h2>
@@ -54,26 +54,28 @@ window.SektorSporttasche = {
         const statusColor = (status === 'Verletzt') ? 'var(--status-error)' : 'var(--status-fit)';
 
         return `
-            <div class="fifa-card" onclick="SektorSporttasche.edit('${id}')">
-                <div class="rating-num" style="position: absolute; top: 15px; left: 15px; font-size: 2.2rem; font-weight: 900; color: #fff; line-height:1;">
+            <div class="fifa-card" onclick="SektorSporttasche.edit('${id}')" style="position:relative; transition: 0.3s ease-in-out;">
+                <div style="position:absolute; top:0; left:0; width:100%; height:2px; background:linear-gradient(90deg, transparent, var(--neon-green), transparent); opacity:0.3;"></div>
+
+                <div class="rating-num" style="position: absolute; top: 15px; left: 15px; font-size: 2.2rem; font-weight: 900; color: #fff; line-height:1; text-shadow: 0 0 10px rgba(255,255,255,0.2);">
                     ${rating}
-                    <div style="font-size: 0.8rem; color: var(--accent-gold); text-align:center;">${pos}</div>
+                    <div style="font-size: 0.8rem; color: var(--accent-gold); text-align:center; font-weight:bold;">${pos}</div>
                 </div>
 
-                <div class="status-dot" style="position: absolute; top: 15px; right: 15px; width: 12px; height: 12px; background: ${statusColor}; border-radius: 50%; box-shadow: 0 0 10px ${statusColor};"></div>
+                <div class="status-dot" style="position: absolute; top: 15px; right: 15px; width: 12px; height: 12px; background: ${statusColor}; border-radius: 50%; box-shadow: 0 0 15px ${statusColor}; border: 2px solid rgba(255,255,255,0.2);"></div>
 
                 <div style="margin-top: 70px; text-align: center;">
-                    <div style="font-size: 1.3rem; font-weight: 900; letter-spacing: 2px; color:#fff;">${name.toUpperCase()}</div>
+                    <div style="font-size: 1.3rem; font-weight: 900; letter-spacing: 2px; color:#fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${name.toUpperCase()}</div>
                     <div style="margin-top: 10px; padding: 10px 0; border-top: 1px solid rgba(212,175,55,0.2); font-size: 0.75rem; color: var(--accent-gold); font-weight: 800;">
                         NR: ${num} | BMI: ${bmi}
                     </div>
                 </div>
 
                 <div style="display: flex; justify-content: center; margin-top: 10px;">
-                    <div style="width: 30px; height: 18px; background: linear-gradient(to bottom, #009b3a, #fedf00, #002776); border-radius: 3px; opacity: 0.7;"></div>
+                    <div style="width: 32px; height: 20px; background: linear-gradient(to bottom, #009b3a 33%, #fedf00 33% 66%, #002776 66%); border-radius: 3px; border: 1px solid rgba(255,255,255,0.1);"></div>
                 </div>
 
-                <div class="ginga-bg" style="position: absolute; bottom: 5px; right: 10px; font-size: 3rem; opacity: 0.05; font-weight: 900; font-style: italic;">GINGA</div>
+                <div class="ginga-bg" style="position: absolute; bottom: 5px; right: 10px; font-size: 3rem; opacity: 0.07; font-weight: 900; font-style: italic; pointer-events:none;">GINGA</div>
             </div>`;
     },
 
@@ -94,7 +96,7 @@ window.SektorSporttasche = {
         });
         
         localStorage.setItem('toni_players', JSON.stringify(players));
-        if(window.ToniTTS) ToniTTS.speak(`${name} wurde dem Kader hinzugefügt.`, "warm");
+        if(window.ToniTTS) ToniTTS.speak(`${name} wurde erfolgreich in den Kader integriert.`, "warm");
         this.render();
     },
 
@@ -104,36 +106,36 @@ window.SektorSporttasche = {
         if(!p) return;
 
         document.getElementById('active-content').innerHTML = `
-            <div style="padding:30px; max-width:600px; margin:0 auto; background:rgba(0,0,0,0.6); border:2px solid var(--accent-gold); border-radius:20px;">
+            <div style="padding:30px; max-width:600px; margin:0 auto; background:rgba(13, 20, 33, 0.95); border:2px solid var(--accent-gold); border-radius:20px; box-shadow: 0 0 30px rgba(0,0,0,0.5);">
                 <button class="tactic-btn" style="width:auto; margin-bottom:25px;" onclick="SektorSporttasche.render()">
                     <i class="fas fa-chevron-left"></i> ZURÜCK ZUR KABINE
                 </button>
                 
-                <h2 style="color:var(--accent-gold); margin-bottom:20px;">PROFI-DOSSIER: ${p.name.toUpperCase()}</h2>
+                <h2 style="color:var(--accent-gold); margin-bottom:25px; letter-spacing:2px; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:10px;">PROFI-DOSSIER: ${p.name.toUpperCase()}</h2>
                 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
                     <div>
-                        <label style="font-size:0.7rem; color:var(--text-dim);">STATUS</label>
+                        <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">STATUS</label>
                         <select id="edit-status" class="login-input" style="width:100%;">
                             <option value="FIT" ${p.status==='FIT'?'selected':''}>EINSATZBEREIT</option>
                             <option value="Verletzt" ${p.status==='Verletzt'?'selected':''}>VERLETZT</option>
                         </select>
                     </div>
                     <div>
-                        <label style="font-size:0.7rem; color:var(--text-dim);">RATING (1-99)</label>
+                        <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">RATING (1-99)</label>
                         <input type="number" id="edit-rating" value="${p.rating}" class="login-input" style="width:100%;">
                     </div>
                     <div>
-                        <label style="font-size:0.7rem; color:var(--text-dim);">GEWICHT (KG)</label>
+                        <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">GEWICHT (KG)</label>
                         <input type="number" id="edit-weight" value="${p.weight}" class="login-input" style="width:100%;">
                     </div>
                     <div>
-                        <label style="font-size:0.7rem; color:var(--text-dim);">GRÖSSE (CM)</label>
+                        <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">GRÖSSE (CM)</label>
                         <input type="number" id="edit-height" value="${p.height}" class="login-input" style="width:100%;">
                     </div>
                 </div>
                 
-                <button class="login-btn" style="width:100%; margin-top:30px; background:var(--neon-green); color:#000;" onclick="SektorSporttasche.save('${p.id}')">ÄNDERUNGEN SPEICHERN</button>
+                <button class="login-btn" style="width:100%; margin-top:35px; background:var(--neon-green); color:#000; font-weight:900; letter-spacing:2px;" onclick="SektorSporttasche.save('${p.id}')">ÄNDERUNGEN SPEICHERN</button>
             </div>`;
     },
 
@@ -147,7 +149,7 @@ window.SektorSporttasche = {
             players[idx].height = document.getElementById('edit-height').value;
             
             localStorage.setItem('toni_players', JSON.stringify(players));
-            if(window.ToniTTS) ToniTTS.speak("Daten im System gesichert.", "warm");
+            if(window.ToniTTS) ToniTTS.speak("Daten erfolgreich im System gesichert.", "warm");
             this.render();
         }
     }
