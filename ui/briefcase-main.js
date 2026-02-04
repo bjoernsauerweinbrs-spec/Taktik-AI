@@ -1,5 +1,5 @@
 /**
- * TONI 2.0 - ZENTRALE STEUEREINHEIT (FIXED)
+ * TONI 2.0 - ZENTRALE STEUEREINHEIT (ULTIMATE FIX)
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -11,18 +11,25 @@ window.BriefcaseUI = {
 
     toggle: function() {
         const overlay = document.getElementById('briefcase-overlay');
-        if (!overlay) return;
+        if (!overlay) {
+            console.error("Fehler: briefcase-overlay nicht im HTML gefunden!");
+            return;
+        }
 
         this.isOpen = !this.isOpen;
 
         if (this.isOpen) {
-            overlay.style.display = 'flex'; // Zwingt das Overlay zur Anzeige
+            // Zwingt das Overlay zur Anzeige und übersteuert alle CSS-Blockaden
+            overlay.style.setProperty('display', 'flex', 'important');
             overlay.classList.remove('hidden');
+            
             this.backToNav();
             if(window.ToniTTS) ToniTTS.speak("Zentrale geöffnet.", "warm");
+            console.log("Zentrale: Sichtbar geschaltet.");
         } else {
             overlay.style.display = 'none';
             overlay.classList.add('hidden');
+            console.log("Zentrale: Ausgeblendet.");
         }
     },
 
@@ -55,7 +62,6 @@ window.BriefcaseUI = {
                     <div class="fifa-card" onclick="BriefcaseUI.switchSektor('${f.id}')" style="padding: 50px 20px;">
                         <i class="fas ${f.icon}" style="font-size: 3rem; color: ${f.color}; margin-bottom: 25px; display: block;"></i>
                         <span style="font-weight: 900; letter-spacing: 2px; font-size: 0.9rem; color:#fff;">${f.name}</span>
-                        <div style="position:absolute; bottom:10px; right:15px; font-size:2rem; opacity:0.05; font-weight:900;">GINGA</div>
                     </div>
                 `).join('')}
             </div>
@@ -67,18 +73,25 @@ window.BriefcaseUI = {
         const content = document.getElementById('briefcase-content');
         const title = document.getElementById('sector-title');
         
-        nav.classList.add('hidden');
-        content.classList.remove('hidden');
-        title.innerHTML = `<button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:var(--neon-green); cursor:pointer; margin-right:15px; font-size:1.5rem;"><i class="fas fa-arrow-left"></i></button> ${sektor.toUpperCase()}`;
+        if(nav) nav.classList.add('hidden');
+        if(content) content.classList.remove('hidden');
+        
+        title.innerHTML = `
+            <button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:var(--neon-green); cursor:pointer; margin-right:15px; font-size:1.5rem;">
+                <i class="fas fa-arrow-left"></i>
+            </button> ${sektor.toUpperCase()}
+        `;
 
         if (sektor === 'sport' && window.SektorSporttasche) {
             window.SektorSporttasche.render();
         } else if (sektor === 'analyse' && window.SektorAnalyse) {
             window.SektorAnalyse.render();
         } else {
-            document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:100px; color:var(--text-dim);"><i class="fas fa-tools fa-3x mb-3"></i><br>Modul wird geladen...</div>`;
+            const active = document.getElementById('active-content');
+            if(active) active.innerHTML = `<div style="text-align:center; padding:100px; color:var(--text-dim);">Modul wird geladen...</div>`;
         }
     }
 };
 
+// Startet das System
 BriefcaseUI.init();
