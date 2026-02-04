@@ -1,28 +1,24 @@
 /**
  * TONI 2.0 - ZENTRALE STEUEREINHEIT (PRO-ROUTING)
- * Steuerung der Sektoren inklusive neuem Trainingsbetrieb.
+ * Optimierte Ordner-Struktur und Fehler-Handling.
  */
 window.BriefcaseUI = {
     isOpen: false,
 
     init: function() {
-        console.log("Briefcase System: Online.");
+        console.log("TONI 2.0 Briefcase System: Online.");
         this.renderFolderGrid();
     },
 
     toggle: function() {
         const overlay = document.getElementById('briefcase-overlay');
-        if (!overlay) {
-            console.error("Fehler: briefcase-overlay nicht im HTML gefunden!");
-            return;
-        }
+        if (!overlay) return;
 
         this.isOpen = !this.isOpen;
 
         if (this.isOpen) {
             overlay.style.setProperty('display', 'flex', 'important');
             overlay.classList.remove('hidden');
-            
             this.backToNav();
             if(window.ToniTTS) ToniTTS.speak("Zentrale geöffnet.", "warm");
         } else {
@@ -47,10 +43,10 @@ window.BriefcaseUI = {
         const nav = document.getElementById('briefcase-nav');
         if(!nav) return;
 
-        // Erweiterte Ordner-Struktur für professionellen Trainingsbetrieb
+        // Organisierte Ordner-Struktur
         const folders = [
             { id: 'sport', name: 'MANNSCHAFTSKABINE', icon: 'fa-users', color: 'var(--accent-gold)' },
-            { id: 'training', name: 'TRAININGSBETRIEB', icon: 'fa-whistle', color: 'var(--accent-orange)' },
+            { id: 'training', name: 'TRAININGSBETRIEB', icon: 'fa-dumbbell', color: 'var(--accent-orange)' },
             { id: 'analyse', name: 'PERFORMANCE LAB', icon: 'fa-chart-line', color: 'var(--neon-green)' },
             { id: 'templates', name: 'STADIONHEFT', icon: 'fa-book-open', color: '#fff' },
             { id: 'system', name: 'SYSTEM-SETUP', icon: 'fa-cogs', color: '#888' }
@@ -59,7 +55,8 @@ window.BriefcaseUI = {
         nav.innerHTML = `
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; padding: 20px;">
                 ${folders.map(f => `
-                    <div class="fifa-card" onclick="BriefcaseUI.switchSektor('${f.id}')" style="padding: 50px 20px; text-align: center; cursor: pointer;">
+                    <div class="fifa-card" onclick="BriefcaseUI.switchSektor('${f.id}')" 
+                         style="padding: 50px 20px; text-align: center; cursor: pointer; transition: 0.3s;">
                         <i class="fas ${f.icon}" style="font-size: 3rem; color: ${f.color}; margin-bottom: 25px; display: block;"></i>
                         <span style="font-weight: 900; letter-spacing: 2px; font-size: 0.8rem; color:#fff;">${f.name}</span>
                     </div>
@@ -79,37 +76,42 @@ window.BriefcaseUI = {
         nav.classList.add('hidden');
         content.classList.remove('hidden');
         
+        // Titel mit Zurück-Button
+        const displayTitles = {
+            'sport': 'MANNSCHAFTSKABINE',
+            'training': 'TRAININGSBETRIEB',
+            'analyse': 'PERFORMANCE LAB',
+            'templates': 'STADIONHEFT',
+            'system': 'SYSTEM-SETUP'
+        };
+
         title.innerHTML = `
             <button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:var(--neon-green); cursor:pointer; margin-right:15px; font-size:1.5rem;">
                 <i class="fas fa-arrow-left"></i>
-            </button> ${sektor.toUpperCase()}
+            </button> ${displayTitles[sektor] || sektor.toUpperCase()}
         `;
 
-        // --- VERBESSERTES ROUTING: HIER WERDEN DIE MODULE AKTIVIERT ---
-        if (sektor === 'sport' && window.SektorSporttasche) {
-            window.SektorSporttasche.render();
-        } 
-        else if (sektor === 'training' && window.SektorTraining) {
-            window.SektorTraining.render();
-        }
-        else if (sektor === 'analyse' && window.SektorAnalyse) {
-            window.SektorAnalyse.render();
-        } 
-        else if (sektor === 'system' && window.SektorSystem) {
-            window.SektorSystem.render();
-        } 
-        else if (sektor === 'templates' && window.SektorTemplates) {
-            window.SektorTemplates.render();
-        } 
-        else {
-            active.innerHTML = `<div style="text-align:center; padding:100px; color:var(--text-dim);">
-                <i class="fas fa-exclamation-triangle" style="font-size:2rem; margin-bottom:15px; display:block;"></i>
-                Modul <b>${sektor}</b> konnte nicht geladen werden.<br>
-                Prüfe, ob die entsprechende Skript-Datei in der app.html eingebunden ist.
-            </div>`;
+        // Routing-Logik
+        switch(sektor) {
+            case 'sport':
+                if(window.SektorSporttasche) window.SektorSporttasche.render();
+                break;
+            case 'training':
+                if(window.SektorTraining) window.SektorTraining.render();
+                break;
+            case 'analyse':
+                if(window.SektorAnalyse) window.SektorAnalyse.render();
+                break;
+            case 'templates':
+                if(window.SektorTemplates) window.SektorTemplates.render();
+                break;
+            case 'system':
+                if(window.SektorSystem) window.SektorSystem.render();
+                break;
+            default:
+                active.innerHTML = `<div style="text-align:center; padding:100px; color:var(--text-dim);">Modul nicht gefunden.</div>`;
         }
     }
 };
 
-// Startet das System
 BriefcaseUI.init();
