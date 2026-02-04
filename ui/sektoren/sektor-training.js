@@ -1,22 +1,23 @@
 /**
  * TONI 2.0 - INTERNATIONAL TRAINING & METHODOLOGY
- * Verwaltung von Trainings-Pools, Platzaufbau & A4-Export.
+ * Verwaltung von Trainings-Pools, Archivierung & A4-Druck-Engine.
  */
 window.SektorTraining = {
-    sessionPlan: [], // Liste der gespeicherten Übungen für A4
+    sessionPlan: [], 
     currentMode: 'pro',
 
     render: function() {
         const squad = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const drillsArchive = JSON.parse(localStorage.getItem('toni_drills')) || [];
         
         document.getElementById('active-content').innerHTML = `
-            <div style="padding:25px; display:grid; grid-template-columns: 1fr 380px; gap:30px; animation: fadeIn 0.4s ease-out;">
+            <div style="padding:25px; display:grid; grid-template-columns: 1fr 380px; gap:30px; animation: fadeIn 0.4s ease-out; height: 82vh; overflow-y: auto;">
                 
                 <div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
                         <div>
                             <h2 style="color:var(--accent-orange); margin:0; letter-spacing:2px;">TRAININGS-ZENTRALE</h2>
-                            <p style="font-size:0.6rem; color:var(--text-dim); text-transform:uppercase;">Methodik & Belastungssteuerung</p>
+                            <p style="font-size:0.6rem; color:var(--text-dim); text-transform:uppercase;">Methodik & Archivierung</p>
                         </div>
                         <div style="display:flex; gap:10px;">
                             <button class="tactic-btn" onclick="SektorTraining.setMode('pro')" style="${this.currentMode==='pro'?'border-color:var(--neon-green);color:#fff':''}">PRO-PITCH</button>
@@ -25,28 +26,31 @@ window.SektorTraining = {
                         </div>
                     </div>
 
-                    <div class="fifa-card" style="text-align:left; cursor:default; margin-bottom:25px;">
+                    <div class="fifa-card" style="text-align:left; cursor:default; margin-bottom:25px; background:rgba(255,106,0,0.02);">
                         <h4 style="font-size:0.6rem; color:var(--accent-gold); margin-bottom:15px; letter-spacing:1px;">ANWESENHEITSPRÜFUNG (POOL: MAX 20)</h4>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:10px; max-height:250px; overflow-y:auto; padding-right:10px;">
+                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:10px; max-height:200px; overflow-y:auto; padding-right:10px;">
                             ${this.renderAttendanceList(squad)}
                         </div>
                     </div>
 
-                    <div class="fifa-card" style="text-align:left; cursor:default;">
-                        <h4 style="font-size:0.6rem; color:var(--data-cyan); margin-bottom:15px; letter-spacing:1px;">MATERIAL & TOOLS</h4>
-                        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px;">
-                            <button class="tactic-btn" onclick="arena.addTrainingObject('cone')"><i class="fas fa-triangle"></i> HÜTCHEN</button>
-                            <button class="tactic-btn" onclick="arena.addTrainingObject('ladder')"><i class="fas fa-align-justify"></i> LEITER</button>
-                            <button class="tactic-btn" onclick="arena.addTrainingObject('hurdle')"><i class="fas fa-minus"></i> HÜRDE</button>
-                            <button class="tactic-btn" onclick="arena.addTrainingObject('ball')"><i class="fas fa-volleyball-ball"></i> EXTRA-BALL</button>
+                    <div class="fifa-card" style="text-align:left; cursor:default; border-color:var(--accent-orange);">
+                        <h4 style="font-size:0.6rem; color:var(--accent-orange); margin-bottom:15px; letter-spacing:1px;">GESPEICHERTE ÜBUNGEN (ARCHIV)</h4>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:15px;">
+                            ${drillsArchive.length > 0 ? drillsArchive.map((d, i) => `
+                                <div style="background:rgba(0,0,0,0.4); border:1px solid #333; padding:15px; border-radius:10px; position:relative;">
+                                    <div style="font-size:0.75rem; font-weight:900; color:#fff; margin-bottom:5px;">${d.name.toUpperCase()}</div>
+                                    <div style="font-size:0.55rem; color:var(--text-dim); margin-bottom:12px;">${d.date}</div>
+                                    <div style="display:flex; gap:5px;">
+                                        <button class="tactic-btn" style="flex:1; font-size:0.5rem;" onclick="SektorTraining.loadFromArchive(${i})">LADEN</button>
+                                        <button class="tactic-btn" style="color:var(--status-error); font-size:0.5rem;" onclick="SektorTraining.deleteFromArchive(${i})">X</button>
+                                    </div>
+                                </div>
+                            `).join('') : '<p style="font-size:0.6rem; color:#444;">Archiv ist leer. Sag Toni "Speichere Übung", um Daten zu sichern.</p>'}
                         </div>
-                        <button class="login-btn" style="width:100%; margin-top:20px; background:var(--accent-orange); color:#fff;" onclick="SektorTraining.startSession()">
-                            TRAINING AUF BOARD STARTEN
-                        </button>
                     </div>
                 </div>
 
-                <div class="fifa-card" style="border-color:var(--neon-green); text-align:left; cursor:default; display:flex; flex-direction:column;">
+                <div class="fifa-card" style="border-color:var(--neon-green); text-align:left; cursor:default; display:flex; flex-direction:column; position:sticky; top:0; height: fit-content;">
                     <h4 style="font-size:0.6rem; color:var(--neon-green); margin-bottom:20px; letter-spacing:1px;">A4 TAGESPLAN-EDITOR</h4>
                     
                     <div style="flex:1;">
@@ -54,11 +58,11 @@ window.SektorTraining = {
                         <textarea id="drill-desc" placeholder="Ablauf & Coaching-Punkte..." class="login-input" style="width:100%; height:80px; margin-bottom:15px;"></textarea>
                         
                         <button class="login-btn" style="width:100%; font-size:0.7rem;" onclick="SektorTraining.addDrillToPlan()">
-                            ÜBUNG IN PLAN SPEICHERN
+                            ÜBUNG IN PLAN ÜBERNEHMEN
                         </button>
 
                         <div style="margin-top:25px; border-top:1px solid #333; padding-top:20px;">
-                            <h4 style="font-size:0.55rem; color:var(--accent-gold); margin-bottom:10px;">GESPEICHERTE EINHEITEN:</h4>
+                            <h4 style="font-size:0.55rem; color:var(--accent-gold); margin-bottom:10px;">AKTUELLER TAGESABLAUF:</h4>
                             <div id="session-list-summary" style="font-size:0.75rem; color:#fff;">
                                 ${this.renderSessionSummary()}
                             </div>
@@ -75,6 +79,27 @@ window.SektorTraining = {
         `;
     },
 
+    loadFromArchive: function(index) {
+        const archive = JSON.parse(localStorage.getItem('toni_drills')) || [];
+        const drill = archive[index];
+        if(drill && window.arena) {
+            window.arena.players = drill.players;
+            window.arena.trainingObjects = drill.objects;
+            window.arena.render();
+            if(window.BriefcaseUI) window.BriefcaseUI.toggle();
+            if(window.ToniTTS) ToniTTS.speak(`Archivierte Übung ${drill.name} geladen.`, "warm");
+        }
+    },
+
+    deleteFromArchive: function(index) {
+        if(confirm("Übung aus dem Archiv löschen?")) {
+            let archive = JSON.parse(localStorage.getItem('toni_drills')) || [];
+            archive.splice(index, 1);
+            localStorage.setItem('toni_drills', JSON.stringify(archive));
+            this.render();
+        }
+    },
+
     setMode: function(mode) {
         this.currentMode = mode;
         if(window.arena) window.arena.setPitchMode(mode);
@@ -82,7 +107,6 @@ window.SektorTraining = {
     },
 
     renderAttendanceList: function(squad) {
-        if (squad.length === 0) return "<p style='font-size:0.7rem; color:var(--text-dim);'>Kader ist leer.</p>";
         return squad.map(p => {
             const isAtTraining = p.isPresent;
             return `
@@ -105,14 +129,6 @@ window.SektorTraining = {
         }
     },
 
-    startSession: function() {
-        if(window.arena) {
-            window.arena.resetBoard(); 
-            if(window.BriefcaseUI) window.BriefcaseUI.toggle();
-            if(window.ToniTTS) ToniTTS.speak("Trainings-Szenario wird auf das Board übertragen.", "warm");
-        }
-    },
-
     addDrillToPlan: function() {
         const nameInput = document.getElementById('drill-name');
         const descInput = document.getElementById('drill-desc');
@@ -131,7 +147,7 @@ window.SektorTraining = {
     },
 
     renderSessionSummary: function() {
-        if(this.sessionPlan.length === 0) return "<span style='color:#444'>Plan ist leer...</span>";
+        if(this.sessionPlan.length === 0) return "<span style='color:#444'>Noch keine Übungen hinzugefügt...</span>";
         return this.sessionPlan.map((d, i) => `
             <div style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size:0.7rem;">${i+1}. ${d.name}</span>
@@ -149,7 +165,6 @@ window.SektorTraining = {
     preparePrintLayout: function() {
         const printArea = document.getElementById('a4-print-layout');
         if(!printArea) return;
-        
         const date = new Date().toLocaleDateString('de-DE');
 
         printArea.innerHTML = `
@@ -157,28 +172,21 @@ window.SektorTraining = {
                 <div style="display:flex; justify-content:space-between; border-bottom:4px solid #000; padding-bottom:10px; margin-bottom:30px;">
                     <div>
                         <h1 style="margin:0; font-size:24pt;">TRAININGSPLAN</h1>
-                        <p style="margin:0; font-size:10pt; font-weight:bold; color:#666;">INTERNATIONAL PERFORMANCE STANDARDS</p>
+                        <p style="margin:0; font-size:10pt; font-weight:bold; color:#666;">COACH ${JSON.parse(localStorage.getItem('toni_club_config'))?.coach?.toUpperCase() || 'BJÖRN'}</p>
                     </div>
                     <div style="text-align:right;">
-                        <p style="margin:0; font-size:12pt; font-weight:900;">COACH BJÖRN</p>
                         <p style="margin:0; font-size:10pt;">DATUM: ${date}</p>
                     </div>
                 </div>
                 ${this.sessionPlan.map((d, i) => `
                     <div class="drill-card-print">
-                        <div>
-                            <img src="${d.snapshot}" class="drill-image-print">
-                        </div>
+                        <img src="${d.snapshot}" class="drill-image-print">
                         <div style="font-size:10pt; line-height:1.4;">
                             <h2 style="font-size:16pt; margin:0 0 10px 0; border-bottom:2px solid #000; padding-bottom:5px;">${i+1}. ${d.name.toUpperCase()}</h2>
-                            <strong>ABLAUF / COACHING:</strong><br>
-                            ${d.desc.replace(/\n/g, '<br>')}
+                            <strong>ABLAUF / COACHING:</strong><br>${d.desc.replace(/\n/g, '<br>')}
                         </div>
                     </div>
                 `).join('')}
-                <div style="position:fixed; bottom:10mm; left:20mm; right:20mm; border-top:1px solid #eee; padding-top:5px; font-size:8pt; color:#aaa; text-align:center;">
-                    Generiert durch TONI 2.0 AI Assistant - Vertrauliches Trainingsmaterial
-                </div>
             </div>
         `;
     }
