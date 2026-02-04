@@ -48,7 +48,13 @@ window.SektorSporttasche = {
                 <div class="pro-player-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px;">
                     ${filteredPlayers.length > 0 
                         ? filteredPlayers.map(p => this.renderFifaCard(p)).join('') 
-                        : `<div style="grid-column: 1/-1; text-align:center; padding:100px; color:var(--text-dim); border:1px dashed #333;">Keine Spieler in dieser Ansicht gefunden.</div>`
+                        : `
+                        <div style="grid-column: 1/-1; text-align:center; padding:60px; color:var(--text-dim); border:1px dashed #333; border-radius:15px;">
+                            <p>Keine Spieler gefunden.</p>
+                            <button class="login-btn" style="margin-top:20px; background:var(--accent-gold); color:#000;" onclick="SektorSporttasche.seedEliteTeam()">
+                                INTERNATIONALES ELITE-TEAM LADEN
+                            </button>
+                        </div>`
                     }
                 </div>
             </div>`;
@@ -60,8 +66,12 @@ window.SektorSporttasche = {
     },
 
     renderFifaCard: function(p) {
+        // Fallback-Logik gegen "undefined"
         const rating = p.rating || 80;
         const photo = p.photoUrl || 'https://via.placeholder.com/200/000000/39FF14?text=PRO';
+        const status = p.status || 'FIT';
+        const vmax = (p.proKpis && p.proKpis.vmax) ? p.proKpis.vmax : '--';
+        const rsa = (p.proKpis && p.proKpis.rsa) ? p.proKpis.rsa : '--';
         
         // Status-Indikatoren
         let badge = "";
@@ -86,11 +96,15 @@ window.SektorSporttasche = {
 
                 <div style="padding:15px; text-align: center;">
                     <div style="font-size: 1.1rem; font-weight: 900; color:#fff; margin-bottom:5px;">${p.name.toUpperCase()}</div>
-                    <div style="font-size: 0.6rem; color:var(--text-dim); margin-bottom:10px;">NR: ${p.number} | ${p.status}</div>
+                    <div style="font-size: 0.6rem; color:var(--text-dim); margin-bottom:10px;">NR: ${p.number} | ${status}</div>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.6rem; font-weight: bold; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                        <div style="display:flex; justify-content:space-between;"><span>VMAX</span> <span style="color:var(--neon-green)">${p.proKpis?.vmax || '--'}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>RSA</span> <span style="color:var(--neon-green)">${p.proKpis?.rsa || '--'}</span></div>
+                        <div style="display:flex; justify-content:space-between; padding-right:5px; border-right:1px solid #333;">
+                            <span>VMAX</span> <span style="color:var(--neon-green)">${vmax}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding-left:5px;">
+                            <span>RSA</span> <span style="color:var(--neon-green)">${rsa}</span>
+                        </div>
                     </div>
                 </div>
             </div>`;
@@ -100,6 +114,10 @@ window.SektorSporttasche = {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const p = players.find(x => x.id == id);
         if(!p) return;
+
+        // Fallback für vitals
+        const pulse = (p.vitals && p.vitals.pulse) ? p.vitals.pulse : 70;
+        const spo2 = (p.vitals && p.vitals.spo2) ? p.vitals.spo2 : 98;
 
         document.getElementById('active-content').innerHTML = `
             <div style="padding:30px; max-width:900px; margin:0 auto; background:rgba(13, 20, 33, 0.98); border:2px solid var(--accent-gold); border-radius:20px; animation: fadeIn 0.3s;">
@@ -138,10 +156,10 @@ window.SektorSporttasche = {
                     <div style="background:rgba(57,255,20,0.03); padding:20px; border-radius:10px; border:1px solid rgba(57,255,20,0.1);">
                         <h4 style="color:var(--neon-green); font-size:0.6rem; margin-bottom:15px;">PERFORMANCE-PARAMETER</h4>
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                            <div><label style="font-size:0.5rem;">RATING</label><input type="number" id="edit-rating" value="${p.rating}" class="login-input"></div>
+                            <div><label style="font-size:0.5rem;">RATING</label><input type="number" id="edit-rating" value="${rating}" class="login-input"></div>
                             <div><label style="font-size:0.5rem;">NUMMER</label><input type="number" id="edit-number" value="${p.number}" class="login-input"></div>
-                            <div><label style="font-size:0.5rem;">PULS</label><input type="number" id="edit-pulse" value="${p.vitals?.pulse || 70}" class="login-input"></div>
-                            <div><label style="font-size:0.5rem;">SpO2</label><input type="number" id="edit-spo2" value="${p.vitals?.spo2 || 98}" class="login-input"></div>
+                            <div><label style="font-size:0.5rem;">PULS</label><input type="number" id="edit-pulse" value="${pulse}" class="login-input"></div>
+                            <div><label style="font-size:0.5rem;">SpO2</label><input type="number" id="edit-spo2" value="${spo2}" class="login-input"></div>
                         </div>
                     </div>
                 </div>
@@ -223,5 +241,18 @@ window.SektorSporttasche = {
             localStorage.setItem('toni_players', JSON.stringify([]));
             this.render();
         }
+    },
+
+    seedEliteTeam: function() {
+        const elite = [
+            { id: 'p1', name: 'M. Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 62, spo2: 99 }, proKpis: { vmax: 2, rsa: 80, ballControl: 85, stress: 90 }, formHistory: [88, 89, 89, 90, 89] },
+            { id: 'p2', name: 'V. van Dijk', number: 4, pos: 'IV', rating: 88, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 65, spo2: 98 }, proKpis: { vmax: 3, rsa: 85, ballControl: 78, stress: 95 }, formHistory: [85, 86, 88, 88, 88] },
+            { id: 'p3', name: 'K. Mbappe', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 56, spo2: 99 }, proKpis: { vmax: 3, rsa: 85, ballControl: 92, stress: 89 }, formHistory: [91, 92, 92, 92, 92] },
+            { id: 'p4', name: 'E. Haaland', number: 9, pos: 'ST', rating: 91, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 63, spo2: 98 }, proKpis: { vmax: 3, rsa: 82, ballControl: 80, stress: 92 }, formHistory: [89, 90, 91, 91, 91] },
+            { id: 'p5', name: 'J. Kimmich', number: 6, pos: 'ZM', rating: 86, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 55, spo2: 99 }, proKpis: { vmax: 2, rsa: 95, ballControl: 88, stress: 98 }, formHistory: [85, 86, 86, 87, 86] }
+        ];
+        localStorage.setItem('toni_players', JSON.stringify(elite));
+        this.render();
+        if(window.ToniTTS) ToniTTS.speak("Internationaler Elite-Kader geladen.", "warm");
     }
 };
