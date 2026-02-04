@@ -6,6 +6,19 @@
     <title>TONI 2.0 - INTERNATIONAL PERFORMANCE CENTER</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Zusätzlicher Effekt für das Mikrofon, wenn es aktiv ist */
+        .mic-active {
+            color: var(--accent-orange) !important;
+            text-shadow: 0 0 15px var(--accent-orange);
+            animation: pulse-mic 1.5s infinite;
+        }
+        @keyframes pulse-mic {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
 
@@ -17,8 +30,8 @@
             <span style="font-size: 0.5rem; font-weight: 900; color: var(--neon-green);">ZENTRALE</span>
         </div>
 
-        <div class="control-unit" onclick="if(window.ToniCore) ToniCore.startVoice()" title="Toni Live Chat">
-            <i class="fas fa-microphone-alt"></i>
+        <div class="control-unit" id="mic-control" onclick="if(window.ToniCore) ToniCore.startVoice()" title="Toni Live Chat">
+            <i class="fas fa-microphone-alt" id="mic-icon"></i>
             <span style="font-size: 0.5rem; font-weight: 900;">TONI LIVE</span>
         </div>
 
@@ -39,22 +52,23 @@
     </main>
 
     <section class="analysis-panel">
-        <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="font-size: 0.7rem; letter-spacing: 3px; color: var(--neon-green); margin: 0;">PERFORMANCE FEED</h2>
+            <i class="fas fa-signal" style="font-size: 0.6rem; color: var(--neon-green); opacity: 0.5;"></i>
         </div>
         
         <div id="setcard-content" style="padding: 20px;">
             <div style="background: rgba(57, 255, 20, 0.05); padding: 15px; border-radius: 10px; border-left: 3px solid var(--neon-green);">
-                <span style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">STATUS</span>
-                <div id="toni-status-text" style="font-size:0.8rem; font-weight:bold; color:#fff; letter-spacing:1px;">KI-KERN BEREIT</div>
+                <span style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">STATUS-MONITOR</span>
+                <div id="toni-status-text" style="font-size:0.8rem; font-weight:bold; color:#fff; letter-spacing:1px;">SYSTEM BOOTING...</div>
             </div>
         </div>
 
         <div class="chat-container">
-            <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; font-size: 0.85rem;"></div>
+            <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; font-size: 0.85rem; scroll-behavior: smooth;"></div>
             <div style="padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.3);">
-                <input type="text" id="chat-input" style="flex: 1; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 5px; outline: none;" placeholder="Befehl an Toni...">
-                <button id="send-btn" style="background: var(--neon-green); border: none; width: 40px; border-radius: 5px; cursor: pointer;">
+                <input type="text" id="chat-input" autocomplete="off" style="flex: 1; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 5px; outline: none; font-size: 0.8rem;" placeholder="Befehl an Toni...">
+                <button id="send-btn" style="background: var(--neon-green); border: none; width: 45px; border-radius: 5px; cursor: pointer; transition: 0.2s;">
                     <i class="fas fa-paper-plane" style="color:#000;"></i>
                 </button>
             </div>
@@ -65,8 +79,11 @@
 <div id="briefcase-overlay" class="briefcase-overlay">
     <div class="briefcase-window">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:20px;">
-            <h2 id="sector-title" style="margin:0; color:var(--neon-green); letter-spacing:3px;">ZENTRALE</h2>
-            <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:#fff; font-size:2rem; cursor:pointer;">&times;</button>
+            <div style="display:flex; align-items:center; gap:15px;">
+                <i class="fas fa-briefcase" style="color:var(--accent-gold);"></i>
+                <h2 id="sector-title" style="margin:0; color:var(--neon-green); letter-spacing:3px; font-size:1.1rem;">ZENTRALE</h2>
+            </div>
+            <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:#fff; font-size:2rem; cursor:pointer; line-height:1;">&times;</button>
         </div>
         <div id="briefcase-nav"></div>
         <div id="briefcase-content" class="hidden">
@@ -77,20 +94,15 @@
 
 <script src="logic/toni-tts.js"></script>
 <script src="logic/toni-core.js"></script>
-
 <script src="ui/sektoren/sektor-sporttasche.js"></script>
 <script src="ui/sektoren/sektor-training.js"></script>
 <script src="ui/sektoren/sektor-system.js"></script>
 <script src="ui/sektoren/sektor-analyse.js"></script>
 <script src="ui/sektoren/sektor-templates.js"></script>
-
 <script src="ui/briefcase-main.js"></script>
 <script src="engine/arena.js"></script>
 
 <script>
-    /**
-     * ZENTRALE CHAT-LOGIK
-     */
     function sendMessage() {
         const input = document.getElementById('chat-input');
         if(!input) return;
@@ -101,49 +113,34 @@
         }
     }
 
-    /**
-     * INITIALISIERUNG NACH LADEN DER SEITE
-     */
     window.addEventListener('load', function() {
-        console.log("TONI 2.0: Booting international protocol...");
+        console.log("TONI 2.0: Initializing elite protocols...");
 
-        // Arena initialisieren
+        // Arena Start
         if(window.arena) {
             arena.init('main-canvas');
-        } else {
-            console.error("KRITISCH: Arena-Engine nicht gefunden!");
         }
 
-        // Aktentasche initialisieren
+        // Aktentasche Start
         if(window.BriefcaseUI) {
             BriefcaseUI.init();
         }
 
-        // Event Listener sicher zuweisen
+        // Event Listeners
         const sendBtn = document.getElementById('send-btn');
         const chatInput = document.getElementById('chat-input');
+        if(sendBtn) sendBtn.addEventListener('click', sendMessage);
+        if(chatInput) chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-        if(sendBtn) {
-            sendBtn.addEventListener('click', sendMessage);
-        }
-
-        if(chatInput) {
-            chatInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') sendMessage();
-            });
-        }
-
-        // Internationaler System-Check & Status-Update
+        // System Ready Signal
         setTimeout(() => {
-            if(window.ToniCore) {
-                console.log("TONI 2.0: International Core Online.");
-                const statusBox = document.getElementById('toni-status-text');
-                if(statusBox) statusBox.innerText = "SYSTEM BEREIT [PRO]";
-                
-                // Kurze Begrüßung (Optional)
-                if(window.ToniTTS) ToniTTS.speak("System bereit, Coach Björn. Analyse-Einheit scharf geschaltet.", "warm");
+            const statusBox = document.getElementById('toni-status-text');
+            if(statusBox) {
+                statusBox.innerText = "SYSTEM BEREIT [PRO]";
+                statusBox.style.color = "var(--neon-green)";
             }
-        }, 800);
+            if(window.ToniTTS) ToniTTS.speak("System bereit, Coach Björn. Analyse-Einheit scharf geschaltet.", "warm");
+        }, 1000);
     });
 </script>
 
