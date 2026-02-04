@@ -1,5 +1,5 @@
 /**
- * TONI 2.0 - INTERNATIONAL PERFORMANCE LAB
+ * TONI 2.0 - INTERNATIONAL PERFORMANCE LAB (FINAL VERSION)
  * Professional Analytics: Radar-Matrix, Medical Trends & Evolution Tracking.
  */
 window.SektorAnalyse = {
@@ -20,7 +20,7 @@ window.SektorAnalyse = {
                 </div>
 
                 <div id="analysis-console" style="background: rgba(13, 20, 33, 0.6); border-radius: 20px; border: 1px solid rgba(57,255,20,0.1); padding: 40px; position:relative; overflow-y:auto;">
-                    ${this.renderInitialState()}
+                    ${this.selectedPlayerId ? this.renderDetailView(this.selectedPlayerId) : this.renderInitialState()}
                 </div>
 
             </div>`;
@@ -44,7 +44,7 @@ window.SektorAnalyse = {
                     </div>
                     <div style="flex:1;">
                         <div style="font-size:0.8rem; font-weight:700; color:#fff;">${p.name.toUpperCase()}</div>
-                        <div style="font-size:0.55rem; color:var(--text-dim);">${p.pos} | ${p.status}</div>
+                        <div style="font-size:0.55rem; color:var(--text-dim);">${p.pos} | ${p.status || 'FIT'}</div>
                     </div>
                 </div>`;
         };
@@ -60,20 +60,21 @@ window.SektorAnalyse = {
     selectPlayer: function(id) {
         this.selectedPlayerId = id;
         this.render(); 
-        this.updateDetailView(id);
     },
 
-    updateDetailView: function(id) {
+    renderDetailView: function(id) {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
         const p = players.find(x => x.id === id);
-        const console = document.getElementById('analysis-console');
-        if(!p || !console) return;
+        if(!p) return this.renderInitialState();
 
-        console.innerHTML = `
+        // Nutze die formHistory aus dem Elite-Seed oder generiere Fallback
+        const formTrend = p.formHistory || [80, 82, 85, 84, p.rating];
+
+        return `
             <div style="animation: fadeIn 0.4s ease-out;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:40px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:20px;">
                     <div style="display:flex; gap:20px; align-items:center;">
-                        <img src="${p.photoUrl || ''}" style="width:90px; height:90px; border-radius:15px; border:2px solid var(--neon-green); object-fit:cover;">
+                        <img src="${p.photoUrl || 'https://via.placeholder.com/150/000000/39FF14?text=' + p.name}" style="width:90px; height:90px; border-radius:15px; border:2px solid var(--neon-green); object-fit:cover;">
                         <div>
                             <h1 style="margin:0; font-size:2.5rem; font-weight:900; letter-spacing:-1px;">${p.name.toUpperCase()}</h1>
                             <span style="color:var(--neon-green); font-weight:900; letter-spacing:2px; font-size:0.7rem;">INTERNATIONAL PERFORMANCE DOSSIER</span>
@@ -93,10 +94,10 @@ window.SektorAnalyse = {
                     </div>
 
                     <div style="background:rgba(0,209,255,0.02); padding:25px; border-radius:15px; border:1px solid rgba(0,209,255,0.1);">
-                        <h3 style="font-size:0.65rem; color:var(--data-cyan); margin-bottom:20px; letter-spacing:2px;">EVOLUTION MATRIX (LAST 3 DAYS)</h3>
+                        <h3 style="font-size:0.65rem; color:var(--data-cyan); margin-bottom:20px; letter-spacing:2px;">EVOLUTION MATRIX (LEISTUNGS-TREND)</h3>
                         <div style="display:flex; flex-direction:column; gap:20px;">
-                            ${this.renderVitalTrend("PULS (BPM)", p.vitals?.pulse || 72, [74, 69, p.vitals?.pulse || 72], "var(--status-fit)")}
-                            ${this.renderVitalTrend("SAUERSTOFF (SpO2)", p.vitals?.spo2 || 98, [96, 98, p.vitals?.spo2 || 98], "var(--data-cyan)")}
+                            ${this.renderVitalTrend("EVOLUTION (TREND)", p.rating, formTrend, "var(--neon-green)")}
+                            ${this.renderVitalTrend("PULS-BELASTUNG (BPM)", p.vitals?.pulse || 72, [74, 69, 71, 75, p.vitals?.pulse || 72], "var(--status-fit)")}
                         </div>
                     </div>
 
@@ -136,8 +137,8 @@ window.SektorAnalyse = {
                 </div>
                 <div style="display:flex; align-items:flex-end; gap:8px; height:50px; padding-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.1);">
                     ${history.map(val => {
-                        // Dynamische Höhe für Trend-Visualisierung
-                        const h = (val / (label.includes("PULS") ? 200 : 100)) * 100;
+                        const max = label.includes("PULS") ? 200 : 100;
+                        const h = (val / max) * 100;
                         return `<div style="flex:1; height:${h}%; background:${color}; opacity:0.6; border-radius:3px 3px 0 0;"></div>`;
                     }).join('')}
                 </div>
@@ -146,15 +147,15 @@ window.SektorAnalyse = {
 
     generateProReport: function(p) {
         const kpis = p.proKpis || { rsa: 75, stress: 75 };
-        if(p.status !== 'FIT') return `Achtung Coach: Die medizinische Abteilung empfiehlt für ${p.name} ein individuelles Belastungs-Management. Ein Einsatz in der Startelf ist bei den aktuellen Vitalwerten (Trend abfallend) nicht ratsam.`;
+        if(p.status && p.status !== 'FIT') return `Achtung Coach: Die medizinische Abteilung empfiehlt für ${p.name} ein individuelles Belastungs-Management. Ein Einsatz in der Startelf ist bei den aktuellen Vitalwerten (Trend abfallend) nicht ratsam.`;
         if(p.rating > 85) return `${p.name} agiert auf absolutem Weltklasse-Niveau. Seine Stress-Resistenz (${kpis.stress}) und die Antizipation von vertikalen Räumen machen ihn zum unverzichtbaren Anker in unserem System.`;
-        return `${p.name} zeigt eine stabile Leistungs-Entwicklung in der Evolution-Matrix. Besonders die RSA-Werte (Sprint-Ausdauer) haben sich über die letzten 3 Tage positiv stabilisiert. Einsatzbereit für volle 90 Minuten.`;
+        return `${p.name} zeigt eine stabile Leistungs-Entwicklung in der Evolution-Matrix. Besonders die RSA-Werte (Sprint-Ausdauer) haben sich über die letzten Einheiten positiv stabilisiert. Einsatzbereit für volle 90 Minuten.`;
     },
 
     renderInitialState: function() {
         return `
             <div style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; opacity:0.4;">
-                <i class="fas fa-chart-network" style="font-size:4rem; color:var(--neon-green); margin-bottom:20px;"></i>
+                <i class="fas fa-microscope" style="font-size:4rem; color:var(--neon-green); margin-bottom:20px;"></i>
                 <h3 style="letter-spacing:4px; font-weight:900;">READY FOR PRO-ANALYSIS</h3>
                 <p style="font-size:0.8rem;">Wähle einen Profi aus dem Kader-Panel links aus,<br>um das internationale Performance-Dossier zu laden.</p>
             </div>`;
