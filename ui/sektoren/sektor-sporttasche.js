@@ -1,10 +1,18 @@
 /**
- * TONI 2.0 - MANNSCHAFTSKABINE
- * FIFA-Karten mit Neon-Ginga Hover-Effekt
+ * TONI 2.0 - MANNSCHAFTSKABINE PRO
+ * FIFA-Karten mit Neon-Ginga Hover-Effekt & Sortier-Logik
  */
 window.SektorSporttasche = {
+    // Standardmäßig nach Stärke sortieren
+    currentSort: 'rating', 
+
     render: function() {
-        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        
+        // Automatisches Sortieren nach Rating (Absteigend)
+        if (this.currentSort === 'rating') {
+            players.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        }
         
         document.getElementById('active-content').innerHTML = `
             <div style="padding:20px;">
@@ -13,9 +21,15 @@ window.SektorSporttasche = {
                         <h2 style="color:var(--accent-gold); letter-spacing:3px; margin:0; text-shadow: 0 0 15px rgba(212,175,55,0.3);">MANNSCHAFTSKABINE</h2>
                         <p style="font-size:0.8rem; color:var(--neon-green); font-weight:bold; margin-top:5px;">GINGA PERFORMANCE SELECTION</p>
                     </div>
-                    <button class="login-btn" style="width:auto; padding:12px 30px; background:var(--neon-green); color:#000; font-weight:900;" onclick="SektorSporttasche.addPlayer()">
-                        <i class="fas fa-plus"></i> NEUER PROFI
-                    </button>
+                    <div style="display:flex; gap:15px;">
+                        <div style="background:rgba(255,255,255,0.05); padding:10px 20px; border-radius:10px; border:1px solid var(--accent-gold); display:flex; align-items:center; gap:10px;">
+                            <i class="fas fa-sort-amount-down" style="color:var(--accent-gold);"></i>
+                            <span style="font-size:0.7rem; font-weight:bold; color:#fff;">SORTIERT NACH: RATING</span>
+                        </div>
+                        <button class="login-btn" style="width:auto; padding:12px 30px; background:var(--neon-green); color:#000; font-weight:900;" onclick="SektorSporttasche.addPlayer()">
+                            <i class="fas fa-plus"></i> NEUER PROFI
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="pro-player-list">
@@ -73,7 +87,7 @@ window.SektorSporttasche = {
             name: name,
             number: prompt("Rückennummer:", "10"),
             pos: prompt("Position (ST, ZM, IV, TW):", "ZM"),
-            rating: 80,
+            rating: parseInt(prompt("Rating (1-99):", "80")),
             status: 'FIT',
             weight: 75,
             height: 180
@@ -128,12 +142,12 @@ window.SektorSporttasche = {
         const idx = players.findIndex(x => x.id == id);
         if(idx > -1) {
             players[idx].status = document.getElementById('edit-status').value;
-            players[idx].rating = document.getElementById('edit-rating').value;
+            players[idx].rating = parseInt(document.getElementById('edit-rating').value);
             players[idx].weight = document.getElementById('edit-weight').value;
             players[idx].height = document.getElementById('edit-height').value;
             
             localStorage.setItem('toni_players', JSON.stringify(players));
-            if(window.ToniTTS) ToniTTS.speak("Daten aktualisiert.", "warm");
+            if(window.ToniTTS) ToniTTS.speak("Daten im System gesichert.", "warm");
             this.render();
         }
     }
