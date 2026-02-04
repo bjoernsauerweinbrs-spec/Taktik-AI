@@ -21,14 +21,13 @@ window.BriefcaseUI = {
         if(!localStorage.getItem('toni_club_config')) {
             localStorage.setItem('toni_club_config', JSON.stringify(this.clubData));
         }
-        // Initialer Seiten-Speicher für das Magazin
-        if (!this.magazinPages) {
-            this.magazinPages = [
-                { id: 'p1', title: 'INSIDE ARENA.', type: 'cover', content: 'MATCHDAY MAG' },
-                { id: 'p2', title: 'Wort des Coaches', type: 'text', content: 'Heute zählt nur die absolute Hingabe...' },
-                { id: 'p3', title: 'Analyse & Formation', type: 'taktik', content: 'Fokus auf Raumkontrolle.' }
-            ];
-        }
+        
+        // Magazin-Seiten aus dem Speicher laden oder Standard erstellen
+        this.magazinPages = JSON.parse(localStorage.getItem('toni_magazin_draft')) || [
+            { id: 'p1', title: 'INSIDE ARENA.', type: 'cover', content: 'MATCHDAY MAG - Klicken zum Bearbeiten' },
+            { id: 'p2', title: 'Wort des Coaches', type: 'text', content: 'Heute zählt nur die absolute Hingabe...' },
+            { id: 'p3', title: 'Analyse & Formation', type: 'taktik', content: 'Fokus auf Raumkontrolle und Libero-Absicherung.' }
+        ];
     },
 
     // --- NAVIGATION ---
@@ -90,7 +89,7 @@ window.BriefcaseUI = {
         else this.renderPlaceholder(sektor);
     },
 
-    // --- SYSTEM (STAMMDATEN) ---
+    // --- SYSTEM ---
     renderSystem: function() {
         const c = this.clubData;
         document.getElementById('active-content').innerHTML = `
@@ -131,7 +130,7 @@ window.BriefcaseUI = {
         if(window.ToniAI) ToniAI.speak("Daten gespeichert. Wir greifen jetzt in der " + this.clubData.league + " an, Coach!");
     },
 
-    // --- SPONSORING (CONSULTING) ---
+    // --- SPONSORING ---
     renderSponsoring: function() {
         document.getElementById('active-content').innerHTML = `
             <div style="padding:15px;">
@@ -161,7 +160,7 @@ window.BriefcaseUI = {
         }
     },
 
-    // --- STADIONHEFT (INTERAKTIV & SEITEN-MANAGEMENT) ---
+    // --- STADIONHEFT EDITOR ---
     renderTemplates: function() {
         const currentMatch = JSON.parse(localStorage.getItem('toni_current_matchplan')) || { formation: '4-3-3' };
         
@@ -189,9 +188,9 @@ window.BriefcaseUI = {
                             <span style="font-size:0.75rem;">SEITE ${index + 1}</span>
                         </div>
                         
-                        <h2 contenteditable="true" style="font-size:3.5rem; font-weight:900; line-height:0.8; margin:0; letter-spacing:-3px; text-transform:uppercase;">${p.title}</h2>
+                        <h2 contenteditable="true" onblur="BriefcaseUI.saveMagDraft(${index}, 'title', this.innerText)" style="font-size:3.5rem; font-weight:900; line-height:0.8; margin:0; letter-spacing:-3px; text-transform:uppercase;">${p.title}</h2>
                         ${layoutExtra}
-                        <div contenteditable="true" style="font-size:1.1rem; line-height:1.6; text-align:justify; margin-top:15px; flex-grow:1; outline:none; border:1px dashed transparent;" onfocus="this.style.border='1px dashed #ccc'" onblur="this.style.border='1px dashed transparent'">
+                        <div contenteditable="true" onblur="BriefcaseUI.saveMagDraft(${index}, 'content', this.innerText)" style="font-size:1.1rem; line-height:1.6; text-align:justify; margin-top:15px; flex-grow:1; outline:none; border:1px dashed transparent;">
                             ${p.content}
                         </div>
                         
@@ -209,39 +208,38 @@ window.BriefcaseUI = {
                     .no-print, #sector-title, #briefcase-nav, .login-btn:not(#print-btn) { display: none !important; } 
                     body { background: white !important; padding:0 !important; } 
                     .mag-page { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; height: 100vh !important; page-break-after: always !important; }
-                    .mag-page-wrapper { margin: 0 !important; }
                 }
-                .mag-page:hover { border: 1px solid #ff9500; }
             </style>
             <div style="padding:20px; background:#1a1a1a; height:500px; overflow-y:auto; scroll-behavior: smooth;">
-                <p style="color:#ff9500; font-size:0.8rem; text-align:center; margin-bottom:20px;"><i class="fas fa-info-circle"></i> Bearbeite Texte direkt auf der Seite. Nutze die Buttons links für das Seiten-Management.</p>
                 <div id="magazin-canvas">
                     ${this.magazinPages.map((p, i) => renderPage(p, i)).join('')}
                 </div>
                 <div style="text-align:center; padding:40px;">
                     <button id="print-btn" class="login-btn" style="background:#ff9500; color:#000; width:350px; height:60px; font-size:1.2rem;" onclick="window.print()">
-                        <i class="fas fa-print"></i> MAGAZIN DRUCKEN / PDF EXPORT
+                        <i class="fas fa-print"></i> PDF EXPORT
                     </button>
                 </div>
             </div>`;
     },
 
+    saveMagDraft: function(index, field, value) {
+        this.magazinPages[index][field] = value;
+        localStorage.setItem('toni_magazin_draft', JSON.stringify(this.magazinPages));
+    },
+
     addMagPage: function(index) {
-        this.magazinPages.splice(index + 1, 0, { 
-            id: Date.now(), 
-            title: 'NEUE SEITE.', 
-            type: 'text', 
-            content: 'Schreibe hier deine Analyse oder füge Spieltags-Informationen ein...' 
-        });
+        this.magazinPages.splice(index + 1, 0, { id: Date.now(), title: 'NEUE SEITE.', type: 'text', content: 'Inhalt hier einfügen...' });
+        localStorage.setItem('toni_magazin_draft', JSON.stringify(this.magazinPages));
         this.renderTemplates();
-        if(window.ToniAI) ToniAI.speak("Ich habe eine neue Seite eingefügt, Coach.");
+        if(window.ToniAI) ToniAI.speak("Neue Seite hinzugefügt.");
     },
 
     removeMagPage: function(index) {
         if (this.magazinPages.length <= 1) return;
         this.magazinPages.splice(index, 1);
+        localStorage.setItem('toni_magazin_draft', JSON.stringify(this.magazinPages));
         this.renderTemplates();
-        if(window.ToniAI) ToniAI.speak("Seite wurde aus dem Entwurf gelöscht.");
+        if(window.ToniAI) ToniAI.speak("Seite entfernt.");
     },
 
     // --- SPORTTASCHE ---
@@ -256,7 +254,7 @@ window.BriefcaseUI = {
             <div style="padding:15px;">
                 <h4 style="color:#fff;">INTERNATIONALES TRAINING</h4>
                 <div id="drill-box" style="background:#111; padding:15px; border-radius:10px; border-left:4px solid #00d1ff; font-size:0.75rem; color:#ccc;">
-                    Ich scanne Datenbanken für die ${this.clubData.league}...
+                    Datenbank-Analyse für ${this.clubData.league} aktiv...
                 </div>
                 <button class="tactic-btn" style="margin-top:15px;" onclick="BriefcaseUI.askConsultant('training')">ÜBUNGEN RECHARCHIEREN</button>
             </div>`;
@@ -265,6 +263,12 @@ window.BriefcaseUI = {
     openFIFAcard: function(id) {
         var players = JSON.parse(localStorage.getItem('toni_players')) || []; var p = players.find(x => x.id == id); if(!p) return;
         document.getElementById('active-content').innerHTML = `<div style="display:grid; grid-template-columns:240px 1fr; gap:30px; background:#000; padding:25px; border-radius:15px; border:1px solid #ff9500;"><div style="width:240px; height:360px; background:linear-gradient(145deg, #d4af37, #b8860b); border-radius:10px; padding:20px; color:#111; text-align:center;"><div id="v-rating" style="font-size:4rem; font-weight:900;">${p.rating||80}</div><div style="font-weight:bold;">${p.pos||'ZM'}</div><div style="width:110px; height:110px; margin:10px auto; border-radius:50%; background:#333; overflow:hidden;"><img id="v-photo" src="${p.photo||''}" style="width:100%; height:100%; object-fit:cover;"></div><div style="font-size:1.3rem; font-weight:900;">${p.name}</div></div><div><h3 style="color:#ff9500; margin:0;">ANALYSIS</h3><button class="login-btn" style="width:100%; margin-top:20px;" onclick="BriefcaseUI.renderSporttasche()">ZURÜCK</button></div></div>`;
+    },
+
+    renderReports: function() {
+        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const avg = players.length > 0 ? Math.round(players.reduce((a,b) => a + (b.rating || 0), 0) / players.length) : 0;
+        document.getElementById('active-content').innerHTML = `<div style="padding:15px;"><div style="background:rgba(0,209,255,0.05); border:1px solid #00d1ff; padding:20px; border-radius:15px; text-align:center; margin-bottom:20px;"><h4 style="margin:0; color:#00d1ff;">GLOBAL INDEX</h4><div style="font-size:3rem; font-weight:900; color:#fff;">${avg}%</div></div><div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px;">${players.sort((a,b)=>b.rating-a.rating).map(p => `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #222; font-size:0.8rem;"><span>${p.name}</span><b style="color:#ff9500;">${p.rating}</b></div>`).join('')}</div></div>`;
     },
 
     renderPlaceholder: function(s) { document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px; color:#444;">Sektor ${s} folgt...</div>`; },
