@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - MANNSCHAFTSKABINE PRO (INTERNATIONAL STANDARDS)
- * FIFA-Style Cards mit Foto-Upload, Anwesenheits-Management & Arena-Sync.
+ * FIFA-Style Cards mit Foto-Upload, Anwesenheits-Management & Dossier-Zugriff.
  */
 window.SektorSporttasche = {
     currentFilter: 'all',
@@ -53,12 +53,12 @@ window.SektorSporttasche = {
         const photo = p.photoUrl || 'https://via.placeholder.com/150/000000/39FF14?text=PRO';
 
         return `
-            <div class="fifa-card" style="border: 2px solid ${borderCol}; background: linear-gradient(135deg, #0d1117 0%, #000 100%); position:relative; box-shadow: ${presenceGlow};">
+            <div class="fifa-card" onclick="SektorSporttasche.edit('${p.id}')" style="border: 2px solid ${borderCol}; background: linear-gradient(135deg, #0d1117 0%, #000 100%); position:relative; box-shadow: ${presenceGlow}; cursor:pointer; transition: transform 0.2s;">
                 
                 <div style="position:absolute; top:12px; right:12px; z-index:10;">
                     <div onclick="event.stopPropagation(); SektorSporttasche.fastToggle('${p.id}', 'isPresent')" 
                          title="${p.isPresent ? 'Im Training' : 'Abwesend'}"
-                         style="width:18px; height:18px; border-radius:50%; background:${p.isPresent ? 'var(--neon-green)' : '#444'}; border:3px solid #000; cursor:pointer; box-shadow:${p.isPresent ? '0 0 10px var(--neon-green)' : 'none'};"></div>
+                         style="width:18px; height:18px; border-radius:50%; background:${p.isPresent ? 'var(--neon-green)' : '#444'}; border:3px solid #000; cursor:pointer;"></div>
                 </div>
 
                 <div style="padding:25px 25px 15px 25px; display:flex; gap:15px; align-items:center;">
@@ -70,7 +70,7 @@ window.SektorSporttasche = {
                         <img src="${photo}" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div style="flex:1;">
-                        <div style="font-weight:900; font-size:0.9rem; letter-spacing:1px;">${p.name.toUpperCase()}</div>
+                        <div style="font-weight:900; font-size:0.9rem; letter-spacing:1px; color:#fff;">${p.name.toUpperCase()}</div>
                         <div style="font-size:0.5rem; color:var(--accent-gold); font-weight:bold;">NR. ${p.number} | ${p.status || 'FIT'}</div>
                     </div>
                 </div>
@@ -80,8 +80,6 @@ window.SektorSporttasche = {
                             style="flex:1; font-size:0.55rem; padding:6px; border-radius:4px; border:1px solid #333; cursor:pointer; background:${p.isStarter?'var(--neon-green)':'transparent'}; color:${p.isStarter?'#000':'#fff'}; font-weight:900;">STARTELF</button>
                     <button onclick="event.stopPropagation(); SektorSporttasche.setMatchRole('${p.id}', 'sub')" 
                             style="flex:1; font-size:0.55rem; padding:6px; border-radius:4px; border:1px solid #333; cursor:pointer; background:${p.isNominated?'var(--accent-gold)':'transparent'}; color:${p.isNominated?'#000':'#fff'}; font-weight:900;">BANK</button>
-                    <button onclick="SektorSporttasche.edit('${p.id}')" 
-                            style="width:30px; background:rgba(255,255,255,0.05); border:1px solid #333; color:#fff; border-radius:4px;"><i class="fas fa-edit"></i></button>
                 </div>
             </div>`;
     },
@@ -93,7 +91,6 @@ window.SektorSporttasche = {
             players[idx][field] = !players[idx][field];
             localStorage.setItem('toni_players', JSON.stringify(players));
             this.render();
-            if(window.ToniTTS && players[idx][field]) ToniTTS.speak(`${players[idx].name} ist jetzt aktiv im Training.`, "warm");
         }
     },
 
@@ -116,7 +113,6 @@ window.SektorSporttasche = {
     syncWithArena: function() {
         if(window.arena) {
             window.arena.resetBoard();
-            if(window.ToniTTS) ToniTTS.speak("Spielfeld mit anwesenden Spielern synchronisiert.", "warm");
             if(window.BriefcaseUI) window.BriefcaseUI.toggle();
         }
     },
@@ -142,9 +138,9 @@ window.SektorSporttasche = {
                 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                     <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px;">
-                        <h4 style="color:var(--accent-gold); font-size:0.6rem; margin-bottom:15px;">FOTO & ANWESENHEIT</h4>
-                        <div id="drop-zone" style="width:100%; height:150px; border:2px dashed #444; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; position:relative;" onclick="document.getElementById('file-input').click()">
-                            ${p.photoUrl ? `<img src="${p.photoUrl}" style="height:100%; width:100%; object-fit:cover;">` : '<i class="fas fa-camera" style="font-size:2rem; color:#444;"></i>'}
+                        <h4 style="color:var(--accent-gold); font-size:0.6rem; margin-bottom:15px;">FOTO & STATUS</h4>
+                        <div id="drop-zone" style="width:100%; height:180px; border:2px dashed #444; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; position:relative;" onclick="document.getElementById('file-input').click()">
+                            ${p.photoUrl ? `<img src="${p.photoUrl}" style="height:100%; width:100%; object-fit:cover;">` : '<i class="fas fa-camera" style="font-size:2.5rem; color:#444;"></i><p style="font-size:0.6rem; color:#666; margin-top:10px;">KLICKEN ZUM HOCHLADEN</p>'}
                         </div>
                         <input type="file" id="file-input" style="display:none" onchange="SektorSporttasche.handleFileUpload(this)">
                         <input type="hidden" id="edit-photo-data" value="${p.photoUrl || ''}">
@@ -161,10 +157,10 @@ window.SektorSporttasche = {
                     <div style="background:rgba(57,255,20,0.03); padding:20px; border-radius:10px; border:1px solid rgba(57,255,20,0.1);">
                         <h4 style="color:var(--neon-green); font-size:0.6rem; margin-bottom:15px;">LEISTUNGSDATEN</h4>
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                            <div><label style="font-size:0.5rem;">RATING</label><input type="number" id="edit-rating" value="${p.rating || 80}" class="login-input"></div>
-                            <div><label style="font-size:0.5rem;">NUMMER</label><input type="number" id="edit-number" value="${p.number}" class="login-input"></div>
-                            <div><label style="font-size:0.5rem;">PULS (BPM)</label><input type="number" id="edit-pulse" value="${p.vitals?.pulse || 70}" class="login-input"></div>
-                            <div><label style="font-size:0.5rem;">SpO2 (%)</label><input type="number" id="edit-spo2" value="${p.vitals?.spo2 || 98}" class="login-input"></div>
+                            <div><label style="font-size:0.5rem; color:#aaa;">RATING</label><input type="number" id="edit-rating" value="${p.rating || 80}" class="login-input" style="width:100%"></div>
+                            <div><label style="font-size:0.5rem; color:#aaa;">NUMMER</label><input type="number" id="edit-number" value="${p.number}" class="login-input" style="width:100%"></div>
+                            <div><label style="font-size:0.5rem; color:#aaa;">PULS (BPM)</label><input type="number" id="edit-pulse" value="${p.vitals?.pulse || 70}" class="login-input" style="width:100%"></div>
+                            <div><label style="font-size:0.5rem; color:#aaa;">SpO2 (%)</label><input type="number" id="edit-spo2" value="${p.vitals?.spo2 || 98}" class="login-input" style="width:100%"></div>
                         </div>
                     </div>
                 </div>
@@ -216,7 +212,7 @@ window.SektorSporttasche = {
             isStarter: false,
             isNominated: false,
             vitals: { pulse: 70, spo2: 98 },
-            proKpis: { vmax: 2, rsa: 75 }
+            proKpis: { vmax: 2.2, rsa: 78 }
         });
         localStorage.setItem('toni_players', JSON.stringify(players));
         this.render();
