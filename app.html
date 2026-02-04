@@ -43,7 +43,7 @@
         <div id="setcard-content">
             <div class="kpi-card">
                 <span style="font-size:0.6rem; color:var(--text-dim);">SYSTEM-STATUS</span>
-                <div style="font-size:0.8rem; font-weight:bold; color:var(--status-fit);">AKTIV</div>
+                <div style="font-size:0.8rem; font-weight:bold; color:var(--status-fit);">ANALYSIS ONLINE</div>
             </div>
         </div>
 
@@ -82,28 +82,39 @@
 <script src="ui/sektoren/sektor-templates.js"></script>
 
 <script src="ui/briefcase-main.js"></script>
-
 <script src="engine/arena.js"></script>
 
 <script>
     window.addEventListener('load', function() {
-        console.log("System-Initialisierung gestartet...");
+        console.log("Toni 2.0 Engine: Booting...");
         
-        // Arena starten
+        // 1. Arena & Grid-System
         if(window.arena) arena.init('main-canvas');
+
+        // 2. Datenbank-Hygiene (Musterprofi-Check gegen undefined)
+        if (!localStorage.getItem('toni_players')) {
+            const initialKader = [{
+                id: Date.now(),
+                name: "Musterprofi",
+                number: "10",
+                pos: "ZM",
+                status: "FIT",
+                weight: 78,
+                height: 182
+            }];
+            localStorage.setItem('toni_players', JSON.stringify(initialKader));
+            console.log("Database: Musterprofi initialisiert.");
+        }
         
-        // Chat-Logik
+        // 3. Chat-Funktionalität
         const input = document.getElementById('chat-input');
         const sendBtn = document.getElementById('send-btn');
 
         function sendMessage() {
             const val = input.value;
             if(val && window.ToniCore) {
-                // User Nachricht anzeigen
                 const msgArea = document.getElementById('chat-messages');
                 msgArea.innerHTML += `<div class="user-msg">${val}</div>`;
-                
-                // KI Befehl verarbeiten
                 ToniCore.processCommand(val);
                 input.value = '';
                 msgArea.scrollTop = msgArea.scrollHeight;
@@ -113,11 +124,13 @@
         sendBtn.addEventListener('click', sendMessage);
         input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
 
-        // Begrüßung nach kurzer Verzögerung
+        // 4. Toni Begrüßung (verzögert für UI-Aufbau)
         setTimeout(() => {
             const coach = BriefcaseUI.clubData?.coach || "Björn";
-            if(window.ToniTTS) ToniTTS.speak(`Willkommen zurück im Dienst, Coach ${coach}. Alle Systeme sind auf Höchstleistung kalibriert.`, "warm");
-        }, 2000);
+            if(window.ToniTTS) {
+                ToniTTS.speak(`System bereit. Willkommen im Analysezentrum, Coach ${coach}.`, "warm");
+            }
+        }, 1500);
     });
 </script>
 
