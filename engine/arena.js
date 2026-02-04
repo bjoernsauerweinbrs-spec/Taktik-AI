@@ -1,7 +1,7 @@
 /**
- * TONI 2.0 - INTERNATIONAL MULTI-ARENA ENGINE (PRO RESILIENCE)
- * Pitch: Pro, F-Youth & Funino | Tools: Cones, Ladders, Hurdles
- * Features: AI-Tactics, Elite-Squad Seeding, A4-Snapshot
+ * TONI 2.0 - INTERNATIONAL MULTI-ARENA ENGINE (PRO MATCHDAY EDITION)
+ * Pitch: Pro (5m Area), F-Youth & Funino | Tools: Cones, Ladders, Hurdles
+ * Features: 11+5 Squad Seeding, Full Name Display, Auto-Ball Kickoff
  */
 window.arena = {
     canvas: null,
@@ -23,28 +23,39 @@ window.arena = {
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
-        // Initialisierung: Seed nur wenn absolut leer, sonst normaler Reset
         this.checkAndSeedEliteSquad();
         this.resetBoard();
         
-        // Sicherheit: Einmaliges Rendern nach 100ms, falls der Container verzögert lädt
         setTimeout(() => this.render(), 100);
     },
 
     /**
-     * Erstellt ein internationales Muster-Team, falls der Speicher komplett leer ist.
+     * Erstellt den vollständigen Elite-Kader (11+5), falls der Speicher leer ist.
      */
     checkAndSeedEliteSquad: function() {
         let squad = JSON.parse(localStorage.getItem('toni_players')) || [];
         if (squad.length === 0) {
-            console.log("TONI 2.0: Initialisiere International Elite Squad...");
+            console.log("TONI 2.0: Initialisiere International Elite Squad (11+5)...");
             const elite = [
-                { id: 'p1', name: 'M. Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 62, spo2: 99 }, proKpis: { vmax: 2, rsa: 80 }, formHistory: [88, 89, 90] },
-                { id: 'p2', name: 'V. van Dijk', number: 4, pos: 'IV', rating: 88, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 65, spo2: 98 }, proKpis: { vmax: 3, rsa: 85 }, formHistory: [85, 86, 88] },
-                { id: 'p10', name: 'K. Mbappe', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 56, spo2: 99 }, proKpis: { vmax: 3, rsa: 85 }, formHistory: [91, 92, 92] },
-                { id: 'p11', name: 'E. Haaland', number: 9, pos: 'ST', rating: 91, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 63, spo2: 98 }, proKpis: { vmax: 3, rsa: 82 }, formHistory: [89, 90, 91] }
+                // STARTELF (11)
+                { id: 'p1', name: 'Manuel Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 62, spo2: 99 }, proKpis: { vmax: 2, rsa: 80 }, formHistory: [88, 89, 90] },
+                { id: 'p2', name: 'Virgil van Dijk', number: 4, pos: 'IV', rating: 88, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 65, spo2: 98 }, proKpis: { vmax: 3, rsa: 85 }, formHistory: [85, 86, 88] },
+                { id: 'p3', name: 'Ruben Dias', number: 3, pos: 'IV', rating: 87, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 68, spo2: 98 }, proKpis: { vmax: 2, rsa: 82 } },
+                { id: 'p4', name: 'Alphonso Davies', number: 19, pos: 'LV', rating: 85, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 58, spo2: 99 }, proKpis: { vmax: 3, rsa: 92 } },
+                { id: 'p5', name: 'Trent Alexander-Arnold', number: 66, pos: 'RV', rating: 86, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 61, spo2: 98 }, proKpis: { vmax: 2, rsa: 87 } },
+                { id: 'p6', name: 'Joshua Kimmich', number: 6, pos: 'ZM', rating: 86, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 55, spo2: 99 }, proKpis: { vmax: 2, rsa: 95 } },
+                { id: 'p7', name: 'Kevin De Bruyne', number: 17, pos: 'ZM', rating: 91, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 64, spo2: 98 }, proKpis: { vmax: 2, rsa: 88 } },
+                { id: 'p8', name: 'Jude Bellingham', number: 5, pos: 'ZM', rating: 88, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 60, spo2: 99 }, proKpis: { vmax: 3, rsa: 90 } },
+                { id: 'p9', name: 'Mohamed Salah', number: 11, pos: 'RM', rating: 89, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 59, spo2: 99 }, proKpis: { vmax: 3, rsa: 88 } },
+                { id: 'p10', name: 'Kylian Mbappé', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 56, spo2: 99 }, proKpis: { vmax: 3, rsa: 85 }, formHistory: [91, 92, 92] },
+                { id: 'p11', name: 'Erling Haaland', number: 9, pos: 'ST', rating: 91, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 63, spo2: 98 }, proKpis: { vmax: 3, rsa: 82 }, formHistory: [89, 90, 91] },
+                // BANK (5)
+                { id: 'p12', name: 'Thomas Müller', number: 25, pos: 'ST', rating: 84, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 60, spo2: 99 } },
+                { id: 'p13', name: 'Leroy Sané', number: 10, pos: 'RM', rating: 85, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 62, spo2: 98 } },
+                { id: 'p14', name: 'Rodri', number: 16, pos: 'ZM', rating: 87, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 58, spo2: 99 } },
+                { id: 'p15', name: 'Vinícius Júnior', number: 20, pos: 'RM', rating: 88, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 61, spo2: 98 } },
+                { id: 'p16', name: 'Jamal Musiala', number: 42, pos: 'ZM', rating: 86, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 59, spo2: 99 } }
             ];
-            // Wir füllen hier nur ein paar auf, den Rest macht der User über den neuen Button in der Sporttasche
             localStorage.setItem('toni_players', JSON.stringify(elite));
         }
     },
@@ -65,10 +76,11 @@ window.arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // Sicherer Filter: Wenn isStarter/isPresent fehlt (alte Spieler), behandeln wir sie als anwesend für das Board
-        const starters = squad.filter(p => p.isStarter && (p.isPresent !== false)).slice(0, 11);
-        const bench = squad.filter(p => p.isNominated && !p.isStarter && (p.isPresent !== false)).slice(0, 5);
+        // Ball automatisch auf Anstoßpunkt setzen
+        this.addTrainingObject('ball');
 
+        // Starter (Red Team)
+        const starters = squad.filter(p => p.isStarter && (p.isPresent !== false)).slice(0, 11);
         starters.forEach((p, i) => {
             this.players.push({
                 id: p.id, name: p.name, nr: p.number, team: 'home',
@@ -76,14 +88,16 @@ window.arena = {
             });
         });
 
+        // Bank (Orange / Bench) - 5 Spieler
+        const bench = squad.filter(p => p.isNominated && !p.isStarter && (p.isPresent !== false)).slice(0, 5);
         bench.forEach((p, i) => {
             this.players.push({
                 id: p.id, name: p.name, nr: p.number, team: 'bench',
-                x: (w * 0.25) + (i * (w * 0.1)), y: h - 35, radius: 14
+                x: (w * 0.20) + (i * (w * 0.12)), y: h - 35, radius: 14
             });
         });
 
-        // Gegner (Away) - Immer 11 Spieler
+        // Gegner (Away / Blue) - 11 Spieler
         for(let i=0; i < 11; i++) {
             this.players.push({ id: 'opp_'+i, nr: i+1, team: 'away', x: this.getInitialX(i, 'away', w), y: this.getInitialY(i, h), radius: 18 });
         }
@@ -121,7 +135,7 @@ window.arena = {
             type: type,
             x: this.canvas.width / 2,
             y: this.canvas.height / 2,
-            radius: type === 'ball' ? 6 : 20
+            radius: type === 'ball' ? 7 : 20
         });
         this.render();
     },
@@ -149,8 +163,8 @@ window.arena = {
             ctx.strokeRect(pad, pad, w-(pad*2), h-(pad*2));
             ctx.beginPath(); ctx.moveTo(w/2, pad); ctx.lineTo(w/2, h-pad); ctx.stroke();
             ctx.beginPath(); ctx.arc(w/2, h/2, 60, 0, Math.PI*2); ctx.stroke();
-            this.drawBox(ctx, pad, h/2, 120, 260, 40);
-            this.drawBox(ctx, w-pad, h/2, -120, 260, -40);
+            this.drawBox(ctx, pad, h/2, 120, 260, 40); // Links
+            this.drawBox(ctx, w-pad, h/2, -120, 260, -40); // Rechts
         } else if (this.pitchMode === 'youth') {
             ctx.strokeRect(pad * 2, pad, w-(pad*4), h-(pad*2));
             this.drawSmallGoal(ctx, pad*2, h/2);
@@ -163,8 +177,8 @@ window.arena = {
     },
 
     drawBox: function(ctx, x, y, boxW, boxH, goalW) {
-        ctx.strokeRect(x, y - boxH/2, boxW, boxH);
-        ctx.strokeRect(x, y - 70, goalW, 140);
+        ctx.strokeRect(x, y - boxH/2, boxW, boxH); // 16m
+        ctx.strokeRect(x, y - 70, goalW, 140);     // 5m Area
     },
 
     drawTool: function(ctx, obj) {
@@ -180,7 +194,8 @@ window.arena = {
             ctx.strokeStyle = "red"; ctx.lineWidth = 3;
             ctx.beginPath(); ctx.moveTo(-20, 0); ctx.lineTo(20, 0); ctx.stroke();
         } else if (obj.type === 'ball') {
-            ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(0,0,6,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fill();
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
         }
         ctx.restore();
     },
@@ -190,16 +205,20 @@ window.arena = {
         ctx.fillStyle = color;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+        
         ctx.fillStyle = "#fff"; ctx.font = `bold ${p.radius}px Inter`; ctx.textAlign = "center";
         ctx.fillText(p.nr, p.x, p.y + (p.radius/3));
+        
         if(p.team !== 'away') {
-            ctx.font = "10px Inter"; ctx.fillText(p.name ? p.name.split(' ')[0] : 'PRO', p.x, p.y + p.radius + 12);
+            ctx.font = "bold 11px Inter"; 
+            // Hier wird jetzt der VOLLSTÄNDIGE Name gezeichnet
+            ctx.fillText(p.name || 'PRO', p.x, p.y + p.radius + 14);
         }
     },
 
     drawGrid: function(ctx, w, h) {
         ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
-        const step = 45;
+        const step = 45; // Entspricht ca. 5 Metern
         for(let x=60; x<w-60; x+=step) { ctx.beginPath(); ctx.moveTo(x, 60); ctx.lineTo(x, h-60); ctx.stroke(); }
         for(let y=60; y<h-60; y+=step) { ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(w-60, y); ctx.stroke(); }
     },
