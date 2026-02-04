@@ -1,5 +1,6 @@
 /**
  * TONI 2.0 - ZENTRALE STEUEREINHEIT (ULTIMATE FIX)
+ * Verknüpft alle Sektoren und behebt den Lade-Hänger.
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -19,7 +20,6 @@ window.BriefcaseUI = {
         this.isOpen = !this.isOpen;
 
         if (this.isOpen) {
-            // Zwingt das Overlay zur Anzeige und übersteuert alle CSS-Blockaden
             overlay.style.setProperty('display', 'flex', 'important');
             overlay.classList.remove('hidden');
             
@@ -59,7 +59,7 @@ window.BriefcaseUI = {
         nav.innerHTML = `
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; padding: 20px;">
                 ${folders.map(f => `
-                    <div class="fifa-card" onclick="BriefcaseUI.switchSektor('${f.id}')" style="padding: 50px 20px;">
+                    <div class="fifa-card" onclick="BriefcaseUI.switchSektor('${f.id}')" style="padding: 50px 20px; text-align: center; cursor: pointer;">
                         <i class="fas ${f.icon}" style="font-size: 3rem; color: ${f.color}; margin-bottom: 25px; display: block;"></i>
                         <span style="font-weight: 900; letter-spacing: 2px; font-size: 0.9rem; color:#fff;">${f.name}</span>
                     </div>
@@ -72,9 +72,12 @@ window.BriefcaseUI = {
         const nav = document.getElementById('briefcase-nav');
         const content = document.getElementById('briefcase-content');
         const title = document.getElementById('sector-title');
+        const active = document.getElementById('active-content');
         
-        if(nav) nav.classList.add('hidden');
-        if(content) content.classList.remove('hidden');
+        if(!nav || !content || !active) return;
+
+        nav.classList.add('hidden');
+        content.classList.remove('hidden');
         
         title.innerHTML = `
             <button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:var(--neon-green); cursor:pointer; margin-right:15px; font-size:1.5rem;">
@@ -82,13 +85,25 @@ window.BriefcaseUI = {
             </button> ${sektor.toUpperCase()}
         `;
 
+        // --- VERBESSERTES ROUTING: HIER WERDEN DIE MODULE AKTIVIERT ---
         if (sektor === 'sport' && window.SektorSporttasche) {
             window.SektorSporttasche.render();
-        } else if (sektor === 'analyse' && window.SektorAnalyse) {
+        } 
+        else if (sektor === 'analyse' && window.SektorAnalyse) {
             window.SektorAnalyse.render();
-        } else {
-            const active = document.getElementById('active-content');
-            if(active) active.innerHTML = `<div style="text-align:center; padding:100px; color:var(--text-dim);">Modul wird geladen...</div>`;
+        } 
+        else if (sektor === 'system' && window.SektorSystem) {
+            window.SektorSystem.render();
+        } 
+        else if (sektor === 'templates' && window.SektorTemplates) {
+            window.SektorTemplates.render();
+        } 
+        else {
+            active.innerHTML = `<div style="text-align:center; padding:100px; color:var(--text-dim);">
+                <i class="fas fa-exclamation-triangle" style="font-size:2rem; margin-bottom:15px; display:block;"></i>
+                Modul <b>${sektor}</b> konnte nicht geladen werden.<br>
+                Prüfe, ob die entsprechende Skript-Datei in der app.html eingebunden ist.
+            </div>`;
         }
     }
 };
