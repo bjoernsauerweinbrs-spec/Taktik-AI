@@ -39,78 +39,88 @@ window.SektorTemplates = {
 
                 <div id="magazine-container" style="display: flex; flex-direction: column; gap: 40px; align-items: center;">
                     
-                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; min-height:210mm; padding:20mm; box-shadow:0 15px 40px rgba(0,0,0,0.5); position:relative;">
+                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; min-height:210mm; padding:20mm; box-shadow:0 15px 40px rgba(0,0,0,0.5); position:relative; overflow:hidden;">
                         <div style="border: 10px solid #000; height:100%; padding:20px; display:flex; flex-direction:column; justify-content:space-between; align-items:center;">
                             <div style="text-align:center;">
-                                <div style="background:#000; color:var(--neon-green); padding:5px 20px; font-weight:900; letter-spacing:4px;">STADIONKURIER</div>
+                                <div style="background:#000; color:var(--neon-green); padding:5px 25px; font-weight:900; letter-spacing:4px; font-size:1.2rem;">STADIONKURIER</div>
                                 <img src="${this.magazineData.logoUrl}" style="width:130px; margin-top:30px; filter: grayscale(1);">
                             </div>
                             <div style="text-align:center;">
-                                <h1 style="font-size:3.8rem; line-height:0.85; font-weight:900; margin:0;">${this.magazineData.clubName}</h1>
-                                <div style="font-size:1.5rem; margin:15px 0; font-weight:bold; background:#000; color:#fff; display:inline-block; padding:5px 20px;">GEGEN</div>
-                                <h2 style="font-size:2.2rem; text-transform:uppercase;">${this.magazineData.opponent}</h2>
+                                <h1 style="font-size:3.5rem; line-height:0.85; font-weight:900; margin:0; text-transform:uppercase;">${this.magazineData.clubName}</h1>
+                                <div style="font-size:1.5rem; margin:15px 0; font-weight:bold; background:#000; color:#fff; display:inline-block; padding:5px 25px;">HEIMSPIEL GEGEN</div>
+                                <h2 style="font-size:2.5rem; text-transform:uppercase; color:#333;">${this.magazineData.opponent}</h2>
                             </div>
-                            <div style="text-align:center; width:100%; border-top:3px solid #000; padding-top:15px;">
-                                <p style="font-weight:900; letter-spacing:1px;">${this.magazineData.matchDate.toUpperCase()}</p>
-                                <p style="font-size:0.8rem; letter-spacing:2px;">${this.magazineData.stadium.toUpperCase()}</p>
+                            <div style="text-align:center; width:100%; border-top:4px solid #000; padding-top:20px;">
+                                <p style="font-weight:900; letter-spacing:1px; font-size:1.1rem;">${this.magazineData.matchDate.toUpperCase()}</p>
+                                <p style="font-size:0.9rem; letter-spacing:3px; color:#555;">${this.magazineData.stadium.toUpperCase()}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; min-height:210mm; padding:20mm; box-shadow:0 15px 40px rgba(0,0,0,0.5);">
-                        <h3 style="border-bottom:4px solid #000; padding-bottom:10px; font-size:1.6rem; font-weight:900;">DAS WORT ZUM SPIEL</h3>
-                        <div style="margin-top:30px; display:flex; gap:20px; align-items:flex-start;">
-                            <div style="width:60px; height:60px; background:#eee; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">👔</div>
+                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; min-height:210mm; padding:20mm; box-shadow:0 15px 40px rgba(0,0,0,0.5); position:relative;">
+                        <h3 style="border-bottom:5px solid #000; padding-bottom:10px; font-size:1.8rem; font-weight:900; letter-spacing:-1px;">VORWORT DES TRAINERS</h3>
+                        <div style="margin-top:35px; display:flex; gap:25px; align-items:flex-start;">
+                            <div style="width:70px; height:70px; background:#000; color:var(--neon-green); border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">⚽</div>
                             <div>
-                                <p style="font-size:1rem; line-height:1.6; font-style:italic;">"${this.magazineData.editorial}"</p>
-                                <p style="margin-top:20px; font-weight:900; color:var(--accent-orange);">COACH ${this.magazineData.coachName.toUpperCase()}</p>
+                                <p style="font-size:1.05rem; line-height:1.7; font-style:italic; color:#222;">"${this.magazineData.editorial}"</p>
+                                <p style="margin-top:25px; font-weight:900; font-size:1.2rem; color:var(--accent-orange); text-transform:uppercase;">Coach ${this.magazineData.coachName}</p>
                             </div>
                         </div>
-                        <div style="margin-top:50px; padding:20px; background:#f9f9f9; border-left:5px solid var(--neon-green);">
-                            <h4 style="font-size:0.8rem; letter-spacing:1px; margin-bottom:10px;">AKTUELLE NEWS</h4>
-                            <p style="font-size:0.75rem;">Willkommen zum heutigen Heimspiel! Wir begrüßen alle Fans und unsere Partner in der ${this.magazineData.stadium}.</p>
+                        <div style="margin-top:50px; padding:25px; background:#f4f4f4; border-left:8px solid var(--neon-green);">
+                            <h4 style="font-size:0.9rem; letter-spacing:2px; margin-bottom:12px; font-weight:900;">SPIELTAGS-UPDATE</h4>
+                            <p style="font-size:0.85rem; line-height:1.5;">Wir begrüßen alle Gäste aus ${this.magazineData.opponent} und freuen uns auf ein faires, hochintensives Spiel in der ${this.magazineData.stadium}. Bleibt motiviert!</p>
                         </div>
-                        <div style="position:absolute; bottom:15mm; left:20mm; font-size:0.6rem; color:#aaa;">Seite 2 | Editorial</div>
+                        <div style="position:absolute; bottom:15mm; left:20mm; font-size:0.7rem; color:#888; font-weight:bold;">SEITE 2 | FC TONI 2.0 MEDIA</div>
                     </div>
 
-                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; min-height:210mm; padding:20mm; box-shadow:0 15px 40px rgba(0,0,0,0.5);">
-                        <h3 style="border-bottom:4px solid #000; padding-bottom:10px; font-size:1.6rem; font-weight:900;">TONI'S TAKTIK-CHECK</h3>
-                        <div style="background:#000; color:var(--neon-green); padding:15px; margin:20px 0; font-size:0.85rem; line-height:1.4;">
-                            <b style="display:block; margin-bottom:5px; color:#fff;">GEGNER-ANALYSE:</b>
+                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; min-height:210mm; padding:20mm; box-shadow:0 15px 40px rgba(0,0,0,0.5); position:relative;">
+                        <h3 style="border-bottom:5px solid #000; padding-bottom:10px; font-size:1.8rem; font-weight:900; letter-spacing:-1px;">TONI'S TAKTIK-CHECK</h3>
+                        <div style="background:#000; color:var(--neon-green); padding:20px; margin:25px 0; font-size:0.95rem; line-height:1.5; border-radius:5px;">
+                            <b style="display:block; margin-bottom:8px; color:#fff; font-size:0.7rem; letter-spacing:2px;">ANALYSE-BERICHT:</b>
                             ${this.magazineData.scoutingReport}
                         </div>
                         
-                        <h4 style="margin-top:30px; font-size:1.1rem; border-bottom:2px solid #eee; padding-bottom:5px;">VORAUSSICHTLICHE AUFSTELLUNG</h4>
-                        <table style="width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:15px;">
-                            ${players.map(p => `
-                                <tr style="border-bottom:1px solid #eee;">
-                                    <td style="padding:6px; font-weight:900;">${p.number || '10'}</td>
-                                    <td style="padding:6px;">${p.name.toUpperCase()}</td>
-                                    <td style="padding:6px; color:#666; font-size:0.7rem;">${p.pos || 'ZM'}</td>
-                                    <td style="padding:6px; text-align:right;">${p.status === 'FIT' ? '✓' : '✕'}</td>
+                        <h4 style="margin-top:35px; font-size:1.2rem; border-bottom:3px solid #eee; padding-bottom:8px; font-weight:900;">VORAUSSICHTLICHE AUFSTELLUNG</h4>
+                        <table style="width:100%; border-collapse:collapse; font-size:0.95rem; margin-top:15px;">
+                            <thead>
+                                <tr style="background:#f0f0f0; border-bottom:2px solid #000;">
+                                    <th style="padding:10px; text-align:left;">NR</th>
+                                    <th style="padding:10px; text-align:left;">NAME</th>
+                                    <th style="padding:10px; text-align:left;">POS</th>
+                                    <th style="padding:10px; text-align:right;">STAT</th>
                                 </tr>
-                            `).join('')}
+                            </thead>
+                            <tbody>
+                                ${players.map(p => `
+                                    <tr style="border-bottom:1px solid #eee;">
+                                        <td style="padding:8px; font-weight:900;">${p.number || '10'}</td>
+                                        <td style="padding:8px; font-weight:bold;">${p.name.toUpperCase()}</td>
+                                        <td style="padding:8px; color:#555; font-size:0.8rem;">${p.pos || 'ZM'}</td>
+                                        <td style="padding:8px; text-align:right;">${p.status === 'FIT' ? '✓' : '✕'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
                         </table>
-                        <div style="position:absolute; bottom:15mm; left:20mm; font-size:0.6rem; color:#aaa;">Seite 3 | Taktik & Kader</div>
+                        <div style="position:absolute; bottom:15mm; left:20mm; font-size:0.7rem; color:#888; font-weight:bold;">SEITE 3 | TAKTIK-DOSSIER</div>
                     </div>
 
-                    <div class="mag-page" style="background:#000; color:#fff; width:148mm; min-height:210mm; padding:20mm; box-shadow:0 15px 40px rgba(0,0,0,0.5); border: 12px solid var(--neon-green);">
-                        <div style="text-align:center; margin-bottom:50px;">
-                            <h3 style="color:var(--neon-green); font-size:1.8rem; letter-spacing:6px; font-weight:900;">PARTNER</h3>
-                            <p style="font-size:0.6rem; color:var(--accent-gold); letter-spacing:3px;">STOLZE UNTERSTÜTZER DES ${this.magazineData.clubName}</p>
+                    <div class="mag-page" style="background:#000; color:#fff; width:148mm; min-height:210mm; padding:20mm; box-shadow:0 15px 40px rgba(0,0,0,0.5); border: 15px solid var(--neon-green); position:relative;">
+                        <div style="text-align:center; margin-bottom:60px;">
+                            <h3 style="color:var(--neon-green); font-size:2.2rem; letter-spacing:8px; font-weight:900;">PARTNER</h3>
+                            <p style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:4px; font-weight:bold; margin-top:10px;">GEMEINSAM ZUM ERFOLG</p>
                         </div>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                             ${this.magazineData.sponsors.map(s => `
-                                <div style="border: 1px solid rgba(57, 255, 20, 0.4); padding:20px; text-align:center; background:rgba(255,255,255,0.03);">
-                                    <div style="font-size:3rem; margin-bottom:10px;">${s.logo}</div>
-                                    <div style="font-size:0.85rem; font-weight:900; color:var(--neon-green);">${s.name.toUpperCase()}</div>
-                                    <div style="font-size:0.5rem; color:#777; margin-top:5px;">REGIONALER PARTNER</div>
+                                <div style="border: 2px solid rgba(57, 255, 20, 0.4); padding:25px; text-align:center; background:rgba(255,255,255,0.05); border-radius:10px;">
+                                    <div style="font-size:3.5rem; margin-bottom:15px;">${s.logo}</div>
+                                    <div style="font-size:0.9rem; font-weight:900; color:var(--neon-green); letter-spacing:1px;">${s.name.toUpperCase()}</div>
+                                    <div style="font-size:0.5rem; color:#aaa; margin-top:8px; letter-spacing:2px;">OFFIZIELLER PARTNER</div>
                                 </div>
                             `).join('')}
                         </div>
-                        <div style="position:absolute; bottom:20mm; left:0; width:100%; text-align:center;">
-                            <img src="${this.magazineData.logoUrl}" style="width:60px; filter: invert(1) brightness(2); margin-bottom:15px;">
-                            <p style="font-size:0.5rem; color:#555; letter-spacing:2px;">POWERED BY TONI 2.0 GINGA ENGINE</p>
+                        <div style="position:absolute; bottom:25mm; left:0; width:100%; text-align:center;">
+                            <img src="${this.magazineData.logoUrl}" style="width:70px; filter: invert(1) brightness(2); margin-bottom:20px;">
+                            <p style="font-size:0.6rem; color:#666; letter-spacing:3px;">POWERED BY TONI 2.0 PERFORMANCE ENGINE</p>
                         </div>
                     </div>
                 </div>
@@ -120,7 +130,7 @@ window.SektorTemplates = {
     editClubInfo: function() {
         const newClub = prompt("Vereinsname:", this.magazineData.clubName);
         const newOpp = prompt("Gegner:", this.magazineData.opponent);
-        const newDate = prompt("Datum:", this.magazineData.matchDate);
+        const newDate = prompt("Spieldatum:", this.magazineData.matchDate);
         const newStad = prompt("Stadion:", this.magazineData.stadium);
         if(newClub) this.magazineData.clubName = newClub;
         if(newOpp) this.magazineData.opponent = newOpp;
@@ -130,16 +140,16 @@ window.SektorTemplates = {
     },
 
     editTexts: function() {
-        const newEdi = prompt("Editorial (Wort vom Coach):", this.magazineData.editorial);
-        const newScout = prompt("Taktik-Check (Gegner-Analyse):", this.magazineData.scoutingReport);
+        const newEdi = prompt("Vorwort des Trainers:", this.magazineData.editorial);
+        const newScout = prompt("Toni's Scouting-Analyse:", this.magazineData.scoutingReport);
         if(newEdi) this.magazineData.editorial = newEdi;
         if(newScout) this.magazineData.scoutingReport = newScout;
         this.render();
     },
 
     addSponsor: function() {
-        const name = prompt("Name:");
-        const emoji = prompt("Icon (Emoji):", "🏢");
+        const name = prompt("Name der Firma:");
+        const emoji = prompt("Sponsoren-Icon (Emoji):", "🏢");
         if(name) {
             this.magazineData.sponsors.push({ id: Date.now(), name: name, logo: emoji });
             this.render();
