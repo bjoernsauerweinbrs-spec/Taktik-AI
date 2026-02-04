@@ -110,8 +110,8 @@
 <script src="engine/arena.js"></script>
 
 <script>
-    // Sende-Logik (Verknüpfung zu ToniCore)
     function sendMessage() {
+        console.log("Sende-Vorgang gestartet...");
         const input = document.getElementById('chat-input');
         if(!input) return;
         const text = input.value.trim();
@@ -119,10 +119,11 @@
         if(text !== "" && window.ToniCore) {
             window.ToniCore.processMessage(text);
             input.value = "";
+        } else if (!window.ToniCore) {
+            console.error("ToniCore wurde nicht gefunden!");
         }
     }
 
-    // Voice-Schnittstelle
     function startToniVoice() {
         const icon = document.getElementById('mic-icon');
         if(window.ToniCore) {
@@ -140,12 +141,10 @@
         }
     }
 
-    // System-Start
     window.addEventListener('load', function() {
         if(window.arena) arena.init('main-canvas');
         if(window.BriefcaseUI) BriefcaseUI.init();
 
-        // Chat Event Listener
         const chatInput = document.getElementById('chat-input');
         if(chatInput) {
             chatInput.addEventListener('keypress', (e) => { 
@@ -167,18 +166,20 @@
         }, 1500);
     });
 
-    // Diagnose-Tool für Ollama
     async function checkOllamaConnection() {
         const indicator = document.getElementById('ollama-indicator');
         try {
+            // Prüfung gegen die lokale IP des MacBook
             const response = await fetch('http://127.0.0.1:11434/api/tags');
             if(response.ok) {
                 indicator.style.background = "var(--neon-green)";
                 indicator.title = "Ollama Online";
+                console.log("Verbindung zu Ollama steht.");
             }
         } catch(e) {
             indicator.style.background = "var(--status-error)";
             indicator.title = "Ollama Offline - Prüfe Port 11434";
+            console.warn("Ollama ist nicht erreichbar.");
         }
     }
 </script>
