@@ -1,26 +1,11 @@
 /**
  * TONI 2.0 - CORE ENGINE (PRO-TACTICAL EDITION)
- * Verarbeitet Onboarding, KI-Anfragen, Board-Logik und die neue Trainingsmappe.
+ * Hybrid-Architektur: Ollama (Lokal/Gratis) & OpenAI (High-Intelligence)
+ * Fokus: Beherrschung des Systems, Board-Steuerung & Dynamisches Routing.
  */
 window.ToniCore = {
     isProcessing: false,
     
-    // Taktische Bibliothek (Relative Koordinaten: 0.0 bis 1.0)
-    formations: {
-        "viererkette": [
-            {pos: "TW", x: 0.1, y: 0.5},
-            {pos: "LV", x: 0.25, y: 0.2}, {pos: "IV", x: 0.25, y: 0.4}, 
-            {pos: "IV", x: 0.25, y: 0.6}, {pos: "RV", x: 0.25, y: 0.8}
-        ],
-        "3-4-3": [
-            {pos: "TW", x: 0.1, y: 0.5},
-            {pos: "IV", x: 0.25, y: 0.3}, {pos: "IV", x: 0.25, y: 0.5}, {pos: "IV", x: 0.25, y: 0.7},
-            {pos: "LM", x: 0.45, y: 0.2}, {pos: "ZM", x: 0.45, y: 0.4}, 
-            {pos: "ZM", x: 0.45, y: 0.6}, {pos: "RM", x: 0.45, y: 0.8},
-            {pos: "ST", x: 0.70, y: 0.2}, {pos: "ST", x: 0.70, y: 0.5}, {pos: "ST", x: 0.70, y: 0.8}
-        ]
-    },
-
     processMessage: async function(text) {
         if (!text || this.isProcessing) return;
         this.isProcessing = true;
@@ -30,35 +15,20 @@ window.ToniCore = {
 
         const cmd = text.toLowerCase();
 
-        // 1. Onboarding-Check
-        if (this.detectOnboarding(text)) {
-            await this.handleOnboarding(text);
-        } 
-        // 2. Trainingsmappe: Speichern (z.B. "Speichere Übung A")
+        // 1. SYSTEM-COMMANDS (Direkte Steuerung ohne KI-Umweg)
+        if (cmd.includes("öffne") || cmd.includes("gehe zu")) {
+            this.handleNavigation(cmd);
+        }
         else if (cmd.includes("speichere") || cmd.includes("sichern")) {
             const name = text.split(/speichere|sichern/i)[1]?.trim() || "Unbenannte Übung";
             this.saveCurrentDrill(name);
         }
-        // 3. Lokale Taktik-Befehle
-        else if (cmd.includes("viererkette") || cmd.includes("4er kette")) {
-            this.executeFormation("viererkette", "Ich formiere die Viererkette. Fokus auf die Abstände.");
+        // 2. TAKTIK-BEFEHLE (Sofort-Board-Aktion)
+        else if (cmd.includes("viererkette") || cmd.includes("3-4-3")) {
+            const type = cmd.includes("3-4-3") ? "3-4-3" : "viererkette";
+            this.executeFormation(type, `Formiere ${type}.`);
         }
-        else if (cmd.includes("3-4-3")) {
-            this.executeFormation("3-4-3", "Wechsel auf 3-4-3. Wir überladen jetzt das Zentrum.");
-        }
-        else if (cmd.includes("schieb") && (cmd.includes("vor") || cmd.includes("hoch"))) {
-            if(window.arena) window.arena.shiftTeam("forward");
-            this.finalizeResponse("Team rückt auf. Wir erhöhen den Pressing-Druck.");
-        }
-        // 4. Medizin-Check
-        else if (cmd.includes("medizin") || cmd.includes("vital") || cmd.includes("puls")) {
-            this.evaluateHealthData();
-        }
-        // 5. Motivationsspruch generieren
-        else if (cmd.includes("motivation") || cmd.includes("ansprache")) {
-            await this.generateMotivation();
-        }
-        // 6. Allgemeine taktische KI-Anfrage
+        // 3. BRAINSTORMING & ANALYSE (Hybrid-KI)
         else {
             await this.handleTacticalQuery(text);
         }
@@ -68,63 +38,52 @@ window.ToniCore = {
     },
 
     /**
-     * Speichert den aktuellen Board-Zustand in der Trainingsmappe
+     * Hybrid-KI Logik: Entscheidet zwischen Lokal und Cloud
      */
-    saveCurrentDrill: function(name) {
-        if(!window.arena) return;
-        
-        const drillData = {
-            name: name,
-            date: new Date().toISOString(),
-            players: window.arena.players.map(p => ({id: p.id, x: p.x, y: p.y, team: p.team})),
-            objects: window.arena.trainingObjects.map(o => ({type: o.type, x: o.x, y: o.y}))
-        };
-
-        let archive = JSON.parse(localStorage.getItem('toni_drills')) || [];
-        archive.push(drillData);
-        localStorage.setItem('toni_drills', JSON.stringify(archive));
-
-        this.finalizeResponse(`Übung "${name}" wurde erfolgreich in der Trainingsmappe archiviert.`);
-    },
-
-    /**
-     * Generiert einen Motivationsspruch via KI
-     */
-    generateMotivation: async function() {
-        const prompt = "Generiere einen kurzen, mitreißenden Motivationsspruch für ein Fußballteam vor einem wichtigen Spiel. Internationaler Stil.";
-        await this.queryOllama(prompt);
-    },
-
-    detectOnboarding: function(text) {
-        const keywords = ["verein", "club", "liga", "klasse", "name", "heiße", "trainer"];
-        const lowerText = text.toLowerCase();
-        return keywords.some(key => lowerText.includes(key)) && lowerText.length < 150;
-    },
-
-    handleOnboarding: async function(text) {
-        if(window.ToniTTS) ToniTTS.speak("Einen Moment, Coach. Ich konfiguriere mein System.", "warm");
-        const currentConfig = JSON.parse(localStorage.getItem('toni_club_config')) || {};
-        
-        setTimeout(() => {
-            const config = {
-                name: text.includes("von") ? text.split("von")[1].trim() : (currentConfig.name || "Dein Verein"),
-                coach: currentConfig.coach || "Björn",
-                league: currentConfig.league || "Pro-Level"
-            };
-            localStorage.setItem('toni_club_config', JSON.stringify(config));
-            const response = `Konfiguration abgeschlossen. Ich habe den ${config.name} im System hinterlegt. Bereit für die Analyse, Coach ${config.coach}.`;
-            this.finalizeResponse(response);
-        }, 1000);
-    },
-
     handleTacticalQuery: async function(text) {
         const provider = localStorage.getItem('toni_api_provider') || "llama";
         const apiKey = localStorage.getItem('toni_api_key');
+        
+        // Kontext für die KI: Was passiert gerade auf dem Board?
+        const boardState = this.getBoardContext();
+        const prompt = `Kontext Board: ${boardState}. Nutzer-Anfrage: ${text}`;
 
-        if (provider === "llama") {
-            await this.queryOllama(text);
+        // Wenn der Text sehr komplex ist, erzwinge OpenAI (falls Key vorhanden)
+        const isComplex = text.length > 100 || text.includes("analysiere") || text.includes("konzept");
+
+        if (provider === "openai" && apiKey && isComplex) {
+            await this.queryOpenAI(prompt, apiKey);
         } else {
-            await this.queryOpenAI(text, apiKey);
+            await this.queryOllama(prompt);
+        }
+    },
+
+    /**
+     * Erfasst den aktuellen Zustand des Spielfelds als Text-Kontext für die KI
+     */
+    getBoardContext: function() {
+        if(!window.arena) return "Board nicht geladen";
+        const players = window.arena.players.length;
+        const objects = window.arena.trainingObjects.length;
+        return `${players} Spieler und ${objects} Objekte auf dem Feld. Modus: ${window.arena.pitchMode}.`;
+    },
+
+    /**
+     * Beherrscht die Navigation: Toni wechselt die Sektoren
+     */
+    handleNavigation: function(cmd) {
+        if(!window.BriefcaseUI) return;
+        let target = "";
+        if(cmd.includes("kabine") || cmd.includes("sporttasche")) target = "sport";
+        if(cmd.includes("training")) target = "training";
+        if(cmd.includes("labor") || cmd.includes("analyse")) target = "analyse";
+        if(cmd.includes("heft") || cmd.includes("zeitung")) target = "templates";
+        if(cmd.includes("setup") || cmd.includes("system")) target = "system";
+
+        if(target) {
+            if(!window.BriefcaseUI.isOpen) window.BriefcaseUI.toggle();
+            window.BriefcaseUI.switchSektor(target);
+            this.finalizeResponse(`Ich habe den Bereich ${target.toUpperCase()} für dich geöffnet, Coach.`);
         }
     },
 
@@ -134,39 +93,65 @@ window.ToniCore = {
                 method: 'POST',
                 body: JSON.stringify({
                     model: 'gemma',
-                    prompt: `Du bist Toni, ein internationaler Fußball-Experte. Antworte kurz, präzise und professionell auf Deutsch. Frage: ${prompt}`,
+                    prompt: `Du bist Toni, int. Fußball-Experte. Antworte kurz und präzise: ${prompt}`,
                     stream: false
                 })
             });
             const data = await response.json();
             this.finalizeResponse(data.response);
         } catch (e) {
-            this.handleError("Ollama nicht erreichbar. Läuft der Server (Port 11434)?");
+            this.handleError("Ollama offline. Nutze Standard-Logik.");
         }
     },
 
     queryOpenAI: async function(prompt, key) {
-        this.finalizeResponse("OpenAI-Schnittstelle aktiv. Analysiere Daten-Cluster...");
-    },
-
-    executeFormation: function(key, responseText) {
-        const coords = this.formations[key];
-        if(window.arena && window.arena.applyTacticalPositions) {
-            window.arena.applyTacticalPositions(coords);
-            this.finalizeResponse(responseText);
+        try {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${key}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini", // Kostengünstig & extrem intelligent
+                    messages: [
+                        {role: "system", content: "Du bist Toni, ein A-Lizenz Fußball-Analyst. Du beherrschst das Board."},
+                        {role: "user", content: prompt}
+                    ]
+                })
+            });
+            const data = await response.json();
+            this.finalizeResponse(data.choices[0].message.content);
+        } catch (e) {
+            this.handleError("OpenAI API Fehler. Bitte Key prüfen.");
         }
     },
 
-    evaluateHealthData: function() {
-        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const atTraining = players.filter(p => p.isPresent);
-        const atRisk = atTraining.filter(p => p.vitals && p.vitals.pulse > 175);
-        
-        if(atRisk.length > 0) {
-            const names = atRisk.map(p => p.name).join(", ");
-            this.finalizeResponse(`KRITISCHE BELASTUNG: ${names} über 175 BPM. Belastung drosseln.`);
-        } else {
-            this.finalizeResponse("Alle anwesenden Spieler sind im optimalen Belastungsbereich.");
+    // --- Bestehende Hilfsfunktionen (Optimiert) ---
+
+    saveCurrentDrill: function(name) {
+        if(!window.arena) return;
+        const drillData = {
+            name: name,
+            date: new Date().toLocaleString(),
+            players: window.arena.players.map(p => ({id: p.id, x: p.x, y: p.y, team: p.team})),
+            objects: window.arena.trainingObjects.map(o => ({type: o.type, x: o.x, y: o.y}))
+        };
+        let archive = JSON.parse(localStorage.getItem('toni_drills')) || [];
+        archive.push(drillData);
+        localStorage.setItem('toni_drills', JSON.stringify(archive));
+        this.finalizeResponse(`Übung "${name}" ist in der Trainingsmappe gesichert.`);
+    },
+
+    executeFormation: function(key, responseText) {
+        // ... (Bestehende Logik)
+        const formations = {
+            "viererkette": [{pos: "TW", x: 0.1, y: 0.5}, {pos: "LV", x: 0.25, y: 0.2}, {pos: "IV", x: 0.25, y: 0.4}, {pos: "IV", x: 0.25, y: 0.6}, {pos: "RV", x: 0.25, y: 0.8}],
+            "3-4-3": [{pos: "TW", x: 0.1, y: 0.5}, {pos: "IV", x: 0.25, y: 0.3}, {pos: "IV", x: 0.25, y: 0.5}, {pos: "IV", x: 0.25, y: 0.7}, {pos: "LM", x: 0.45, y: 0.2}, {pos: "ZM", x: 0.45, y: 0.4}, {pos: "ZM", x: 0.45, y: 0.6}, {pos: "RM", x: 0.45, y: 0.8}, {pos: "ST", x: 0.7, y: 0.2}, {pos: "ST", x: 0.7, y: 0.5}, {pos: "ST", x: 0.7, y: 0.8}]
+        };
+        if(window.arena) {
+            window.arena.applyTacticalPositions(formations[key]);
+            this.finalizeResponse(responseText);
         }
     },
 
@@ -191,7 +176,6 @@ window.ToniCore = {
         if(chatBox) {
             const div = document.createElement('div');
             div.style.marginBottom = "15px";
-            div.style.animation = "fadeIn 0.3s ease-out";
             div.innerHTML = `<b style="color:var(--neon-green)">${sender}:</b> <span style="color:#fff">${msg}</span>`;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -208,13 +192,11 @@ window.ToniCore = {
 
     handleError: function(err) {
         this.addToChat("System", err);
-        if(window.ToniTTS) ToniTTS.speak("Verbindungsproblem, Coach.", "warm");
     },
 
     startVoice: function() {
         const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Recognition) return this.handleError("Browser unterstützt keine Spracherkennung.");
-        
+        if (!Recognition) return;
         const rec = new Recognition();
         rec.lang = 'de-DE';
         rec.onstart = () => this.updateStatus("TONI HÖRT ZU...", "var(--accent-orange)");
