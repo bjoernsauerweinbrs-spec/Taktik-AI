@@ -1,97 +1,73 @@
 /**
- * TONI 2.0 - SEKTOR ANALYSEZENTRUM
- * Visualisierung von Performance-Daten, BMI-Trends und Trainings-Empfehlungen.
+ * TONI 2.0 - ANALYSEZENTRUM
+ * Performance-Tracking & Kader-Metriken
  */
-
 window.SektorAnalyse = {
     render: function() {
         const players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const avgBmi = this.calculateAverageBmi(players);
+        
+        // Berechnungen
+        const avgRating = players.length > 0 
+            ? (players.reduce((sum, p) => sum + parseInt(p.rating || 0), 0) / players.length).toFixed(1) 
+            : 0;
+            
+        const injuredCount = players.filter(p => p.status === 'Verletzt').length;
+        const fitCount = players.filter(p => p.status === 'FIT').length;
 
         document.getElementById('active-content').innerHTML = `
-            <div style="padding:20px; color:var(--text-main);">
-                <h3 style="color:var(--data-cyan); margin-bottom:20px; letter-spacing:2px;">PERFORMANCE DASHBOARD</h3>
+            <div style="padding:20px;">
+                <h2 style="color:var(--accent-orange); letter-spacing:2px; margin-bottom:30px;">ANALYSEZENTRUM</h2>
                 
-                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin-bottom:30px;">
-                    <div class="kpi-card">
-                        <span style="font-size:0.6rem; color:var(--text-dim);">DURCHSCHNITT. BMI</span>
-                        <div style="font-size:1.8rem; font-weight:900; color:var(--data-cyan);">${avgBmi}</div>
-                        <div class="bmi-bar"><div class="bmi-fill" style="width:${(avgBmi/30)*100}%"></div></div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:20px;">
+                    
+                    <div class="fifa-card" style="text-align:left; cursor:default;">
+                        <div style="font-size:0.7rem; color:var(--accent-gold);">DURCHSCHNITTS-RATING</div>
+                        <div style="font-size:3rem; font-weight:900; color:var(--text-main);">${avgRating}</div>
+                        <div style="font-size:0.8rem; color:var(--text-dim);">Basierend auf ${players.length} Profis</div>
                     </div>
-                    <div class="kpi-card" style="border-left-color:var(--status-fit);">
-                        <span style="font-size:0.6rem; color:var(--text-dim);">KADER-STATUS</span>
-                        <div style="font-size:1.8rem; font-weight:900; color:var(--status-fit);">${players.filter(p => p.status==='FIT').length} / ${players.length}</div>
-                        <span style="font-size:0.5rem;">EINSATZBEREIT</span>
-                    </div>
-                    <div class="kpi-card" style="border-left-color:var(--accent-orange);">
-                        <span style="font-size:0.6rem; color:var(--text-dim);">TRAININGS-VORSCHLAG</span>
-                        <div style="font-size:0.8rem; font-weight:bold; margin-top:5px; color:#fff;">REGENERATION</div>
-                        <button onclick="SektorAnalyse.generatePackage()" style="background:none; border:1px solid var(--accent-orange); color:var(--accent-orange); font-size:0.5rem; padding:3px 8px; margin-top:5px; cursor:pointer; border-radius:3px;">JETZT GENERIEREN</button>
-                    </div>
-                </div>
 
-                <div style="background:rgba(255,255,255,0.02); padding:20px; border-radius:15px; border:1px solid #222;">
-                    <h4 style="font-size:0.8rem; margin-top:0; color:var(--text-dim);">SPIELER-ENTWICKLUNG (VORSCHAU)</h4>
-                    <div style="height:150px; display:flex; align-items:flex-end; gap:10px; padding-bottom:10px; border-bottom:1px solid #333;">
-                        ${this.renderChartBars(players)}
+                    <div class="fifa-card" style="text-align:left; cursor:default;">
+                        <div style="font-size:0.7rem; color:var(--accent-gold);">KADER-VERFÜGBARKEIT</div>
+                        <div style="margin-top:10px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                <span>Einsatzbereit</span><span style="color:var(--status-fit);">${fitCount}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Lazarett</span><span style="color:var(--status-error);">${injuredCount}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.6rem; color:var(--text-dim);">
-                        <span>MONTAG</span><span>HEUTE</span><span>MATCHDAY</span>
-                    </div>
-                </div>
 
-                <h4 style="font-size:0.8rem; margin-top:30px; color:var(--text-dim);">FITNESS-CHECK EINZELANALYSE</h4>
-                <div style="max-height:200px; overflow-y:auto;">
-                    <table style="width:100%; border-collapse:collapse; font-size:0.75rem;">
-                        <tr style="text-align:left; color:var(--data-cyan); border-bottom:1px solid #333;">
-                            <th style="padding:10px 5px;">SPIELER</th>
-                            <th>STATUS</th>
-                            <th>BMI</th>
-                            <th>EMPFEHLUNG</th>
-                        </tr>
-                        ${players.map(p => this.renderTableRow(p)).join('')}
-                    </table>
+                    <div class="fifa-card" style="grid-column: 1 / -1; text-align:left; cursor:default;">
+                        <div style="font-size:0.7rem; color:var(--accent-gold); margin-bottom:15px;">BMI-PERFORMANCE-CHECK (OPTIMAL: 20-24)</div>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px;">
+                            ${this.renderBMICheck(players)}
+                        </div>
+                    </div>
+
                 </div>
-            </div>
-        `;
+            </div>`;
     },
 
-    calculateAverageBmi: function(players) {
-        if(!players.length) return 0;
-        const sum = players.reduce((acc, p) => {
-            const h = p.height || 180;
-            const w = p.weight || 75;
-            return acc + (w / ((h/100)*(h/100)));
-        }, 0);
-        return (sum / players.length).toFixed(1);
-    },
+    renderBMICheck: function(players) {
+        if(players.length === 0) return "Keine Daten verfügbar.";
+        
+        return players.map(p => {
+            const bmi = (p.weight && p.height) ? (p.weight / ((p.height/100)**2)).toFixed(1) : null;
+            if(!bmi) return "";
+            
+            let color = "var(--status-fit)";
+            let statusText = "OPTIMAL";
+            
+            if(bmi > 24.9) { color = "var(--status-error)"; statusText = "GEWICHT HOCH"; }
+            if(bmi < 19) { color = "var(--status-warn)"; statusText = "GEWICHT NIEDRIG"; }
 
-    renderChartBars: function(players) {
-        return players.slice(0, 10).map(p => {
-            const height = Math.random() * 80 + 20; // Simulation
-            return `<div style="flex:1; height:${height}%; background:var(--data-cyan); opacity:0.6; border-radius:2px 2px 0 0;" title="${p.name}"></div>`;
+            return `
+                <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; border-left:4px solid ${color};">
+                    <div style="font-size:0.8rem; font-weight:bold;">${p.name}</div>
+                    <div style="font-size:0.7rem; color:${color};">BMI: ${bmi} (${statusText})</div>
+                </div>
+            `;
         }).join('');
-    },
-
-    renderTableRow: function(p) {
-        const h = p.height || 180;
-        const w = p.weight || 75;
-        const bmi = (w / ((h/100)*(h/100))).toFixed(1);
-        let rec = bmi > 25 ? "Ausdauer-Fokus" : "Kraft-Aufbau";
-        if(p.status === 'OFF') rec = "Physiotherapie";
-
-        return `
-            <tr style="border-bottom:1px solid #111;">
-                <td style="padding:10px 5px;">${p.name}</td>
-                <td><span class="status-indicator ${p.status === 'FIT' ? 'status-fit' : (p.status === 'WARN' ? 'status-warn' : 'status-error')}" style="position:relative; display:inline-block; margin-right:5px;"></span> ${p.status}</td>
-                <td>${bmi}</td>
-                <td style="color:var(--text-dim);">${rec}</td>
-            </tr>
-        `;
-    },
-
-    generatePackage: function() {
-        if(window.ToniTTS) ToniTTS.speak("Analysiere Kaderstatus. Generiere personalisiertes Trainingspaket für Björn.", "deep");
-        alert("Trainingspaket-Generierung gestartet. Das PDF wird im Modul TRAINING bereitgestellt.");
     }
 };
