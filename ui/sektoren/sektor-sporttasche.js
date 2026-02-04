@@ -1,258 +1,127 @@
 /**
- * TONI 2.0 - MANNSCHAFTSKABINE PRO (INTERNATIONAL STANDARDS)
- * Hierarchie: Gesamt-Kader -> Training -> Match (11+5)
- * Feature: Lokaler Foto-Upload (Base64) & Status-Management
+ * TONI 2.0 - MANNSCHAFTSKABINE PRO (FIFA STYLE & TACTICAL SYNC)
  */
 window.SektorSporttasche = {
-    currentFilter: 'all', // all, training, match
+    currentFilter: 'all',
 
     render: function() {
         let players = JSON.parse(localStorage.getItem('toni_players')) || [];
         
-        // Filter-Logik
-        let filteredPlayers = players;
-        if (this.currentFilter === 'training') {
-            filteredPlayers = players.filter(p => p.isPresent);
-        } else if (this.currentFilter === 'match') {
-            filteredPlayers = players.filter(p => p.isStarter || p.isNominated);
-        }
-
-        // Sortierung: Starter -> Nominiert -> Anwesend -> Rest
-        filteredPlayers.sort((a, b) => {
-            if (a.isStarter !== b.isStarter) return a.isStarter ? -1 : 1;
-            if (a.isNominated !== b.isNominated) return a.isNominated ? -1 : 1;
-            if (a.isPresent !== b.isPresent) return a.isPresent ? -1 : 1;
-            return (b.rating || 0) - (a.rating || 0);
-        });
-        
         document.getElementById('active-content').innerHTML = `
-            <div style="padding:20px; animation: fadeIn 0.4s ease-out;">
+            <div style="padding:25px; animation: fadeIn 0.4s ease-out;">
                 
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:40px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:35px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:20px;">
                     <div>
-                        <h2 style="color:var(--accent-gold); letter-spacing:3px; margin:0; text-shadow: 0 0 15px rgba(212,175,55,0.4);">MANNSCHAFTSKABINE</h2>
-                        <div style="display:flex; gap:10px; margin-top:10px;">
-                            <button class="tactic-btn" onclick="SektorSporttasche.setFilter('all')" style="${this.currentFilter==='all'?'border-color:var(--neon-green);color:#fff':''}">GESAMT-KADER</button>
-                            <button class="tactic-btn" onclick="SektorSporttasche.setFilter('training')" style="${this.currentFilter==='training'?'border-color:var(--neon-green);color:#fff':''}">TRAINING-POOL</button>
-                            <button class="tactic-btn" onclick="SektorSporttasche.setFilter('match')" style="${this.currentFilter==='match'?'border-color:var(--neon-green);color:#fff':''}">MATCH-DAY (11+5)</button>
+                        <h2 style="color:var(--accent-gold); letter-spacing:4px; margin:0; font-size:1.5rem; text-shadow: 0 0 20px rgba(212,175,55,0.3);">ELITE SQUAD CONTROL</h2>
+                        <div style="display:flex; gap:12px; margin-top:15px;">
+                            <button class="tactic-btn" onclick="SektorSporttasche.setFilter('all')" style="${this.currentFilter==='all'?'border-color:var(--neon-green);color:#fff':''}">ALLE</button>
+                            <button class="tactic-btn" onclick="SektorSporttasche.setFilter('training')" style="${this.currentFilter==='training'?'border-color:var(--neon-green);color:#fff':''}">IM TRAINING</button>
+                            <button class="tactic-btn" onclick="SektorSporttasche.setFilter('match')" style="${this.currentFilter==='match'?'border-color:var(--neon-green);color:#fff':''}">MATCHDAY</button>
                         </div>
                     </div>
+                    
                     <div style="display:flex; gap:15px;">
-                        <button class="tactic-btn" style="border-color:var(--status-error); color:var(--status-error);" onclick="SektorSporttasche.factoryReset()">KADER LÖSCHEN</button>
-                        <button class="login-btn" style="width:auto; padding:12px 30px; background:var(--neon-green); color:#000; font-weight:900;" onclick="SektorSporttasche.addPlayer()">
-                            <i class="fas fa-plus"></i> NEUER SPIELER
+                        <button class="login-btn" style="background:var(--accent-orange); color:#fff; padding:12px 25px;" onclick="SektorSporttasche.syncWithArena()">
+                            <i class="fas fa-sync-alt"></i> BOARD AKTUALISIEREN
+                        </button>
+                        <button class="login-btn" style="background:var(--neon-green); color:#000; padding:12px 25px;" onclick="SektorSporttasche.addPlayer()">
+                            + PROFI ANLEGEN
                         </button>
                     </div>
                 </div>
-                
-                <div class="pro-player-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px;">
-                    ${filteredPlayers.length > 0 
-                        ? filteredPlayers.map(p => this.renderFifaCard(p)).join('') 
-                        : `
-                        <div style="grid-column: 1/-1; text-align:center; padding:60px; color:var(--text-dim); border:1px dashed #333; border-radius:15px;">
-                            <p>Keine Spieler gefunden.</p>
-                            <button class="login-btn" style="margin-top:20px; background:var(--accent-gold); color:#000;" onclick="SektorSporttasche.seedEliteTeam()">
-                                INTERNATIONALES ELITE-TEAM LADEN
-                            </button>
-                        </div>`
-                    }
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px;">
+                    ${this.getFilteredPlayers(players).map(p => this.renderProCard(p)).join('')}
                 </div>
             </div>`;
+    },
+
+    getFilteredPlayers: function(players) {
+        if (this.currentFilter === 'training') return players.filter(p => p.isPresent);
+        if (this.currentFilter === 'match') return players.filter(p => p.isStarter || p.isNominated);
+        return players;
+    },
+
+    renderProCard: function(p) {
+        const borderCol = p.isStarter ? 'var(--neon-green)' : (p.isNominated ? 'var(--accent-gold)' : '#222');
+        const presenceShadow = p.isPresent ? '0 0 20px rgba(57, 255, 20, 0.2)' : 'none';
+
+        return `
+            <div class="fifa-card" style="border: 2px solid ${borderCol}; background: linear-gradient(160deg, #121212 0%, #000 100%); position:relative; box-shadow: ${presenceShadow};">
+                
+                <div style="position:absolute; top:12px; right:12px; display:flex; gap:8px; z-index:10;">
+                    <div onclick="SektorSporttasche.fastToggle('${p.id}', 'isPresent')" 
+                         title="Anwesenheit Training"
+                         style="width:22px; height:22px; border-radius:50%; background:${p.isPresent ? 'var(--neon-green)' : '#444'}; border:2px solid #000; cursor:pointer;"></div>
+                </div>
+
+                <div style="padding:20px 20px 10px 20px; display:flex; gap:15px; align-items:center;">
+                    <div style="text-align:center;">
+                        <div style="font-size:1.8rem; font-weight:900; line-height:1; color:${borderCol}">${p.rating || 80}</div>
+                        <div style="font-size:0.6rem; font-weight:bold; color:var(--text-dim);">${p.pos || 'ZM'}</div>
+                    </div>
+                    <div style="width:70px; height:70px; background:#1a1a1a; border-radius:10px; border:1px solid #333; overflow:hidden;">
+                        <img src="${p.photoUrl || ''}" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:900; font-size:1rem; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name.toUpperCase()}</div>
+                        <div style="font-size:0.6rem; color:var(--accent-gold); font-weight:bold;">NR. ${p.number} | ${p.status || 'FIT'}</div>
+                    </div>
+                </div>
+
+                <div style="padding:0 20px 15px 20px; display:flex; gap:5px;">
+                    <button onclick="SektorSporttasche.setMatchRole('${p.id}', 'starter')" 
+                            style="flex:1; font-size:0.55rem; padding:6px; border-radius:4px; border:1px solid #333; cursor:pointer; background:${p.isStarter?'var(--neon-green)':'transparent'}; color:${p.isStarter?'#000':'#fff'}; font-weight:900;">STARTELF</button>
+                    <button onclick="SektorSporttasche.setMatchRole('${p.id}', 'sub')" 
+                            style="flex:1; font-size:0.55rem; padding:6px; border-radius:4px; border:1px solid #333; cursor:pointer; background:${p.isNominated?'var(--accent-gold)':'transparent'}; color:${p.isNominated?'#000':'#fff'}; font-weight:900;">BANK</button>
+                    <button onclick="SektorSporttasche.edit('${p.id}')" 
+                            style="width:30px; background:rgba(255,255,255,0.05); border:1px solid #333; color:#fff; border-radius:4px;"><i class="fas fa-edit"></i></button>
+                </div>
+
+                <div style="padding:12px 20px; background:rgba(255,255,255,0.02); display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.6rem; border-top:1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between;"><span>VMAX</span> <span style="color:var(--neon-green)">${p.proKpis?.vmax || '--'}</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>RSA</span> <span style="color:var(--neon-green)">${p.proKpis?.rsa || '--'}</span></div>
+                </div>
+            </div>`;
+    },
+
+    fastToggle: function(id, field) {
+        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const idx = players.findIndex(p => p.id === id);
+        if(idx > -1) {
+            players[idx][field] = !players[idx][field];
+            localStorage.setItem('toni_players', JSON.stringify(players));
+            this.render();
+        }
+    },
+
+    setMatchRole: function(id, role) {
+        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const idx = players.findIndex(p => p.id === id);
+        if(idx > -1) {
+            // Logik: Einer kann nicht beides sein.
+            if(role === 'starter') {
+                players[idx].isStarter = !players[idx].isStarter;
+                players[idx].isNominated = false;
+            } else {
+                players[idx].isNominated = !players[idx].isNominated;
+                players[idx].isStarter = false;
+            }
+            localStorage.setItem('toni_players', JSON.stringify(players));
+            this.render();
+        }
+    },
+
+    syncWithArena: function() {
+        if(window.arena) {
+            window.arena.resetBoard(); // Lädt nur die anwesenden/nominierten Spieler neu
+            if(window.ToniTTS) ToniTTS.speak("Board synchronisiert. Die anwesenden Spieler sind auf ihren Positionen.", "warm");
+            BriefcaseUI.toggle(); // Schließt die Tasche für freie Sicht aufs Board
+        }
     },
 
     setFilter: function(f) {
         this.currentFilter = f;
         this.render();
-    },
-
-    renderFifaCard: function(p) {
-        // Fallback-Logik gegen "undefined"
-        const rating = p.rating || 80;
-        const photo = p.photoUrl || 'https://via.placeholder.com/200/000000/39FF14?text=PRO';
-        const status = p.status || 'FIT';
-        const vmax = (p.proKpis && p.proKpis.vmax) ? p.proKpis.vmax : '--';
-        const rsa = (p.proKpis && p.proKpis.rsa) ? p.proKpis.rsa : '--';
-        
-        // Status-Indikatoren
-        let badge = "";
-        if (p.isStarter) badge = `<span style="background:var(--neon-green); color:#000; padding:2px 8px; border-radius:3px; font-size:0.5rem; font-weight:900;">STARTELF</span>`;
-        else if (p.isNominated) badge = `<span style="background:var(--accent-gold); color:#000; padding:2px 8px; border-radius:3px; font-size:0.5rem; font-weight:900;">BANK</span>`;
-        else if (p.isPresent) badge = `<span style="background:var(--data-cyan); color:#000; padding:2px 8px; border-radius:3px; font-size:0.5rem; font-weight:900;">TRAINING</span>`;
-
-        return `
-            <div class="fifa-card" onclick="SektorSporttasche.edit('${p.id}')" style="position:relative; background: linear-gradient(135deg, #1a1a1a 0%, #000 100%); border: 2px solid ${p.isStarter ? 'var(--neon-green)' : (p.isNominated ? 'var(--accent-gold)' : '#333')}; overflow:hidden;">
-                
-                <div style="width:100%; height:180px; background:#000; overflow:hidden;">
-                    <img src="${photo}" style="width:100%; height:100%; object-fit:cover;">
-                </div>
-
-                <div style="position: absolute; top: 10px; left: 10px; display:flex; flex-direction:column; gap:5px;">
-                    <div style="background:rgba(0,0,0,0.8); padding:5px 10px; border:1px solid var(--accent-gold); border-radius:5px; text-align:center;">
-                        <div style="font-size: 1.2rem; font-weight: 900; color:#fff;">${rating}</div>
-                        <div style="font-size: 0.5rem; color: var(--accent-gold); font-weight:bold;">${p.pos || 'ZM'}</div>
-                    </div>
-                    ${badge}
-                </div>
-
-                <div style="padding:15px; text-align: center;">
-                    <div style="font-size: 1.1rem; font-weight: 900; color:#fff; margin-bottom:5px;">${p.name.toUpperCase()}</div>
-                    <div style="font-size: 0.6rem; color:var(--text-dim); margin-bottom:10px;">NR: ${p.number} | ${status}</div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.6rem; font-weight: bold; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                        <div style="display:flex; justify-content:space-between; padding-right:5px; border-right:1px solid #333;">
-                            <span>VMAX</span> <span style="color:var(--neon-green)">${vmax}</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; padding-left:5px;">
-                            <span>RSA</span> <span style="color:var(--neon-green)">${rsa}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-    },
-
-    edit: function(id) {
-        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const p = players.find(x => x.id == id);
-        if(!p) return;
-
-        // Fallback für vitals
-        const pulse = (p.vitals && p.vitals.pulse) ? p.vitals.pulse : 70;
-        const spo2 = (p.vitals && p.vitals.spo2) ? p.vitals.spo2 : 98;
-
-        document.getElementById('active-content').innerHTML = `
-            <div style="padding:30px; max-width:900px; margin:0 auto; background:rgba(13, 20, 33, 0.98); border:2px solid var(--accent-gold); border-radius:20px; animation: fadeIn 0.3s;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-                    <button class="tactic-btn" onclick="SektorSporttasche.render()"><i class="fas fa-chevron-left"></i> ZURÜCK</button>
-                    <button class="tactic-btn" style="border-color:var(--status-error); color:var(--status-error);" onclick="SektorSporttasche.deletePlayer('${p.id}')">SPIELER LÖSCHEN</button>
-                </div>
-                
-                <h2 style="color:var(--accent-gold); margin-bottom:25px; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:10px;">PROFI-DOSSIER: ${p.name.toUpperCase()}</h2>
-                
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
-                    <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px;">
-                        <h4 style="color:var(--accent-gold); font-size:0.6rem; margin-bottom:15px;">FOTO-UPLOAD</h4>
-                        <div id="drop-zone" style="width:100%; height:120px; border:2px dashed #444; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; overflow:hidden;" onclick="document.getElementById('file-input').click()">
-                            ${p.photoUrl ? `<img src="${p.photoUrl}" style="height:100%; width:100%; object-fit:cover;">` : '<i class="fas fa-cloud-upload-alt" style="font-size:2rem; color:#444;"></i><p style="font-size:0.5rem; color:#666;">KLICKEN ODER BILD HIERHER ZIEHEN</p>'}
-                        </div>
-                        <input type="file" id="file-input" style="display:none" onchange="SektorSporttasche.handleFileUpload(this)">
-                        <input type="hidden" id="edit-photo-data" value="${p.photoUrl || ''}">
-
-                        <div style="margin-top:20px;">
-                            <label style="font-size:0.6rem; color:var(--text-dim);">ANWESENHEIT TRAINING</label>
-                            <select id="edit-present" class="login-input" style="width:100%; margin-bottom:15px;">
-                                <option value="true" ${p.isPresent?'selected':''}>ANWESEND</option>
-                                <option value="false" ${!p.isPresent?'selected':''}>ABWESEND / ENTSCHULDIGT</option>
-                            </select>
-
-                            <label style="font-size:0.6rem; color:var(--text-dim);">MATCH-NOMINIERUNG (Aus Pool)</label>
-                            <select id="edit-role" class="login-input" style="width:100%;">
-                                <option value="none" ${!p.isStarter && !p.isNominated ? 'selected' : ''}>NICHT IM KADER</option>
-                                <option value="starter" ${p.isStarter?'selected':''}>STARTELF (11)</option>
-                                <option value="sub" ${p.isNominated?'selected':''}>ERSATZBANK (5)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style="background:rgba(57,255,20,0.03); padding:20px; border-radius:10px; border:1px solid rgba(57,255,20,0.1);">
-                        <h4 style="color:var(--neon-green); font-size:0.6rem; margin-bottom:15px;">PERFORMANCE-PARAMETER</h4>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                            <div><label style="font-size:0.5rem;">RATING</label><input type="number" id="edit-rating" value="${rating}" class="login-input"></div>
-                            <div><label style="font-size:0.5rem;">NUMMER</label><input type="number" id="edit-number" value="${p.number}" class="login-input"></div>
-                            <div><label style="font-size:0.5rem;">PULS</label><input type="number" id="edit-pulse" value="${pulse}" class="login-input"></div>
-                            <div><label style="font-size:0.5rem;">SpO2</label><input type="number" id="edit-spo2" value="${spo2}" class="login-input"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <button class="login-btn" style="width:100%; margin-top:35px;" onclick="SektorSporttasche.save('${p.id}')">ÄNDERUNGEN SPEICHERN</button>
-            </div>`;
-    },
-
-    handleFileUpload: function(input) {
-        const file = input.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('edit-photo-data').value = e.target.result;
-                document.getElementById('drop-zone').innerHTML = `<img src="${e.target.result}" style="height:100%; width:100%; object-fit:cover;">`;
-            };
-            reader.readAsDataURL(file);
-        }
-    },
-
-    save: function(id) {
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const idx = players.findIndex(x => x.id == id);
-        if(idx > -1) {
-            const role = document.getElementById('edit-role').value;
-            
-            players[idx].rating = parseInt(document.getElementById('edit-rating').value);
-            players[idx].number = parseInt(document.getElementById('edit-number').value);
-            players[idx].photoUrl = document.getElementById('edit-photo-data').value;
-            players[idx].isPresent = document.getElementById('edit-present').value === "true";
-            
-            // Nominierung setzen
-            players[idx].isStarter = (role === 'starter');
-            players[idx].isNominated = (role === 'sub');
-            
-            players[idx].vitals = {
-                pulse: parseInt(document.getElementById('edit-pulse').value),
-                spo2: parseInt(document.getElementById('edit-spo2').value)
-            };
-            
-            localStorage.setItem('toni_players', JSON.stringify(players));
-            if(window.ToniTTS) ToniTTS.speak("Daten synchronisiert.", "warm");
-            this.render();
-        }
-    },
-
-    addPlayer: function() {
-        const name = prompt("Name des Spielers:");
-        if (!name) return;
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        players.push({
-            id: 'p_' + Date.now(),
-            name: name,
-            number: 10,
-            pos: 'ZM',
-            rating: 80,
-            status: 'FIT',
-            isPresent: true,
-            isStarter: false,
-            isNominated: false,
-            vitals: { pulse: 70, spo2: 98 },
-            proKpis: { vmax: 2, rsa: 75, ballControl: 75, stress: 75 }
-        });
-        localStorage.setItem('toni_players', JSON.stringify(players));
-        this.render();
-    },
-
-    deletePlayer: function(id) {
-        if(confirm("Spieler entfernen?")) {
-            let players = JSON.parse(localStorage.getItem('toni_players')) || [];
-            players = players.filter(p => p.id !== id);
-            localStorage.setItem('toni_players', JSON.stringify(players));
-            this.render();
-        }
-    },
-
-    factoryReset: function() {
-        if(confirm("Gesamten Kader löschen?")) {
-            localStorage.setItem('toni_players', JSON.stringify([]));
-            this.render();
-        }
-    },
-
-    seedEliteTeam: function() {
-        const elite = [
-            { id: 'p1', name: 'M. Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 62, spo2: 99 }, proKpis: { vmax: 2, rsa: 80, ballControl: 85, stress: 90 }, formHistory: [88, 89, 89, 90, 89] },
-            { id: 'p2', name: 'V. van Dijk', number: 4, pos: 'IV', rating: 88, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 65, spo2: 98 }, proKpis: { vmax: 3, rsa: 85, ballControl: 78, stress: 95 }, formHistory: [85, 86, 88, 88, 88] },
-            { id: 'p3', name: 'K. Mbappe', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 56, spo2: 99 }, proKpis: { vmax: 3, rsa: 85, ballControl: 92, stress: 89 }, formHistory: [91, 92, 92, 92, 92] },
-            { id: 'p4', name: 'E. Haaland', number: 9, pos: 'ST', rating: 91, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 63, spo2: 98 }, proKpis: { vmax: 3, rsa: 82, ballControl: 80, stress: 92 }, formHistory: [89, 90, 91, 91, 91] },
-            { id: 'p5', name: 'J. Kimmich', number: 6, pos: 'ZM', rating: 86, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 55, spo2: 99 }, proKpis: { vmax: 2, rsa: 95, ballControl: 88, stress: 98 }, formHistory: [85, 86, 86, 87, 86] }
-        ];
-        localStorage.setItem('toni_players', JSON.stringify(elite));
-        this.render();
-        if(window.ToniTTS) ToniTTS.speak("Internationaler Elite-Kader geladen.", "warm");
     }
 };
