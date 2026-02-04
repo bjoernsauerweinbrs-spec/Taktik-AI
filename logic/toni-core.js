@@ -1,36 +1,35 @@
-// logic/toni-core.js
-// KEIN "export" benutzen! Der Browser erkennt window.ToniCore automatisch.
-
+/**
+ * TONI 2.0 - CORE ENGINE
+ * Zentrale Befehlsverarbeitung ohne Export-Fehler
+ */
 window.ToniCore = {
     processCommand: function(input) {
         if (!input) return;
-        
-        console.log("ToniCore analysiert:", input);
-        
-        // Einfache Logik-Prüfung für den Start
         const cmd = input.toLowerCase();
         
+        console.log("ToniCore Befehl:", cmd);
+
         if (cmd.includes("hallo") || cmd.includes("start")) {
-            if(window.ToniTTS) ToniTTS.speak("System bereit. Ich analysiere den Kader, Coach Björn.", "warm");
+            this.respond("Ginga-Modus aktiv. Ich analysiere den Kader, Coach Björn.");
+        } else if (cmd.includes("status") || cmd.includes("kader")) {
+            this.respond("Greife auf die Mannschaftskabine zu. Die FIFA-Karten werden abgeglichen.");
         } else if (cmd.includes("taktik")) {
-            if(window.ToniTTS) ToniTTS.speak("Welches System bevorzugst du? Pressing oder Kompakt?", "deep");
+            this.respond("Analysiere Formation. Soll ich Pressing oder Kompakt-Modus forcieren?");
         } else {
-            // Standard-Antwort
-            if(window.ToniTTS) ToniTTS.speak("Verstanden. Ich nehme das in die Analyse auf.");
+            this.respond("Verstanden. Die Daten werden in die Tiefenanalyse übernommen.");
         }
-        
-        // Nachricht im Feed anzeigen
-        this.displayMessage(input, 'user');
     },
 
-    displayMessage: function(text, sender) {
-        const msgArea = document.getElementById('chat-messages');
-        if(!msgArea) return;
+    respond: function(text) {
+        if(window.ToniTTS) ToniTTS.speak(text, "warm");
         
-        const div = document.createElement('div');
-        div.className = sender === 'user' ? 'user-msg' : 'bot-msg';
-        div.innerText = text;
-        msgArea.appendChild(div);
-        msgArea.scrollTop = msgArea.scrollHeight;
+        const chatArea = document.getElementById('chat-messages');
+        if(chatArea) {
+            const botMsg = document.createElement('div');
+            botMsg.style.cssText = "margin-bottom:15px; color:var(--neon-green); text-shadow: 0 0 5px rgba(57,255,20,0.3);";
+            botMsg.innerHTML = `<b>Toni:</b> ${text}`;
+            chatArea.appendChild(botMsg);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
     }
 };
