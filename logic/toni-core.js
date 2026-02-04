@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - CORE ENGINE (PRO-TACTICAL EDITION)
- * Finaler Fix gegen 'undefined' Antworten und CORS-Probleme.
+ * TONI 2.0 - CORE ENGINE (ULTIMATE STABILITY EDITION)
+ * Fixes CORS issues and ensures Ollama communication from GitHub Pages.
  */
 window.ToniCore = {
     isProcessing: false,
@@ -14,7 +14,7 @@ window.ToniCore = {
 
         const cmd = text.toLowerCase();
 
-        // 1. SYSTEM-STEUERUNG (Lokal, ohne KI)
+        // 1. SYSTEM-COMMANDS
         if (cmd.includes("öffne") || cmd.includes("gehe zu")) {
             this.handleNavigation(cmd);
         }
@@ -26,7 +26,7 @@ window.ToniCore = {
             const type = cmd.includes("3-4-3") ? "3-4-3" : "viererkette";
             this.executeFormation(type, `Formiere ${type}.`);
         }
-        // 2. KI-BRAINSTORMING (Hybrid)
+        // 2. KI-BRAINSTORMING
         else {
             await this.handleTacticalQuery(text);
         }
@@ -41,9 +41,7 @@ window.ToniCore = {
         const boardState = this.getBoardContext();
         const prompt = `Kontext: ${boardState}. Frage: ${text}`;
 
-        const isComplex = text.length > 100 || text.includes("analysiere");
-
-        if (provider === "openai" && apiKey && isComplex) {
+        if (provider === "openai" && apiKey) {
             await this.queryOpenAI(prompt, apiKey);
         } else {
             await this.queryOllama(prompt);
@@ -56,36 +54,36 @@ window.ToniCore = {
     },
 
     /**
-     * OLLAMA ABFRAGE MIT FALLBACK-SICHERUNG
+     * OLLAMA ABFRAGE MIT ROBUSTER FEHLERBEHANDLUNG
      */
     queryOllama: async function(prompt) {
         try {
-            const response = await fetch('http://localhost:11434/api/generate', {
+            const response = await fetch('http://127.0.0.1:11434/api/generate', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                // Wir entfernen spezielle Header, die CORS-Fehler provozieren könnten
                 body: JSON.stringify({
-                    model: 'gemma', // Stelle sicher, dass 'gemma' oder 'llama3' in Ollama geladen ist
-                    prompt: `Du bist Toni, ein Weltklasse-Fußballtrainer. Antworte kurz auf Deutsch: ${prompt}`,
+                    model: 'gemma', 
+                    prompt: `Antworte als Fußball-Experte Toni kurz auf Deutsch: ${prompt}`,
                     stream: false
                 })
             });
 
-            if (!response.ok) throw new Error("Offline");
+            if (!response.ok) throw new Error("CORS oder Server Fehler");
 
             const data = await response.json();
             
-            // DIE DEFINITIVE LÖSUNG GEGEN UNDEFINED:
-            // Wir prüfen alle möglichen Felder, die Ollama zurückgeben könnte
-            let finalAnswer = data.response || data.message?.content || data.message || "";
+            // Schutz vor undefined: Wir prüfen alle Pfade
+            let answer = data.response || (data.message ? data.message.content : null) || "";
             
-            if (!finalAnswer || finalAnswer === "") {
-                finalAnswer = "Ich habe die Daten analysiert, kann aber gerade keine Verbindung zum Sprachmodul herstellen. Läuft 'ollama serve' mit den ORIGINS?";
+            if (!answer) {
+                answer = "Analyse abgeschlossen, aber das Gehirn lieferte keine Daten. Prüfe die Modell-Installation.";
             }
 
-            this.finalizeResponse(finalAnswer);
+            this.finalizeResponse(answer);
 
         } catch (e) {
-            this.handleError("Ollama antwortet nicht. Bitte 'set OLLAMA_ORIGINS=* && ollama serve' im Terminal ausführen.");
+            console.error("Connection Error:", e);
+            this.handleError("VERBINDUNG BLOCKIERT: Bitte starte Ollama neu mit: 'set OLLAMA_ORIGINS=* && ollama serve' (im CMD Fenster).");
         }
     },
 
@@ -93,20 +91,16 @@ window.ToniCore = {
         try {
             const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${key}`,
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     model: "gpt-4o-mini",
                     messages: [{role: "system", content: "Du bist Toni, int. Taktik-Experte."}, {role: "user", content: prompt}]
                 })
             });
             const data = await response.json();
-            const answer = data.choices[0].message.content;
-            this.finalizeResponse(answer);
+            this.finalizeResponse(data.choices[0].message.content);
         } catch (e) {
-            this.handleError("Cloud-Analyse fehlgeschlagen. Key prüfen.");
+            this.handleError("OpenAI API Fehler.");
         }
     },
 
