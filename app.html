@@ -28,7 +28,10 @@
             cursor: pointer;
             color: #888;
             margin-bottom: 5px;
+            transition: 0.3s;
         }
+        
+        .nav-item:hover { color: #ff9500; }
 
         /* Taktik-Steuerung KOMPAKT in der Sidebar */
         #sidebar-tactic-controls {
@@ -80,6 +83,9 @@
             max-width: 98%;
             max-height: 98%;
         }
+
+        /* Overlay & Hidden State */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -121,26 +127,60 @@
 
 <div id="briefcase-overlay" class="hidden">
     <div class="briefcase-window">
-        <div class="briefcase-header" style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 id="sector-title" style="margin:0; color:#ff9500;">ZENTRALE</h2>
-            <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:#fff; font-size:1.5rem;">&times;</button>
+        <div class="briefcase-header" style="display:flex; justify-content:space-between; align-items:center; padding: 15px; background: #111; border-bottom: 1px solid #333;">
+            <h2 id="sector-title" style="margin:0; color:#ff9500; font-size: 1.2rem; letter-spacing: 2px;">ZENTRALE</h2>
+            <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:#fff; font-size:1.8rem; cursor:pointer;">&times;</button>
         </div>
-        <div id="briefcase-nav"></div>
+        <div id="briefcase-nav">
+            </div>
         <div id="briefcase-content" class="hidden">
-            <div id="active-content"></div>
+            <div id="active-content">
+                </div>
         </div>
     </div>
 </div>
 
+<script src="logic/toni-ai.js"></script>
 <script src="ui/briefcase-ui.js"></script>
 <script src="engine/arena.js"></script>
-<script src="engine/toni-ai.js"></script>
 
 <script>
+    // Master-Initialisierung nach dem Laden
     window.addEventListener('load', function() {
+        console.log("App-Start: Lade Systeme...");
+
+        // 1. Toni-AI bereitmachen
+        if(window.ToniAI) {
+            // Warten bis Stimmen verfügbar sind
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = () => {
+                    console.log("Toni Stimmen synchronisiert.");
+                };
+            }
+        }
+
+        // 2. UI & Arena initialisieren
         if(window.BriefcaseUI) BriefcaseUI.init();
         if(window.arena) arena.init('tactic-board');
-        if(window.ToniAI) ToniAI.init();
+
+        // 3. Willkommens-Ansage (Männlich/Deutsch)
+        setTimeout(() => {
+            if(window.ToniAI) {
+                const coachName = (BriefcaseUI.clubData && BriefcaseUI.clubData.coach) ? BriefcaseUI.clubData.coach : "Björn";
+                ToniAI.speak("System bereit. Willkommen im Analysezentrum, Coach " + coachName + ".", "warm");
+            }
+        }, 1200);
+    });
+
+    // Chat-Enter-Logik
+    document.getElementById('chat-input')?.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            const val = this.value;
+            if(val && window.ToniAI) {
+                ToniAI.processCommand(val);
+                this.value = '';
+            }
+        }
     });
 </script>
 
