@@ -1,14 +1,14 @@
 /**
- * TONI 2.0 - INTERNATIONAL MULTI-ARENA ENGINE
+ * TONI 2.0 - INTERNATIONAL MULTI-ARENA ENGINE (TACTICAL UPDATE)
  * Professionelle Spielfeld-Logik: Standard, F-Jugend & Funino.
- * Inklusive Trainings-Tools (Leitern, Hürden, Hütchen) & A4-Export.
+ * Schnittstellen für KI-gesteuerte Formationen & Bewegungen.
  */
 window.arena = {
     canvas: null,
     ctx: null,
     players: [],
-    trainingObjects: [], // Hütchen, Leitern, Hürden, Bälle
-    pitchMode: 'pro',    // 'pro' (Standard), 'youth' (F-Jugend), 'funino'
+    trainingObjects: [], 
+    pitchMode: 'pro',    
     draggedItem: null,
     
     init: function(id) {
@@ -33,16 +33,46 @@ window.arena = {
     },
 
     /**
-     * Wechselt den Spielfeld-Modus (International Standards)
+     * KI-SCHNITTSTELLE: Setzt Spieler auf exakte taktische Positionen
+     * @param {Array} coords - Array mit {x, y} (0.0 - 1.0)
      */
+    applyTacticalPositions: function(coords) {
+        const homePlayers = this.players.filter(p => p.team === 'home');
+        coords.forEach((coord, i) => {
+            if (homePlayers[i]) {
+                this.animateMovement(homePlayers[i], this.canvas.width * coord.x, this.canvas.height * coord.y);
+            }
+        });
+    },
+
+    /**
+     * KI-SCHNITTSTELLE: Verschiebt das gesamte Team als Block
+     * @param {String} direction - 'forward', 'backward'
+     */
+    shiftTeam: function(direction) {
+        const shiftVal = this.canvas.width * 0.08;
+        this.players.filter(p => p.team === 'home').forEach(p => {
+            if (direction === 'forward') p.x += shiftVal;
+            if (direction === 'backward') p.x -= shiftVal;
+        });
+        this.render();
+    },
+
+    /**
+     * Mini-Animation für flüssige Bewegungen
+     */
+    animateMovement: function(player, targetX, targetY) {
+        // Für den Prototyp: Direkter Sprung mit Render
+        player.x = targetX;
+        player.y = targetY;
+        this.render();
+    },
+
     setPitchMode: function(mode) {
         this.pitchMode = mode;
         this.render();
     },
 
-    /**
-     * Fügt ein Trainings-Objekt hinzu (Koordination/Material)
-     */
     addTrainingObject: function(type) {
         const obj = {
             id: 'obj_' + Date.now(),
@@ -62,7 +92,6 @@ window.arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // Nur nominierte Spieler (11+5) für den Match-Modus laden
         const starters = squad.filter(p => p.isStarter).slice(0, 11);
         const bench = squad.filter(p => p.isNominated && !p.isStarter).slice(0, 5);
 
@@ -80,7 +109,6 @@ window.arena = {
             });
         });
 
-        // Gegner (Toni-Steuerung)
         for(let i=0; i < 11; i++) {
             this.players.push({ id: 'opp_'+i, nr: i+1, team: 'away', x: this.getInitialX(i, 'away', w), y: this.getInitialY(i, h), radius: 18 });
         }
@@ -97,13 +125,9 @@ window.arena = {
         this.drawGrid(ctx, w, h);
         this.drawPitchLayout(ctx, w, h);
 
-        // Zeichne Trainings-Material
         this.trainingObjects.forEach(obj => this.drawTool(ctx, obj));
-
-        // Zeichne Spieler
         this.players.forEach(p => this.drawPlayer(ctx, p));
         
-        // Haupt-Ball
         if (this.pitchMode === 'pro') this.drawBall(ctx, w/2 + 20, h/2);
     },
 
@@ -121,12 +145,10 @@ window.arena = {
             this.drawGoal(ctx, pad, h/2, true);
             this.drawGoal(ctx, w-pad, h/2, false);
         } else if (this.pitchMode === 'youth') {
-            // F-Jugend Verkürzt
             ctx.strokeRect(pad * 2, pad, w-(pad*4), h-(pad*2));
             this.drawSmallGoal(ctx, pad*2, h/2, true);
             this.drawSmallGoal(ctx, w-(pad*2), h/2, false);
         } else if (this.pitchMode === 'funino') {
-            // Funino 4 Tore
             ctx.strokeRect(pad * 2, pad, w-(pad*4), h-(pad*2));
             this.drawSmallGoal(ctx, pad*2, h*0.3, true);
             this.drawSmallGoal(ctx, pad*2, h*0.7, true);
@@ -220,9 +242,6 @@ window.arena = {
         return h * pos[i];
     },
 
-    /**
-     * Erstellt ein Bild vom Spielfeld für den A4-Export
-     */
     getSnapshot: function() {
         return this.canvas.toDataURL("image/png");
     }
