@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - ZENTRALE STEUEREINHEIT (PRO-ROUTING)
- * Optimierte Ordner-Struktur und Fehler-Handling.
+ * Optimierte Ordner-Struktur und präzise Sektor-Anwahl.
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -43,7 +43,7 @@ window.BriefcaseUI = {
         const nav = document.getElementById('briefcase-nav');
         if(!nav) return;
 
-        // Organisierte Ordner-Struktur
+        // Organisierte Ordner-Struktur für schnellen Zugriff
         const folders = [
             { id: 'sport', name: 'MANNSCHAFTSKABINE', icon: 'fa-users', color: 'var(--accent-gold)' },
             { id: 'training', name: 'TRAININGSBETRIEB', icon: 'fa-dumbbell', color: 'var(--accent-orange)' },
@@ -56,7 +56,7 @@ window.BriefcaseUI = {
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; padding: 20px;">
                 ${folders.map(f => `
                     <div class="fifa-card" onclick="BriefcaseUI.switchSektor('${f.id}')" 
-                         style="padding: 50px 20px; text-align: center; cursor: pointer; transition: 0.3s;">
+                         style="padding: 50px 20px; text-align: center; cursor: pointer; transition: 0.3s; border:1px solid rgba(255,255,255,0.1);">
                         <i class="fas ${f.icon}" style="font-size: 3rem; color: ${f.color}; margin-bottom: 25px; display: block;"></i>
                         <span style="font-weight: 900; letter-spacing: 2px; font-size: 0.8rem; color:#fff;">${f.name}</span>
                     </div>
@@ -76,8 +76,8 @@ window.BriefcaseUI = {
         nav.classList.add('hidden');
         content.classList.remove('hidden');
         
-        // Titel mit Zurück-Button
-        const displayTitles = {
+        // Anzeige-Namen für die Sektor-Überschrift
+        const sectorNames = {
             'sport': 'MANNSCHAFTSKABINE',
             'training': 'TRAININGSBETRIEB',
             'analyse': 'PERFORMANCE LAB',
@@ -88,10 +88,10 @@ window.BriefcaseUI = {
         title.innerHTML = `
             <button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:var(--neon-green); cursor:pointer; margin-right:15px; font-size:1.5rem;">
                 <i class="fas fa-arrow-left"></i>
-            </button> ${displayTitles[sektor] || sektor.toUpperCase()}
+            </button> ${sectorNames[sektor] || sektor.toUpperCase()}
         `;
 
-        // Routing-Logik
+        // Routing-Logik: Hier wird entschieden, welches Skript rendert
         switch(sektor) {
             case 'sport':
                 if(window.SektorSporttasche) window.SektorSporttasche.render();
@@ -103,13 +103,14 @@ window.BriefcaseUI = {
                 if(window.SektorAnalyse) window.SektorAnalyse.render();
                 break;
             case 'templates':
+                // WICHTIG: Wenn hier Analyse-Inhalt erscheint, liegt der Fehler in der Datei sektor-templates.js
                 if(window.SektorTemplates) window.SektorTemplates.render();
                 break;
             case 'system':
                 if(window.SektorSystem) window.SektorSystem.render();
                 break;
             default:
-                active.innerHTML = `<div style="text-align:center; padding:100px; color:var(--text-dim);">Modul nicht gefunden.</div>`;
+                active.innerHTML = `<div style="text-align:center; padding:100px;">Modul nicht gefunden.</div>`;
         }
     }
 };
