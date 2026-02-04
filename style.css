@@ -1,4 +1,4 @@
-/* --- TONI 2.0 MASTER CSS: NEON-GINGA FULL LAYOUT & PRINT ENGINE --- */
+/* --- TONI 2.0 MASTER CSS: INTERNATIONAL PRO LAYOUT & DUAL PRINT ENGINE --- */
 :root {
     --bg-deep: #05080F;
     --panel-dark: #0D1421;
@@ -10,6 +10,7 @@
     --text-dim: #A0AEC0;
     --status-fit: #4CD964;
     --status-error: #FF3B30;
+    --font-pro: 'Inter', sans-serif;
 }
 
 /* 1. BASIS & RESET */
@@ -19,7 +20,7 @@ body, html {
     width: 100%; height: 100%; 
     background: var(--bg-deep); 
     color: var(--text-main); 
-    font-family: 'Inter', sans-serif; 
+    font-family: var(--font-pro); 
     overflow: hidden; 
 }
 
@@ -92,103 +93,102 @@ body, html {
 /* 6. ZENTRALE OVERLAY (AKTENTASCHE) */
 .briefcase-overlay { 
     position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100vw; 
-    height: 100vh; 
-    background: rgba(0, 0, 0, 0.94); 
+    top: 0; left: 0; 
+    width: 100vw; height: 100vh; 
+    background: rgba(0, 0, 0, 0.96); 
     display: none; 
-    align-items: center; 
-    justify-content: center; 
+    align-items: center; justify-content: center; 
     z-index: 99999 !important; 
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(25px);
 }
 
 .briefcase-window { 
     background: var(--panel-dark); 
     border: 2px solid var(--neon-green); 
-    width: 92%; 
-    height: 88%; 
-    border-radius: 24px; 
-    padding: 40px; 
+    width: 94%; height: 90%; 
+    border-radius: 24px; padding: 40px; 
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 0 50px rgba(57, 255, 20, 0.2);
+    box-shadow: 0 0 50px rgba(57, 255, 20, 0.3);
 }
 
-/* 7. FIFA CARDS & UI ELEMENTS */
-.pro-player-list { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-    gap: 30px; 
-}
-
+/* 7. FIFA CARDS & PRO COMPONENTS */
 .fifa-card {
     background: linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 100%);
     border: 1px solid var(--accent-gold);
-    border-radius: 15px; 
-    padding: 20px; 
-    position: relative;
-    cursor: pointer;
-    text-align: center;
+    border-radius: 15px; padding: 20px; 
+    position: relative; cursor: pointer; text-align: center;
     transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+.fifa-card:hover { transform: translateY(-5px); border-color: var(--neon-green); }
 
-.fifa-card:hover { 
-    transform: translateY(-10px); 
-    border-color: var(--neon-green); 
-    box-shadow: 0 10px 30px rgba(57, 255, 20, 0.3);
-}
-
-/* INPUTS & BUTTONS */
-.login-input {
-    background: #000;
-    border: 1px solid #333;
-    color: #fff;
-    padding: 12px;
-    border-radius: 8px;
-    outline: none;
-    font-family: inherit;
+/* Foto-Upload Dropzone */
+.drop-zone {
+    border: 2px dashed #444;
     transition: 0.3s;
 }
-
-.login-input:focus {
+.drop-zone:hover {
     border-color: var(--neon-green);
-    box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+    background: rgba(57, 255, 20, 0.05);
 }
+
+/* 8. INPUTS & BUTTONS */
+.login-input {
+    background: #000; border: 1px solid #333; color: #fff;
+    padding: 12px; border-radius: 8px; outline: none; font-family: inherit;
+}
+.login-input:focus { border-color: var(--neon-green); }
 
 .login-btn {
-    background: var(--neon-green);
-    color: #000;
-    border: none;
-    padding: 15px;
-    border-radius: 8px;
-    font-weight: 900;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: 0.3s;
-}
-
-.login-btn:hover {
-    transform: scale(1.02);
-    box-shadow: 0 0 20px var(--neon-green);
+    background: var(--neon-green); color: #000; border: none;
+    padding: 15px; border-radius: 8px; font-weight: 900;
+    cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
 }
 
 .tactic-btn {
-    background: transparent;
-    border: 1px solid var(--text-dim);
-    color: var(--text-dim);
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.7rem;
-    transition: 0.3s;
+    background: transparent; border: 1px solid var(--text-dim);
+    color: var(--text-dim); padding: 8px 15px; border-radius: 5px;
+    cursor: pointer; font-size: 0.7rem; font-weight: 700;
 }
 
-.tactic-btn:hover {
-    border-color: var(--accent-gold);
-    color: var(--accent-gold);
+/* 9. PRINT ENGINE (DIN A4 & DIN A5) */
+.only-print { display: none; }
+
+@media print {
+    /* Alles ausblenden außer Druck-Layouts */
+    body * { visibility: hidden !important; }
+    
+    /* Trainingsplan A4 */
+    #a4-print-layout, #a4-print-layout * { 
+        visibility: visible !important; 
+        display: block !important;
+    }
+    #a4-print-layout {
+        position: fixed; left: 0; top: 0; width: 100%;
+        background: #fff !important; color: #000 !important;
+    }
+
+    /* Stadionheft A5 */
+    #magazine-container, #magazine-container * {
+        visibility: visible !important;
+        display: block !important;
+    }
+    #magazine-container {
+        position: fixed; left: 0; top: 0; width: 100%;
+        background: #fff !important;
+    }
+
+    .mag-page {
+        margin: 0 !important;
+        page-break-after: always !important;
+        width: 148mm !important; height: 210mm !important;
+        background: #fff !important;
+    }
+
+    /* Schatten und Buttons im Druck entfernen */
+    .no-print, button, .fifa-card { box-shadow: none !important; border: none !important; }
+    
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 
 /* ANIMATIONS */
@@ -196,46 +196,4 @@ body, html {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
-
 .hidden { display: none !important; }
-
-/* 8. TONI 2.0 PRINT ENGINE (DIN A5 STADIONHEFT) */
-@media print {
-    body, .pro-layout-container, .sidebar-minimal, .analysis-panel, .no-print, .briefcase-overlay {
-        visibility: hidden !important;
-        background: none !important;
-    }
-
-    #magazine-container, #magazine-container * {
-        visibility: visible !important;
-        color: #000 !important;
-    }
-
-    #magazine-container {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        display: block !important;
-    }
-
-    .mag-page {
-        margin: 0 !important;
-        box-shadow: none !important;
-        page-break-after: always !important;
-        border: none !important;
-        width: 148mm !important;
-        height: 210mm !important;
-        background: #fff !important;
-        display: block !important;
-    }
-
-    button, .hidden-print {
-        display: none !important;
-    }
-
-    * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-}
