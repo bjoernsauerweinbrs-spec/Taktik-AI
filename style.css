@@ -1,4 +1,4 @@
-/* --- TONI 2.0 MASTER CSS: INTERNATIONAL PRO LAYOUT & DUAL PRINT ENGINE --- */
+/* --- TONI 2.0 MASTER CSS: INTERNATIONAL PRO LAYOUT & A4 PRINT ENGINE --- */
 :root {
     --bg-deep: #05080F;
     --panel-dark: #0D1421;
@@ -151,44 +151,56 @@ body, html {
     cursor: pointer; font-size: 0.7rem; font-weight: 700;
 }
 
-/* 9. PRINT ENGINE (DIN A4 & DIN A5) */
+/* 9. A4 PRO PRINT ENGINE */
 .only-print { display: none; }
 
 @media print {
-    /* Alles ausblenden außer Druck-Layouts */
-    body * { visibility: hidden !important; }
-    
-    /* Trainingsplan A4 */
-    #a4-print-layout, #a4-print-layout * { 
-        visibility: visible !important; 
-        display: block !important;
+    /* 1. Reset Screen UI */
+    body { background: #fff !important; color: #000 !important; }
+    .pro-layout-container, .sidebar-minimal, .analysis-panel, .briefcase-overlay, .no-print {
+        display: none !important;
     }
+
+    /* 2. Container setup */
     #a4-print-layout {
-        position: fixed; left: 0; top: 0; width: 100%;
-        background: #fff !important; color: #000 !important;
-    }
-
-    /* Stadionheft A5 */
-    #magazine-container, #magazine-container * {
-        visibility: visible !important;
         display: block !important;
-    }
-    #magazine-container {
-        position: fixed; left: 0; top: 0; width: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
         background: #fff !important;
     }
 
-    .mag-page {
-        margin: 0 !important;
-        page-break-after: always !important;
-        width: 148mm !important; height: 210mm !important;
+    /* 3. Page Formatting */
+    .print-page {
+        padding: 15mm;
         background: #fff !important;
+        color: #000 !important;
     }
 
-    /* Schatten und Buttons im Druck entfernen */
-    .no-print, button, .fifa-card { box-shadow: none !important; border: none !important; }
+    /* 4. Drill Card Layout */
+    .drill-card-print {
+        border: 1px solid #eee;
+        margin-bottom: 25px;
+        padding: 15px;
+        display: grid;
+        grid-template-columns: 100mm 1fr; /* Bild-Spalte | Text-Spalte */
+        gap: 20px;
+        page-break-inside: avoid; /* Keine Übung in der Mitte zerschneiden */
+    }
+
+    .drill-image-print {
+        width: 100%;
+        border: 1px solid #000;
+        filter: grayscale(10%); /* Professioneller Look, spart Tinte */
+    }
+
+    h1, h2, h3 { color: #000 !important; text-transform: uppercase; }
     
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    * { 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
+    }
 }
 
 /* ANIMATIONS */
