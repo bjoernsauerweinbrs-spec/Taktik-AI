@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - ZENTRALE STEUEREINHEIT (PRO-ROUTING)
- * Optimierte Ordner-Struktur und präzise Sektor-Anwahl.
+ * Fokus: Präzise Sektor-Trennung und Container-Bereinigung.
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -43,7 +43,6 @@ window.BriefcaseUI = {
         const nav = document.getElementById('briefcase-nav');
         if(!nav) return;
 
-        // Organisierte Ordner-Struktur für schnellen Zugriff
         const folders = [
             { id: 'sport', name: 'MANNSCHAFTSKABINE', icon: 'fa-users', color: 'var(--accent-gold)' },
             { id: 'training', name: 'TRAININGSBETRIEB', icon: 'fa-dumbbell', color: 'var(--accent-orange)' },
@@ -73,10 +72,13 @@ window.BriefcaseUI = {
         
         if(!nav || !content || !active) return;
 
+        // CRITICAL: Hard Clear des Containers vor dem Sektor-Wechsel
+        active.innerHTML = ""; 
+        console.log(`TONI Routing: Wechsle zu Sektor [${sektor}]`);
+
         nav.classList.add('hidden');
         content.classList.remove('hidden');
         
-        // Anzeige-Namen für die Sektor-Überschrift
         const sectorNames = {
             'sport': 'MANNSCHAFTSKABINE',
             'training': 'TRAININGSBETRIEB',
@@ -91,7 +93,7 @@ window.BriefcaseUI = {
             </button> ${sectorNames[sektor] || sektor.toUpperCase()}
         `;
 
-        // Routing-Logik: Hier wird entschieden, welches Skript rendert
+        // Routing-Logik
         switch(sektor) {
             case 'sport':
                 if(window.SektorSporttasche) window.SektorSporttasche.render();
@@ -103,7 +105,7 @@ window.BriefcaseUI = {
                 if(window.SektorAnalyse) window.SektorAnalyse.render();
                 break;
             case 'templates':
-                // WICHTIG: Wenn hier Analyse-Inhalt erscheint, liegt der Fehler in der Datei sektor-templates.js
+                // Wenn hier immer noch Analyse erscheint, muss die Sektor-Template Datei gefixt werden
                 if(window.SektorTemplates) window.SektorTemplates.render();
                 break;
             case 'system':
