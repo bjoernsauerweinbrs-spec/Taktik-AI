@@ -1,7 +1,6 @@
 /**
  * TONI 2.0 - INTERNATIONAL MATCHDAY MAGAZINE ENGINE
- * Pro-Level DIN A5 Layout (Premier League Standard)
- * Dynamische Seitenverwaltung & Global Data Sync
+ * Pro-Level DIN A5 Layout (Matchday Standard)
  */
 window.SektorTemplates = {
     magazineData: {
@@ -13,11 +12,10 @@ window.SektorTemplates = {
             { id: 1, name: "Global Logistics", logo: "🌐" },
             { id: 2, name: "Tech Solutions", logo: "💻" }
         ],
-        customPages: [] // Hier werden zusätzliche Seiten gespeichert
+        customPages: []
     },
 
     render: function() {
-        // 1. Synchronisation mit Globaler Club-Konfiguration
         const config = JSON.parse(localStorage.getItem('toni_club_config')) || {
             name: "FC TONI 2.0",
             coach: "Björn",
@@ -27,103 +25,75 @@ window.SektorTemplates = {
         const starters = (JSON.parse(localStorage.getItem('toni_players')) || []).filter(p => p.isStarter);
 
         document.getElementById('active-content').innerHTML = `
-            <div style="padding:30px; animation: fadeIn 0.4s ease-out;">
+            <div style="padding:25px; animation: fadeIn 0.4s ease-out; height: 85vh; overflow-y: auto;">
                 
-                <div class="no-print" style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; margin-bottom:40px; border:1px solid var(--data-cyan);">
-                    <h3 style="font-size:0.7rem; color:var(--data-cyan); margin-bottom:15px; letter-spacing:2px; font-weight:900;">MATCHDAY PROGRAM EDITOR [PRO]</h3>
-                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                        <button class="login-btn" style="width:auto; padding:8px 15px; font-size:0.65rem; background:transparent; border:1px solid #fff;" onclick="SektorTemplates.editMatchInfo()">SPIELTAGS-INFOS</button>
-                        <button class="login-btn" style="width:auto; padding:8px 15px; font-size:0.65rem; background:transparent; border:1px solid #fff;" onclick="SektorTemplates.editTexts()">TEXTE ANALYSIEREN</button>
-                        <button class="login-btn" style="width:auto; padding:8px 15px; font-size:0.65rem; background:var(--neon-green); color:#000;" onclick="SektorTemplates.addCustomPage()">+ SEITE HINZUFÜGEN</button>
-                        <button class="login-btn" style="width:auto; padding:8px 15px; font-size:0.65rem; background:var(--accent-orange); color:#fff;" onclick="SektorTemplates.resetCustomPages()">SEITEN RESET</button>
-                        <button class="login-btn" style="width:auto; padding:8px 15px; font-size:0.65rem; background:#fff; color:#000;" onclick="window.print()">
-                            <i class="fas fa-print"></i> DRUCKEN (DIN A5)
+                <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; background:rgba(212,175,55,0.1); padding:20px; border-radius:15px; margin-bottom:30px; border:1px solid var(--accent-gold);">
+                    <div>
+                        <h2 style="color:var(--accent-gold); margin:0; letter-spacing:2px; font-size:1rem;">STADIONZEITUNG EDITOR</h2>
+                        <p style="font-size:0.6rem; color:var(--text-dim);">DIN A5 MATCHDAY PROGRAMME GENERATOR</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="tactic-btn" onclick="SektorTemplates.editMatchInfo()">INFO</button>
+                        <button class="tactic-btn" onclick="SektorTemplates.editTexts()">TEXTE</button>
+                        <button class="login-btn" style="width:auto; padding:10px 20px; background:#fff; color:#000;" onclick="window.print()">
+                            <i class="fas fa-print"></i> JETZT DRUCKEN
                         </button>
                     </div>
                 </div>
 
-                <div id="magazine-container" style="display: flex; flex-direction: column; gap: 50px; align-items: center;">
+                <div id="magazine-container" style="display: flex; flex-direction: column; gap: 40px; align-items: center; padding-bottom:50px;">
                     
-                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; height:210mm; padding:15mm; position:relative; border: 1px solid #eee;">
-                        <div style="height:100%; border: 2px solid #000; display:flex; flex-direction:column; justify-content:space-between; padding:10mm;">
-                            <div style="text-align:center;">
-                                <div style="font-weight:900; letter-spacing:5px; font-size:0.8rem; border-bottom:4px solid #000; display:inline-block; padding-bottom:5px; margin-bottom:20px;">OFFICIAL MATCHDAY PROGRAMME</div>
-                                <br><img src="${config.logoUrl}" style="width:80px; margin:20px 0;">
-                            </div>
-                            <div style="text-align:left;">
-                                <h1 style="font-size:4rem; line-height:0.8; font-weight:900; margin:0; word-break:break-word;">${config.name.toUpperCase()}</h1>
-                                <div style="height:15px; width:100px; background:var(--neon-green); margin:20px 0;"></div>
-                                <p style="font-size:1.5rem; font-weight:300; margin:0;">VERSUS</p>
-                                <h2 style="font-size:2.5rem; font-weight:900; margin:0;">${this.magazineData.opponent.toUpperCase()}</h2>
-                            </div>
-                            <div style="border-top:1px solid #000; padding-top:20px; display:flex; justify-content:space-between; font-weight:900; font-size:0.8rem;">
-                                <span>${this.magazineData.matchDate}</span>
-                                <span>${config.stadium.toUpperCase()}</span>
-                            </div>
+                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; height:210mm; padding:15mm; border: 10px solid #000; display:flex; flex-direction:column; justify-content:space-between; box-shadow: 0 0 30px rgba(0,0,0,0.5);">
+                        <div style="text-align:center;">
+                            <div style="font-weight:900; letter-spacing:5px; font-size:0.8rem; border-bottom:4px solid #000; display:inline-block; padding-bottom:5px;">OFFICIAL PROGRAMME</div>
+                            <br><img src="${config.logoUrl}" style="width:100px; margin:30px 0;">
+                        </div>
+                        <div>
+                            <h1 style="font-size:3.5rem; line-height:0.8; font-weight:900; margin:0;">${config.name.toUpperCase()}</h1>
+                            <div style="height:10px; width:80px; background:var(--neon-green); margin:15px 0;"></div>
+                            <p style="font-size:1.2rem; font-weight:300; margin:0;">VERSUS</p>
+                            <h2 style="font-size:2.5rem; font-weight:900; margin:0;">${this.magazineData.opponent.toUpperCase()}</h2>
+                        </div>
+                        <div style="border-top:2px solid #000; padding-top:15px; display:flex; justify-content:space-between; font-weight:900; font-size:0.75rem;">
+                            <span>${this.magazineData.matchDate}</span>
+                            <span>${config.stadium.toUpperCase()}</span>
                         </div>
                     </div>
 
-                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; height:210mm; padding:20mm; position:relative; border: 1px solid #eee;">
-                        <h3 style="font-size:2rem; font-weight:900; border-bottom:8px solid #000; padding-bottom:10px; margin-bottom:30px;">THE MANAGER</h3>
-                        <div style="font-size:1.1rem; line-height:1.6; color:#333; font-weight:400;">
-                            <span style="font-size:4rem; float:left; line-height:0.8; margin-right:10px; font-weight:900;">"</span>
+                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; height:210mm; padding:20mm; position:relative; box-shadow: 0 0 30px rgba(0,0,0,0.5);">
+                        <h3 style="font-size:1.8rem; font-weight:900; border-bottom:6px solid #000; padding-bottom:10px; margin-bottom:25px;">COACH'S COLUMN</h3>
+                        <div style="font-size:1rem; line-height:1.6; color:#333; font-style:italic;">
+                            <span style="font-size:4rem; float:left; line-height:0.6; margin:10px 10px 0 0; font-weight:900;">"</span>
                             ${this.magazineData.editorial}
                         </div>
-                        <div style="margin-top:40px;">
-                            <p style="font-weight:900; font-size:1.2rem;">${config.coach.toUpperCase()}</p>
-                            <p style="font-size:0.7rem; color:#888; letter-spacing:2px;">HEAD COACH | ${config.name}</p>
+                        <div style="margin-top:40px; border-left:4px solid var(--neon-green); padding-left:15px;">
+                            <p style="font-weight:900; font-size:1.1rem; margin:0;">${config.coach.toUpperCase()}</p>
+                            <p style="font-size:0.6rem; color:#888; letter-spacing:1px;">HEAD COACH | ${config.name}</p>
                         </div>
-                        <div style="position:absolute; bottom:15mm; left:20mm; font-size:0.6rem; font-weight:900; color:#ccc;">02 | MATCHDAY ANALYSIS</div>
+                        <div style="position:absolute; bottom:10mm; right:15mm; font-size:0.5rem; font-weight:900;">PAGE 02</div>
                     </div>
 
-                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; height:210mm; padding:20mm; position:relative; border: 1px solid #eee;">
-                        <h3 style="font-size:2rem; font-weight:900; border-bottom:8px solid #000; padding-bottom:10px; margin-bottom:30px;">SQUAD LIST</h3>
-                        <div style="background:#f4f4f4; padding:15px; margin-bottom:30px; border-left:5px solid var(--neon-green);">
-                            <h4 style="font-size:0.7rem; font-weight:900; margin-bottom:5px;">TONI'S TACTICAL NOTE:</h4>
-                            <p style="font-size:0.8rem; line-height:1.4;">${this.magazineData.scoutingReport}</p>
+                    <div class="mag-page" style="background:#fff; color:#000; width:148mm; height:210mm; padding:20mm; position:relative; box-shadow: 0 0 30px rgba(0,0,0,0.5);">
+                        <h3 style="font-size:1.8rem; font-weight:900; border-bottom:6px solid #000; padding-bottom:10px; margin-bottom:25px;">TODAY'S SQUAD</h3>
+                        <div style="background:#f9f9f9; padding:15px; margin-bottom:25px; border:1px solid #eee;">
+                            <h4 style="font-size:0.6rem; font-weight:900; color:var(--neon-green); margin-bottom:5px;">TACTICAL SCOUTING:</h4>
+                            <p style="font-size:0.75rem; line-height:1.4;">${this.magazineData.scoutingReport}</p>
                         </div>
-                        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
-                            <tr style="border-bottom:2px solid #000; font-weight:900; font-size:0.7rem;">
-                                <th style="text-align:left; padding:10px 0;">NO.</th>
-                                <th style="text-align:left; padding:10px 0;">PLAYER</th>
-                                <th style="text-align:right; padding:10px 0;">POS</th>
+                        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+                            <tr style="border-bottom:2px solid #000; font-weight:900;">
+                                <th style="text-align:left; padding:8px 0;">NO.</th>
+                                <th style="text-align:left; padding:8px 0;">PLAYER</th>
+                                <th style="text-align:right; padding:8px 0;">POS</th>
                             </tr>
-                            ${starters.map(p => `
+                            ${starters.length > 0 ? starters.map(p => `
                                 <tr style="border-bottom:1px solid #eee;">
-                                    <td style="padding:10px 0; font-weight:900;">${p.number}</td>
-                                    <td style="padding:10px 0;">${p.name.toUpperCase()}</td>
-                                    <td style="padding:10px 0; text-align:right; font-weight:300;">${p.pos}</td>
+                                    <td style="padding:8px 0; font-weight:900;">${p.number}</td>
+                                    <td style="padding:8px 0;">${p.name.toUpperCase()}</td>
+                                    <td style="padding:8px 0; text-align:right;">${p.pos || 'ZM'}</td>
                                 </tr>
-                            `).join('')}
+                            `).join('') : '<tr><td colspan="3" style="padding:20px; text-align:center;">Keine Startelf nominiert</td></tr>'}
                         </table>
-                        <div style="position:absolute; bottom:15mm; left:20mm; font-size:0.6rem; font-weight:900; color:#ccc;">03 | OFFICIAL LINE-UP</div>
-                    </div>
-
-                    ${this.magazineData.customPages.map((page, index) => `
-                        <div class="mag-page" style="background:#fff; color:#000; width:148mm; height:210mm; padding:20mm; position:relative; border: 1px solid #eee;">
-                            <div class="no-print" style="position:absolute; top:10px; right:10px;">
-                                <button onclick="SektorTemplates.removePage(${index})" style="background:red; color:#fff; border:none; border-radius:3px; padding:2px 10px; cursor:pointer;">LÖSCHEN</button>
-                            </div>
-                            <h3 style="font-size:2rem; font-weight:900; border-bottom:8px solid #000; padding-bottom:10px; margin-bottom:30px;">${page.title.toUpperCase()}</h3>
-                            <div style="font-size:1rem; line-height:1.6;">${page.content}</div>
-                            <div style="position:absolute; bottom:15mm; left:20mm; font-size:0.6rem; font-weight:900; color:#ccc;">0${index + 4} | CUSTOM CONTENT</div>
-                        </div>
-                    `).join('')}
-
-                    <div class="mag-page" style="background:#000; color:#fff; width:148mm; height:210mm; padding:20mm; position:relative; text-align:center;">
-                        <h3 style="font-size:1.5rem; font-weight:900; letter-spacing:5px; margin-bottom:50px;">OFFICIAL PARTNERS</h3>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                            ${this.magazineData.sponsors.map(s => `
-                                <div style="border: 1px solid #333; padding:20px; background:#111;">
-                                    <div style="font-size:2rem; margin-bottom:10px;">${s.logo}</div>
-                                    <div style="font-size:0.7rem; font-weight:900; letter-spacing:1px;">${s.name.toUpperCase()}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div style="position:absolute; bottom:20mm; left:0; width:100%;">
-                            <img src="${config.logoUrl}" style="width:50px; filter: invert(1); margin-bottom:10px;">
-                            <p style="font-size:0.5rem; letter-spacing:3px; color:#444;">ENGINEERED BY TONI 2.0 PERFORMANCE SYSTEM</p>
-                        </div>
+                        <div style="position:absolute; bottom:10mm; right:15mm; font-size:0.5rem; font-weight:900;">PAGE 03</div>
                     </div>
 
                 </div>
@@ -139,33 +109,10 @@ window.SektorTemplates = {
     },
 
     editTexts: function() {
-        const edi = prompt("Manager Editorial:", this.magazineData.editorial);
-        const scout = prompt("Taktische Analyse:", this.magazineData.scoutingReport);
+        const edi = prompt("Grusswort des Trainers:", this.magazineData.editorial);
+        const scout = prompt("Taktische Analyse (Toni-Style):", this.magazineData.scoutingReport);
         if(edi) this.magazineData.editorial = edi;
         if(scout) this.magazineData.scoutingReport = scout;
         this.render();
-    },
-
-    addCustomPage: function() {
-        const title = prompt("Titel der neuen Seite:");
-        const content = prompt("Inhalt (Text):");
-        if(title && content) {
-            this.magazineData.customPages.push({ title, content });
-            this.render();
-        }
-    },
-
-    removePage: function(index) {
-        if(confirm("Diese Seite wirklich entfernen?")) {
-            this.magazineData.customPages.splice(index, 1);
-            this.render();
-        }
-    },
-
-    resetCustomPages: function() {
-        if(confirm("Alle zusätzlichen Seiten löschen?")) {
-            this.magazineData.customPages = [];
-            this.render();
-        }
     }
 };
