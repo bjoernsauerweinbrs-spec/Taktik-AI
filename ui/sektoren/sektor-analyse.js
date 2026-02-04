@@ -1,5 +1,5 @@
 /**
- * TONI 2.0 - INTERNATIONAL PERFORMANCE LAB (FINAL VERSION)
+ * TONI 2.0 - INTERNATIONAL PERFORMANCE LAB (PRO-EDITION)
  * Professional Analytics: Radar-Matrix, Medical Trends & Evolution Tracking.
  */
 window.SektorAnalyse = {
@@ -67,14 +67,13 @@ window.SektorAnalyse = {
         const p = players.find(x => x.id === id);
         if(!p) return this.renderInitialState();
 
-        // Nutze die formHistory aus dem Elite-Seed oder generiere Fallback
         const formTrend = p.formHistory || [80, 82, 85, 84, p.rating];
 
         return `
             <div style="animation: fadeIn 0.4s ease-out;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:40px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:20px;">
                     <div style="display:flex; gap:20px; align-items:center;">
-                        <img src="${p.photoUrl || 'https://via.placeholder.com/150/000000/39FF14?text=' + p.name}" style="width:90px; height:90px; border-radius:15px; border:2px solid var(--neon-green); object-fit:cover;">
+                        <img src="${p.photoUrl || 'https://via.placeholder.com/150/000/39FF14?text=' + p.name[0]}" style="width:90px; height:90px; border-radius:15px; border:2px solid var(--neon-green); object-fit:cover;">
                         <div>
                             <h1 style="margin:0; font-size:2.5rem; font-weight:900; letter-spacing:-1px;">${p.name.toUpperCase()}</h1>
                             <span style="color:var(--neon-green); font-weight:900; letter-spacing:2px; font-size:0.7rem;">INTERNATIONAL PERFORMANCE DOSSIER</span>
@@ -101,7 +100,8 @@ window.SektorAnalyse = {
                         </div>
                     </div>
 
-                    <div style="grid-column: span 2; background:rgba(57,255,20,0.03); padding:30px; border-radius:15px; border:1px solid rgba(57,255,20,0.1);">
+                    <div style="grid-column: span 2; background:rgba(57,255,20,0.03); padding:30px; border-radius:15px; border:1px solid rgba(57,255,20,0.1); position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:0; right:0; padding:10px; background:rgba(57,255,20,0.1); font-size:0.5rem; color:var(--neon-green); font-weight:900;">AI ANALYZED</div>
                         <h3 style="font-size:0.65rem; color:var(--neon-green); margin-bottom:15px; letter-spacing:2px;">INTERNATIONAL PRO-SCOUTING REPORT</h3>
                         <p style="font-size:0.95rem; line-height:1.7; color:#fff; font-style:italic;">
                             "${this.generateProReport(p)}"
@@ -147,9 +147,13 @@ window.SektorAnalyse = {
 
     generateProReport: function(p) {
         const kpis = p.proKpis || { rsa: 75, stress: 75 };
-        if(p.status && p.status !== 'FIT') return `Achtung Coach: Die medizinische Abteilung empfiehlt für ${p.name} ein individuelles Belastungs-Management. Ein Einsatz in der Startelf ist bei den aktuellen Vitalwerten (Trend abfallend) nicht ratsam.`;
-        if(p.rating > 85) return `${p.name} agiert auf absolutem Weltklasse-Niveau. Seine Stress-Resistenz (${kpis.stress}) und die Antizipation von vertikalen Räumen machen ihn zum unverzichtbaren Anker in unserem System.`;
-        return `${p.name} zeigt eine stabile Leistungs-Entwicklung in der Evolution-Matrix. Besonders die RSA-Werte (Sprint-Ausdauer) haben sich über die letzten Einheiten positiv stabilisiert. Einsatzbereit für volle 90 Minuten.`;
+        if(p.status && p.status !== 'FIT') return `Achtung Coach: Die medizinische Abteilung empfiehlt für ${p.name} ein individuelles Belastungs-Management. Ein Einsatz in der Startelf ist bei den aktuellen Vitalwerten nicht ratsam.`;
+        
+        if(p.rating > 85) {
+            return `${p.name} agiert auf absolutem Weltklasse-Niveau. Mit einer Stress-Resistenz von ${kpis.stress}% und exzellenter Antizipation ist er der strategische Anker. Empfehlung: Volle Belastung im nächsten Matchday.`;
+        }
+        
+        return `${p.name} zeigt eine stabile Leistungs-Entwicklung. Besonders die RSA-Werte (Sprint-Ausdauer) haben sich über die letzten Einheiten stabilisiert. Taktisch bereit für hybride Rollen im Mittelfeld.`;
     },
 
     renderInitialState: function() {
