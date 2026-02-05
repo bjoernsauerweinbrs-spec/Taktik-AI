@@ -1,75 +1,60 @@
 /**
- * TONI 2.0 - TACTICAL BOARD ENGINE
- * Zeichnet 11 vs 11 plus Auswechselbank. 
- * Reagiert sofort auf ToniDB-Updates via Event-Bus.
+ * TONI 2.0 - ARENA ENGINE (REAKTIV)
+ * Behebt das Rendering-Problem durch erzwungenen Initial-Sync.
  */
 window.Arena = {
-    canvas: null,
-    ctx: null,
-    players: [],
- 
-    init: function(canvasId) {
-        this.canvas = document.getElementById(canvasId);
-        if (!this.canvas) return;
+    canvas: null, ctx: null, players: [],
+
+    init: function(id) {
+        this.canvas = document.getElementById(id);
         this.ctx = this.canvas.getContext('2d');
         
-        // Auf Daten-Updates hören
+        // Event-Bus Anbindung: Wenn DB sich ändert, sofort neu zeichnen
         window.ToniEvents.on('players:updated', (data) => {
-            this.syncAndRender(data);
+            console.log("Arena: Update empfangen.");
+            this.players = data;
+            this.render();
         });
 
-        // Initialer Load
-        this.syncAndRender(window.ToniDB.getPlayers());
+        // Erster Sync
+        this.players = window.ToniDB.getPlayers();
+        this.render();
     },
 
-    syncAndRender: function(allPlayers) {
-        // Wir filtern: Wer muss aufs Feld?
-        this.players = allPlayers.filter(p => p.isPresent);
-        this.draw();
-    },
-
-    draw: function() {
-        const ctx = this.ctx;
+    render: function() {
+        if(!this.ctx) return;
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // 1. Spielfeld zeichnen (Grün)
-        ctx.fillStyle = '#1a3a1a';
-        ctx.fillRect(0, 0, w, h);
+        // GRUNDIERUNG (Pitch)
+        this.ctx.fillStyle = "#051205"; 
+        this.ctx.fillRect(0, 0, w, h);
+
+        // LINIEN ZEICHNEN
+        this.ctx.strokeStyle = "rgba(57, 255, 20, 0.4)";
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(50, 50, w-100, h-100); // Außenlinie
         
-        // 2. Linien (Weiß)
-        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(50, 50, w - 100, h - 100); // Außenlinie
-        ctx.beginPath();
-        ctx.moveTo(w/2, 50); ctx.lineTo(w/2, h-50); ctx.stroke(); // Mittellinie
-
-        // 3. Spieler zeichnen
+        // SPIELER ZEICHNEN
         this.players.forEach(p => {
+            if(!p.isPresent && p.team === 'home') return; // Nur anwesende Heimspieler zeigen
+            
             const isHome = p.team === 'home';
-            // Start-Positionen grob nach Rolle berechnen, wenn keine Koordinaten da sind
+            // Startpositionen falls keine Koordinaten da sind
             const x = isHome ? 150 : w - 150;
-            const y = 100 + (p.nr * 40 % (h - 200));
+            const y = 100 + (p.nr * 50 % (h - 200));
 
-            // Spieler-Punkt
-            ctx.beginPath();
-            ctx.arc(x, y, 15, 0, Math.PI * 2);
-            ctx.fillStyle = isHome ? '#ff3b3b' : '#3b82f6'; // Rot vs Blau
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.stroke();
-
-            // Nummer & Name
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 12px Inter';
-            ctx.textAlign = 'center';
-            ctx.fillText(p.nr, x, y + 5);
-            ctx.font = '10px Inter';
-            ctx.fillText(p.name, x, y + 30);
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, 15, 0, Math.PI*2);
+            this.ctx.fillStyle = isHome ? (p.isStarter ? '#39FF14' : '#FF3030') : '#3080FF';
+            this.ctx.fill();
+            this.ctx.strokeStyle = "#fff";
+            this.ctx.stroke();
+            
+            this.ctx.fillStyle = "#fff";
+            this.ctx.font = "bold 10px Inter";
+            this.ctx.fillText(p.name, x - 15, y + 30);
         });
-    },
-
-    getSnapshot: function() {
-        return this.canvas.toDataURL("image/png");
+        console.log("Arena: Render abgeschlossen.");
     }
 };
