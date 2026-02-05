@@ -15,9 +15,10 @@
         .video-finished #video-container { transform: scale(1.1); filter: blur(12px) brightness(0.5); }
         .video-finished #video-overlay { opacity: 1; }
         .video-finished .login-box { opacity: 1; transform: translateY(0); }
-        .login-input { width: 100%; background: #000; color: #fff; border: 1px solid #333; padding: 12px; margin-bottom: 20px; border-radius: 5px; outline: none; text-align: center; }
-        .login-btn { width: 100%; background: #ff9500; color: #000; border: none; padding: 15px; font-weight: 900; cursor: pointer; border-radius: 5px; text-transform: uppercase; letter-spacing: 2px; }
-        .skip-intro { position: fixed; bottom: 20px; right: 20px; z-index: 20; color: #fff; font-size: 0.7rem; cursor: pointer; opacity: 0.3; }
+        .login-input { width: 100%; background: #000; color: #fff; border: 1px solid #333; padding: 12px; margin-bottom: 20px; border-radius: 5px; outline: none; text-align: center; font-size: 1.1rem; letter-spacing: 5px; }
+        .login-btn { width: 100%; background: #ff9500; color: #000; border: none; padding: 15px; font-weight: 900; cursor: pointer; border-radius: 5px; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        .login-btn:hover { background: #fff; transform: scale(1.02); }
+        .skip-intro { position: fixed; bottom: 20px; right: 20px; z-index: 20; color: #fff; font-size: 0.7rem; cursor: pointer; opacity: 0.3; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -33,9 +34,10 @@
     <div class="login-container">
         <div class="login-box">
             <h2 style="color:#ff9500; letter-spacing: 4px; margin:0 0 5px 0;">TONI 2.0</h2>
-            <p style="color:#666; font-size: 0.65rem; margin-bottom: 30px; text-transform: uppercase;">Analysis Center Login</p>
-            <input type="password" id="pass-input" placeholder="PASSWORT" class="login-input">
+            <p style="color:#666; font-size: 0.65rem; margin-bottom: 30px; text-transform: uppercase;">Performance Center Login</p>
+            <input type="password" id="pass-input" placeholder="••••" class="login-input">
             <button onclick="checkPass()" class="login-btn">Initialisieren</button>
+            <p id="error-msg" style="color: #ff3030; font-size: 0.6rem; margin-top: 15px; display: none; font-weight: bold;"></p>
         </div>
     </div>
 
@@ -43,8 +45,9 @@
 
     <script>
         const video = document.getElementById('intro-video');
+        const passInput = document.getElementById('pass-input');
         
-        // Video-Timing
+        // Intro-Steuerung
         video.onended = finishIntro;
         setTimeout(finishIntro, 9000); 
 
@@ -53,13 +56,39 @@
             document.body.classList.add('video-finished');
             video.pause(); 
             document.querySelector('.skip-intro').style.display = 'none';
+            passInput.focus(); // Fokus direkt auf das Passwortfeld für schnelles Tippen
         }
 
+        // Enter-Taste Support
+        passInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkPass();
+            }
+        });
+
         function checkPass() {
-            if(document.getElementById('pass-input').value === "1234") { 
+            const enteredPass = passInput.value;
+            const errorMsg = document.getElementById('error-msg');
+            
+            // Abruf der Passwörter aus der System-Zentrale (ToniDB/LocalStorage)
+            const passBjorn = localStorage.getItem('toni_pass_bjorn');
+            const passNadine = localStorage.getItem('toni_pass_nadine');
+            
+            // Validierung gegen neue Passwörter ODER Fallback 1234
+            if (
+                (passBjorn && enteredPass === passBjorn) || 
+                (passNadine && enteredPass === passNadine) || 
+                (enteredPass === "1234") // Erlaubt Zugriff, falls noch nichts im System gesetzt wurde
+            ) { 
                 window.location.href = "app.html";
             } else {
-                alert("ZUGRIFF VERWEIGERT");
+                errorMsg.innerText = "ZUGRIFF VERWEIGERT: SCHLÜSSEL UNGÜLTIG";
+                errorMsg.style.display = "block";
+                passInput.value = "";
+                // Kleiner Shaking-Effekt für die Box bei Fehlern
+                const box = document.querySelector('.login-box');
+                box.style.borderColor = "#ff3030";
+                setTimeout(() => { box.style.borderColor = "#ff9500"; }, 1000);
             }
         }
     </script>
