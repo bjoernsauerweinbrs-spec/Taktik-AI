@@ -1,118 +1,91 @@
-/**
- * TONI 2.0 - CORE ENGINE (ACTION & GATEWAY INTEGRATION)
- * Steuert den Denkprozess, die Navigation und die Arena-Befehle.
- */
+// logic/toni-core.js
+// ToniCore: zentrale Verarbeitungs‑ und UI‑Schicht für Chat/Commands, Status und TTS
+
 window.ToniCore = {
-    isProcessing: false,
-
-    processMessage: async function(text) {
-        if (!text || this.isProcessing) return;
-        this.isProcessing = true;
-        
-        this.updateStatus("TONI DENKT NACH...", "var(--accent-orange)");
-        this.addUserMessage(text);
-
-        const cmd = text.toLowerCase();
-
-        // 1. NAVIGATION (Sofort-Ausführung)
-        if (cmd.includes("öffne") || cmd.includes("gehe zu") || cmd.includes("zeige")) {
-            this.handleNavigation(cmd);
-            this.finishProcess();
-            return;
-        }
-
-        // 2. TAKTISCHE ANFRAGE ÜBER GATEWAY
-        const context = this.getBoardContext();
-        
+    async processMessage(text) {
         try {
-            // Erstversuch: Ollama via Gateway
-            let result = await window.ToniGateway.callOllama(text, context);
-            
-            // Backup: OpenAI via Gateway
-            if (!result) {
-                console.log("ToniCore: Ollama offline, wechsle zu OpenAI...");
-                result = await window.ToniGateway.callOpenAI(text, context);
+            // Update UI status
+            this.updateStatus("DENKT NACH...", "var(--accent-gold)");
+
+            // Ask the gateway and get a normalized response { text, source, error }
+            const response = await window.ToniGateway.ask(text);
+
+            // Handle error responses
+            if (!response || response.error) {
+                this.addChatMessage("Toni", "Systemfehler in der Denk‑Einheit.");
+                console.error('[ToniCore] gateway error or no response', response);
+                return;
             }
 
-            // Ergebnis verarbeiten
-            if (result && result.text) {
-                // Taktische Bewegung ausführen falls vorhanden
-                if (result.tacticalMove && window.arena) {
-                    this.executeMove(result.tacticalMove);
+            // Normalized reply text
+            const reply = response.text || '';
+
+            // Add to chat UI
+            this.addChatMessage("Toni", reply);
+
+            // Try to detect and execute embedded tacticalMove JSON (optional)
+            try {
+                // Look for a JSON object that contains "tacticalMove"
+                const tacticalMatch = reply.match(/\{[\s\S]*"tacticalMove"[\s\S]*\}/);
+                if (tacticalMatch) {
+                    const json = JSON.parse(tacticalMatch[0]);
+                    if (json.tacticalMove && window.arena && typeof window.arena.execute === 'function') {
+                        window.arena.execute(json.tacticalMove);
+                        console.log('[ToniCore] executed tacticalMove', json.tacticalMove);
+                    }
                 }
-                
-                // Antwort anzeigen (Befehle werden im Gateway bereits gefiltert)
-                this.finalizeResponse(result.text);
-            } else {
-                this.finalizeResponse("Coach, ich konnte keine Verbindung zu meinen Taktik-Modulen herstellen.");
+            } catch (e) {
+                console.warn('[ToniCore] tacticalMove parse/execute failed', e);
             }
 
+            // Safe TTS call (if available)
+            if (window.ToniTTS && typeof window.ToniTTS.speak === 'function') {
+                try {
+                    window.ToniTTS.speak(reply);
+                } catch (e) {
+                    console.warn('[ToniCore] TTS speak failed', e);
+                }
+            }
         } catch (e) {
-            console.error("ToniCore Error:", e);
-            this.finalizeResponse("Systemfehler in der Denk-Einheit. Bitte Seite neu laden.");
-        }
-
-        this.finishProcess();
-    },
-
-    executeMove: function(move) {
-        if (move.pos && window.arena.applyTacticalFormation) {
-            window.arena.applyTacticalFormation(move.pos);
-            this.updateStatus("BOARD AKTUALISIERT", "var(--neon-green)");
+            console.error('[ToniCore] processMessage failed', e);
+            this.addChatMessage("Toni", "Interner Fehler beim Verarbeiten der Anfrage.");
+        } finally {
+            // Always set status back to ready
+            this.updateStatus("BEREIT", "var(--neon-green)");
         }
     },
 
-    getBoardContext: function() {
-        const squad = window.ToniDB ? window.ToniDB.getPlayers() : [];
-        const active = squad.filter(p => p.isPresent).map(p => p.name).join(", ");
-        const starters = squad.filter(p => p.isStarter).map(p => p.name).join(", ");
-        return {
-            anwesend: active,
-            startelf: starters,
-            modus: window.arena?.pitchMode || 'pro'
-        };
+    addChatMessage(sender, msg) {
+        const box = document.getElementById('chat-messages');
+        if (!box) return;
+        const div = document.createElement('div');
+        div.className = 'chat-line';
+        div.innerHTML = `<b>${sender}:</b> ${this._escapeHtml(String(msg))}`;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
     },
 
-    handleNavigation: function(cmd) {
-        if (!window.BriefcaseUI) return;
-        
-        if (cmd.includes("kabine") || cmd.includes("mannschaft")) SektorSporttasche.render();
-        else if (cmd.includes("training")) SektorTraining.render();
-        else if (cmd.includes("analyse") || cmd.includes("labor")) SektorAnalyse.render();
-        else if (cmd.includes("system") || cmd.includes("einstellung")) SektorSystem.render();
-        else if (cmd.includes("heft") || cmd.includes("zeitung")) SektorTemplates.render();
-        
-        // Overlay öffnen falls zu
-        const overlay = document.getElementById('briefcase-overlay');
-        if (overlay && !overlay.classList.contains('active')) {
-            window.BriefcaseUI.toggle();
+    updateStatus(text, color) {
+        const el = document.getElementById('status-text');
+        if (el) {
+            el.innerText = text;
+            if (color) el.style.color = color;
         }
     },
 
-    addUserMessage: function(text) {
-        const container = document.getElementById('chat-messages');
-        if(container) {
-            container.innerHTML += `<div style="margin-bottom:10px; color:var(--text-dim); font-size:0.85rem;"><b>Björn:</b> ${text}</div>`;
-            container.scrollTop = container.scrollHeight;
-        }
-    },
-
-    finalizeResponse: function(answer) {
-        const container = document.getElementById('chat-messages');
-        if(container) {
-            container.innerHTML += `<div style="margin-bottom:15px; color:#fff; border-left: 2px solid var(--neon-green); padding-left:10px;"><b>Toni:</b> ${answer}</div>`;
-            container.scrollTop = container.scrollHeight;
-        }
-        if(window.ToniTTS) window.ToniTTS.speak(answer, "warm");
-    },
-    
-    updateStatus: function(text, color) {
-        const el = document.getElementById('toni-status-text');
-        if(el) { el.innerText = text; el.style.color = color; }
-    },
-
-    finishProcess: function() {
-        this.isProcessing = false;
-        setTimeout(() => this.updateStatus("BEREIT", "var(--neon-green)"), 2000);
+    // small helper to avoid injecting raw HTML into chat
+    _escapeHtml(str) {
+        return str.replace(/[&<>"'`=\/]/g, function (s) {
+            return ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+                '/': '&#x2F;',
+                '`': '&#x60;',
+                '=': '&#x3D;'
+            })[s];
+        });
     }
 };
