@@ -2,88 +2,115 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 - EMERGENCY RECOVERY</title>
+    <title>TONI 2.0 - PRO MATCHDAY</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
 </head>
-<body style="background: #000; margin: 0; overflow: hidden;">
-
+<body>
     <div class="pro-layout-container">
         <nav class="sidebar-minimal">
-            <div class="control-unit" onclick="SektorSporttasche.render()"><i class="fas fa-tshirt"></i></div>
-            <div class="control-unit" onclick="SektorAnalyse.render()"><i class="fas fa-microchip"></i></div>
-            <div class="control-unit" onclick="location.reload()"><i class="fas fa-sync"></i></div>
+            <div class="control-unit" onclick="window.BriefcaseUI.toggle('sporttasche')"><i class="fas fa-briefcase"></i></div>
+            <div class="control-unit" onclick="window.BriefcaseUI.toggle('analyse')"><i class="fas fa-chart-line"></i></div>
+            <div class="control-unit" onclick="window.BriefcaseUI.toggle('system')"><i class="fas fa-cog"></i></div>
         </nav>
-
-        <main id="stage-container" style="background:#051205; position:relative;">
+        <main id="stage-container">
             <canvas id="main-canvas"></canvas>
-            <div style="position:absolute; top:20px; left:20px; color:#39FF14; font-family:monospace; font-size:12px;">
-                STATUS: <span id="toni-status-text">RECOVERY MODE</span>
-            </div>
+            <div id="toni-status-bar">SYSTEM: <span id="status-text">READY</span></div>
         </main>
-
         <aside class="analysis-panel">
-            <div id="chat-messages" style="flex:1; padding:20px; overflow-y:auto; color:#fff;"></div>
-            <div style="padding:20px;"><input type="text" id="user-input" placeholder="Befehl an Toni..."></div>
+            <div id="chat-messages"></div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Befehl...">
+                <button id="send-btn">Senden</button>
+            </div>
         </aside>
     </div>
+    <div id="briefcase-overlay" class="briefcase-overlay" style="display:none;">
+        <div class="briefcase-window"><div id="active-content"></div></div>
+    </div>
 
-    <div id="briefcase-overlay" class="briefcase-overlay"><div class="briefcase-window"><div id="active-content"></div></div></div>
-
-    <script>
-        // 1. EVENT BUS
-        window.ToniEvents = {
-            listeners: {},
-            on(e, f) { (this.listeners[e] = this.listeners[e] || []).push(f); },
-            emit(e, d) { (this.listeners[e] || []).forEach(f => f(d)); }
-        };
-
-        // 2. DATENBANK (Mit Sofort-Seed)
-        window.ToniDB = {
-            init() {
-                if (!localStorage.getItem('toni_players')) {
-                    const seed = [
-                        { id: 'p1', name: 'Neuer', nr: 1, team: 'home', isStarter: true, isPresent: true },
-                        { id: 'p2', name: 'Mbappé', nr: 7, team: 'home', isStarter: true, isPresent: true },
-                        { id: 'opp1', name: 'Gegner', nr: 1, team: 'away', isStarter: true, isPresent: true }
-                    ];
-                    localStorage.setItem('toni_players', JSON.stringify(seed));
-                }
-            },
-            getPlayers() { return JSON.parse(localStorage.getItem('toni_players')) || []; },
-            updatePlayer(id, patch) {
-                let p = this.getPlayers();
-                let i = p.findIndex(x => x.id === id);
-                if(i !== -1) { p[i] = {...p[i], ...patch}; localStorage.setItem('toni_players', JSON.stringify(p)); window.ToniEvents.emit('players:updated', p); }
-            }
-        };
-    </script>
-
-    <script src="engine/arena.js"></script>
+    <!-- Logic -->
+    <script src="logic/event-bus.js"></script>
+    <script src="logic/database.js"></script>
     <script src="logic/llm-gateway.js"></script>
     <script src="logic/toni-core.js"></script>
+
+    <!-- Engine -->
+    <script src="engine/arena.js"></script>
+
+    <!-- UI -->
+    <script src="ui/briefcase-ui.js"></script>
     <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
+    <script src="ui/sektoren/sektor-system.js"></script>
 
     <script>
-        window.onload = () => {
-            window.ToniDB.init();
-            const canvas = document.getElementById('main-canvas');
-            const stage = document.getElementById('stage-container');
-            canvas.width = stage.clientWidth;
-            canvas.height = stage.clientHeight;
-
-            if(window.arena) {
-                window.arena.init('main-canvas');
-                document.getElementById('toni-status-text').innerText = "ONLINE";
+    /* Deterministic bootstrap sequence to avoid race conditions */
+    async function bootstrap() {
+        try {
+            // 1) Init DB (seed + emit)
+            if (window.ToniDB && typeof window.ToniDB.init === 'function') {
+                window.ToniDB.init();
+                console.log('[BOOT] ToniDB initialized');
             } else {
-                document.getElementById('toni-status-text').innerText = "ERROR: engine/arena.js NOT FOUND";
+                console.error('[BOOT] ToniDB missing');
             }
 
-            document.getElementById('user-input').onkeypress = (e) => {
-                if(e.key === 'Enter') { window.ToniCore.processMessage(e.target.value); e.target.value = ''; }
-            };
-        };
+            // 2) Init Arena (subscribes to players:updated)
+            if (window.arena && typeof window.arena.init === 'function') {
+                window.arena.init('main-canvas');
+                console.log('[BOOT] Arena initialized');
+            } else {
+                console.error('[BOOT] Arena missing');
+            }
+
+            // 3) Init UI sectors (they subscribe to events)
+            if (window.SektorSporttasche && typeof window.SektorSporttasche.init === 'function') {
+                window.SektorSporttasche.init('active-content');
+                console.log('[BOOT] SektorSporttasche initialized');
+            } else if (window.SektorSporttasche && typeof window.SektorSporttasche.render === 'function') {
+                window.SektorSporttasche.render();
+            }
+
+            if (window.SektorAnalyse && typeof window.SektorAnalyse.init === 'function') {
+                window.SektorAnalyse.init('active-content');
+            } else if (window.SektorAnalyse && typeof window.SektorAnalyse.render === 'function') {
+                window.SektorAnalyse.render();
+            }
+
+            // 4) Wire up chat input
+            const input = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            function sendMessage() {
+                const text = input.value && input.value.trim();
+                if (!text) return;
+                if (window.ToniCore && typeof window.ToniCore.processMessage === 'function') {
+                    window.ToniCore.processMessage(text);
+                } else {
+                    console.warn('[BOOT] ToniCore not available');
+                }
+                input.value = '';
+            }
+            sendBtn.addEventListener('click', sendMessage);
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+            // 5) Update status bar with gateway state if available
+            const statusText = document.getElementById('status-text');
+            if (window.ToniGateway && window.ToniGateway.status) {
+                statusText.textContent = 'GATEWAY: ' + window.ToniGateway.status.toUpperCase();
+            } else {
+                statusText.textContent = 'READY';
+            }
+
+            console.log('[BOOT] bootstrap completed');
+        } catch (e) {
+            console.error('[BOOT] bootstrap failed', e);
+            const statusText = document.getElementById('status-text');
+            if (statusText) { statusText.textContent = 'BOOT ERROR'; statusText.style.color = 'var(--status-error)'; }
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', bootstrap);
     </script>
 </body>
 </html>
