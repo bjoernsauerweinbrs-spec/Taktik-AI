@@ -12,7 +12,7 @@ window.ToniDB = {
             console.log("ToniDB: Kader bereits vorhanden.");
         }
     },
-
+ 
     seed: function() {
         console.log("ToniDB: Generiere Elite-Kader für Coach Björn...");
         
