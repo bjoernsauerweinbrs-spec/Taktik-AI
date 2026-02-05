@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - HYBRID BRAIN ENGINE (PRO-LEVEL)
- * Manages local Ollama power with invisible OpenAI Fallback.
+ * TONI 2.0 - ACTION BRAIN ENGINE
+ * Erlaubt der KI, Spieler auf dem Board aktiv zu verschieben.
  */
 window.ToniCore = {
     isProcessing: false,
@@ -14,97 +14,80 @@ window.ToniCore = {
 
         const cmd = text.toLowerCase();
 
-        // 1. Direkt-Befehle (Sofort-Ausführung ohne KI)
+        // 1. SYSTEM-NAVIGATION (Sofort-Befehle)
         if (cmd.includes("öffne") || cmd.includes("gehe zu")) {
             this.handleNavigation(cmd);
             this.finishProcess();
             return;
         }
 
-        // 2. Taktische Anfrage (Hybrid-KI Logik)
-        await this.handleHybridIntelligence(text);
+        // 2. HYBRID-INTELLIGENZ MIT ACTION-PARSER
+        await this.handleHybridAction(text);
     },
 
-    handleHybridIntelligence: async function(text) {
+    handleHybridAction: async function(text) {
         const boardContext = this.getBoardContext();
-        const prompt = `Kontext: ${boardContext}. Frage: ${text}`;
-        
+        // Wir weisen Toni an, bei taktischen Änderungen ein spezielles JSON-Format zu nutzen
+        const systemInstruction = `
+            Du bist Toni. Wenn du die Formation ändern willst, füge am Ende deiner Antwort 
+            EXAKT dieses Format an: [MOVE: {"pos": "compact"}] oder [MOVE: {"pos": "wide"}].
+            Kontext: ${boardContext}`;
+
         let aiResponse = null;
-        let usedProvider = "Ollama (Local)";
+        let provider = "Ollama";
 
         try {
-            // SCHRITT 1: Versuch mit Ollama (Schnell & Lokal)
-            aiResponse = await this.queryOllama(prompt);
-
-            // SCHRITT 2: Qualitäts-Check
-            // Wenn Ollama keine Antwort liefert oder die Antwort zu kurz/generisch ist
-            if (!aiResponse || aiResponse.length < 15 || aiResponse.includes("Fehler")) {
-                console.log("Toni: Lokale Intelligenz reicht nicht aus. Starte Silent Upgrade...");
-                usedProvider = "OpenAI (Cloud)";
-                aiResponse = await this.queryOpenAI(prompt);
+            aiResponse = await this.queryOllama(text, systemInstruction);
+            if (!aiResponse || aiResponse.length < 15) {
+                provider = "OpenAI";
+                aiResponse = await this.queryOpenAI(text, systemInstruction);
             }
-        } catch (err) {
-            // SCHRITT 3: Notfall-Fallback (Falls Ollama komplett crashed)
-            aiResponse = await this.queryOpenAI(prompt);
+        } catch (e) {
+            aiResponse = await this.queryOpenAI(text, systemInstruction);
         }
 
-        this.finalizeResponse(aiResponse, usedProvider);
+        this.parseAndExecuteActions(aiResponse);
+        this.finalizeResponse(aiResponse, provider);
         this.finishProcess();
     },
 
-    queryOllama: async function(prompt) {
-        try {
-            const response = await fetch('http://127.0.0.1:11434/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify({
-                    model: 'gemma', // Oder dein installiertes Modell
-                    prompt: `Antworte als internationaler Taktik-Experte Toni kurz auf Deutsch: ${prompt}`,
-                    stream: false
-                })
-            });
-            const data = await response.json();
-            return data.response;
-        } catch (e) { return null; }
-    },
+    /**
+     * Scannt die Antwort nach [MOVE: ...] Befehlen
+     */
+    parseAndExecuteActions: function(text) {
+        const moveRegex = /\[MOVE:\s*({.*?})\]/;
+        const match = text.match(moveRegex);
 
-    queryOpenAI: async function(prompt) {
-        const key = localStorage.getItem('toni_api_key');
-        if (!key) return "Toni: Ich benötige ein Upgrade (API-Key), um diese komplexe Taktik-Frage zu beantworten.";
-
-        try {
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: "gpt-4o", // Höchste Qualitätsstufe für Profis
-                    messages: [
-                        {role: "system", content: "Du bist Toni, ein brasilianischer Taktik-Experte mit Weltklasse-Niveau. Du analysierst Spielsituationen präzise, nutzt Fachbegriffe und hilfst Coach Björn."},
-                        {role: "user", content: prompt}
-                    ]
-                })
-            });
-            const data = await response.json();
-            return data.choices[0].message.content;
-        } catch (e) { return "Verbindung zum Experten-Server unterbrochen."; }
+        if (match && window.arena) {
+            try {
+                const actionData = JSON.parse(match[1]);
+                console.log("Toni führt Aktion aus:", actionData);
+                
+                if (actionData.pos === "compact") {
+                    // Beispiel: Zieht das Team im Zentrum zusammen
+                    window.arena.applyTacticalPositions([
+                        {x: 0.1, y: 0.5}, {x: 0.3, y: 0.4}, {x: 0.3, y: 0.6}, 
+                        {x: 0.5, y: 0.45}, {x: 0.5, y: 0.55}
+                    ]);
+                } else if (actionData.pos === "wide") {
+                    // Beispiel: Zieht das Team in die Breite
+                    window.arena.applyTacticalPositions([
+                        {x: 0.1, y: 0.5}, {x: 0.3, y: 0.2}, {x: 0.3, y: 0.8}, 
+                        {x: 0.5, y: 0.1}, {x: 0.5, y: 0.9}
+                    ]);
+                }
+            } catch (e) {
+                console.error("Fehler beim Parsen der Toni-Aktion", e);
+            }
+        }
     },
 
     getBoardContext: function() {
         const squad = window.ToniDB ? window.ToniDB.getPlayers() : [];
-        const starters = squad.filter(p => p.isStarter).map(p => `${p.name} (#${p.number})`);
-        return `Kader aktiv: ${starters.join(", ")}. Trainer: Björn.`;
+        const starters = squad.filter(p => p.isStarter).map(p => p.name);
+        return `Startelf: ${starters.join(", ")}. Spielfeld-Modus: ${window.arena?.pitchMode || 'pro'}.`;
     },
 
-    finalizeResponse: function(answer, provider) {
-        console.log(`Antwort generiert via: ${provider}`);
-        this.addToChat("Toni", answer);
-        if(window.ToniTTS) ToniTTS.speak(answer, "warm");
-    },
-
-    finishProcess: function() {
-        this.isProcessing = false;
-        this.updateStatus("SYSTEM BEREIT [PRO]", "var(--neon-green)");
-    },
-
-    // ... (Hier folgen deine bestehenden Hilfs-Funktionen wie addUserMessage, addToChat, updateStatus, handleNavigation)
+    // ... Bestehende queryOllama, queryOpenAI, finalizeResponse etc. beibehalten
+    // Wichtig: In den API-Calls muss die systemInstruction mitgeschickt werden!
 };
