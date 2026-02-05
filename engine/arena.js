@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - INTERNATIONAL MULTI-ARENA ENGINE (PRO MATCHDAY EDITION)
  * Pitch: Pro (5m Area), F-Youth & Funino | Tools: Cones, Ladders, Hurdles
- * Features: 11+5 Squad Seeding, Full Name Display, Auto-Ball Kickoff
+ * Features: 11+5 Squad Seeding, Full Name Display, Auto-Ball Kickoff, ToniDB Integration.
  */
 window.arena = {
     canvas: null,
@@ -20,24 +20,28 @@ window.arena = {
         this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
         this.canvas.addEventListener('mouseup', () => this.handleMouseUp());
 
+        // Touch Support für MacBook Trackpad/Mobile
+        this.canvas.addEventListener('touchstart', (e) => this.handleMouseDown(e.touches[0]));
+        this.canvas.addEventListener('touchmove', (e) => this.handleMouseMove(e.touches[0]));
+        this.canvas.addEventListener('touchend', () => this.handleMouseUp());
+
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
-        // Initialisierung: Seed nur wenn absolut leer, sonst normaler Reset
+        // Initialisierung: Elite-Squad laden & Board vorbereiten
         this.checkAndSeedEliteSquad();
         this.resetBoard();
         
-        // Sicherheit: Einmaliges Rendern nach 100ms
         setTimeout(() => this.render(), 100);
     },
 
     /**
-     * Erstellt den vollständigen Elite-Kader (11+5), falls der Speicher leer ist.
+     * Erstellt den vollständigen Elite-Kader (11+5), falls ToniDB leer ist.
      */
     checkAndSeedEliteSquad: function() {
         let squad = JSON.parse(localStorage.getItem('toni_players')) || [];
         if (squad.length === 0) {
-            console.log("TONI 2.0: Initialisiere International Elite Squad (11+5)...");
+            console.log("TONI 2.0: Seeding Elite Squad...");
             const elite = [
                 // STARTELF (11)
                 { id: 'p1', name: 'Manuel Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 62, spo2: 99 }, proKpis: { vmax: 2, rsa: 80 } },
@@ -52,11 +56,11 @@ window.arena = {
                 { id: 'p10', name: 'Kylian Mbappé', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 56, spo2: 99 }, proKpis: { vmax: 3, rsa: 85 } },
                 { id: 'p11', name: 'Erling Haaland', number: 9, pos: 'ST', rating: 91, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 63, spo2: 98 }, proKpis: { vmax: 3, rsa: 82 } },
                 // BANK (5)
-                { id: 'p12', name: 'Thomas Müller', number: 25, pos: 'ST', rating: 84, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 60, spo2: 99 } },
-                { id: 'p13', name: 'Leroy Sané', number: 10, pos: 'RM', rating: 85, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 62, spo2: 98 } },
-                { id: 'p14', name: 'Rodri', number: 16, pos: 'ZM', rating: 87, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 58, spo2: 99 } },
-                { id: 'p15', name: 'Vinícius Júnior', number: 20, pos: 'RM', rating: 88, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 61, spo2: 98 } },
-                { id: 'p16', name: 'Jamal Musiala', number: 42, pos: 'ZM', rating: 86, isStarter: false, isNominated: true, isPresent: true, vitals: { pulse: 59, spo2: 99 } }
+                { id: 'p12', name: 'Thomas Müller', number: 25, pos: 'ST', rating: 84, isStarter: false, isNominated: true, isPresent: true },
+                { id: 'p13', name: 'Leroy Sané', number: 10, pos: 'RM', rating: 85, isStarter: false, isNominated: true, isPresent: true },
+                { id: 'p14', name: 'Rodri', number: 16, pos: 'ZM', rating: 87, isStarter: false, isNominated: true, isPresent: true },
+                { id: 'p15', name: 'Vinícius Júnior', number: 20, pos: 'RM', rating: 88, isStarter: false, isNominated: true, isPresent: true },
+                { id: 'p16', name: 'Jamal Musiala', number: 42, pos: 'ZM', rating: 86, isStarter: false, isNominated: true, isPresent: true }
             ];
             localStorage.setItem('toni_players', JSON.stringify(elite));
         }
@@ -73,16 +77,17 @@ window.arena = {
 
     resetBoard: function() {
         this.trainingObjects = [];
-        const squad = JSON.parse(localStorage.getItem('toni_players')) || [];
         this.players = [];
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // Ball automatisch auf Anstoßpunkt setzen
-        this.addTrainingObject('ball');
+        // Ball auf Anstoßpunkt
+        this.addTrainingObject('ball', w / 2, h / 2);
 
-        // Starter (Red Team)
-        const starters = squad.filter(p => p.isStarter && (p.isPresent !== false)).slice(0, 11);
+        const squad = JSON.parse(localStorage.getItem('toni_players')) || [];
+
+        // Echte Starter (Home Team - Red)
+        const starters = squad.filter(p => p.isStarter && p.isPresent !== false).slice(0, 11);
         starters.forEach((p, i) => {
             this.players.push({
                 id: p.id, name: p.name, nr: p.number, team: 'home',
@@ -90,8 +95,8 @@ window.arena = {
             });
         });
 
-        // Bank (Orange / Bench) - 5 Spieler an der Seitenlinie
-        const bench = squad.filter(p => p.isNominated && !p.isStarter && (p.isPresent !== false)).slice(0, 5);
+        // Echte Bank (Bench - Orange)
+        const bench = squad.filter(p => p.isNominated && !p.isStarter && p.isPresent !== false).slice(0, 5);
         bench.forEach((p, i) => {
             this.players.push({
                 id: p.id, name: p.name, nr: p.number, team: 'bench',
@@ -99,62 +104,22 @@ window.arena = {
             });
         });
 
-        // Gegner (Away / Blue) - 11 Spieler
+        // Gegner (Away - Blue)
         for(let i=0; i < 11; i++) {
             this.players.push({ id: 'opp_'+i, nr: i+1, team: 'away', x: this.getInitialX(i, 'away', w), y: this.getInitialY(i, h), radius: 18 });
         }
         this.render();
     },
 
-    applyTacticalPositions: function(coords) {
-        const homePlayers = this.players.filter(p => p.team === 'home');
-        coords.forEach((coord, i) => {
-            if (homePlayers[i]) {
-                homePlayers[i].x = this.canvas.width * coord.x;
-                homePlayers[i].y = this.canvas.height * coord.y;
-            }
-        });
-        this.render();
-    },
-
-    shiftTeam: function(direction) {
-        const shiftVal = this.canvas.width * 0.08;
-        this.players.filter(p => p.team === 'home').forEach(p => {
-            if (direction === 'forward') p.x += shiftVal;
-            if (direction === 'backward') p.x -= shiftVal;
-        });
-        this.render();
-    },
-
-    setPitchMode: function(mode) {
-        this.pitchMode = mode;
-        this.render();
-    },
-
-    addTrainingObject: function(type) {
+    addTrainingObject: function(type, x, y) {
         this.trainingObjects.push({
             id: 'obj_' + Date.now(),
             type: type,
-            x: this.canvas.width / 2,
-            y: this.canvas.height / 2,
+            x: x || this.canvas.width / 2,
+            y: y || this.canvas.height / 2,
             radius: type === 'ball' ? 7 : 20
         });
         this.render();
-    },
-
-    render: function() {
-        const ctx = this.ctx;
-        if (!ctx) return;
-        const w = this.canvas.width;
-        const h = this.canvas.height;
-
-        ctx.fillStyle = "#051205"; 
-        ctx.fillRect(0,0,w,h);
-        
-        this.drawGrid(ctx, w, h);
-        this.drawPitchLayout(ctx, w, h);
-        this.trainingObjects.forEach(obj => this.drawTool(ctx, obj));
-        this.players.forEach(p => this.drawPlayer(ctx, p));
     },
 
     drawPitchLayout: function(ctx, w, h) {
@@ -183,6 +148,47 @@ window.arena = {
         ctx.strokeRect(x, y - 70, goalW, 140);     // 5m Area
     },
 
+    render: function() {
+        const ctx = this.ctx;
+        if (!ctx) return;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        ctx.fillStyle = "#051205"; 
+        ctx.fillRect(0,0,w,h);
+        
+        this.drawGrid(ctx, w, h);
+        this.drawPitchLayout(ctx, w, h);
+        this.trainingObjects.forEach(obj => this.drawTool(ctx, obj));
+        this.players.forEach(p => this.drawPlayer(ctx, p));
+    },
+
+    drawGrid: function(ctx, w, h) {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+        const step = 45; // Ca. 5 Meter
+        for(let x=60; x<w-60; x+=step) { ctx.beginPath(); ctx.moveTo(x, 60); ctx.lineTo(x, h-60); ctx.stroke(); }
+        for(let y=60; y<h-60; y+=step) { ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(w-60, y); ctx.stroke(); }
+    },
+
+    drawPlayer: function(ctx, p) {
+        const color = p.team === 'home' ? '#FF3030' : (p.team === 'bench' ? '#FF8C00' : '#3080FF');
+        ctx.save();
+        ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+        
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#fff"; ctx.font = `bold ${p.radius}px Inter`; ctx.textAlign = "center";
+        ctx.fillText(p.nr, p.x, p.y + (p.radius/3));
+        
+        if(p.team !== 'away') {
+            ctx.font = "bold 11px Inter"; 
+            ctx.fillText(p.name || 'PRO', p.x, p.y + p.radius + 14);
+        }
+        ctx.restore();
+    },
+
     drawTool: function(ctx, obj) {
         ctx.save();
         ctx.translate(obj.x, obj.y);
@@ -202,39 +208,13 @@ window.arena = {
         ctx.restore();
     },
 
-    drawPlayer: function(ctx, p) {
-        const color = p.team === 'home' ? '#FF3030' : (p.team === 'bench' ? '#FF8C00' : '#3080FF');
-        ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
-        
-        ctx.fillStyle = "#fff"; ctx.font = `bold ${p.radius}px Inter`; ctx.textAlign = "center";
-        ctx.fillText(p.nr, p.x, p.y + (p.radius/3));
-        
-        if(p.team !== 'away') {
-            ctx.font = "bold 11px Inter"; 
-            ctx.fillText(p.name || 'PRO', p.x, p.y + p.radius + 14);
-        }
-    },
-
-    drawGrid: function(ctx, w, h) {
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
-        const step = 45; // Entspricht ca. 5 Metern
-        for(let x=60; x<w-60; x+=step) { ctx.beginPath(); ctx.moveTo(x, 60); ctx.lineTo(x, h-60); ctx.stroke(); }
-        for(let y=60; y<h-60; y+=step) { ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(w-60, y); ctx.stroke(); }
-    },
-
-    drawSmallGoal: function(ctx, x, y) {
-        ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(x, y - 25); ctx.lineTo(x, y + 25); ctx.stroke();
-    },
-
     handleMouseDown: function(e) {
         const rect = this.canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left; const my = e.clientY - rect.top;
         this.draggedItem = this.players.find(p => Math.sqrt((p.x-mx)**2 + (p.y-my)**2) < p.radius) ||
                            this.trainingObjects.find(o => Math.sqrt((o.x-mx)**2 + (o.y-my)**2) < o.radius);
     },
+
     handleMouseMove: function(e) {
         if (this.draggedItem) {
             const rect = this.canvas.getBoundingClientRect();
@@ -243,6 +223,7 @@ window.arena = {
             this.render();
         }
     },
+
     handleMouseUp: function() { this.draggedItem = null; },
 
     getInitialX: function(i, team, w) {
@@ -251,9 +232,35 @@ window.arena = {
         if (i < 9) return team === 'home' ? w * 0.42 : w * 0.58;
         return team === 'home' ? w * 0.48 : w * 0.52;
     },
+
     getInitialY: function(i, h) {
         const pos = [0.5, 0.2, 0.4, 0.6, 0.8, 0.2, 0.4, 0.6, 0.8, 0.4, 0.6];
         return h * pos[i];
+    },
+
+    drawSmallGoal: function(ctx, x, y) {
+        ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(x, y - 25); ctx.lineTo(x, y + 25); ctx.stroke();
+    },
+
+    applyTacticalPositions: function(coords) {
+        const homePlayers = this.players.filter(p => p.team === 'home');
+        coords.forEach((coord, i) => {
+            if (homePlayers[i]) {
+                homePlayers[i].x = this.canvas.width * coord.x;
+                homePlayers[i].y = this.canvas.height * coord.y;
+            }
+        });
+        this.render();
+    },
+
+    shiftTeam: function(direction) {
+        const shiftVal = this.canvas.width * 0.08;
+        this.players.filter(p => p.team === 'home').forEach(p => {
+            if (direction === 'forward') p.x += shiftVal;
+            if (direction === 'backward') p.x -= shiftVal;
+        });
+        this.render();
     },
 
     getSnapshot: function() {
