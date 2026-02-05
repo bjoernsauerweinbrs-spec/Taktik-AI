@@ -1,33 +1,54 @@
-/**
- * TONI 2.0 - VOICE ENGINE
- */
+// logic/toni-tts.js
+// ToniTTS: einfacher TTS-Adapter mit Web Speech API Fallback
+// Bietet eine speak(text) Funktion und eine isAvailable() Prüfung
+
 window.ToniTTS = {
-    selectedVoice: null,
-
-    init: function() {
-        const loadVoices = () => {
-            const voices = window.speechSynthesis.getVoices();
-            // Suche männliche deutsche Stimme (Stefan oder Google)
-            this.selectedVoice = voices.find(v => v.lang.includes('de') && (v.name.includes('Stefan') || v.name.includes('Male')));
-        };
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-        loadVoices();
+    voice: null,
+    rate: 1,
+    pitch: 1,
+    lang: 'de-DE',
+    init() {
+        try {
+            if (!('speechSynthesis' in window)) {
+                console.warn('[ToniTTS] Web Speech API not available');
+                return;
+            }
+            // try to pick a German voice if available
+            const loadVoices = () => {
+                const voices = window.speechSynthesis.getVoices();
+                if (voices && voices.length) {
+                    this.voice = voices.find(v => v.lang && v.lang.startsWith('de')) || voices[0];
+                }
+            };
+            loadVoices();
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+            console.log('[ToniTTS] initialized');
+        } catch (e) {
+            console.warn('[ToniTTS] init failed', e);
+        }
     },
-
-    speak: function(text, mode = "warm") {
-        if (!window.speechSynthesis) return;
-        window.speechSynthesis.cancel();
-        
-        const msg = new SpeechSynthesisUtterance(text);
-        if (this.selectedVoice) msg.voice = this.selectedVoice;
-        
-        msg.pitch = mode === "deep" ? 0.75 : 0.85;
-        msg.rate = 0.95;
-        window.speechSynthesis.speak(msg);
+    speak(text) {
+        try {
+            if (!text) return;
+            if (!('speechSynthesis' in window)) {
+                console.warn('[ToniTTS] speak requested but API not available');
+                return;
+            }
+            const utter = new SpeechSynthesisUtterance(String(text));
+            utter.lang = this.lang;
+            utter.rate = this.rate;
+            utter.pitch = this.pitch;
+            if (this.voice) utter.voice = this.voice;
+            window.speechSynthesis.cancel(); // stop previous
+            window.speechSynthesis.speak(utter);
+        } catch (e) {
+            console.warn('[ToniTTS] speak failed', e);
+        }
     },
-
-    test: function() {
-        this.speak("Toni Sprachausgabe online. Ich bin bereit für die Ginga-Analyse, Coach Björn.", "warm");
+    isAvailable() {
+        return !!(window.speechSynthesis && typeof window.speechSynthesis.speak === 'function');
     }
 };
-ToniTTS.init();
+
+// Auto-init so TTS is ready after script load
+try { window.ToniTTS.init(); } catch (e) { /* ignore */ }
