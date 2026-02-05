@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - INTERNATIONAL MULTI-ARENA ENGINE (PRO MATCHDAY EDITION)
  * Pitch: Pro (5m Area), F-Youth & Funino | Tools: Cones, Ladders, Hurdles
- * Features: 11+5 Squad Seeding, Full Name Display, Auto-Ball Kickoff, ToniDB Integration.
+ * Features: Tactical Formation Memory, 11+5 Squad Seeding, Auto-Ball Kickoff.
  */
 window.arena = {
     canvas: null,
@@ -10,6 +10,22 @@ window.arena = {
     trainingObjects: [],
     pitchMode: 'pro',
     draggedItem: null,
+
+    // NEU: Taktische Koordinaten-Muster (relativ 0.0 - 1.0)
+    formations: {
+        "compact": [
+            {x: 0.15, y: 0.5}, {x: 0.35, y: 0.35}, {x: 0.35, y: 0.65}, {x: 0.4, y: 0.45}, {x: 0.4, y: 0.55},
+            {x: 0.5, y: 0.3}, {x: 0.5, y: 0.7}, {x: 0.6, y: 0.5}, {x: 0.7, y: 0.4}, {x: 0.8, y: 0.5}, {x: 0.7, y: 0.6}
+        ],
+        "wide": [
+            {x: 0.15, y: 0.5}, {x: 0.35, y: 0.15}, {x: 0.35, y: 0.85}, {x: 0.4, y: 0.35}, {x: 0.4, y: 0.65},
+            {x: 0.5, y: 0.1}, {x: 0.5, y: 0.9}, {x: 0.6, y: 0.5}, {x: 0.7, y: 0.2}, {x: 0.8, y: 0.5}, {x: 0.7, y: 0.8}
+        ],
+        "pressing": [
+            {x: 0.25, y: 0.5}, {x: 0.45, y: 0.3}, {x: 0.45, y: 0.7}, {x: 0.5, y: 0.5}, {x: 0.6, y: 0.2},
+            {x: 0.6, y: 0.8}, {x: 0.7, y: 0.4}, {x: 0.7, y: 0.6}, {x: 0.8, y: 0.3}, {x: 0.8, y: 0.7}, {x: 0.9, y: 0.5}
+        ]
+    },
 
     init: function(id) {
         this.canvas = document.getElementById(id);
@@ -20,7 +36,6 @@ window.arena = {
         this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
         this.canvas.addEventListener('mouseup', () => this.handleMouseUp());
 
-        // Touch Support für MacBook Trackpad/Mobile
         this.canvas.addEventListener('touchstart', (e) => this.handleMouseDown(e.touches[0]));
         this.canvas.addEventListener('touchmove', (e) => this.handleMouseMove(e.touches[0]));
         this.canvas.addEventListener('touchend', () => this.handleMouseUp());
@@ -28,7 +43,6 @@ window.arena = {
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
-        // Initialisierung: Elite-Squad laden & Board vorbereiten
         this.checkAndSeedEliteSquad();
         this.resetBoard();
         
@@ -36,31 +50,37 @@ window.arena = {
     },
 
     /**
-     * Erstellt den vollständigen Elite-Kader (11+5), falls ToniDB leer ist.
+     * NEU: Wendet eine vordefinierte taktische Formation an
      */
+    applyTacticalFormation: function(type) {
+        const coords = this.formations[type];
+        if (!coords) return;
+
+        const homePlayers = this.players.filter(p => p.team === 'home');
+        coords.forEach((coord, i) => {
+            if (homePlayers[i]) {
+                homePlayers[i].x = coord.x * this.canvas.width;
+                homePlayers[i].y = coord.y * this.canvas.height;
+            }
+        });
+        this.render();
+    },
+
     checkAndSeedEliteSquad: function() {
         let squad = JSON.parse(localStorage.getItem('toni_players')) || [];
         if (squad.length === 0) {
-            console.log("TONI 2.0: Seeding Elite Squad...");
             const elite = [
-                // STARTELF (11)
-                { id: 'p1', name: 'Manuel Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 62, spo2: 99 }, proKpis: { vmax: 2, rsa: 80 } },
-                { id: 'p2', name: 'Virgil van Dijk', number: 4, pos: 'IV', rating: 88, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 65, spo2: 98 }, proKpis: { vmax: 3, rsa: 85 } },
-                { id: 'p3', name: 'Ruben Dias', number: 3, pos: 'IV', rating: 87, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 68, spo2: 98 }, proKpis: { vmax: 2, rsa: 82 } },
-                { id: 'p4', name: 'Alphonso Davies', number: 19, pos: 'LV', rating: 85, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 58, spo2: 99 }, proKpis: { vmax: 3, rsa: 92 } },
-                { id: 'p5', name: 'Trent Alexander-Arnold', number: 66, pos: 'RV', rating: 86, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 61, spo2: 98 }, proKpis: { vmax: 2, rsa: 87 } },
-                { id: 'p6', name: 'Joshua Kimmich', number: 6, pos: 'ZM', rating: 86, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 55, spo2: 99 }, proKpis: { vmax: 2, rsa: 95 } },
-                { id: 'p7', name: 'Kevin De Bruyne', number: 17, pos: 'ZM', rating: 91, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 64, spo2: 98 }, proKpis: { vmax: 2, rsa: 88 } },
-                { id: 'p8', name: 'Jude Bellingham', number: 5, pos: 'ZM', rating: 88, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 60, spo2: 99 }, proKpis: { vmax: 3, rsa: 90 } },
-                { id: 'p9', name: 'Mohamed Salah', number: 11, pos: 'RM', rating: 89, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 59, spo2: 99 }, proKpis: { vmax: 3, rsa: 88 } },
-                { id: 'p10', name: 'Kylian Mbappé', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 56, spo2: 99 }, proKpis: { vmax: 3, rsa: 85 } },
-                { id: 'p11', name: 'Erling Haaland', number: 9, pos: 'ST', rating: 91, isStarter: true, isNominated: true, isPresent: true, vitals: { pulse: 63, spo2: 98 }, proKpis: { vmax: 3, rsa: 82 } },
-                // BANK (5)
-                { id: 'p12', name: 'Thomas Müller', number: 25, pos: 'ST', rating: 84, isStarter: false, isNominated: true, isPresent: true },
-                { id: 'p13', name: 'Leroy Sané', number: 10, pos: 'RM', rating: 85, isStarter: false, isNominated: true, isPresent: true },
-                { id: 'p14', name: 'Rodri', number: 16, pos: 'ZM', rating: 87, isStarter: false, isNominated: true, isPresent: true },
-                { id: 'p15', name: 'Vinícius Júnior', number: 20, pos: 'RM', rating: 88, isStarter: false, isNominated: true, isPresent: true },
-                { id: 'p16', name: 'Jamal Musiala', number: 42, pos: 'ZM', rating: 86, isStarter: false, isNominated: true, isPresent: true }
+                { id: 'p1', name: 'Manuel Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isNominated: true, isPresent: true },
+                { id: 'p2', name: 'Virgil van Dijk', number: 4, pos: 'IV', rating: 88, isStarter: true, isNominated: true, isPresent: true },
+                { id: 'p3', name: 'Ruben Dias', number: 3, pos: 'IV', rating: 87, isStarter: true, isNominated: true, isPresent: true },
+                { id: 'p4', name: 'Alphonso Davies', number: 19, pos: 'LV', rating: 85, isStarter: true, isNominated: true, isPresent: true },
+                { id: 'p5', name: 'Trent Alexander-Arnold', number: 66, pos: 'RV', rating: 86, isStarter: true, isNominated: true, isPresent: true },
+                { id: 'p6', name: 'Joshua Kimmich', number: 6, pos: 'ZM', rating: 86, isStarter: true, isNominated: true, isPresent: true },
+                { id: 'p7', name: 'Kevin De Bruyne', number: 17, pos: 'ZM', rating: 91, isStarter: true, isNominated: true, isPresent: true },
+                { id: 'p8', name: 'Jude Bellingham', number: 5, pos: 'ZM', rating: 88, isStarter: true, isNominated: true, isPresent: true },
+                { id: 'p9', name: 'Mohamed Salah', number: 11, pos: 'RM', rating: 89, isStarter: true, isNominated: true, isPresent: true },
+                { id: 'p10', name: 'Kylian Mbappé', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true },
+                { id: 'p11', name: 'Erling Haaland', number: 9, pos: 'ST', rating: 91, isStarter: true, isNominated: true, isPresent: true }
             ];
             localStorage.setItem('toni_players', JSON.stringify(elite));
         }
@@ -80,13 +100,9 @@ window.arena = {
         this.players = [];
         const w = this.canvas.width;
         const h = this.canvas.height;
-
-        // Ball auf Anstoßpunkt
         this.addTrainingObject('ball', w / 2, h / 2);
 
         const squad = JSON.parse(localStorage.getItem('toni_players')) || [];
-
-        // Echte Starter (Home Team - Red)
         const starters = squad.filter(p => p.isStarter && p.isPresent !== false).slice(0, 11);
         starters.forEach((p, i) => {
             this.players.push({
@@ -95,16 +111,7 @@ window.arena = {
             });
         });
 
-        // Echte Bank (Bench - Orange)
-        const bench = squad.filter(p => p.isNominated && !p.isStarter && p.isPresent !== false).slice(0, 5);
-        bench.forEach((p, i) => {
-            this.players.push({
-                id: p.id, name: p.name, nr: p.number, team: 'bench',
-                x: (w * 0.20) + (i * (w * 0.12)), y: h - 35, radius: 14
-            });
-        });
-
-        // Gegner (Away - Blue)
+        // Gegner (Away)
         for(let i=0; i < 11; i++) {
             this.players.push({ id: 'opp_'+i, nr: i+1, team: 'away', x: this.getInitialX(i, 'away', w), y: this.getInitialY(i, h), radius: 18 });
         }
@@ -125,27 +132,18 @@ window.arena = {
     drawPitchLayout: function(ctx, w, h) {
         ctx.strokeStyle = "rgba(57, 255, 20, 0.6)"; ctx.lineWidth = 3;
         const pad = 60;
-
         if (this.pitchMode === 'pro') {
             ctx.strokeRect(pad, pad, w-(pad*2), h-(pad*2));
             ctx.beginPath(); ctx.moveTo(w/2, pad); ctx.lineTo(w/2, h-pad); ctx.stroke();
             ctx.beginPath(); ctx.arc(w/2, h/2, 60, 0, Math.PI*2); ctx.stroke();
-            this.drawBox(ctx, pad, h/2, 120, 260, 40); // Links
-            this.drawBox(ctx, w-pad, h/2, -120, 260, -40); // Rechts
-        } else if (this.pitchMode === 'youth') {
-            ctx.strokeRect(pad * 2, pad, w-(pad*4), h-(pad*2));
-            this.drawSmallGoal(ctx, pad*2, h/2);
-            this.drawSmallGoal(ctx, w-(pad*2), h/2);
-        } else if (this.pitchMode === 'funino') {
-            ctx.strokeRect(pad * 2, pad, w-(pad*4), h-(pad*2));
-            this.drawSmallGoal(ctx, pad*2, h*0.3); this.drawSmallGoal(ctx, pad*2, h*0.7);
-            this.drawSmallGoal(ctx, w-(pad*2), h*0.3); this.drawSmallGoal(ctx, w-(pad*2), h*0.7);
+            this.drawBox(ctx, pad, h/2, 120, 260, 40);
+            this.drawBox(ctx, w-pad, h/2, -120, 260, -40);
         }
     },
 
     drawBox: function(ctx, x, y, boxW, boxH, goalW) {
-        ctx.strokeRect(x, y - boxH/2, boxW, boxH); // 16m
-        ctx.strokeRect(x, y - 70, goalW, 140);     // 5m Area
+        ctx.strokeRect(x, y - boxH/2, boxW, boxH);
+        ctx.strokeRect(x, y - 70, goalW, 140);
     },
 
     render: function() {
@@ -153,10 +151,8 @@ window.arena = {
         if (!ctx) return;
         const w = this.canvas.width;
         const h = this.canvas.height;
-
         ctx.fillStyle = "#051205"; 
         ctx.fillRect(0,0,w,h);
-        
         this.drawGrid(ctx, w, h);
         this.drawPitchLayout(ctx, w, h);
         this.trainingObjects.forEach(obj => this.drawTool(ctx, obj));
@@ -165,23 +161,21 @@ window.arena = {
 
     drawGrid: function(ctx, w, h) {
         ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
-        const step = 45; // Ca. 5 Meter
+        const step = 45;
         for(let x=60; x<w-60; x+=step) { ctx.beginPath(); ctx.moveTo(x, 60); ctx.lineTo(x, h-60); ctx.stroke(); }
         for(let y=60; y<h-60; y+=step) { ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(w-60, y); ctx.stroke(); }
     },
 
     drawPlayer: function(ctx, p) {
-        const color = p.team === 'home' ? '#FF3030' : (p.team === 'bench' ? '#FF8C00' : '#3080FF');
+        const color = p.team === 'home' ? '#FF3030' : '#3080FF';
         ctx.save();
         ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0,0,0,0.5)";
         ctx.fillStyle = color;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
-        
         ctx.shadowBlur = 0;
         ctx.fillStyle = "#fff"; ctx.font = `bold ${p.radius}px Inter`; ctx.textAlign = "center";
         ctx.fillText(p.nr, p.x, p.y + (p.radius/3));
-        
         if(p.team !== 'away') {
             ctx.font = "bold 11px Inter"; 
             ctx.fillText(p.name || 'PRO', p.x, p.y + p.radius + 14);
@@ -192,16 +186,7 @@ window.arena = {
     drawTool: function(ctx, obj) {
         ctx.save();
         ctx.translate(obj.x, obj.y);
-        if (obj.type === 'cone') {
-            ctx.fillStyle = "orange"; ctx.beginPath();
-            ctx.moveTo(0, -12); ctx.lineTo(12, 12); ctx.lineTo(-12, 12); ctx.closePath(); ctx.fill();
-        } else if (obj.type === 'ladder') {
-            ctx.strokeStyle = "yellow"; ctx.lineWidth = 2;
-            for(let i=0; i<5; i++) ctx.strokeRect(-15, -50 + (i*20), 30, 20);
-        } else if (obj.type === 'hurdle') {
-            ctx.strokeStyle = "red"; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.moveTo(-20, 0); ctx.lineTo(20, 0); ctx.stroke();
-        } else if (obj.type === 'ball') {
+        if (obj.type === 'ball') {
             ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fill();
             ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
         }
@@ -236,31 +221,6 @@ window.arena = {
     getInitialY: function(i, h) {
         const pos = [0.5, 0.2, 0.4, 0.6, 0.8, 0.2, 0.4, 0.6, 0.8, 0.4, 0.6];
         return h * pos[i];
-    },
-
-    drawSmallGoal: function(ctx, x, y) {
-        ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(x, y - 25); ctx.lineTo(x, y + 25); ctx.stroke();
-    },
-
-    applyTacticalPositions: function(coords) {
-        const homePlayers = this.players.filter(p => p.team === 'home');
-        coords.forEach((coord, i) => {
-            if (homePlayers[i]) {
-                homePlayers[i].x = this.canvas.width * coord.x;
-                homePlayers[i].y = this.canvas.height * coord.y;
-            }
-        });
-        this.render();
-    },
-
-    shiftTeam: function(direction) {
-        const shiftVal = this.canvas.width * 0.08;
-        this.players.filter(p => p.team === 'home').forEach(p => {
-            if (direction === 'forward') p.x += shiftVal;
-            if (direction === 'backward') p.x -= shiftVal;
-        });
-        this.render();
     },
 
     getSnapshot: function() {
