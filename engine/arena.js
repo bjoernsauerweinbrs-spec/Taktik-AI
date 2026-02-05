@@ -7,7 +7,7 @@ window.Arena = {
     canvas: null,
     ctx: null,
     players: [],
-
+ 
     init: function(canvasId) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) return;
