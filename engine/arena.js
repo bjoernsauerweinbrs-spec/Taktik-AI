@@ -11,7 +11,6 @@ window.arena = {
     pitchMode: 'pro',
     draggedItem: null,
 
-    // NEU: Taktische Koordinaten-Muster (relativ 0.0 - 1.0)
     formations: {
         "compact": [
             {x: 0.15, y: 0.5}, {x: 0.35, y: 0.35}, {x: 0.35, y: 0.65}, {x: 0.4, y: 0.45}, {x: 0.4, y: 0.55},
@@ -50,12 +49,17 @@ window.arena = {
     },
 
     /**
-     * NEU: Wendet eine vordefinierte taktische Formation an
+     * FIX: Wechselt den Spielfeld-Modus und zeichnet sofort neu
      */
+    setPitchMode: function(mode) {
+        this.pitchMode = mode;
+        this.render();
+        console.log("Arena: Pitch-Mode auf " + mode + " geändert.");
+    },
+
     applyTacticalFormation: function(type) {
         const coords = this.formations[type];
         if (!coords) return;
-
         const homePlayers = this.players.filter(p => p.team === 'home');
         coords.forEach((coord, i) => {
             if (homePlayers[i]) {
@@ -72,15 +76,7 @@ window.arena = {
             const elite = [
                 { id: 'p1', name: 'Manuel Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isNominated: true, isPresent: true },
                 { id: 'p2', name: 'Virgil van Dijk', number: 4, pos: 'IV', rating: 88, isStarter: true, isNominated: true, isPresent: true },
-                { id: 'p3', name: 'Ruben Dias', number: 3, pos: 'IV', rating: 87, isStarter: true, isNominated: true, isPresent: true },
-                { id: 'p4', name: 'Alphonso Davies', number: 19, pos: 'LV', rating: 85, isStarter: true, isNominated: true, isPresent: true },
-                { id: 'p5', name: 'Trent Alexander-Arnold', number: 66, pos: 'RV', rating: 86, isStarter: true, isNominated: true, isPresent: true },
-                { id: 'p6', name: 'Joshua Kimmich', number: 6, pos: 'ZM', rating: 86, isStarter: true, isNominated: true, isPresent: true },
-                { id: 'p7', name: 'Kevin De Bruyne', number: 17, pos: 'ZM', rating: 91, isStarter: true, isNominated: true, isPresent: true },
-                { id: 'p8', name: 'Jude Bellingham', number: 5, pos: 'ZM', rating: 88, isStarter: true, isNominated: true, isPresent: true },
-                { id: 'p9', name: 'Mohamed Salah', number: 11, pos: 'RM', rating: 89, isStarter: true, isNominated: true, isPresent: true },
-                { id: 'p10', name: 'Kylian Mbappé', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true },
-                { id: 'p11', name: 'Erling Haaland', number: 9, pos: 'ST', rating: 91, isStarter: true, isNominated: true, isPresent: true }
+                { id: 'p10', name: 'Kylian Mbappé', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true }
             ];
             localStorage.setItem('toni_players', JSON.stringify(elite));
         }
@@ -111,7 +107,6 @@ window.arena = {
             });
         });
 
-        // Gegner (Away)
         for(let i=0; i < 11; i++) {
             this.players.push({ id: 'opp_'+i, nr: i+1, team: 'away', x: this.getInitialX(i, 'away', w), y: this.getInitialY(i, h), radius: 18 });
         }
@@ -132,13 +127,27 @@ window.arena = {
     drawPitchLayout: function(ctx, w, h) {
         ctx.strokeStyle = "rgba(57, 255, 20, 0.6)"; ctx.lineWidth = 3;
         const pad = 60;
+
         if (this.pitchMode === 'pro') {
             ctx.strokeRect(pad, pad, w-(pad*2), h-(pad*2));
             ctx.beginPath(); ctx.moveTo(w/2, pad); ctx.lineTo(w/2, h-pad); ctx.stroke();
             ctx.beginPath(); ctx.arc(w/2, h/2, 60, 0, Math.PI*2); ctx.stroke();
-            this.drawBox(ctx, pad, h/2, 120, 260, 40);
+            this.drawBox(ctx, pad, h/2, 120, 260, 40); // 5m Area integriert
             this.drawBox(ctx, w-pad, h/2, -120, 260, -40);
+        } else if (this.pitchMode === 'youth') {
+            ctx.strokeRect(pad * 2, pad, w-(pad*4), h-(pad*2));
+            this.drawSmallGoal(ctx, pad*2, h/2);
+            this.drawSmallGoal(ctx, w-(pad*2), h/2);
+        } else if (this.pitchMode === 'funino') {
+            ctx.strokeRect(pad * 2, pad, w-(pad*4), h-(pad*2));
+            this.drawSmallGoal(ctx, pad*2, h*0.3); this.drawSmallGoal(ctx, pad*2, h*0.7);
+            this.drawSmallGoal(ctx, w-(pad*2), h*0.3); this.drawSmallGoal(ctx, w-(pad*2), h*0.7);
         }
+    },
+
+    drawSmallGoal: function(ctx, x, y) {
+        ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(x, y - 25); ctx.lineTo(x, y + 25); ctx.stroke();
     },
 
     drawBox: function(ctx, x, y, boxW, boxH, goalW) {
