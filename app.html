@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>TONI 2.0 - PRO PERFORMANCE</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
 </head>
 <body>
     <div class="pro-layout-container">
@@ -13,16 +14,18 @@
             <div class="control-unit" onclick="SektorSystem.render()"><i class="fas fa-cog"></i></div>
         </nav>
 
-        <main id="stage-container" style="background:#000; position:relative;">
+        <main id="stage-container" style="background:#051205; position:relative; overflow:hidden;">
             <canvas id="main-canvas"></canvas>
-            <div id="toni-status-bar" style="position:absolute; top:20px; left:20px; color:#fff; font-size:0.7rem; font-weight:900;">
-                STATUS: <span id="toni-status-text" style="color:var(--neon-green);">INITIALISIERE...</span>
+            <div id="toni-status-bar" style="position:absolute; top:20px; left:20px; color:#39FF14; font-size:0.7rem; font-family:monospace;">
+                SYSTEM: <span id="toni-status-text">INITIALIZING...</span>
             </div>
         </main>
 
         <aside class="analysis-panel">
-            <div id="chat-messages" style="flex:1; padding:20px; overflow-y:auto;"></div>
-            <div style="padding:20px;"><input type="text" id="user-input" placeholder="Befehl an Toni..."></div>
+            <div id="chat-messages" style="flex:1; padding:20px; overflow-y:auto; color:#fff;"></div>
+            <div style="padding:20px;">
+                <input type="text" id="user-input" placeholder="Befehl an Toni..." style="width:100%; background:#000; border:1px solid #333; color:#fff; padding:10px;">
+            </div>
         </aside>
     </div>
 
@@ -32,35 +35,33 @@
     <script src="logic/database.js"></script>
     <script src="logic/llm-gateway.js"></script>
     <script src="logic/toni-core.js"></script>
-    <script src="engine/arena.js"></script>
-    <script src="ui/sektoren/sektor-sporttasche.js"></script>
+    <script src="engine/arena.js"></script> <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
     <script src="ui/sektoren/sektor-system.js"></script>
 
     <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log("BOOT: Starte System...");
-            
-            // 1. Datenbank laden
-            window.ToniDB.init(); 
-            
-            // 2. Arena initialisieren (ERST JETZT, damit Canvas-Größe stimmt)
-            const canvas = document.getElementById('main-canvas');
-            if(canvas) {
+        window.onload = function() {
+            try {
+                console.log("BOOT: Prüfe Module...");
+                window.ToniDB.init();
+                
+                const canvas = document.getElementById('main-canvas');
                 const container = document.getElementById('stage-container');
                 canvas.width = container.clientWidth;
                 canvas.height = container.clientHeight;
-                window.Arena.init('main-canvas');
-            }
 
-            // 3. Status setzen
-            document.getElementById('toni-status-text').innerText = "BEREIT (PRO)";
-            
-            // 4. Chat Handler
-            document.getElementById('user-input').onkeypress = (e) => {
-                if(e.key === 'Enter') { window.ToniCore.processMessage(e.target.value); e.target.value = ''; }
-            };
-        });
+                // WICHTIG: Wir nutzen jetzt das kleingeschriebene 'arena' Objekt
+                if(window.arena) {
+                    window.arena.init('main-canvas');
+                    document.getElementById('toni-status-text').innerText = "ONLINE (PRO)";
+                } else {
+                    document.getElementById('toni-status-text').innerText = "ARENA ERROR";
+                }
+            } catch (e) {
+                console.error("Boot-Fehler:", e);
+                document.getElementById('toni-status-text').innerText = "CRITICAL BOOT FAILURE";
+            }
+        };
     </script>
 </body>
 </html>
