@@ -1,11 +1,57 @@
 // logic/llm-gateway.js
 // ToniGateway: versucht lokale Ollama-Instanz, fällt bei Fehlern auf Cloud-Fallback zurück
 // Liefert immer ein normalisiertes Objekt: { text, source, error }
+// Zusätzlich: initCheck() beim Script-Load, das gateway:status emittiert.
 
 window.ToniGateway = {
     status: 'unknown', // 'local' | 'cloud' | 'error' | 'unknown'
+    _initChecked: false,
+
+    // initial check to determine availability (call on load)
+    async initCheck(timeout = 1500) {
+        if (this._initChecked) return this.status;
+        this._initChecked = true;
+        try {
+            // quick HEAD/OPTIONS or lightweight POST to local Ollama to verify reachability
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+
+            try {
+                const res = await fetch('http://localhost:11434/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: 'gemma', prompt: 'ping', stream: false }),
+                    signal: controller.signal
+                });
+                clearTimeout(id);
+                if (res.ok) {
+                    this.status = 'local';
+                    console.log('[ToniGateway] initCheck: local reachable');
+                } else {
+                    this.status = 'unknown';
+                    console.warn('[ToniGateway] initCheck: local responded with', res.status);
+                }
+            } catch (e) {
+                clearTimeout(id);
+                console.warn('[ToniGateway] initCheck: local unreachable', e && e.name ? e.name : e);
+                this.status = 'unknown';
+            }
+        } catch (e) {
+            console.warn('[ToniGateway] initCheck failed', e);
+            this.status = 'unknown';
+        } finally {
+            // emit status for UI
+            try { window.ToniEvents.emit('gateway:status', this.status); } catch (e) { /* ignore */ }
+            return this.status;
+        }
+    },
 
     async ask(prompt) {
+        // Ensure we have at least attempted initCheck before first ask
+        if (!this._initChecked) {
+            await this.initCheck();
+        }
+
         // Try local Ollama first
         try {
             this.status = 'local';
@@ -59,3 +105,6 @@ window.ToniGateway = {
         return this.status !== 'error';
     }
 };
+
+// Auto-run initCheck so UI gets immediate status
+try { window.ToniGateway.initCheck(); } catch (e) { /* ignore */ }
