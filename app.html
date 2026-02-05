@@ -3,186 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 - INTERNATIONAL PERFORMANCE CENTER</title>
+    <title>TONI 2.0 - PRO PERFORMANCE CENTER</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        /* Spezial-Effekte für Sprach-Interaktion */
-        .mic-active {
-            color: var(--accent-orange) !important;
-            text-shadow: 0 0 20px var(--accent-orange);
-            animation: pulse-mic 1.2s infinite;
-        }
-        @keyframes pulse-mic {
-            0% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.2); filter: brightness(1.5); }
-            100% { transform: scale(1); filter: brightness(1); }
-        }
-        /* Fix für Tipp-Blockade & Interaktion */
-        input, textarea, select {
-            pointer-events: auto !important;
-            cursor: text !important;
-            position: relative;
-            z-index: 10;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
 </head>
 <body>
 
-<div class="pro-layout-container">
-    
-    <aside class="sidebar-minimal">
-        <div class="control-unit" onclick="BriefcaseUI.toggle()" title="Zentrale Aktentasche">
-            <i class="fas fa-briefcase"></i>
-            <span style="font-size: 0.5rem; font-weight: 900; color: var(--neon-green);">ZENTRALE</span>
-        </div>
-
-        <div class="control-unit" id="mic-control" onclick="startToniVoice()" title="Toni Live Chat">
-            <i class="fas fa-microphone-alt" id="mic-icon"></i>
-            <span style="font-size: 0.5rem; font-weight: 900;">TONI LIVE</span>
-        </div>
-
-        <hr style="width: 40%; border: 0.5px solid rgba(57, 255, 20, 0.2); margin-bottom: 25px;">
-
-        <div id="sidebar-tactic-controls">
-            <button class="control-unit" style="background:none; border:none;" onclick="if(window.arena) arena.shiftTeam('forward')" title="Pressing (Team rückt auf)">
-                <i class="fas fa-fire" style="color: var(--accent-orange);"></i>
-            </button>
-            <button class="control-unit" style="background:none; border:none;" onclick="if(window.arena) arena.resetBoard()" title="Spielfeld zurücksetzen">
-                <i class="fas fa-undo" style="color: var(--text-dim);"></i>
-            </button>
-        </div>
-    </aside>
-
-    <main id="stage-container">
-        <canvas id="main-canvas"></canvas>
-    </main>
-
-    <section class="analysis-panel">
-        <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="font-size: 0.7rem; letter-spacing: 3px; color: var(--neon-green); margin: 0;">PERFORMANCE FEED</h2>
-            <div id="ollama-indicator" title="Ollama Status" style="width: 8px; height: 8px; border-radius: 50%; background: gray;"></div>
-        </div>
+    <div class="pro-layout-container">
         
-        <div id="setcard-content" style="padding: 20px;">
-            <div style="background: rgba(57, 255, 20, 0.05); padding: 15px; border-radius: 10px; border-left: 3px solid var(--neon-green);">
-                <span style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">STATUS-MONITOR</span>
-                <div id="toni-status-text" style="font-size:0.8rem; font-weight:bold; color:#fff; letter-spacing:1px;">INITIALIZING...</div>
+        <nav class="sidebar-minimal">
+            <div class="control-unit" onclick="SektorSporttasche.render()">
+                <i class="fas fa-tshirt"></i><span>KABINE</span>
             </div>
-        </div>
+            <div class="control-unit" onclick="SektorTraining.render()">
+                <i class="fas fa-clipboard-list"></i><span>TRAINING</span>
+            </div>
+            <div class="control-unit" onclick="SektorAnalyse.render()">
+                <i class="fas fa-microchip"></i><span>ANALYSE</span>
+            </div>
+            <div class="control-unit" onclick="SektorTemplates.render()">
+                <i class="fas fa-file-invoice"></i><span>HEFT</span>
+            </div>
+            <div style="margin-top: auto;" class="control-unit" onclick="SektorSystem.render()">
+                <i class="fas fa-cog"></i><span>SETUP</span>
+            </div>
+        </nav>
 
-        <div class="chat-container" style="display: flex; flex-direction: column; height: calc(100% - 150px);">
-            <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; font-size: 0.85rem; scroll-behavior: smooth;"></div>
-            <div style="padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.3); border-top: 1px solid #222; position: relative; z-index: 100;">
-                <input type="text" id="chat-input" autocomplete="off" style="flex: 1; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 5px; outline: none; font-size: 0.8rem;" placeholder="Befehl an Toni...">
-                <button id="send-btn" onclick="sendMessage()" style="background: var(--neon-green); border: none; width: 45px; border-radius: 5px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-paper-plane" style="color:#000; pointer-events: none;"></i>
-                </button>
+        <main id="stage-container">
+            <canvas id="main-canvas"></canvas>
+            
+            <div id="toni-status-bar" style="position:absolute; top:20px; left:20px; background:rgba(0,0,0,0.8); padding:10px 20px; border-radius:30px; border:1px solid var(--neon-green); display:flex; align-items:center; gap:10px;">
+                <div id="status-indicator" style="width:10px; height:10px; border-radius:50%; background:var(--neon-green); box-shadow:0 0 10px var(--neon-green);"></div>
+                <span id="toni-status-text" style="font-size:0.7rem; font-weight:900; letter-spacing:1px; color:#fff;">SYSTEM BEREIT</span>
             </div>
-        </div>
-    </section>
-</div>
+        </main>
 
-<div id="briefcase-overlay" class="briefcase-overlay" style="z-index: 9999;">
-    <div class="briefcase-window">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:20px;">
-            <div style="display:flex; align-items:center; gap:15px;">
-                <i class="fas fa-briefcase" style="color:var(--accent-gold);"></i>
-                <h2 id="sector-title" style="margin:0; color:var(--neon-green); letter-spacing:3px; font-size:1.1rem;">ZENTRALE</h2>
+        <aside class="analysis-panel">
+            <div id="chat-messages" style="flex:1; padding:20px; overflow-y:auto; font-family:'Inter', sans-serif;">
+                </div>
+            <div class="chat-input-area" style="padding:20px; background:rgba(0,0,0,0.5); border-top:1px solid #222;">
+                <input type="text" id="user-input" placeholder="Befehl an Toni..." style="width:100%; background:#000; border:1px solid #444; color:#fff; padding:12px; border-radius:8px;">
             </div>
-            <button onclick="BriefcaseUI.toggle()" style="background:none; border:none; color:#fff; font-size:2rem; cursor:pointer; line-height:1;">&times;</button>
-        </div>
-        <div id="briefcase-nav"></div>
-        <div id="briefcase-content" class="hidden">
-            <div id="active-content"></div>
+        </aside>
+
+    </div>
+
+    <div id="briefcase-overlay" class="briefcase-overlay">
+        <div class="briefcase-window">
+            <button onclick="window.BriefcaseUI.toggle()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <div id="active-content">
+                </div>
         </div>
     </div>
-</div>
 
-<script src="logic/toni-tts.js"></script>
-<script src="logic/toni-core.js"></script>
-<script src="ui/sektoren/sektor-sporttasche.js"></script>
-<script src="ui/sektoren/sektor-training.js"></script>
-<script src="ui/sektoren/sektor-system.js"></script>
-<script src="ui/sektoren/sektor-analyse.js"></script>
-<script src="ui/sektoren/sektor-templates.js"></script>
-<script src="ui/briefcase-main.js"></script>
-<script src="engine/arena.js"></script>
+    <script src="logic/event-bus.js"></script>
+    <script src="logic/database.js"></script>
+    <script src="logic/llm-gateway.js"></script>
+    <script src="logic/toni-core.js"></script>
+    <script src="engine/arena.js"></script>
+    
+    <script src="ui/sektoren/sektor-sporttasche.js"></script>
+    <script src="ui/sektoren/sektor-training.js"></script>
+    <script src="ui/sektoren/sektor-analyse.js"></script>
+    <script src="ui/sektoren/sektor-templates.js"></script>
+    <script src="ui/sektoren/sektor-system.js"></script>
+    <script src="ui/briefcase-ui.js"></script>
 
-<script>
-    function sendMessage() {
-        console.log("Sende-Vorgang gestartet...");
-        const input = document.getElementById('chat-input');
-        if(!input) return;
-        const text = input.value.trim();
-        
-        if(text !== "" && window.ToniCore) {
-            window.ToniCore.processMessage(text);
-            input.value = "";
-        } else if (!window.ToniCore) {
-            console.error("ToniCore wurde nicht gefunden!");
-        }
-    }
-
-    function startToniVoice() {
-        const icon = document.getElementById('mic-icon');
-        if(window.ToniCore) {
-            icon.classList.add('mic-active');
-            window.ToniCore.startVoice();
+    <script>
+        // BOOTSTRAP PROZESS
+        window.addEventListener('load', () => {
+            console.log("TONI 2.0: Bootstrapping gestartet...");
             
-            const observer = new MutationObserver(() => {
-                const status = document.getElementById('toni-status-text').innerText;
-                if(!status.includes("HÖRT")) {
-                    icon.classList.remove('mic-active');
-                    observer.disconnect();
+            // 1. Datenbank & Daten prüfen (Seed)
+            window.ToniDB.init();
+            
+            // 2. Arena wecken
+            window.Arena.init('main-canvas');
+            
+            // 3. UI-Komponenten vorbereiten
+            window.BriefcaseUI = {
+                toggle: function() {
+                    const el = document.getElementById('briefcase-overlay');
+                    el.classList.toggle('active');
+                    el.style.display = el.classList.contains('active') ? 'flex' : 'none';
+                }
+            };
+
+            // 4. Input-Handler für Toni
+            document.getElementById('user-input').addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') {
+                    window.ToniCore.processMessage(e.target.value);
+                    e.target.value = '';
                 }
             });
-            observer.observe(document.getElementById('toni-status-text'), { childList: true });
-        }
-    }
 
-    window.addEventListener('load', function() {
-        if(window.arena) arena.init('main-canvas');
-        if(window.BriefcaseUI) BriefcaseUI.init();
-
-        const chatInput = document.getElementById('chat-input');
-        if(chatInput) {
-            chatInput.addEventListener('keypress', (e) => { 
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    sendMessage(); 
-                }
-            });
-        }
-
-        checkOllamaConnection();
-
-        setTimeout(() => {
-            const statusBox = document.getElementById('toni-status-text');
-            if(statusBox) {
-                statusBox.innerText = "SYSTEM BEREIT [PRO]";
-                statusBox.style.color = "var(--neon-green)";
-            }
-        }, 1500);
-    });
-
-    async function checkOllamaConnection() {
-        const indicator = document.getElementById('ollama-indicator');
-        try {
-            // Prüfung gegen die lokale IP des MacBook
-            const response = await fetch('http://127.0.0.1:11434/api/tags');
-            if(response.ok) {
-                indicator.style.background = "var(--neon-green)";
-                indicator.title = "Ollama Online";
-                console.log("Verbindung zu Ollama steht.");
-            }
-        } catch(e) {
-            indicator.style.background = "var(--status-error)";
-            indicator.title = "Ollama Offline - Prüfe Port 11434";
-            console.warn("Ollama ist nicht erreichbar.");
-        }
-    }
-</script>
-
+            console.log("TONI 2.0: System Online.");
+        });
+    </script>
 </body>
 </html>
