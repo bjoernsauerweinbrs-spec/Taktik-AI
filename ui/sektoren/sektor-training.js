@@ -7,7 +7,7 @@ window.SektorTraining = {
     currentMode: 'pro',
 
     render: function() {
-        const squad = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const squad = window.ToniDB ? window.ToniDB.getPlayers() : (JSON.parse(localStorage.getItem('toni_players')) || []);
         const drillsArchive = JSON.parse(localStorage.getItem('toni_drills')) || [];
         
         document.getElementById('active-content').innerHTML = `
@@ -45,7 +45,7 @@ window.SektorTraining = {
                                         <button class="tactic-btn" style="color:var(--status-error); font-size:0.5rem;" onclick="SektorTraining.deleteFromArchive(${i})">X</button>
                                     </div>
                                 </div>
-                            `).join('') : '<p style="font-size:0.6rem; color:#444;">Archiv ist leer. Sag Toni "Speichere Übung", um Daten zu sichern.</p>'}
+                            `).join('') : '<p style="font-size:0.6rem; color:#444;">Archiv ist leer. Nutze das Board, um Übungen zu erstellen.</p>'}
                         </div>
                     </div>
                 </div>
@@ -84,10 +84,11 @@ window.SektorTraining = {
         const drill = archive[index];
         if(drill && window.arena) {
             window.arena.players = drill.players;
-            window.arena.trainingObjects = drill.objects;
+            window.arena.trainingObjects = drill.objects || [];
+            if(drill.pitchMode) window.arena.setPitchMode(drill.pitchMode);
             window.arena.render();
             if(window.BriefcaseUI) window.BriefcaseUI.toggle();
-            if(window.ToniTTS) ToniTTS.speak(`Archivierte Übung ${drill.name} geladen.`, "warm");
+            if(window.ToniTTS) ToniTTS.speak(`Übung ${drill.name} geladen.`, "warm");
         }
     },
 
@@ -120,12 +121,14 @@ window.SektorTraining = {
     },
 
     toggleAttendance: function(id) {
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const idx = players.findIndex(p => p.id === id);
-        if(idx > -1) {
-            players[idx].isPresent = !players[idx].isPresent;
-            localStorage.setItem('toni_players', JSON.stringify(players));
-            this.render();
+        if (window.ToniDB) {
+            const players = window.ToniDB.getPlayers();
+            const idx = players.findIndex(p => p.id === id);
+            if(idx > -1) {
+                players[idx].isPresent = !players[idx].isPresent;
+                window.ToniDB.savePlayer(players[idx]);
+                this.render();
+            }
         }
     },
 
@@ -168,22 +171,25 @@ window.SektorTraining = {
         const date = new Date().toLocaleDateString('de-DE');
 
         printArea.innerHTML = `
-            <div class="print-page" style="padding:20mm; font-family:Inter, sans-serif; color:#000; background:#fff;">
-                <div style="display:flex; justify-content:space-between; border-bottom:4px solid #000; padding-bottom:10px; margin-bottom:30px;">
+            <div class="print-page" style="padding:15mm; font-family: sans-serif; color:#000; background:#fff;">
+                <div style="display:flex; justify-content:space-between; border-bottom:3px solid #000; padding-bottom:10px; margin-bottom:20px;">
                     <div>
-                        <h1 style="margin:0; font-size:24pt;">TRAININGSPLAN</h1>
-                        <p style="margin:0; font-size:10pt; font-weight:bold; color:#666;">COACH ${JSON.parse(localStorage.getItem('toni_club_config'))?.coach?.toUpperCase() || 'BJÖRN'}</p>
+                        <h1 style="margin:0; font-size:22pt; letter-spacing:-1px;">TRAININGSPLAN</h1>
+                        <p style="margin:0; font-size:10pt; font-weight:bold;">COACH: BJÖRN | TONI 2.0 AI SYSTEM</p>
                     </div>
                     <div style="text-align:right;">
                         <p style="margin:0; font-size:10pt;">DATUM: ${date}</p>
                     </div>
                 </div>
                 ${this.sessionPlan.map((d, i) => `
-                    <div class="drill-card-print">
-                        <img src="${d.snapshot}" class="drill-image-print">
-                        <div style="font-size:10pt; line-height:1.4;">
-                            <h2 style="font-size:16pt; margin:0 0 10px 0; border-bottom:2px solid #000; padding-bottom:5px;">${i+1}. ${d.name.toUpperCase()}</h2>
-                            <strong>ABLAUF / COACHING:</strong><br>${d.desc.replace(/\n/g, '<br>')}
+                    <div style="margin-bottom: 30px; page-break-inside: avoid; border-bottom: 1px solid #eee; padding-bottom: 20px;">
+                        <h2 style="font-size:14pt; margin:0 0 10px 0; background:#000; color:#fff; padding:5px 10px;">${i+1}. ${d.name.toUpperCase()}</h2>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                            <img src="${d.snapshot}" style="width:100%; border:1px solid #000; border-radius:4px;">
+                            <div style="font-size:10pt; line-height:1.5;">
+                                <strong style="text-decoration:underline;">ABLAUF & COACHING:</strong><br>
+                                ${d.desc.replace(/\n/g, '<br>')}
+                            </div>
                         </div>
                     </div>
                 `).join('')}
