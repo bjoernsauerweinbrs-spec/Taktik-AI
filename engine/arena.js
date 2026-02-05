@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - INTERNATIONAL MULTI-ARENA ENGINE (PRO MATCHDAY EDITION)
  * Pitch: Pro (5m Area), F-Youth & Funino | Tools: Cones, Ladders, Hurdles
- * Features: Tactical Formation Memory, 11+5 Squad Seeding, Auto-Ball Kickoff.
+ * Features: Trainerbank-Zonen (Bank), Tactical Formations, Auto-Scaling.
  */
 window.arena = {
     canvas: null,
@@ -48,13 +48,9 @@ window.arena = {
         setTimeout(() => this.render(), 100);
     },
 
-    /**
-     * FIX: Wechselt den Spielfeld-Modus und zeichnet sofort neu
-     */
     setPitchMode: function(mode) {
         this.pitchMode = mode;
         this.render();
-        console.log("Arena: Pitch-Mode auf " + mode + " geändert.");
     },
 
     applyTacticalFormation: function(type) {
@@ -74,9 +70,8 @@ window.arena = {
         let squad = JSON.parse(localStorage.getItem('toni_players')) || [];
         if (squad.length === 0) {
             const elite = [
-                { id: 'p1', name: 'Manuel Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isNominated: true, isPresent: true },
-                { id: 'p2', name: 'Virgil van Dijk', number: 4, pos: 'IV', rating: 88, isStarter: true, isNominated: true, isPresent: true },
-                { id: 'p10', name: 'Kylian Mbappé', number: 7, pos: 'ST', rating: 92, isStarter: true, isNominated: true, isPresent: true }
+                { id: 'p1', name: 'M. Neuer', number: 1, pos: 'TW', rating: 89, isStarter: true, isPresent: true },
+                { id: 'p10', name: 'K. Mbappé', number: 7, pos: 'ST', rating: 92, isStarter: true, isPresent: true }
             ];
             localStorage.setItem('toni_players', JSON.stringify(elite));
         }
@@ -99,60 +94,70 @@ window.arena = {
         this.addTrainingObject('ball', w / 2, h / 2);
 
         const squad = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const starters = squad.filter(p => p.isStarter && p.isPresent !== false).slice(0, 11);
-        starters.forEach((p, i) => {
+        const active = squad.filter(p => p.isPresent);
+
+        // TRAINERBANK LOGIK: Spieler am Rand positionieren
+        active.forEach((p, i) => {
+            const onTopBench = i < 10;
+            const benchX = (i % 10) * (w / 11) + 50;
+            const benchY = onTopBench ? 30 : h - 30; // Oben oder unten parken
+
             this.players.push({
                 id: p.id, name: p.name, nr: p.number, team: 'home',
-                x: this.getInitialX(i, 'home', w), y: this.getInitialY(i, h), radius: 18
+                x: benchX, y: benchY, radius: 18, isStarter: p.isStarter
             });
         });
 
+        // Gegner (Standardmäßig auf Position)
         for(let i=0; i < 11; i++) {
-            this.players.push({ id: 'opp_'+i, nr: i+1, team: 'away', x: this.getInitialX(i, 'away', w), y: this.getInitialY(i, h), radius: 18 });
+            this.players.push({ id: 'opp_'+i, nr: i+1, team: 'away', x: w - 100, y: (h/12)*(i+1), radius: 18 });
         }
         this.render();
     },
 
     addTrainingObject: function(type, x, y) {
         this.trainingObjects.push({
-            id: 'obj_' + Date.now(),
-            type: type,
-            x: x || this.canvas.width / 2,
-            y: y || this.canvas.height / 2,
-            radius: type === 'ball' ? 7 : 20
+            id: 'obj_' + Date.now(), type: type, x: x, y: y, radius: type === 'ball' ? 7 : 20
         });
         this.render();
     },
 
     drawPitchLayout: function(ctx, w, h) {
-        ctx.strokeStyle = "rgba(57, 255, 20, 0.6)"; ctx.lineWidth = 3;
+        ctx.strokeStyle = "rgba(57, 255, 20, 0.4)"; ctx.lineWidth = 2;
         const pad = 60;
+
+        // TRAINERBÄNKE ZEICHNEN
+        ctx.fillStyle = "rgba(255,255,255,0.03)";
+        ctx.fillRect(0, 0, w, 55); // Obere Bank
+        ctx.fillRect(0, h-55, w, 55); // Untere Bank
+        ctx.strokeRect(5, 5, w-10, 50);
+        ctx.strokeRect(5, h-55, w-10, 50);
 
         if (this.pitchMode === 'pro') {
             ctx.strokeRect(pad, pad, w-(pad*2), h-(pad*2));
             ctx.beginPath(); ctx.moveTo(w/2, pad); ctx.lineTo(w/2, h-pad); ctx.stroke();
             ctx.beginPath(); ctx.arc(w/2, h/2, 60, 0, Math.PI*2); ctx.stroke();
-            this.drawBox(ctx, pad, h/2, 120, 260, 40); // 5m Area integriert
-            this.drawBox(ctx, w-pad, h/2, -120, 260, -40);
+            this.drawBox(ctx, pad, h/2, 120, 260, 40); // Links
+            this.drawBox(ctx, w-pad, h/2, -120, 260, -40); // Rechts
         } else if (this.pitchMode === 'youth') {
-            ctx.strokeRect(pad * 2, pad, w-(pad*4), h-(pad*2));
-            this.drawSmallGoal(ctx, pad*2, h/2);
-            this.drawSmallGoal(ctx, w-(pad*2), h/2);
+            ctx.strokeRect(pad*1.5, pad, w-(pad*3), h-(pad*2));
+            this.drawSmallGoal(ctx, pad*1.5, h/2);
+            this.drawSmallGoal(ctx, w-(pad*1.5), h/2);
         } else if (this.pitchMode === 'funino') {
-            ctx.strokeRect(pad * 2, pad, w-(pad*4), h-(pad*2));
-            this.drawSmallGoal(ctx, pad*2, h*0.3); this.drawSmallGoal(ctx, pad*2, h*0.7);
-            this.drawSmallGoal(ctx, w-(pad*2), h*0.3); this.drawSmallGoal(ctx, w-(pad*2), h*0.7);
+            ctx.strokeRect(pad*1.5, pad, w-(pad*3), h-(pad*2));
+            this.drawSmallGoal(ctx, pad*1.5, h*0.3); this.drawSmallGoal(ctx, pad*1.5, h*0.7);
+            this.drawSmallGoal(ctx, w-(pad*1.5), h*0.3); this.drawSmallGoal(ctx, w-(pad*1.5), h*0.7);
         }
     },
 
     drawSmallGoal: function(ctx, x, y) {
-        ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(x, y - 25); ctx.lineTo(x, y + 25); ctx.stroke();
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(x, y-25); ctx.lineTo(x, y+25); ctx.stroke();
     },
 
     drawBox: function(ctx, x, y, boxW, boxH, goalW) {
         ctx.strokeRect(x, y - boxH/2, boxW, boxH);
-        ctx.strokeRect(x, y - 70, goalW, 140);
+        ctx.strokeRect(x, y - 70, goalW, 140); // 5m Area
     },
 
     render: function() {
@@ -169,35 +174,29 @@ window.arena = {
     },
 
     drawGrid: function(ctx, w, h) {
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.02)";
         const step = 45;
-        for(let x=60; x<w-60; x+=step) { ctx.beginPath(); ctx.moveTo(x, 60); ctx.lineTo(x, h-60); ctx.stroke(); }
-        for(let y=60; y<h-60; y+=step) { ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(w-60, y); ctx.stroke(); }
+        for(let x=0; x<w; x+=step) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+        for(let y=0; y<h; y+=step) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
     },
 
     drawPlayer: function(ctx, p) {
-        const color = p.team === 'home' ? '#FF3030' : '#3080FF';
+        const isHome = p.team === 'home';
+        const color = isHome ? (p.isStarter ? '#39FF14' : '#FF3030') : '#3080FF';
+        
         ctx.save();
         ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0,0,0,0.5)";
         ctx.fillStyle = color;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = "#fff"; ctx.font = `bold ${p.radius}px Inter`; ctx.textAlign = "center";
+        
+        ctx.fillStyle = isHome && p.isStarter ? "#000" : "#fff";
+        ctx.font = `bold ${p.radius}px Inter`; ctx.textAlign = "center";
         ctx.fillText(p.nr, p.x, p.y + (p.radius/3));
-        if(p.team !== 'away') {
-            ctx.font = "bold 11px Inter"; 
-            ctx.fillText(p.name || 'PRO', p.x, p.y + p.radius + 14);
-        }
-        ctx.restore();
-    },
-
-    drawTool: function(ctx, obj) {
-        ctx.save();
-        ctx.translate(obj.x, obj.y);
-        if (obj.type === 'ball') {
-            ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fill();
-            ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
+        
+        if(isHome) {
+            ctx.font = "bold 10px Inter"; ctx.fillStyle = "#fff";
+            ctx.fillText(p.name, p.x, p.y + p.radius + 12);
         }
         ctx.restore();
     },
@@ -220,19 +219,8 @@ window.arena = {
 
     handleMouseUp: function() { this.draggedItem = null; },
 
-    getInitialX: function(i, team, w) {
-        if (i === 0) return team === 'home' ? 100 : w - 100;
-        if (i < 5) return team === 'home' ? w * 0.25 : w * 0.75;
-        if (i < 9) return team === 'home' ? w * 0.42 : w * 0.58;
-        return team === 'home' ? w * 0.48 : w * 0.52;
-    },
+    getInitialX: function(i, team, w) { return team === 'home' ? 100 : w - 100; },
+    getInitialY: function(i, h) { return (h/12)*(i+1); },
 
-    getInitialY: function(i, h) {
-        const pos = [0.5, 0.2, 0.4, 0.6, 0.8, 0.2, 0.4, 0.6, 0.8, 0.4, 0.6];
-        return h * pos[i];
-    },
-
-    getSnapshot: function() {
-        return this.canvas.toDataURL("image/png");
-    }
+    getSnapshot: function() { return this.canvas.toDataURL("image/png"); }
 };
