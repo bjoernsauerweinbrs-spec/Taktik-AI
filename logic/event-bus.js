@@ -8,5 +8,5 @@ window.ToniEvents = {
         console.log(`[EventBus] ${event} gefeuert.`);
         (this.listeners[event] || []).forEach(h => h(payload));
     }
-};
+}; 
  
