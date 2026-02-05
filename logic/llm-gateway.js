@@ -1,96 +1,54 @@
-/**
- * TONI 2.0 - LLM GATEWAY (PRO)
- * Alleinige Schnittstelle zu Ollama und OpenAI.
- * Verarbeitet Anfragen und extrahiert taktische Befehle für die Arena.
- */
 window.ToniGateway = {
-    /**
-     * Ruft das lokale Modell auf deinem MacBook ab (Standard-Pfad).
-     */
-    async callOllama(question, context) {
-        try {
-            const response = await fetch('http://localhost:11434/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'gemma', 
-                    prompt: this.buildFinalPrompt(question, context),
-                    stream: false
-                })
-            });
-            
-            if (!response.ok) throw new Error("Ollama Status: " + response.status);
-            
-            const data = await response.json();
-            return { 
-                text: data.response, 
-                tacticalMove: this.extractMove(data.response),
-                provider: 'Ollama'
-            };
-        } catch (e) {
-            console.warn("ToniGateway: Ollama nicht erreichbar. Fallback erforderlich.");
-            return null; 
-        }
-    },
+    askToni: async function(question) {
+        const context = this.buildContext();
+        window.ToniCore.updateStatus("PRÜFE LOKALES GEHIRN...", "var(--accent-orange)");
 
-    /**
-     * Ruft die OpenAI Cloud-KI ab, falls Ollama offline ist oder die Qualität nicht reicht.
-     */
-    async callOpenAI(question, context) {
+        // 1. VERSUCH: OLLAMA (mit hartem Timeout)
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 2000); // 2 Sek. Zeit für Ollama
+
+            const res = await fetch('http://localhost:11434/api/generate', {
+                method: 'POST',
+                signal: controller.signal,
+                body: JSON.stringify({ model: 'gemma', prompt: question, stream: false })
+            });
+            clearTimeout(timeout);
+            if (res.ok) {
+                const data = await res.json();
+                return { text: data.response, provider: 'Ollama' };
+            }
+        } catch (e) {
+            console.log("Ollama offline oder zu langsam. Nutze OpenAI.");
+        }
+
+        // 2. VERSUCH: OPENAI (Fallback)
+        window.ToniCore.updateStatus("NUTZE CLOUD-WISSEN...", "var(--accent-gold)");
+        return await this.callOpenAI(question, context);
+    },
+    
+    callOpenAI: async function(prompt, ctx) {
         const key = localStorage.getItem('toni_api_key');
-        if (!key) return { text: "System-Info: Bitte OpenAI API-Key in den Einstellungen hinterlegen.", provider: 'Error' };
+        if (!key) return { text: "Bitte API-Key in den Einstellungen hinterlegen!", error: true };
         
         try {
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            const res = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     model: "gpt-4o-mini",
-                    messages: [
-                        {role: "system", content: "Du bist Toni, ein brasilianischer Taktik-Experte für Coach Björn. Antworte fachlich versiert."},
-                        {role: "user", content: this.buildFinalPrompt(question, context)}
-                    ]
+                    messages: [{role: "system", content: "Du bist Toni."}, {role: "user", content: prompt}]
                 })
             });
-            
-            if (!response.ok) throw new Error("OpenAI Status: " + response.status);
-            
-            const data = await response.json();
-            const content = data.choices[0].message.content;
-            return { 
-                text: content, 
-                tacticalMove: this.extractMove(content),
-                provider: 'OpenAI'
-            };
+            const data = await res.json();
+            return { text: data.choices[0].message.content, provider: 'OpenAI' };
         } catch (e) {
-            console.error("ToniGateway: OpenAI Fehler", e);
-            return { text: "Cloud-KI aktuell nicht erreichbar. Bitte Internetverbindung prüfen.", provider: 'Error' };
+            return { text: "Beide KI-Dienste offline.", error: true };
         }
     },
-
-    /**
-     * Hilfsfunktion: Baut den Prompt mit taktischen Anweisungen.
-     */
-    buildFinalPrompt(question, context) {
-        return `
-            Kontext: ${JSON.stringify(context)}
-            Frage von Coach Björn: ${question}
-            
-            Anweisung: Antworte als internationaler Taktik-Experte. 
-            Falls eine Verschiebung auf dem Board nötig ist, füge am Ende [MOVE: {"pos": "compact"}] oder [MOVE: {"pos": "wide"}] oder [MOVE: {"pos": "pressing"}] ein.
-        `;
-    },
-
-    /**
-     * Extrahiert den JSON-Befehl aus der KI-Antwort.
-     */
-    extractMove(text) {
-        try {
-            const match = text.match(/\[MOVE:\s*({.*?})\]/);
-            return match ? JSON.parse(match[1]) : null;
-        } catch (e) {
-            console.error("ToniGateway: Fehler beim Parsen des taktischen Befehls", e);
-            return null;
-        }
+    
+    buildContext: function() {
+        const p = window.ToniDB.getPlayers().filter(p => p.isPresent && p.team === 'home');
+        return `Kader: ${p.map(s => s.name).join(", ")}.`;
     }
 };
