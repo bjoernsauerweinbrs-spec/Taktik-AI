@@ -48,38 +48,38 @@ window.SektorSporttasche = {
 
     renderProCard: function(p) {
         const borderCol = p.isStarter ? 'var(--neon-green)' : (p.isNominated ? 'var(--accent-gold)' : 'rgba(255,255,255,0.1)');
-        const presenceGlow = p.isPresent ? `0 0 25px rgba(57, 255, 20, 0.2)` : 'none';
+        const presenceGlow = p.isPresent ? `0 0 25px rgba(57, 255, 20, 0.4)` : 'none';
         const rating = p.rating || 80;
         const photo = p.photoUrl || 'https://via.placeholder.com/150/000000/39FF14?text=PRO';
 
         return `
-            <div class="fifa-card" onclick="SektorSporttasche.edit('${p.id}')" style="border: 2px solid ${borderCol}; background: linear-gradient(135deg, #0d1117 0%, #000 100%); position:relative; box-shadow: ${presenceGlow}; cursor:pointer; transition: transform 0.2s;">
+            <div class="fifa-card" onclick="SektorSporttasche.edit('${p.id}')" style="border: 2px solid ${borderCol}; background: linear-gradient(135deg, #0d1117 0%, #000 100%); position:relative; box-shadow: ${presenceGlow}; cursor:pointer; transition: transform 0.2s; border-radius: 10px; overflow: hidden; padding: 15px;">
                 
-                <div style="position:absolute; top:12px; right:12px; z-index:10;">
+                <div style="position:absolute; top:12px; right:12px; z-index:100;">
                     <div onclick="event.stopPropagation(); SektorSporttasche.fastToggle('${p.id}', 'isPresent')" 
                          title="${p.isPresent ? 'Im Training' : 'Abwesend'}"
-                         style="width:18px; height:18px; border-radius:50%; background:${p.isPresent ? 'var(--neon-green)' : '#444'}; border:3px solid #000; cursor:pointer;"></div>
+                         style="width:20px; height:20px; border-radius:50%; background:${p.isPresent ? 'var(--neon-green)' : '#444'}; border:3px solid #000; cursor:pointer; box-shadow: 0 0 10px ${p.isPresent ? 'var(--neon-green)' : 'transparent'}; pointer-events: auto !important;"></div>
                 </div>
 
-                <div style="padding:25px 25px 15px 25px; display:flex; gap:15px; align-items:center;">
+                <div style="padding:10px; display:flex; gap:15px; align-items:center;">
                     <div style="text-align:center;">
-                        <div style="font-size:1.8rem; font-weight:900; line-height:1; color:${borderCol}">${rating}</div>
-                        <div style="font-size:0.6rem; font-weight:bold; color:var(--text-dim);">${p.pos || 'ZM'}</div>
+                        <div style="font-size:2rem; font-weight:900; line-height:1; color:${borderCol}">${rating}</div>
+                        <div style="font-size:0.7rem; font-weight:bold; color:var(--text-dim);">${p.pos || 'ZM'}</div>
                     </div>
-                    <div style="width:75px; height:75px; background:#111; border-radius:10px; border:1px solid #333; overflow:hidden;">
+                    <div style="width:85px; height:85px; background:#111; border-radius:10px; border:1px solid #333; overflow:hidden;">
                         <img src="${photo}" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div style="flex:1;">
-                        <div style="font-weight:900; font-size:0.9rem; letter-spacing:1px; color:#fff;">${p.name.toUpperCase()}</div>
-                        <div style="font-size:0.5rem; color:var(--accent-gold); font-weight:bold;">NR. ${p.number} | ${p.status || 'FIT'}</div>
+                        <div style="font-weight:900; font-size:1rem; letter-spacing:1px; color:#fff;">${p.name.toUpperCase()}</div>
+                        <div style="font-size:0.6rem; color:var(--accent-gold); font-weight:bold;">NR. ${p.number} | ${p.status || 'FIT'}</div>
                     </div>
                 </div>
 
-                <div style="padding:0 20px 20px 20px; display:flex; gap:5px;">
+                <div style="padding:10px; display:flex; gap:10px; margin-top: 10px;">
                     <button onclick="event.stopPropagation(); SektorSporttasche.setMatchRole('${p.id}', 'starter')" 
-                            style="flex:1; font-size:0.55rem; padding:6px; border-radius:4px; border:1px solid #333; cursor:pointer; background:${p.isStarter?'var(--neon-green)':'transparent'}; color:${p.isStarter?'#000':'#fff'}; font-weight:900;">STARTELF</button>
+                            style="flex:1; font-size:0.6rem; padding:8px; border-radius:4px; border:1px solid #333; cursor:pointer; background:${p.isStarter?'var(--neon-green)':'transparent'}; color:${p.isStarter?'#000':'#fff'}; font-weight:900; pointer-events: auto;">STARTELF</button>
                     <button onclick="event.stopPropagation(); SektorSporttasche.setMatchRole('${p.id}', 'sub')" 
-                            style="flex:1; font-size:0.55rem; padding:6px; border-radius:4px; border:1px solid #333; cursor:pointer; background:${p.isNominated?'var(--accent-gold)':'transparent'}; color:${p.isNominated?'#000':'#fff'}; font-weight:900;">BANK</button>
+                            style="flex:1; font-size:0.6rem; padding:8px; border-radius:4px; border:1px solid #333; cursor:pointer; background:${p.isNominated?'var(--accent-gold)':'transparent'}; color:${p.isNominated?'#000':'#fff'}; font-weight:900; pointer-events: auto;">BANK</button>
                 </div>
             </div>`;
     },
@@ -90,7 +90,7 @@ window.SektorSporttasche = {
         if(idx > -1) {
             players[idx][field] = !players[idx][field];
             window.ToniDB.savePlayer(players[idx]);
-            this.render();
+            this.render(); // UI Refresh
         }
     },
 
@@ -123,7 +123,6 @@ window.SektorSporttasche = {
             }));
             window.arena.render();
             if(window.BriefcaseUI) window.BriefcaseUI.toggle();
-            if(window.ToniTTS) ToniTTS.speak("Kader synchronisiert. Anwesende Spieler auf dem Board positioniert.", "warm");
         }
     },
 
