@@ -6,7 +6,7 @@ window.SektorSporttasche = {
     currentFilter: 'all',
 
     render: function() {
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const players = window.ToniDB ? window.ToniDB.getPlayers() : (JSON.parse(localStorage.getItem('toni_players')) || []);
         
         document.getElementById('active-content').innerHTML = `
             <div style="padding:25px; animation: fadeIn 0.4s ease-out; height: 82vh; overflow-y: auto;">
@@ -85,17 +85,17 @@ window.SektorSporttasche = {
     },
 
     fastToggle: function(id, field) {
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        let players = window.ToniDB.getPlayers();
         const idx = players.findIndex(p => p.id === id);
         if(idx > -1) {
             players[idx][field] = !players[idx][field];
-            localStorage.setItem('toni_players', JSON.stringify(players));
+            window.ToniDB.savePlayer(players[idx]);
             this.render();
         }
     },
 
     setMatchRole: function(id, role) {
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        let players = window.ToniDB.getPlayers();
         const idx = players.findIndex(p => p.id === id);
         if(idx > -1) {
             if(role === 'starter') {
@@ -105,15 +105,25 @@ window.SektorSporttasche = {
                 players[idx].isNominated = !players[idx].isNominated;
                 players[idx].isStarter = false;
             }
-            localStorage.setItem('toni_players', JSON.stringify(players));
+            window.ToniDB.savePlayer(players[idx]);
             this.render();
         }
     },
 
     syncWithArena: function() {
         if(window.arena) {
-            window.arena.resetBoard();
+            const squad = window.ToniDB.getPlayers().filter(p => p.isPresent);
+            window.arena.players = squad.map((p, i) => ({
+                id: p.id,
+                name: p.name,
+                number: p.number,
+                team: 'red',
+                x: 0.2 + (i * 0.05),
+                y: 0.2 + (i * 0.1)
+            }));
+            window.arena.render();
             if(window.BriefcaseUI) window.BriefcaseUI.toggle();
+            if(window.ToniTTS) ToniTTS.speak("Kader synchronisiert. Anwesende Spieler auf dem Board positioniert.", "warm");
         }
     },
 
@@ -123,7 +133,7 @@ window.SektorSporttasche = {
     },
 
     edit: function(id) {
-        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const players = window.ToniDB.getPlayers();
         const p = players.find(x => x.id == id);
         if(!p) return;
 
@@ -161,6 +171,7 @@ window.SektorSporttasche = {
                             <div><label style="font-size:0.5rem; color:#aaa;">NUMMER</label><input type="number" id="edit-number" value="${p.number}" class="login-input" style="width:100%"></div>
                             <div><label style="font-size:0.5rem; color:#aaa;">PULS (BPM)</label><input type="number" id="edit-pulse" value="${p.vitals?.pulse || 70}" class="login-input" style="width:100%"></div>
                             <div><label style="font-size:0.5rem; color:#aaa;">SpO2 (%)</label><input type="number" id="edit-spo2" value="${p.vitals?.spo2 || 98}" class="login-input" style="width:100%"></div>
+                            <div><label style="font-size:0.5rem; color:#aaa;">V-MAX (KM/H)</label><input type="number" id="edit-vmax" value="${p.proKpis?.vmax || 30}" class="login-input" style="width:100%"></div>
                         </div>
                     </div>
                 </div>
@@ -182,7 +193,7 @@ window.SektorSporttasche = {
     },
 
     save: function(id) {
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
+        const players = window.ToniDB.getPlayers();
         const idx = players.findIndex(x => x.id == id);
         if(idx > -1) {
             players[idx].rating = parseInt(document.getElementById('edit-rating').value);
@@ -193,7 +204,11 @@ window.SektorSporttasche = {
                 pulse: parseInt(document.getElementById('edit-pulse').value),
                 spo2: parseInt(document.getElementById('edit-spo2').value)
             };
-            localStorage.setItem('toni_players', JSON.stringify(players));
+            players[idx].proKpis = {
+                vmax: parseFloat(document.getElementById('edit-vmax').value),
+                rsa: players[idx].proKpis?.rsa || 78
+            };
+            window.ToniDB.savePlayer(players[idx]);
             this.render();
         }
     },
@@ -201,8 +216,7 @@ window.SektorSporttasche = {
     addPlayer: function() {
         const name = prompt("Name des neuen Spielers:");
         if (!name) return;
-        let players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        players.push({
+        const newPlayer = {
             id: 'p_' + Date.now(),
             name: name,
             number: 10,
@@ -212,17 +226,15 @@ window.SektorSporttasche = {
             isStarter: false,
             isNominated: false,
             vitals: { pulse: 70, spo2: 98 },
-            proKpis: { vmax: 2.2, rsa: 78 }
-        });
-        localStorage.setItem('toni_players', JSON.stringify(players));
+            proKpis: { vmax: 30, rsa: 78 }
+        };
+        window.ToniDB.savePlayer(newPlayer);
         this.render();
     },
 
     deletePlayer: function(id) {
         if(confirm("Spieler unwiderruflich löschen?")) {
-            let players = JSON.parse(localStorage.getItem('toni_players')) || [];
-            players = players.filter(p => p.id !== id);
-            localStorage.setItem('toni_players', JSON.stringify(players));
+            window.ToniDB.deletePlayer(id);
             this.render();
         }
     }
