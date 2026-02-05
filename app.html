@@ -5,6 +5,7 @@
     <title>TONI 2.0 - PRO MATCHDAY</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
 </head>
 <body>
     <div class="pro-layout-container">
@@ -29,25 +30,63 @@
         <div class="briefcase-window"><div id="active-content"></div></div>
     </div>
 
-    <!-- Logic -->
-    <script src="logic/event-bus.js"></script>
-    <script src="logic/database.js"></script>
-    <script src="logic/llm-gateway.js"></script>
-    <script src="logic/toni-core.js"></script>
+    <!-- Logic (loaded as modules to support ESM syntax in bundled/third-party files) -->
+    <script type="module" src="logic/event-bus.js"></script>
+    <script type="module" src="logic/database.js"></script>
+    <script type="module" src="logic/llm-gateway.js"></script>
+    <script type="module" src="logic/toni-core.js"></script>
 
     <!-- Engine -->
-    <script src="engine/arena.js"></script>
+    <script type="module" src="engine/arena.js"></script>
 
     <!-- UI -->
-    <script src="ui/briefcase-ui.js"></script>
-    <script src="ui/sektoren/sektor-sporttasche.js"></script>
-    <script src="ui/sektoren/sektor-analyse.js"></script>
-    <script src="ui/sektoren/sektor-system.js"></script>
+    <script type="module" src="ui/briefcase-ui.js"></script>
+    <script type="module" src="ui/sektoren/sektor-sporttasche.js"></script>
+    <script type="module" src="ui/sektoren/sektor-analyse.js"></script>
+    <script type="module" src="ui/sektoren/sektor-system.js"></script>
 
-    <script>
-    /* Deterministic bootstrap sequence to avoid race conditions */
+    <script type="module">
+    /* Deterministic bootstrap sequence to avoid race conditions
+       Modules above are loaded as ES modules; they still attach globals (window.*) where needed.
+       This bootstrap waits for DOMContentLoaded and for the first gateway:status event (short timeout).
+    */
+    async function waitForGatewayStatus(timeout = 2000) {
+        return new Promise((resolve) => {
+            let resolved = false;
+            const timer = setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    resolve(null);
+                }
+            }, timeout);
+
+            try {
+                if (window.ToniEvents && typeof window.ToniEvents.on === 'function') {
+                    window.ToniEvents.on('gateway:status', (s) => {
+                        if (!resolved) {
+                            resolved = true;
+                            clearTimeout(timer);
+                            resolve(s);
+                        }
+                    });
+                } else {
+                    // No event bus available; resolve after timeout
+                    // (this keeps bootstrap resilient)
+                }
+            } catch (e) {
+                clearTimeout(timer);
+                resolve(null);
+            }
+        });
+    }
+
     async function bootstrap() {
         try {
+            // Wait for DOM ready
+            if (document.readyState === 'loading') {
+                await new Promise(r => window.addEventListener('DOMContentLoaded', r, { once: true }));
+            }
+
             // 1) Init DB (seed + emit)
             if (window.ToniDB && typeof window.ToniDB.init === 'function') {
                 window.ToniDB.init();
@@ -91,15 +130,36 @@
                 }
                 input.value = '';
             }
-            sendBtn.addEventListener('click', sendMessage);
-            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+            if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+            if (input) input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-            // 5) Update status bar with gateway state if available
-            const statusText = document.getElementById('status-text');
-            if (window.ToniGateway && window.ToniGateway.status) {
-                statusText.textContent = 'GATEWAY: ' + window.ToniGateway.status.toUpperCase();
+            // 5) Wait briefly for gateway status event (so UI doesn't show UNKNOWN unnecessarily)
+            const gwStatus = await waitForGatewayStatus(2000);
+            const statusTextEl = document.getElementById('status-text');
+
+            if (gwStatus && statusTextEl) {
+                statusTextEl.textContent = 'GATEWAY: ' + String(gwStatus).toUpperCase();
+                statusTextEl.style.color = (gwStatus === 'error') ? 'var(--status-error)' : 'var(--neon-green)';
             } else {
-                statusText.textContent = 'READY';
+                // If no gateway status arrived, show READY but keep listening for later updates
+                if (statusTextEl) {
+                    statusTextEl.textContent = 'BEREIT';
+                    statusTextEl.style.color = 'var(--neon-green)';
+                }
+            }
+
+            // Ensure status-text updates on future gateway events
+            try {
+                if (window.ToniEvents && typeof window.ToniEvents.on === 'function') {
+                    window.ToniEvents.on('gateway:status', (s) => {
+                        const el = document.getElementById('status-text');
+                        if (!el) return;
+                        el.textContent = 'GATEWAY: ' + String(s).toUpperCase();
+                        el.style.color = (s === 'error') ? 'var(--status-error)' : 'var(--neon-green)';
+                    });
+                }
+            } catch (e) {
+                console.warn('[BOOT] failed to attach gateway:status listener', e);
             }
 
             console.log('[BOOT] bootstrap completed');
@@ -110,7 +170,8 @@
         }
     }
 
-    window.addEventListener('DOMContentLoaded', bootstrap);
+    // Start bootstrap (modules are loaded before this script runs)
+    bootstrap();
     </script>
 </body>
 </html>
