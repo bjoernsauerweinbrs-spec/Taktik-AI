@@ -19,21 +19,31 @@ window.SektorTraining = {
                             <h2 style="color:var(--accent-orange); margin:0; letter-spacing:2px;">TRAININGS-ZENTRALE</h2>
                             <p style="font-size:0.6rem; color:var(--text-dim); text-transform:uppercase;">Methodik & Archivierung</p>
                         </div>
-                        <div style="display:flex; gap:10px;">
-                            <button class="tactic-btn" onclick="SektorTraining.setMode('pro')" style="${this.currentMode==='pro'?'border-color:var(--neon-green);color:#fff':''}">PRO-PITCH</button>
-                            <button class="tactic-btn" onclick="SektorTraining.setMode('youth')" style="${this.currentMode==='youth'?'border-color:var(--neon-green);color:#fff':''}">F-JUGEND</button>
-                            <button class="tactic-btn" onclick="SektorTraining.setMode('funino')" style="${this.currentMode==='funino'?'border-color:var(--neon-green);color:#fff':''}">FUNINO</button>
+                        
+                        <div style="display:flex; gap:10px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 8px;">
+                            <button onclick="SektorTraining.setMode('pro')" 
+                                style="cursor:pointer; padding: 8px 15px; border-radius: 5px; border: 1px solid ${this.currentMode==='pro' ? 'var(--neon-green)' : '#444'}; background: ${this.currentMode==='pro' ? 'rgba(57, 255, 20, 0.2)' : '#111'}; color: #fff; font-size: 0.65rem; font-weight: bold; transition: 0.3s;">
+                                PRO-PITCH
+                            </button>
+                            <button onclick="SektorTraining.setMode('youth')" 
+                                style="cursor:pointer; padding: 8px 15px; border-radius: 5px; border: 1px solid ${this.currentMode==='youth' ? 'var(--neon-green)' : '#444'}; background: ${this.currentMode==='youth' ? 'rgba(57, 255, 20, 0.2)' : '#111'}; color: #fff; font-size: 0.65rem; font-weight: bold; transition: 0.3s;">
+                                F-JUGEND
+                            </button>
+                            <button onclick="SektorTraining.setMode('funino')" 
+                                style="cursor:pointer; padding: 8px 15px; border-radius: 5px; border: 1px solid ${this.currentMode==='funino' ? 'var(--neon-green)' : '#444'}; background: ${this.currentMode==='funino' ? 'rgba(57, 255, 20, 0.2)' : '#111'}; color: #fff; font-size: 0.65rem; font-weight: bold; transition: 0.3s;">
+                                FUNINO
+                            </button>
                         </div>
                     </div>
 
-                    <div class="fifa-card" style="text-align:left; cursor:default; margin-bottom:25px; background:rgba(255,106,0,0.02);">
+                    <div class="fifa-card" style="text-align:left; cursor:default; margin-bottom:25px; background:rgba(255,106,0,0.02); border: 1px solid rgba(255,106,0,0.2); padding: 20px; border-radius: 12px;">
                         <h4 style="font-size:0.6rem; color:var(--accent-gold); margin-bottom:15px; letter-spacing:1px;">ANWESENHEITSPRÜFUNG (POOL: MAX 20)</h4>
                         <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:10px; max-height:200px; overflow-y:auto; padding-right:10px;">
                             ${this.renderAttendanceList(squad)}
                         </div>
                     </div>
 
-                    <div class="fifa-card" style="text-align:left; cursor:default; border-color:var(--accent-orange);">
+                    <div class="fifa-card" style="text-align:left; cursor:default; border-color:var(--accent-orange); padding: 20px; border-radius: 12px;">
                         <h4 style="font-size:0.6rem; color:var(--accent-orange); margin-bottom:15px; letter-spacing:1px;">GESPEICHERTE ÜBUNGEN (ARCHIV)</h4>
                         <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:15px;">
                             ${drillsArchive.length > 0 ? drillsArchive.map((d, i) => `
@@ -41,8 +51,8 @@ window.SektorTraining = {
                                     <div style="font-size:0.75rem; font-weight:900; color:#fff; margin-bottom:5px;">${d.name.toUpperCase()}</div>
                                     <div style="font-size:0.55rem; color:var(--text-dim); margin-bottom:12px;">${d.date}</div>
                                     <div style="display:flex; gap:5px;">
-                                        <button class="tactic-btn" style="flex:1; font-size:0.5rem;" onclick="SektorTraining.loadFromArchive(${i})">LADEN</button>
-                                        <button class="tactic-btn" style="color:var(--status-error); font-size:0.5rem;" onclick="SektorTraining.deleteFromArchive(${i})">X</button>
+                                        <button class="tactic-btn" style="flex:1; font-size:0.5rem; cursor:pointer;" onclick="SektorTraining.loadFromArchive(${i})">LADEN</button>
+                                        <button class="tactic-btn" style="color:var(--status-error); font-size:0.5rem; cursor:pointer;" onclick="SektorTraining.deleteFromArchive(${i})">X</button>
                                     </div>
                                 </div>
                             `).join('') : '<p style="font-size:0.6rem; color:#444;">Archiv ist leer. Nutze das Board, um Übungen zu erstellen.</p>'}
@@ -50,14 +60,14 @@ window.SektorTraining = {
                     </div>
                 </div>
 
-                <div class="fifa-card" style="border-color:var(--neon-green); text-align:left; cursor:default; display:flex; flex-direction:column; position:sticky; top:0; height: fit-content;">
+                <div class="fifa-card" style="border-color:var(--neon-green); background: rgba(57, 255, 20, 0.02); text-align:left; cursor:default; display:flex; flex-direction:column; position:sticky; top:0; height: fit-content; padding: 20px; border-radius: 12px;">
                     <h4 style="font-size:0.6rem; color:var(--neon-green); margin-bottom:20px; letter-spacing:1px;">A4 TAGESPLAN-EDITOR</h4>
                     
                     <div style="flex:1;">
-                        <input type="text" id="drill-name" placeholder="Name der Übung..." class="login-input" style="width:100%; margin-bottom:10px;">
-                        <textarea id="drill-desc" placeholder="Ablauf & Coaching-Punkte..." class="login-input" style="width:100%; height:80px; margin-bottom:15px;"></textarea>
+                        <input type="text" id="drill-name" placeholder="Name der Übung..." class="login-input" style="width:100%; margin-bottom:10px; background: #000; border: 1px solid #333; color: #fff; padding: 10px;">
+                        <textarea id="drill-desc" placeholder="Ablauf & Coaching-Punkte..." class="login-input" style="width:100%; height:80px; margin-bottom:15px; background: #000; border: 1px solid #333; color: #fff; padding: 10px; resize: none;"></textarea>
                         
-                        <button class="login-btn" style="width:100%; font-size:0.7rem;" onclick="SektorTraining.addDrillToPlan()">
+                        <button class="login-btn" style="width:100%; font-size:0.7rem; background: var(--neon-green); color: #000; font-weight: bold; border: none; padding: 12px; cursor: pointer;" onclick="SektorTraining.addDrillToPlan()">
                             ÜBUNG IN PLAN ÜBERNEHMEN
                         </button>
 
@@ -69,7 +79,7 @@ window.SektorTraining = {
                         </div>
                     </div>
 
-                    <button class="login-btn" style="width:100%; background:#fff; color:#000; margin-top:20px;" onclick="window.print()">
+                    <button class="login-btn" style="width:100%; background:#fff; color:#000; margin-top:20px; padding: 12px; font-weight: bold; cursor: pointer;" onclick="window.print()">
                         <i class="fas fa-print"></i> PLAN DRUCKEN (A4)
                     </button>
                 </div>
@@ -79,31 +89,13 @@ window.SektorTraining = {
         `;
     },
 
-    loadFromArchive: function(index) {
-        const archive = JSON.parse(localStorage.getItem('toni_drills')) || [];
-        const drill = archive[index];
-        if(drill && window.arena) {
-            window.arena.players = drill.players;
-            window.arena.trainingObjects = drill.objects || [];
-            if(drill.pitchMode) window.arena.setPitchMode(drill.pitchMode);
-            window.arena.render();
-            if(window.BriefcaseUI) window.BriefcaseUI.toggle();
-            if(window.ToniTTS) ToniTTS.speak(`Übung ${drill.name} geladen.`, "warm");
-        }
-    },
-
-    deleteFromArchive: function(index) {
-        if(confirm("Übung aus dem Archiv löschen?")) {
-            let archive = JSON.parse(localStorage.getItem('toni_drills')) || [];
-            archive.splice(index, 1);
-            localStorage.setItem('toni_drills', JSON.stringify(archive));
-            this.render();
-        }
-    },
-
     setMode: function(mode) {
         this.currentMode = mode;
-        if(window.arena) window.arena.setPitchMode(mode);
+        if(window.arena) {
+            window.arena.setPitchMode(mode);
+            // Kleines Feedback für Toni
+            if(window.ToniTTS) ToniTTS.speak(`Spielfeld auf ${mode} umgestellt.`, "warm");
+        }
         this.render();
     },
 
@@ -112,9 +104,9 @@ window.SektorTraining = {
             const isAtTraining = p.isPresent;
             return `
                 <div onclick="SektorTraining.toggleAttendance('${p.id}')" 
-                     style="padding:10px; border:1px solid ${isAtTraining ? 'var(--accent-orange)' : '#222'}; border-radius:8px; cursor:pointer; background:${isAtTraining ? 'rgba(255,106,0,0.1)' : 'rgba(0,0,0,0.2)'}; text-align:center; transition:0.2s;">
-                    <div style="font-size:0.9rem; font-weight:900; color:${isAtTraining ? '#fff' : '#444'}">${p.number}</div>
-                    <div style="font-size:0.5rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:${isAtTraining ? '#fff' : '#444'}">${p.name.toUpperCase()}</div>
+                     style="padding:10px; border:1px solid ${isAtTraining ? 'var(--accent-orange)' : '#333'}; border-radius:8px; cursor:pointer; background:${isAtTraining ? 'rgba(255,106,0,0.15)' : 'rgba(0,0,0,0.4)'}; text-align:center; transition:0.2s;">
+                    <div style="font-size:0.9rem; font-weight:900; color:${isAtTraining ? '#fff' : '#666'}">${p.number}</div>
+                    <div style="font-size:0.55rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:${isAtTraining ? '#fff' : '#666'}">${p.name.toUpperCase()}</div>
                 </div>
             `;
         }).join('');
@@ -132,23 +124,39 @@ window.SektorTraining = {
         }
     },
 
+    // ... (restliche Funktionen loadFromArchive, deleteFromArchive, addDrillToPlan, renderSessionSummary, removeDrill, preparePrintLayout bleiben gleich)
+    loadFromArchive: function(index) {
+        const archive = JSON.parse(localStorage.getItem('toni_drills')) || [];
+        const drill = archive[index];
+        if(drill && window.arena) {
+            window.arena.players = drill.players;
+            window.arena.trainingObjects = drill.objects || [];
+            if(drill.pitchMode) window.arena.setPitchMode(drill.pitchMode);
+            window.arena.render();
+            if(window.BriefcaseUI) window.BriefcaseUI.toggle();
+            if(window.ToniTTS) ToniTTS.speak(`Übung ${drill.name} geladen.`, "warm");
+        }
+    },
+    deleteFromArchive: function(index) {
+        if(confirm("Übung aus dem Archiv löschen?")) {
+            let archive = JSON.parse(localStorage.getItem('toni_drills')) || [];
+            archive.splice(index, 1);
+            localStorage.setItem('toni_drills', JSON.stringify(archive));
+            this.render();
+        }
+    },
     addDrillToPlan: function() {
         const nameInput = document.getElementById('drill-name');
         const descInput = document.getElementById('drill-desc');
         const name = nameInput.value.trim();
         const desc = descInput.value.trim();
-        
         if(!name) return alert("Bitte Namen für die Übung eingeben.");
-
         const snapshot = window.arena ? window.arena.getSnapshot() : null;
         this.sessionPlan.push({ name, desc, snapshot });
-        
-        nameInput.value = "";
-        descInput.value = "";
+        nameInput.value = ""; descInput.value = "";
         this.render();
         this.preparePrintLayout();
     },
-
     renderSessionSummary: function() {
         if(this.sessionPlan.length === 0) return "<span style='color:#444'>Noch keine Übungen hinzugefügt...</span>";
         return this.sessionPlan.map((d, i) => `
@@ -158,18 +166,15 @@ window.SektorTraining = {
             </div>
         `).join('');
     },
-
     removeDrill: function(i) {
         this.sessionPlan.splice(i, 1);
         this.render();
         this.preparePrintLayout();
     },
-
     preparePrintLayout: function() {
         const printArea = document.getElementById('a4-print-layout');
         if(!printArea) return;
         const date = new Date().toLocaleDateString('de-DE');
-
         printArea.innerHTML = `
             <div class="print-page" style="padding:15mm; font-family: sans-serif; color:#000; background:#fff;">
                 <div style="display:flex; justify-content:space-between; border-bottom:3px solid #000; padding-bottom:10px; margin-bottom:20px;">
