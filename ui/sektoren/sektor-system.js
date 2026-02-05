@@ -7,7 +7,7 @@ window.SektorSystem = {
     render: function() {
         const config = JSON.parse(localStorage.getItem('toni_club_config')) || { name: "International Pro Club", coach: "Björn" };
         const apiKey = localStorage.getItem('toni_api_key') || "";
-         
+        
         document.getElementById('active-content').innerHTML = `
             <div style="padding:30px; animation: fadeIn 0.4s ease-out; height: 82vh; overflow-y: auto;">
                 
