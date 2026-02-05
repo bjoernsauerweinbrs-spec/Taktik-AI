@@ -2,7 +2,7 @@ window.ToniGateway = {
     askToni: async function(question) {
         const context = this.buildContext();
         window.ToniCore.updateStatus("PRÜFE LOKALES GEHIRN...", "var(--accent-orange)");
-
+ 
         // 1. VERSUCH: OLLAMA (mit hartem Timeout)
         try {
             const controller = new AbortController();
