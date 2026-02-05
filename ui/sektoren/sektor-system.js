@@ -1,123 +1,98 @@
 /**
- * TONI 2.0 - SYSTEM-ZENTRALE & IDENTITY CORE
- * Fokus: Sicherheit (Björn/Nadine), Club-Daten & KI-Schnittstellen.
+ * TONI 2.0 - SYSTEM & CONNECTIVITY CONTROL
+ * Verwaltung von API-Keys, KI-Providern und System-Sicherheit.
+ * Bietet Live-Status für Ollama (Lokal) und OpenAI (Cloud).
  */
 window.SektorSystem = {
     render: function() {
-        const c = JSON.parse(localStorage.getItem('toni_club_config')) || {
-            name: "FC TONI 2.0",
-            coach: "Björn",
-            league: "Amateur-Pro",
-            stadium: "Ginga Arena"
-        };
-        
+        const config = JSON.parse(localStorage.getItem('toni_club_config')) || { name: "International Pro Club", coach: "Björn" };
         const apiKey = localStorage.getItem('toni_api_key') || "";
-        const apiProvider = localStorage.getItem('toni_api_provider') || "llama";
-
+        
         document.getElementById('active-content').innerHTML = `
-            <div style="padding:25px; animation: fadeIn 0.4s ease-out; pointer-events: all !important; height: 82vh; overflow-y: auto;">
+            <div style="padding:30px; animation: fadeIn 0.4s ease-out; height: 82vh; overflow-y: auto;">
                 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom:1px solid rgba(57, 255, 20, 0.2); padding-bottom:20px;">
-                    <div>
-                        <h3 style="color:var(--neon-green); margin:0; letter-spacing:2px; text-shadow: 0 0 10px rgba(57,255,20,0.3);">SYSTEM-ZENTRALE</h3>
-                        <p style="font-size:0.75rem; color:var(--text-dim); margin:5px 0 0 0;">Globaler Daten-Anker & Sicherheits-Management</p>
-                    </div>
-                    <button class="tactic-btn" style="border-color:var(--neon-green); color:var(--neon-green);" onclick="SektorSystem.startOnboarding()">
-                        <i class="fas fa-magic"></i> IDENTITY-WIZARD
-                    </button>
+                <div style="margin-bottom:40px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:20px;">
+                    <h2 style="color:var(--data-cyan); letter-spacing:3px; margin:0;">SYSTEM SETUP & AI BRIDGE</h2>
+                    <p style="font-size:0.6rem; color:var(--text-dim); text-transform:uppercase;">Konnektivität und globale Trainer-Einstellungen</p>
                 </div>
 
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap:30px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                     
-                    <div class="fifa-card" style="text-align:left; cursor:default; background:rgba(255,255,255,0.02); pointer-events: auto;">
-                        <h4 style="color:var(--accent-gold); font-size:0.8rem; margin-bottom:20px; letter-spacing:1px; border-bottom:1px solid rgba(212,175,55,0.2); padding-bottom:5px;">CLUB-IDENTITÄT</h4>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                            <div style="margin-bottom:15px; grid-column: span 2;">
-                                <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">VEREINSNAME</label>
-                                <input type="text" id="set-club" value="${c.name}" class="login-input" style="width:100%;">
+                    <div style="background:rgba(255,255,255,0.02); padding:25px; border-radius:15px; border:1px solid rgba(0,209,255,0.2);">
+                        <h3 style="font-size:0.7rem; color:var(--data-cyan); margin-bottom:20px; letter-spacing:2px;">KI-STATUS MONITOR</h3>
+                        
+                        <div style="display:flex; flex-direction:column; gap:15px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:15px; border-radius:8px;">
+                                <span>OLLAMA (Lokal MacBook)</span>
+                                <div id="status-ollama" style="color:#666;"><i class="fas fa-circle-notch fa-spin"></i> PRÜFE...</div>
                             </div>
-                            <div style="margin-bottom:15px;">
-                                <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">COACH</label>
-                                <input type="text" id="set-coach" value="${c.coach}" class="login-input" style="width:100%;">
-                            </div>
-                            <div style="margin-bottom:15px;">
-                                <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">LIGA</label>
-                                <input type="text" id="set-league" value="${c.league}" class="login-input" style="width:100%;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:15px; border-radius:8px;">
+                                <span>OPENAI (Cloud Gateway)</span>
+                                <div id="status-openai" style="color:${apiKey ? 'var(--neon-green)' : 'var(--status-error)'}">
+                                    ${apiKey ? 'BEREIT' : 'KEY FEHLT'}
+                                </div>
                             </div>
                         </div>
+                        <p style="font-size:0.6rem; color:var(--text-dim); margin-top:20px; line-height:1.5;">
+                            Toni nutzt standardmäßig Ollama. Sollte der lokale Dienst nicht antworten, schaltet das System automatisch (Silent-Fallback) auf OpenAI um.
+                        </p>
                     </div>
 
-                    <div class="fifa-card" style="text-align:left; cursor:default; border-color:var(--status-error); background:rgba(255,50,50,0.02); pointer-events: auto;">
-                        <h4 style="color:var(--status-error); font-size:0.8rem; margin-bottom:20px; letter-spacing:1px; border-bottom:1px solid rgba(255,50,50,0.2); padding-bottom:5px;">AUTHENTIFIZIERUNG</h4>
+                    <div style="background:rgba(255,255,255,0.02); padding:25px; border-radius:15px; border:1px solid rgba(212,175,55,0.2);">
+                        <h3 style="font-size:0.7rem; color:var(--accent-gold); margin-bottom:20px; letter-spacing:2px;">CLUB-IDENTITY</h3>
+                        
                         <div style="margin-bottom:15px;">
-                            <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">PASSWORT COACH (BJÖRN)</label>
-                            <input type="password" id="pass-bjorn" placeholder="Neues Passwort..." class="login-input" style="width:100%;">
+                            <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">CLUB NAME</label>
+                            <input type="text" id="sys-club-name" value="${config.name}" class="login-input" style="width:100%;">
                         </div>
                         <div style="margin-bottom:15px;">
-                            <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">PASSWORT NADINE</label>
-                            <input type="password" id="pass-nadine" placeholder="Neues Passwort..." class="login-input" style="width:100%;">
+                            <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">COACH NAME</label>
+                            <input type="text" id="sys-coach-name" value="${config.coach}" class="login-input" style="width:100%;">
                         </div>
+                        <div style="margin-bottom:15px;">
+                            <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">OPENAI API-KEY</label>
+                            <input type="password" id="sys-openai-key" value="${apiKey}" placeholder="sk-..." class="login-input" style="width:100%;">
+                        </div>
+                        <button class="login-btn" onclick="SektorSystem.saveConfig()" style="width:100%; margin-top:10px;">EINSTELLUNGEN SPEICHERN</button>
                     </div>
 
-                    <div class="fifa-card" style="text-align:left; cursor:default; border-color:var(--neon-green); background:rgba(57,255,20,0.02); pointer-events: auto; grid-column: span 2;">
-                        <h4 style="color:var(--neon-green); font-size:0.8rem; margin-bottom:20px; letter-spacing:1px; border-bottom:1px solid rgba(57,255,20,0.2); padding-bottom:5px;">KI-CORE & API GATEWAY</h4>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                            <div>
-                                <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">PROVIDER</label>
-                                <select id="api-provider" class="login-input" style="width:100%; background:#000;">
-                                    <option value="llama" ${apiProvider==='llama'?'selected':''}>Ollama (Lokal / MacBook)</option>
-                                    <option value="openai" ${apiProvider==='openai'?'selected':''}>OpenAI (Cloud GPT-4)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">API-KEY / ADRESSE</label>
-                                <input type="password" id="api-key-input" value="${apiKey}" class="login-input" style="width:100%;" placeholder="sk-... oder http://127.0.0.1:11434">
-                            </div>
-                        </div>
-                        <div style="margin-top:20px; background:rgba(255,255,255,0.03); padding:15px; border-radius:10px; font-size:0.65rem; color:var(--text-dim); line-height:1.5;">
-                            <i class="fas fa-terminal" style="color:var(--neon-green);"></i> MacBook: Starte Ollama im Terminal mit <code>OLLAMA_ORIGINS="*" ollama serve</code> um die Verbindung freizugeben.
-                        </div>
-                    </div>
                 </div>
 
-                <button class="login-btn" style="width:100%; margin-top:35px; letter-spacing:3px; background:var(--neon-green); color:#000; font-weight:900;" onclick="SektorSystem.saveAll()">
-                    GESAMT-KONFIGURATION & SECURITY SPEICHERN
-                </button>
-            </div>
-        `;
+                <div style="margin-top:40px; background:rgba(57,255,20,0.05); padding:30px; border-radius:15px; border-left:5px solid var(--neon-green);">
+                    <h4 style="color:var(--neon-green); margin-bottom:10px;">Anleitung: Ollama für Profis freischalten</h4>
+                    <p style="font-size:0.8rem; line-height:1.6; color:var(--text-dim);">
+                        Um die volle Power deines MacBooks zu nutzen, installiere Ollama. Damit Toni 2.0 darauf zugreifen kann, öffne dein Terminal und starte den Dienst mit: 
+                        <br><code style="background:#000; color:#fff; padding:5px 10px; border-radius:4px; display:inline-block; margin-top:10px;">OLLAMA_ORIGINS="*" ollama serve</code>
+                    </p>
+                </div>
+            </div>`;
+        
+        this.checkOllamaStatus();
     },
 
-    saveAll: function() {
-        // Club-Daten speichern
-        const clubData = {
-            name: document.getElementById('set-club').value,
-            coach: document.getElementById('set-coach').value,
-            league: document.getElementById('set-league').value,
-            stadium: "Ginga Arena"
+    checkOllamaStatus: async function() {
+        const el = document.getElementById('status-ollama');
+        try {
+            const res = await fetch('http://localhost:11434/api/tags');
+            if(res.ok) {
+                el.innerText = "VERBUNDEN";
+                el.style.color = "var(--neon-green)";
+            } else { throw new Error(); }
+        } catch(e) {
+            el.innerText = "OFFLINE";
+            el.style.color = "var(--status-error)";
+        }
+    },
+
+    saveConfig: function() {
+        const config = {
+            name: document.getElementById('sys-club-name').value,
+            coach: document.getElementById('sys-coach-name').value
         };
-        localStorage.setItem('toni_club_config', JSON.stringify(clubData));
-
-        // API-Daten speichern
-        localStorage.setItem('toni_api_key', document.getElementById('api-key-input').value);
-        localStorage.setItem('toni_api_provider', document.getElementById('api-provider').value);
-
-        // Security speichern
-        const pBjorn = document.getElementById('pass-bjorn').value;
-        const pNadine = document.getElementById('pass-nadine').value;
-        if(pBjorn) localStorage.setItem('toni_pass_bjorn', pBjorn);
-        if(pNadine) localStorage.setItem('toni_pass_nadine', pNadine);
+        localStorage.setItem('toni_club_config', JSON.stringify(config));
+        localStorage.setItem('toni_api_key', document.getElementById('sys-openai-key').value);
         
-        if(window.ToniTTS) {
-            ToniTTS.speak(`System-Update abgeschlossen. Coach ${clubData.coach}, alle Protokolle sind gesichert.`, "warm");
-        }
-        
-        alert("System-Konfiguration erfolgreich gespeichert.");
         this.render();
-    },
-
-    startOnboarding: function() {
-        if(window.ToniTTS) {
-            ToniTTS.speak("Security-Wizard aktiv. Bitte setze die Passwörter für den geschützten Bereich.", "warm");
-        }
+        if(window.ToniTTS) ToniTTS.speak("System-Konfiguration wurde aktualisiert.", "warm");
     }
 };
