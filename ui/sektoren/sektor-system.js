@@ -1,98 +1,126 @@
-/**
- * TONI 2.0 - SYSTEM & CONNECTIVITY CONTROL
- * Verwaltung von API-Keys, KI-Providern und System-Sicherheit.
- * Bietet Live-Status für Ollama (Lokal) und OpenAI (Cloud).
- */
+// ui/sektoren/sektor-system.js
+// SektorSystem: System-Setup für API-Key, Club-Name und Gateway-Statusanzeige
+
 window.SektorSystem = {
-    render: function() {
-        const config = JSON.parse(localStorage.getItem('toni_club_config')) || { name: "International Pro Club", coach: "Björn" };
-        const apiKey = localStorage.getItem('toni_api_key') || "";
-        
-        document.getElementById('active-content').innerHTML = `
-            <div style="padding:30px; animation: fadeIn 0.4s ease-out; height: 82vh; overflow-y: auto;">
-                
-                <div style="margin-bottom:40px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:20px;">
-                    <h2 style="color:var(--data-cyan); letter-spacing:3px; margin:0;">SYSTEM SETUP & AI BRIDGE</h2>
-                    <p style="font-size:0.6rem; color:var(--text-dim); text-transform:uppercase;">Konnektivität und globale Trainer-Einstellungen</p>
-                </div>
+    containerId: 'active-content',
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
-                    
-                    <div style="background:rgba(255,255,255,0.02); padding:25px; border-radius:15px; border:1px solid rgba(0,209,255,0.2);">
-                        <h3 style="font-size:0.7rem; color:var(--data-cyan); margin-bottom:20px; letter-spacing:2px;">KI-STATUS MONITOR</h3>
-                        
-                        <div style="display:flex; flex-direction:column; gap:15px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:15px; border-radius:8px;">
-                                <span>OLLAMA (Lokal MacBook)</span>
-                                <div id="status-ollama" style="color:#666;"><i class="fas fa-circle-notch fa-spin"></i> PRÜFE...</div>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:15px; border-radius:8px;">
-                                <span>OPENAI (Cloud Gateway)</span>
-                                <div id="status-openai" style="color:${apiKey ? 'var(--neon-green)' : 'var(--status-error)'}">
-                                    ${apiKey ? 'BEREIT' : 'KEY FEHLT'}
-                                </div>
-                            </div>
-                        </div>
-                        <p style="font-size:0.6rem; color:var(--text-dim); margin-top:20px; line-height:1.5;">
-                            Toni nutzt standardmäßig Ollama. Sollte der lokale Dienst nicht antworten, schaltet das System automatisch (Silent-Fallback) auf OpenAI um.
-                        </p>
-                    </div>
-
-                    <div style="background:rgba(255,255,255,0.02); padding:25px; border-radius:15px; border:1px solid rgba(212,175,55,0.2);">
-                        <h3 style="font-size:0.7rem; color:var(--accent-gold); margin-bottom:20px; letter-spacing:2px;">CLUB-IDENTITY</h3>
-                        
-                        <div style="margin-bottom:15px;">
-                            <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">CLUB NAME</label>
-                            <input type="text" id="sys-club-name" value="${config.name}" class="login-input" style="width:100%;">
-                        </div>
-                        <div style="margin-bottom:15px;">
-                            <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">COACH NAME</label>
-                            <input type="text" id="sys-coach-name" value="${config.coach}" class="login-input" style="width:100%;">
-                        </div>
-                        <div style="margin-bottom:15px;">
-                            <label style="font-size:0.6rem; color:var(--text-dim); display:block; margin-bottom:5px;">OPENAI API-KEY</label>
-                            <input type="password" id="sys-openai-key" value="${apiKey}" placeholder="sk-..." class="login-input" style="width:100%;">
-                        </div>
-                        <button class="login-btn" onclick="SektorSystem.saveConfig()" style="width:100%; margin-top:10px;">EINSTELLUNGEN SPEICHERN</button>
-                    </div>
-
-                </div>
-
-                <div style="margin-top:40px; background:rgba(57,255,20,0.05); padding:30px; border-radius:15px; border-left:5px solid var(--neon-green);">
-                    <h4 style="color:var(--neon-green); margin-bottom:10px;">Anleitung: Ollama für Profis freischalten</h4>
-                    <p style="font-size:0.8rem; line-height:1.6; color:var(--text-dim);">
-                        Um die volle Power deines MacBooks zu nutzen, installiere Ollama. Damit Toni 2.0 darauf zugreifen kann, öffne dein Terminal und starte den Dienst mit: 
-                        <br><code style="background:#000; color:#fff; padding:5px 10px; border-radius:4px; display:inline-block; margin-top:10px;">OLLAMA_ORIGINS="*" ollama serve</code>
-                    </p>
-                </div>
-            </div>`;
-        
-        this.checkOllamaStatus();
-    },
-
-    checkOllamaStatus: async function() {
-        const el = document.getElementById('status-ollama');
-        try {
-            const res = await fetch('http://localhost:11434/api/tags');
-            if(res.ok) {
-                el.innerText = "VERBUNDEN";
-                el.style.color = "var(--neon-green)";
-            } else { throw new Error(); }
-        } catch(e) {
-            el.innerText = "OFFLINE";
-            el.style.color = "var(--status-error)";
+    init(containerId = 'active-content') {
+        this.containerId = containerId;
+        if (window.ToniEvents && typeof window.ToniEvents.on === 'function') {
+            // listen for gateway status changes if ToniGateway exposes status
+            window.ToniEvents.on('gateway:status', (s) => this.render());
+            // listen for players updates to show quick stats
+            window.ToniEvents.on('players:updated', () => this.render());
         }
+        this.render();
     },
 
-    saveConfig: function() {
-        const config = {
-            name: document.getElementById('sys-club-name').value,
-            coach: document.getElementById('sys-coach-name').value
-        };
-        localStorage.setItem('toni_club_config', JSON.stringify(config));
-        localStorage.setItem('toni_api_key', document.getElementById('sys-openai-key').value);
-        
-        this.render();
-        if(window.ToniTTS) ToniTTS.speak("System-Konfiguration wurde aktualisiert.", "warm");
+    render() {
+        const container = document.getElementById(this.containerId);
+        if (!container) {
+            console.error('[SektorSystem] container not found:', this.containerId);
+            return;
+        }
+
+        const apiKey = localStorage.getItem('toni_api_key') || '';
+        const clubName = localStorage.getItem('toni_club_name') || 'FC TONI';
+        const gatewayStatus = (window.ToniGateway && window.ToniGateway.status) ? window.ToniGateway.status : 'unknown';
+        const playersCount = (window.ToniDB && typeof window.ToniDB.getPlayers === 'function') ? window.ToniDB.getPlayers().length : 0;
+
+        container.innerHTML = `
+            <div style="padding:20px;">
+                <h2>SYSTEM-SETUP</h2>
+                <div style="margin-bottom:12px;">
+                    <label><strong>Club-Name</strong></label><br/>
+                    <input type="text" id="club-name-input" value="${clubName}" placeholder="Club-Name" style="width:100%;padding:8px;margin-top:6px;">
+                    <button id="save-club-btn" style="margin-top:8px;">SPEICHERN</button>
+                </div>
+
+                <div style="margin-bottom:12px;">
+                    <label><strong>OpenAI API Key (optional)</strong></label><br/>
+                    <input type="password" id="api-key-input" value="${apiKey}" placeholder="OpenAI Key" style="width:100%;padding:8px;margin-top:6px;">
+                    <div style="margin-top:8px;">
+                        <button id="save-api-btn">SPEICHERN</button>
+                        <button id="clear-api-btn" style="margin-left:8px;">LÖSCHEN</button>
+                    </div>
+                    <div style="margin-top:8px;font-size:12px;color:#ccc;">
+                        Hinweis: Für Produktion bitte einen sicheren Server-Proxy verwenden. Keys nicht in localStorage ablegen.
+                    </div>
+                </div>
+
+                <div style="margin-bottom:12px;">
+                    <strong>Gateway-Status:</strong>
+                    <div id="gateway-status" style="margin-top:6px;padding:8px;border-radius:6px;background:#111;color:#fff;">
+                        ${gatewayStatus.toUpperCase()}
+                    </div>
+                </div>
+
+                <div style="margin-top:16px;">
+                    <strong>Quick Stats</strong>
+                    <div style="margin-top:8px;">Spieler im Kader: <strong>${playersCount}</strong></div>
+                    <div style="margin-top:8px;">
+                        <button id="seed-players-btn">Seed-Daten neu erzeugen</button>
+                        <button id="clear-players-btn" style="margin-left:8px;">Kader löschen</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // attach handlers
+        const saveApiBtn = document.getElementById('save-api-btn');
+        const clearApiBtn = document.getElementById('clear-api-btn');
+        const saveClubBtn = document.getElementById('save-club-btn');
+        const seedBtn = document.getElementById('seed-players-btn');
+        const clearPlayersBtn = document.getElementById('clear-players-btn');
+
+        if (saveApiBtn) {
+            saveApiBtn.addEventListener('click', () => {
+                const val = document.getElementById('api-key-input').value;
+                localStorage.setItem('toni_api_key', val);
+                alert('API-Key gespeichert (lokal). Für Produktion: Server-Proxy verwenden.');
+                this.render();
+            });
+        }
+
+        if (clearApiBtn) {
+            clearApiBtn.addEventListener('click', () => {
+                localStorage.removeItem('toni_api_key');
+                alert('API-Key entfernt.');
+                this.render();
+            });
+        }
+
+        if (saveClubBtn) {
+            saveClubBtn.addEventListener('click', () => {
+                const val = document.getElementById('club-name-input').value || 'FC TONI';
+                localStorage.setItem('toni_club_name', val);
+                alert('Club-Name gespeichert.');
+                this.render();
+            });
+        }
+
+        if (seedBtn) {
+            seedBtn.addEventListener('click', () => {
+                // re-seed players by clearing and calling ToniDB.init()
+                localStorage.removeItem('toni_players');
+                if (window.ToniDB && typeof window.ToniDB.init === 'function') {
+                    window.ToniDB.init();
+                    alert('Seed-Daten neu erzeugt.');
+                } else {
+                    alert('ToniDB nicht verfügbar.');
+                }
+            });
+        }
+
+        if (clearPlayersBtn) {
+            clearPlayersBtn.addEventListener('click', () => {
+                localStorage.removeItem('toni_players');
+                if (window.ToniEvents && typeof window.ToniEvents.emit === 'function') {
+                    window.ToniEvents.emit('players:updated', []);
+                }
+                alert('Kader gelöscht.');
+                this.render();
+            });
+        }
     }
 };
