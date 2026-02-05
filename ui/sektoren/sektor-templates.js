@@ -10,7 +10,7 @@ window.SektorTemplates = {
         const starters = players.filter(p => p.isStarter).slice(0, 11);
         const bench = players.filter(p => p.isNominated && !p.isStarter).slice(0, 7);
         const boardImg = window.arena ? window.arena.getSnapshot() : "";
-
+ 
         document.getElementById('active-content').innerHTML = `
             <div style="padding:30px; animation: fadeIn 0.4s ease-out; color: #fff; height: 82vh; overflow-y: auto;">
                 
