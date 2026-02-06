@@ -7,7 +7,7 @@ window.arena = {
     ctx: null,
     width: 0,
     height: 0,
-
+ 
     init(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
