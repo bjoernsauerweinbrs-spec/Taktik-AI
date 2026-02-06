@@ -2,19 +2,33 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="css/toni-style.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <title>TONI 2.0 - ELITE PERFORMANCE</title>
+    <link rel="stylesheet" href="css/toni-style.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
 </head>
-<body>
+<body class="pro-app">
     <div class="pro-layout-container">
         <nav class="sidebar-minimal">
             <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
-                <i class="fas fa-briefcase"></i><span>ZENTRALE</span>
+                <i class="fas fa-briefcase"></i>
+                <span class="label">ZENTRALE</span>
+            </div>
+            <div class="control-unit" onclick="window.location.reload()">
+                <i class="fas fa-sync-alt"></i>
+                <span class="label">RELOAD</span>
             </div>
         </nav>
-        <main id="stage-container"><canvas id="main-canvas"></canvas></main>
+
+        <main id="stage-container">
+            <canvas id="main-canvas"></canvas>
+        </main>
+
         <aside class="analysis-panel">
-            <div class="video-preview">VIDEOANALYSE BEREIT</div>
+            <div class="video-preview">VIDEO-ANALYSE BEREIT</div>
             <div id="chat-messages" class="chat-container"></div>
+            <div class="input-area" style="padding:15px;">
+                <input type="text" id="user-input" class="login-input" placeholder="Befehl...">
+            </div>
         </aside>
     </div>
 
@@ -24,7 +38,7 @@
         </div>
     </div>
 
-    <script src="logic/event-bus.js"></script>
+    <script src="logic/event-bus.js"></script> 
     <script src="logic/database.js"></script>
     <script src="js/toni-core.js"></script>
     <script src="engine/arena.js"></script>
@@ -32,8 +46,12 @@
     <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
     <script src="ui/sektoren/sektor-management.js"></script>
+
     <script>
-        window.onload = () => { window.arena.init('main-canvas'); window.BriefcaseUI.init(); };
+        window.onload = () => {
+            window.arena.init('main-canvas');
+            window.BriefcaseUI.init();
+        };
     </script>
 </body>
 </html>
