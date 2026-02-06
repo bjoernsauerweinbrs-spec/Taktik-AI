@@ -443,3 +443,26 @@ body, html {
     text-align: center;
     padding: 2px 0;
 }
+.main-grid {
+    display: grid;
+    grid-template-columns: 80px 1fr 300px;
+    height: 100vh;
+    background: #000;
+}
+
+.sidebar { border-right: 1px solid #111; display: flex; justify-content: center; padding-top: 20px; }
+.briefcase-trigger { color: #39FF14; cursor: pointer; text-align: center; font-size: 0.7rem; }
+.briefcase-trigger i { font-size: 1.5rem; display: block; margin-bottom: 5px; }
+
+.arena-zone { position: relative; background: #051205; overflow: hidden; }
+canvas { width: 100%; height: 100%; }
+
+.toni-panel { background: #0a0a0a; border-left: 1px solid #111; display: flex; flex-direction: column; padding: 15px; }
+.video-preview { height: 180px; background: #111; border: 1px solid #333; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: #555; font-size: 0.8rem; }
+#chat-box { flex-grow: 1; color: #fff; font-size: 0.9rem; }
+
+/* MODAL / AKTEN-TASCHE */
+.modal-hidden { display: none; }
+#briefcase-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; display: none; }
+#briefcase-modal.active { display: flex; }
+.modal-content { background: #111; border: 1px solid #39FF14; width: 80%; height: 80%; padding: 20px; }
