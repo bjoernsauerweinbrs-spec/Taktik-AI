@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 - TACTICAL HQ</title>
+    <title>TONI 2.0 - ARENA</title>
     <link rel="stylesheet" href="css/toni-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
 </head>
@@ -15,7 +15,7 @@
             </div>
             <div class="control-unit" onclick="window.location.reload()">
                 <i class="fas fa-sync-alt"></i>
-                <span class="label">RESET</span>
+                <span class="label">RELOAD</span>
             </div>
         </nav>
 
@@ -24,40 +24,35 @@
         </main>
 
         <aside class="analysis-panel">
-            <div class="video-preview">
-                <span id="video-status">VIDEOANALYSE BEREIT</span>
-            </div>
-            <div class="chat-container" id="chat-messages"></div>
+            <div class="video-preview">VIDEOANALYSE BEREIT</div>
+            <div id="chat-messages" class="chat-container"></div>
             <div class="input-area" style="padding: 15px;">
-                <input type="text" id="user-input" class="login-input" style="width: 100%;" placeholder="Toni Befehl geben...">
+                <input type="text" id="user-input" class="login-input" style="width:100%" placeholder="Befehl an Toni...">
             </div>
         </aside>
     </div>
 
     <div id="briefcase-overlay" class="briefcase-overlay">
         <div class="briefcase-window">
-            <div id="briefcase-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:15px;">
-                <h2 id="modal-title" style="color:var(--neon-green);">MANAGEMENT ZENTRALE</h2>
-                <button class="tactic-btn" onclick="window.BriefcaseUI.toggle()">SCHLIESSEN X</button>
+            <div class="modal-header" style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h2 style="color:var(--neon-green)">MANAGEMENT ZENTRALE</h2>
+                <button class="tactic-btn" onclick="window.BriefcaseUI.toggle()">X</button>
             </div>
-            <div id="active-content">
-                </div>
+            <div id="active-content"></div>
         </div>
     </div>
 
     <script src="logic/event-bus.js"></script>
     <script src="logic/database.js"></script>
-    <script src="js/toni-core.js"></script>
     <script src="engine/arena.js"></script>
     <script src="ui/aktentasche-ui.js"></script>
     <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
     <script src="ui/sektoren/sektor-management.js"></script>
-
     <script>
-        window.onload = () => {
-            window.ToniDB.init();
-            window.arena.init('main-canvas');
+        window.onload = () => { 
+            window.ToniDB.init(); 
+            window.arena.init('main-canvas'); 
             window.BriefcaseUI.init();
         };
     </script>
