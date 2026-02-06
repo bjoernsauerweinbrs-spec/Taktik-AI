@@ -18,7 +18,7 @@ window.BriefcaseUI = {
             { name: 'ARCHIV', icon: 'fa-folder-open', action: 'alert("In Arbeit...")' },
             { name: 'SETTINGS', icon: 'fa-cog', action: 'alert("In Arbeit...")' }
         ];
-
+ 
         container.innerHTML = `
             <div class="management-grid">
                 ${tiles.map(t => `
