@@ -1,76 +1,83 @@
-// ui/sektoren/sektor-analyse.js
-// SektorAnalyse: Performance-Labor mit Player-Selection, Live-Vitals und Warnungen
-
 window.SektorAnalyse = {
-    containerId: 'active-content',
-    selectedPlayerId: null,
+    render: function() {
+        const container = document.getElementById('active-content');
+        const players = window.ToniDB.getPlayers().filter(p => p.team === 'home');
 
-    init(containerId = 'active-content') {
-        this.containerId = containerId;
-        if (window.ToniEvents && typeof window.ToniEvents.on === 'function') {
-            window.ToniEvents.on('players:updated', () => this.render());
-        } else {
-            console.warn('[SektorAnalyse] ToniEvents not available');
-        }
-        this.render();
+        container.innerHTML = `
+            <div class="analyse-header">
+                <h2><i class="fas fa-microchip"></i> PERFORMANCE-LABOR</h2>
+                <p>Echtzeit-Analyse & Vitaldaten der Heimelf</p>
+            </div>
+            <div class="analyse-layout">
+                <div class="player-selection-list">
+                    ${players.map(p => `
+                        <div class="analyse-player-item" onclick="window.SektorAnalyse.showDetail('${p.id}')">
+                            <span class="player-nr">${p.nr}</span>
+                            <span class="player-name">${p.name}</span>
+                            <span class="vitals-indicator ${p.isPresent ? 'online' : 'offline'}"></span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div id="analyse-detail-view" class="analyse-detail-view">
+                    <div class="placeholder-msg">Wähle einen Spieler für die Tiefenanalyse aus.</div>
+                </div>
+            </div>
+        `;
     },
 
-    render() {
-        const container = document.getElementById(this.containerId);
-        if (!container) {
-            console.error('[SektorAnalyse] container not found:', this.containerId);
-            return;
-        }
+    showDetail: function(id) {
+        const player = window.ToniDB.getPlayers().find(p => p.id === id);
+        const detailView = document.getElementById('analyse-detail-view');
 
-        const players = (window.ToniDB && typeof window.ToniDB.getPlayers === 'function')
-            ? window.ToniDB.getPlayers().filter(p => p.team === 'home')
-            : [];
+        // Simulation von Vitalwerten (da wir keine echten Sensoren haben)
+        const pulse = Math.floor(Math.random() * (180 - 60) + 60);
+        const spo2 = Math.floor(Math.random() * (100 - 95) + 95);
+        const stress = Math.floor(Math.random() * 100);
 
-        // build player list and detail panel
-        let html = `<div class="analyse-grid">
-            <div class="player-list">
-                <h2 style="color:var(--neon-green)">ANALYSE-LABOR</h2>
-                <ul class="player-list-ul">`;
-        players.forEach(p => {
-            const activeClass = p.id === this.selectedPlayerId ? 'active' : '';
-            html += `<li class="player-item ${activeClass}" data-player-id="${p.id}">
-                        <strong>${p.name}</strong> <span class="meta">(${p.pos} | ${p.rat})</span>
-                     </li>`;
-        });
-        html += `</ul></div><div class="player-detail"><h3>Spieler-Details</h3>`;
+        detailView.innerHTML = `
+            <div class="player-detail-card">
+                <div class="detail-header">
+                    <h3>${player.name.toUpperCase()}</h3>
+                    <div class="rating-badge">${player.rat || '??'}</div>
+                </div>
+                
+                <div class="vitals-grid">
+                    <div class="vital-box">
+                        <i class="fas fa-heartbeat pulse-anim"></i>
+                        <span class="vital-val">${pulse}</span>
+                        <span class="vital-unit">BPM</span>
+                        <label>PULS</label>
+                    </div>
+                    <div class="vital-box">
+                        <i class="fas fa-wind"></i>
+                        <span class="vital-val">${spo2}%</span>
+                        <span class="vital-unit">SpO2</span>
+                        <label>SAUERSTOFF</label>
+                    </div>
+                    <div class="vital-box">
+                        <i class="fas fa-brain"></i>
+                        <span class="vital-val">${stress}</span>
+                        <span class="vital-unit">%</span>
+                        <label>STRESSLEVEL</label>
+                    </div>
+                </div>
 
-        const selected = players.find(p => p.id === this.selectedPlayerId) || players[0] || null;
-        if (selected) {
-            // ensure selectedPlayerId is set
-            this.selectedPlayerId = selected.id;
-            const pulse = selected.vitals?.pulse ?? 'N/A';
-            const spo2 = selected.vitals?.spo2 ?? 'N/A';
-            const warning = (typeof pulse === 'number' && pulse > 160) ? `<div class="warning" style="color:var(--status-error)">WARNUNG: Puls kritisch (${pulse})</div>` : '';
-            html += `<div class="detail-block">
-                        <p><strong>Name:</strong> ${selected.name}</p>
-                        <p><strong>Position:</strong> ${selected.pos}</p>
-                        <p><strong>Rating:</strong> ${selected.rat}</p>
-                        <p><strong>Puls:</strong> ${pulse}</p>
-                        <p><strong>SpO2:</strong> ${spo2}</p>
-                        ${warning}
-                     </div>`;
-        } else {
-            html += `<div class="detail-block"><p>Keine Spieler im Kader.</p></div>`;
-        }
+                <div class="scouting-report">
+                    <h4><i class="fas fa-comment-dots"></i> TONI'S SCOUTING REPORT</h4>
+                    <p class="scouting-text">
+                        "Der Spieler zeigt heute eine ${pulse > 150 ? 'sehr hohe Belastung' : 'stabile physische Verfassung'}. 
+                        Taktisch empfehle ich ${player.pos === 'ST' ? 'mehr Tiefenläufe' : 'eine defensivere Positionierung'}, 
+                        um die ${stress > 70 ? 'mentale Erschöpfung' : 'aktuelle Konzentration'} optimal zu nutzen."
+                    </p>
+                </div>
 
-        html += `</div></div>`; // close grid
-
-        container.innerHTML = html;
-
-        // attach click handlers for player selection
-        container.querySelectorAll('.player-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const id = item.getAttribute('data-player-id');
-                if (id && id !== this.selectedPlayerId) {
-                    this.selectedPlayerId = id;
-                    this.render(); // re-render to show selected details
-                }
-            });
-        });
+                <div class="performance-meter">
+                    <label>TRAININGS-SCORE (1-10):</label>
+                    <div class="meter-bar">
+                        <div class="meter-fill" style="width: ${Math.random() * 100}%"></div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 };
