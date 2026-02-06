@@ -2,69 +2,29 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 - Kickoff</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <title>TONI 2.0 - LOGIN</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; }
-        
-        /* Start-Overlay (Zwingend für Sound-Aktivierung) */
-        #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
-        .start-btn { background: none; border: 2px solid #39FF14; color: #39FF14; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; cursor: pointer; letter-spacing: 3px; transition: 0.3s; }
-        .start-btn:hover { background: #39FF14; color: #000; box-shadow: 0 0 20px #39FF14; }
-
-        /* Video-Bereich */
-        #intro-video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 100; opacity: 0; transition: opacity 1s; }
-        
-        /* Login-Bereich */
-        .login-container { opacity: 0; z-index: 10; transition: opacity 1.5s; text-align: center; }
-        .login-active .login-container { opacity: 1; }
-        .show-video #intro-video { opacity: 1; }
+        body { background: #000; color: #39FF14; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-box { border: 2px solid #39FF14; padding: 40px; text-align: center; background: #050505; box-shadow: 0 0 20px rgba(57, 255, 20, 0.2); }
+        input { background: #111; border: 1px solid #333; color: #39FF14; padding: 12px; margin: 10px 0; width: 200px; text-align: center; font-size: 1.2rem; }
+        button { background: #39FF14; color: #000; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; width: 100%; letter-spacing: 2px; }
     </style>
 </head>
 <body>
-
-    <div id="start-overlay">
-        <i class="fas fa-microchip" style="color: #39FF14; font-size: 3rem; margin-bottom: 20px;"></i>
-        <button class="start-btn" onclick="startIntro()">SYSTEM STARTEN</button>
+    <div class="login-box">
+        <h2>TONI 2.0</h2>
+        <input type="password" id="pass" placeholder="PASSWORT" autofocus>
+        <br>
+        <button onclick="login()">ENTER</button>
     </div>
-
-    <video id="intro-video" playsinline>
-        <source src="intro.mp4" type="video/mp4"> </video>
-
-    <div class="login-container">
-        <div class="login-box" style="border: 1px solid #39FF14; padding: 40px; background: rgba(0,0,0,0.9);">
-            <i class="fas fa-lock" style="color: #39FF14; font-size: 2rem; margin-bottom: 20px;"></i>
-            <h2 style="color: #fff; letter-spacing: 2px;">AUTHENTIFIZIERUNG</h2>
-            <input type="password" id="pass-input" placeholder="PASSWORT" style="background: #111; border: 1px solid #333; color: #39FF14; padding: 12px; text-align: center; width: 100%; margin-bottom: 20px;">
-            <button onclick="checkAuth()" style="background: #39FF14; color: #000; border: none; padding: 12px 30px; font-weight: bold; cursor: pointer; width: 100%;">LOGIN</button>
-        </div>
-    </div>
-
     <script>
-        const video = document.getElementById('intro-video');
-        const overlay = document.getElementById('start-overlay');
-
-        function startIntro() {
-            overlay.style.opacity = '0';
-            setTimeout(() => { overlay.style.display = 'none'; }, 500);
-            
-            document.body.classList.add('show-video');
-            video.play(); // Video startet jetzt MIT Sound, weil der User geklickt hat
-        }
-
-        // Wenn Video zu Ende ist (8 Sek), Login einblenden
-        video.onended = () => {
-            video.style.opacity = '0';
-            document.body.classList.add('login-active');
-        };
-
-        function checkAuth() {
-            if (document.getElementById('pass-input').value === 'toni2026') {
+        function login() {
+            if(document.getElementById('pass').value === 'toni2026') {
                 sessionStorage.setItem('toni_auth', 'true');
                 window.location.href = 'app.html';
-            }
+            } else { alert('Falsches Passwort!'); }
         }
+        document.getElementById('pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') login(); });
     </script>
 </body>
 </html>
