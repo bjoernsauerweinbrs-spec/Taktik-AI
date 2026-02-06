@@ -3,22 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 - Authentifizierung</title>
+    <title>TONI 2.0 - Tactical Entrance</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
     <style>
-        body { background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        body { background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Inter', sans-serif; }
+        
+        /* Video-Container */
+        .video-intro-container {
+            width: 80%;
+            max-width: 800px;
+            aspect-ratio: 16 / 9;
+            background: #051205;
+            border: 2px solid var(--neon-green);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.2);
+        }
+        .video-intro-container iframe, .video-intro-container video { width: 100%; height: 100%; border: none; }
+        .video-placeholder-text { color: var(--neon-green); font-weight: bold; letter-spacing: 2px; text-align: center; }
+
         .login-box { 
             background: rgba(255, 255, 255, 0.02); 
             border: 1px solid var(--neon-green); 
-            padding: 40px; 
-            border-radius: 15px; 
+            padding: 30px; 
+            border-radius: 10px; 
             text-align: center; 
-            box-shadow: 0 0 30px rgba(57, 255, 20, 0.1);
-            width: 350px;
+            width: 320px;
         }
-        .login-logo { font-size: 3rem; color: var(--neon-green); margin-bottom: 20px; }
-        h2 { color: #fff; letter-spacing: 3px; font-size: 1.2rem; margin-bottom: 30px; }
+        .login-logo { font-size: 2.5rem; color: var(--neon-green); margin-bottom: 15px; }
         input[type="password"] {
             width: 100%;
             padding: 12px;
@@ -27,8 +43,9 @@
             color: var(--neon-green);
             text-align: center;
             font-size: 1.1rem;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border-radius: 5px;
+            box-sizing: border-box;
         }
         .login-btn {
             width: 100%;
@@ -39,33 +56,39 @@
             font-weight: bold;
             cursor: pointer;
             letter-spacing: 2px;
-            transition: 0.3s;
+            text-transform: uppercase;
         }
-        .login-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--neon-green); }
-        .error-msg { color: #ff3030; font-size: 0.8rem; margin-top: 15px; display: none; }
+        .error-msg { color: #ff3030; font-size: 0.8rem; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
+
+    <div class="video-intro-container">
+        <div class="video-placeholder-text">
+            <i class="fas fa-play-circle" style="font-size: 3rem; margin-bottom: 10px;"></i><br>
+            TRAINER-INTRO VIDEO BEREIT
+        </div>
+    </div>
+
     <div class="login-box">
-        <div class="login-logo"><i class="fas fa-shield-halved"></i></div>
-        <h2>TONI 2.0 ACCESS</h2>
-        <input type="password" id="pass-input" placeholder="PASSWORT EINGEBEN">
-        <button class="login-btn" onclick="checkAuth()">LOGIN</button>
-        <div id="error" class="error-msg">ZUGRIFF VERWEIGERT: UNGÜLTIGER CODE</div>
+        <div class="login-logo"><i class="fas fa-briefcase"></i></div>
+        <h2 style="color: #fff; font-size: 1rem; letter-spacing: 3px; margin-bottom: 20px;">TONI 2.0 LOGIN</h2>
+        <input type="password" id="pass-input" placeholder="PASSWORT">
+        <button class="login-btn" onclick="checkAuth()">ENTRANCE</button>
+        <div id="error" class="error-msg">ZUGRIFF VERWEIGERT</div>
     </div>
 
     <script>
         function checkAuth() {
             const pass = document.getElementById('pass-input').value;
-            // Hier dein gewünschtes Passwort setzen (z.B. 'brasil')
-            if (pass === 'toni20') {
+            // DEIN NEUES PASSWORT HIER:
+            if (pass === 'toni2026') {
                 sessionStorage.setItem('toni_auth', 'true');
                 window.location.href = 'app.html';
             } else {
                 document.getElementById('error').style.display = 'block';
             }
         }
-        // Enter-Taste unterstützen
         document.getElementById('pass-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') checkAuth();
         });
