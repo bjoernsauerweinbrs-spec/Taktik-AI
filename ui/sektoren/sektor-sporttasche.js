@@ -1,62 +1,45 @@
-// ui/sektoren/sektor-sporttasche.js
-// SektorSporttasche: reaktive Kabine-Ansicht mit Event-Subscription und sicheren Event-Handlern
-
 window.SektorSporttasche = {
-    init(containerId = 'active-content') {
-        this.containerId = containerId;
-        // subscribe to updates
-        if (window.ToniEvents && typeof window.ToniEvents.on === 'function') {
-            window.ToniEvents.on('players:updated', () => this.render());
-        } else {
-            console.warn('[SektorSporttasche] ToniEvents not available');
-        }
-        // initial render
-        this.render();
+    render: function() {
+        const container = document.getElementById('active-content');
+        const players = window.ToniDB.getPlayers().filter(p => p.team === 'home');
+
+        container.innerHTML = `
+            <div class="kabine-header">
+                <h2><i class="fas fa-tshirt"></i> MANNSCHAFTSKABINE</h2>
+                <p>Klicke auf eine Karte, um den Spieler für das Feld zu aktivieren oder zu deaktivieren.</p>
+            </div>
+            <div class="fifa-cards-grid">
+                ${players.map(p => this.createCard(p)).join('')}
+            </div>
+        `;
     },
 
-    render() {
-        const container = document.getElementById(this.containerId);
-        if (!container) {
-            console.error('[SektorSporttasche] container not found:', this.containerId);
-            return;
-        }
-
-        const players = (window.ToniDB && typeof window.ToniDB.getPlayers === 'function')
-            ? window.ToniDB.getPlayers().filter(p => p.team === 'home')
-            : [];
-
-        let html = '<div class="grid">';
-        players.forEach(p => {
-            html += `<div class="card" data-player-id="${p.id}">
-                <div class="card-header">
-                    <h3 class="player-name">${p.name}</h3>
-                    <div class="player-meta">${p.pos} | ${p.rat}</div>
+    createCard: function(p) {
+        return `
+            <div class="fifa-card ${p.isPresent ? 'active' : 'inactive'}" onclick="window.SektorSporttasche.togglePresence('${p.id}', ${p.isPresent})">
+                <div class="card-inner">
+                    <div class="card-top">
+                        <div class="rating">${p.rat || 85}</div>
+                        <div class="position">${p.pos || 'ST'}</div>
+                    </div>
+                    <div class="player-img">
+                        <i class="fas fa-user-ninja"></i>
+                    </div>
+                    <div class="card-bottom">
+                        <div class="player-name">${p.name.toUpperCase()}</div>
+                        <div class="player-stats">
+                            <span>NR: ${p.nr}</span>
+                            <span>PRO</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="vitals">Puls: ${p.vitals?.pulse ?? 'N/A'} | SpO2: ${p.vitals?.spo2 ?? 'N/A'}</div>
-                </div>
-                <div class="card-footer">
-                    <button class="presence-btn">${p.isPresent ? 'Anwesend' : 'Abwesend'}</button>
-                </div>
-            </div>`;
-        });
-        html += '</div>';
+                <div class="status-ribbon">${p.isPresent ? 'AUF DEM FELD' : 'IN KABINE'}</div>
+            </div>
+        `;
+    },
 
-        container.innerHTML = html;
-
-        // attach handlers (event delegation per card)
-        container.querySelectorAll('.card').forEach(card => {
-            const btn = card.querySelector('.presence-btn');
-            if (!btn) return;
-            btn.addEventListener('click', () => {
-                const id = card.getAttribute('data-player-id');
-                const current = window.ToniDB && window.ToniDB.getPlayers().find(x => x.id === id);
-                if (current) {
-                    window.ToniDB.updatePlayer(id, { isPresent: !current.isPresent });
-                } else {
-                    console.warn('[SektorSporttasche] player not found for toggle', id);
-                }
-            });
-        });
+    togglePresence: function(id, currentStatus) {
+        window.ToniDB.updatePlayer(id, { isPresent: !currentStatus });
+        this.render(); // UI in der Aktentasche sofort aktualisieren
     }
 };
