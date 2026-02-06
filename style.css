@@ -285,3 +285,81 @@ body, html {
     padding: 10px;
     font-family: monospace;
 }
+/* ANALYSE SEKTOR STYLING */
+.analyse-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 20px;
+    padding: 20px;
+    height: 450px;
+}
+
+.player-selection-list {
+    background: rgba(0,0,0,0.3);
+    overflow-y: auto;
+    border-right: 1px solid #333;
+}
+
+.analyse-player-item {
+    padding: 12px;
+    border-bottom: 1px solid #222;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.analyse-player-item:hover {
+    background: rgba(57, 255, 20, 0.1);
+}
+
+.vitals-indicator { width: 8px; height: 8px; border-radius: 50%; }
+.vitals-indicator.online { background: var(--neon-green); box-shadow: 0 0 5px var(--neon-green); }
+.vitals-indicator.offline { background: #555; }
+
+.analyse-detail-view {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.vitals-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.vital-box {
+    background: #000;
+    border: 1px solid #333;
+    padding: 15px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.vital-val { font-size: 1.5rem; color: var(--neon-green); font-weight: bold; display: block; }
+.vital-unit { font-size: 0.7rem; color: #888; }
+.vital-box label { font-size: 0.6rem; letter-spacing: 1px; color: #555; display: block; margin-top: 5px; }
+
+.pulse-anim {
+    color: #ff3030;
+    animation: heartBeat 1.2s infinite;
+}
+
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.3); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.15); }
+    60% { transform: scale(1); }
+}
+
+.scouting-report {
+    background: rgba(57, 255, 20, 0.05);
+    padding: 15px;
+    border-left: 3px solid var(--neon-green);
+    margin-top: 20px;
+}
+
+.scouting-text { font-style: italic; font-size: 0.9rem; line-height: 1.4; }
