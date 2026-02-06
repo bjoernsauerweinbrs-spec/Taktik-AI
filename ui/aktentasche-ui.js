@@ -1,65 +1,67 @@
+/**
+ * TONI 2.0 - BRIEFCASE UI (ZENTRALE)
+ * Verwaltet das 9-Kachel-Raster und das Laden der Sektoren
+ */
 window.BriefcaseUI = {
     isOpen: false,
 
     init() {
-        console.log("Briefcase UI initialized");
+        console.log("Briefcase System Online");
+        // Event-Bus Listener könnten hier hin
     },
 
     toggle() {
         const overlay = document.getElementById('briefcase-overlay');
         this.isOpen = !this.isOpen;
-        
-        if (this.isOpen) {
-            overlay.style.display = 'flex';
-            this.renderMainGrid();
-        } else {
-            overlay.style.display = 'none';
-        }
+        overlay.style.display = this.isOpen ? 'flex' : 'none';
+        if (this.isOpen) this.renderMainGrid();
     },
 
     renderMainGrid() {
         const content = document.getElementById('active-content');
         content.innerHTML = `
-            <h1 style="color: var(--neon-green); text-align:center; letter-spacing:5px;">ZENTRALE</h1>
+            <div class="kabine-header">
+                <h1 style="color: var(--neon-green); letter-spacing: 5px; text-align:center;">ZENTRALE</h1>
+            </div>
             <div class="management-grid">
-                <div class="mgmt-card" onclick="window.SektorKabine.open()">
+                <div class="mgmt-card" onclick="window.SektorSporttasche.open()">
                     <div class="card-header"><i class="fas fa-users"></i> KABINE</div>
-                    <p>Spieler & FIFA Karten</p>
+                    <p>50+ Spieler als FIFA-Karten. Ratings & Anwesenheit.</p>
                 </div>
                 <div class="mgmt-card" onclick="window.SektorAnalyse.open()">
-                    <div class="card-header"><i class="fas fa-heartbeat"></i> ANALYSE</div>
-                    <p>Vitals & Fitness</p>
+                    <div class="card-header"><i class="fas fa-heartbeat pulse-anim"></i> ANALYSE</div>
+                    <p>Vitals: Puls, Kilometer, Schlaf. Manuelle Dateneingabe.</p>
                 </div>
-                <div class="mgmt-card">
-                    <div class="card-header"><i class="fas fa-briefcase"></i> BUSINESS</div>
-                    <p>Management</p>
+                <div class="mgmt-card" onclick="alert('Business Sektor lädt...')">
+                    <div class="card-header"><i class="fas fa-chart-line"></i> BUSINESS</div>
+                    <p>Sponsoren, Finanzen & Vereinsführung.</p>
                 </div>
-                <div class="mgmt-card">
+                <div class="mgmt-card" onclick="alert('Stadion-Zeitung (Nino) wird generiert...')">
                     <div class="card-header"><i class="fas fa-print"></i> STADION</div>
-                    <p>Nino Print Engine</p>
+                    <p>Print-Engine: Stadion-Zeitung (A4).</p>
                 </div>
-                <div class="mgmt-card">
+                <div class="mgmt-card" onclick="alert('Materialkammer offen')">
                     <div class="card-header"><i class="fas fa-dumbbell"></i> TRAINING</div>
-                    <p>Equipment</p>
+                    <p>Equipment: Hütchen, Bälle, Stangen für die Arena.</p>
                 </div>
-                <div class="mgmt-card">
-                    <div class="card-header"><i class="fas fa-video"></i> SKILLS</div>
-                    <p>Tutorials</p>
+                <div class="mgmt-card" onclick="alert('Video-Bibliothek')">
+                    <div class="card-header"><i class="fas fa-play-circle"></i> SKILLS</div>
+                    <p>Technik-Videos & Split-Screen Analyse.</p>
                 </div>
                 <div class="mgmt-card">
                     <div class="card-header"><i class="fas fa-search"></i> SCOUTING</div>
-                    <p>Suche</p>
+                    <p>Externe Datenbank & Spielersuche.</p>
                 </div>
                 <div class="mgmt-card">
                     <div class="card-header"><i class="fas fa-chess-board"></i> TAKTIK</div>
-                    <p>Formationen</p>
+                    <p>Formationen & Toni-Befehlskette.</p>
                 </div>
                 <div class="mgmt-card">
-                    <div class="card-header"><i class="fas fa-cog"></i> SETTINGS</div>
-                    <p>Ollama Config</p>
+                    <div class="card-header"><i class="fas fa-robot"></i> SETTINGS</div>
+                    <p>System & Ollama KI-Anleitung.</p>
                 </div>
             </div>
-            <button class="pro-btn-gold" onclick="window.BriefcaseUI.toggle()" style="margin-top:20px; width:auto; padding: 10px 40px;">X SCHLIESSEN</button>
+            <button class="pro-btn-gold" onclick="window.BriefcaseUI.toggle()" style="margin-top:20px; width: 200px; display:block; margin-left:auto; margin-right:auto;">X SCHLIESSEN</button>
         `;
     }
 };
