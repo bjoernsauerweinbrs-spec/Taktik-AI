@@ -1,171 +1,86 @@
-// engine/arena.js
-// Arena: Canvas-basiertes Taktik-Board mit DPR-scaling, defensive checks und Event-Subscription
-
 window.arena = {
-    canvas: null,
-    ctx: null,
-    players: [],
-
-    init(id) {
+    canvas: null, ctx: null, players: [],
+    
+    init: function(id) {
         this.canvas = document.getElementById(id);
-        if (!this.canvas) {
-            console.error('[Arena] Canvas not found:', id);
-            return;
-        }
-
         this.ctx = this.canvas.getContext('2d');
-        if (!this.ctx) {
-            console.error('[Arena] 2D context not available');
-            return;
-        }
-
-        // Subscribe to player updates early so we don't miss the initial emit
-        window.ToniEvents.on('players:updated', (d) => {
-            this.players = Array.isArray(d) ? d : [];
+        window.ToniEvents.on('players:updated', (data) => {
+            this.players = data;
             this.render();
         });
-
-        // Initial snapshot from DB
-        try {
-            this.players = window.ToniDB && typeof window.ToniDB.getPlayers === 'function'
-                ? window.ToniDB.getPlayers()
-                : [];
-        } catch (e) {
-            console.error('[Arena] initial getPlayers failed', e);
-            this.players = [];
-        }
-
-        // Setup sizing and listeners
+        this.players = window.ToniDB.getPlayers();
         this.resize();
         window.addEventListener('resize', () => this.resize());
-
-        // Initial render
-        this.render();
-        console.log('[Arena] initialized with', this.players.length, 'players');
-    },
-
-    resize() {
-        if (!this.canvas || !this.ctx) return;
-
-        const parent = this.canvas.parentElement || document.body;
-        const width = parent.clientWidth || window.innerWidth;
-        const height = parent.clientHeight || Math.max(window.innerHeight * 0.6, 400);
-
-        // CSS size
-        this.canvas.style.width = width + 'px';
-        this.canvas.style.height = height + 'px';
-
-        // Backing store size for crisp rendering on high-DPI displays
-        const dpr = window.devicePixelRatio || 1;
-        this.canvas.width = Math.floor(width * dpr);
-        this.canvas.height = Math.floor(height * dpr);
-
-        // Reset transform so drawing coordinates map to CSS pixels
-        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        // Re-render after resize
         this.render();
     },
 
-    render() {
-        if (!this.ctx || !this.canvas) return;
+    resize: function() {
+        this.canvas.width = this.canvas.parentElement.clientWidth;
+        this.canvas.height = this.canvas.parentElement.clientHeight;
+        this.render();
+    },
 
+    render: function() {
         const ctx = this.ctx;
-        const w = this.canvas.clientWidth;
-        const h = this.canvas.clientHeight;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const pad = 60; // Spielfeld-Abstand
 
-        // Clear
-        ctx.clearRect(0, 0, w, h);
-
-        // Background
+        // 1. RASEN (Dunkler Profi-Look)
         ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
 
-        // Pitch outline
+        // 2. LINIEN (Neon-Grün)
         ctx.strokeStyle = "#39FF14";
         ctx.lineWidth = 2;
-        const pad = 50;
-        ctx.strokeRect(pad, pad, w - pad * 2, h - pad * 2);
+        ctx.strokeRect(pad, pad, w - (pad*2), h - (pad*2)); // Außenlinie
 
-        // Middle circle
+        // Mittellinie & Kreis
         ctx.beginPath();
-        ctx.arc(w / 2, h / 2, 60, 0, Math.PI * 2);
+        ctx.moveTo(w/2, pad); ctx.lineTo(w/2, h - pad);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(w/2, h/2, 50, 0, Math.PI*2);
         ctx.stroke();
 
-        // 16er boxes (example positions)
-        ctx.strokeRect(pad, (h / 2) - 130, 120, 260);
-        ctx.strokeRect(w - pad - 120, (h / 2) - 130, 120, 260);
+        // 3. TORE & STRAFRÄUME (Inkl. 5m-Raum)
+        const boxW = 120;
+        const boxH = 240;
+        const smallBoxW = 40; // 5m Raum
+        const smallBoxH = 100;
 
-        // Draw players grouped by team for stable vertical spacing
-        const homePlayers = this.players.filter(p => p.team === 'home');
-        const awayPlayers = this.players.filter(p => p.team === 'away');
+        // Heim-Seite (Links)
+        ctx.strokeRect(pad, (h/2) - (boxH/2), boxW, boxH); // 16er
+        ctx.strokeRect(pad, (h/2) - (smallBoxH/2), smallBoxW, smallBoxH); // 5er
+        ctx.fillStyle = "#39FF14";
+        ctx.fillRect(pad - 10, (h/2) - 30, 10, 60); // Tor
 
-        const drawTeam = (teamPlayers, isHome) => {
-            const baseX = isHome ? 150 : w - 150;
-            const maxSpacing = Math.min(60, Math.floor((h - 200) / Math.max(1, teamPlayers.length)));
-            teamPlayers.forEach((p, idx) => {
-                const x = baseX;
-                const y = 100 + idx * maxSpacing;
-                // marker
-                ctx.beginPath();
-                ctx.arc(x, y, 15, 0, Math.PI * 2);
-                ctx.fillStyle = isHome ? "#39FF14" : "#3080FF";
-                ctx.fill();
-                // name
-                ctx.fillStyle = "#fff";
-                ctx.font = '12px Inter, sans-serif';
-                ctx.fillText(p.name, x - 20, y + 30);
-                // presence indicator (small dot)
-                ctx.beginPath();
-                ctx.arc(x + 18, y - 18, 6, 0, Math.PI * 2);
-                ctx.fillStyle = p.isPresent ? '#00ff88' : '#444';
-                ctx.fill();
-            });
-        };
+        // Gast-Seite (Rechts)
+        ctx.strokeRect(w - pad - boxW, (h/2) - (boxH/2), boxW, boxH); // 16er
+        ctx.strokeRect(w - pad - smallBoxW, (h/2) - (smallBoxH/2), smallBoxW, smallBoxH); // 5er
+        ctx.fillRect(w - pad, (h/2) - 30, 10, 60); // Tor
 
-        drawTeam(homePlayers, true);
-        drawTeam(awayPlayers, false);
-    },
+        // 4. SPIELER RENDERN
+        this.players.forEach((p, i) => {
+            if(p.team === 'home' && !p.isPresent) return;
 
-    // Optional: execute tacticalMove objects from ToniCore (stub for Sprint 2)
-    execute(tacticalMove) {
-        if (!tacticalMove || !tacticalMove.type) return;
-        try {
-            switch (tacticalMove.type) {
-                case 'MOVE_PLAYER':
-                    this._movePlayer(tacticalMove.playerId, tacticalMove.x, tacticalMove.y);
-                    break;
-                case 'SHIFT_LINE':
-                    this._shiftLine(tacticalMove.line, tacticalMove.dx || 0, tacticalMove.dy || 0);
-                    break;
-                default:
-                    console.warn('[Arena] unknown tacticalMove type', tacticalMove.type);
-            }
-            this.render();
-        } catch (e) {
-            console.error('[Arena] execute failed', e);
-        }
-    },
+            const isHome = p.team === 'home';
+            // Taktische Verteilung statt einer Reihe
+            const x = isHome ? (pad + 100 + (i * 20)) : (w - pad - 100 - (i * 20));
+            const y = pad + 50 + (i * 45 % (h - 150));
 
-    _movePlayer(playerId, x, y) {
-        const p = this.players.find(pl => pl.id === playerId);
-        if (p) {
-            // store custom coordinates for rendering (non-persistent)
-            p._x = x;
-            p._y = y;
-            // if coordinates provided, render them; otherwise keep team layout
-            // For now we use _x/_y only if both exist
-            if (typeof x === 'number' && typeof y === 'number') {
-                // override drawing for this player in render()
-                // (render currently uses team layout; advanced placement to be added in Sprint 2)
-            }
-        } else {
-            console.warn('[Arena] _movePlayer: player not found', playerId);
-        }
-    },
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, Math.PI*2);
+            ctx.fillStyle = isHome ? "#FF3030" : "#3080FF";
+            if(p.isStarter && isHome) ctx.fillStyle = "#39FF14"; // Starter leuchten Grün
+            ctx.fill();
+            ctx.strokeStyle = "#fff";
+            ctx.stroke();
 
-    _shiftLine(lineName, dx, dy) {
-        // placeholder: in Sprint 2 we will map lineName to player subsets (e.g., 'defense', 'midfield')
-        console.log('[Arena] _shiftLine called', lineName, dx, dy);
+            // Name
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 10px Inter";
+            ctx.fillText(p.name, x - 20, y + 30);
+        });
     }
 };
