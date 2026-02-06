@@ -2,17 +2,16 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 - TACTICAL INTELLIGENCE</title>
-    <link rel="stylesheet" href="css/toni-style.css"> 
+    <title>TONI 2.0 - TACTICAL HQ</title>
+    <link rel="stylesheet" href="css/toni-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
 </head>
 <body>
     <div class="pro-layout-container">
-        
         <nav class="sidebar-minimal">
             <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
                 <i class="fas fa-briefcase"></i>
-                <span class="label">AKTEN-TASCHE</span>
+                <span class="label">ZENTRALE</span>
             </div>
             <div class="control-unit" onclick="window.location.reload()">
                 <i class="fas fa-sync-alt"></i>
@@ -22,19 +21,14 @@
 
         <main id="stage-container">
             <canvas id="main-canvas"></canvas>
-            <div id="toni-status-bar" style="position: absolute; bottom: 20px; left: 20px; color: var(--neon-green);">
-                STATUS: ONLINE
-            </div>
         </main>
 
         <aside class="analysis-panel">
-            <div class="video-preview" style="height: 200px; background: #000; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--neon-green);">
-                <span style="color: #444;">VIDEOANALYSE BEREIT</span>
+            <div class="video-preview">
+                <span id="video-status">VIDEOANALYSE BEREIT</span>
             </div>
-            <div class="chat-container" id="chat-messages" style="flex: 1; padding: 20px; overflow-y: auto;">
-                <div style="color: var(--neon-green);"><b>Toni:</b> Hallo Björn! System bereit.</div>
-            </div>
-            <div class="input-area" style="padding: 20px; background: #05080F;">
+            <div class="chat-container" id="chat-messages"></div>
+            <div class="input-area" style="padding: 15px;">
                 <input type="text" id="user-input" class="login-input" style="width: 100%;" placeholder="Toni Befehl geben...">
             </div>
         </aside>
@@ -42,23 +36,21 @@
 
     <div id="briefcase-overlay" class="briefcase-overlay">
         <div class="briefcase-window">
-            <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-                <button class="tactic-btn" onclick="window.SektorSporttasche.render()">KABINE</button>
-                <button class="tactic-btn" onclick="window.SektorAnalyse.render()">ANALYSE</button>
-                <button class="tactic-btn" onclick="window.SektorManagement.render()">BUSINESS</button>
-                <button class="tactic-btn" style="margin-left: auto; color: var(--status-error);" onclick="window.BriefcaseUI.toggle()">X</button>
+            <div id="briefcase-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:15px;">
+                <h2 id="modal-title" style="color:var(--neon-green);">MANAGEMENT ZENTRALE</h2>
+                <button class="tactic-btn" onclick="window.BriefcaseUI.toggle()">SCHLIESSEN X</button>
             </div>
             <div id="active-content">
-                <h2 style="color: var(--neon-green);">Willkommen in der Zentrale.</h2>
-                <p>Wähle einen Sektor aus.</p>
-            </div>
+                </div>
         </div>
     </div>
 
     <script src="logic/event-bus.js"></script>
     <script src="logic/database.js"></script>
-    <script src="js/toni-core.js"></script> <script src="engine/arena.js"></script>
-    <script src="ui/aktentasche-ui.js"></script> <script src="ui/sektoren/sektor-sporttasche.js"></script>
+    <script src="js/toni-core.js"></script>
+    <script src="engine/arena.js"></script>
+    <script src="ui/aktentasche-ui.js"></script>
+    <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
     <script src="ui/sektoren/sektor-management.js"></script>
 
@@ -66,6 +58,7 @@
         window.onload = () => {
             window.ToniDB.init();
             window.arena.init('main-canvas');
+            window.BriefcaseUI.init();
         };
     </script>
 </body>
