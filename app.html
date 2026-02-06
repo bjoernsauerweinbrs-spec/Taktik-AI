@@ -7,6 +7,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
 </head>
 <body>
+<script>
+    // Sicherheits-Check: Wenn nicht eingeloggt, zurück zum Start
+    if (sessionStorage.getItem('toni_auth') !== 'true') {
+        window.location.href = 'index.html';
+    }
+</script>
     <div class="pro-layout-container">
         <nav class="sidebar-minimal">
             <div class="control-unit briefcase-btn" onclick="window.BriefcaseUI.toggle('sporttasche')">
