@@ -2,66 +2,51 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 - PRO PERFORMANCE</title>
+    <title>TONI 2.0 - Arena</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
 </head>
-<body>
-<script>
-    // Sicherheits-Check: Wenn nicht eingeloggt, zurück zum Start
-    if (sessionStorage.getItem('toni_auth') !== 'true') {
-        window.location.href = 'index.html';
-    }
-</script>
-    <div class="pro-layout-container">
-        <nav class="sidebar-minimal">
-            <div class="control-unit briefcase-btn" onclick="window.BriefcaseUI.toggle('sporttasche')">
+<body class="pro-app">
+    <div class="main-grid">
+        <aside class="sidebar">
+            <div class="briefcase-trigger" onclick="window.BriefcaseUI.toggle()">
                 <i class="fas fa-briefcase"></i>
-                <span class="label">AKTEN-TASCHE</span>
+                <span>AKTEN-TASCHE</span>
             </div>
-        </nav>
+        </aside>
 
-        <main id="stage-container">
+        <section class="arena-zone">
             <canvas id="main-canvas"></canvas>
-            <div id="toni-status-bar">
-                <span class="pulse-icon"></span> STATUS: <span id="status-text">ONLINE</span>
+            <div id="field-overlay">
+                <span id="status-tag">STATUS: ONLINE</span>
             </div>
-        </main>
+        </section>
 
-        <aside class="analysis-panel">
-            <div class="video-section">
-                <div class="video-placeholder">VIDEO-ANALYSE BEREIT</div>
+        <aside class="toni-panel">
+            <div class="video-preview">VIDEO-ANALYSE BEREIT</div>
+            <div id="chat-box">
+                <div class="msg"><b>Toni:</b> Hallo Björn! System bereit.</div>
             </div>
-            
-            <div id="chat-messages">
-                <div class="toni-msg"><b>Toni:</b> Hallo Björn! Das System ist bereit. Was analysieren wir heute?</div>
-            </div>
-
-            <div class="interaction-area">
-                <input type="text" id="user-input" placeholder="Taktischen Befehl geben...">
-                <div id="toni-mic" onclick="window.ToniCore.startVoice()">
-                    <i class="fas fa-microphone"></i>
-                </div>
+            <div class="input-row">
+                <input type="text" placeholder="Taktischen Befehl geben...">
+                <button><i class="fas fa-microphone"></i></button>
             </div>
         </aside>
     </div>
 
-    <div id="briefcase-overlay" class="briefcase-overlay">
-        <div class="briefcase-window">
-            <div class="briefcase-header">
-                <h2>PROFESSIONAL MANAGEMENT</h2>
+    <div id="briefcase-modal" class="modal-hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>MANAGEMENT ZENTRALE</h3>
                 <button onclick="window.BriefcaseUI.toggle()">X</button>
             </div>
-            <div id="active-content"></div>
-        </div>
+            <div id="active-content"></div> </div>
     </div>
 
     <script src="logic/event-bus.js"></script>
     <script src="logic/database.js"></script>
-    <script src="logic/llm-gateway.js"></script>
     <script src="logic/toni-core.js"></script>
     <script src="engine/arena.js"></script>
-    
     <script src="ui/briefcase-ui.js"></script>
     <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
@@ -71,13 +56,6 @@
         window.onload = () => {
             window.ToniDB.init();
             window.arena.init('main-canvas');
-            
-            document.getElementById('user-input').onkeypress = (e) => {
-                if(e.key === 'Enter') { 
-                    window.ToniCore.processMessage(e.target.value); 
-                    e.target.value = ''; 
-                }
-            };
         };
     </script>
 </body>
