@@ -1,57 +1,83 @@
 window.SektorSporttasche = {
-    // Kleiner Übersetzer, um Unicode-Fehler im Code zu vermeiden
-    getFlag: function(code) {
-        const flags = { 'BRA': '🇧🇷', 'GER': '🇩🇪', 'FRA': '🇫🇷', 'ENG': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'EUR': '🇪🇺' };
-        return flags[code] || '🏳️';
-    },
+    players: [], // Hier landen die 50+ Profile
 
     render: function() {
         const container = document.getElementById('active-content');
-        const players = window.ToniDB.getPlayers().filter(p => p.team === 'home');
-        const starters = players.filter(p => p.isStarter);
-        const bench = players.filter(p => !p.isStarter);
-
         container.innerHTML = `
-            <div class="kabine-wrapper">
-                <section class="kabine-section">
-                    <h3 class="section-title"><i class="fas fa-star"></i> STARTELF (XI)</h3>
-                    <div class="fifa-cards-grid">${starters.map(p => this.createFullCard(p)).join('')}</div>
-                </section>
-                <section class="kabine-section">
-                    <h3 class="section-title"><i class="fas fa-subway"></i> ERSATZBANK</h3>
-                    <div class="fifa-cards-grid">${bench.map(p => this.createFullCard(p)).join('')}</div>
-                </section>
-            </div>`;
+            <div class="kabine-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="color:var(--neon-green)">SPIELERKABINE (PRO-MODUS)</h2>
+                <button class="tactic-btn" onclick="window.SektorSporttasche.addPlayer()">+ NEUER SPIELER</button>
+            </div>
+            <div id="fifa-cards-grid" class="fifa-cards-grid">
+                </div>
+        `;
+        this.updateGrid();
     },
 
-    createFullCard: function(p) {
-        return `
-            <div class="fifa-card-pro ${p.isPresent ? 'active' : 'inactive'}" onclick="window.SektorSporttasche.togglePresence('${p.id}', ${p.isPresent})">
-                <div class="card-content">
-                    <div class="top-row">
-                        <div class="rating-box">
-                            <span class="rat">${p.rat}</span>
-                            <span class="pos">${p.pos}</span>
-                            <span class="flag">${this.getFlag(p.country)}</span>
-                        </div>
-                        <div class="player-avatar"><i class="fas fa-user-ninja"></i></div>
+    addPlayer: function() {
+        const name = prompt("Name des Spielers:");
+        if (!name) return;
+        const newPlayer = {
+            id: Date.now(),
+            name: name,
+            img: null,
+            status: 'inactive', // 'training' oder 'match'
+            rating: 85,
+            stats: { pac: 80, sho: 75, pas: 78, dri: 82, def: 50, phy: 70 }
+        };
+        this.players.push(newPlayer);
+        this.updateGrid();
+    },
+
+    uploadImage: function(playerId) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = event => {
+                const player = this.players.find(p => p.id === playerId);
+                if (player) {
+                    player.img = event.target.result;
+                    this.updateGrid();
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+        input.click();
+    },
+
+    toggleStatus: function(playerId, type) {
+        const player = this.players.find(p => p.id === playerId);
+        if (player) {
+            player.status = (player.status === type) ? 'inactive' : type;
+            this.updateGrid();
+            // Signal an Toni und das Spielfeld senden
+            window.ToniEvents.emit('playerStatusChanged', player);
+        }
+    },
+
+    updateGrid: function() {
+        const grid = document.getElementById('fifa-cards-grid');
+        grid.innerHTML = this.players.map(p => `
+            <div class="fifa-card ${p.status}">
+                <div class="presence-toggle ${p.status !== 'inactive' ? 'on' : ''}" onclick="window.SektorSporttasche.toggleStatus(${p.id}, 'match')"></div>
+                <div class="card-inner" onclick="window.SektorSporttasche.uploadImage(${p.id})">
+                    <div class="rating">${p.rating}</div>
+                    <div class="player-photo">
+                        ${p.img ? `<img src="${p.img}" style="width:100%; height:100%; object-fit:cover;">` : `<i class="fas fa-user-ninja"></i>`}
                     </div>
-                    <div class="name-box">${p.name.toUpperCase()}</div>
-                    <div class="stats-grid">
-                        <div class="stat"><span>PAC</span> <b>${p.stats?.PAC || 0}</b></div>
-                        <div class="stat"><span>SHO</span> <b>${p.stats?.SHO || 0}</b></div>
-                        <div class="stat"><span>PAS</span> <b>${p.stats?.PAS || 0}</b></div>
-                        <div class="stat"><span>DRI</span> <b>${p.stats?.DRI || 0}</b></div>
-                        <div class="stat"><span>DEF</span> <b>${p.stats?.DEF || 0}</b></div>
-                        <div class="stat"><span>PHY</span> <b>${p.stats?.PHY || 0}</b></div>
+                    <div class="player-name">${p.name.toUpperCase()}</div>
+                    <div class="player-stats">
+                        <span>PAC ${p.stats.pac}</span> <span>SHO ${p.stats.sho}</span> <span>PAS ${p.stats.pas}</span>
                     </div>
                 </div>
-                <div class="card-status-label">${p.isPresent ? 'IM SPIEL' : 'BEREIT'}</div>
-            </div>`;
-    },
-
-    togglePresence: function(id, currentStatus) {
-        window.ToniDB.updatePlayer(id, { isPresent: !currentStatus });
-        this.render();
+                <div style="padding:5px; display:flex; gap:5px;">
+                    <button class="tactic-btn" style="font-size:8px" onclick="window.SektorSporttasche.toggleStatus(${p.id}, 'training')">TRAINING</button>
+                    <button class="tactic-btn" style="font-size:8px" onclick="window.SektorSporttasche.toggleStatus(${p.id}, 'match')">SPIEL</button>
+                </div>
+            </div>
+        `).join('');
     }
 };
