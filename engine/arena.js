@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - ARENA ENGINE (HORIZONTAL ELITE)
- * Horizontales Spielfeld, Ersatzbank-Zone & Taktik-Linien.
+ * Taktische Transformation: FIFA-Karte (Bank) -> Punkt (Feld).
  */
 window.arena = {
     canvas: null,
@@ -30,7 +30,6 @@ window.arena = {
         const presentPlayers = window.Database.getPresentPlayers();
         this.elements = this.elements.filter(el => el.type !== 'player');
         
-        // Konstanten für die Ersatzbank (unten mittig)
         const cardWidth = 45;
         const spacing = 15;
         const benchY = this.canvas.height - 50;
@@ -40,7 +39,7 @@ window.arena = {
         presentPlayers.forEach((p, index) => {
             this.elements.push({
                 id: p.id, type: 'player',
-                // Nutze gespeicherte Position oder setze auf die Bank
+                number: p.number || p.id, // Rückennummer aus DB
                 x: p.x || (startX + index * (cardWidth + spacing)),
                 y: p.y || benchY,
                 color: window.Database.activeMode === 'match' ? 'var(--accent-gold)' : 'var(--neon-green)',
@@ -72,7 +71,6 @@ window.arena = {
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
 
-        // Check für Linien-Tools
         if (['arrow', 'pass', 'shot'].includes(this.currentTool)) {
             this.tempArrow = { startX: mx, startY: my, endX: mx, endY: my, type: this.currentTool };
         } else if (this.currentTool === 'cone') {
@@ -136,68 +134,103 @@ window.arena = {
         const ctx = this.ctx;
         const w = this.canvas.width;
         const h = this.canvas.height;
-        const margin = 70; // Mehr Platz für die Bank unten
+        const margin = 70;
+        const benchThreshold = h - 100; // Grenze zur Ersatzbank
 
-        // 1. SPIELFELD-HINTERGRUND
         ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
         
         ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
         ctx.lineWidth = 2;
 
-        // Außenlinie (Horizontal)
         const fieldW = w - margin * 2;
         const fieldH = h - margin * 2;
         ctx.strokeRect(margin, margin, fieldW, fieldH);
         
-        // Mittellinie & Anstoßkreis (Vertikal geteilt)
         ctx.beginPath(); ctx.moveTo(w/2, margin); ctx.lineTo(w/2, h-margin); ctx.stroke();
         ctx.beginPath(); ctx.arc(w/2, h/2, 60, 0, Math.PI*2); ctx.stroke();
         
-        // Strafräume (Links & Rechts)
         const penaltyW = 120;
         const penaltyH = 280;
-        ctx.strokeRect(margin, h/2 - penaltyH/2, penaltyW, penaltyH); // West
-        ctx.strokeRect(w - margin - penaltyW, h/2 - penaltyH/2, penaltyW, penaltyH); // Ost
+        ctx.strokeRect(margin, h/2 - penaltyH/2, penaltyW, penaltyH);
+        ctx.strokeRect(w - margin - penaltyW, h/2 - penaltyH/2, penaltyW, penaltyH);
         
-        // Torräume (5m)
         const goalBoxW = 45;
         const goalBoxH = 120;
-        ctx.strokeRect(margin, h/2 - goalBoxH/2, goalBoxW, goalBoxH); // West
-        ctx.strokeRect(w - margin - goalBoxW, h/2 - goalBoxH/2, goalBoxW, goalBoxH); // Ost
+        ctx.strokeRect(margin, h/2 - goalBoxH/2, goalBoxW, goalBoxH);
+        ctx.strokeRect(w - margin - goalBoxW, h/2 - goalBoxH/2, goalBoxW, goalBoxH);
 
-        // Tore (Links & Rechts außen)
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
-        ctx.strokeRect(margin - 15, h/2 - 45, 15, 90); // West Tor
-        ctx.strokeRect(w - margin, h/2 - 45, 15, 90); // Ost Tor
+        ctx.strokeRect(margin - 15, h/2 - 45, 15, 90);
+        ctx.strokeRect(w - margin, h/2 - 45, 15, 90);
 
-        // Ersatzbank-Beschriftung
         ctx.fillStyle = "rgba(255,255,255,0.1)";
         ctx.font = "bold 10px Inter";
         ctx.textAlign = "center";
         ctx.fillText("ERSATZBANK / KADER-POOL", w/2, h - 15);
 
-        // --- EBENE 1: LAUFWEGE (PFEILE) ---
         this.arrows.forEach(a => this.drawTacticLine(ctx, a));
         if(this.tempArrow) this.drawTacticLine(ctx, this.tempArrow, true);
 
-        // --- EBENE 2: PLAYER & EQUIPMENT ---
         this.elements.forEach(el => {
-            if (el.type === 'player') this.drawMiniCard(ctx, el);
-            else if (el.type === 'cone') this.drawCone(ctx, el.x, el.y, el.color);
-            else if (el.type === 'ball') this.drawBall(ctx, el.x, el.y);
-            else if (el.type === 'goal') this.drawMiniGoal(ctx, el.x, el.y);
+            if (el.type === 'player') {
+                // TRANSFORMATION: Auf dem Feld -> Punkt | Auf der Bank -> Karte
+                if (el.y < benchThreshold) {
+                    this.drawTacticalDot(ctx, el);
+                } else {
+                    this.drawMiniCard(ctx, el);
+                }
+            } else if (el.type === 'cone') {
+                this.drawCone(ctx, el.x, el.y, el.color);
+            } else if (el.type === 'ball') {
+                this.drawBall(ctx, el.x, el.y);
+            } else if (el.type === 'goal') {
+                this.drawMiniGoal(ctx, el.x, el.y);
+            }
         });
+    },
+
+    // NEU: Der professionelle Taktik-Punkt
+    drawTacticalDot(ctx, el) {
+        ctx.save();
+        const radius = 18;
+        
+        // Kreis (Schatten für Tiefe)
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.beginPath();
+        ctx.arc(el.x, el.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = el.color;
+        ctx.fill();
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Rückennummer
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#000";
+        ctx.font = "bold 14px Inter";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(el.number || el.id, el.x, el.y);
+
+        // Name & Position unter dem Punkt
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 11px Inter";
+        const lastName = el.name.split(' ').pop().toUpperCase();
+        ctx.fillText(lastName, el.x, el.y + radius + 15);
+        
+        ctx.fillStyle = el.color;
+        ctx.font = "8px Inter";
+        ctx.fillText(el.pos, el.x, el.y + radius + 25);
+        ctx.restore();
     },
 
     drawTacticLine(ctx, a, isTemp = false) {
         ctx.save();
         const headlen = 12;
         const angle = Math.atan2(a.endY - a.startY, a.endX - a.startX);
-        
         if (isTemp) ctx.globalAlpha = 0.5;
-
-        // Linienstil basierend auf Typ
         if (a.type === 'pass') {
             ctx.setLineDash([10, 5]);
             ctx.strokeStyle = "var(--data-cyan)";
@@ -208,10 +241,7 @@ window.arena = {
             ctx.strokeStyle = "var(--neon-green)";
             ctx.lineWidth = 3;
         }
-
         ctx.beginPath(); ctx.moveTo(a.startX, a.startY); ctx.lineTo(a.endX, a.endY); ctx.stroke();
-        
-        // Pfeilspitze
         ctx.setLineDash([]);
         ctx.beginPath(); ctx.moveTo(a.endX, a.endY);
         ctx.lineTo(a.endX - headlen * Math.cos(angle - Math.PI / 6), a.endY - headlen * Math.sin(angle - Math.PI / 6));
@@ -232,8 +262,11 @@ window.arena = {
         ctx.fillStyle = "#000"; ctx.fill();
         ctx.strokeStyle = el.color; ctx.lineWidth = 2; ctx.stroke();
         
+        // Rating
         ctx.fillStyle = el.color; ctx.font = "bold 11px Inter"; ctx.textAlign = "center";
         ctx.fillText(el.rat, el.x, y + 18);
+        
+        // Name (Karten-Style)
         ctx.fillStyle = "#fff"; ctx.font = "bold 8px Inter";
         ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, y + h + 12);
         ctx.restore();
