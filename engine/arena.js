@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - ARENA ENGINE (HORIZONTAL ELITE)
- * Taktische Transformation: FIFA-Karte (Bank) -> Punkt (Feld).
+ * Taktische Transformation mit Team-Farb-Logik (Leibchen & Gegner).
  */
 window.arena = {
     canvas: null,
@@ -28,6 +28,7 @@ window.arena = {
     syncFromDatabase() {
         if(!window.Database) return;
         const presentPlayers = window.Database.getPresentPlayers();
+        const mode = window.Database.activeMode;
         this.elements = this.elements.filter(el => el.type !== 'player');
         
         const cardWidth = 45;
@@ -37,12 +38,22 @@ window.arena = {
         let startX = (this.canvas.width - totalBenchWidth) / 2;
 
         presentPlayers.forEach((p, index) => {
+            // Farblogik basierend auf Team und Modus
+            let playerColor = 'var(--neon-green)'; // Default Training Team A
+            
+            if (mode === 'match') {
+                playerColor = (p.team === 'A') ? 'var(--accent-gold)' : '#ff3b30'; // Gold vs Rot (KI)
+            } else {
+                playerColor = (p.team === 'A') ? 'var(--neon-green)' : '#ccff00'; // Grün vs Gelb (Leibchen)
+            }
+
             this.elements.push({
                 id: p.id, type: 'player',
-                number: p.number || p.id, // Rückennummer aus DB
+                number: p.number || p.id,
+                team: p.team || 'A',
                 x: p.x || (startX + index * (cardWidth + spacing)),
                 y: p.y || benchY,
-                color: window.Database.activeMode === 'match' ? 'var(--accent-gold)' : 'var(--neon-green)',
+                color: playerColor,
                 width: cardWidth, height: 55,
                 name: p.name, pos: p.pos, rat: p.rat
             });
@@ -135,7 +146,7 @@ window.arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
         const margin = 70;
-        const benchThreshold = h - 100; // Grenze zur Ersatzbank
+        const benchThreshold = h - 100;
 
         ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
@@ -174,7 +185,6 @@ window.arena = {
 
         this.elements.forEach(el => {
             if (el.type === 'player') {
-                // TRANSFORMATION: Auf dem Feld -> Punkt | Auf der Bank -> Karte
                 if (el.y < benchThreshold) {
                     this.drawTacticalDot(ctx, el);
                 } else {
@@ -190,23 +200,19 @@ window.arena = {
         });
     },
 
-    // NEU: Der professionelle Taktik-Punkt
     drawTacticalDot(ctx, el) {
         ctx.save();
         const radius = 18;
-        
-        // Kreis (Schatten für Tiefe)
         ctx.shadowBlur = 8;
         ctx.shadowColor = "rgba(0,0,0,0.5)";
         ctx.beginPath();
         ctx.arc(el.x, el.y, radius, 0, Math.PI * 2);
         ctx.fillStyle = el.color;
         ctx.fill();
-        ctx.strokeStyle = "#000";
+        ctx.strokeStyle = (el.team === 'B' && window.Database.activeMode === 'training') ? "#000" : "#fff";
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Rückennummer
         ctx.shadowBlur = 0;
         ctx.fillStyle = "#000";
         ctx.font = "bold 14px Inter";
@@ -214,7 +220,6 @@ window.arena = {
         ctx.textBaseline = "middle";
         ctx.fillText(el.number || el.id, el.x, el.y);
 
-        // Name & Position unter dem Punkt
         ctx.fillStyle = "#fff";
         ctx.font = "bold 11px Inter";
         const lastName = el.name.split(' ').pop().toUpperCase();
@@ -261,12 +266,8 @@ window.arena = {
         ctx.lineTo(x, y + h*0.2); ctx.closePath();
         ctx.fillStyle = "#000"; ctx.fill();
         ctx.strokeStyle = el.color; ctx.lineWidth = 2; ctx.stroke();
-        
-        // Rating
         ctx.fillStyle = el.color; ctx.font = "bold 11px Inter"; ctx.textAlign = "center";
         ctx.fillText(el.rat, el.x, y + 18);
-        
-        // Name (Karten-Style)
         ctx.fillStyle = "#fff"; ctx.font = "bold 8px Inter";
         ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, y + h + 12);
         ctx.restore();
