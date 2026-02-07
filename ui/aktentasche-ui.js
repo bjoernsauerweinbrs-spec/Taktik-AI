@@ -1,6 +1,7 @@
 /**
  * TONI 2.0 - AKTENTASCHE UI (MASTER FIX)
  * Stellt das 3x3 Kachel-Grid wieder her und verknüpft die Sektoren.
+ * Korrektur: Settings öffnet jetzt den echten KI-Sektor.
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -74,14 +75,14 @@ window.BriefcaseUI = {
                     <p>Formationen & Befehle</p>
                 </div>
 
-                <div class="mgmt-card" onclick="alert('System-Einstellungen...')">
-                    <div class="card-header"><i class="fas fa-cog"></i> SETTINGS</div>
+                <div class="mgmt-card" onclick="openSection('settings')">
+                    <div class="card-header" style="color: var(--neon-green);"><i class="fas fa-cog"></i> SETTINGS</div>
                     <p>Ollama & System-Config</p>
                 </div>
             </div>
             
             <div style="text-align: center; margin-top: 40px;">
-                <button class="pro-btn-gold" style="width: 250px; padding: 15px;" onclick="toggleBriefcase()">SCHLIESSEN</button>
+                <button class="pro-btn-gold" style="width: 250px; padding: 15px;" onclick="window.BriefcaseUI.toggle()">SCHLIESSEN</button>
             </div>
         `;
     }
