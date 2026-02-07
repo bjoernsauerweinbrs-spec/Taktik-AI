@@ -27,13 +27,13 @@ function openSection(name) {
         if (window.SektorStadion) window.SektorStadion.open();
     }
     else {
-        // Fallback für noch nicht belegte Sektoren (verhindert leere Fenster)
+        // Fallback für noch nicht belegte Sektoren
         content.innerHTML = `
             <div style="text-align:center; padding-top:100px; animation: fadeIn 0.5s;">
-                <i class="fas fa-microchip" style="font-size:4rem; color:var(--neon-green); margin-bottom:20px; opacity:0.2;"></i>
+                <i class="fas fa-microchip" style="font-size:4rem; color:var(--neon-green); margin-bottom:20px; opacity:0.1;"></i>
                 <h2 style="color:#fff; letter-spacing:2px;">SEKTOR ${name.toUpperCase()}</h2>
-                <p style="color:#555;">Dieses Modul wird gerade von der KI kalibriert...</p>
-                <button class="pro-btn-gold" onclick="window.BriefcaseUI.renderMainGrid()" style="margin-top:30px; width:200px;">ZENTRALE</button>
+                <p style="color:#555;">Toni kalibriert dieses Modul basierend auf deinen Anforderungen...</p>
+                <button class="pro-btn-gold" onclick="window.BriefcaseUI.renderMainGrid()" style="margin-top:30px; width:220px;">ZURÜCK ZUR ZENTRALE</button>
             </div>
         `;
     }
@@ -51,32 +51,44 @@ function toggleEquipmentPalette(show) {
     }
 }
 
-// 4. Toni Chat-Logik (KI-Befehle verarbeiten)
+// 4. Toni Chat-Logik (Erweiterte KI-Befehle & Taktik-Beratung)
 function handleCommand(command) {
     if (!command.trim()) return;
     
     const chatBox = document.getElementById('chat-box');
     const userMsg = document.createElement('p');
     userMsg.style.color = "#fff";
+    userMsg.style.marginBottom = "10px";
     userMsg.innerHTML = `<strong>Coach:</strong> ${command}`;
     chatBox.appendChild(userMsg);
 
     const cmd = command.toLowerCase();
-    let response = "Ich habe den Befehl registriert. Soll ich die Arena entsprechend kalibrieren?";
+    let response = "Befehl registriert. Ich analysiere die taktische Umsetzung...";
     
-    // Erweiterte Toni-Logik mit Paletten-Steuerung
-    if (cmd.includes("aufbau") || cmd.includes("hütchen") || cmd.includes("übung") || cmd.includes("training")) {
-        response = "Verstanden. Ich habe die Materialkammer ausgefahren. Die Tools für den Aufbau sind jetzt bereit.";
-        toggleEquipmentPalette(true); // Palette automatisch ausfahren
-    } else if (cmd.includes("spiel") || cmd.includes("taktik") || cmd.includes("match")) {
-        response = "Match-Modus aktiv. Ich habe das Equipment verstaut, damit wir uns auf die Taktik konzentrieren können.";
-        toggleEquipmentPalette(false); // Palette einklappen
-    } else if (cmd.includes("analyse") || cmd.includes("puls")) {
-        response = "Vital-Monitor ist aktiv. Die Sensoren übertragen jetzt die Live-Daten der Spieler.";
+    // Taktische Intelligenz: Toni reagiert auf spezifische Trainings-Befehle
+    if (cmd.includes("aufbau") || cmd.includes("übung") || cmd.includes("hütchen")) {
+        response = "Materialkammer ist bereit. Ich empfehle, die Hütchen für ein kompaktes Verschieben im Zentrum zu platzieren.";
+        toggleEquipmentPalette(true);
+    } 
+    else if (cmd.includes("pass") || cmd.includes("laufweg")) {
+        response = "Verstanden. Die Taktik-Linien sind kalibriert. (Blau = Pass, Grün = Laufweg).";
+        toggleEquipmentPalette(true);
+    }
+    else if (cmd.includes("torschuss") || cmd.includes("abschluss")) {
+        response = "Abschluss-Modus aktiv. (Rote Linie). Ich tracke die Trefferquote.";
+        toggleEquipmentPalette(true);
+    }
+    else if (cmd.includes("spiel") || cmd.includes("match") || cmd.includes("aufstellung")) {
+        response = "Match-Modus kalibriert. Fokus auf die Startelf. Equipment wurde verstaut.";
+        toggleEquipmentPalette(false);
+    }
+    else if (cmd.includes("analyse") || cmd.includes("puls")) {
+        response = "Vital-Monitor synchronisiert. Ich melde kritische Belastungswerte sofort.";
     }
 
     const toniMsg = document.createElement('p');
     toniMsg.style.color = "var(--neon-green)";
+    toniMsg.style.marginBottom = "15px";
     toniMsg.innerHTML = `<strong>Toni:</strong> ${response}`;
     chatBox.appendChild(toniMsg);
     
@@ -91,19 +103,21 @@ window.onload = () => {
     // Datenbank initialisieren
     if (window.Database) {
         window.Database.init();
-        // Palette je nach Modus (Training/Match) voreinstellen
+        // Palette beim Start basierend auf Modus voreinstellen
         toggleEquipmentPalette(window.Database.activeMode === 'training');
     }
 
     // Arena (Spielfeld) starten
     if (window.arena && document.getElementById('main-canvas')) {
         window.arena.init('main-canvas');
+        
+        // Synchronisation der Spieler (Ersatzbank-Reihe)
         if (window.Database) {
             window.arena.syncFromDatabase(); 
         }
     }
 
-    // Enter-Taste für die Chatbox aktivieren
+    // Event-Listener für Chat-Eingabe
     const input = document.getElementById('command-input');
     if (input) {
         input.addEventListener('keypress', (e) => {
@@ -111,5 +125,5 @@ window.onload = () => {
         });
     }
     
-    console.log("System ONLINE. Warte auf Anweisungen.");
+    console.log("System ONLINE. Horizontales Board bereit.");
 };
