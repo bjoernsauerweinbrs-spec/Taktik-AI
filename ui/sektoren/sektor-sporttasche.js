@@ -1,62 +1,48 @@
-/**
- * TONI 2.0 - SEKTOR: KABINE / SPORTTASCHE
- * Verwaltet die 50+ Spieler, FIFA-Karten und Anwesenheit.
- */
 window.SektorSporttasche = {
-    
     open() {
-        const content = document.getElementById('active-content');
+        const content = document.getElementById('active-content') || document.querySelector('.briefcase-window');
         if (!content) return;
 
-        // Header-Bereich mit Navigation
         let html = `
             <div class="kabine-header">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="color: var(--neon-green); letter-spacing: 3px;">TEAM-KABINE</h2>
-                    <div>
-                        <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">< i class="fas fa-th"></i> ZENTRALE</button>
-                        <button class="pro-btn" style="width: auto; margin-left: 10px;" onclick="alert('Spieler-Editor wird geladen...')">+ SPIELER HINZUFÜGEN</button>
-                    </div>
+                    <h2 style="color: var(--neon-green); letter-spacing: 3px;">TEAM-KABINE (PRO-DEMO)</h2>
+                    <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
                 </div>
-                <p style="color: var(--text-dim); font-size: 0.8rem; margin-bottom: 20px;">
-                    Klicke auf den Status-Punkt, um Spieler für das Training/Spiel zu aktivieren.
-                </p>
             </div>
             <div class="fifa-cards-grid">
         `;
 
-        // Wir holen die Spieler-Daten direkt aus der Database.js
         window.Database.players.forEach(p => {
             const statusClass = p.present ? "active" : "inactive";
             const toggleClass = p.present ? "on" : "off";
-            const ribbonText = p.present ? "IM TRAINING" : "ABWESEND";
             
             html += `
                 <div class="fifa-card ${statusClass}">
                     <div class="presence-toggle ${toggleClass}" 
-                         onclick="window.Database.togglePresence(${p.id}); window.SektorSporttasche.open();" 
-                         title="Anwesenheit umschalten">
+                         onclick="window.Database.togglePresence(${p.id}); window.SektorSporttasche.open();">
                     </div>
                     
                     <div class="card-inner">
                         <div class="card-top">
-                            <span class="rating">${p.rat}</span>
-                            <span class="position">${p.pos}</span>
+                            <span class="rating" onclick="window.SektorSporttasche.editStat(${p.id}, 'rat')">${p.rat}</span>
+                            <span class="position" onclick="window.SektorSporttasche.editStat(${p.id}, 'pos')">${p.pos}</span>
                         </div>
                         
-                        <div class="player-img">
-                            <i class="fas fa-user-shield" style="font-size: 3.5rem; color: rgba(255,255,255,0.1);"></i>
+                        <div class="player-img" onclick="document.getElementById('upload-${p.id}').click()">
+                            ${p.img.startsWith('assets') ? '<i class="fas fa-user-circle"></i>' : `<img src="${p.img}" style="width:100%; height:100%; object-fit:cover; border-radius:50%">`}
+                            <input type="file" id="upload-${p.id}" style="display:none" onchange="window.SektorSporttasche.handleUpload(event, ${p.id})">
                         </div>
                         
-                        <div class="player-name">${p.name.toUpperCase()}</div>
+                        <div class="player-name" onclick="window.SektorSporttasche.editStat(${p.id}, 'name')">${p.name.toUpperCase()}</div>
                         
                         <div class="player-stats">
-                            <div><span>PAC</span><br>${p.pac || 80}</div>
-                            <div><span>SHO</span><br>${p.sho || 75}</div>
-                            <div><span>PAS</span><br>${p.pas || 82}</div>
+                            <div onclick="window.SektorSporttasche.editStat(${p.id}, 'pac')"><span>PAC</span><br>${p.pac}</div>
+                            <div><span>SHO</span><br>${p.sho}</div>
+                            <div><span>PAS</span><br>${p.pas}</div>
                         </div>
                         
-                        <div class="status-ribbon">${ribbonText}</div>
+                        <div class="status-ribbon">${p.status}</div>
                     </div>
                 </div>
             `;
@@ -64,5 +50,26 @@ window.SektorSporttasche = {
 
         html += `</div>`;
         content.innerHTML = html;
+    },
+
+    handleUpload(event, playerId) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                window.Database.updatePlayerImage(playerId, e.target.result);
+                this.open();
+            };
+            reader.readAsDataURL(file);
+        }
+    },
+
+    editStat(id, stat) {
+        const player = window.Database.players.find(p => p.id === id);
+        const newVal = prompt(`Neuer Wert für ${stat}:`, player[stat]);
+        if (newVal !== null) {
+            player[stat] = isNaN(newVal) ? newVal : parseInt(newVal);
+            this.open();
+        }
     }
 };
