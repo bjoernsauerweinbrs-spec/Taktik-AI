@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - DATABASE (RECOVERY & ELITE UPDATE)
- * Kaderplanung, automatisches Rating & Modus-Filterung
+ * Kaderplanung, automatisches Rating & Team/Leibchen-Logik
  */
 window.Database = {
     players: [],
@@ -31,14 +31,13 @@ window.Database = {
             this.trainingPlan = parsed.trainingPlan || this.trainingPlan;
             this.matchPlan = parsed.matchPlan || this.matchPlan;
 
-            // REPARATUR-LOGIK: Falls Spieler da sind, aber Stats oder Nummern fehlen
+            // REPARATUR-LOGIK: Falls Spieler da sind, aber Stats, Nummern oder Teams fehlen
             if (this.players.length > 0) {
                 this.repairPlayerData();
             } else {
                 this.createDemoTeam();
             }
         } else {
-            // Falls gar nichts da ist -> Neuanlage
             this.createDemoTeam();
         }
         
@@ -47,14 +46,15 @@ window.Database = {
         }
     },
 
-    // Stellt sicher, dass jeder Spieler alle FIFA-Stats, IDs und RÜCKENNUMMERN hat
+    // Stellt sicher, dass jeder Spieler alle FIFA-Stats, IDs, RÜCKENNUMMERN und TEAM-Zuweisung hat
     repairPlayerData() {
         let changed = false;
         this.players.forEach((p, index) => {
             if (p.dri === undefined) { p.dri = 75; changed = true; }
             if (p.def === undefined) { p.def = 50; changed = true; }
             if (p.phy === undefined) { p.phy = 70; changed = true; }
-            if (p.number === undefined) { p.number = p.id || (index + 1); changed = true; } // Rückennummer nachpflegen
+            if (p.number === undefined) { p.number = p.id || (index + 1); changed = true; }
+            if (p.team === undefined) { p.team = 'A'; changed = true; } // Standard: Team A / Trainer
             if (!p.rat) { p.rat = this.calculateRating(p); changed = true; }
         });
         if (changed) this.save();
@@ -77,20 +77,21 @@ window.Database = {
     },
 
     createDemoTeam() {
-        console.log("Toni: Erstelle frisches 20er Kader mit Rückennummern...");
+        console.log("Toni: Erstelle frisches 20er Kader mit Team-Logik...");
         const names = ["Max Master", "Lukas Wall", "Toni Technic", "Marc Speed", "Sven Safe", "Finn Flügel", "Ben Beißer", "Leo Luft", "Mika Mitti", "Sam Solo", "Jan Jäger", "Oli Ordnung", "Paul Pass", "Kalle Kante", "Nico Netz", "Dennis Dribbel", "Uli Umkehr", "Basti Ball", "Rene Räumer", "Flo Flanke"];
         const positions = ["ST", "IV", "ZOM", "RV", "TW", "LF", "CDM", "IV", "ZM", "MS", "ST", "IV", "ZM", "LV", "RF", "ZOM", "CDM", "ST", "IV", "LV"];
         
         this.players = names.map((name, i) => {
             const player = {
                 id: i + 1,
-                number: i + 1, // Rückennummer (Jersey)
+                number: i + 1,
                 name: name,
                 pos: positions[i],
                 pac: 75, sho: 70, pas: 80, dri: 75, def: 50, phy: 70,
                 heart: 65,
                 km: 0.0,
                 assignment: i < 11 ? 'both' : 'training', 
+                team: i < 11 ? 'A' : 'B', // Erste 11 Team A, Rest Team B
                 status: "FIT",
                 img: null,
                 x: null, 
@@ -119,7 +120,8 @@ window.Database = {
                 p.rat = this.calculateRating(p);
             }
             this.save();
-            if ((key === 'assignment' || key === 'present') && window.arena) {
+            // Bei Team-Wechsel (Leibchen) muss das Board sofort neu rendern
+            if ((key === 'assignment' || key === 'team') && window.arena) {
                 window.arena.syncFromDatabase();
             }
         }
