@@ -20,10 +20,22 @@
                 <i class="fas fa-briefcase"></i>
                 <span>TASCHE</span>
             </div>
+
+            <div class="control-unit" id="ai-status-unit" title="KI-Verbindungsstatus">
+                <div id="ai-status-light" style="width: 10px; height: 10px; background: #555; border-radius: 50%; margin: 0 auto 5px; transition: all 0.3s ease;"></div>
+                <span id="ai-status-label" style="font-size: 0.5rem; color: #555; letter-spacing: 1px;">OFFLINE</span>
+            </div>
+
             <div class="control-unit" id="mic-trigger">
                 <i class="fas fa-microphone"></i>
                 <span>TONI</span>
             </div>
+
+            <div class="control-unit" onclick="openSection('settings')">
+                <i class="fas fa-cog"></i>
+                <span>SETUP</span>
+            </div>
+
             <div class="control-unit" onclick="location.reload()">
                 <i class="fas fa-sync-alt"></i>
                 <span>RESET</span>
@@ -107,7 +119,7 @@
                     <div class="card-header"><i class="fas fa-search"></i> SCOUTING</div>
                     <p>KI-Spielersuche</p>
                 </div>
-                <div class="mgmt-card">
+                <div class="mgmt-card" onclick="openSection('settings')">
                     <div class="card-header"><i class="fas fa-cog"></i> SETTINGS</div>
                     <p>Ollama & System</p>
                 </div>
