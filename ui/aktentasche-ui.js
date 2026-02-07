@@ -1,67 +1,71 @@
 /**
- * TONI 2.0 - BRIEFCASE UI (ZENTRALE)
- * Verwaltet das 9-Kachel-Raster und das Laden der Sektoren
+ * TONI 2.0 - AKTENTASCHE UI (REPARATUR)
+ * Stellt das 3x3 Raster gemäß Master-CSS wieder her.
  */
 window.BriefcaseUI = {
     isOpen: false,
 
-    init() {
-        console.log("Briefcase System Online");
-        // Event-Bus Listener könnten hier hin
-    },
-
     toggle() {
-        const overlay = document.getElementById('briefcase-overlay');
+        const modal = document.getElementById('briefcase-modal');
+        if (!modal) return;
         this.isOpen = !this.isOpen;
-        overlay.style.display = this.isOpen ? 'flex' : 'none';
+        modal.style.display = this.isOpen ? 'flex' : 'none';
         if (this.isOpen) this.renderMainGrid();
     },
 
     renderMainGrid() {
-        const content = document.getElementById('active-content');
+        const content = document.getElementById('active-content') || document.querySelector('.briefcase-window');
+        if (!content) return;
+
+        // Wir nutzen exakt die Klassen aus deinem Master-CSS:
+        // .management-grid und .mgmt-card
         content.innerHTML = `
             <div class="kabine-header">
-                <h1 style="color: var(--neon-green); letter-spacing: 5px; text-align:center;">ZENTRALE</h1>
+                <h2 style="color: var(--neon-green); letter-spacing: 3px; text-align:center; margin-bottom:30px;">AKTEN-TASCHE</h2>
             </div>
+            
             <div class="management-grid">
-                <div class="mgmt-card" onclick="window.SektorSporttasche.open()">
+                <div class="mgmt-card" onclick="openSection('kabine')">
                     <div class="card-header"><i class="fas fa-users"></i> KABINE</div>
-                    <p>50+ Spieler als FIFA-Karten. Ratings & Anwesenheit.</p>
+                    <p>50+ Spieler & FIFA Karten</p>
                 </div>
-                <div class="mgmt-card" onclick="window.SektorAnalyse.open()">
-                    <div class="card-header"><i class="fas fa-heartbeat pulse-anim"></i> ANALYSE</div>
-                    <p>Vitals: Puls, Kilometer, Schlaf. Manuelle Dateneingabe.</p>
+                <div class="mgmt-card" onclick="openSection('analyse')">
+                    <div class="card-header"><i class="fas fa-heartbeat"></i> ANALYSE</div>
+                    <p>Puls & Fitness-Daten</p>
                 </div>
-                <div class="mgmt-card" onclick="alert('Business Sektor lädt...')">
-                    <div class="card-header"><i class="fas fa-chart-line"></i> BUSINESS</div>
-                    <p>Sponsoren, Finanzen & Vereinsführung.</p>
+                <div class="mgmt-card">
+                    <div class="card-header"><i class="fas fa-briefcase"></i> BUSINESS</div>
+                    <p>Sponsoren & Finanzen</p>
                 </div>
-                <div class="mgmt-card" onclick="alert('Stadion-Zeitung (Nino) wird generiert...')">
+                <div class="mgmt-card">
                     <div class="card-header"><i class="fas fa-print"></i> STADION</div>
-                    <p>Print-Engine: Stadion-Zeitung (A4).</p>
+                    <p>Print-Engine (Nino)</p>
                 </div>
-                <div class="mgmt-card" onclick="alert('Materialkammer offen')">
+                <div class="mgmt-card">
                     <div class="card-header"><i class="fas fa-dumbbell"></i> TRAINING</div>
-                    <p>Equipment: Hütchen, Bälle, Stangen für die Arena.</p>
+                    <p>Equipment & Material</p>
                 </div>
-                <div class="mgmt-card" onclick="alert('Video-Bibliothek')">
-                    <div class="card-header"><i class="fas fa-play-circle"></i> SKILLS</div>
-                    <p>Technik-Videos & Split-Screen Analyse.</p>
+                <div class="mgmt-card">
+                    <div class="card-header"><i class="fas fa-video"></i> SKILLS</div>
+                    <p>Video-Bibliothek</p>
                 </div>
                 <div class="mgmt-card">
                     <div class="card-header"><i class="fas fa-search"></i> SCOUTING</div>
-                    <p>Externe Datenbank & Spielersuche.</p>
+                    <p>Spielersuche</p>
                 </div>
                 <div class="mgmt-card">
                     <div class="card-header"><i class="fas fa-chess-board"></i> TAKTIK</div>
-                    <p>Formationen & Toni-Befehlskette.</p>
+                    <p>Formationen & Befehle</p>
                 </div>
                 <div class="mgmt-card">
-                    <div class="card-header"><i class="fas fa-robot"></i> SETTINGS</div>
-                    <p>System & Ollama KI-Anleitung.</p>
+                    <div class="card-header"><i class="fas fa-cog"></i> SETTINGS</div>
+                    <p>Ollama & System</p>
                 </div>
             </div>
-            <button class="pro-btn-gold" onclick="window.BriefcaseUI.toggle()" style="margin-top:20px; width: 200px; display:block; margin-left:auto; margin-right:auto;">X SCHLIESSEN</button>
+            
+            <div style="text-align:center; margin-top:30px;">
+                <button class="pro-btn-gold" style="width: 200px;" onclick="toggleBriefcase()">SCHLIESSEN</button>
+            </div>
         `;
     }
 };
