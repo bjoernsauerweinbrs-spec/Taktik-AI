@@ -1,20 +1,20 @@
 /**
- * TONI 2.0 - DATABASE (STRATEGIC UPDATE + PLANNING MAPS)
+ * TONI 2.0 - DATABASE (RECOVERY & ELITE UPDATE)
  * Kaderplanung, automatisches Rating & Modus-Filterung
  */
 window.Database = {
     players: [],
     activeMode: 'training', // 'training' oder 'match'
 
-    // NEU: Datenspeicher für die Einsatz-Mappen
+    // Datenspeicher für die Einsatz-Mappen
     trainingPlan: {
         warmup: { desc: "", img: null },
         mainPart: { desc: "", img: null },
         coolDown: { desc: "", img: null },
-        materials: [] // Automatische Liste aus der Arena
+        materials: [] 
     },
     matchPlan: {
-        lineupImg: null, // Screenshot der Aufstellung
+        lineupImg: null, 
         notes: "",
         motivation: "",
         opponentInfo: "Keine Daten vorhanden. KI-Analyse starten?",
@@ -27,11 +27,18 @@ window.Database = {
         
         if (savedData) {
             const parsed = JSON.parse(savedData);
-            // Wir stellen sicher, dass wir sowohl Spieler als auch Pläne laden
             this.players = parsed.players || [];
             this.trainingPlan = parsed.trainingPlan || this.trainingPlan;
             this.matchPlan = parsed.matchPlan || this.matchPlan;
+
+            // REPARATUR-LOGIK: Falls Spieler da sind, aber Stats fehlen
+            if (this.players.length > 0) {
+                this.repairPlayerData();
+            } else {
+                this.createDemoTeam();
+            }
         } else {
+            // Falls gar nichts da ist -> Neuanlage
             this.createDemoTeam();
         }
         
@@ -40,8 +47,19 @@ window.Database = {
         }
     },
 
+    // Stellt sicher, dass jeder Spieler alle FIFA-Stats und IDs hat
+    repairPlayerData() {
+        let changed = false;
+        this.players.forEach(p => {
+            if (p.dri === undefined) { p.dri = 75; changed = true; }
+            if (p.def === undefined) { p.def = 50; changed = true; }
+            if (p.phy === undefined) { p.phy = 70; changed = true; }
+            if (!p.rat) { p.rat = this.calculateRating(p); changed = true; }
+        });
+        if (changed) this.save();
+    },
+
     save() {
-        // Wir speichern das komplette Paket
         const dataToSave = {
             players: this.players,
             trainingPlan: this.trainingPlan,
@@ -58,6 +76,7 @@ window.Database = {
     },
 
     createDemoTeam() {
+        console.log("Toni: Erstelle frisches 20er Kader...");
         const names = ["Max Master", "Lukas Wall", "Toni Technic", "Marc Speed", "Sven Safe", "Finn Flügel", "Ben Beißer", "Leo Luft", "Mika Mitti", "Sam Solo", "Jan Jäger", "Oli Ordnung", "Paul Pass", "Kalle Kante", "Nico Netz", "Dennis Dribbel", "Uli Umkehr", "Basti Ball", "Rene Räumer", "Flo Flanke"];
         const positions = ["ST", "IV", "ZOM", "RV", "TW", "LF", "CDM", "IV", "ZM", "MS", "ST", "IV", "ZM", "LV", "RF", "ZOM", "CDM", "ST", "IV", "LV"];
         
@@ -98,13 +117,12 @@ window.Database = {
                 p.rat = this.calculateRating(p);
             }
             this.save();
-            if (key === 'assignment' && window.arena) {
+            if ((key === 'assignment' || key === 'present') && window.arena) {
                 window.arena.syncFromDatabase();
             }
         }
     },
 
-    // NEU: Funktionen zum Speichern der Mappen-Inhalte
     updateTrainingStep(step, key, val) {
         if (this.trainingPlan[step]) {
             this.trainingPlan[step][key] = val;
