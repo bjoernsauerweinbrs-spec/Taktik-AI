@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - SEKTOR SPORTTASCHE (KADER-PLANER)
- * FIFA-Cards mit Launch-Control für Training & Spielbetrieb.
+ * FIFA-Cards mit Team-Zuweisung & Leibchen-Logik.
  */
 window.SektorSporttasche = {
     open() {
@@ -51,6 +51,11 @@ window.SektorSporttasche = {
             const isAssigned = (p.assignment === 'both' || p.assignment === mode);
             const statusClass = isAssigned ? 'active' : 'inactive';
             
+            // Team-Logik Labeling
+            const teamLabel = mode === 'training' ? (p.team === 'B' ? 'LEIBCHEN' : 'TRIKOT') : (p.team === 'B' ? 'GEGNER (KI)' : 'EIGENES TEAM');
+            const teamIcon = p.team === 'B' ? 'fa-tshirt' : 'fa-shield-alt';
+            const teamColor = p.team === 'B' ? '#ccff00' : 'var(--neon-green)'; // Leibchen-Gelb vs Team-Grün
+
             html += `
                 <div class="fifa-card ${statusClass}">
                     <div class="presence-toggle ${isAssigned ? 'on' : 'off'}"></div>
@@ -69,6 +74,13 @@ window.SektorSporttasche = {
                             ${p.name.toUpperCase()}
                         </div>
                         
+                        <button onclick="window.SektorSporttasche.toggleTeam(${p.id})" 
+                                style="background: ${p.team === 'B' ? 'rgba(204, 255, 0, 0.2)' : 'rgba(57, 255, 20, 0.1)'}; 
+                                       border: 1px solid ${teamColor}; color: ${teamColor};
+                                       width: 85%; font-size: 0.6rem; padding: 4px; border-radius: 4px; cursor: pointer; margin-bottom: 8px; font-weight: bold;">
+                            <i class="fas ${teamIcon}"></i> ${teamLabel}
+                        </button>
+
                         <div class="stats-grid">
                             <div onclick="window.SektorSporttasche.edit(${p.id}, 'pac')"><span>${p.pac || 0}</span>PAC</div>
                             <div onclick="window.SektorSporttasche.edit(${p.id}, 'sho')"><span>${p.sho || 0}</span>SHO</div>
@@ -94,21 +106,20 @@ window.SektorSporttasche = {
         content.innerHTML = html + `</div>`;
     },
 
-    // Startet die Arena-Engine mit den aktuellen Filtern
+    toggleTeam(id) {
+        const p = window.Database.players.find(x => x.id === id);
+        if (p) {
+            const nextTeam = p.team === 'A' ? 'B' : 'A';
+            window.Database.updatePlayer(id, 'team', nextTeam);
+            this.open();
+        }
+    },
+
     launchBoard() {
-        console.log("Launching Board with Mode:", window.Database.activeMode);
-        
-        // 1. Speichern sicherstellen
         window.Database.save();
-        
-        // 2. Aktentasche schließen
         if (window.toggleBriefcase) window.toggleBriefcase();
-        
-        // 3. Arena synchronisieren (hier greift dann das neue horizontale Layout)
         if (window.arena) {
             window.arena.syncFromDatabase();
-            
-            // Palette basierend auf Modus steuern
             if (window.toggleEquipmentPalette) {
                 window.toggleEquipmentPalette(window.Database.activeMode === 'training');
             }
@@ -118,7 +129,6 @@ window.SektorSporttasche = {
     edit(id, key) {
         const p = window.Database.players.find(x => x.id === id);
         if (!p) return;
-        
         const val = prompt(`Neuer Wert für ${key.toUpperCase()}:`, p[key]);
         if (val !== null) {
             const finalVal = isNaN(val) || val === "" ? val : parseInt(val);
@@ -130,7 +140,6 @@ window.SektorSporttasche = {
     upload(e, id) {
         const file = e.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = () => {
             window.Database.updatePlayer(id, 'img', reader.result);
