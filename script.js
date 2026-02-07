@@ -1,123 +1,75 @@
 /**
- * TONI 2.0 - BRIDGE SCRIPT (FULL UPDATE)
- * Koordiniert UI, Arena-Materialien und Toni-Interaktion
+ * TONI 2.0 - BRIDGE SCRIPT
+ * Verbindet das HTML mit der Logik der Module
  */
 
-// 1. AKTENTASCHE STEUERUNG
+// 1. Die Haupt-Funktion für den Button "TASCHE"
 function toggleBriefcase() {
-    const modal = document.getElementById('briefcase-modal');
-    if (!modal) return console.error("Modal nicht gefunden!");
-
-    if (modal.style.display === 'flex') {
-        modal.style.display = 'none';
+    if (window.BriefcaseUI) {
+        window.BriefcaseUI.toggle();
     } else {
-        modal.style.display = 'flex';
-        if (window.BriefcaseUI) {
-            window.BriefcaseUI.renderMainGrid();
-        }
+        console.error("Fehler: BriefcaseUI-Modul wurde noch nicht geladen!");
     }
 }
 
-function openSection(section) {
-    console.log("Navigiere zu Sektor:", section);
-    if (section === 'kabine' && window.SektorSporttasche) {
+// 2. Navigation innerhalb der Aktentasche (Sektoren öffnen)
+function openSection(name) {
+    console.log("Navigiere zu Sektor:", name);
+    if (name === 'kabine') {
         window.SektorSporttasche.open();
-    } else if (section === 'analyse' && window.SektorAnalyse) {
-        window.SektorAnalyse.open();
+    } else if (name === 'analyse') {
+        // Hier bauen wir gleich die Analyse-Daten ein
+        alert("Analyse-Sektor wird im nächsten Schritt aktiviert!");
     } else {
-        alert("Sektor " + section.toUpperCase() + " wird in Kürze freigeschaltet.");
+        alert("Sektor " + name.toUpperCase() + " ist in Arbeit...");
     }
 }
 
-// 2. ARENA MATERIAL-STEUERUNG (Materialkammer)
-/**
- * Diese Funktionen werden von der Palette neben dem Spielfeld aufgerufen
- */
-function spawnMaterial(type, color) {
-    if (window.arena) {
-        window.arena.addEquipment(type, color);
-        // Kurzes Feedback von Toni
-        const msg = type === 'cone' ? "Hütchen platziert." : "Material auf dem Feld.";
-        toniSpeak(msg);
-    }
-}
-
-// 3. TONI CHAT & ANALYSE LOGIK
-function toniSpeak(text) {
-    const chatBox = document.getElementById('chat-box');
-    if (!chatBox) return;
-
-    const msgElement = document.createElement('p');
-    msgElement.style.color = "var(--neon-green)";
-    msgElement.style.marginBottom = "10px";
-    msgElement.style.animation = "fadeIn 0.5s ease";
-    msgElement.innerHTML = `<strong>Toni:</strong> ${text}`;
-    
-    chatBox.appendChild(msgElement);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-
+// 3. Toni Chat-Logik (Befehle verarbeiten)
 function handleCommand(command) {
     if (!command.trim()) return;
     
-    // Deinen Befehl im Chat anzeigen
     const chatBox = document.getElementById('chat-box');
     const userMsg = document.createElement('p');
     userMsg.style.color = "#fff";
     userMsg.innerHTML = `<strong>Coach:</strong> ${command}`;
     chatBox.appendChild(userMsg);
 
-    // Toni Logik / Antworten
+    // Toni-Antwort-Logik
     const cmd = command.toLowerCase();
-    if (cmd.includes("hütchen") || cmd.includes("aufbau")) {
-        toniSpeak("Verstanden. Ich habe die Materialkammer für den Aufbau vorbereitet.");
-    } else if (cmd.includes("taktik") || cmd.includes("aufstellung")) {
-        toniSpeak("Analysiere aktuelle Positionen... Die Abstände in der Kette wirken stabil.");
-    } else {
-        toniSpeak("Befehl empfangen. Ich verarbeite die Daten für die nächste Analyse.");
+    let response = "Befehl empfangen. Ich analysiere...";
+    
+    if (cmd.includes("aufbau") || cmd.includes("hütchen")) {
+        response = "Materialkammer bereit. Welche Übung planst du?";
+    } else if (cmd.includes("taktik")) {
+        response = "Taktik-Board aktualisiert. Die 50+ Spieler sind in der Datenbank.";
     }
 
+    const toniMsg = document.createElement('p');
+    toniMsg.style.color = "var(--neon-green)";
+    toniMsg.innerHTML = `<strong>Toni:</strong> ${response}`;
+    chatBox.appendChild(toniMsg);
+    
     document.getElementById('command-input').value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// 4. INITIALISIERUNG
+// 4. Initialisierung beim Laden der Seite
 window.onload = () => {
-    console.log("TONI 2.0 SYSTEM ONLINE");
+    console.log("TONI 2.0 Cockpit geladen.");
     
-    // Arena starten
+    // Arena (Spielfeld) starten
     if (window.arena && document.getElementById('main-canvas')) {
         window.arena.init('main-canvas');
+        // Spieler aus dem Speicher direkt auf den Platz laden
+        window.arena.syncFromDatabase(); 
     }
 
-    // Enter-Taste für Toni-Befehle
+    // Enter-Taste für die Chatbox aktivieren
     const input = document.getElementById('command-input');
     if (input) {
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleCommand(input.value);
         });
     }
-};
-window.onload = () => {
-    // Datenbank laden (falls noch nicht geschehen)
-    if (window.Database) window.Database.init();
-    
-    // Arena starten
-    if (window.arena && document.getElementById('main-canvas')) {
-        window.arena.init('main-canvas');
-        window.arena.syncFromDatabase(); // Spieler direkt auf den Platz laden
-    }
-    
-    console.log("System bereit und Daten geladen.");
-};
-window.onload = () => {
-    // Datenbank laden (falls noch nicht geschehen)
-    if (window.Database) window.Database.init();
-    
-    // Arena starten
-    if (window.arena && document.getElementById('main-canvas')) {
-        window.arena.init('main-canvas');
-        window.arena.syncFromDatabase(); // Spieler direkt auf den Platz laden
-    }
-    
-    console.log("System bereit und Daten geladen.");
 };
