@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - AKTENTASCHE UI (REPARATUR)
- * Stellt das 3x3 Raster gemäß Master-CSS wieder her.
+ * TONI 2.0 - AKTENTASCHE UI (GRID-FIX)
+ * Stellt das 3x3 Kachel-System wieder her.
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -14,14 +14,15 @@ window.BriefcaseUI = {
     },
 
     renderMainGrid() {
-        const content = document.getElementById('active-content') || document.querySelector('.briefcase-window');
+        // Wir suchen den Inhaltsbereich im Modal
+        const content = document.querySelector('.briefcase-window');
         if (!content) return;
 
-        // Wir nutzen exakt die Klassen aus deinem Master-CSS:
-        // .management-grid und .mgmt-card
+        // Wir bauen das Grid exakt nach deinem Master-CSS auf
         content.innerHTML = `
-            <div class="kabine-header">
-                <h2 style="color: var(--neon-green); letter-spacing: 3px; text-align:center; margin-bottom:30px;">AKTEN-TASCHE</h2>
+            <div class="kabine-header" style="text-align: center; margin-bottom: 30px;">
+                <h2 style="color: var(--neon-green); letter-spacing: 5px; text-transform: uppercase;">Akten-Tasche</h2>
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 15px;">
             </div>
             
             <div class="management-grid">
@@ -63,8 +64,8 @@ window.BriefcaseUI = {
                 </div>
             </div>
             
-            <div style="text-align:center; margin-top:30px;">
-                <button class="pro-btn-gold" style="width: 200px;" onclick="toggleBriefcase()">SCHLIESSEN</button>
+            <div style="width: 100%; text-align: center; margin-top: 40px;">
+                <button class="pro-btn-gold" style="width: 250px; padding: 15px;" onclick="toggleBriefcase()">SCHLIESSEN</button>
             </div>
         `;
     }
