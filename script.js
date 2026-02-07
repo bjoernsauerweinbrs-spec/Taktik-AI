@@ -1,5 +1,5 @@
 /**
- * TONI 2.0 - BRIDGE SCRIPT
+ * TONI 2.0 - BRIDGE SCRIPT (MASTER UPDATE)
  * Verbindet das HTML mit der Logik der Module
  */
 
@@ -15,13 +15,23 @@ function toggleBriefcase() {
 // 2. Navigation innerhalb der Aktentasche (Sektoren öffnen)
 function openSection(name) {
     console.log("Navigiere zu Sektor:", name);
+    
     if (name === 'kabine') {
-        window.SektorSporttasche.open();
-    } else if (name === 'analyse') {
-        // Hier bauen wir gleich die Analyse-Daten ein
-        alert("Analyse-Sektor wird im nächsten Schritt aktiviert!");
-    } else {
-        alert("Sektor " + name.toUpperCase() + " ist in Arbeit...");
+        if (window.SektorSporttasche) {
+            window.SektorSporttasche.open();
+        } else {
+            console.error("SektorSporttasche nicht gefunden!");
+        }
+    } 
+    else if (name === 'analyse') {
+        if (window.SektorAnalyse) {
+            window.SektorAnalyse.open(); // Aktiviert den Analyse-Sektor
+        } else {
+            console.error("SektorAnalyse nicht gefunden!");
+        }
+    } 
+    else {
+        alert("Sektor " + name.toUpperCase() + " wird im nächsten Update freigeschaltet.");
     }
 }
 
@@ -35,14 +45,15 @@ function handleCommand(command) {
     userMsg.innerHTML = `<strong>Coach:</strong> ${command}`;
     chatBox.appendChild(userMsg);
 
-    // Toni-Antwort-Logik
     const cmd = command.toLowerCase();
     let response = "Befehl empfangen. Ich analysiere...";
     
     if (cmd.includes("aufbau") || cmd.includes("hütchen")) {
-        response = "Materialkammer bereit. Welche Übung planst du?";
-    } else if (cmd.includes("taktik")) {
-        response = "Taktik-Board aktualisiert. Die 50+ Spieler sind in der Datenbank.";
+        response = "Materialkammer bereit. Ich habe die Arena für den Aufbau kalibriert.";
+    } else if (cmd.includes("taktik") || cmd.includes("kabine")) {
+        response = "Taktik-Board steht. Alle Spielerdaten sind im Direktzugriff.";
+    } else if (cmd.includes("analyse") || cmd.includes("puls")) {
+        response = "Vital-Monitor ist aktiv. Ich überwache die Herzfrequenz der Spieler.";
     }
 
     const toniMsg = document.createElement('p');
@@ -58,11 +69,16 @@ function handleCommand(command) {
 window.onload = () => {
     console.log("TONI 2.0 Cockpit geladen.");
     
+    // Datenbank initialisieren (Sicherheitshalber)
+    if (window.Database) window.Database.init();
+
     // Arena (Spielfeld) starten
     if (window.arena && document.getElementById('main-canvas')) {
         window.arena.init('main-canvas');
-        // Spieler aus dem Speicher direkt auf den Platz laden
-        window.arena.syncFromDatabase(); 
+        // Falls Spieler anwesend sind, direkt auf das Feld rendern
+        if (window.Database && typeof window.Database.getPresentPlayers === 'function') {
+            window.arena.syncFromDatabase(); 
+        }
     }
 
     // Enter-Taste für die Chatbox aktivieren
