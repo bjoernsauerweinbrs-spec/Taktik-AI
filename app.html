@@ -41,8 +41,17 @@
                 <div class="tool-btn" title="Ball platzieren" onclick="window.arena.setTool('ball')">
                     <i class="fas fa-futbol"></i>
                 </div>
+                <div class="tool-btn" title="Minitor setzen" onclick="window.arena.setTool('goal')">
+                    <i class="fas fa-door-open" style="color: #fff;"></i>
+                </div>
                 <div class="tool-btn" title="Laufweg zeichnen" onclick="window.arena.setTool('arrow')">
-                    <i class="fas fa-arrow-right" style="color: var(--neon-green);"></i>
+                    <i class="fas fa-running" style="color: var(--neon-green);"></i>
+                </div>
+                <div class="tool-btn" title="Passweg zeichnen" onclick="window.arena.setTool('pass')">
+                    <i class="fas fa-long-arrow-alt-right" style="color: var(--data-cyan);"></i>
+                </div>
+                <div class="tool-btn" title="Torschuss einzeichnen" onclick="window.arena.setTool('shot')">
+                    <i class="fas fa-bolt" style="color: #ff3b30;"></i>
                 </div>
                 <div class="tool-btn" title="Element löschen" onclick="window.arena.setTool('delete')">
                     <i class="fas fa-eraser" style="color: var(--status-error);"></i>
@@ -50,8 +59,7 @@
             </div>
 
             <canvas id="main-canvas"></canvas>
-            <div class="five-meter-space"></div>
-        </main>
+            </main>
 
         <aside class="analysis-panel">
             <div class="video-preview">
