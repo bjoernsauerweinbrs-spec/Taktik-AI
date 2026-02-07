@@ -68,31 +68,41 @@ body, html {
     align-items: center;
     position: relative;
     z-index: 2;
+    overflow: hidden;
 }
 
 #main-canvas { 
     width: 98% !important; 
     height: 95% !important; 
-    border: 2px solid var(--neon-green);
-    box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
+    border: 2px solid rgba(57, 255, 20, 0.3);
+    box-shadow: 0 0 30px rgba(57, 255, 20, 0.1);
+    background: #051205;
 }
 
-/* --- MATERIALKAMMER (EQUIPMENT PALETTE) --- */
+/* --- NEU: EINKLAPPBARE MATERIALKAMMER (EQUIPMENT PALETTE) --- */
 #equipment-palette {
     position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(13, 20, 33, 0.9);
+    left: -70px; /* Standardmäßig eingeklappt hinter der Sidebar */
+    top: 150px;
+    background: rgba(13, 20, 33, 0.95);
     border: 1px solid var(--neon-green);
-    border-radius: 12px;
+    border-left: none;
+    border-radius: 0 15px 15px 0;
     display: flex;
     flex-direction: column;
-    padding: 12px;
+    padding: 15px 10px;
     gap: 15px;
     z-index: 100;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    backdrop-filter: blur(15px);
+    box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Klasse zum Ausklappen (Wird via JS oder Hover gesteuert) */
+#equipment-palette.open, 
+.sidebar-minimal:hover + #stage-container #equipment-palette,
+#equipment-palette:hover {
+    left: 0px; /* Schiebt sich exakt an die Sidebar-Kante */
 }
 
 .tool-btn {
@@ -100,33 +110,21 @@ body, html {
     height: 45px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     transition: 0.3s;
     color: var(--text-main);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
 }
 
 .tool-btn:hover {
     background: var(--neon-green);
     color: #000;
     box-shadow: 0 0 15px var(--neon-green);
-    transform: scale(1.1);
-}
-
-/* --- 5M RAUM --- */
-.five-meter-space {
-    position: absolute;
-    bottom: 5%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 20%;
-    height: 8%;
-    border: 2px solid rgba(57, 255, 20, 0.4);
-    pointer-events: none;
+    transform: translateX(5px);
 }
 
 /* 5. RECHTE ANALYSE-SPALTE */
@@ -220,6 +218,11 @@ body, html {
     overflow: hidden;
     clip-path: polygon(10% 0, 90% 0, 100% 15%, 100% 85%, 50% 100%, 0 85%, 0 15%);
     border: 2px solid var(--accent-gold);
+}
+
+.fifa-card.inactive {
+    filter: grayscale(0.8) opacity(0.5);
+    border-color: #333;
 }
 
 .fifa-card:hover { 
