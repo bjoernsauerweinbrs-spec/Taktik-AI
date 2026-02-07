@@ -109,3 +109,15 @@ window.onload = () => {
     
     console.log("System bereit und Daten geladen.");
 };
+window.onload = () => {
+    // Datenbank laden (falls noch nicht geschehen)
+    if (window.Database) window.Database.init();
+    
+    // Arena starten
+    if (window.arena && document.getElementById('main-canvas')) {
+        window.arena.init('main-canvas');
+        window.arena.syncFromDatabase(); // Spieler direkt auf den Platz laden
+    }
+    
+    console.log("System bereit und Daten geladen.");
+};
