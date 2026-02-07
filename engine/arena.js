@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - ARENA ENGINE (ELITE TACTICAL BOARD)
- * Maßstabsgetreues Spielfeld, FIFA-Shields & Zusatztore.
+ * TONI 2.0 - ARENA ENGINE (HORIZONTAL ELITE)
+ * Horizontales Spielfeld, Ersatzbank-Zone & Taktik-Linien.
  */
 window.arena = {
     canvas: null,
@@ -22,7 +22,6 @@ window.arena = {
 
     setTool(tool) {
         this.currentTool = tool;
-        // Visuelles Feedback in der Konsole
         console.log("Aktion: " + tool.toUpperCase() + " aktiv.");
     },
 
@@ -31,13 +30,21 @@ window.arena = {
         const presentPlayers = window.Database.getPresentPlayers();
         this.elements = this.elements.filter(el => el.type !== 'player');
         
+        // Konstanten für die Ersatzbank (unten mittig)
+        const cardWidth = 45;
+        const spacing = 15;
+        const benchY = this.canvas.height - 50;
+        const totalBenchWidth = presentPlayers.length * (cardWidth + spacing);
+        let startX = (this.canvas.width - totalBenchWidth) / 2;
+
         presentPlayers.forEach((p, index) => {
             this.elements.push({
                 id: p.id, type: 'player',
-                x: p.x || (100 + index * 60),
-                y: p.y || (this.canvas.height - 80),
+                // Nutze gespeicherte Position oder setze auf die Bank
+                x: p.x || (startX + index * (cardWidth + spacing)),
+                y: p.y || benchY,
                 color: window.Database.activeMode === 'match' ? 'var(--accent-gold)' : 'var(--neon-green)',
-                width: 45, height: 55,
+                width: cardWidth, height: 55,
                 name: p.name, pos: p.pos, rat: p.rat
             });
         });
@@ -46,8 +53,7 @@ window.arena = {
     addEquipment(type, color = '#FF6A00', x, y) {
         this.elements.push({
             type: type,
-            x: x || this.canvas.width / 2,
-            y: y || this.canvas.height / 2,
+            x: x, y: y,
             color: color,
             radius: type === 'ball' ? 8 : 15,
             id: Date.now()
@@ -66,8 +72,9 @@ window.arena = {
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
 
-        if (this.currentTool === 'arrow') {
-            this.tempArrow = { startX: mx, startY: my, endX: mx, endY: my };
+        // Check für Linien-Tools
+        if (['arrow', 'pass', 'shot'].includes(this.currentTool)) {
+            this.tempArrow = { startX: mx, startY: my, endX: mx, endY: my, type: this.currentTool };
         } else if (this.currentTool === 'cone') {
             this.addEquipment('cone', '#FF6A00', mx, my);
         } else if (this.currentTool === 'ball') {
@@ -117,6 +124,7 @@ window.arena = {
         if(!container) return;
         this.canvas.width = container.clientWidth * 0.98;
         this.canvas.height = container.clientHeight * 0.95;
+        this.syncFromDatabase();
     },
 
     renderLoop() {
@@ -128,43 +136,50 @@ window.arena = {
         const ctx = this.ctx;
         const w = this.canvas.width;
         const h = this.canvas.height;
-        const margin = 50;
+        const margin = 70; // Mehr Platz für die Bank unten
 
-        // 1. SPIELFELD-GRAFIK (PITCH)
-        ctx.fillStyle = "#051205"; // Dunkles Gras
+        // 1. SPIELFELD-HINTERGRUND
+        ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
         
         ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
         ctx.lineWidth = 2;
 
-        // Außenlinie
-        ctx.strokeRect(margin, margin, w - margin*2, h - margin*2);
+        // Außenlinie (Horizontal)
+        const fieldW = w - margin * 2;
+        const fieldH = h - margin * 2;
+        ctx.strokeRect(margin, margin, fieldW, fieldH);
         
-        // Mittellinie & Kreis
+        // Mittellinie & Anstoßkreis (Vertikal geteilt)
         ctx.beginPath(); ctx.moveTo(w/2, margin); ctx.lineTo(w/2, h-margin); ctx.stroke();
         ctx.beginPath(); ctx.arc(w/2, h/2, 60, 0, Math.PI*2); ctx.stroke();
         
-        // Strafräume (16m)
-        ctx.strokeRect(w/2 - 160, margin, 320, 100); // Nord
-        ctx.strokeRect(w/2 - 160, h-margin-100, 320, 100); // Süd
+        // Strafräume (Links & Rechts)
+        const penaltyW = 120;
+        const penaltyH = 280;
+        ctx.strokeRect(margin, h/2 - penaltyH/2, penaltyW, penaltyH); // West
+        ctx.strokeRect(w - margin - penaltyW, h/2 - penaltyH/2, penaltyW, penaltyH); // Ost
         
         // Torräume (5m)
-        ctx.strokeRect(w/2 - 70, margin, 140, 40); // Nord
-        ctx.strokeRect(w/2 - 70, h-margin-40, 140, 40); // Süd
+        const goalBoxW = 45;
+        const goalBoxH = 120;
+        ctx.strokeRect(margin, h/2 - goalBoxH/2, goalBoxW, goalBoxH); // West
+        ctx.strokeRect(w - margin - goalBoxW, h/2 - goalBoxH/2, goalBoxW, goalBoxH); // Ost
 
-        // Elfmeterpunkte
-        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-        ctx.beginPath(); ctx.arc(w/2, margin + 80, 3, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(w/2, h - margin - 80, 3, 0, Math.PI*2); ctx.fill();
-
-        // Haupt-Tore (Weiß)
+        // Tore (Links & Rechts außen)
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
-        ctx.strokeRect(w/2 - 45, margin - 15, 90, 15);
-        ctx.strokeRect(w/2 - 45, h - margin, 90, 15);
+        ctx.strokeRect(margin - 15, h/2 - 45, 15, 90); // West Tor
+        ctx.strokeRect(w - margin, h/2 - 45, 15, 90); // Ost Tor
+
+        // Ersatzbank-Beschriftung
+        ctx.fillStyle = "rgba(255,255,255,0.1)";
+        ctx.font = "bold 10px Inter";
+        ctx.textAlign = "center";
+        ctx.fillText("ERSATZBANK / KADER-POOL", w/2, h - 15);
 
         // --- EBENE 1: LAUFWEGE (PFEILE) ---
-        this.arrows.forEach(a => this.drawArrow(ctx, a.startX, a.startY, a.endX, a.endY, "var(--neon-green)"));
-        if(this.tempArrow) this.drawArrow(ctx, this.tempArrow.startX, this.tempArrow.startY, this.tempArrow.endX, this.tempArrow.endY, "rgba(57, 255, 20, 0.5)");
+        this.arrows.forEach(a => this.drawTacticLine(ctx, a));
+        if(this.tempArrow) this.drawTacticLine(ctx, this.tempArrow, true);
 
         // --- EBENE 2: PLAYER & EQUIPMENT ---
         this.elements.forEach(el => {
@@ -175,17 +190,33 @@ window.arena = {
         });
     },
 
-    drawArrow(ctx, x1, y1, x2, y2, color) {
-        const headlen = 12;
-        const angle = Math.atan2(y2 - y1, x2 - x1);
+    drawTacticLine(ctx, a, isTemp = false) {
         ctx.save();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-        ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+        const headlen = 12;
+        const angle = Math.atan2(a.endY - a.startY, a.endX - a.startX);
+        
+        if (isTemp) ctx.globalAlpha = 0.5;
+
+        // Linienstil basierend auf Typ
+        if (a.type === 'pass') {
+            ctx.setLineDash([10, 5]);
+            ctx.strokeStyle = "var(--data-cyan)";
+        } else if (a.type === 'shot') {
+            ctx.strokeStyle = "#ff3b30";
+            ctx.lineWidth = 5;
+        } else {
+            ctx.strokeStyle = "var(--neon-green)";
+            ctx.lineWidth = 3;
+        }
+
+        ctx.beginPath(); ctx.moveTo(a.startX, a.startY); ctx.lineTo(a.endX, a.endY); ctx.stroke();
+        
+        // Pfeilspitze
+        ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(a.endX, a.endY);
+        ctx.lineTo(a.endX - headlen * Math.cos(angle - Math.PI / 6), a.endY - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.moveTo(a.endX, a.endY);
+        ctx.lineTo(a.endX - headlen * Math.cos(angle + Math.PI / 6), a.endY - headlen * Math.sin(angle + Math.PI / 6));
         ctx.stroke();
         ctx.restore();
     },
@@ -194,14 +225,13 @@ window.arena = {
         const w = el.width; const h = el.height;
         const x = el.x - w/2; const y = el.y - h/2;
         ctx.save();
-        // Shield Shape
         ctx.beginPath();
         ctx.moveTo(x + w*0.1, y); ctx.lineTo(x + w*0.9, y); ctx.lineTo(x + w, y + h*0.2);
         ctx.lineTo(x + w, y + h*0.8); ctx.lineTo(x + w*0.5, y + h); ctx.lineTo(x, y + h*0.8);
         ctx.lineTo(x, y + h*0.2); ctx.closePath();
         ctx.fillStyle = "#000"; ctx.fill();
         ctx.strokeStyle = el.color; ctx.lineWidth = 2; ctx.stroke();
-        // Rating & Name
+        
         ctx.fillStyle = el.color; ctx.font = "bold 11px Inter"; ctx.textAlign = "center";
         ctx.fillText(el.rat, el.x, y + 18);
         ctx.fillStyle = "#fff"; ctx.font = "bold 8px Inter";
