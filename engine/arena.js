@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - ARENA ENGINE (HORIZONTAL ELITE)
- * Taktische Transformation mit Team-Farb-Logik (Leibchen & Gegner).
+ * Integration: Separates KI-Gegner-Team im Spielmodus.
  */
 window.arena = {
     canvas: null,
@@ -27,25 +27,25 @@ window.arena = {
 
     syncFromDatabase() {
         if(!window.Database) return;
-        const presentPlayers = window.Database.getPresentPlayers();
         const mode = window.Database.activeMode;
-        this.elements = this.elements.filter(el => el.type !== 'player');
+        const allPresent = window.Database.getPresentPlayers();
+        
+        // Filter: Im Match-Modus nur Team A (Eigene) anzeigen
+        const myPlayers = mode === 'match' 
+            ? allPresent.filter(p => p.team === 'A') 
+            : allPresent;
+
+        this.elements = this.elements.filter(el => el.type !== 'player' && el.type !== 'opponent');
         
         const cardWidth = 45;
         const spacing = 15;
         const benchY = this.canvas.height - 50;
-        const totalBenchWidth = presentPlayers.length * (cardWidth + spacing);
+        const totalBenchWidth = myPlayers.length * (cardWidth + spacing);
         let startX = (this.canvas.width - totalBenchWidth) / 2;
 
-        presentPlayers.forEach((p, index) => {
-            // Farblogik basierend auf Team und Modus
-            let playerColor = 'var(--neon-green)'; // Default Training Team A
-            
-            if (mode === 'match') {
-                playerColor = (p.team === 'A') ? 'var(--accent-gold)' : '#ff3b30'; // Gold vs Rot (KI)
-            } else {
-                playerColor = (p.team === 'A') ? 'var(--neon-green)' : '#ccff00'; // Grün vs Gelb (Leibchen)
-            }
+        // 1. Eigene Spieler laden
+        myPlayers.forEach((p, index) => {
+            let playerColor = mode === 'match' ? 'var(--accent-gold)' : (p.team === 'A' ? 'var(--neon-green)' : '#ccff00');
 
             this.elements.push({
                 id: p.id, type: 'player',
@@ -58,15 +58,46 @@ window.arena = {
                 name: p.name, pos: p.pos, rat: p.rat
             });
         });
+
+        // 2. KI-Gegner laden (Nur im Match-Modus)
+        if (mode === 'match') {
+            this.createOpponentTeam();
+        }
+    },
+
+    // Erstellt 11 neutrale KI-Gegner in einer 4-4-2 Grundordnung
+    createOpponentTeam() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const startX = w * 0.6; // Gegner starten in der rechten Hälfte
+
+        const formation = [
+            { n: '1', x: w - 100, y: h/2, p: 'TW' }, // Torwart
+            { n: '2', x: startX + 150, y: h*0.2, p: 'RV' }, { n: '4', x: startX + 180, y: h*0.4, p: 'IV' },
+            { n: '5', x: startX + 180, y: h*0.6, p: 'IV' }, { n: '3', x: startX + 150, y: h*0.8, p: 'LV' },
+            { n: '7', x: startX + 80, y: h*0.2, p: 'RM' }, { n: '6', x: startX + 100, y: h*0.4, p: 'ZM' },
+            { n: '8', x: startX + 100, y: h*0.6, p: 'ZM' }, { n: '11', x: startX + 80, y: h*0.8, p: 'LM' },
+            { n: '9', x: startX + 20, y: h*0.35, p: 'ST' }, { n: '10', x: startX + 20, y: h*0.65, p: 'ST' }
+        ];
+
+        formation.forEach((opp, i) => {
+            this.elements.push({
+                id: 'opp-' + i,
+                type: 'opponent',
+                number: opp.n,
+                x: opp.x,
+                y: opp.y,
+                color: '#ff3b30', // Klassisches Gegner-Rot
+                name: 'GEGNER',
+                pos: opp.p
+            });
+        });
     },
 
     addEquipment(type, color = '#FF6A00', x, y) {
         this.elements.push({
-            type: type,
-            x: x, y: y,
-            color: color,
-            radius: type === 'ball' ? 8 : 15,
-            id: Date.now()
+            type: type, x: x, y: y, color: color,
+            radius: type === 'ball' ? 8 : 15, id: Date.now()
         });
     },
 
@@ -84,18 +115,12 @@ window.arena = {
 
         if (['arrow', 'pass', 'shot'].includes(this.currentTool)) {
             this.tempArrow = { startX: mx, startY: my, endX: mx, endY: my, type: this.currentTool };
-        } else if (this.currentTool === 'cone') {
-            this.addEquipment('cone', '#FF6A00', mx, my);
-        } else if (this.currentTool === 'ball') {
-            this.addEquipment('ball', '#fff', mx, my);
-        } else if (this.currentTool === 'goal') {
-            this.addEquipment('goal', '#fff', mx, my);
         } else if (this.currentTool === 'delete') {
             this.elements = this.elements.filter(el => Math.sqrt((mx-el.x)**2 + (my-el.y)**2) > 25);
             this.arrows = this.arrows.filter(a => Math.sqrt((mx-a.endX)**2 + (my-a.endY)**2) > 25);
         } else {
             this.selectedElement = [...this.elements].reverse().find(el => {
-                const range = el.type === 'player' ? 30 : 20;
+                const range = (el.type === 'player' || el.type === 'opponent') ? 30 : 20;
                 return Math.sqrt((mx - el.x)**2 + (my - el.y)**2) < range;
             });
         }
@@ -166,11 +191,6 @@ window.arena = {
         ctx.strokeRect(margin, h/2 - penaltyH/2, penaltyW, penaltyH);
         ctx.strokeRect(w - margin - penaltyW, h/2 - penaltyH/2, penaltyW, penaltyH);
         
-        const goalBoxW = 45;
-        const goalBoxH = 120;
-        ctx.strokeRect(margin, h/2 - goalBoxH/2, goalBoxW, goalBoxH);
-        ctx.strokeRect(w - margin - goalBoxW, h/2 - goalBoxH/2, goalBoxW, goalBoxH);
-
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
         ctx.strokeRect(margin - 15, h/2 - 45, 15, 90);
         ctx.strokeRect(w - margin, h/2 - 45, 15, 90);
@@ -184,8 +204,8 @@ window.arena = {
         if(this.tempArrow) this.drawTacticLine(ctx, this.tempArrow, true);
 
         this.elements.forEach(el => {
-            if (el.type === 'player') {
-                if (el.y < benchThreshold) {
+            if (el.type === 'player' || el.type === 'opponent') {
+                if (el.y < benchThreshold || el.type === 'opponent') {
                     this.drawTacticalDot(ctx, el);
                 } else {
                     this.drawMiniCard(ctx, el);
@@ -209,7 +229,7 @@ window.arena = {
         ctx.arc(el.x, el.y, radius, 0, Math.PI * 2);
         ctx.fillStyle = el.color;
         ctx.fill();
-        ctx.strokeStyle = (el.team === 'B' && window.Database.activeMode === 'training') ? "#000" : "#fff";
+        ctx.strokeStyle = "#fff";
         ctx.lineWidth = 2;
         ctx.stroke();
 
@@ -218,12 +238,12 @@ window.arena = {
         ctx.font = "bold 14px Inter";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(el.number || el.id, el.x, el.y);
+        ctx.fillText(el.number, el.x, el.y);
 
         ctx.fillStyle = "#fff";
         ctx.font = "bold 11px Inter";
-        const lastName = el.name.split(' ').pop().toUpperCase();
-        ctx.fillText(lastName, el.x, el.y + radius + 15);
+        const label = el.type === 'opponent' ? 'GEGNER' : el.name.split(' ').pop().toUpperCase();
+        ctx.fillText(label, el.x, el.y + radius + 15);
         
         ctx.fillStyle = el.color;
         ctx.font = "8px Inter";
@@ -236,16 +256,9 @@ window.arena = {
         const headlen = 12;
         const angle = Math.atan2(a.endY - a.startY, a.endX - a.startX);
         if (isTemp) ctx.globalAlpha = 0.5;
-        if (a.type === 'pass') {
-            ctx.setLineDash([10, 5]);
-            ctx.strokeStyle = "var(--data-cyan)";
-        } else if (a.type === 'shot') {
-            ctx.strokeStyle = "#ff3b30";
-            ctx.lineWidth = 5;
-        } else {
-            ctx.strokeStyle = "var(--neon-green)";
-            ctx.lineWidth = 3;
-        }
+        ctx.strokeStyle = a.type === 'pass' ? "var(--data-cyan)" : (a.type === 'shot' ? "#ff3b30" : "var(--neon-green)");
+        ctx.lineWidth = a.type === 'shot' ? 5 : 3;
+        if (a.type === 'pass') ctx.setLineDash([10, 5]);
         ctx.beginPath(); ctx.moveTo(a.startX, a.startY); ctx.lineTo(a.endX, a.endY); ctx.stroke();
         ctx.setLineDash([]);
         ctx.beginPath(); ctx.moveTo(a.endX, a.endY);
