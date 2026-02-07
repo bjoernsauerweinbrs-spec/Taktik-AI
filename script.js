@@ -26,8 +26,11 @@ function openSection(name) {
     else if (name === 'stadion') {
         if (window.SektorStadion) window.SektorStadion.open();
     }
+    else if (name === 'settings') {
+        // Neu: Aufruf der Setup-Sektion für die KI
+        if (window.SektorSettings) window.SektorSettings.open();
+    }
     else {
-        // Fallback für noch nicht belegte Sektoren
         content.innerHTML = `
             <div style="text-align:center; padding-top:100px; animation: fadeIn 0.5s;">
                 <i class="fas fa-microchip" style="font-size:4rem; color:var(--neon-green); margin-bottom:20px; opacity:0.1;"></i>
@@ -65,6 +68,9 @@ function handleCommand(command) {
     const cmd = command.toLowerCase();
     let response = "Befehl registriert. Ich analysiere die taktische Umsetzung...";
     
+    // Prüfen ob Super-KI online ist (Status kommt aus checkAIStatus)
+    const isSuperAI = window.aiOnline === true;
+
     // Taktische Intelligenz: Toni reagiert auf spezifische Trainings-Befehle
     if (cmd.includes("aufbau") || cmd.includes("übung") || cmd.includes("hütchen")) {
         response = "Materialkammer ist bereit. Ich empfehle, die Hütchen für ein kompaktes Verschieben im Zentrum zu platzieren.";
@@ -82,8 +88,9 @@ function handleCommand(command) {
         response = "Match-Modus kalibriert. Fokus auf die Startelf. Equipment wurde verstaut.";
         toggleEquipmentPalette(false);
     }
-    else if (cmd.includes("analyse") || cmd.includes("puls")) {
-        response = "Vital-Monitor synchronisiert. Ich melde kritische Belastungswerte sofort.";
+    else if (isSuperAI && (cmd.includes("warum") || cmd.includes("erklär") || cmd.includes("plan"))) {
+        response = "Ich frage mein lokales Experten-Modell (A-Lizenz) nach einer detaillierten Analyse... (Verbindung steht!)";
+        // Hier folgt später der API-Call an Ollama
     }
 
     const toniMsg = document.createElement('p');
@@ -96,28 +103,52 @@ function handleCommand(command) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// 5. Initialisierung beim Laden der Seite
+// 5. KI-STATUS-PULS (Prüft ob Ollama lokal läuft)
+window.aiOnline = false;
+async function checkAIStatus() {
+    const light = document.getElementById('ai-status-light');
+    const label = document.getElementById('ai-status-label');
+    if (!light || !label) return;
+
+    try {
+        // Wir pingen die lokale Ollama API an
+        const response = await fetch('http://localhost:11434/api/tags');
+        if (response.ok) {
+            window.aiOnline = true;
+            light.style.background = 'var(--neon-green)';
+            light.style.boxShadow = '0 0 10px var(--neon-green)';
+            label.innerText = 'ONLINE';
+            label.style.color = 'var(--neon-green)';
+        }
+    } catch (err) {
+        window.aiOnline = false;
+        light.style.background = '#555';
+        light.style.boxShadow = 'none';
+        label.innerText = 'OFFLINE';
+        label.style.color = '#555';
+    }
+}
+
+// 6. Initialisierung beim Laden der Seite
 window.onload = () => {
     console.log("TONI 2.0 Cockpit geladen. System-Check...");
     
-    // Datenbank initialisieren
+    // KI-Status sofort und dann alle 10 Sekunden prüfen
+    checkAIStatus();
+    setInterval(checkAIStatus, 10000);
+
     if (window.Database) {
         window.Database.init();
-        // Palette beim Start basierend auf Modus voreinstellen
         toggleEquipmentPalette(window.Database.activeMode === 'training');
     }
 
-    // Arena (Spielfeld) starten
     if (window.arena && document.getElementById('main-canvas')) {
         window.arena.init('main-canvas');
-        
-        // Synchronisation der Spieler (Ersatzbank-Reihe)
         if (window.Database) {
             window.arena.syncFromDatabase(); 
         }
     }
 
-    // Event-Listener für Chat-Eingabe
     const input = document.getElementById('command-input');
     if (input) {
         input.addEventListener('keypress', (e) => {
