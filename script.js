@@ -1,6 +1,7 @@
 /**
  * TONI 2.0 - BRIDGE SCRIPT (MASTER UPDATE)
  * Zentrale Steuerung: Verbindet UI-Sektoren, Arena-Tools und lokale Super-KI.
+ * Optimiert auf Performance (Phi-3 Turbo).
  */
 
 // 1. Die Haupt-Funktion für den Button "TASCHE"
@@ -73,7 +74,7 @@ async function handleCommand(command) {
     toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Analyse läuft...</span>`;
     chatBox.appendChild(toniMsg);
     
-    // Auto-Scroll nach unten (Dank neuem CSS bleibt Input sichtbar)
+    // Auto-Scroll nach unten
     chatBox.scrollTop = chatBox.scrollHeight;
     inputField.value = "";
 
@@ -88,16 +89,16 @@ async function handleCommand(command) {
         finalResponse = "Match-Modus aktiv. Equipment verstaut.";
         toggleEquipmentPalette(false);
     }
-    // B. Super-KI Analyse (Ollama API Call)
+    // B. Super-KI Analyse (Ollama API Call) - GEÄNDERT AUF PHI3
     else if (isSuperAI) {
         try {
             const response = await fetch('http://localhost:11434/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: 'llama3', 
+                    model: 'phi3', // TURBO-MODUS AKTIVIERT
                     prompt: `Du bist Toni, ein Weltklasse-Fußball-Analyst. 
-                             Antworte kurz und präzise auf Deutsch. 
+                             Antworte kurz, präzise und professionell auf Deutsch. 
                              Coach sagt: ${command}`,
                     stream: false
                 })
@@ -105,7 +106,7 @@ async function handleCommand(command) {
             const data = await response.json();
             finalResponse = data.response;
         } catch (err) {
-            finalResponse = "Coach, Verbindung zu Llama 3 unterbrochen. Bitte Terminal prüfen.";
+            finalResponse = "Coach, Verbindung zum Phi-3 Modell unterbrochen. Bitte Terminal prüfen.";
         }
     } 
     else {
@@ -125,7 +126,6 @@ async function checkAIStatus() {
     if (!light || !label) return;
 
     try {
-        // Kurzer Timeout, damit das UI nicht hängt
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2000);
 
@@ -151,7 +151,7 @@ async function checkAIStatus() {
 // 6. Initialisierung beim Start
 window.addEventListener('DOMContentLoaded', () => {
     checkAIStatus();
-    setInterval(checkAIStatus, 5000); // Alle 5 Sek. prüfen
+    setInterval(checkAIStatus, 5000);
 
     if (window.Database) {
         window.Database.init();
@@ -160,7 +160,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (window.arena && document.getElementById('main-canvas')) {
         window.arena.init('main-canvas');
-        // Kleine Verzögerung für das Canvas-Sizing
         setTimeout(() => window.arena.syncFromDatabase(), 100);
     }
 
