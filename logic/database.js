@@ -31,7 +31,7 @@ window.Database = {
             this.trainingPlan = parsed.trainingPlan || this.trainingPlan;
             this.matchPlan = parsed.matchPlan || this.matchPlan;
 
-            // REPARATUR-LOGIK: Falls Spieler da sind, aber Stats fehlen
+            // REPARATUR-LOGIK: Falls Spieler da sind, aber Stats oder Nummern fehlen
             if (this.players.length > 0) {
                 this.repairPlayerData();
             } else {
@@ -47,13 +47,14 @@ window.Database = {
         }
     },
 
-    // Stellt sicher, dass jeder Spieler alle FIFA-Stats und IDs hat
+    // Stellt sicher, dass jeder Spieler alle FIFA-Stats, IDs und RÜCKENNUMMERN hat
     repairPlayerData() {
         let changed = false;
-        this.players.forEach(p => {
+        this.players.forEach((p, index) => {
             if (p.dri === undefined) { p.dri = 75; changed = true; }
             if (p.def === undefined) { p.def = 50; changed = true; }
             if (p.phy === undefined) { p.phy = 70; changed = true; }
+            if (p.number === undefined) { p.number = p.id || (index + 1); changed = true; } // Rückennummer nachpflegen
             if (!p.rat) { p.rat = this.calculateRating(p); changed = true; }
         });
         if (changed) this.save();
@@ -76,13 +77,14 @@ window.Database = {
     },
 
     createDemoTeam() {
-        console.log("Toni: Erstelle frisches 20er Kader...");
+        console.log("Toni: Erstelle frisches 20er Kader mit Rückennummern...");
         const names = ["Max Master", "Lukas Wall", "Toni Technic", "Marc Speed", "Sven Safe", "Finn Flügel", "Ben Beißer", "Leo Luft", "Mika Mitti", "Sam Solo", "Jan Jäger", "Oli Ordnung", "Paul Pass", "Kalle Kante", "Nico Netz", "Dennis Dribbel", "Uli Umkehr", "Basti Ball", "Rene Räumer", "Flo Flanke"];
         const positions = ["ST", "IV", "ZOM", "RV", "TW", "LF", "CDM", "IV", "ZM", "MS", "ST", "IV", "ZM", "LV", "RF", "ZOM", "CDM", "ST", "IV", "LV"];
         
         this.players = names.map((name, i) => {
             const player = {
                 id: i + 1,
+                number: i + 1, // Rückennummer (Jersey)
                 name: name,
                 pos: positions[i],
                 pac: 75, sho: 70, pas: 80, dri: 75, def: 50, phy: 70,
