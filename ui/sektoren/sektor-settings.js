@@ -1,9 +1,18 @@
 /**
  * TONI 2.0 - SEKTOR SETTINGS (KI-SETUP)
- * Zentrale für die lokale KI-Anbindung (Ollama).
+ * Zentrale für die lokale KI-Anbindung (Ollama) mit Live-Status-Update.
  */
 window.SektorSettings = {
+    timer: null,
+
     open() {
+        this.render();
+        // Starte ein kurzes Intervall, um den Status live zu aktualisieren, solange das Fenster offen ist
+        if (this.timer) clearInterval(this.timer);
+        this.timer = setInterval(() => this.updateStatusOnly(), 2000);
+    },
+
+    render() {
         const content = document.querySelector('.briefcase-window');
         if (!content) return;
 
@@ -17,13 +26,13 @@ window.SektorSettings = {
                         <h2 style="color:var(--neon-green); letter-spacing: 2px; margin-bottom: 5px;">KI-SETUP & SYSTEM</h2>
                         <span style="color: #555; font-size: 0.7rem; letter-spacing: 1px;">KONFIGURATION DER SUPER-INTELLIGENZ</span>
                     </div>
-                    <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
+                    <button class="tactic-btn" onclick="clearInterval(window.SektorSettings.timer); window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                     
                     <div style="background: rgba(0,0,0,0.2); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);">
-                        <h3 style="color:#fff; margin-bottom:20px; font-size: 1rem;">
+                        <h3 id="settings-ai-title" style="color:#fff; margin-bottom:20px; font-size: 1rem;">
                             <i class="fas fa-microchip" style="color:${aiColor}; margin-right: 10px;"></i> 
                             STATUS: <span style="color:${aiColor}">${aiStatus}</span>
                         </h3>
@@ -58,7 +67,7 @@ window.SektorSettings = {
                         </p>
 
                         <p style="color:#aaa; font-size: 0.7rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Windows Befehl (PowerShell):</p>
-                        <textarea readonly style="width: 100%; background: #000; color: #555; border: 1px solid #333; padding: 10px; font-family: monospace; font-size: 0.65rem; height: 80px; border-radius: 5px; resize: none;">
+                        <textarea readonly style="width: 100%; background: #000; color: #ccc; border: 1px solid #333; padding: 10px; font-family: monospace; font-size: 0.65rem; height: 80px; border-radius: 5px; resize: none;">
 $env:OLLAMA_ORIGINS="*"; ollama serve</textarea>
                         
                         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
@@ -69,7 +78,7 @@ $env:OLLAMA_ORIGINS="*"; ollama serve</textarea>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color:#666; font-size: 0.75rem;">Latenz:</span>
-                                <span style="color:#fff; font-size: 0.75rem;">${window.aiOnline ? 'Optimiert' : 'N/A'}</span>
+                                <span id="settings-latency" style="color:#fff; font-size: 0.75rem;">${window.aiOnline ? 'Optimiert' : 'N/A'}</span>
                             </div>
                         </div>
 
@@ -80,5 +89,18 @@ $env:OLLAMA_ORIGINS="*"; ollama serve</textarea>
             </div>
         `;
         content.innerHTML = html;
+    },
+
+    // Aktualisiert nur die Texte, ohne das ganze Fenster neu zu laden (verhindert Flackern)
+    updateStatusOnly() {
+        const title = document.getElementById('settings-ai-title');
+        const latency = document.getElementById('settings-latency');
+        if (!title) return;
+
+        const aiStatus = window.aiOnline ? 'AKTIV' : 'INAKTIV';
+        const aiColor = window.aiOnline ? 'var(--neon-green)' : '#ff3b30';
+
+        title.innerHTML = `<i class="fas fa-microchip" style="color:${aiColor}; margin-right: 10px;"></i> STATUS: <span style="color:${aiColor}">${aiStatus}</span>`;
+        if(latency) latency.innerText = window.aiOnline ? 'Optimiert' : 'N/A';
     }
 };
