@@ -79,10 +79,10 @@ body, html {
     background: #051205;
 }
 
-/* --- NEU: EINKLAPPBARE MATERIALKAMMER (EQUIPMENT PALETTE) --- */
+/* --- EINKLAPPBARE MATERIALKAMMER --- */
 #equipment-palette {
     position: absolute;
-    left: -70px; /* Standardmäßig eingeklappt hinter der Sidebar */
+    left: -70px; 
     top: 150px;
     background: rgba(13, 20, 33, 0.95);
     border: 1px solid var(--neon-green);
@@ -98,11 +98,10 @@ body, html {
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Klasse zum Ausklappen (Wird via JS oder Hover gesteuert) */
 #equipment-palette.open, 
 .sidebar-minimal:hover + #stage-container #equipment-palette,
 #equipment-palette:hover {
-    left: 0px; /* Schiebt sich exakt an die Sidebar-Kante */
+    left: 0px; 
 }
 
 .tool-btn {
@@ -127,7 +126,7 @@ body, html {
     transform: translateX(5px);
 }
 
-/* 5. RECHTE ANALYSE-SPALTE */
+/* 5. RECHTE ANALYSE-SPALTE (FIXIERT) */
 .analysis-panel { 
     background: var(--panel-dark); 
     border-left: 1px solid rgba(255,255,255,0.05); 
@@ -135,14 +134,38 @@ body, html {
     flex-direction: column; 
     height: 100vh;
     z-index: 3;
+    overflow: hidden; /* Verhindert Panel-Scrollen */
 }
 
+/* Video Preview fest oben */
+.video-preview {
+    flex-shrink: 0;
+}
+
+/* Chat-System mit fixiertem Input */
 .chat-container {
     flex: 1;
     background: rgba(0,0,0,0.4); 
     border-top: 2px solid var(--neon-green);
     display: flex;
     flex-direction: column;
+    overflow: hidden; /* Wichtig für flex:1 */
+}
+
+#chat-box {
+    flex: 1;
+    overflow-y: auto; /* Nur hier wird gescrollt */
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-input-area {
+    padding: 15px;
+    background: rgba(13, 20, 33, 0.98);
+    border-top: 1px solid rgba(57, 255, 20, 0.2);
+    flex-shrink: 0; /* Verhindert das Einklappen des Inputs */
 }
 
 /* 6. ZENTRALE OVERLAY (AKTENTASCHE) */
@@ -167,7 +190,6 @@ body, html {
     box-shadow: 0 0 80px rgba(0,0,0,0.5);
 }
 
-/* 3x3 DASHBOARD GRID */
 .management-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -199,7 +221,7 @@ body, html {
     margin-bottom: 10px;
 }
 
-/* 7. ELITE FIFA CARDS (SHIELD DESIGN) */
+/* 7. ELITE FIFA CARDS */
 .fifa-cards-grid {
     display: flex;
     flex-wrap: wrap;
@@ -231,18 +253,12 @@ body, html {
     z-index: 10;
 }
 
-.fifa-card.active {
-    border-color: var(--neon-green);
-    box-shadow: 0 0 15px var(--neon-green);
-}
-
 .card-inner {
     padding: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
     height: 100%;
-    color: white;
 }
 
 .rating {
@@ -252,38 +268,9 @@ body, html {
     font-size: 2.2rem;
     font-weight: 900;
     color: var(--accent-gold);
-    line-height: 1;
 }
 
-.pos-label {
-    position: absolute;
-    top: 60px;
-    left: 22px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    color: white;
-}
-
-.player-img-container {
-    width: 90px;
-    height: 90px;
-    margin-top: 20px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: rgba(255,255,255,0.05);
-}
-
-.player-name-banner {
-    width: 80%;
-    text-align: center;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    margin: 10px 0;
-    border-bottom: 1px solid var(--accent-gold);
-    padding-bottom: 3px;
-}
-
+/* STATS & ANIMATIONS */
 .stats-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -300,21 +287,11 @@ body, html {
     color: var(--accent-gold);
 }
 
-/* ANIMATIONS */
-.pulse-anim {
-    animation: pulse 1.5s infinite;
-}
-
+.pulse-anim { animation: pulse 1.5s infinite; }
 @keyframes pulse {
     0% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.2); opacity: 0.7; }
     100% { transform: scale(1); opacity: 1; }
-}
-
-.fadeIn { animation: fadeIn 0.5s ease forwards; }
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
 }
 
 .pro-btn-gold {
@@ -338,7 +315,7 @@ body, html {
     background: rgba(0,0,0,0.5);
     border: 1px solid #333;
     color: var(--neon-green);
-    padding: 10px;
+    padding: 12px;
     border-radius: 5px;
-    font-family: monospace;
+    font-family: 'Inter', sans-serif;
 }
