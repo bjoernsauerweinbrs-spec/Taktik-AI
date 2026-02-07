@@ -1,12 +1,12 @@
 window.SektorSporttasche = {
     open() {
-        const content = document.getElementById('active-content') || document.querySelector('.briefcase-window');
+        const content = document.querySelector('.briefcase-window');
         if (!content) return;
 
         let html = `
             <div class="kabine-header">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="color: var(--neon-green); letter-spacing: 3px;">TEAM-KABINE (PRO-DEMO)</h2>
+                    <h2 style="color: var(--neon-green); letter-spacing: 3px;">TEAM-KABINE</h2>
                     <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
                 </div>
             </div>
@@ -25,19 +25,19 @@ window.SektorSporttasche = {
                     
                     <div class="card-inner">
                         <div class="card-top">
-                            <span class="rating" onclick="window.SektorSporttasche.editStat(${p.id}, 'rat')">${p.rat}</span>
-                            <span class="position" onclick="window.SektorSporttasche.editStat(${p.id}, 'pos')">${p.pos}</span>
+                            <span class="rating" onclick="window.SektorSporttasche.edit(${p.id}, 'rat')">${p.rat}</span>
+                            <span class="position" onclick="window.SektorSporttasche.edit(${p.id}, 'pos')">${p.pos}</span>
                         </div>
                         
-                        <div class="player-img" onclick="document.getElementById('upload-${p.id}').click()">
-                            ${p.img.startsWith('assets') ? '<i class="fas fa-user-circle"></i>' : `<img src="${p.img}" style="width:100%; height:100%; object-fit:cover; border-radius:50%">`}
-                            <input type="file" id="upload-${p.id}" style="display:none" onchange="window.SektorSporttasche.handleUpload(event, ${p.id})">
+                        <div class="player-img" onclick="document.getElementById('file-${p.id}').click()">
+                            ${p.img ? `<img src="${p.img}" style="width:100%; height:100%; object-fit:cover; border-radius:50%">` : `<i class="fas fa-user-circle" style="font-size:3.5rem; color:rgba(255,255,255,0.1)"></i>`}
+                            <input type="file" id="file-${p.id}" style="display:none" onchange="window.SektorSporttasche.upload(event, ${p.id})">
                         </div>
                         
-                        <div class="player-name" onclick="window.SektorSporttasche.editStat(${p.id}, 'name')">${p.name.toUpperCase()}</div>
+                        <div class="player-name" onclick="window.SektorSporttasche.edit(${p.id}, 'name')">${p.name.toUpperCase()}</div>
                         
-                        <div class="player-stats">
-                            <div onclick="window.SektorSporttasche.editStat(${p.id}, 'pac')"><span>PAC</span><br>${p.pac}</div>
+                        <div class="player-stats" style="cursor:pointer" onclick="window.SektorSporttasche.edit(${p.id}, 'pac')">
+                            <div><span>PAC</span><br>${p.pac}</div>
                             <div><span>SHO</span><br>${p.sho}</div>
                             <div><span>PAS</span><br>${p.pas}</div>
                         </div>
@@ -52,24 +52,24 @@ window.SektorSporttasche = {
         content.innerHTML = html;
     },
 
-    handleUpload(event, playerId) {
+    edit(id, key) {
+        const p = window.Database.players.find(player => player.id === id);
+        const val = prompt(`Neuer Wert für ${key}:`, p[key]);
+        if (val !== null) {
+            window.Database.updatePlayer(id, key, isNaN(val) ? val : parseInt(val));
+            this.open();
+        }
+    },
+
+    upload(event, id) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                window.Database.updatePlayerImage(playerId, e.target.result);
+                window.Database.updatePlayer(id, 'img', e.target.result);
                 this.open();
             };
             reader.readAsDataURL(file);
-        }
-    },
-
-    editStat(id, stat) {
-        const player = window.Database.players.find(p => p.id === id);
-        const newVal = prompt(`Neuer Wert für ${stat}:`, player[stat]);
-        if (newVal !== null) {
-            player[stat] = isNaN(newVal) ? newVal : parseInt(newVal);
-            this.open();
         }
     }
 };
