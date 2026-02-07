@@ -1,14 +1,14 @@
 /**
- * TONI 2.0 - ARENA ENGINE (HIGH-PRO TACTICAL UPDATE)
- * AI-Board mit Pfeil-Logik, Equipment-System & Snapshot-Engine.
+ * TONI 2.0 - ARENA ENGINE (ELITE TACTICAL BOARD)
+ * Maßstabsgetreues Spielfeld, FIFA-Shields & Zusatztore.
  */
 window.arena = {
     canvas: null,
     ctx: null,
     elements: [], 
-    arrows: [], // Separate Ebene für taktische Laufwege
+    arrows: [], 
     selectedElement: null,
-    currentTool: 'drag', // drag, cone, ball, arrow, delete
+    currentTool: 'drag', 
     tempArrow: null,
 
     init(canvasId) {
@@ -20,22 +20,10 @@ window.arena = {
         this.renderLoop();
     },
 
-    // --- TOOL SYSTEM ---
     setTool(tool) {
         this.currentTool = tool;
-        console.log("Arena Tool gewechselt zu:", tool);
-    },
-
-    // --- AI INTERFACE: Befehle von TONI umsetzen ---
-    executeAICommand(action, data) {
-        if(action === 'setup_drill') {
-            // Beispiel: Toni platziert Hütchen automatisch
-            data.cones.forEach(c => this.addEquipment('cone', c.color, c.x, c.y));
-        }
-        if(action === 'show_run') {
-            // Beispiel: Toni zeichnet einen Laufweg ein
-            this.arrows.push({ startX: data.x1, startY: data.y1, endX: data.x2, endY: data.y2, type: 'sprint' });
-        }
+        // Visuelles Feedback in der Konsole
+        console.log("Aktion: " + tool.toUpperCase() + " aktiv.");
     },
 
     syncFromDatabase() {
@@ -46,10 +34,10 @@ window.arena = {
         presentPlayers.forEach((p, index) => {
             this.elements.push({
                 id: p.id, type: 'player',
-                x: p.x || (100 + index * 50),
-                y: p.y || (this.canvas.height - 100),
-                color: '#39FF14',
-                width: 40, height: 50,
+                x: p.x || (100 + index * 60),
+                y: p.y || (this.canvas.height - 80),
+                color: window.Database.activeMode === 'match' ? 'var(--accent-gold)' : 'var(--neon-green)',
+                width: 45, height: 55,
                 name: p.name, pos: p.pos, rat: p.rat
             });
         });
@@ -61,7 +49,7 @@ window.arena = {
             x: x || this.canvas.width / 2,
             y: y || this.canvas.height / 2,
             color: color,
-            radius: type === 'ball' ? 10 : 15,
+            radius: type === 'ball' ? 8 : 15,
             id: Date.now()
         });
     },
@@ -69,7 +57,7 @@ window.arena = {
     setupEventListeners() {
         this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
         this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-        this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+        this.canvas.addEventListener('mouseup', () => this.handleMouseUp());
         window.addEventListener('resize', () => this.resize());
     },
 
@@ -84,18 +72,21 @@ window.arena = {
             this.addEquipment('cone', '#FF6A00', mx, my);
         } else if (this.currentTool === 'ball') {
             this.addEquipment('ball', '#fff', mx, my);
+        } else if (this.currentTool === 'goal') {
+            this.addEquipment('goal', '#fff', mx, my);
         } else if (this.currentTool === 'delete') {
-            this.elements = this.elements.filter(el => Math.sqrt((mx-el.x)**2 + (my-el.y)**2) > 20);
-            this.arrows = this.arrows.filter(a => Math.sqrt((mx-a.endX)**2 + (my-a.endY)**2) > 20);
+            this.elements = this.elements.filter(el => Math.sqrt((mx-el.x)**2 + (my-el.y)**2) > 25);
+            this.arrows = this.arrows.filter(a => Math.sqrt((mx-a.endX)**2 + (my-a.endY)**2) > 25);
         } else {
             this.selectedElement = [...this.elements].reverse().find(el => {
-                const dist = Math.sqrt((mx - el.x)**2 + (my - el.y)**2);
-                return dist < 25;
+                const range = el.type === 'player' ? 30 : 20;
+                return Math.sqrt((mx - el.x)**2 + (my - el.y)**2) < range;
             });
         }
     },
 
     handleMouseMove(e) {
+        if (!this.selectedElement && !this.tempArrow) return;
         const rect = this.canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
@@ -111,7 +102,7 @@ window.arena = {
 
     handleMouseUp() {
         if (this.tempArrow) {
-            this.arrows.push({...this.tempArrow, type: 'sprint'});
+            this.arrows.push({...this.tempArrow});
             this.tempArrow = null;
         }
         if (this.selectedElement && this.selectedElement.type === 'player') {
@@ -133,23 +124,65 @@ window.arena = {
         requestAnimationFrame(() => this.renderLoop());
     },
 
-    // Professionelle Pfeil-Zeichen-Funktion
-    drawArrow(ctx, x1, y1, x2, y2, color, dashed = false) {
-        const headlen = 15;
+    render() {
+        const ctx = this.ctx;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const margin = 50;
+
+        // 1. SPIELFELD-GRAFIK (PITCH)
+        ctx.fillStyle = "#051205"; // Dunkles Gras
+        ctx.fillRect(0, 0, w, h);
+        
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.lineWidth = 2;
+
+        // Außenlinie
+        ctx.strokeRect(margin, margin, w - margin*2, h - margin*2);
+        
+        // Mittellinie & Kreis
+        ctx.beginPath(); ctx.moveTo(w/2, margin); ctx.lineTo(w/2, h-margin); ctx.stroke();
+        ctx.beginPath(); ctx.arc(w/2, h/2, 60, 0, Math.PI*2); ctx.stroke();
+        
+        // Strafräume (16m)
+        ctx.strokeRect(w/2 - 160, margin, 320, 100); // Nord
+        ctx.strokeRect(w/2 - 160, h-margin-100, 320, 100); // Süd
+        
+        // Torräume (5m)
+        ctx.strokeRect(w/2 - 70, margin, 140, 40); // Nord
+        ctx.strokeRect(w/2 - 70, h-margin-40, 140, 40); // Süd
+
+        // Elfmeterpunkte
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.beginPath(); ctx.arc(w/2, margin + 80, 3, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(w/2, h - margin - 80, 3, 0, Math.PI*2); ctx.fill();
+
+        // Haupt-Tore (Weiß)
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
+        ctx.strokeRect(w/2 - 45, margin - 15, 90, 15);
+        ctx.strokeRect(w/2 - 45, h - margin, 90, 15);
+
+        // --- EBENE 1: LAUFWEGE (PFEILE) ---
+        this.arrows.forEach(a => this.drawArrow(ctx, a.startX, a.startY, a.endX, a.endY, "var(--neon-green)"));
+        if(this.tempArrow) this.drawArrow(ctx, this.tempArrow.startX, this.tempArrow.startY, this.tempArrow.endX, this.tempArrow.endY, "rgba(57, 255, 20, 0.5)");
+
+        // --- EBENE 2: PLAYER & EQUIPMENT ---
+        this.elements.forEach(el => {
+            if (el.type === 'player') this.drawMiniCard(ctx, el);
+            else if (el.type === 'cone') this.drawCone(ctx, el.x, el.y, el.color);
+            else if (el.type === 'ball') this.drawBall(ctx, el.x, el.y);
+            else if (el.type === 'goal') this.drawMiniGoal(ctx, el.x, el.y);
+        });
+    },
+
+    drawArrow(ctx, x1, y1, x2, y2, color) {
+        const headlen = 12;
         const angle = Math.atan2(y2 - y1, x2 - x1);
         ctx.save();
         ctx.strokeStyle = color;
         ctx.lineWidth = 3;
-        if(dashed) ctx.setLineDash([10, 5]);
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-        
-        // Pfeilspitze
-        ctx.setLineDash([]);
-        ctx.beginPath();
-        ctx.moveTo(x2, y2);
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2);
         ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
         ctx.moveTo(x2, y2);
         ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
@@ -157,65 +190,41 @@ window.arena = {
         ctx.restore();
     },
 
-    render() {
-        const ctx = this.ctx;
-        const w = this.canvas.width;
-        const h = this.canvas.height;
-        const margin = 60;
-
-        // Spielfeld (Profi-Look)
-        ctx.fillStyle = "#051205";
-        ctx.fillRect(0, 0, w, h);
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(margin, margin, w - margin*2, h - margin*2);
-        
-        // Zeichne Mittellinie, Strafräume etc. (wie zuvor)
-        
-        // --- Ebene 1: Laufwege (Arrows) ---
-        this.arrows.forEach(a => this.drawArrow(ctx, a.startX, a.startY, a.endX, a.endY, "var(--neon-green)"));
-        if(this.tempArrow) this.drawArrow(ctx, this.tempArrow.startX, this.tempArrow.startY, this.tempArrow.endX, this.tempArrow.endY, "rgba(57, 255, 20, 0.5)");
-
-        // --- Ebene 2: Spieler & Equipment ---
-        this.elements.forEach(el => {
-            if (el.type === 'player') {
-                this.drawMiniCard(ctx, el);
-            } else if (el.type === 'cone') {
-                this.drawCone(ctx, el.x, el.y, el.color);
-            } else if (el.type === 'ball') {
-                this.drawBall(ctx, el.x, el.y);
-            }
-        });
-    },
-
     drawMiniCard(ctx, el) {
-        // (Logik für Mini-FIFA-Karten wie zuvor besprochen)
-        const w = 40; const h = 50;
-        ctx.fillStyle = "#000";
-        ctx.strokeStyle = el.color;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(el.x - w/2, el.y - h/2, w, h);
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 9px Inter";
-        ctx.textAlign = "center";
-        ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, el.y + 35);
+        const w = el.width; const h = el.height;
+        const x = el.x - w/2; const y = el.y - h/2;
+        ctx.save();
+        // Shield Shape
+        ctx.beginPath();
+        ctx.moveTo(x + w*0.1, y); ctx.lineTo(x + w*0.9, y); ctx.lineTo(x + w, y + h*0.2);
+        ctx.lineTo(x + w, y + h*0.8); ctx.lineTo(x + w*0.5, y + h); ctx.lineTo(x, y + h*0.8);
+        ctx.lineTo(x, y + h*0.2); ctx.closePath();
+        ctx.fillStyle = "#000"; ctx.fill();
+        ctx.strokeStyle = el.color; ctx.lineWidth = 2; ctx.stroke();
+        // Rating & Name
+        ctx.fillStyle = el.color; ctx.font = "bold 11px Inter"; ctx.textAlign = "center";
+        ctx.fillText(el.rat, el.x, y + 18);
+        ctx.fillStyle = "#fff"; ctx.font = "bold 8px Inter";
+        ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, y + h + 12);
+        ctx.restore();
     },
 
     drawCone(ctx, x, y, color) {
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.moveTo(x, y - 12); ctx.lineTo(x + 10, y + 10); ctx.lineTo(x - 10, y + 10);
+        ctx.fillStyle = color; ctx.beginPath();
+        ctx.moveTo(x, y-12); ctx.lineTo(x+10, y+10); ctx.lineTo(x-10, y+10);
         ctx.closePath(); ctx.fill();
     },
 
     drawBall(ctx, x, y) {
-        ctx.fillStyle = "#fff";
-        ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = "#000"; ctx.stroke();
+        ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
     },
 
-    // --- SNAPSHOT FUNKTION ---
-    getSnapshot() {
-        return this.canvas.toDataURL("image/png");
-    }
+    drawMiniGoal(ctx, x, y) {
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 3;
+        ctx.strokeRect(x - 20, y - 10, 40, 20);
+        ctx.fillStyle = "rgba(255,255,255,0.1)"; ctx.fillRect(x - 20, y - 10, 40, 20);
+    },
+
+    getSnapshot() { return this.canvas.toDataURL("image/png"); }
 };
