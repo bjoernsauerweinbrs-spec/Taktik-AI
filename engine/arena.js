@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - ARENA ENGINE (FULL UPDATE)
- * Drag & Drop, Trainingsequipment & Datenbank-Sync
+ * TONI 2.0 - ARENA ENGINE (ELITE TACTIC BOARD)
+ * Maßstabsgetreues Spielfeld & Drag & Drop Logik
  */
 window.arena = {
     canvas: null,
@@ -14,18 +14,13 @@ window.arena = {
         this.setupEventListeners();
         this.resize();
         
-        // Erster Sync mit der Spieler-Datenbank
         if(window.Database) this.syncFromDatabase();
-        
         this.renderLoop();
     },
 
-    // Zentraler Sync: Nur anwesende Spieler laden
     syncFromDatabase() {
         if(!window.Database) return;
         const presentPlayers = window.Database.getPresentPlayers();
-        
-        // Bestehende Spieler entfernen, um Dubletten zu vermeiden
         this.elements = this.elements.filter(el => el.type !== 'player');
         
         presentPlayers.forEach(p => {
@@ -41,15 +36,12 @@ window.arena = {
         });
     },
 
-    // Material hinzufügen (wird von der Palette aufgerufen)
     addEquipment(type, color = '#fff') {
-        const x = this.canvas.width / 2 + (Math.random() * 40 - 20);
-        const y = this.canvas.height / 2 + (Math.random() * 40 - 20);
-        
+        const x = this.canvas.width / 2;
+        const y = this.canvas.height / 2;
         this.elements.push({
             type: type,
-            x: x,
-            y: y,
+            x: x, y: y,
             color: color,
             radius: type === 'ball' ? 10 : 15,
             id: Date.now()
@@ -67,8 +59,6 @@ window.arena = {
         const rect = this.canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
-
-        // Das oberste Element unter der Maus finden
         this.selectedElement = [...this.elements].reverse().find(el => {
             const dist = Math.sqrt((mouseX - el.x)**2 + (mouseY - el.y)**2);
             return dist < (el.radius + 10);
@@ -98,30 +88,61 @@ window.arena = {
         const ctx = this.ctx;
         const w = this.canvas.width;
         const h = this.canvas.height;
+        const margin = 60; // Platz für Tore und Auslinien
 
-        // 1. Hintergrund & Spielfeld
-        ctx.fillStyle = "#0A1A0A";
+        // 1. Hintergrund (Sattes Stadion-Grün)
+        ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
-        ctx.strokeStyle = "rgba(57, 255, 20, 0.4)";
+
+        // 2. Spielfeldmarkierungen (Profi-Weiß/Neon)
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
         ctx.lineWidth = 2;
-        ctx.strokeRect(20, 20, w - 40, h - 40);
+
+        // Außenlinien
+        ctx.strokeRect(margin, margin, w - (margin * 2), h - (margin * 2));
+
+        // Mittellinie
+        ctx.beginPath();
+        ctx.moveTo(w / 2, margin);
+        ctx.lineTo(w / 2, h - margin);
+        ctx.stroke();
+
+        // Anstoßkreis
+        ctx.beginPath();
+        ctx.arc(w / 2, h / 2, 70, 0, Math.PI * 2);
+        ctx.stroke();
+        // Anstoßpunkt
+        ctx.fillCircle = (x, y, r) => { ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); };
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.beginPath(); ctx.arc(w/2, h/2, 3, 0, Math.PI*2); ctx.fill();
+
+        // --- STRAFRÄUME (OBEN & UNTEN) ---
+        const penaltyW = w * 0.4;
+        const penaltyH = h * 0.18;
+        const goalBoxW = w * 0.15;
+        const goalBoxH = h * 0.06;
+
+        // Oben (Nord)
+        ctx.strokeRect(w / 2 - penaltyW / 2, margin, penaltyW, penaltyH); // 16m
+        ctx.strokeRect(w / 2 - goalBoxW / 2, margin, goalBoxW, goalBoxH); // 5m
         
-        // Mittellinie & Kreis
-        ctx.beginPath();
-        ctx.moveTo(w/2, 20); ctx.lineTo(w/2, h-20);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(w/2, h/2, 50, 0, Math.PI*2);
-        ctx.stroke();
+        // Unten (Süd)
+        ctx.strokeRect(w / 2 - penaltyW / 2, h - margin - penaltyH, penaltyW, penaltyH); // 16m
+        ctx.strokeRect(w / 2 - goalBoxW / 2, h - margin - goalBoxH, goalBoxW, goalBoxH); // 5m
 
-        // 5m-Raum (Vision)
-        ctx.strokeStyle = "rgba(57, 255, 20, 0.8)";
-        ctx.strokeRect(w * 0.40, h - 60, w * 0.2, 40);
+        // --- TORE (GRAFISCH) ---
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 4;
+        const goalWidth = w * 0.12;
+        // Tor Nord
+        ctx.strokeRect(w/2 - goalWidth/2, margin - 15, goalWidth, 15);
+        // Tor Süd
+        ctx.strokeRect(w/2 - goalWidth/2, h - margin, goalWidth, 15);
 
-        // 2. Elemente zeichnen
+        // 3. Elemente (Spieler & Material) zeichnen
         this.elements.forEach(el => {
             ctx.beginPath();
-            ctx.shadowBlur = this.selectedElement === el ? 15 : 0;
+            ctx.shadowBlur = this.selectedElement === el ? 20 : 0;
             ctx.shadowColor = el.color;
 
             if(el.type === 'cone') {
@@ -131,27 +152,30 @@ window.arena = {
                 ctx.closePath();
                 ctx.fillStyle = el.color;
                 ctx.fill();
-            } else if(el.type === 'goal') {
-                ctx.fillStyle = "#fff";
-                ctx.fillRect(el.x - 20, el.y - 10, 40, 20);
-                ctx.strokeRect(el.x - 20, el.y - 10, 40, 20);
-            } else {
+            } else if(el.type === 'ball') {
                 ctx.arc(el.x, el.y, el.radius, 0, Math.PI * 2);
-                ctx.fillStyle = el.type === 'ball' ? '#fff' : el.color;
+                ctx.fillStyle = "#FFF";
                 ctx.fill();
-                
-                if(el.type === 'player' && el.name) {
-                    ctx.shadowBlur = 0;
-                    ctx.fillStyle = "#fff";
-                    ctx.font = "bold 10px Inter";
-                    ctx.textAlign = "center";
-                    ctx.fillText(el.name, el.x, el.y + el.radius + 15);
-                }
+                // Ball-Muster (Punkte)
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            } else if(el.type === 'player') {
+                // Spieler-Icon
+                ctx.arc(el.x, el.y, el.radius, 0, Math.PI * 2);
+                ctx.fillStyle = el.color;
+                ctx.fill();
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Spieler-Name (Elite-Look)
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = "#fff";
+                ctx.font = "bold 11px Inter";
+                ctx.textAlign = "center";
+                ctx.fillText(el.name.toUpperCase(), el.x, el.y + el.radius + 15);
             }
-            
-            ctx.strokeStyle = "#000";
-            ctx.lineWidth = 1;
-            ctx.stroke();
             ctx.shadowBlur = 0;
         });
     }
