@@ -54,6 +54,9 @@ async function handleCommand(command) {
     if (!command.trim()) return;
     
     const chatBox = document.getElementById('chat-box');
+    const inputField = document.getElementById('command-input');
+    
+    // User Nachricht anzeigen
     const userMsg = document.createElement('p');
     userMsg.style.color = "#fff";
     userMsg.style.marginBottom = "10px";
@@ -63,18 +66,20 @@ async function handleCommand(command) {
     const cmd = command.toLowerCase();
     const isSuperAI = window.aiOnline === true;
 
-    // Erstelle Toni-Antwort Element (zuerst "Denk-Modus")
+    // Toni-Antwort Element (Denk-Modus)
     const toniMsg = document.createElement('p');
     toniMsg.style.color = "var(--neon-green)";
     toniMsg.style.marginBottom = "15px";
     toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Analyse läuft...</span>`;
     chatBox.appendChild(toniMsg);
+    
+    // Auto-Scroll nach unten (Dank neuem CSS bleibt Input sichtbar)
     chatBox.scrollTop = chatBox.scrollHeight;
+    inputField.value = "";
 
-    // --- LOGIK-WEICHE ---
     let finalResponse = "Ich habe den Befehl registriert.";
 
-    // A. System-Befehle (Sofort-Reaktion ohne KI)
+    // A. System-Befehle (Sofort-Reaktion)
     if (cmd.includes("aufbau") || cmd.includes("hütchen")) {
         finalResponse = "Materialkammer ausgefahren. Hütchen und Bälle liegen bereit.";
         toggleEquipmentPalette(true);
@@ -90,9 +95,9 @@ async function handleCommand(command) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: 'llama3', // Hier das installierte Modell eintragen
-                    prompt: `Du bist Toni, ein Weltklasse-Fußball-Analyst mit UEFA Pro Lizenz. 
-                             Antworte kurz, präzise und professionell auf deutsch. 
+                    model: 'llama3', 
+                    prompt: `Du bist Toni, ein Weltklasse-Fußball-Analyst. 
+                             Antworte kurz und präzise auf Deutsch. 
                              Coach sagt: ${command}`,
                     stream: false
                 })
@@ -100,17 +105,15 @@ async function handleCommand(command) {
             const data = await response.json();
             finalResponse = data.response;
         } catch (err) {
-            finalResponse = "Coach, die Verbindung zum Experten-Modell wurde unterbrochen. Prüfe Ollama.";
+            finalResponse = "Coach, Verbindung zu Llama 3 unterbrochen. Bitte Terminal prüfen.";
         }
     } 
-    // C. Fallback (Standard-Logik)
     else {
-        finalResponse = "Basis-System aktiv. Für Tiefenanalysen starte bitte die Super-KI (Setup).";
+        finalResponse = "Basis-System aktiv. Für Profi-Analysen starte bitte Ollama auf deinem Mac.";
     }
 
-    // Antwort im Chat anzeigen
+    // Antwort anzeigen
     toniMsg.innerHTML = `<strong>Toni:</strong> ${finalResponse}`;
-    document.getElementById('command-input').value = "";
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
@@ -122,7 +125,13 @@ async function checkAIStatus() {
     if (!light || !label) return;
 
     try {
-        const response = await fetch('http://localhost:11434/api/tags');
+        // Kurzer Timeout, damit das UI nicht hängt
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+        const response = await fetch('http://localhost:11434/api/tags', { signal: controller.signal });
+        clearTimeout(timeoutId);
+
         if (response.ok) {
             window.aiOnline = true;
             light.style.background = 'var(--neon-green)';
@@ -139,10 +148,10 @@ async function checkAIStatus() {
     }
 }
 
-// 6. Initialisierung
-window.onload = () => {
+// 6. Initialisierung beim Start
+window.addEventListener('DOMContentLoaded', () => {
     checkAIStatus();
-    setInterval(checkAIStatus, 10000);
+    setInterval(checkAIStatus, 5000); // Alle 5 Sek. prüfen
 
     if (window.Database) {
         window.Database.init();
@@ -151,7 +160,8 @@ window.onload = () => {
 
     if (window.arena && document.getElementById('main-canvas')) {
         window.arena.init('main-canvas');
-        if (window.Database) window.arena.syncFromDatabase(); 
+        // Kleine Verzögerung für das Canvas-Sizing
+        setTimeout(() => window.arena.syncFromDatabase(), 100);
     }
 
     const input = document.getElementById('command-input');
@@ -160,4 +170,4 @@ window.onload = () => {
             if (e.key === 'Enter') handleCommand(input.value);
         });
     }
-};
+});
