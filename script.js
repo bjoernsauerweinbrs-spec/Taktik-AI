@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - BRIDGE SCRIPT (MASTER UPDATE)
- * Verbindet das HTML mit der Logik der Module
+ * Zentrale Steuerung: Verbindet UI-Sektoren, Arena und KI-Logik.
  */
 
 // 1. Die Haupt-Funktion für den Button "TASCHE"
@@ -25,17 +25,24 @@ function openSection(name) {
     } 
     else if (name === 'analyse') {
         if (window.SektorAnalyse) {
-            window.SektorAnalyse.open(); // Aktiviert den Analyse-Sektor
+            window.SektorAnalyse.open();
         } else {
             console.error("SektorAnalyse nicht gefunden!");
         }
     } 
+    else if (name === 'stadion') {
+        if (window.SektorStadion) {
+            window.SektorStadion.open(); // Öffnet die neue Einsatz-Mappe
+        } else {
+            console.error("SektorStadion (Einsatz-Mappe) nicht gefunden!");
+        }
+    }
     else {
-        alert("Sektor " + name.toUpperCase() + " wird im nächsten Update freigeschaltet.");
+        alert("Sektor " + name.toUpperCase() + " ist in der Entwicklung.");
     }
 }
 
-// 3. Toni Chat-Logik (Befehle verarbeiten)
+// 3. Toni Chat-Logik (KI-Befehle verarbeiten)
 function handleCommand(command) {
     if (!command.trim()) return;
     
@@ -46,14 +53,17 @@ function handleCommand(command) {
     chatBox.appendChild(userMsg);
 
     const cmd = command.toLowerCase();
-    let response = "Befehl empfangen. Ich analysiere...";
+    let response = "Ich habe den Befehl registriert. Soll ich die Arena entsprechend kalibrieren?";
     
-    if (cmd.includes("aufbau") || cmd.includes("hütchen")) {
-        response = "Materialkammer bereit. Ich habe die Arena für den Aufbau kalibriert.";
-    } else if (cmd.includes("taktik") || cmd.includes("kabine")) {
-        response = "Taktik-Board steht. Alle Spielerdaten sind im Direktzugriff.";
+    // Erweiterte Toni-Logik
+    if (cmd.includes("aufbau") || cmd.includes("hütchen") || cmd.includes("übung")) {
+        response = "Verstanden. Ich habe die Materialkammer geöffnet. Du kannst Hütchen und Bälle jetzt direkt auf dem Board platzieren.";
+    } else if (cmd.includes("taktik") || cmd.includes("aufstellung")) {
+        response = "Taktik-Board ist synchronisiert. Die Spieler aus der Kabine stehen am unteren Rand bereit.";
     } else if (cmd.includes("analyse") || cmd.includes("puls")) {
-        response = "Vital-Monitor ist aktiv. Ich überwache die Herzfrequenz der Spieler.";
+        response = "Vital-Monitor ist aktiv. Ich überwache die Herzfrequenz und Laufleistung der Spieler.";
+    } else if (cmd.includes("mappe") || cmd.includes("plan") || cmd.includes("stadion")) {
+        response = "Einsatz-Mappe liegt bereit. Soll ich einen Snapshot der aktuellen Arena für den Trainingsplan machen?";
     }
 
     const toniMsg = document.createElement('p');
@@ -67,16 +77,17 @@ function handleCommand(command) {
 
 // 4. Initialisierung beim Laden der Seite
 window.onload = () => {
-    console.log("TONI 2.0 Cockpit geladen.");
+    console.log("TONI 2.0 Cockpit geladen. System-Check...");
     
-    // Datenbank initialisieren (Sicherheitshalber)
+    // Datenbank initialisieren
     if (window.Database) window.Database.init();
 
     // Arena (Spielfeld) starten
     if (window.arena && document.getElementById('main-canvas')) {
         window.arena.init('main-canvas');
-        // Falls Spieler anwesend sind, direkt auf das Feld rendern
-        if (window.Database && typeof window.Database.getPresentPlayers === 'function') {
+        
+        // Erst-Synchronisation der Spieler auf das Board
+        if (window.Database) {
             window.arena.syncFromDatabase(); 
         }
     }
@@ -88,4 +99,6 @@ window.onload = () => {
             if (e.key === 'Enter') handleCommand(input.value);
         });
     }
+    
+    console.log("System ONLINE. Warte auf Anweisungen.");
 };
