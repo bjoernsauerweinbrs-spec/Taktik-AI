@@ -1,13 +1,13 @@
 /**
  * TONI 2.0 - SEKTOR SETTINGS (KI-SETUP)
  * Zentrale für die lokale KI-Anbindung (Ollama) mit Live-Status-Update.
+ * Optimiert für plattformübergreifende Befehle (Mac & Windows).
  */
 window.SektorSettings = {
     timer: null,
 
     open() {
         this.render();
-        // Starte ein kurzes Intervall, um den Status live zu aktualisieren, solange das Fenster offen ist
         if (this.timer) clearInterval(this.timer);
         this.timer = setInterval(() => this.updateStatusOnly(), 2000);
     },
@@ -38,21 +38,21 @@ window.SektorSettings = {
                         </h3>
                         
                         <p style="color:#888; font-size: 0.85rem; line-height: 1.6; margin-bottom: 20px;">
-                            Um die <strong>Toni Super-Intelligenz (A-Lizenz Modus)</strong> zu nutzen, muss die lokale KI "Ollama" auf diesem Rechner laufen. 
-                            Dies garantiert 100% Datenschutz – deine Taktiken bleiben privat.
+                            Um die <strong>Toni Super-Intelligenz (A-Lizenz Modus)</strong> zu nutzen, muss "Ollama" auf diesem Rechner laufen. 
+                            Deine Taktiken bleiben zu 100% privat.
                         </p>
 
                         <div style="background: rgba(57,255,20,0.05); border-left: 3px solid var(--neon-green); padding: 15px; margin-bottom: 20px;">
                             <h4 style="color:var(--neon-green); font-size: 0.8rem; margin-bottom: 5px;">SCHRITT 1: DOWNLOAD</h4>
-                            <p style="color:#ccc; font-size: 0.75rem;">Lade Ollama für Windows/Mac herunter und installiere es.</p>
+                            <p style="color:#ccc; font-size: 0.75rem;">Lade Ollama für Mac oder Windows herunter.</p>
                             <a href="https://ollama.com/download" target="_blank" class="pro-btn-gold" style="display: inline-block; margin-top: 10px; text-decoration: none; text-align: center; width: auto; padding: 8px 20px;">
-                                <i class="fas fa-download"></i> OLLAMA DOWNLOAD
+                                <i class="fas fa-download"></i> OLLAMA WEBSITE
                             </a>
                         </div>
 
                         <div style="background: rgba(255,255,255,0.05); border-left: 3px solid #fff; padding: 15px;">
-                            <h4 style="color:#fff; font-size: 0.8rem; margin-bottom: 5px;">SCHRITT 2: MODELL LADEN</h4>
-                            <p style="color:#ccc; font-size: 0.75rem;">Öffne dein Terminal (CMD) und gib diesen Befehl ein:</p>
+                            <h4 style="color:#fff; font-size: 0.8rem; margin-bottom: 5px;">SCHRITT 2: MODELL STARTEN</h4>
+                            <p style="color:#ccc; font-size: 0.75rem;">Terminal öffnen und Modell laden:</p>
                             <code style="display: block; background: #000; padding: 10px; margin-top: 10px; color: var(--neon-green); font-size: 0.7rem; border-radius: 5px;">
                                 ollama run llama3
                             </code>
@@ -60,29 +60,33 @@ window.SektorSettings = {
                     </div>
 
                     <div style="background: rgba(0,0,0,0.2); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);">
-                        <h3 style="color:#fff; margin-bottom:20px; font-size: 1rem;"><i class="fas fa-user-shield"></i> BROWSER-FREIGABE</h3>
+                        <h3 style="color:#fff; margin-bottom:20px; font-size: 1rem;"><i class="fas fa-user-shield"></i> BROWSER-FREIGABE (CORS)</h3>
                         
                         <p style="color:#888; font-size: 0.85rem; line-height: 1.6; margin-bottom: 15px;">
-                            Damit dein Browser mit der KI kommunizieren darf, muss Ollama mit einer Erlaubnis (CORS) gestartet werden.
+                            Damit das Cockpit die KI steuern darf, muss die Zugriffsberechtigung gesetzt sein:
                         </p>
 
-                        <p style="color:#aaa; font-size: 0.7rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Windows Befehl (PowerShell):</p>
-                        <textarea readonly style="width: 100%; background: #000; color: #ccc; border: 1px solid #333; padding: 10px; font-family: monospace; font-size: 0.65rem; height: 80px; border-radius: 5px; resize: none;">
+                        <p style="color:#aaa; font-size: 0.6rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Für MacBook (Terminal):</p>
+                        <textarea readonly style="width: 100%; background: #000; color: var(--data-cyan); border: 1px solid #333; padding: 8px; font-family: monospace; font-size: 0.65rem; height: 50px; border-radius: 5px; resize: none; margin-bottom: 10px;">
+launchctl setenv OLLAMA_ORIGINS "*"</textarea>
+
+                        <p style="color:#aaa; font-size: 0.6rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Für Windows (PowerShell):</p>
+                        <textarea readonly style="width: 100%; background: #000; color: #777; border: 1px solid #333; padding: 8px; font-family: monospace; font-size: 0.65rem; height: 50px; border-radius: 5px; resize: none;">
 $env:OLLAMA_ORIGINS="*"; ollama serve</textarea>
                         
-                        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
-                            <h4 style="color:#fff; font-size: 0.8rem; margin-bottom: 15px;">SYSTEM-RESOURCEN</h4>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span style="color:#666; font-size: 0.75rem;">KI-Modell:</span>
-                                <span style="color:var(--neon-green); font-size: 0.75rem;">Llama 3 (8B)</span>
+                        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05);">
+                            <h4 style="color:#fff; font-size: 0.8rem; margin-bottom: 10px;">SYSTEM-INFO</h4>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="color:#666; font-size: 0.7rem;">Modell:</span>
+                                <span style="color:var(--neon-green); font-size: 0.7rem;">Llama 3 (8B)</span>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
-                                <span style="color:#666; font-size: 0.75rem;">Latenz:</span>
-                                <span id="settings-latency" style="color:#fff; font-size: 0.75rem;">${window.aiOnline ? 'Optimiert' : 'N/A'}</span>
+                                <span style="color:#666; font-size: 0.7rem;">Latenz:</span>
+                                <span id="settings-latency" style="color:#fff; font-size: 0.7rem;">${window.aiOnline ? 'Optimiert' : 'N/A'}</span>
                             </div>
                         </div>
 
-                        <button class="pro-btn-gold" onclick="location.reload()" style="margin-top: 30px; width: 100%;">SYSTEM NEU STARTEN</button>
+                        <button class="pro-btn-gold" onclick="location.reload()" style="margin-top: 20px; width: 100%;">SYSTEM NEU LADEN</button>
                     </div>
 
                 </div>
@@ -91,7 +95,6 @@ $env:OLLAMA_ORIGINS="*"; ollama serve</textarea>
         content.innerHTML = html;
     },
 
-    // Aktualisiert nur die Texte, ohne das ganze Fenster neu zu laden (verhindert Flackern)
     updateStatusOnly() {
         const title = document.getElementById('settings-ai-title');
         const latency = document.getElementById('settings-latency');
