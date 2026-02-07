@@ -134,27 +134,25 @@ body, html {
     flex-direction: column; 
     height: 100vh;
     z-index: 3;
-    overflow: hidden; /* Verhindert Panel-Scrollen */
+    overflow: hidden; 
 }
 
-/* Video Preview fest oben */
 .video-preview {
     flex-shrink: 0;
 }
 
-/* Chat-System mit fixiertem Input */
 .chat-container {
     flex: 1;
     background: rgba(0,0,0,0.4); 
     border-top: 2px solid var(--neon-green);
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Wichtig für flex:1 */
+    overflow: hidden; 
 }
 
 #chat-box {
     flex: 1;
-    overflow-y: auto; /* Nur hier wird gescrollt */
+    overflow-y: auto; 
     padding: 15px;
     display: flex;
     flex-direction: column;
@@ -165,7 +163,7 @@ body, html {
     padding: 15px;
     background: rgba(13, 20, 33, 0.98);
     border-top: 1px solid rgba(57, 255, 20, 0.2);
-    flex-shrink: 0; /* Verhindert das Einklappen des Inputs */
+    flex-shrink: 0; 
 }
 
 /* 6. ZENTRALE OVERLAY (AKTENTASCHE) */
