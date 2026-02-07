@@ -1,44 +1,54 @@
 /**
  * TONI 2.0 - SEKTOR SPORTTASCHE (KADER-PLANER)
- * FIFA-Cards mit Betriebs-Modus (Training/Spiel) und Einsatz-Zuweisung.
+ * FIFA-Cards mit Launch-Control für Training & Spielbetrieb.
  */
 window.SektorSporttasche = {
     open() {
         const content = document.querySelector('.briefcase-window');
         if (!content) return;
 
-        // Header mit Betriebsmodus-Schalter
+        const mode = window.Database.activeMode;
+        const modeLabel = mode === 'training' ? 'TRAININGS-BETRIEB' : 'SPIEL-VORBEREITUNG';
+        const modeColor = mode === 'training' ? 'var(--neon-green)' : 'var(--accent-gold)';
+
         let html = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; padding: 0 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:30px; padding: 0 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 25px;">
                 <div>
                     <h2 style="color:var(--neon-green); letter-spacing: 2px; margin-bottom: 5px;">TEAM-KABINE</h2>
-                    <span style="color: #555; font-size: 0.7rem; letter-spacing: 1px;">KADER-PLANUNG & STATUS-KONTROLLE</span>
+                    <span style="color: ${modeColor}; font-size: 0.8rem; letter-spacing: 2px; font-weight: bold; text-transform: uppercase;">
+                        <i class="fas ${mode === 'training' ? 'fa-dumbbell' : 'fa-trophy'}"></i> ${modeLabel}
+                    </span>
                 </div>
 
                 <div style="display: flex; gap: 10px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 12px; border: 1px solid #222;">
                     <button class="tactic-btn" 
-                            style="background: ${window.Database.activeMode === 'training' ? 'var(--neon-green)' : 'transparent'}; 
-                                   color: ${window.Database.activeMode === 'training' ? '#000' : '#fff'}; margin: 0; min-width: 120px;"
+                            style="background: ${mode === 'training' ? 'var(--neon-green)' : 'transparent'}; 
+                                   color: ${mode === 'training' ? '#000' : '#fff'}; margin: 0; min-width: 130px;"
                             onclick="window.Database.setMode('training'); window.SektorSporttasche.open();">
-                        <i class="fas fa-dumbbell"></i> TRAINING
+                        TRAINING
                     </button>
                     <button class="tactic-btn" 
-                            style="background: ${window.Database.activeMode === 'match' ? 'var(--neon-green)' : 'transparent'}; 
-                                   color: ${window.Database.activeMode === 'match' ? '#000' : '#fff'}; margin: 0; min-width: 120px;"
+                            style="background: ${mode === 'match' ? 'var(--accent-gold)' : 'transparent'}; 
+                                   color: ${mode === 'match' ? '#000' : '#fff'}; margin: 0; min-width: 130px;"
                             onclick="window.Database.setMode('match'); window.SektorSporttasche.open();">
-                        <i class="fas fa-trophy"></i> SPIEL
+                        SPIELBETRIEB
                     </button>
                 </div>
 
-                <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
+                <div style="display: flex; gap: 15px;">
+                    <button class="pro-btn-gold" style="background: var(--neon-green); border-radius: 8px; box-shadow: 0 0 15px rgba(57,255,20,0.3);" 
+                            onclick="window.SektorSporttasche.launchBoard()">
+                        <i class="fas fa-play"></i> TEAM AUFGESTELLT - BOARD STARTEN
+                    </button>
+                    <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
+                </div>
             </div>
             
             <div class="fifa-cards-grid">
         `;
 
         window.Database.players.forEach(p => {
-            // Prüfung, ob der Spieler im aktuellen Modus "anwesend" ist
-            const isAssigned = (p.assignment === 'both' || p.assignment === window.Database.activeMode);
+            const isAssigned = (p.assignment === 'both' || p.assignment === mode);
             const statusClass = isAssigned ? 'active' : 'inactive';
             
             html += `
@@ -82,6 +92,27 @@ window.SektorSporttasche = {
         });
         
         content.innerHTML = html + `</div>`;
+    },
+
+    // Startet die Arena-Engine mit den aktuellen Filtern
+    launchBoard() {
+        console.log("Launching Board with Mode:", window.Database.activeMode);
+        
+        // 1. Speichern sicherstellen
+        window.Database.save();
+        
+        // 2. Aktentasche schließen
+        if (window.toggleBriefcase) window.toggleBriefcase();
+        
+        // 3. Arena synchronisieren (hier greift dann das neue horizontale Layout)
+        if (window.arena) {
+            window.arena.syncFromDatabase();
+            
+            // Palette basierend auf Modus steuern
+            if (window.toggleEquipmentPalette) {
+                window.toggleEquipmentPalette(window.Database.activeMode === 'training');
+            }
+        }
     },
 
     edit(id, key) {
