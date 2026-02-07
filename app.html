@@ -31,8 +31,25 @@
         </nav>
 
         <main id="stage-container">
+            <div id="equipment-palette">
+                <div class="tool-btn" title="Verschieben / Auswählen" onclick="window.arena.setTool('drag')">
+                    <i class="fas fa-mouse-pointer"></i>
+                </div>
+                <div class="tool-btn" title="Hütchen setzen" onclick="window.arena.setTool('cone')">
+                    <i class="fas fa-triangle-exclamation" style="color: var(--accent-orange);"></i>
+                </div>
+                <div class="tool-btn" title="Ball platzieren" onclick="window.arena.setTool('ball')">
+                    <i class="fas fa-futbol"></i>
+                </div>
+                <div class="tool-btn" title="Laufweg zeichnen" onclick="window.arena.setTool('arrow')">
+                    <i class="fas fa-arrow-right" style="color: var(--neon-green);"></i>
+                </div>
+                <div class="tool-btn" title="Element löschen" onclick="window.arena.setTool('delete')">
+                    <i class="fas fa-eraser" style="color: var(--status-error);"></i>
+                </div>
+            </div>
+
             <canvas id="main-canvas"></canvas>
-            
             <div class="five-meter-space"></div>
         </main>
 
@@ -40,7 +57,7 @@
             <div class="video-preview">
                 <div class="scan-line"></div>
                 <span>LIVE ANALYSE ACTIVE</span>
-                </div>
+            </div>
             
             <div class="chat-container">
                 <div id="chat-box">
@@ -63,35 +80,24 @@
             <div class="management-grid">
                 <div class="mgmt-card" onclick="openSection('kabine')">
                     <div class="card-header"><i class="fas fa-users"></i> KABINE</div>
-                    <p>50+ Spieler & FIFA Karten</p>
+                    <p>Kader-Planung & FIFA Stats</p>
                 </div>
                 <div class="mgmt-card" onclick="openSection('analyse')">
                     <div class="card-header"><i class="fas fa-heartbeat"></i> ANALYSE</div>
-                    <p>Puls & Fitness-Daten</p>
+                    <p>Live Vitaldaten (Puls/KM)</p>
                 </div>
-                <div class="mgmt-card">
-                    <div class="card-header"><i class="fas fa-briefcase"></i> BUSINESS</div>
-                    <p>Sponsoren & Finanzen</p>
+                <div class="mgmt-card" onclick="openSection('stadion')">
+                    <div class="card-header"><i class="fas fa-clipboard-list"></i> EINSATZ-MAPPE</div>
+                    <p>Training & Match-Planung</p>
                 </div>
-                <div class="mgmt-card">
-                    <div class="card-header"><i class="fas fa-print"></i> STADION</div>
-                    <p>Print-Engine (Nino)</p>
-                </div>
-                <div class="mgmt-card">
-                    <div class="card-header"><i class="fas fa-dumbbell"></i> TRAINING</div>
-                    <p>Equipment & Material</p>
-                </div>
+                
                 <div class="mgmt-card">
                     <div class="card-header"><i class="fas fa-video"></i> SKILLS</div>
                     <p>Video-Bibliothek</p>
                 </div>
                 <div class="mgmt-card">
                     <div class="card-header"><i class="fas fa-search"></i> SCOUTING</div>
-                    <p>Spielersuche</p>
-                </div>
-                <div class="mgmt-card">
-                    <div class="card-header"><i class="fas fa-chess-board"></i> TAKTIK</div>
-                    <p>Formationen & Befehle</p>
+                    <p>KI-Spielersuche</p>
                 </div>
                 <div class="mgmt-card">
                     <div class="card-header"><i class="fas fa-cog"></i> SETTINGS</div>
@@ -103,10 +109,12 @@
         </div>
     </div>
 
- <script src="logic/database.js"></script>
+    <script src="logic/database.js"></script>
     <script src="engine/arena.js"></script>
     <script src="ui/aktentasche-ui.js"></script>
     <script src="ui/sektoren/sektor-sporttasche.js"></script>
+    <script src="ui/sektoren/sektor-analyse.js"></script>
+    <script src="ui/sektoren/sektor-stadion.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
