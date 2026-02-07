@@ -16,7 +16,7 @@
     <div class="pro-layout-container">
         
         <nav class="sidebar-minimal">
-            <div class="control-unit" onclick="toggleBriefcase()">
+            <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
                 <i class="fas fa-briefcase"></i>
                 <span>TASCHE</span>
             </div>
@@ -71,7 +71,7 @@
             </div>
 
             <canvas id="main-canvas"></canvas>
-            </main>
+        </main>
 
         <aside class="analysis-panel">
             <div class="video-preview">
@@ -83,7 +83,7 @@
                 <div id="chat-box">
                     <p style="color: var(--neon-green);">Toni: System bereit. Arena wird gescannt...</p>
                 </div>
-                <div style="padding: 15px; border-top: 1px solid rgba(57,255,20,0.2);">
+                <div class="chat-input-area">
                     <input type="text" id="command-input" class="pro-textarea" style="height: 50px;" placeholder="Befehl an Toni...">
                 </div>
             </div>
@@ -92,41 +92,7 @@
 
     <div id="briefcase-modal" class="briefcase-overlay">
         <div class="briefcase-window">
-            <div class="kabine-header">
-                <h2 style="color: var(--neon-green); letter-spacing: 3px;">AKTEN-TASCHE</h2>
-                <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
             </div>
-
-            <div class="management-grid">
-                <div class="mgmt-card" onclick="openSection('kabine')">
-                    <div class="card-header"><i class="fas fa-users"></i> KABINE</div>
-                    <p>Kader-Planung & FIFA Stats</p>
-                </div>
-                <div class="mgmt-card" onclick="openSection('analyse')">
-                    <div class="card-header"><i class="fas fa-heartbeat"></i> ANALYSE</div>
-                    <p>Live Vitaldaten (Puls/KM)</p>
-                </div>
-                <div class="mgmt-card" onclick="openSection('stadion')">
-                    <div class="card-header"><i class="fas fa-clipboard-list"></i> EINSATZ-MAPPE</div>
-                    <p>Training & Match-Planung</p>
-                </div>
-                
-                <div class="mgmt-card">
-                    <div class="card-header"><i class="fas fa-video"></i> SKILLS</div>
-                    <p>Video-Bibliothek</p>
-                </div>
-                <div class="mgmt-card">
-                    <div class="card-header"><i class="fas fa-search"></i> SCOUTING</div>
-                    <p>KI-Spielersuche</p>
-                </div>
-                <div class="mgmt-card" onclick="openSection('settings')">
-                    <div class="card-header"><i class="fas fa-cog"></i> SETTINGS</div>
-                    <p>Ollama & System</p>
-                </div>
-            </div>
-            
-            <button class="pro-btn-gold" style="margin-top: 30px; width: 200px;" onclick="toggleBriefcase()">SCHLIESSEN</button>
-        </div>
     </div>
 
     <script src="logic/database.js"></script>
