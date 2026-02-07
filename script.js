@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - BRIDGE SCRIPT (MASTER UPDATE)
  * Zentrale Steuerung: Verbindet UI-Sektoren, Arena-Tools und lokale Super-KI.
- * Optimiert auf Performance (Phi-3 Turbo).
+ * Optimiert auf Performance (Phi-3 Turbo) & Profi-Analyse.
  */
 
 // 1. Die Haupt-Funktion für den Button "TASCHE"
@@ -57,7 +57,6 @@ async function handleCommand(command) {
     const chatBox = document.getElementById('chat-box');
     const inputField = document.getElementById('command-input');
     
-    // User Nachricht anzeigen
     const userMsg = document.createElement('p');
     userMsg.style.color = "#fff";
     userMsg.style.marginBottom = "10px";
@@ -67,20 +66,17 @@ async function handleCommand(command) {
     const cmd = command.toLowerCase();
     const isSuperAI = window.aiOnline === true;
 
-    // Toni-Antwort Element (Denk-Modus)
     const toniMsg = document.createElement('p');
     toniMsg.style.color = "var(--neon-green)";
     toniMsg.style.marginBottom = "15px";
-    toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Analyse läuft...</span>`;
+    toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Analysiere Taktik...</span>`;
     chatBox.appendChild(toniMsg);
     
-    // Auto-Scroll nach unten
     chatBox.scrollTop = chatBox.scrollHeight;
     inputField.value = "";
 
     let finalResponse = "Ich habe den Befehl registriert.";
 
-    // A. System-Befehle (Sofort-Reaktion)
     if (cmd.includes("aufbau") || cmd.includes("hütchen")) {
         finalResponse = "Materialkammer ausgefahren. Hütchen und Bälle liegen bereit.";
         toggleEquipmentPalette(true);
@@ -89,16 +85,21 @@ async function handleCommand(command) {
         finalResponse = "Match-Modus aktiv. Equipment verstaut.";
         toggleEquipmentPalette(false);
     }
-    // B. Super-KI Analyse (Ollama API Call) - GEÄNDERT AUF PHI3
     else if (isSuperAI) {
         try {
             const response = await fetch('http://localhost:11434/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: 'phi3', // TURBO-MODUS AKTIVIERT
-                    prompt: `Du bist Toni, ein Weltklasse-Fußball-Analyst. 
-                             Antworte kurz, präzise und professionell auf Deutsch. 
+                    model: 'phi3', 
+                    prompt: `Du bist TONI 2.0, ein Elite-Fußball-Analyst mit UEFA-Pro-Lizenz. 
+                             Dein Stil: Analytisch, präzise, direkt. Keine Floskeln.
+                             Wenn nach Übungen gefragt wird, antworte immer so:
+                             1. KURZANALYSE: Warum gibt es das Problem?
+                             2. ÜBUNG: (Name der Übung)
+                             3. ABLAUF: (Kurze Schritte)
+                             4. COACHING POINTS: (Worauf achten?)
+                             
                              Coach sagt: ${command}`,
                     stream: false
                 })
@@ -113,7 +114,6 @@ async function handleCommand(command) {
         finalResponse = "Basis-System aktiv. Für Profi-Analysen starte bitte Ollama auf deinem Mac.";
     }
 
-    // Antwort anzeigen
     toniMsg.innerHTML = `<strong>Toni:</strong> ${finalResponse}`;
     chatBox.scrollTop = chatBox.scrollHeight;
 }
