@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - BRIDGE SCRIPT (MASTER UPDATE)
- * Zentrale Steuerung: Verbindet UI-Sektoren, Arena-Tools und KI-Logik.
+ * Zentrale Steuerung: Verbindet UI-Sektoren, Arena-Tools und lokale Super-KI.
  */
 
 // 1. Die Haupt-Funktion für den Button "TASCHE"
@@ -27,7 +27,6 @@ function openSection(name) {
         if (window.SektorStadion) window.SektorStadion.open();
     }
     else if (name === 'settings') {
-        // Neu: Aufruf der Setup-Sektion für die KI
         if (window.SektorSettings) window.SektorSettings.open();
     }
     else {
@@ -42,20 +41,16 @@ function openSection(name) {
     }
 }
 
-// 3. Equipment-Palette Steuerung (Einklappen/Ausklappen)
+// 3. Equipment-Palette Steuerung
 function toggleEquipmentPalette(show) {
     const palette = document.getElementById('equipment-palette');
     if (!palette) return;
-    
-    if (show) {
-        palette.classList.add('open');
-    } else {
-        palette.classList.remove('open');
-    }
+    if (show) palette.classList.add('open');
+    else palette.classList.remove('open');
 }
 
-// 4. Toni Chat-Logik (Erweiterte KI-Befehle & Taktik-Beratung)
-function handleCommand(command) {
+// 4. Toni Chat-Logik & Lokale KI-Anbindung (Ollama)
+async function handleCommand(command) {
     if (!command.trim()) return;
     
     const chatBox = document.getElementById('chat-box');
@@ -66,44 +61,60 @@ function handleCommand(command) {
     chatBox.appendChild(userMsg);
 
     const cmd = command.toLowerCase();
-    let response = "Befehl registriert. Ich analysiere die taktische Umsetzung...";
-    
-    // Prüfen ob Super-KI online ist (Status kommt aus checkAIStatus)
     const isSuperAI = window.aiOnline === true;
 
-    // Taktische Intelligenz: Toni reagiert auf spezifische Trainings-Befehle
-    if (cmd.includes("aufbau") || cmd.includes("übung") || cmd.includes("hütchen")) {
-        response = "Materialkammer ist bereit. Ich empfehle, die Hütchen für ein kompaktes Verschieben im Zentrum zu platzieren.";
-        toggleEquipmentPalette(true);
-    } 
-    else if (cmd.includes("pass") || cmd.includes("laufweg")) {
-        response = "Verstanden. Die Taktik-Linien sind kalibriert. (Blau = Pass, Grün = Laufweg).";
-        toggleEquipmentPalette(true);
-    }
-    else if (cmd.includes("torschuss") || cmd.includes("abschluss")) {
-        response = "Abschluss-Modus aktiv. (Rote Linie). Ich tracke die Trefferquote.";
-        toggleEquipmentPalette(true);
-    }
-    else if (cmd.includes("spiel") || cmd.includes("match") || cmd.includes("aufstellung")) {
-        response = "Match-Modus kalibriert. Fokus auf die Startelf. Equipment wurde verstaut.";
-        toggleEquipmentPalette(false);
-    }
-    else if (isSuperAI && (cmd.includes("warum") || cmd.includes("erklär") || cmd.includes("plan"))) {
-        response = "Ich frage mein lokales Experten-Modell (A-Lizenz) nach einer detaillierten Analyse... (Verbindung steht!)";
-        // Hier folgt später der API-Call an Ollama
-    }
-
+    // Erstelle Toni-Antwort Element (zuerst "Denk-Modus")
     const toniMsg = document.createElement('p');
     toniMsg.style.color = "var(--neon-green)";
     toniMsg.style.marginBottom = "15px";
-    toniMsg.innerHTML = `<strong>Toni:</strong> ${response}`;
+    toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Analyse läuft...</span>`;
     chatBox.appendChild(toniMsg);
-    
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // --- LOGIK-WEICHE ---
+    let finalResponse = "Ich habe den Befehl registriert.";
+
+    // A. System-Befehle (Sofort-Reaktion ohne KI)
+    if (cmd.includes("aufbau") || cmd.includes("hütchen")) {
+        finalResponse = "Materialkammer ausgefahren. Hütchen und Bälle liegen bereit.";
+        toggleEquipmentPalette(true);
+    } 
+    else if (cmd.includes("spiel") || cmd.includes("match")) {
+        finalResponse = "Match-Modus aktiv. Equipment verstaut.";
+        toggleEquipmentPalette(false);
+    }
+    // B. Super-KI Analyse (Ollama API Call)
+    else if (isSuperAI) {
+        try {
+            const response = await fetch('http://localhost:11434/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'llama3', // Hier das installierte Modell eintragen
+                    prompt: `Du bist Toni, ein Weltklasse-Fußball-Analyst mit UEFA Pro Lizenz. 
+                             Antworte kurz, präzise und professionell auf deutsch. 
+                             Coach sagt: ${command}`,
+                    stream: false
+                })
+            });
+            const data = await response.json();
+            finalResponse = data.response;
+        } catch (err) {
+            finalResponse = "Coach, die Verbindung zum Experten-Modell wurde unterbrochen. Prüfe Ollama.";
+        }
+    } 
+    // C. Fallback (Standard-Logik)
+    else {
+        finalResponse = "Basis-System aktiv. Für Tiefenanalysen starte bitte die Super-KI (Setup).";
+    }
+
+    // Antwort im Chat anzeigen
+    toniMsg.innerHTML = `<strong>Toni:</strong> ${finalResponse}`;
     document.getElementById('command-input').value = "";
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// 5. KI-STATUS-PULS (Prüft ob Ollama lokal läuft)
+// 5. KI-STATUS-PULS (Ollama Heartbeat)
 window.aiOnline = false;
 async function checkAIStatus() {
     const light = document.getElementById('ai-status-light');
@@ -111,7 +122,6 @@ async function checkAIStatus() {
     if (!light || !label) return;
 
     try {
-        // Wir pingen die lokale Ollama API an
         const response = await fetch('http://localhost:11434/api/tags');
         if (response.ok) {
             window.aiOnline = true;
@@ -119,7 +129,7 @@ async function checkAIStatus() {
             light.style.boxShadow = '0 0 10px var(--neon-green)';
             label.innerText = 'ONLINE';
             label.style.color = 'var(--neon-green)';
-        }
+        } else { throw new Error(); }
     } catch (err) {
         window.aiOnline = false;
         light.style.background = '#555';
@@ -129,11 +139,8 @@ async function checkAIStatus() {
     }
 }
 
-// 6. Initialisierung beim Laden der Seite
+// 6. Initialisierung
 window.onload = () => {
-    console.log("TONI 2.0 Cockpit geladen. System-Check...");
-    
-    // KI-Status sofort und dann alle 10 Sekunden prüfen
     checkAIStatus();
     setInterval(checkAIStatus, 10000);
 
@@ -144,9 +151,7 @@ window.onload = () => {
 
     if (window.arena && document.getElementById('main-canvas')) {
         window.arena.init('main-canvas');
-        if (window.Database) {
-            window.arena.syncFromDatabase(); 
-        }
+        if (window.Database) window.arena.syncFromDatabase(); 
     }
 
     const input = document.getElementById('command-input');
@@ -155,6 +160,4 @@ window.onload = () => {
             if (e.key === 'Enter') handleCommand(input.value);
         });
     }
-    
-    console.log("System ONLINE. Horizontales Board bereit.");
 };
