@@ -1,7 +1,6 @@
 /**
  * TONI 2.0 - ARENA ENGINE (ELITE RECOVERY + FIFA CARDS)
- * Status: REPARIERT (Canvas Null-Check & Bench-Sync)
- * Fokus: Trainer-Bank, FIFA-Cards & Automatischer Formations-Sync.
+ * Status: REPARIERT (Farben-Sync & Canvas Null-Check)
  */
 window.arena = {
     canvas: null,
@@ -9,19 +8,18 @@ window.arena = {
     elements: [], 
     arrows: [], 
     selectedElement: null,
-    benchHeight: 130, // Bereich für die FIFA-Karten unten
+    benchHeight: 130, 
     isAnimating: false,
 
-    // Taktik-Schablonen (Werte 0-1)
     formations: {
-        '3-4-3': [ // Trainer Team (Neon-Green)
+        '3-4-3': [ 
             {p: 'TW', x: 0.1, y: 0.5},
             {p: 'IV', x: 0.25, y: 0.5}, {p: 'LIV', x: 0.22, y: 0.3}, {p: 'RIV', x: 0.22, y: 0.7},
             {p: 'ZM', x: 0.4, y: 0.4}, {p: 'ZM', x: 0.4, y: 0.6},
             {p: 'LAV', x: 0.35, y: 0.15}, {p: 'RAV', x: 0.35, y: 0.85},
             {p: 'ST', x: 0.55, y: 0.5}, {p: 'LS', x: 0.52, y: 0.3}, {p: 'RS', x: 0.52, y: 0.7}
         ],
-        '4-4-2': [ // Toni Team (Rot)
+        '4-4-2': [ 
             {p: 'TW', x: 0.9, y: 0.5},
             {p: 'IV', x: 0.75, y: 0.4}, {p: 'IV', x: 0.75, y: 0.6},
             {p: 'LV', x: 0.78, y: 0.2}, {p: 'RV', x: 0.78, y: 0.8},
@@ -41,7 +39,6 @@ window.arena = {
         
         if(window.Database) {
             this.syncFromDatabase();
-            // Start-Formation nach 500ms erzwingen
             setTimeout(() => this.applyStartTactics(), 500);
         }
         
@@ -55,31 +52,42 @@ window.arena = {
     },
 
     syncFromDatabase() {
-        // FIX: Sicherheitscheck verhindert den Absturz in Zeile 59
         if(!this.canvas || !window.Database || !window.Database.players) {
-            console.warn("Arena Sync: Canvas oder Database noch nicht bereit.");
             return;
         }
         
         const players = window.Database.players;
         const h = this.canvas.height;
         const w = this.canvas.width;
+        const mode = window.Database.activeMode || 'training';
 
-        this.elements = players.map((p, i) => ({
-            id: p.id,
-            type: 'player',
-            number: p.number || (i+1),
-            // Start-Position: Entweder gespeichert oder auf der Bank
-            x: p.x || (60 + (i % 8) * 85), 
-            y: p.y || (h - 65),
-            targetX: p.x || (60 + (i % 8) * 85),
-            targetY: p.y || (h - 65),
-            color: p.team === 'B' ? 'var(--accent-gold)' : 'var(--neon-green)',
-            name: p.name || 'Spieler',
-            pos: p.pos || '?'
-        }));
+        this.elements = players.map((p, i) => {
+            // FARB-LOGIK: 
+            // Training & Leibchen -> Gelb (#ccff00)
+            // Alles andere -> Dein Standard Neon-Grün
+            let playerColor = 'var(--neon-green)';
+            if (mode === 'training' && p.assignment === 'training') {
+                playerColor = '#ccff00'; 
+            } else if (p.team === 'B') {
+                playerColor = 'var(--accent-gold)';
+            }
+
+            return {
+                id: p.id,
+                type: 'player',
+                number: p.number || (i+1),
+                x: p.x || (60 + (i % 8) * 85), 
+                y: p.y || (h - 65),
+                targetX: p.x || (60 + (i % 8) * 85),
+                targetY: p.y || (h - 65),
+                color: playerColor, // Dynamisch zugewiesen
+                name: p.name || 'Spieler',
+                pos: p.pos || '?',
+                assignment: p.assignment // Für Filterung beim Zeichnen
+            };
+        });
         
-        if(window.Database.activeMode === 'match') this.createOpponentTeam();
+        if(mode === 'match') this.createOpponentTeam();
     },
 
     createOpponentTeam() {
@@ -135,11 +143,10 @@ window.arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // 1. Spielfeld (Pitch)
+        // 1. Spielfeld
         ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
         
-        // Markierungen
         ctx.strokeStyle = "rgba(57, 255, 20, 0.3)";
         ctx.lineWidth = 2;
         const m = 50;
@@ -148,7 +155,7 @@ window.arena = {
         ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke();
         ctx.beginPath(); ctx.arc(w/2, (fieldH)/2, 60, 0, Math.PI*2); ctx.stroke();
 
-        // 2. Trainer-Bank (Bereich für Karten)
+        // 2. Trainer-Bank
         ctx.fillStyle = "rgba(0,0,0,0.6)";
         ctx.fillRect(0, h - this.benchHeight, w, this.benchHeight);
         ctx.strokeStyle = "var(--data-cyan)";
@@ -160,8 +167,11 @@ window.arena = {
         ctx.strokeRect(m-15, (fieldH)/2 - 50, 15, 100);
         ctx.strokeRect(w-m, (fieldH)/2 - 50, 15, 100);
 
-        // 4. Spieler & FIFA Cards
+        // 4. Spieler zeichnen
         this.elements.forEach(el => {
+            // Filter: Spieler, die "Abwesend" oder "Nicht im Kader" sind, werden ignoriert
+            if (el.assignment === 'none') return;
+
             if (el.y > h - this.benchHeight - 20) {
                 this.drawFIFACard(ctx, el);
             } else {
@@ -174,14 +184,11 @@ window.arena = {
         ctx.save();
         const cw = 70; const ch = 90;
         const x = el.x - cw/2; const y = el.y - ch/2;
-
         ctx.shadowBlur = 10; ctx.shadowColor = el.color;
         ctx.fillStyle = "#111";
         ctx.fillRect(x, y, cw, ch);
-        
         ctx.strokeStyle = el.color; ctx.lineWidth = 2;
         ctx.strokeRect(x, y, cw, ch);
-
         ctx.shadowBlur = 0;
         ctx.fillStyle = "#fff";
         ctx.font = "bold 12px Inter"; ctx.textAlign = "center";
