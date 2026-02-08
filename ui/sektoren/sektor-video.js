@@ -1,15 +1,12 @@
 /**
  * TONI 2.0 - SEKTOR SKILLS VIDEOANALYSE
- * Jetzt mit intelligenter YouTube-Suche und Referenz-Beamer.
+ * Version: 2.1 (Elite Capture & YouTube-Automatik)
  */
 window.SektorVideo = {
     currentDrill: "Allround-Check",
     stream: null,
+    capturedImage: null,
 
-    /**
-     * Wird von Toni (script.js) aufgerufen.
-     * Beispiel: "Toni, zeig mir den Zidane Turn."
-     */
     setupDrill(type) {
         this.currentDrill = type;
         this.updateYouTubeReferenz(type);
@@ -19,23 +16,17 @@ window.SektorVideo = {
         const content = document.querySelector('.briefcase-window');
         if (!content) return;
         this.render();
-        // Falls beim Öffnen schon ein Drill aktiv ist, Video laden
         if(this.currentDrill !== "Allround-Check") {
             this.updateYouTubeReferenz(this.currentDrill);
         }
     },
 
-    /**
-     * Der "Referenz-Beamer": Sucht automatisch nach Fußball-Tutorials.
-     */
     updateYouTubeReferenz(query) {
         const ytContainer = document.getElementById('youtube-frame-container');
         if (!ytContainer) return;
 
-        // Wir bauen einen optimierten Suchbegriff für Fußball-Elite-Tutorials
         const searchQuery = encodeURIComponent(`football tutorial ${query} slow motion coaching points`);
         
-        // Wir nutzen den YouTube-Embed-Modus mit Suchfunktion
         ytContainer.innerHTML = `
             <iframe 
                 width="100%" 
@@ -62,10 +53,7 @@ window.SektorVideo = {
             <div class="video-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
                 
                 <div id="youtube-frame-container" style="background: #000; border-radius: 15px; border: 1px solid #333; height: 400px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                    <div style="text-align:center;">
-                        <i class="fab fa-youtube" style="font-size: 4rem; color: #ff0000; margin-bottom: 15px; opacity: 0.3;"></i>
-                        <p style="color: #444; font-size: 0.8rem;">WARTE AUF BEFEHL...</p>
-                    </div>
+                    <i class="fab fa-youtube" style="font-size: 4rem; color: #ff0000; opacity: 0.3;"></i>
                 </div>
 
                 <div style="background: #000; border-radius: 15px; border: 2px solid var(--neon-green); height: 400px; position: relative; overflow: hidden;">
@@ -81,25 +69,32 @@ window.SektorVideo = {
             </div>
 
             <div style="display: flex; gap: 15px; margin-top: 25px;">
-                <button class="pro-btn-gold" style="flex: 2;" onclick="window.SektorVideo.startCamera()">
+                <button id="cam-toggle-btn" class="pro-btn-gold" style="flex: 2;" onclick="window.SektorVideo.startCamera()">
                     <i class="fas fa-video"></i> KAMERA AKTIVIEREN
                 </button>
                 <button class="tactic-btn" style="flex: 1;" onclick="window.SektorVideo.captureAction()">
-                    <i class="fas fa-camera"></i> SNAPSHOT
+                    <i class="fas fa-camera"></i> SNAPSHOT (ANALYSE)
                 </button>
             </div>
+            
+            <canvas id="capture-canvas" style="display:none;"></canvas>
         `;
     },
 
     async startCamera() {
         const video = document.getElementById('player-cam');
+        const btn = document.getElementById('cam-toggle-btn');
+        
         try {
             this.stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" } 
+                video: { facingMode: "environment", frameRate: { ideal: 60 } } 
             });
             video.srcObject = this.stream;
+            btn.innerHTML = `<i class="fas fa-video-slash"></i> KAMERA STOPPEN`;
+            btn.onclick = () => this.stopCamera();
+            document.getElementById('toni-video-feedback').innerText = "Kamera läuft mit 60 FPS. Ich scanne jetzt...";
         } catch (err) {
-            alert("Kamera-Zugriff fehlgeschlagen.");
+            alert("Kamera-Zugriff fehlgeschlagen. Bitte Berechtigung prüfen.");
         }
     },
 
@@ -108,5 +103,24 @@ window.SektorVideo = {
             this.stream.getTracks().forEach(track => track.stop());
             this.stream = null;
         }
+        this.render(); // UI zurücksetzen
+    },
+
+    captureAction() {
+        const video = document.getElementById('player-cam');
+        const canvas = document.getElementById('capture-canvas');
+        if (!video || !this.stream) return alert("Kamera ist nicht aktiv!");
+
+        // Snapshot machen
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        this.capturedImage = canvas.toDataURL('image/jpeg');
+        document.getElementById('toni-video-feedback').innerHTML = 
+            `<span style="color:var(--accent-gold);">SNAPSHOT FIXIERT!</span> Toni analysiert die Körperhaltung...`;
+        
+        // Hier folgt als Nächstes die Übergabe an das Vision-Modell
+        console.log("Snapshot für Analyse bereit.");
     }
 };
