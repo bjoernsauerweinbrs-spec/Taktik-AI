@@ -154,6 +154,27 @@ body, html {
     box-shadow: 0 0 80px rgba(0,0,0,0.5);
 }
 
+/* NEU: MANAGEMENT GRID FÜR GEPFLEGTE KARREN (PC & HANDY) */
+.management-grid {
+    display: grid;
+    /* Erzeugt automatisch Spalten (min. 280px), die sich dem Display anpassen */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .management-grid {
+        grid-template-columns: 1fr; /* Auf Handys eine saubere Kachel pro Zeile */
+        gap: 15px;
+    }
+    .briefcase-window {
+        padding: 20px;
+        width: 98%;
+        height: 95%;
+    }
+}
+
 /* 7. AUTHENTIC FIFA ELITE CARDS */
 .fifa-cards-grid {
     display: flex;
