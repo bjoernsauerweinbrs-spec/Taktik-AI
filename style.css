@@ -1,4 +1,4 @@
-/* --- TONI 2.0 MASTER CSS: INTERNATIONAL PRO LAYOUT & A4 PRINT ENGINE --- */
+/* --- TONI 2.0 MASTER CSS: INTERNATIONAL PRO LAYOUT & A5 BOOKLET ENGINE --- */
 :root {
     --bg-deep: #05080F;
     --panel-dark: #0D1421;
@@ -12,7 +12,7 @@
     --status-error: #FF3B30;
     --font-pro: 'Inter', sans-serif;
     
-    /* NEU: FIFA CARD GRADIENTS */
+    /* FIFA CARD GRADIENTS */
     --card-gold: linear-gradient(135deg, #f5e6ad 0%, #D4AF37 50%, #b38728 100%);
     --card-dark: linear-gradient(135deg, #1a1a1a 0%, #0d1421 100%);
 }
@@ -66,7 +66,6 @@ body, html {
 .control-unit:hover { color: var(--neon-green); transform: scale(1.1); }
 .control-unit i { font-size: 26px; display: block; margin-bottom: 5px; }
 
-/* Mikrofon-Spezialeffekt (Wenn Toni spricht/zuhört) */
 .mic-active {
     color: var(--neon-green) !important;
     text-shadow: 0 0 15px var(--neon-green);
@@ -155,14 +154,7 @@ body, html {
     box-shadow: 0 0 80px rgba(0,0,0,0.5);
 }
 
-.management-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 25px;
-    padding: 20px;
-}
-
-/* 7. AUTHENTIC FIFA ELITE CARDS (SHIELD DESIGN) */
+/* 7. AUTHENTIC FIFA ELITE CARDS */
 .fifa-cards-grid {
     display: flex;
     flex-wrap: wrap;
@@ -172,28 +164,20 @@ body, html {
 }
 
 .fifa-card {
-    width: 210px; /* Etwas breiter für die Vital-Stats */
+    width: 210px;
     height: 300px;
     background: var(--card-dark);
     position: relative; 
     cursor: pointer; 
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     overflow: hidden;
-    /* AUTHENTISCHE SCHILD-FORM */
     clip-path: polygon(0% 15%, 50% 0%, 100% 15%, 100% 85%, 50% 100%, 0% 85%);
     border: 2px solid rgba(255,255,255,0.1);
 }
 
-/* Eigenes Team (Gold/Neon) */
 .fifa-card.home-team {
     border: 2px solid var(--accent-gold);
     box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
-}
-
-/* Gegner Team (Rot/Dunkel) */
-.fifa-card.away-team {
-    border: 2px solid var(--status-error);
-    filter: saturate(0.8);
 }
 
 .fifa-card:hover { 
@@ -220,15 +204,7 @@ body, html {
     text-shadow: 2px 2px 0px #000;
 }
 
-.pos-label {
-    position: absolute;
-    top: 75px;
-    left: 22px;
-    font-weight: bold;
-    color: var(--text-main);
-}
-
-/* VITAL-STATS (SPORTUHR-INTEGRATION) */
+/* VITAL-STATS */
 .vital-bar-container {
     width: 100%;
     margin-top: auto;
@@ -243,10 +219,7 @@ body, html {
     color: var(--text-dim);
 }
 
-.vital-stat span {
-    color: var(--neon-green);
-    font-weight: bold;
-}
+.vital-stat span { color: var(--neon-green); font-weight: bold; }
 
 .progress-mini {
     width: 100%;
@@ -262,7 +235,6 @@ body, html {
     box-shadow: 0 0 5px var(--neon-green);
 }
 
-/* NEU: PULS-ANIMATION AUF DER KARTE */
 .card-pulse-icon {
     position: absolute;
     top: 40px;
@@ -278,19 +250,88 @@ body, html {
     40% { transform: scale(1); }
 }
 
-/* ANALYSE-DETAIL (TIEFENWERTE) */
-.detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-top: 20px;
+/* --- 8. NEU: STADION-ZEITUNG (A5 BOOKLET ENGINE) --- */
+.magazine-viewport {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: 40px 0;
 }
 
-.detail-box {
-    background: rgba(255,255,255,0.03);
-    padding: 15px;
-    border-radius: 10px;
-    border-left: 3px solid var(--data-cyan);
+/* A5 Proportionen im Editor */
+.mag-page {
+    width: 148mm;
+    min-height: 210mm;
+    background: #FFFFFF;
+    color: #1A1A1A;
+    padding: 15mm;
+    box-shadow: 0 10px 60px rgba(0,0,0,0.7);
+    position: relative;
+    overflow: hidden;
+    transition: 0.3s;
+}
+
+/* Spezielle Styles für Magazin-Inhalte */
+.mag-section-title {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--bg-deep);
+    border-bottom: 4px solid var(--neon-green);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.mag-back-cover {
+    background: var(--bg-deep) !important;
+    color: white !important;
+    border: 5px solid var(--neon-green);
+}
+
+/* Editor-Interaktion */
+[contenteditable="true"]:hover {
+    background: rgba(57, 255, 20, 0.05);
+    outline: 1px dashed var(--neon-green);
+}
+
+/* Löschen-Button im Editor */
+button[title="Seite löschen"] {
+    opacity: 0.2;
+    transition: 0.3s;
+}
+.mag-page:hover button[title="Seite löschen"] {
+    opacity: 1;
+}
+
+/* --- 9. PRINT ENGINE (Optimiert für Booklet-Druck) --- */
+@media print {
+    /* Blendet alles außer dem Magazin aus */
+    body * { visibility: hidden; }
+    
+    .briefcase-overlay, 
+    .briefcase-window, 
+    .magazine-viewport, 
+    .magazine-viewport * { 
+        visibility: visible; 
+    }
+
+    /* Entfernt Bildschirm-Elemente für den Druck */
+    .briefcase-overlay { position: absolute; left: 0; top: 0; background: none; }
+    .briefcase-window { width: 100%; height: auto; padding: 0; border: none; box-shadow: none; overflow: visible; }
+    .magazine-editor-header, .ignore-print, button, .sidebar-minimal { display: none !important; }
+
+    .magazine-viewport { display: block; padding: 0; margin: 0; }
+
+    .mag-page {
+        width: 100%;
+        height: 100vh; /* Jede A5 Seite auf ein Blatt/Halbblatt */
+        margin: 0;
+        padding: 15mm;
+        box-shadow: none;
+        page-break-after: always;
+        border: none;
+        -webkit-print-color-adjust: exact;
+    }
 }
 
 /* BUTTONS & TEXTAREA */
