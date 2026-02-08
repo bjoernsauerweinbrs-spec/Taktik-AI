@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - MASTER BRIDGE SCRIPT
- * Zentrale: Voice-Engine, Klopp-Nagelsmann Personality & Offline-Guide Logik.
+ * Zentrale: Voice-Engine, Klopp-Nagelsmann Personality, Offline-Guide & Sponsor-Sync.
  */
 
 // --- 1. TONI VOICE ENGINE (STIMME & GEHÖR) ---
@@ -112,7 +112,7 @@ async function handleCommand(command) {
     chatBox.scrollTop = chatBox.scrollHeight;
     inputField.value = "";
 
-    // --- OFFLINE ASSISTENT LOGIK ---
+    // --- OFFLINE ASSISTENT LOGIK (TRAINER-GUIDE) ---
     if (!isSuperAI) {
         let helpText = "Ich bin momentan <b>OFFLINE</b>, Coach. Mein Gehirn am MacBook schläft noch.";
         
@@ -123,11 +123,11 @@ async function handleCommand(command) {
                 <code style="color:#fff; background:#222; padding:3px;">OLLAMA_HOST=0.0.0.0 OLLAMA_ORIGINS="*" ollama serve</code><br><br>
                 2. <b>IP-Check:</b> Trage die IP deines MacBooks in den <b>SETUP-Settings</b> ein.<br><br>
                 3. <b>Login:</b> Das Passwort für alle Trainer ist <b style="color:white;">toni2026</b>.<br><br>
-                Soll ich den Setup-Sektor für dich öffnen?
+                Ich helfe jedem Trainer beim Login – sag einfach Bescheid!
             `;
-            window.ToniVoice.speak("Ich bin offline, Coach. Bitte starte das Terminal am MacBook und prüfe die I P Adresse im Setup.");
+            window.ToniVoice.speak("Ich bin offline, Coach. Bitte starte das Terminal am MacBook mit dem Host Befehl und prüfe die I P Adresse im Setup.");
         } else {
-            window.ToniVoice.speak("Basis-System aktiv. Für Profi-Analysen muss ich online sein. Sag Hilfe für eine Anleitung.");
+            window.ToniVoice.speak("Basis-System aktiv. Für Profi-Analysen muss ich online sein. Sag Hilfe für die Anleitung zum Verbinden.");
         }
         
         toniMsg.innerHTML = `<strong>Toni:</strong> ${helpText}`;
@@ -154,8 +154,9 @@ async function handleCommand(command) {
             body: JSON.stringify({
                 model: 'phi3', 
                 prompt: `Du bist TONI 2.0, ein Elite-Fußball-Analyst (Nagelsmann/Klopp Mix). 
-                         WICHTIG: Wenn der Coach nach DRUCKEN fragt, erkläre das A5 Booklet (2 Seiten pro Blatt). 
-                         Wenn du OFFLINE warst und jetzt ONLINE bist, begrüße den Coach kurz und knackig.
+                         WISSENS-UPDATE: Sponsoren werden im Management-Hub (Business-Sektor) angelegt. Diese fließen automatisch in die Stadionzeitung ein. 
+                         Du berätst Trainer bei der Akquise und dem Drucken (A5 Booklet: 2 Seiten pro Blatt). 
+                         Du bist der Guide für alle Trainer: Erkläre bei Bedarf den Login (toni2026) und das Terminal-Setup.
                          Coach sagt: ${command}`,
                 stream: false
             })
@@ -181,7 +182,6 @@ async function checkAIStatus() {
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2000);
-        // Prüft die Verbindung zur konfigurierten IP
         const response = await fetch(`http://${savedIP}:11434/api/tags`, { signal: controller.signal });
         clearTimeout(timeoutId);
 
