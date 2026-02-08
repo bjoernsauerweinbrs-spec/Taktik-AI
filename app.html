@@ -16,27 +16,27 @@
     <div class="pro-layout-container">
         
         <nav class="sidebar-minimal">
-            <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
+            <div class="control-unit" onclick="window.BriefcaseUI.toggle()" title="Aktentasche öffnen">
                 <i class="fas fa-briefcase"></i>
                 <span>TASCHE</span>
             </div>
 
             <div class="control-unit" id="ai-status-unit" title="KI-Verbindungsstatus">
-                <div id="ai-status-light" style="width: 10px; height: 10px; background: #555; border-radius: 50%; margin: 0 auto 5px; transition: all 0.3s ease;"></div>
-                <span id="ai-status-label" style="font-size: 0.5rem; color: #555; letter-spacing: 1px;">OFFLINE</span>
+                <div id="ai-status-light"></div>
+                <span id="ai-status-label">OFFLINE</span>
             </div>
 
-            <div class="control-unit" id="mic-trigger">
+            <div class="control-unit" id="mic-trigger" onclick="window.ToniVoice.toggle()" title="Mit Toni sprechen">
                 <i class="fas fa-microphone"></i>
                 <span>TONI</span>
             </div>
 
-            <div class="control-unit" onclick="openSection('settings')">
-                <i class="fas fa-cog"></i>
+            <div class="control-unit" onclick="openSection('settings')" title="System-Einstellungen">
+                <i class="fas fa-sliders-h"></i>
                 <span>SETUP</span>
             </div>
 
-            <div class="control-unit" onclick="location.reload()">
+            <div class="control-unit" onclick="location.reload()" title="System Neustart">
                 <i class="fas fa-sync-alt"></i>
                 <span>RESET</span>
             </div>
@@ -44,29 +44,29 @@
 
         <main id="stage-container">
             <div id="equipment-palette">
-                <div class="tool-btn" title="Verschieben / Auswählen" onclick="window.arena.setTool('drag')">
+                <div class="tool-btn" title="Verschieben" onclick="window.arena.setTool('drag')">
                     <i class="fas fa-mouse-pointer"></i>
                 </div>
-                <div class="tool-btn" title="Hütchen setzen" onclick="window.arena.setTool('cone')">
+                <div class="tool-btn" title="Hütchen" onclick="window.arena.setTool('cone')">
                     <i class="fas fa-triangle-exclamation" style="color: var(--accent-orange);"></i>
                 </div>
-                <div class="tool-btn" title="Ball platzieren" onclick="window.arena.setTool('ball')">
+                <div class="tool-btn" title="Ball" onclick="window.arena.setTool('ball')">
                     <i class="fas fa-futbol"></i>
                 </div>
-                <div class="tool-btn" title="Minitor setzen" onclick="window.arena.setTool('goal')">
-                    <i class="fas fa-door-open" style="color: #fff;"></i>
+                <div class="tool-btn" title="Minitor" onclick="window.arena.setTool('goal')">
+                    <i class="fas fa-door-open"></i>
                 </div>
-                <div class="tool-btn" title="Laufweg zeichnen" onclick="window.arena.setTool('arrow')">
+                <div class="tool-btn" title="Laufweg" onclick="window.arena.setTool('arrow')">
                     <i class="fas fa-running" style="color: var(--neon-green);"></i>
                 </div>
-                <div class="tool-btn" title="Passweg zeichnen" onclick="window.arena.setTool('pass')">
+                <div class="tool-btn" title="Passweg" onclick="window.arena.setTool('pass')">
                     <i class="fas fa-long-arrow-alt-right" style="color: var(--data-cyan);"></i>
                 </div>
-                <div class="tool-btn" title="Torschuss einzeichnen" onclick="window.arena.setTool('shot')">
-                    <i class="fas fa-bolt" style="color: #ff3b30;"></i>
+                <div class="tool-btn" title="Torschuss" onclick="window.arena.setTool('shot')">
+                    <i class="fas fa-bolt" style="color: var(--status-error);"></i>
                 </div>
-                <div class="tool-btn" title="Element löschen" onclick="window.arena.setTool('delete')">
-                    <i class="fas fa-eraser" style="color: var(--status-error);"></i>
+                <div class="tool-btn" title="Löschen" onclick="window.arena.setTool('delete')">
+                    <i class="fas fa-eraser"></i>
                 </div>
             </div>
 
@@ -76,15 +76,17 @@
         <aside class="analysis-panel">
             <div class="video-preview">
                 <div class="scan-line"></div>
+                <i class="fas fa-satellite-dish" style="margin-right: 10px; font-size: 0.8rem;"></i>
                 <span>LIVE ANALYSE ACTIVE</span>
             </div>
             
             <div class="chat-container">
                 <div id="chat-box">
-                    <p style="color: var(--neon-green);">Toni: System bereit. Arena wird gescannt...</p>
+                    <p style="color: var(--neon-green); font-family: monospace;">[SYSTEM]: Initialisiere Toni 2.0 Core...</p>
+                    <p style="color: var(--text-dim);">Toni: System bereit, Coach. Arena wird gescannt. Wie gehen wir es an?</p>
                 </div>
                 <div class="chat-input-area">
-                    <input type="text" id="command-input" class="pro-textarea" style="height: 50px;" placeholder="Befehl an Toni...">
+                    <input type="text" id="command-input" class="pro-textarea" placeholder="Befehl an Toni senden...">
                 </div>
             </div>
         </aside>
@@ -102,6 +104,7 @@
     <script src="ui/sektoren/sektor-analyse.js"></script>
     <script src="ui/sektoren/sektor-stadion.js"></script>
     <script src="ui/sektoren/sektor-settings.js"></script>
+    
     <script src="script.js"></script>
 </body>
 </html>
