@@ -1,7 +1,7 @@
 /**
- * TONI 2.0 - AKTENTASCHE UI (FINAL INTEGRATION)
- * Verknüpft das 3x3 Grid mit den aktiven Sektoren.
- * Alle Systeme – von Video bis Management – sind nun scharf geschaltet.
+ * TONI 2.0 - AKTENTASCHE UI (MASTER FIX)
+ * Zentrale Steuerung für das 3x3 Grid.
+ * Fokus: Neue Matchday-Mappe & integrierte Sektoren.
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -37,7 +37,7 @@ window.BriefcaseUI = {
 
                 <div class="mgmt-card" onclick="openSection('analyse')">
                     <div class="card-header"><i class="fas fa-heartbeat pulse-anim"></i> ANALYSE</div>
-                    <p>Live Vital-Daten & Fitness</p>
+                    <p>Live Vital-Daten & Körperfett</p>
                 </div>
 
                 <div class="mgmt-card" onclick="openSection('management')">
@@ -52,17 +52,19 @@ window.BriefcaseUI = {
 
                 <div class="mgmt-card" onclick="alert('Materialkammer wird kalibriert...')">
                     <div class="card-header"><i class="fas fa-dumbbell"></i> TRAINING</div>
-                    <p>Equipment & Übungen</p>
+                    <p>Equipment & Bestandsliste</p>
                 </div>
 
                 <div class="mgmt-card" onclick="openSection('video')">
                     <div class="card-header" style="color: var(--data-cyan);"><i class="fas fa-video"></i> SKILLS</div>
-                    <p>KI Video-Analyse</p>
+                    <p>KI Video-Analyse (Zidane etc.)</p>
                 </div>
 
-                <div class="mgmt-card" onclick="alert('Scouting-Netzwerk offline...')">
-                    <div class="card-header"><i class="fas fa-search"></i> SCOUTING</div>
-                    <p>Marktwerte & Suche</p>
+                <div class="mgmt-card" onclick="openSection('matchday')">
+                    <div class="card-header" style="color: var(--accent-orange);">
+                        <i class="fas fa-clipboard-list"></i> MATCHDAY
+                    </div>
+                    <p>Gegner-Check & Taktik-Mappe</p>
                 </div>
 
                 <div class="mgmt-card" onclick="alert('Taktik-Board initialisiert...')">
@@ -72,7 +74,7 @@ window.BriefcaseUI = {
 
                 <div class="mgmt-card" onclick="openSection('settings')">
                     <div class="card-header" style="color: var(--neon-green);"><i class="fas fa-cog"></i> SETTINGS</div>
-                    <p>Ollama IP & System-Sync</p>
+                    <p>Ollama IP & System-Setup</p>
                 </div>
             </div>
             
