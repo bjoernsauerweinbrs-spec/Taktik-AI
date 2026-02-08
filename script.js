@@ -1,9 +1,9 @@
 /**
  * TONI 2.0 - MASTER BRIDGE SCRIPT
- * Fokus: Deep Voice, Onboarding-Logik & High-Speed Performance.
+ * Version: 3.0 (Onboarding-Fix, Arena-Recovery & Manual Data)
  */
 
-// --- 1. TONI VOICE ENGINE (DEEP VOICE UPGRADE) ---
+// --- 1. TONI VOICE ENGINE (STABILISIERT) ---
 window.ToniVoice = {
     isListening: false,
     recognition: null,
@@ -14,30 +14,21 @@ window.ToniVoice = {
         if (SpeechRecognition) {
             this.recognition = new SpeechRecognition();
             this.recognition.lang = 'de-DE';
-            this.recognition.interimResults = false;
-            this.recognition.continuous = false;
             this.recognition.onresult = (event) => {
-                const text = event.results[0][0].transcript;
-                handleCommand(text);
+                handleCommand(event.results[0][0].transcript);
                 this.stopListening();
             };
-            this.recognition.onerror = () => this.stopListening();
             this.recognition.onend = () => this.stopListening();
         }
     },
 
-    toggle() {
-        if (this.isListening) this.stopListening();
-        else this.startListening();
-    },
-
+    toggle() { this.isListening ? this.stopListening() : this.startListening(); },
     startListening() {
-        if (!this.recognition) return alert("Browser-Support fehlt.");
+        if (!this.recognition) return;
         this.isListening = true;
         document.getElementById('mic-trigger').classList.add('mic-active');
         this.recognition.start();
     },
-
     stopListening() {
         this.isListening = false;
         document.getElementById('mic-trigger').classList.remove('mic-active');
@@ -48,61 +39,62 @@ window.ToniVoice = {
         this.synth.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         const voices = this.synth.getVoices();
-        
-        // Suche nach einer tiefen, männlichen Stimme
-        let eliteVoice = voices.find(v => v.name.includes("Yannick") || v.name.includes("Stefan") || v.name.includes("Google Deutsch")) || voices[0];
-        
-        utterance.voice = eliteVoice;
-        utterance.pitch = 0.85; // Tieferer Sound
-        utterance.rate = 1.0;   // Normale Geschwindigkeit
-        utterance.volume = 1.0;
+        utterance.voice = voices.find(v => v.name.includes("Google Deutsch") || v.lang === 'de-DE') || voices[0];
+        utterance.pitch = 0.85;
         this.synth.speak(utterance);
     }
 };
 
-// --- 2. COACH-DATEN SPEICHER ---
-window.coachInfo = JSON.parse(localStorage.getItem('toni_coach_data')) || { name: null, verein: null, step: 0 };
+// --- 2. COACH & DATA MANAGEMENT ---
+window.coachInfo = JSON.parse(localStorage.getItem('toni_coach_data')) || { name: null, verein: null };
 
 function saveCoach() {
     localStorage.setItem('toni_coach_data', JSON.stringify(window.coachInfo));
 }
 
-// --- 3. NAVIGATION ---
+/**
+ * NEU: Manuelles Update für Analyse-Daten (Körperfett etc.)
+ */
+window.updateBodyStats = function(playerId, key, value) {
+    if(window.Database) {
+        window.Database.updatePlayer(playerId, key, parseFloat(value));
+        console.log(`Update: Spieler ${playerId} -> ${key}: ${value}`);
+    }
+};
+
+// --- 3. NAVIGATION (HUB-RECOVERY) ---
 function openSection(name) {
+    // Falls die Mappe zu ist, öffnen
     if (!window.BriefcaseUI.isOpen) window.BriefcaseUI.toggle();
-    const content = document.querySelector('.briefcase-window');
     
-    if (name === 'kabine') { if (window.SektorSporttasche) window.SektorSporttasche.open(); } 
-    else if (name === 'analyse') { if (window.SektorAnalyse) window.SektorAnalyse.open(); } 
-    else if (name === 'stadion') { if (window.SektorStadion) window.SektorStadion.open(); }
-    else if (name === 'settings') { if (window.SektorSettings) window.SektorSettings.open(); }
-    else if (name === 'management') { if (window.SektorManagement) window.SektorManagement.open(); }
-    else if (name === 'video') { if (window.SektorVideo) window.SektorVideo.open(); }
+    // Direkter Aufruf des Routers (aus aktentasche-ui.js)
+    if (window.openSection) {
+        window.openSection(name);
+    }
 }
 
-// --- 4. TONI CORE LOGIK (CONVERSATIONAL) ---
+// --- 4. TONI CORE LOGIK (ONBOARDING & CHAT) ---
 async function handleCommand(command) {
-    if (!command.trim()) return;
+    if (!command || !command.trim()) return;
     const chatBox = document.getElementById('chat-box');
     const inputField = document.getElementById('command-input');
     
+    // User Message
     const userMsg = document.createElement('p');
-    userMsg.style.color = "#fff";
-    userMsg.innerHTML = `<strong>Coach:</strong> ${command}`;
+    userMsg.style.padding = "5px 0";
+    userMsg.innerHTML = `<span style="color:var(--accent-gold)">Coach:</span> ${command}`;
     chatBox.appendChild(userMsg);
     inputField.value = "";
 
-    const cmd = command.toLowerCase();
-    const isOnline = window.aiOnline === true;
     const toniMsg = document.createElement('p');
     toniMsg.style.color = "var(--neon-green)";
     chatBox.appendChild(toniMsg);
 
-    // --- ONBOARDING FLOW (SMALLTALK) ---
+    // --- ONBOARDING FLOW ---
     if (!window.coachInfo.name) {
         window.coachInfo.name = command;
         saveCoach();
-        let resp = `Sehr angenehm! Welchen Verein führen wir heute zum Sieg?`;
+        let resp = `Sehr angenehm, Coach ${command}! Von welchem Verein reden wir?`;
         toniMsg.innerHTML = `<strong>Toni:</strong> ${resp}`;
         window.ToniVoice.speak(resp);
         return;
@@ -111,26 +103,23 @@ async function handleCommand(command) {
     if (!window.coachInfo.verein) {
         window.coachInfo.verein = command;
         saveCoach();
-        let resp = `Alles klar, ${window.coachInfo.verein} also. Sobald wir online sind, scanne ich die Vereinsdaten. Aktiviere jetzt die Super-KI im Setup!`;
+        let resp = `Alles klar, ${window.coachInfo.verein}. Ich lade das Stadion-Modul. Aktiviere jetzt die KI im Setup!`;
         toniMsg.innerHTML = `<strong>Toni:</strong> ${resp}`;
         window.ToniVoice.speak(resp);
-        setTimeout(() => openSection('settings'), 3000);
+        setTimeout(() => openSection('settings'), 2500);
         return;
     }
 
-    // --- KI PERFORMANCE LOGIK ---
-    if (isOnline) {
-        toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Denke nach...</span>`;
+    // --- AI RESPONSE (OLLAMA) ---
+    if (window.aiOnline) {
+        toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Analysiere...</span>`;
         const savedIP = localStorage.getItem('toni_mac_ip') || 'localhost';
         try {
             const response = await fetch(`http://${savedIP}:11434/api/generate`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     model: 'phi3', 
-                    prompt: `Antworte extrem kurz (max 2 Sätze) als Fußball-Analyst. 
-                             Coach: ${window.coachInfo.name}, Verein: ${window.coachInfo.verein}. 
-                             Befehl: ${command}`,
+                    prompt: `Analysten-Modus. Coach: ${window.coachInfo.name}. Befehl: ${command}`,
                     stream: false
                 })
             });
@@ -138,62 +127,43 @@ async function handleCommand(command) {
             toniMsg.innerHTML = `<strong>Toni:</strong> ${data.response}`;
             window.ToniVoice.speak(data.response);
         } catch (err) {
-            toniMsg.innerHTML = `<strong>Toni:</strong> Offline. Check das Terminal!`;
+            toniMsg.innerHTML = `<strong>Toni:</strong> Verbindung zum Mac verloren.`;
         }
     } else {
-        // Basis-Antworten wenn offline
-        let offResp = "Ich bin im Energiesparmodus. Starte Ollama am Mac, damit ich mein volles Wissen für den Verein nutzen kann!";
-        toniMsg.innerHTML = `<strong>Toni:</strong> ${offResp}`;
-        window.ToniVoice.speak(offResp);
+        toniMsg.innerHTML = `<strong>Toni:</strong> Ich bin offline. Aktiviere mich im Setup!`;
     }
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// --- 5. SYSTEM STATUS ---
-window.aiOnline = false;
-async function checkAIStatus() {
-    const light = document.getElementById('ai-status-light');
-    const label = document.getElementById('ai-status-label');
-    const savedIP = localStorage.getItem('toni_mac_ip') || 'localhost';
-    if (!light || !label) return;
-
-    try {
-        const response = await fetch(`http://${savedIP}:11434/api/tags`);
-        if (response.ok) {
-            window.aiOnline = true;
-            light.style.background = 'var(--neon-green)';
-            label.innerText = 'ONLINE';
-        } else { throw new Error(); }
-    } catch (err) {
-        window.aiOnline = false;
-        light.style.background = '#555';
-        label.innerText = 'OFFLINE';
-    }
-}
-
-// --- 6. INITIALISIERUNG ---
+// --- 5. INITIALISIERUNG (RECOVERY ENGINE) ---
 window.addEventListener('DOMContentLoaded', () => {
     window.ToniVoice.init();
-    checkAIStatus();
-    setInterval(checkAIStatus, 5000);
+    
+    // Arena Recovery: Spielfeld erzwingen
+    setTimeout(() => {
+        if (window.arena) {
+            window.arena.init('main-canvas');
+            window.arena.resize(); // Resize erzwingen für Sichtbarkeit
+        }
+    }, 500);
 
-    // Erstbegrüßung nur wenn noch kein Name da ist
+    // Erstbegrüßung & Confirm-Button Fix
     if (!window.coachInfo.name) {
-        setTimeout(() => {
-            const intro = "Hallo! Ich bin Toni 2.0. Nenn mir doch bitte mal deinen Namen.";
-            const chatBox = document.getElementById('chat-box');
-            const toniMsg = document.createElement('p');
-            toniMsg.style.color = "var(--neon-green)";
-            toniMsg.innerHTML = `<strong>Toni:</strong> ${intro}`;
-            chatBox.appendChild(toniMsg);
-            window.ToniVoice.speak(intro);
-        }, 1500);
+        const chatBox = document.getElementById('chat-box');
+        const intro = "Hallo! Ich bin Toni 2.0. Wie ist dein Name, Coach?";
+        const toniMsg = document.createElement('p');
+        toniMsg.style.color = "var(--neon-green)";
+        toniMsg.innerHTML = `<strong>Toni:</strong> ${intro}<br>
+            <button class="onboarding-confirm-btn" onclick="handleCommand(document.getElementById('command-input').value)">BESTÄTIGEN</button>`;
+        chatBox.appendChild(toniMsg);
+        window.ToniVoice.speak(intro);
     }
 
-    if (window.Database) window.Database.init();
-    if (window.arena) window.arena.init('main-canvas');
-
+    // Enter-Taste für Chat
     document.getElementById('command-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleCommand(e.target.value);
     });
+
+    // Datenbank laden
+    if (window.Database) window.Database.init();
 });
