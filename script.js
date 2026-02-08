@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - MASTER BRIDGE SCRIPT
- * Zentrale: Voice-Engine, Klopp-Nagelsmann Personality & Video-Analyse-Logik.
+ * Zentrale: Voice-Engine, Klopp-Nagelsmann Personality & Offline-Guide Logik.
  */
 
 // --- 1. TONI VOICE ENGINE (STIMME & GEHÖR) ---
@@ -51,7 +51,6 @@ window.ToniVoice = {
         this.synth.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         const voices = this.synth.getVoices();
-        // Bevorzugt kraftvolle männliche Stimme
         utterance.voice = voices.find(v => v.name.includes("Yannick") || v.name.includes("Google Deutsch")) || voices[0];
         utterance.pitch = 0.9;
         utterance.rate = 1.0;
@@ -70,7 +69,6 @@ function openSection(name) {
     console.log("Navigiere zu Sektor:", name);
     const content = document.querySelector('.briefcase-window');
     
-    // Routing zu den einzelnen Sektoren
     if (name === 'kabine') { if (window.SektorSporttasche) window.SektorSporttasche.open(); } 
     else if (name === 'analyse') { if (window.SektorAnalyse) window.SektorAnalyse.open(); } 
     else if (name === 'stadion') { if (window.SektorStadion) window.SektorStadion.open(); }
@@ -96,7 +94,6 @@ async function handleCommand(command) {
     const chatBox = document.getElementById('chat-box');
     const inputField = document.getElementById('command-input');
     
-    // User-Eingabe anzeigen
     const userMsg = document.createElement('p');
     userMsg.style.color = "#fff";
     userMsg.style.marginBottom = "10px";
@@ -106,73 +103,86 @@ async function handleCommand(command) {
     const cmd = command.toLowerCase();
     const isSuperAI = window.aiOnline === true;
 
-    // Toni's Denk-Blase
     const toniMsg = document.createElement('p');
     toniMsg.style.color = "var(--neon-green)";
     toniMsg.style.marginBottom = "15px";
-    toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Analysiere Taktik...</span>`;
+    toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Analysiere...</span>`;
     chatBox.appendChild(toniMsg);
     
     chatBox.scrollTop = chatBox.scrollHeight;
     inputField.value = "";
 
-    // --- AUTOMATISCHE SEKTOR-ERKENNUNG (VIDEO & SKILLS) ---
+    // --- OFFLINE ASSISTENT LOGIK ---
+    if (!isSuperAI) {
+        let helpText = "Ich bin momentan <b>OFFLINE</b>, Coach. Mein Gehirn am MacBook schläft noch.";
+        
+        if (cmd.includes("hilfe") || cmd.includes("verbinden") || cmd.includes("online") || cmd.includes("wie")) {
+            helpText = `
+                <b>SCHLACHPLAN ZUM ONLINE-MODUS:</b><br><br>
+                1. <b>MacBook Terminal:</b> Starte Ollama mit dem Befehl:<br>
+                <code style="color:#fff; background:#222; padding:3px;">OLLAMA_HOST=0.0.0.0 OLLAMA_ORIGINS="*" ollama serve</code><br><br>
+                2. <b>IP-Check:</b> Trage die IP deines MacBooks in den <b>SETUP-Settings</b> ein.<br><br>
+                3. <b>Login:</b> Das Passwort für alle Trainer ist <b style="color:white;">toni2026</b>.<br><br>
+                Soll ich den Setup-Sektor für dich öffnen?
+            `;
+            window.ToniVoice.speak("Ich bin offline, Coach. Bitte starte das Terminal am MacBook und prüfe die I P Adresse im Setup.");
+        } else {
+            window.ToniVoice.speak("Basis-System aktiv. Für Profi-Analysen muss ich online sein. Sag Hilfe für eine Anleitung.");
+        }
+        
+        toniMsg.innerHTML = `<strong>Toni:</strong> ${helpText}`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return; 
+    }
+
+    // --- ONLINE MODUS (PHI-3) ---
     if (cmd.includes("video") || cmd.includes("analyse") || cmd.includes("zeig mir") || cmd.includes("trick")) {
         let drillType = "Allround-Check";
         if (cmd.includes("zidane")) drillType = "Zidane Turn";
         if (cmd.includes("torschuss") || cmd.includes("abschluss")) drillType = "Torschuss";
         if (cmd.includes("annahme")) drillType = "Ballannahme";
-
         openSection('video');
         if (window.SektorVideo) window.SektorVideo.setupDrill(drillType);
     }
 
-    let finalResponse = "Ich habe den Befehl registriert.";
+    const savedIP = localStorage.getItem('toni_mac_ip') || 'localhost';
 
-    if (isSuperAI) {
-        try {
-            const response = await fetch('http://localhost:11434/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'phi3', 
-                    prompt: `Du bist TONI 2.0, ein Elite-Fußball-Analyst. 
-                             PERSÖNLICHKEIT: Mix aus Nagelsmann (Analytik) & Klopp (Emotion). 
-                             
-                             WISSEN: Du kannst Videoanalysen durchführen, Skelett-Tracking nutzen und A5-Stadionhefte drucken.
-                             DRUCK-TIPP: Erwähne bei Fragen zum Drucken IMMER '2 Seiten pro Blatt' für A5 Booklets.
-                             VIDEO-LOGIC: Du analysierst Biomechanik (Winkel, Standfuß, Schwerpunkt).
-                             
-                             Coach sagt: ${command}`,
-                    stream: false
-                })
-            });
-            const data = await response.json();
-            finalResponse = data.response;
-        } catch (err) {
-            finalResponse = "Coach, Verbindung zum Phi-3 Modell unterbrochen. Bitte Terminal prüfen.";
-        }
-    } else {
-        finalResponse = "Basis-System aktiv. Für Profi-Analysen starte bitte Ollama mit Phi-3.";
+    try {
+        const response = await fetch(`http://${savedIP}:11434/api/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'phi3', 
+                prompt: `Du bist TONI 2.0, ein Elite-Fußball-Analyst (Nagelsmann/Klopp Mix). 
+                         WICHTIG: Wenn der Coach nach DRUCKEN fragt, erkläre das A5 Booklet (2 Seiten pro Blatt). 
+                         Wenn du OFFLINE warst und jetzt ONLINE bist, begrüße den Coach kurz und knackig.
+                         Coach sagt: ${command}`,
+                stream: false
+            })
+        });
+        const data = await response.json();
+        const finalResponse = data.response;
+        toniMsg.innerHTML = `<strong>Toni:</strong> ${finalResponse}`;
+        window.ToniVoice.speak(finalResponse);
+    } catch (err) {
+        toniMsg.innerHTML = `<strong>Toni:</strong> Verbindung zum MacBook (${savedIP}) verloren. Bitte Terminal prüfen!`;
     }
-
-    // Antwort anzeigen & SPRECHEN
-    toniMsg.innerHTML = `<strong>Toni:</strong> ${finalResponse}`;
-    window.ToniVoice.speak(finalResponse);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// --- 4. SYSTEM STATUS (OLLAMA CHECK) ---
+// --- 4. SYSTEM STATUS (DYNAMISCHE IP PRÜFUNG) ---
 window.aiOnline = false;
 async function checkAIStatus() {
     const light = document.getElementById('ai-status-light');
     const label = document.getElementById('ai-status-label');
+    const savedIP = localStorage.getItem('toni_mac_ip') || 'localhost';
     if (!light || !label) return;
 
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2000);
-        const response = await fetch('http://localhost:11434/api/tags', { signal: controller.signal });
+        // Prüft die Verbindung zur konfigurierten IP
+        const response = await fetch(`http://${savedIP}:11434/api/tags`, { signal: controller.signal });
         clearTimeout(timeoutId);
 
         if (response.ok) {
