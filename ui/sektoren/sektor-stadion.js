@@ -1,40 +1,36 @@
 /**
  * TONI 2.0 - SEKTOR STADION (DYNAMISCHER MAGAZIN GENERATOR)
- * Feature: Automatische Sponsoren-Synchronisation mit dem Management-Hub.
- * Optimiert für A5-Booklet Druck & Snapshot-Beamer.
+ * Version: 3.2 (Layout-Fix & Elite Sync)
  */
 window.SektorStadion = {
-    // Grundgerüst der Seiten
     dynamicPages: [
         { 
             title: "INSIDE TACTICS: COACH'S CORNER", 
-            content: `<div><h4 style="color: var(--neon-green);">DIE TAKTIK-VORSCHAU</h4><p style="font-size: 0.9rem; line-height: 1.6; color: #ccc;">"Wir erwarten heute einen Gegner, der extrem kompakt steht. Der Fokus liegt auf schnellem Umschaltspiel..."</p></div>` 
+            content: `<div><h4 style="color: var(--neon-green);">DIE TAKTIK-VORSCHAU</h4><p style="font-size: 0.9rem; line-height: 1.6; color: #333;">"Wir erwarten heute einen Gegner, der extrem kompakt steht. Der Fokus liegt auf schnellem Umschaltspiel..."</p></div>` 
         },
         { 
             title: "DIE ELITE-ELF DES TAGES", 
-            content: `<div class="mag-squad-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;"><div class="mini-fifa-card">SPIELER 1</div><div class="mini-fifa-card">SPIELER 2</div><div class="mini-fifa-card">SPIELER 3</div></div>` 
+            content: `<div class="mag-squad-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"><div style="border:1px solid #ddd; padding:5px; text-align:center; font-size:0.7rem;">SPIELER 1</div><div style="border:1px solid #ddd; padding:5px; text-align:center; font-size:0.7rem;">SPIELER 2</div><div style="border:1px solid #ddd; padding:5px; text-align:center; font-size:0.7rem;">SPIELER 3</div></div>` 
         },
         { 
             title: "UNSERE PREMIUM-PARTNER", 
-            isSponsorPage: true, // Markierung für dynamisches Laden
+            isSponsorPage: true,
             content: "" 
-        },
-        { 
-            title: "FAN-NEWS & INFOS", 
-            content: `<div><h4 style="color: var(--accent-gold);">STADION-CATERING</h4><p style="font-size: 0.8rem;">Heute exklusiv: Die Stadionwurst "Elite" zum Vorteilspreis.</p></div>` 
         }
     ],
 
     open() {
         const content = document.querySelector('.briefcase-window');
         if (!content) return;
-        this.syncSponsors(); // Erst Daten abgleichen
+        
+        // Layout-Reset für Stadion-Modus
+        content.style.paddingBottom = "150px";
+        content.style.background = "var(--panel-dark)";
+        
+        this.syncSponsors();
         this.render();
     },
 
-    /**
-     * Zieht sich die Sponsoren-Daten aus dem Management-Hub (localStorage)
-     */
     syncSponsors() {
         const sponsorPage = this.dynamicPages.find(p => p.isSponsorPage);
         if (!sponsorPage) return;
@@ -42,19 +38,15 @@ window.SektorStadion = {
         const rawData = localStorage.getItem('toni_management_data');
         const data = rawData ? JSON.parse(rawData) : { sponsors: [] };
 
-        if (data.sponsors.length === 0) {
-            sponsorPage.content = `
-                <div style="text-align:center; padding: 20px; border: 1px dashed #ccc;">
-                    <p style="color: #888; font-size: 0.8rem;">Noch keine Partner im Management-Hub hinterlegt.</p>
-                    <p style="color: var(--neon-green); font-size: 0.7rem; cursor:pointer;" onclick="window.SektorManagement.open()">-> JETZT PARTNER ANLEGEN</p>
-                </div>`;
+        if (!data.sponsors || data.sponsors.length === 0) {
+            sponsorPage.content = `<p style="color: #888; text-align:center; border: 1px dashed #ccc; padding:20px;">Keine Partner im Management-Hub gefunden.</p>`;
         } else {
-            let sponsorHTML = `<div class="mag-sponsor-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">`;
+            let sponsorHTML = `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">`;
             data.sponsors.forEach(s => {
                 sponsorHTML += `
-                    <div class="sponsor-box" style="border: 1px solid #eee; padding: 10px; text-align: center;">
-                        <div style="font-weight: bold; color: #333; font-size: 0.9rem;">${s.name.toUpperCase()}</div>
-                        <div style="color: var(--neon-green); font-size: 0.6rem; letter-spacing: 1px;">${s.type || 'PREMIUM PARTNER'}</div>
+                    <div style="border: 1px solid #eee; padding: 10px; text-align: center; border-radius:5px;">
+                        <div style="font-weight: bold; color: #333; font-size: 0.8rem;">${s.name.toUpperCase()}</div>
+                        <div style="color: var(--neon-green); font-size: 0.5rem;">${s.type || 'PARTNER'}</div>
                     </div>`;
             });
             sponsorHTML += `</div>`;
@@ -62,116 +54,72 @@ window.SektorStadion = {
         }
     },
 
-    showPrintTip() {
-        alert("TONI TIPP: Coach, für das perfekte Booklet stellst du im Druckdialog deines MacBook '2 Seiten pro Blatt' ein. So druckst du zwei A5-Seiten auf ein A4-Blatt. Einfach falten, tackern, fertig!");
-    },
-
     beamSnapshot(index) {
-        if (!window.arena) return alert("Fehler: Arena-System nicht aktiv.");
+        if (!window.arena) return;
         const img = window.arena.getSnapshot();
         this.dynamicPages[index].content += `
-            <div class="mag-snapshot" style="margin-top:20px; text-align:center;">
-                <img src="${img}" style="width:100%; border:1px solid #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                <p style="font-size:0.6rem; color:#888; margin-top:5px;">SNAPSHOT: ARENA BOARD</p>
+            <div style="margin-top:15px; text-align:center; border: 1px solid #eee; padding:5px; background:#f9f9f9;">
+                <img src="${img}" style="width:100%; display:block;">
+                <p style="font-size:0.5rem; color:#999; margin-top:3px;">LIVE ARENA SNAPSHOT</p>
             </div>`;
         this.render();
-    },
-
-    addPage() {
-        this.dynamicPages.push({
-            title: "NEUE MAGAZIN-SEITE",
-            content: "<p>Klicke hier, um neuen Inhalt für deine Fans oder Sponsoren zu erstellen...</p>"
-        });
-        this.render();
-    },
-
-    removePage(index) {
-        if (confirm("Möchtest du diese Seite wirklich aus der Stadion-Zeitung entfernen?")) {
-            this.dynamicPages.splice(index, 1);
-            this.render();
-        }
+        window.ToniVoice.speak("Taktik-Snapshot wurde in das Magazin übertragen.");
     },
 
     render() {
         const content = document.querySelector('.briefcase-window');
         
-        let html = `
-            <div class="magazine-editor-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
+        content.innerHTML = `
+            <div class="magazine-editor-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom: 2px solid var(--accent-gold); padding-bottom: 20px;">
                 <div>
-                    <h2 style="color:var(--neon-green); letter-spacing: 2px;">STADION-ZEITUNG: PRO-EDITOR</h2>
-                    <div style="background: rgba(57, 255, 20, 0.1); border: 1px solid var(--neon-green); padding: 8px 15px; border-radius: 8px; margin-top: 10px; cursor:pointer; display: inline-block;" onclick="window.SektorStadion.showPrintTip()">
-                        <span style="color:var(--neon-green); font-size: 0.75rem; font-weight: bold;">
-                            <i class="fas fa-lightbulb"></i> TONI'S TIPP: A5 BOOKLET-DRUCK (KLICKEN)
-                        </span>
-                    </div>
+                    <h2 style="color:var(--accent-gold); letter-spacing: 2px;">THE ELITE | MATCHDAY-PROGRAMM</h2>
+                    <span style="color: var(--text-dim); font-size: 0.7rem;">PRO-EDITOR AKTIV</span>
                 </div>
-                <div style="display: flex; gap: 15px;">
-                    <button class="tactic-btn" style="border-color: var(--neon-green);" onclick="window.SektorStadion.addPage()">
-                        <i class="fas fa-plus"></i> SEITE
-                    </button>
-                    <button class="pro-btn-gold" style="box-shadow: 0 0 15px var(--accent-gold);" onclick="window.print()">
-                        <i class="fas fa-file-pdf"></i> PRINT
-                    </button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="pro-btn-gold" style="padding: 10px 20px;" onclick="window.print()"><i class="fas fa-print"></i> PRINT</button>
                     <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
                 </div>
             </div>
 
-            <div class="magazine-viewport" style="display: flex; flex-direction: column; gap: 50px; align-items: center; padding-bottom: 100px;">
+            <div class="magazine-viewport" style="display: flex; flex-direction: column; gap: 40px; align-items: center; width: 100%;">
                 
-                <div class="mag-page" id="mag-p-cover">
-                    <div class="mag-content cover-layout">
-                        <div class="mag-club-logo" contenteditable="true">
-                            <i class="fas fa-shield-halved" style="font-size: 4rem; color: var(--accent-gold);"></i>
-                            <p>DEIN VEREIN</p>
+                <div class="mag-page" style="width: 420px; height: 594px; background: #fff; color: #000; padding: 40px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="text-align:center; border: 5px solid #000; padding: 20px; height: 100%; display:flex; flex-direction:column; justify-content:space-between;">
+                        <h1 style="font-size: 3rem; font-weight: 900; margin: 0;">MATCHDAY</h1>
+                        <div style="flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                            <i class="fas fa-shield-halved" style="font-size: 6rem; color: #222; margin-bottom: 20px;"></i>
+                            <h2 style="border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 10px 0; width: 80%; text-transform:uppercase;">
+                                ${window.coachInfo.verein || 'DEIN VEREIN'}
+                            </h2>
                         </div>
-                        <div class="mag-title-box">
-                            <h1 contenteditable="true">MATCHDAY</h1>
-                            <h3 contenteditable="true">OFFIZIELLES ARENA-MAGAZIN</h3>
-                        </div>
-                        <div class="mag-main-feature">
-                            <h2 contenteditable="true">DER KAMPF UM DIE SPITZE</h2>
-                            <p contenteditable="true">ANSTOSS: HEUTE | ELITE-COCKPIT POWERED</p>
-                        </div>
+                        <p style="font-weight: bold; letter-spacing: 2px;">OFFICIAL PROGRAMME 2026</p>
                     </div>
                 </div>
 
                 ${this.dynamicPages.map((page, index) => `
-                    <div class="mag-page" style="position: relative;">
-                        <div style="position: absolute; right: 10px; top: 10px; display: flex; gap: 5px;" class="ignore-print">
-                            <button class="tactic-btn" style="padding: 5px 10px; font-size: 0.6rem; background: var(--data-cyan); border:none; color:#000;" 
-                                    onclick="window.SektorStadion.beamSnapshot(${index})" title="Taktik vom Board hier einfügen">
-                                <i class="fas fa-camera"></i> BEAM
-                            </button>
-                            <button onclick="window.SektorStadion.removePage(${index})" 
-                                    style="background: #ff3b30; border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.6rem;"
-                                    title="Seite löschen">
-                                <i class="fas fa-trash"></i>
+                    <div class="mag-page" style="width: 420px; height: 594px; background: #fff; color: #000; padding: 40px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden;">
+                        <div class="ignore-print" style="position: absolute; right: 10px; top: 10px;">
+                            <button class="tactic-btn" style="font-size: 0.6rem; padding: 5px 10px; background: var(--data-cyan); color:#000; border:none;" 
+                                    onclick="window.SektorStadion.beamSnapshot(${index})">
+                                <i class="fas fa-camera"></i> BOARD BEAM
                             </button>
                         </div>
-
-                        <div class="mag-content">
-                            <div class="mag-section-title" contenteditable="true">${page.title}</div>
-                            <div style="margin-top: 20px; color: #333;" contenteditable="true">
-                                ${page.content}
-                            </div>
+                        <h3 style="border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; font-size: 1rem;">${page.title}</h3>
+                        <div style="font-family: 'Times New Roman', serif;" contenteditable="true">
+                            ${page.content}
                         </div>
                     </div>
                 `).join('')}
 
-                <div class="mag-page mag-back-cover">
-                    <div class="mag-content" style="text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%;">
-                        <div class="toni-ad-container">
-                            <i class="fas fa-microchip" style="font-size: 5rem; color: var(--neon-green); margin-bottom: 20px;"></i>
-                            <h1 style="color: #fff; letter-spacing: 10px; margin: 0;">TONI 2.0</h1>
-                            <p style="color: var(--accent-gold); font-weight: bold; letter-spacing: 3px; text-transform: uppercase;">The AI Revolution</p>
-                            <div style="margin: 40px auto; width: 60%; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-green), transparent);"></div>
-                            <p style="font-size: 1.2rem; color: #fff; font-style: italic;">"Weil Taktik kein Zufall ist."</p>
-                        </div>
+                <div class="mag-page" style="width: 420px; height: 594px; background: #000; color: #fff; padding: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center; text-align: center;">
+                    <div>
+                        <i class="fas fa-microchip" style="font-size: 5rem; color: var(--neon-green); margin-bottom: 20px;"></i>
+                        <h1 style="letter-spacing: 8px;">TONI 2.0</h1>
+                        <p style="color: var(--accent-gold); font-size: 0.8rem; letter-spacing: 3px;">POWERED BY ELITE AI</p>
                     </div>
                 </div>
 
             </div>
         `;
-        content.innerHTML = html;
     }
 };
