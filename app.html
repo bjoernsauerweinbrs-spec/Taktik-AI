@@ -4,12 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TONI 2.0 | ELITE COCKPIT</title>
+    
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
 </head>
 <body>
 
     <script>
+        // Sicherheits-Check: Nur mit gültigem Login Zugriff gewähren
         if(sessionStorage.getItem('toni_auth') !== 'true') window.location.href = 'index.html';
     </script>
 
@@ -83,7 +91,7 @@
             <div class="chat-container">
                 <div id="chat-box">
                     <p style="color: var(--neon-green); font-family: monospace;">[SYSTEM]: Initialisiere Toni 2.0 Core...</p>
-                    <p style="color: var(--text-dim);">Toni: System bereit, Coach. Arena wird gescannt. Wie gehen wir es an?</p>
+                    <p style="color: var(--text-dim);">Toni: System bereit, Coach. Wie gehen wir es an?</p>
                 </div>
                 <div class="chat-input-area">
                     <input type="text" id="command-input" class="pro-textarea" placeholder="Befehl an Toni senden...">
@@ -99,12 +107,11 @@
 
     <script src="logic/database.js"></script>
     <script src="engine/arena.js"></script>
-    <script src="ui/aktentasche-ui.js"></script>
+    <script src="libs/toni-vision.js"></script> <script src="ui/aktentasche-ui.js"></script>
     <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
     <script src="ui/sektoren/sektor-stadion.js"></script>
     <script src="ui/sektoren/sektor-settings.js"></script>
-    
-    <script src="script.js"></script>
+    <script src="ui/sektoren/sektor-management.js"></script> <script src="ui/sektoren/sektor-video.js"></script> <script src="script.js"></script>
 </body>
 </html>
