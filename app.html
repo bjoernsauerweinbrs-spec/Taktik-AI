@@ -17,7 +17,7 @@
 <body>
 
     <script>
-        // Sicherheits-Check: Nur mit gültigem Login Zugriff gewähren
+        // Sicherheits-Check: Nur autorisierte Trainer haben Zugriff
         if(sessionStorage.getItem('toni_auth') !== 'true') window.location.href = 'index.html';
     </script>
 
@@ -107,11 +107,16 @@
 
     <script src="logic/database.js"></script>
     <script src="engine/arena.js"></script>
-    <script src="libs/toni-vision.js"></script> <script src="ui/aktentasche-ui.js"></script>
+    <script src="libs/toni-vision.js"></script>
+
+    <script src="ui/aktentasche-ui.js"></script>
     <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
     <script src="ui/sektoren/sektor-stadion.js"></script>
     <script src="ui/sektoren/sektor-settings.js"></script>
-    <script src="ui/sektoren/sektor-management.js"></script> <script src="ui/sektoren/sektor-video.js"></script> <script src="script.js"></script>
+    <script src="ui/sektoren/sektor-management.js"></script>
+    <script src="ui/sektoren/sektor-video.js"></script>
+    
+    <script src="script.js"></script>
 </body>
 </html>
