@@ -1,20 +1,22 @@
 /**
  * TONI 2.0 - VISION ENGINE (ELITE BIOMECHANICS)
- * Fokus: Gelenkwinkel-Analyse & Echtzeit-Coaching.
+ * Version: 2.8 (Dynamic Drill-Sync & Professional Feedback)
  */
 window.ToniVision = {
     detector: null,
     isReady: false,
     lastFeedbackTime: 0,
 
-    // Referenz-Winkel für Profi-Tricks (Beispielwerte)
+    // Datenbank für biomechanische Idealwerte
     drills: {
-        "zidane turn": { knee_angle: 120, hip_angle: 160, label: "Tief bleiben!" },
-        "torschuss": { knee_angle: 145, ankle_angle: 90, label: "Standbein fest!" }
+        "Allround-Check": { knee_angle: 160, hip_angle: 170, label: "Haltung stabil." },
+        "zidane turn": { knee_angle: 115, hip_angle: 150, label: "Tief bleiben für mehr Balance!" },
+        "torschuss": { knee_angle: 140, ankle_angle: 95, label: "Standbein fest neben den Ball!" },
+        "dribbling": { knee_angle: 125, hip_angle: 155, label: "Schwerpunkt senken, Ball eng führen!" }
     },
 
     async init() {
-        console.log("Toni Vision: Lade TensorFlow Pose-Detection...");
+        console.log("Toni Vision: Initialisiere Hochleistungs-Tracking...");
         try {
             const detectorConfig = {
                 runtime: 'mediapipe',
@@ -47,7 +49,7 @@ window.ToniVision = {
     },
 
     /**
-     * Berechnet den Winkel zwischen drei Punkten (z.B. Hüfte-Knie-Ankle)
+     * Berechnet den Winkel zwischen drei Punkten (Vektor-Mathematik)
      */
     calculateAngle(p1, p2, p3) {
         const radians = Math.atan2(p3.y - p2.y, p3.x - p2.x) - 
@@ -57,46 +59,52 @@ window.ToniVision = {
         return angle;
     },
 
+    /**
+     * Vergleicht Live-Daten mit der Profi-Referenz
+     */
     runProComparison(keypoints) {
         const now = Date.now();
-        if (now - this.lastFeedbackTime < 3000) return; // Nur alle 3 Sek. Feedback
+        if (now - this.lastFeedbackTime < 4000) return; // Feedback-Bremse (4 Sek.)
 
-        const leftKnee = keypoints.find(k => k.name === 'left_knee');
-        const leftHip = keypoints.find(k => k.name === 'left_hip');
-        const leftAnkle = keypoints.find(k => k.name === 'left_ankle');
+        // Welchen Drill machen wir gerade?
+        const currentDrillName = window.SektorVideo ? window.SektorVideo.currentDrill : "Allround-Check";
+        const ref = this.drills[currentDrillName] || this.drills["Allround-Check"];
 
-        if (leftKnee?.score > 0.5 && leftHip?.score > 0.5 && leftAnkle?.score > 0.5) {
-            const currentAngle = this.calculateAngle(leftHip, leftKnee, leftAnkle);
+        // Gelenke extrahieren
+        const hip = keypoints.find(k => k.name === 'left_hip' || k.name === 'right_hip');
+        const knee = keypoints.find(k => k.name === 'left_knee' || k.name === 'right_knee');
+        const ankle = keypoints.find(k => k.name === 'left_ankle' || k.name === 'right_ankle');
+
+        if (knee?.score > 0.6 && hip?.score > 0.6 && ankle?.score > 0.6) {
+            const currentAngle = this.calculateAngle(hip, knee, ankle);
             
-            // Logik: Wenn wir im "Zidane" Modus sind
-            const ref = this.drills["zidane turn"];
-            if (currentAngle > ref.knee_angle + 20) {
-                window.ToniVoice.speak(`Coach, Schwerpunkt zu hoch! Dein Winkel liegt bei ${Math.round(currentAngle)} Grad. Geh tiefer!`);
+            // Logik: Abweichung prüfen
+            if (currentAngle > ref.knee_angle + 15) {
+                const diff = Math.round(currentAngle - ref.knee_angle);
+                window.ToniVoice.speak(`Coach, Korrektur nötig! ${ref.label}. Aktueller Kniewinkel: ${Math.round(currentAngle)} Grad.`);
                 this.lastFeedbackTime = now;
+                
+                // Visuelles Feedback im Video-Sektor
+                const fb = document.getElementById('toni-video-feedback');
+                if(fb) fb.innerHTML = `<span style="color:var(--status-error);">WINKEL-ALARM: ${diff}° ZU HOCH!</span>`;
             }
         }
     },
 
     drawEliteSkeleton(ctx, keypoints) {
-        const connections = [
-            ['left_shoulder', 'right_shoulder'], ['left_shoulder', 'left_hip'],
-            ['right_shoulder', 'right_hip'], ['left_hip', 'right_hip'],
-            ['left_hip', 'left_knee'], ['left_knee', 'left_ankle'],
-            ['right_hip', 'right_knee'], ['right_knee', 'right_ankle'],
-            ['left_shoulder', 'left_elbow'], ['left_elbow', 'left_wrist'],
-            ['right_shoulder', 'right_elbow'], ['right_elbow', 'right_wrist']
-        ];
+        const connections = poseDetection.util.getAdjacentKeypoints(
+            poseDetection.SupportedModels.MediaPipePose
+        );
 
         ctx.lineWidth = 4;
         ctx.lineCap = 'round';
+        ctx.strokeStyle = '#39FF14'; // Neon-Grün Standard
 
-        connections.forEach(([p1, p2]) => {
-            const kp1 = keypoints.find(k => k.name === p1);
-            const kp2 = keypoints.find(k => k.name === p2);
+        connections.forEach(([i, j]) => {
+            const kp1 = keypoints[i];
+            const kp2 = keypoints[j];
 
             if (kp1?.score > 0.5 && kp2?.score > 0.5) {
-                // Farb-Feedback: Alles okay = Neon-Grün
-                ctx.strokeStyle = '#39FF14'; 
                 ctx.beginPath();
                 ctx.moveTo(kp1.x, kp1.y);
                 ctx.lineTo(kp2.x, kp2.y);
@@ -104,10 +112,10 @@ window.ToniVision = {
             }
         });
 
-        // Gelenkpunkte markieren
+        // Gelenke als Datenpunkte zeichnen
         keypoints.forEach(kp => {
             if (kp.score > 0.5) {
-                ctx.fillStyle = '#fff';
+                ctx.fillStyle = kp.name.includes('knee') ? 'var(--data-cyan)' : '#fff';
                 ctx.beginPath();
                 ctx.arc(kp.x, kp.y, 4, 0, Math.PI * 2);
                 ctx.fill();
