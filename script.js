@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - MASTER BRIDGE SCRIPT
- * Zentrale: Voice-Engine, Klopp-Nagelsmann Personality & Elite-Analyse.
+ * Zentrale: Voice-Engine, Klopp-Nagelsmann Personality & Druck-Expertise.
  */
 
 // --- 1. TONI VOICE ENGINE (STIMME & GEHÖR) ---
@@ -48,17 +48,12 @@ window.ToniVoice = {
     },
 
     speak(text) {
-        // Voice-Output stoppen, falls er noch redet
         this.synth.cancel();
-        
         const utterance = new SpeechSynthesisUtterance(text);
         const voices = this.synth.getVoices();
-        
-        // Suche nach einer kraftvollen männlichen Stimme (z.B. Yannick oder Google Deutsch)
         utterance.voice = voices.find(v => v.name.includes("Yannick") || v.name.includes("Google Deutsch")) || voices[0];
-        utterance.pitch = 0.9; // Etwas tiefer = kraftvoller
-        utterance.rate = 1.0;  // Normales Tempo
-        
+        utterance.pitch = 0.9;
+        utterance.rate = 1.0;
         this.synth.speak(utterance);
     }
 };
@@ -84,7 +79,7 @@ function openSection(name) {
                 <i class="fas fa-microchip" style="font-size:4rem; color:var(--neon-green); margin-bottom:20px; opacity:0.1;"></i>
                 <h2 style="color:#fff; letter-spacing:2px;">SEKTOR ${name.toUpperCase()}</h2>
                 <p style="color:#555;">Modul wird von Toni kalibriert...</p>
-                <button class="pro-btn-gold" onclick="window.BriefcaseUI.renderMainGrid()" style="margin-top:30px; width:220px;">ZENTRALE</button>
+                <button class="pro-btn-gold" onclick="window.BriefcaseUI.renderMainGrid()" style="margin-top:30px; width:220px;">ZURÜCK</button>
             </div>
         `;
     }
@@ -125,8 +120,15 @@ async function handleCommand(command) {
                 body: JSON.stringify({
                     model: 'phi3', 
                     prompt: `Du bist TONI 2.0, ein Elite-Fußball-Analyst. 
-                             DEINE PERSÖNLICHKEIT: Eine Mischung aus der taktischen Genialität von Julian Nagelsmann und der motivierenden Leidenschaft von Jürgen Klopp. 
+                             DEINE PERSÖNLICHKEIT: Eine Mischung aus der taktischen Genialität von Julian Nagelsmann und der leidenschaftlichen Motivation von Jürgen Klopp. 
                              DEIN STIL: Fachlich knallhart, international orientiert, präzise, aber mit Charisma. 
+                             
+                             WICHTIGES DRUCK-WISSEN: Die Stadionzeitung ist auf A5 (Booklet) optimiert. 
+                             Wenn der Coach nach dem DRUCKEN fragt, erkläre ihm IMMER: 
+                             "Coach, stell im Druckdialog am Mac/PC '2 Seiten pro Blatt' ein. 
+                             Dann druckt das System zwei A5-Seiten auf ein A4-Papier. 
+                             Einfach falten, tackern – fertig ist das Profi-Heft für die Fans!"
+                             
                              FORMALE VORGABE: Wenn nach Übungen gefragt wird: 1. Kurzanalyse, 2. Übung, 3. Ablauf, 4. Coaching Points.
                              
                              Coach sagt: ${command}`,
@@ -142,7 +144,6 @@ async function handleCommand(command) {
         finalResponse = "Basis-System aktiv. Für Profi-Analysen starte bitte Ollama.";
     }
 
-    // Antwort anzeigen & SPRECHEN
     toniMsg.innerHTML = `<strong>Toni:</strong> ${finalResponse}`;
     window.ToniVoice.speak(finalResponse);
     chatBox.scrollTop = chatBox.scrollHeight;
