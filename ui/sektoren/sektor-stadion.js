@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - SEKTOR STADION (DYNAMISCHER MAGAZIN GENERATOR)
  * Erstellt ein hochprofessionelles Hochglanz-Magazin mit flexibler Seitenanzahl.
- * Feature: Seiten hinzufügen/löschen + Fixierte Rückseiten-Werbung.
+ * Feature: Seiten hinzufügen/löschen, Toni-Druckberatung & Snapshot-Beamer.
  */
 window.SektorStadion = {
     // Initialer Inhalt der Innenseiten
@@ -30,8 +30,25 @@ window.SektorStadion = {
         this.render();
     },
 
-    // --- SEITEN-LOGIK ---
+    // --- TONI BERATUNG ---
+    showPrintTip() {
+        alert("TONI TIPP: Coach, für das perfekte Booklet stellst du im Druckdialog deines MacBook '2 Seiten pro Blatt' ein. So druckst du zwei A5-Seiten auf ein A4-Blatt. Einfach falten, tackern, fertig!");
+    },
 
+    // --- SNAPSHOT BEAMER ---
+    beamSnapshot(index) {
+        if (!window.arena) return alert("Fehler: Arena-System nicht aktiv.");
+        const img = window.arena.getSnapshot();
+        // Fügt das Bild zum Inhalt der gewählten Seite hinzu
+        this.dynamicPages[index].content += `
+            <div class="mag-snapshot" style="margin-top:20px; text-align:center;">
+                <img src="${img}" style="width:100%; border:1px solid #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                <p style="font-size:0.6rem; color:#888; margin-top:5px;">SNAPSHOT: ARENA BOARD</p>
+            </div>`;
+        this.render();
+    },
+
+    // --- SEITEN-LOGIK ---
     addPage() {
         this.dynamicPages.push({
             title: "NEUE MAGAZIN-SEITE",
@@ -48,15 +65,18 @@ window.SektorStadion = {
     },
 
     // --- RENDER-ENGINE ---
-
     render() {
         const content = document.querySelector('.briefcase-window');
         
         let html = `
-            <div class="magazine-editor-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
+            <div class="magazine-editor-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
                 <div>
                     <h2 style="color:var(--neon-green); letter-spacing: 2px;">STADION-ZEITUNG: PRO-EDITOR</h2>
-                    <span style="color: #888; font-size: 0.7rem;">SEITEN TOTAL: ${this.dynamicPages.length + 2} | KLICKE IN TEXTE ZUM EDITIEREN</span>
+                    <div style="background: rgba(57, 255, 20, 0.1); border: 1px solid var(--neon-green); padding: 8px 15px; border-radius: 8px; margin-top: 10px; cursor:pointer; display: inline-block;" onclick="window.SektorStadion.showPrintTip()">
+                        <span style="color:var(--neon-green); font-size: 0.75rem; font-weight: bold;">
+                            <i class="fas fa-lightbulb"></i> TONI'S TIPP: A5 BOOKLET-DRUCK (KLICKEN)
+                        </span>
+                    </div>
                 </div>
                 <div style="display: flex; gap: 15px;">
                     <button class="tactic-btn" style="border-color: var(--neon-green);" onclick="window.SektorStadion.addPage()">
@@ -90,14 +110,21 @@ window.SektorStadion = {
 
                 ${this.dynamicPages.map((page, index) => `
                     <div class="mag-page" style="position: relative;">
-                        <button onclick="window.SektorStadion.removePage(${index})" 
-                                style="position: absolute; right: -50px; top: 0; background: #ff3b30; border: none; color: white; padding: 10px; border-radius: 5px; cursor: pointer;"
-                                title="Seite löschen" class="ignore-print">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div style="position: absolute; right: 10px; top: 10px; display: flex; gap: 5px;" class="ignore-print">
+                            <button class="tactic-btn" style="padding: 5px 10px; font-size: 0.6rem; background: var(--data-cyan); border:none; color:#000;" 
+                                    onclick="window.SektorStadion.beamSnapshot(${index})" title="Taktik vom Board hier einfügen">
+                                <i class="fas fa-camera"></i> BEAM
+                            </button>
+                            <button onclick="window.SektorStadion.removePage(${index})" 
+                                    style="background: #ff3b30; border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.6rem;"
+                                    title="Seite löschen">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+
                         <div class="mag-content">
                             <div class="mag-section-title" contenteditable="true">${page.title}</div>
-                            <div style="margin-top: 20px; color: #ccc;" contenteditable="true">
+                            <div style="margin-top: 20px; color: #333;" contenteditable="true">
                                 ${page.content}
                             </div>
                         </div>
