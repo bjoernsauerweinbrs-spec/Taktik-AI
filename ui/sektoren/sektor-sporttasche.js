@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - SEKTOR KABINE (RESTORED & HIGH CONTRAST)
- * Stand: Heute Mittag (mit besserer Lesbarkeit)
+ * TONI 2.0 - SEKTOR KABINE (RESTORED & FIFA ENHANCED)
+ * Stand: Heute Mittag + Bearbeitbare Stats & Foto-Upload
  */
 window.SektorSporttasche = {
     open() {
@@ -44,29 +44,33 @@ window.SektorSporttasche = {
                     }
 
                     return `
-                        <div class="fifa-card" style="background: rgba(0,0,0,0.4); border: 1px solid #333; border-radius: 12px; width: 220px; padding: 15px; position: relative;">
-                            <div style="color:#fff; font-weight:900; font-size:1.2rem; position:absolute; top:10px; left:15px;">${p.rat || 80}</div>
+                        <div class="fifa-card" style="background: rgba(0,0,0,0.6); border: 2px solid ${teamColor}; border-radius: 12px; width: 220px; padding: 15px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                            <div style="color:#fff; font-weight:900; font-size:1.4rem; position:absolute; top:10px; left:15px; cursor:pointer;" 
+                                 onclick="window.SektorSporttasche.edit(${p.id}, 'rat')">${p.rat || 80}</div>
                             
                             <div style="text-align:center; margin-top:20px;">
-                                <div style="width: 70px; height: 70px; background: rgba(255,255,255,0.05); border-radius: 50%; border: 2px solid ${teamColor}; margin: 0 auto 10px; display:flex; align-items:center; justify-content:center;">
-                                    <i class="fas fa-user-ninja" style="color:${teamColor}; font-size:1.5rem;"></i>
+                                <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%; border: 2px solid ${teamColor}; margin: 0 auto 10px; display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer;"
+                                     onclick="document.getElementById('img-up-${p.id}').click()">
+                                    ${p.img ? `<img src="${p.img}" style="width:100%; height:100%; object-fit:cover;">` : `<i class="fas fa-user-ninja" style="color:${teamColor}; font-size:1.8rem;"></i>`}
+                                    <input type="file" id="img-up-${p.id}" style="display:none" onchange="window.SektorSporttasche.upload(event, ${p.id})">
                                 </div>
                                 
-                                <div style="font-weight:900; color:#fff; text-transform:uppercase; font-size:0.85rem; letter-spacing:1px;">${p.name}</div>
-                                <div style="color:var(--data-cyan); font-size:0.65rem; font-weight:bold; margin-bottom:15px;">${p.pos || 'N/A'}</div>
+                                <div style="font-weight:900; color:#fff; text-transform:uppercase; font-size:0.9rem; letter-spacing:1px; cursor:pointer;" 
+                                     onclick="window.SektorSporttasche.edit(${p.id}, 'name')">${p.name}</div>
+                                <div style="color:var(--data-cyan); font-size:0.7rem; font-weight:bold; margin-bottom:15px;">${p.pos || 'N/A'}</div>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; font-size: 0.7rem; font-weight:bold;">
-                                <div style="color:#888;">PAC <span style="color:#fff;">${p.pac || 70}</span></div>
-                                <div style="color:#888;">SHO <span style="color:#fff;">${p.sho || 70}</span></div>
-                                <div style="color:#888;">PAS <span style="color:#fff;">${p.pas || 70}</span></div>
-                                <div style="color:#888;">DRI <span style="color:#fff;">${p.dri || 70}</span></div>
-                                <div style="color:#888;">DEF <span style="color:#fff;">${p.def || 70}</span></div>
-                                <div style="color:#888;">PHY <span style="color:#fff;">${p.phy || 70}</span></div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: rgba(255,255,255,0.04); padding: 10px; border-radius: 8px; font-size: 0.75rem; font-weight:bold;">
+                                <div style="color:#aaa; cursor:pointer;" onclick="window.SektorSporttasche.edit(${p.id}, 'pac')">PAC <span style="color:#fff;">${p.pac || 70}</span></div>
+                                <div style="color:#aaa; cursor:pointer;" onclick="window.SektorSporttasche.edit(${p.id}, 'sho')">SHO <span style="color:#fff;">${p.sho || 70}</span></div>
+                                <div style="color:#aaa; cursor:pointer;" onclick="window.SektorSporttasche.edit(${p.id}, 'pas')">PAS <span style="color:#fff;">${p.pas || 70}</span></div>
+                                <div style="color:#aaa; cursor:pointer;" onclick="window.SektorSporttasche.edit(${p.id}, 'dri')">DRI <span style="color:#fff;">${p.dri || 70}</span></div>
+                                <div style="color:#aaa; cursor:pointer;" onclick="window.SektorSporttasche.edit(${p.id}, 'def')">DEF <span style="color:#fff;">${p.def || 70}</span></div>
+                                <div style="color:#aaa; cursor:pointer;" onclick="window.SektorSporttasche.edit(${p.id}, 'phy')">PHY <span style="color:#fff;">${p.phy || 70}</span></div>
                             </div>
 
-                            <select onchange="window.Database.updatePlayer(${p.id}, 'assignment', this.value); window.SektorSporttasche.render();" 
-                                    style="width:100%; margin-top:12px; background:#111; color:var(--neon-green); border:1px solid #444; padding:6px; border-radius:5px; font-weight:bold; font-size:0.75rem; cursor:pointer;">
+                            <select onchange="window.Database.updatePlayer(${p.id}, 'assignment', this.value); window.SektorSporttasche.render(); if(window.arena) window.arena.syncFromDatabase();" 
+                                    style="width:100%; margin-top:12px; background:#000; color:var(--neon-green); border:1px solid #444; padding:8px; border-radius:6px; font-weight:bold; font-size:0.75rem; cursor:pointer; text-transform:uppercase;">
                                 ${options}
                             </select>
                         </div>
@@ -74,5 +78,30 @@ window.SektorSporttasche = {
                 }).join('')}
             </div>
         `;
+    },
+
+    // Die "Scharfmacher"-Funktionen für FIFA-Karten
+    edit(id, key) {
+        const p = window.Database.players.find(x => x.id === id);
+        if (!p) return;
+        const val = prompt(`${key.toUpperCase()} ändern für ${p.name}:`, p[key]);
+        if (val !== null && val.trim() !== "") {
+            const newVal = isNaN(val) ? val : parseInt(val);
+            window.Database.updatePlayer(id, key, newVal);
+            this.render();
+            if(window.arena) window.arena.syncFromDatabase();
+        }
+    },
+
+    upload(e, id) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            window.Database.updatePlayer(id, 'img', reader.result);
+            this.render();
+            if(window.arena) window.arena.syncFromDatabase();
+        };
+        reader.readAsDataURL(file);
     }
 };
