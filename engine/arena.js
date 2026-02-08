@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - ARENA ENGINE (HORIZONTAL ELITE + ANIMATION)
- * Fokus: Flüssige Laufwege, 3-4-3 vs 4-4-2 Integration & KI-Gegner-Logik.
+ * TONI 2.0 - ARENA ENGINE (HORIZONTAL ELITE + ANIMATION + VIDEO BRIDGE)
+ * Fokus: Flüssige Laufwege, 3-4-3 vs 4-4-2 & KI-Pfad-Import.
  */
 window.arena = {
     canvas: null,
@@ -45,8 +45,25 @@ window.arena = {
     },
 
     /**
-     * Setzt ein Team in eine bestimmte Formation mit Animation
+     * NEU: Empfängt Pfade von der KI-Videoanalyse (Werte 0-100)
      */
+    addPathFromVideo(startX, startY, endX, endY, type = 'arrow') {
+        const boardX1 = (startX / 100) * this.canvas.width;
+        const boardY1 = (startY / 100) * this.canvas.height;
+        const boardX2 = (endX / 100) * this.canvas.width;
+        const boardY2 = (endY / 100) * this.canvas.height;
+
+        this.arrows.push({
+            startX: boardX1,
+            startY: boardY1,
+            endX: boardX2,
+            endY: boardY2,
+            type: type 
+        });
+        
+        if(window.ToniVoice) window.ToniVoice.speak("Laufweg vom Video übernommen.");
+    },
+
     setFormation(team, type) {
         const form = this.formations[type];
         if (!form) return;
@@ -70,7 +87,6 @@ window.arena = {
         const allPresent = window.Database.getPresentPlayers();
         const myPlayers = mode === 'match' ? allPresent.filter(p => p.team === 'A') : allPresent;
 
-        // Wir behalten existierende Elemente für die Animation, falls möglich
         const newElements = this.elements.filter(el => el.type !== 'player' && el.type !== 'opponent');
         
         myPlayers.forEach((p, index) => {
@@ -92,7 +108,7 @@ window.arena = {
         form.forEach((opp, i) => {
             this.elements.push({
                 id: 'opp-' + i, type: 'opponent', number: opp.n || (i+1),
-                x: this.canvas.width + 50, y: opp.y * this.canvas.height, // Startet von rechts außen
+                x: this.canvas.width + 50, y: opp.y * this.canvas.height,
                 targetX: opp.x * this.canvas.width, targetY: opp.y * this.canvas.height,
                 color: '#ff3b30', name: 'GEGNER', pos: opp.p
             });
@@ -103,7 +119,7 @@ window.arena = {
     update() {
         if (!this.isAnimating) return;
         let moving = false;
-        const speed = 0.08; // Weichheit der Bewegung
+        const speed = 0.08;
 
         this.elements.forEach(el => {
             if (el.targetX !== undefined) {
@@ -154,7 +170,7 @@ window.arena = {
         if (this.selectedElement) {
             this.selectedElement.x = mx;
             this.selectedElement.y = my;
-            this.selectedElement.targetX = mx; // Drag überschreibt Target
+            this.selectedElement.targetX = mx; 
             this.selectedElement.targetY = my;
         } else if (this.tempArrow) {
             this.tempArrow.endX = mx;
@@ -197,7 +213,6 @@ window.arena = {
         ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
         
-        // Spielfeld zeichnen
         ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
         ctx.lineWidth = 2;
         ctx.strokeRect(margin, margin, w - margin*2, h - margin*2);
@@ -252,6 +267,15 @@ window.arena = {
         ctx.lineWidth = 3;
         if (a.type === 'pass') ctx.setLineDash([10, 5]);
         ctx.beginPath(); ctx.moveTo(a.startX, a.startY); ctx.lineTo(a.endX, a.endY); ctx.stroke();
+        
+        // Pfeilspitze
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(a.endX, a.endY);
+        ctx.lineTo(a.endX - headlen * Math.cos(angle - Math.PI / 6), a.endY - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.moveTo(a.endX, a.endY);
+        ctx.lineTo(a.endX - headlen * Math.cos(angle + Math.PI / 6), a.endY - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.stroke();
         ctx.restore();
     },
 
