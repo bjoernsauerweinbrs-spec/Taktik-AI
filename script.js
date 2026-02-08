@@ -1,9 +1,13 @@
 /**
  * TONI 2.0 - MASTER BRIDGE SCRIPT (RECOVERY UPDATE)
- * Fokus: Stabiler Arena-Start & Präzises Error-Logging für Sektoren.
+ * Status: REPARIERT (CoachInfo Null-Check Fix)
  */
 
-// --- 1. TONI VOICE ENGINE (Bleibt unverändert) ---
+// --- 0. GLOBALE INITIALISIERUNG ---
+// Fix: Verhindert den Absturz, falls der Speicher noch leer ist
+window.coachInfo = JSON.parse(localStorage.getItem('toni_coach_data')) || { name: null, verein: null };
+
+// --- 1. TONI VOICE ENGINE ---
 window.ToniVoice = {
     isListening: false,
     recognition: null,
@@ -20,12 +24,14 @@ window.ToniVoice = {
     startListening() {
         if (!this.recognition) return;
         this.isListening = true;
-        document.getElementById('mic-trigger').classList.add('mic-active');
+        const mic = document.getElementById('mic-trigger');
+        if (mic) mic.classList.add('mic-active');
         this.recognition.start();
     },
     stopListening() {
         this.isListening = false;
-        document.getElementById('mic-trigger')?.classList.remove('mic-active');
+        const mic = document.getElementById('mic-trigger');
+        if (mic) mic.classList.remove('mic-active');
         this.recognition?.stop();
     },
     speak(text) {
@@ -38,17 +44,16 @@ window.ToniVoice = {
     }
 };
 
-// --- 2. NAVIGATION & ROUTER (OPTIMIERT) ---
+// --- 2. NAVIGATION & ROUTER ---
 function openSection(name) {
     console.log("Routing aktiv -> Sektor:", name);
     
-    if (!window.BriefcaseUI.isOpen) {
+    if (window.BriefcaseUI && !window.BriefcaseUI.isOpen) {
         window.BriefcaseUI.toggle();
     }
 
     setTimeout(() => {
         try {
-            // Prüfung: Existiert das Sektor-Objekt überhaupt?
             const target = {
                 'kabine': window.SektorSporttasche,
                 'analyse': window.SektorAnalyse,
@@ -65,16 +70,15 @@ function openSection(name) {
             if (target && typeof target.open === 'function') {
                 target.open();
             } else {
-                throw new Error(`Objekt für '${name}' nicht gefunden oder keine open() Funktion vorhanden.`);
+                throw new Error(`Sektor '${name}' nicht bereit.`);
             }
         } catch (err) {
             console.error("KRITISCH: Sektor-Ladefehler:", err);
-            alert(`FEHLER: Sektor '${name}' ist nicht bereit. Bitte prüfe, ob die Datei korrekt geladen wurde.`);
         }
-    }, 100);
+    }, 150);
 }
 
-// --- 3. TONI CORE LOGIK (Bleibt gleich, kleine Korrektur am Scroll-Focus) ---
+// --- 3. TONI CORE LOGIK ---
 async function handleCommand(command) {
     if (!command || !command.trim()) return;
     const chatBox = document.getElementById('chat-box');
@@ -89,6 +93,7 @@ async function handleCommand(command) {
     toniMsg.style.color = "var(--neon-green)";
     chatBox.appendChild(toniMsg);
 
+    // Initiales Onboarding
     if (!window.coachInfo.name) {
         window.coachInfo.name = command;
         localStorage.setItem('toni_coach_data', JSON.stringify(window.coachInfo));
@@ -101,10 +106,10 @@ async function handleCommand(command) {
     if (!window.coachInfo.verein) {
         window.coachInfo.verein = command;
         localStorage.setItem('toni_coach_data', JSON.stringify(window.coachInfo));
-        let resp = `Alles klar, ${window.coachInfo.verein}! Aktiviere mich jetzt im Setup, damit ich online gehen kann!`;
+        let resp = `Alles klar, ${window.coachInfo.verein}! Aktiviere mich jetzt im Setup für den Online-Modus!`;
         toniMsg.innerHTML = `<strong>Toni:</strong> ${resp}`;
         window.ToniVoice.speak(resp);
-        setTimeout(() => openSection('settings'), 2500);
+        setTimeout(() => openSection('settings'), 2000);
         return;
     }
 
@@ -116,7 +121,7 @@ async function handleCommand(command) {
                 method: 'POST',
                 body: JSON.stringify({
                     model: 'phi3', 
-                    prompt: `Kurz-Antwort als Analyst. Coach: ${window.coachInfo.name}. Befehl: ${command}`,
+                    prompt: `Kurz-Antwort als Fußball-Analyst. Coach: ${window.coachInfo.name}. Befehl: ${command}`,
                     stream: false
                 })
             });
@@ -132,7 +137,7 @@ async function handleCommand(command) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// --- 4. STATUS-CHECK (Bleibt unverändert) ---
+// --- 4. STATUS-CHECK ---
 window.aiOnline = false;
 async function checkAIStatus() {
     const light = document.getElementById('ai-status-light');
@@ -154,41 +159,43 @@ async function checkAIStatus() {
     }
 }
 
-// --- 5. INITIALISIERUNG (RECOVERY-SEQUENZ) ---
+// --- 5. INITIALISIERUNG ---
 window.addEventListener('DOMContentLoaded', () => {
     window.ToniVoice.init();
     checkAIStatus();
-    setInterval(checkAIStatus, 5000);
+    setInterval(checkAIStatus, 8000);
 
-    // WICHTIG: Erst Datenbank, dann Arena!
-    if (window.Database) {
+    if (window.Database && typeof window.Database.init === 'function') {
         window.Database.init();
     }
 
     setTimeout(() => {
-        if (window.arena) {
+        if (window.arena && typeof window.arena.init === 'function') {
             console.log("Arena wird scharf geschaltet...");
             window.arena.init('main-canvas');
-            // Force-Resize für Sichtbarkeit
             window.arena.resize();
-            // Falls das Board leer ist, Daten-Sync erzwingen
             if (typeof window.arena.syncFromDatabase === 'function') {
                 window.arena.syncFromDatabase();
             }
         }
-    }, 600); // Mehr Zeit zum Atmen beim Laden
+    }, 800);
 
-    if (!window.coachInfo.name) {
+    // Sicherer Check auf coachInfo.name
+    if (window.coachInfo && !window.coachInfo.name) {
         const chatBox = document.getElementById('chat-box');
-        const toniMsg = document.createElement('p');
-        toniMsg.style.color = "var(--neon-green)";
-        toniMsg.innerHTML = `<strong>Toni:</strong> Willkommen! Ich bin Toni 2.0. Wie ist dein Name?<br>
-            <button class="onboarding-confirm-btn" onclick="handleCommand(document.getElementById('command-input').value)">BESTÄTIGEN</button>`;
-        chatBox.appendChild(toniMsg);
-        window.ToniVoice.speak("Willkommen! Ich bin Toni 2.0. Wie ist dein Name?");
+        if (chatBox) {
+            const toniMsg = document.createElement('p');
+            toniMsg.style.color = "var(--neon-green)";
+            toniMsg.innerHTML = `<strong>Toni:</strong> Willkommen! Ich bin Toni 2.0. Wie ist dein Name?`;
+            chatBox.appendChild(toniMsg);
+            window.ToniVoice.speak("Willkommen! Ich bin Toni 2.0. Wie ist dein Name?");
+        }
     }
 
-    document.getElementById('command-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleCommand(e.target.value);
-    });
+    const cmdInput = document.getElementById('command-input');
+    if (cmdInput) {
+        cmdInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleCommand(e.target.value);
+        });
+    }
 });
