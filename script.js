@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - MASTER BRIDGE SCRIPT
- * Zentrale: Voice-Engine, Klopp-Nagelsmann Personality & Druck-Expertise.
+ * Zentrale: Voice-Engine, Klopp-Nagelsmann Personality & Video-Analyse-Logik.
  */
 
 // --- 1. TONI VOICE ENGINE (STIMME & GEHÖR) ---
@@ -51,6 +51,7 @@ window.ToniVoice = {
         this.synth.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         const voices = this.synth.getVoices();
+        // Bevorzugt kraftvolle männliche Stimme
         utterance.voice = voices.find(v => v.name.includes("Yannick") || v.name.includes("Google Deutsch")) || voices[0];
         utterance.pitch = 0.9;
         utterance.rate = 1.0;
@@ -69,17 +70,20 @@ function openSection(name) {
     console.log("Navigiere zu Sektor:", name);
     const content = document.querySelector('.briefcase-window');
     
+    // Routing zu den einzelnen Sektoren
     if (name === 'kabine') { if (window.SektorSporttasche) window.SektorSporttasche.open(); } 
     else if (name === 'analyse') { if (window.SektorAnalyse) window.SektorAnalyse.open(); } 
     else if (name === 'stadion') { if (window.SektorStadion) window.SektorStadion.open(); }
     else if (name === 'settings') { if (window.SektorSettings) window.SektorSettings.open(); }
+    else if (name === 'management') { if (window.SektorManagement) window.SektorManagement.open(); }
+    else if (name === 'video') { if (window.SektorVideo) window.SektorVideo.open(); }
     else {
         content.innerHTML = `
             <div style="text-align:center; padding-top:100px; animation: fadeIn 0.5s;">
                 <i class="fas fa-microchip" style="font-size:4rem; color:var(--neon-green); margin-bottom:20px; opacity:0.1;"></i>
                 <h2 style="color:#fff; letter-spacing:2px;">SEKTOR ${name.toUpperCase()}</h2>
                 <p style="color:#555;">Modul wird von Toni kalibriert...</p>
-                <button class="pro-btn-gold" onclick="window.BriefcaseUI.renderMainGrid()" style="margin-top:30px; width:220px;">ZURÜCK</button>
+                <button class="pro-btn-gold" onclick="window.BriefcaseUI.renderMainGrid()" style="margin-top:30px; width:220px;">ZENTRALE</button>
             </div>
         `;
     }
@@ -92,6 +96,7 @@ async function handleCommand(command) {
     const chatBox = document.getElementById('chat-box');
     const inputField = document.getElementById('command-input');
     
+    // User-Eingabe anzeigen
     const userMsg = document.createElement('p');
     userMsg.style.color = "#fff";
     userMsg.style.marginBottom = "10px";
@@ -101,6 +106,7 @@ async function handleCommand(command) {
     const cmd = command.toLowerCase();
     const isSuperAI = window.aiOnline === true;
 
+    // Toni's Denk-Blase
     const toniMsg = document.createElement('p');
     toniMsg.style.color = "var(--neon-green)";
     toniMsg.style.marginBottom = "15px";
@@ -109,6 +115,17 @@ async function handleCommand(command) {
     
     chatBox.scrollTop = chatBox.scrollHeight;
     inputField.value = "";
+
+    // --- AUTOMATISCHE SEKTOR-ERKENNUNG (VIDEO & SKILLS) ---
+    if (cmd.includes("video") || cmd.includes("analyse") || cmd.includes("zeig mir") || cmd.includes("trick")) {
+        let drillType = "Allround-Check";
+        if (cmd.includes("zidane")) drillType = "Zidane Turn";
+        if (cmd.includes("torschuss") || cmd.includes("abschluss")) drillType = "Torschuss";
+        if (cmd.includes("annahme")) drillType = "Ballannahme";
+
+        openSection('video');
+        if (window.SektorVideo) window.SektorVideo.setupDrill(drillType);
+    }
 
     let finalResponse = "Ich habe den Befehl registriert.";
 
@@ -120,16 +137,11 @@ async function handleCommand(command) {
                 body: JSON.stringify({
                     model: 'phi3', 
                     prompt: `Du bist TONI 2.0, ein Elite-Fußball-Analyst. 
-                             DEINE PERSÖNLICHKEIT: Eine Mischung aus der taktischen Genialität von Julian Nagelsmann und der leidenschaftlichen Motivation von Jürgen Klopp. 
-                             DEIN STIL: Fachlich knallhart, international orientiert, präzise, aber mit Charisma. 
+                             PERSÖNLICHKEIT: Mix aus Nagelsmann (Analytik) & Klopp (Emotion). 
                              
-                             WICHTIGES DRUCK-WISSEN: Die Stadionzeitung ist auf A5 (Booklet) optimiert. 
-                             Wenn der Coach nach dem DRUCKEN fragt, erkläre ihm IMMER: 
-                             "Coach, stell im Druckdialog am Mac/PC '2 Seiten pro Blatt' ein. 
-                             Dann druckt das System zwei A5-Seiten auf ein A4-Papier. 
-                             Einfach falten, tackern – fertig ist das Profi-Heft für die Fans!"
-                             
-                             FORMALE VORGABE: Wenn nach Übungen gefragt wird: 1. Kurzanalyse, 2. Übung, 3. Ablauf, 4. Coaching Points.
+                             WISSEN: Du kannst Videoanalysen durchführen, Skelett-Tracking nutzen und A5-Stadionhefte drucken.
+                             DRUCK-TIPP: Erwähne bei Fragen zum Drucken IMMER '2 Seiten pro Blatt' für A5 Booklets.
+                             VIDEO-LOGIC: Du analysierst Biomechanik (Winkel, Standfuß, Schwerpunkt).
                              
                              Coach sagt: ${command}`,
                     stream: false
@@ -141,15 +153,16 @@ async function handleCommand(command) {
             finalResponse = "Coach, Verbindung zum Phi-3 Modell unterbrochen. Bitte Terminal prüfen.";
         }
     } else {
-        finalResponse = "Basis-System aktiv. Für Profi-Analysen starte bitte Ollama.";
+        finalResponse = "Basis-System aktiv. Für Profi-Analysen starte bitte Ollama mit Phi-3.";
     }
 
+    // Antwort anzeigen & SPRECHEN
     toniMsg.innerHTML = `<strong>Toni:</strong> ${finalResponse}`;
     window.ToniVoice.speak(finalResponse);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// --- 4. SYSTEM STATUS ---
+// --- 4. SYSTEM STATUS (OLLAMA CHECK) ---
 window.aiOnline = false;
 async function checkAIStatus() {
     const light = document.getElementById('ai-status-light');
