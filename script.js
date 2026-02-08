@@ -1,9 +1,9 @@
 /**
  * TONI 2.0 - MASTER BRIDGE SCRIPT
- * Zentrale: Voice-Engine, Klopp-Nagelsmann Personality, Offline-Guide & Sponsor-Sync.
+ * Fokus: Deep Voice, Onboarding-Logik & High-Speed Performance.
  */
 
-// --- 1. TONI VOICE ENGINE (STIMME & GEHÖR) ---
+// --- 1. TONI VOICE ENGINE (DEEP VOICE UPGRADE) ---
 window.ToniVoice = {
     isListening: false,
     recognition: null,
@@ -16,14 +16,11 @@ window.ToniVoice = {
             this.recognition.lang = 'de-DE';
             this.recognition.interimResults = false;
             this.recognition.continuous = false;
-
             this.recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript;
-                console.log("Toni hat gehört:", text);
                 handleCommand(text);
                 this.stopListening();
             };
-
             this.recognition.onerror = () => this.stopListening();
             this.recognition.onend = () => this.stopListening();
         }
@@ -35,7 +32,7 @@ window.ToniVoice = {
     },
 
     startListening() {
-        if (!this.recognition) return alert("Spracherkennung wird von diesem Browser nicht unterstützt.");
+        if (!this.recognition) return alert("Browser-Support fehlt.");
         this.isListening = true;
         document.getElementById('mic-trigger').classList.add('mic-active');
         this.recognition.start();
@@ -51,22 +48,28 @@ window.ToniVoice = {
         this.synth.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         const voices = this.synth.getVoices();
-        utterance.voice = voices.find(v => v.name.includes("Yannick") || v.name.includes("Google Deutsch")) || voices[0];
-        utterance.pitch = 0.9;
-        utterance.rate = 1.0;
+        
+        // Suche nach einer tiefen, männlichen Stimme
+        let eliteVoice = voices.find(v => v.name.includes("Yannick") || v.name.includes("Stefan") || v.name.includes("Google Deutsch")) || voices[0];
+        
+        utterance.voice = eliteVoice;
+        utterance.pitch = 0.85; // Tieferer Sound
+        utterance.rate = 1.0;   // Normale Geschwindigkeit
+        utterance.volume = 1.0;
         this.synth.speak(utterance);
     }
 };
 
-// --- 2. NAVIGATION & UI ---
-function toggleBriefcase() {
-    if (window.BriefcaseUI) window.BriefcaseUI.toggle();
+// --- 2. COACH-DATEN SPEICHER ---
+window.coachInfo = JSON.parse(localStorage.getItem('toni_coach_data')) || { name: null, verein: null, step: 0 };
+
+function saveCoach() {
+    localStorage.setItem('toni_coach_data', JSON.stringify(window.coachInfo));
 }
 
+// --- 3. NAVIGATION ---
 function openSection(name) {
     if (!window.BriefcaseUI.isOpen) window.BriefcaseUI.toggle();
-    
-    console.log("Navigiere zu Sektor:", name);
     const content = document.querySelector('.briefcase-window');
     
     if (name === 'kabine') { if (window.SektorSporttasche) window.SektorSporttasche.open(); } 
@@ -75,103 +78,78 @@ function openSection(name) {
     else if (name === 'settings') { if (window.SektorSettings) window.SektorSettings.open(); }
     else if (name === 'management') { if (window.SektorManagement) window.SektorManagement.open(); }
     else if (name === 'video') { if (window.SektorVideo) window.SektorVideo.open(); }
-    else {
-        content.innerHTML = `
-            <div style="text-align:center; padding-top:100px; animation: fadeIn 0.5s;">
-                <i class="fas fa-microchip" style="font-size:4rem; color:var(--neon-green); margin-bottom:20px; opacity:0.1;"></i>
-                <h2 style="color:#fff; letter-spacing:2px;">SEKTOR ${name.toUpperCase()}</h2>
-                <p style="color:#555;">Modul wird von Toni kalibriert...</p>
-                <button class="pro-btn-gold" onclick="window.BriefcaseUI.renderMainGrid()" style="margin-top:30px; width:220px;">ZENTRALE</button>
-            </div>
-        `;
-    }
 }
 
-// --- 3. TONI CORE LOGIK ---
+// --- 4. TONI CORE LOGIK (CONVERSATIONAL) ---
 async function handleCommand(command) {
     if (!command.trim()) return;
-    
     const chatBox = document.getElementById('chat-box');
     const inputField = document.getElementById('command-input');
     
     const userMsg = document.createElement('p');
     userMsg.style.color = "#fff";
-    userMsg.style.marginBottom = "10px";
     userMsg.innerHTML = `<strong>Coach:</strong> ${command}`;
     chatBox.appendChild(userMsg);
-
-    const cmd = command.toLowerCase();
-    const isSuperAI = window.aiOnline === true;
-
-    const toniMsg = document.createElement('p');
-    toniMsg.style.color = "var(--neon-green)";
-    toniMsg.style.marginBottom = "15px";
-    toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Analysiere...</span>`;
-    chatBox.appendChild(toniMsg);
-    
-    chatBox.scrollTop = chatBox.scrollHeight;
     inputField.value = "";
 
-    // --- OFFLINE ASSISTENT LOGIK (TRAINER-GUIDE) ---
-    if (!isSuperAI) {
-        let helpText = "Ich bin momentan <b>OFFLINE</b>, Coach. Mein Gehirn am MacBook schläft noch.";
-        
-        if (cmd.includes("hilfe") || cmd.includes("verbinden") || cmd.includes("online") || cmd.includes("wie")) {
-            helpText = `
-                <b>SCHLACHPLAN ZUM ONLINE-MODUS:</b><br><br>
-                1. <b>MacBook Terminal:</b> Starte Ollama mit dem Befehl:<br>
-                <code style="color:#fff; background:#222; padding:3px;">OLLAMA_HOST=0.0.0.0 OLLAMA_ORIGINS="*" ollama serve</code><br><br>
-                2. <b>IP-Check:</b> Trage die IP deines MacBooks in den <b>SETUP-Settings</b> ein.<br><br>
-                3. <b>Login:</b> Das Passwort für alle Trainer ist <b style="color:white;">toni2026</b>.<br><br>
-                Ich helfe jedem Trainer beim Login – sag einfach Bescheid!
-            `;
-            window.ToniVoice.speak("Ich bin offline, Coach. Bitte starte das Terminal am MacBook mit dem Host Befehl und prüfe die I P Adresse im Setup.");
-        } else {
-            window.ToniVoice.speak("Basis-System aktiv. Für Profi-Analysen muss ich online sein. Sag Hilfe für die Anleitung zum Verbinden.");
+    const cmd = command.toLowerCase();
+    const isOnline = window.aiOnline === true;
+    const toniMsg = document.createElement('p');
+    toniMsg.style.color = "var(--neon-green)";
+    chatBox.appendChild(toniMsg);
+
+    // --- ONBOARDING FLOW (SMALLTALK) ---
+    if (!window.coachInfo.name) {
+        window.coachInfo.name = command;
+        saveCoach();
+        let resp = `Sehr angenehm! Welchen Verein führen wir heute zum Sieg?`;
+        toniMsg.innerHTML = `<strong>Toni:</strong> ${resp}`;
+        window.ToniVoice.speak(resp);
+        return;
+    } 
+    
+    if (!window.coachInfo.verein) {
+        window.coachInfo.verein = command;
+        saveCoach();
+        let resp = `Alles klar, ${window.coachInfo.verein} also. Sobald wir online sind, scanne ich die Vereinsdaten. Aktiviere jetzt die Super-KI im Setup!`;
+        toniMsg.innerHTML = `<strong>Toni:</strong> ${resp}`;
+        window.ToniVoice.speak(resp);
+        setTimeout(() => openSection('settings'), 3000);
+        return;
+    }
+
+    // --- KI PERFORMANCE LOGIK ---
+    if (isOnline) {
+        toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Denke nach...</span>`;
+        const savedIP = localStorage.getItem('toni_mac_ip') || 'localhost';
+        try {
+            const response = await fetch(`http://${savedIP}:11434/api/generate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'phi3', 
+                    prompt: `Antworte extrem kurz (max 2 Sätze) als Fußball-Analyst. 
+                             Coach: ${window.coachInfo.name}, Verein: ${window.coachInfo.verein}. 
+                             Befehl: ${command}`,
+                    stream: false
+                })
+            });
+            const data = await response.json();
+            toniMsg.innerHTML = `<strong>Toni:</strong> ${data.response}`;
+            window.ToniVoice.speak(data.response);
+        } catch (err) {
+            toniMsg.innerHTML = `<strong>Toni:</strong> Offline. Check das Terminal!`;
         }
-        
-        toniMsg.innerHTML = `<strong>Toni:</strong> ${helpText}`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-        return; 
-    }
-
-    // --- ONLINE MODUS (PHI-3) ---
-    if (cmd.includes("video") || cmd.includes("analyse") || cmd.includes("zeig mir") || cmd.includes("trick")) {
-        let drillType = "Allround-Check";
-        if (cmd.includes("zidane")) drillType = "Zidane Turn";
-        if (cmd.includes("torschuss") || cmd.includes("abschluss")) drillType = "Torschuss";
-        if (cmd.includes("annahme")) drillType = "Ballannahme";
-        openSection('video');
-        if (window.SektorVideo) window.SektorVideo.setupDrill(drillType);
-    }
-
-    const savedIP = localStorage.getItem('toni_mac_ip') || 'localhost';
-
-    try {
-        const response = await fetch(`http://${savedIP}:11434/api/generate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: 'phi3', 
-                prompt: `Du bist TONI 2.0, ein Elite-Fußball-Analyst (Nagelsmann/Klopp Mix). 
-                         WISSENS-UPDATE: Sponsoren werden im Management-Hub (Business-Sektor) angelegt. Diese fließen automatisch in die Stadionzeitung ein. 
-                         Du berätst Trainer bei der Akquise und dem Drucken (A5 Booklet: 2 Seiten pro Blatt). 
-                         Du bist der Guide für alle Trainer: Erkläre bei Bedarf den Login (toni2026) und das Terminal-Setup.
-                         Coach sagt: ${command}`,
-                stream: false
-            })
-        });
-        const data = await response.json();
-        const finalResponse = data.response;
-        toniMsg.innerHTML = `<strong>Toni:</strong> ${finalResponse}`;
-        window.ToniVoice.speak(finalResponse);
-    } catch (err) {
-        toniMsg.innerHTML = `<strong>Toni:</strong> Verbindung zum MacBook (${savedIP}) verloren. Bitte Terminal prüfen!`;
+    } else {
+        // Basis-Antworten wenn offline
+        let offResp = "Ich bin im Energiesparmodus. Starte Ollama am Mac, damit ich mein volles Wissen für den Verein nutzen kann!";
+        toniMsg.innerHTML = `<strong>Toni:</strong> ${offResp}`;
+        window.ToniVoice.speak(offResp);
     }
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// --- 4. SYSTEM STATUS (DYNAMISCHE IP PRÜFUNG) ---
+// --- 5. SYSTEM STATUS ---
 window.aiOnline = false;
 async function checkAIStatus() {
     const light = document.getElementById('ai-status-light');
@@ -180,44 +158,42 @@ async function checkAIStatus() {
     if (!light || !label) return;
 
     try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000);
-        const response = await fetch(`http://${savedIP}:11434/api/tags`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-
+        const response = await fetch(`http://${savedIP}:11434/api/tags`);
         if (response.ok) {
             window.aiOnline = true;
             light.style.background = 'var(--neon-green)';
-            light.style.boxShadow = '0 0 10px var(--neon-green)';
             label.innerText = 'ONLINE';
-            label.style.color = 'var(--neon-green)';
         } else { throw new Error(); }
     } catch (err) {
         window.aiOnline = false;
         light.style.background = '#555';
-        light.style.boxShadow = 'none';
         label.innerText = 'OFFLINE';
-        label.style.color = '#555';
     }
 }
 
-// --- 5. INITIALISIERUNG ---
+// --- 6. INITIALISIERUNG ---
 window.addEventListener('DOMContentLoaded', () => {
     window.ToniVoice.init();
     checkAIStatus();
     setInterval(checkAIStatus, 5000);
 
+    // Erstbegrüßung nur wenn noch kein Name da ist
+    if (!window.coachInfo.name) {
+        setTimeout(() => {
+            const intro = "Hallo! Ich bin Toni 2.0. Nenn mir doch bitte mal deinen Namen.";
+            const chatBox = document.getElementById('chat-box');
+            const toniMsg = document.createElement('p');
+            toniMsg.style.color = "var(--neon-green)";
+            toniMsg.innerHTML = `<strong>Toni:</strong> ${intro}`;
+            chatBox.appendChild(toniMsg);
+            window.ToniVoice.speak(intro);
+        }, 1500);
+    }
+
     if (window.Database) window.Database.init();
+    if (window.arena) window.arena.init('main-canvas');
 
-    if (window.arena && document.getElementById('main-canvas')) {
-        window.arena.init('main-canvas');
-        setTimeout(() => window.arena.syncFromDatabase(), 100);
-    }
-
-    const input = document.getElementById('command-input');
-    if (input) {
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleCommand(input.value);
-        });
-    }
+    document.getElementById('command-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleCommand(e.target.value);
+    });
 });
