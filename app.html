@@ -17,21 +17,21 @@
 <body>
 
     <script>
-        // Sicherheits-Check: Nur autorisierte Trainer haben Zugriff
+        // Sicherheits-Check
         if(sessionStorage.getItem('toni_auth') !== 'true') window.location.href = 'index.html';
     </script>
 
     <div class="pro-layout-container">
         
         <nav class="sidebar-minimal">
-            <div class="control-unit" onclick="window.BriefcaseUI.toggle()" title="Aktentasche öffnen">
+            <div class="control-unit" onclick="window.BriefcaseUI.toggle()" title="Zentrale öffnen">
                 <i class="fas fa-briefcase"></i>
                 <span>TASCHE</span>
             </div>
 
             <div class="control-unit" id="ai-status-unit" title="KI-Verbindungsstatus">
-                <div id="ai-status-light"></div>
-                <span id="ai-status-label">OFFLINE</span>
+                <div id="ai-status-light" style="width:10px; height:10px; border-radius:50%; background:#555; margin:0 auto 5px;"></div>
+                <span id="ai-status-label" style="font-size:10px;">OFFLINE</span>
             </div>
 
             <div class="control-unit" id="mic-trigger" onclick="window.ToniVoice.toggle()" title="Mit Toni sprechen">
@@ -52,48 +52,29 @@
 
         <main id="stage-container">
             <div id="equipment-palette">
-                <div class="tool-btn" title="Verschieben" onclick="window.arena.setTool('drag')">
-                    <i class="fas fa-mouse-pointer"></i>
-                </div>
-                <div class="tool-btn" title="Hütchen" onclick="window.arena.setTool('cone')">
-                    <i class="fas fa-triangle-exclamation" style="color: var(--accent-orange);"></i>
-                </div>
-                <div class="tool-btn" title="Ball" onclick="window.arena.setTool('ball')">
-                    <i class="fas fa-futbol"></i>
-                </div>
-                <div class="tool-btn" title="Minitor" onclick="window.arena.setTool('goal')">
-                    <i class="fas fa-door-open"></i>
-                </div>
-                <div class="tool-btn" title="Laufweg" onclick="window.arena.setTool('arrow')">
-                    <i class="fas fa-running" style="color: var(--neon-green);"></i>
-                </div>
-                <div class="tool-btn" title="Passweg" onclick="window.arena.setTool('pass')">
-                    <i class="fas fa-long-arrow-alt-right" style="color: var(--data-cyan);"></i>
-                </div>
-                <div class="tool-btn" title="Torschuss" onclick="window.arena.setTool('shot')">
-                    <i class="fas fa-bolt" style="color: var(--status-error);"></i>
-                </div>
-                <div class="tool-btn" title="Löschen" onclick="window.arena.setTool('delete')">
-                    <i class="fas fa-eraser"></i>
-                </div>
+                <div class="tool-btn" title="Verschieben" onclick="window.arena.setTool('drag')"><i class="fas fa-mouse-pointer"></i></div>
+                <div class="tool-btn" title="Hütchen" onclick="window.arena.setTool('cone')"><i class="fas fa-triangle-exclamation" style="color: var(--accent-orange);"></i></div>
+                <div class="tool-btn" title="Ball" onclick="window.arena.setTool('ball')"><i class="fas fa-futbol"></i></div>
+                <div class="tool-btn" title="Minitor" onclick="window.arena.setTool('goal')"><i class="fas fa-door-open"></i></div>
+                <div class="tool-btn" title="Laufweg" onclick="window.arena.setTool('arrow')"><i class="fas fa-running" style="color: var(--neon-green);"></i></div>
+                <div class="tool-btn" title="Passweg" onclick="window.arena.setTool('pass')"><i class="fas fa-long-arrow-alt-right" style="color: var(--data-cyan);"></i></div>
+                <div class="tool-btn" title="Torschuss" onclick="window.arena.setTool('shot')"><i class="fas fa-bolt" style="color: var(--status-error);"></i></div>
+                <div class="tool-btn" title="Löschen" onclick="window.arena.setTool('delete')"><i class="fas fa-eraser"></i></div>
             </div>
 
             <canvas id="main-canvas"></canvas>
         </main>
 
         <aside class="analysis-panel">
-            <div class="video-preview">
-                <div class="scan-line"></div>
-                <i class="fas fa-satellite-dish" style="margin-right: 10px; font-size: 0.8rem;"></i>
-                <span>LIVE ANALYSE ACTIVE</span>
+            <div class="video-preview" style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                <i class="fas fa-satellite-dish" style="margin-right: 10px; font-size: 0.8rem; color: var(--neon-green);"></i>
+                <span style="font-size: 0.7rem; letter-spacing: 1px;">LIVE ANALYSE ACTIVE</span>
             </div>
             
             <div class="chat-container">
-                <div id="chat-box">
-                    <p style="color: var(--neon-green); font-family: monospace;">[SYSTEM]: Initialisiere Toni 2.0 Core...</p>
-                    <p style="color: var(--text-dim);">Toni: System bereit, Coach. Wie gehen wir es an?</p>
-                </div>
-                <div class="chat-input-area">
+                <div id="chat-box" style="flex:1; overflow-y:auto; padding:15px;">
+                    </div>
+                <div class="chat-input-area" style="padding:15px; background: rgba(13,20,33,0.98); border-top: 1px solid rgba(57, 255, 20, 0.2);">
                     <input type="text" id="command-input" class="pro-textarea" placeholder="Befehl an Toni senden...">
                 </div>
             </div>
