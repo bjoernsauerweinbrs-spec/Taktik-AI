@@ -1,15 +1,27 @@
 /**
  * TONI 2.0 - SEKTOR SKILLS VIDEOANALYSE
- * Version: 2.6 (Elite Interaction & Tactics Transfer)
+ * Version: 2.7 (Drill-Selector & AI-Sync Integration)
  */
 window.SektorVideo = {
     currentDrill: "Allround-Check",
     stream: null,
     animationFrame: null,
 
+    /**
+     * Wechselt den Analyse-Modus und aktualisiert Referenz-Daten
+     */
     setupDrill(type) {
         this.currentDrill = type;
         this.updateYouTubeReferenz(type);
+        
+        // ToniVoice Feedback
+        if (window.ToniVoice) {
+            window.ToniVoice.speak(`Analyse-Modus auf ${type} umgestellt. Ich lade die Referenzwerte.`);
+        }
+        
+        // UI-Label direkt aktualisieren
+        const label = document.getElementById('video-status-label');
+        if (label) label.innerText = `MODUS: ${type.toUpperCase()}`;
     },
 
     open() {
@@ -24,11 +36,14 @@ window.SektorVideo = {
     updateYouTubeReferenz(query) {
         const ytContainer = document.getElementById('youtube-frame-container');
         if (!ytContainer) return;
-        const searchQuery = encodeURIComponent(`football tutorial ${query} coaching points`);
+        
+        // Suche gezielt nach Coaching Points und Zeitlupe
+        const searchQuery = encodeURIComponent(`football tutorial ${query} slow motion coaching points`);
         ytContainer.innerHTML = `
             <iframe width="100%" height="100%" 
-                src="https://www.youtube.com/embed?listType=search&list=${searchQuery}" 
-                frameborder="0" allowfullscreen>
+                src="https://www.youtube.com/embed?listType=search&list=${searchQuery}&autoplay=1" 
+                frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
             </iframe>`;
     },
 
@@ -53,17 +68,26 @@ window.SektorVideo = {
                     <canvas id="skeleton-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                     
                     <div style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.7); padding: 10px; border-top: 1px solid var(--neon-green);">
-                        <p id="toni-video-feedback" style="color: #fff; font-size: 0.75rem; text-align: center;">Warte auf Kamera-Start...</p>
+                        <p id="toni-video-feedback" style="color: #fff; font-size: 0.75rem; text-align: center;">Kamera bereit für biomechanischen Scan.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="video-action-bar" style="position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 800px; display: flex; gap: 10px; background: rgba(13,20,33,0.95); padding: 15px; border-radius: 50px; border: 1px solid var(--data-cyan); box-shadow: 0 0 30px rgba(0,209,255,0.3); z-index: 1000;">
+            <div class="video-action-bar" style="position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 900px; display: flex; gap: 10px; background: rgba(13,20,33,0.95); padding: 15px; border-radius: 50px; border: 1px solid var(--data-cyan); box-shadow: 0 0 30px rgba(0,209,255,0.3); z-index: 1000;">
+                
+                <select id="drill-selector" onchange="window.SektorVideo.setupDrill(this.value)" 
+                    style="background: #000; color: var(--data-cyan); border: 1px solid var(--data-cyan); border-radius: 20px; padding: 5px 15px; font-size: 0.8rem; outline: none; cursor:pointer;">
+                    <option value="Allround-Check" ${this.currentDrill === 'Allround-Check' ? 'selected' : ''}>ALLROUND-CHECK</option>
+                    <option value="zidane turn" ${this.currentDrill === 'zidane turn' ? 'selected' : ''}>ZIDANE TURN</option>
+                    <option value="torschuss" ${this.currentDrill === 'torschuss' ? 'selected' : ''}>TORSCHUSS</option>
+                    <option value="dribbling" ${this.currentDrill === 'dribbling' ? 'selected' : ''}>DRIBBLING (TIEF)</option>
+                </select>
+
                 <button class="tool-btn" onclick="window.ToniVoice.toggle()" style="background:none; border:none; color:var(--neon-green); cursor:pointer;" title="Sprachbefehl">
                     <i class="fas fa-microphone" style="font-size: 1.5rem;"></i>
                 </button>
                 
-                <input type="text" id="video-command-input" placeholder="Befehl an Toni (z.B. Analysiere Laufweg)..." 
+                <input type="text" id="video-command-input" placeholder="Befehl an Toni senden..." 
                     style="flex:1; background:transparent; border:none; color:#fff; outline:none; font-family:sans-serif;">
                 
                 <button class="pro-btn-gold" style="padding: 8px 20px; background: var(--data-cyan); color: #000; border: none;" onclick="window.SektorVideo.transferToBoard()" title="An Taktik-Board senden">
@@ -76,16 +100,12 @@ window.SektorVideo = {
             </div>
         `;
 
-        // Event Listener für Enter-Taste
         setTimeout(() => {
             const inp = document.getElementById('video-command-input');
             if(inp) inp.addEventListener('keypress', (e) => { if(e.key === 'Enter') this.sendLocalCommand(); });
         }, 100);
     },
 
-    /**
-     * KI-LOGIK: Extrahiert Taktik aus dem Bild/Video und sendet sie an die Arena
-     */
     async transferToBoard() {
         const feedback = document.getElementById('toni-video-feedback');
         const statusLabel = document.getElementById('video-status-label');
@@ -94,21 +114,16 @@ window.SektorVideo = {
         statusLabel.innerText = "TRANSFER LÄUFT...";
         statusLabel.style.color = "var(--accent-gold)";
 
-        window.ToniVoice.speak("Ich extrahiere den Laufweg und übertrage ihn auf dein Taktikboard.");
+        if (window.ToniVoice) window.ToniVoice.speak("Ich extrahiere den Laufweg.");
 
-        // Simulation der KI-Erkennung (Vektoren berechnen)
         setTimeout(() => {
             if (window.arena) {
-                // Beispiel: Ein Diagonallauf von Halb-Links in den Strafraum
-                const startX = 35; // 35% Breite
-                const startY = 60; // 60% Tiefe
-                const endX = 15;   // 15% Breite (Richtung Tor)
-                const endY = 40;   // 40% Tiefe
-
+                const startX = 35; const startY = 60;
+                const endX = 15;   const endY = 40;
                 window.arena.addPathFromVideo(startX, startY, endX, endY, 'arrow');
                 
-                feedback.innerHTML = `<span style="color:var(--neon-green);">Laufweg erfolgreich an Board gesendet!</span>`;
-                statusLabel.innerText = "TRANSFER ABGESCHLOSSEN";
+                feedback.innerHTML = `<span style="color:var(--neon-green);">Vektoren an Board gesendet!</span>`;
+                statusLabel.innerText = `MODUS: ${this.currentDrill.toUpperCase()}`;
                 statusLabel.style.color = "var(--neon-green)";
             }
         }, 2000);
@@ -130,10 +145,12 @@ window.SektorVideo = {
                 video: { facingMode: "environment" } 
             });
             video.srcObject = this.stream;
-            document.getElementById('toni-video-feedback').innerText = "KI-SCAN AKTIV: Gelenk-Tracking gestartet.";
+            document.getElementById('toni-video-feedback').innerText = "KI-SCAN AKTIV: Analyse gestartet.";
             
-            btn.innerHTML = `<i class="fas fa-video-slash"></i> STOP`;
-            btn.onclick = () => this.stopCamera();
+            if (btn) {
+                btn.innerHTML = `<i class="fas fa-video-slash"></i> STOP`;
+                btn.onclick = () => this.stopCamera();
+            }
             
             this.runVisionLoop();
         } catch (err) {
@@ -147,7 +164,7 @@ window.SektorVideo = {
             this.stream = null;
         }
         if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
-        this.render(); // UI Reset
+        this.render(); 
     },
 
     runVisionLoop() {
