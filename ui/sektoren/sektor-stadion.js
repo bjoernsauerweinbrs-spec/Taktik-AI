@@ -1,14 +1,14 @@
 /**
  * TONI 2.0 - SEKTOR STADION (DYNAMISCHER MAGAZIN GENERATOR)
- * Erstellt ein hochprofessionelles Hochglanz-Magazin mit flexibler Seitenanzahl.
- * Feature: Seiten hinzufügen/löschen, Toni-Druckberatung & Snapshot-Beamer.
+ * Feature: Automatische Sponsoren-Synchronisation mit dem Management-Hub.
+ * Optimiert für A5-Booklet Druck & Snapshot-Beamer.
  */
 window.SektorStadion = {
-    // Initialer Inhalt der Innenseiten
+    // Grundgerüst der Seiten
     dynamicPages: [
         { 
             title: "INSIDE TACTICS: COACH'S CORNER", 
-            content: `<div><h4 style="color: var(--neon-green);">DIE TAKTIK-VORSCHAU</h4><p style="font-size: 0.9rem; line-height: 1.6; color: #ccc;">"Wir erwarten heute einen Gegner, der extrem kompakt steht..."</p></div>` 
+            content: `<div><h4 style="color: var(--neon-green);">DIE TAKTIK-VORSCHAU</h4><p style="font-size: 0.9rem; line-height: 1.6; color: #ccc;">"Wir erwarten heute einen Gegner, der extrem kompakt steht. Der Fokus liegt auf schnellem Umschaltspiel..."</p></div>` 
         },
         { 
             title: "DIE ELITE-ELF DES TAGES", 
@@ -16,7 +16,8 @@ window.SektorStadion = {
         },
         { 
             title: "UNSERE PREMIUM-PARTNER", 
-            content: `<div class="mag-sponsor-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;"><div class="sponsor-box">HAUPTSPONSOR</div><div class="sponsor-box">STADION-PARTNER</div></div>` 
+            isSponsorPage: true, // Markierung für dynamisches Laden
+            content: "" 
         },
         { 
             title: "FAN-NEWS & INFOS", 
@@ -27,19 +28,47 @@ window.SektorStadion = {
     open() {
         const content = document.querySelector('.briefcase-window');
         if (!content) return;
+        this.syncSponsors(); // Erst Daten abgleichen
         this.render();
     },
 
-    // --- TONI BERATUNG ---
+    /**
+     * Zieht sich die Sponsoren-Daten aus dem Management-Hub (localStorage)
+     */
+    syncSponsors() {
+        const sponsorPage = this.dynamicPages.find(p => p.isSponsorPage);
+        if (!sponsorPage) return;
+
+        const rawData = localStorage.getItem('toni_management_data');
+        const data = rawData ? JSON.parse(rawData) : { sponsors: [] };
+
+        if (data.sponsors.length === 0) {
+            sponsorPage.content = `
+                <div style="text-align:center; padding: 20px; border: 1px dashed #ccc;">
+                    <p style="color: #888; font-size: 0.8rem;">Noch keine Partner im Management-Hub hinterlegt.</p>
+                    <p style="color: var(--neon-green); font-size: 0.7rem; cursor:pointer;" onclick="window.SektorManagement.open()">-> JETZT PARTNER ANLEGEN</p>
+                </div>`;
+        } else {
+            let sponsorHTML = `<div class="mag-sponsor-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">`;
+            data.sponsors.forEach(s => {
+                sponsorHTML += `
+                    <div class="sponsor-box" style="border: 1px solid #eee; padding: 10px; text-align: center;">
+                        <div style="font-weight: bold; color: #333; font-size: 0.9rem;">${s.name.toUpperCase()}</div>
+                        <div style="color: var(--neon-green); font-size: 0.6rem; letter-spacing: 1px;">${s.type || 'PREMIUM PARTNER'}</div>
+                    </div>`;
+            });
+            sponsorHTML += `</div>`;
+            sponsorPage.content = sponsorHTML;
+        }
+    },
+
     showPrintTip() {
         alert("TONI TIPP: Coach, für das perfekte Booklet stellst du im Druckdialog deines MacBook '2 Seiten pro Blatt' ein. So druckst du zwei A5-Seiten auf ein A4-Blatt. Einfach falten, tackern, fertig!");
     },
 
-    // --- SNAPSHOT BEAMER ---
     beamSnapshot(index) {
         if (!window.arena) return alert("Fehler: Arena-System nicht aktiv.");
         const img = window.arena.getSnapshot();
-        // Fügt das Bild zum Inhalt der gewählten Seite hinzu
         this.dynamicPages[index].content += `
             <div class="mag-snapshot" style="margin-top:20px; text-align:center;">
                 <img src="${img}" style="width:100%; border:1px solid #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
@@ -48,7 +77,6 @@ window.SektorStadion = {
         this.render();
     },
 
-    // --- SEITEN-LOGIK ---
     addPage() {
         this.dynamicPages.push({
             title: "NEUE MAGAZIN-SEITE",
@@ -64,7 +92,6 @@ window.SektorStadion = {
         }
     },
 
-    // --- RENDER-ENGINE ---
     render() {
         const content = document.querySelector('.briefcase-window');
         
@@ -80,10 +107,10 @@ window.SektorStadion = {
                 </div>
                 <div style="display: flex; gap: 15px;">
                     <button class="tactic-btn" style="border-color: var(--neon-green);" onclick="window.SektorStadion.addPage()">
-                        <i class="fas fa-plus"></i> SEITE HINZUFÜGEN
+                        <i class="fas fa-plus"></i> SEITE
                     </button>
                     <button class="pro-btn-gold" style="box-shadow: 0 0 15px var(--accent-gold);" onclick="window.print()">
-                        <i class="fas fa-file-pdf"></i> MAGAZIN EXPORTIEREN
+                        <i class="fas fa-file-pdf"></i> PRINT
                     </button>
                     <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
                 </div>
@@ -103,7 +130,7 @@ window.SektorStadion = {
                         </div>
                         <div class="mag-main-feature">
                             <h2 contenteditable="true">DER KAMPF UM DIE SPITZE</h2>
-                            <p contenteditable="true">FC FANTASIA vs. GÄSTE-TEAM | ANSTOSS 15:30</p>
+                            <p contenteditable="true">ANSTOSS: HEUTE | ELITE-COCKPIT POWERED</p>
                         </div>
                     </div>
                 </div>
@@ -136,18 +163,9 @@ window.SektorStadion = {
                         <div class="toni-ad-container">
                             <i class="fas fa-microchip" style="font-size: 5rem; color: var(--neon-green); margin-bottom: 20px;"></i>
                             <h1 style="color: #fff; letter-spacing: 10px; margin: 0;">TONI 2.0</h1>
-                            <p style="color: var(--accent-gold); font-weight: bold; letter-spacing: 3px; text-transform: uppercase;">The AI Revolution in Football</p>
+                            <p style="color: var(--accent-gold); font-weight: bold; letter-spacing: 3px; text-transform: uppercase;">The AI Revolution</p>
                             <div style="margin: 40px auto; width: 60%; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-green), transparent);"></div>
-                            <p style="font-size: 1.2rem; color: #fff; font-style: italic; margin-bottom: 40px;">"Weil Taktik kein Zufall ist."</p>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; padding: 0 40px;">
-                                <div style="font-size: 0.7rem; color: #888;"><i class="fas fa-check" style="color: var(--neon-green);"></i> NAGELSMANN ANALYTICS</div>
-                                <div style="font-size: 0.7rem; color: #888;"><i class="fas fa-check" style="color: var(--neon-green);"></i> KLOPP MOTIVATION ENGINE</div>
-                                <div style="font-size: 0.7rem; color: #888;"><i class="fas fa-check" style="color: var(--neon-green);"></i> LIVE VITAL-DATA SCAN</div>
-                                <div style="font-size: 0.7rem; color: #888;"><i class="fas fa-check" style="color: var(--neon-green);"></i> SMART EQUIPMENT LOGIC</div>
-                            </div>
-                            <div style="margin-top: 60px;">
-                                <p style="font-size: 0.6rem; color: #444; letter-spacing: 2px;">POWERED BY TONI-FOOTBALL-AI.COM</p>
-                            </div>
+                            <p style="font-size: 1.2rem; color: #fff; font-style: italic;">"Weil Taktik kein Zufall ist."</p>
                         </div>
                     </div>
                 </div>
