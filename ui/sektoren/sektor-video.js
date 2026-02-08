@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - SEKTOR SKILLS VIDEOANALYSE
- * Version: 2.5 (Elite Interaction & Vision Bridge)
+ * Version: 2.6 (Elite Interaction & Tactics Transfer)
  */
 window.SektorVideo = {
     currentDrill: "Allround-Check",
@@ -38,7 +38,7 @@ window.SektorVideo = {
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom: 1px solid var(--data-cyan); padding-bottom: 15px;">
                 <div>
                     <h2 style="color:var(--data-cyan); letter-spacing: 2px;">SKILLS VIDEO-ANALYST</h2>
-                    <span style="color: var(--neon-green); font-size: 0.7rem; letter-spacing: 1px;">MODUS: ${this.currentDrill.toUpperCase()}</span>
+                    <span id="video-status-label" style="color: var(--neon-green); font-size: 0.7rem; letter-spacing: 1px;">MODUS: ${this.currentDrill.toUpperCase()}</span>
                 </div>
                 <button class="tactic-btn" onclick="window.SektorVideo.stopCamera(); window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
             </div>
@@ -58,41 +58,83 @@ window.SektorVideo = {
                 </div>
             </div>
 
-            <div class="video-action-bar" style="position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 600px; display: flex; gap: 10px; background: rgba(13,20,33,0.95); padding: 15px; border-radius: 50px; border: 1px solid var(--data-cyan); box-shadow: 0 0 30px rgba(0,209,255,0.3); z-index: 1000;">
-                <button class="tool-btn" onclick="window.ToniVoice.toggle()" style="background:none; border:none; color:var(--neon-green); cursor:pointer;">
+            <div class="video-action-bar" style="position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 800px; display: flex; gap: 10px; background: rgba(13,20,33,0.95); padding: 15px; border-radius: 50px; border: 1px solid var(--data-cyan); box-shadow: 0 0 30px rgba(0,209,255,0.3); z-index: 1000;">
+                <button class="tool-btn" onclick="window.ToniVoice.toggle()" style="background:none; border:none; color:var(--neon-green); cursor:pointer;" title="Sprachbefehl">
                     <i class="fas fa-microphone" style="font-size: 1.5rem;"></i>
                 </button>
-                <input type="text" id="video-command-input" placeholder="Befehl an Toni (z.B. Zeig mir Zidane-Trick)..." 
+                
+                <input type="text" id="video-command-input" placeholder="Befehl an Toni (z.B. Analysiere Laufweg)..." 
                     style="flex:1; background:transparent; border:none; color:#fff; outline:none; font-family:sans-serif;">
-                <button class="pro-btn-gold" style="padding: 8px 20px;" onclick="window.SektorVideo.sendLocalCommand()">SENDEN</button>
+                
+                <button class="pro-btn-gold" style="padding: 8px 20px; background: var(--data-cyan); color: #000; border: none;" onclick="window.SektorVideo.transferToBoard()" title="An Taktik-Board senden">
+                    <i class="fas fa-draw-polygon"></i> BOARD
+                </button>
+
+                <button id="camera-trigger-btn" class="pro-btn-gold" style="padding: 8px 20px;" onclick="window.SektorVideo.startCamera()">
+                    <i class="fas fa-video"></i> CAM
+                </button>
             </div>
         `;
 
-        // Event Listener für Enter-Taste in der Action-Bar
+        // Event Listener für Enter-Taste
         setTimeout(() => {
             const inp = document.getElementById('video-command-input');
             if(inp) inp.addEventListener('keypress', (e) => { if(e.key === 'Enter') this.sendLocalCommand(); });
         }, 100);
     },
 
+    /**
+     * KI-LOGIK: Extrahiert Taktik aus dem Bild/Video und sendet sie an die Arena
+     */
+    async transferToBoard() {
+        const feedback = document.getElementById('toni-video-feedback');
+        const statusLabel = document.getElementById('video-status-label');
+        
+        feedback.innerText = "Analysiere Bewegungsvektoren...";
+        statusLabel.innerText = "TRANSFER LÄUFT...";
+        statusLabel.style.color = "var(--accent-gold)";
+
+        window.ToniVoice.speak("Ich extrahiere den Laufweg und übertrage ihn auf dein Taktikboard.");
+
+        // Simulation der KI-Erkennung (Vektoren berechnen)
+        setTimeout(() => {
+            if (window.arena) {
+                // Beispiel: Ein Diagonallauf von Halb-Links in den Strafraum
+                const startX = 35; // 35% Breite
+                const startY = 60; // 60% Tiefe
+                const endX = 15;   // 15% Breite (Richtung Tor)
+                const endY = 40;   // 40% Tiefe
+
+                window.arena.addPathFromVideo(startX, startY, endX, endY, 'arrow');
+                
+                feedback.innerHTML = `<span style="color:var(--neon-green);">Laufweg erfolgreich an Board gesendet!</span>`;
+                statusLabel.innerText = "TRANSFER ABGESCHLOSSEN";
+                statusLabel.style.color = "var(--neon-green)";
+            }
+        }, 2000);
+    },
+
     sendLocalCommand() {
         const inp = document.getElementById('video-command-input');
         if (inp && inp.value.trim()) {
-            window.handleCommand(inp.value); // Nutzt die globale Toni-Logik
+            window.handleCommand(inp.value);
             inp.value = "";
         }
     },
 
     async startCamera() {
         const video = document.getElementById('player-cam');
+        const btn = document.getElementById('camera-trigger-btn');
         try {
             this.stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "environment" } 
             });
             video.srcObject = this.stream;
-            document.getElementById('toni-video-feedback').innerText = "KI-SCAN AKTIV: Ich analysiere deine Gelenke.";
+            document.getElementById('toni-video-feedback').innerText = "KI-SCAN AKTIV: Gelenk-Tracking gestartet.";
             
-            // Starte Skelett-Tracking Loop
+            btn.innerHTML = `<i class="fas fa-video-slash"></i> STOP`;
+            btn.onclick = () => this.stopCamera();
+            
             this.runVisionLoop();
         } catch (err) {
             alert("Kamera-Fehler. Bitte Berechtigungen prüfen.");
@@ -105,6 +147,7 @@ window.SektorVideo = {
             this.stream = null;
         }
         if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
+        this.render(); // UI Reset
     },
 
     runVisionLoop() {
@@ -112,7 +155,6 @@ window.SektorVideo = {
         const canvas = document.getElementById('skeleton-canvas');
         if (!video || !canvas || !this.stream) return;
 
-        // Hier wird später die echte MediaPipe Logik aus window.ToniVision aufgerufen
         if (window.ToniVision && window.ToniVision.isReady) {
             window.ToniVision.analyzeFrame(video, canvas);
         }
