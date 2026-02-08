@@ -1,204 +1,128 @@
 /**
- * TONI 2.0 - INTERNATIONAL TRAINING & METHODOLOGY
- * Verwaltung von Trainings-Pools, Archivierung & A4-Druck-Engine.
+ * TONI 2.0 - SEKTOR TRAINING (AI ADVISOR EDITION)
+ * Fokus: KI-generierte Übungen, Beratung & Taktik-Vorschläge.
  */
 window.SektorTraining = {
-    sessionPlan: [], 
-    currentMode: 'pro',
+    open() {
+        const content = document.querySelector('.briefcase-window');
+        if (!content) return;
+        this.render();
+    },
 
-    render: function() {
-        const squad = window.ToniDB ? window.ToniDB.getPlayers() : (JSON.parse(localStorage.getItem('toni_players')) || []);
-        const drillsArchive = JSON.parse(localStorage.getItem('toni_drills')) || [];
-        
-        document.getElementById('active-content').innerHTML = `
-            <div style="padding:25px; display:grid; grid-template-columns: 1fr 380px; gap:30px; animation: fadeIn 0.4s ease-out; height: 82vh; overflow-y: auto;">
+    render() {
+        const content = document.querySelector('.briefcase-window');
+        const coach = window.coachInfo || { name: "Coach" };
+
+        content.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom: 1px solid var(--neon-green); padding-bottom: 20px;">
+                <div>
+                    <h2 style="color:var(--neon-green); letter-spacing: 2px;">TRAINING & KI-BERATUNG</h2>
+                    <span style="color: #888; font-size: 0.7rem;">COACH ${coach.name.toUpperCase()} x TONI 2.0 COLLAB</span>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 350px; gap: 30px;">
                 
                 <div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-                        <div>
-                            <h2 style="color:var(--accent-orange); margin:0; letter-spacing:2px;">TRAININGS-ZENTRALE</h2>
-                            <p style="font-size:0.6rem; color:var(--text-dim); text-transform:uppercase;">Methodik & Archivierung</p>
-                        </div>
+                    <div style="background: rgba(57, 255, 20, 0.05); padding: 25px; border-radius: 15px; border: 1px solid var(--neon-green);">
+                        <h3 style="color:var(--neon-green); margin-bottom:15px;"><i class="fas fa-robot"></i> TONI'S ÜBUNGS-GENERATOR</h3>
+                        <p style="font-size:0.8rem; color:#ccc; margin-bottom:20px;">Was ist heute der Fokus? Toni erstellt dir eine Übung basierend auf deinem Kader.</p>
                         
-                        <div style="display:flex; gap:10px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 8px;">
-                            <button onclick="SektorTraining.setMode('pro')" 
-                                style="cursor:pointer; padding: 8px 15px; border-radius: 5px; border: 1px solid ${this.currentMode==='pro' ? 'var(--neon-green)' : '#444'}; background: ${this.currentMode==='pro' ? 'rgba(57, 255, 20, 0.2)' : '#111'}; color: #fff; font-size: 0.65rem; font-weight: bold; transition: 0.3s;">
-                                PRO-PITCH
-                            </button>
-                            <button onclick="SektorTraining.setMode('youth')" 
-                                style="cursor:pointer; padding: 8px 15px; border-radius: 5px; border: 1px solid ${this.currentMode==='youth' ? 'var(--neon-green)' : '#444'}; background: ${this.currentMode==='youth' ? 'rgba(57, 255, 20, 0.2)' : '#111'}; color: #fff; font-size: 0.65rem; font-weight: bold; transition: 0.3s;">
-                                F-JUGEND
-                            </button>
-                            <button onclick="SektorTraining.setMode('funino')" 
-                                style="cursor:pointer; padding: 8px 15px; border-radius: 5px; border: 1px solid ${this.currentMode==='funino' ? 'var(--neon-green)' : '#444'}; background: ${this.currentMode==='funino' ? 'rgba(57, 255, 20, 0.2)' : '#111'}; color: #fff; font-size: 0.65rem; font-weight: bold; transition: 0.3s;">
-                                FUNINO
-                            </button>
+                        <div style="display:flex; gap:10px; margin-bottom:20px;">
+                            <input type="text" id="training-focus-input" class="pro-textarea" placeholder="z.B. Gegenpressing nach Ballverlust..." style="flex:1;">
+                            <button class="pro-btn-gold" onclick="window.SektorTraining.askToni()">VORSCHLAG GENERIEREN</button>
                         </div>
-                    </div>
 
-                    <div class="fifa-card" style="text-align:left; cursor:default; margin-bottom:25px; background:rgba(255,106,0,0.02); border: 1px solid rgba(255,106,0,0.2); padding: 20px; border-radius: 12px;">
-                        <h4 style="font-size:0.6rem; color:var(--accent-gold); margin-bottom:15px; letter-spacing:1px;">ANWESENHEITSPRÜFUNG (POOL: MAX 20)</h4>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:10px; max-height:200px; overflow-y:auto; padding-right:10px;">
-                            ${this.renderAttendanceList(squad)}
-                        </div>
-                    </div>
-
-                    <div class="fifa-card" style="text-align:left; cursor:default; border-color:var(--accent-orange); padding: 20px; border-radius: 12px;">
-                        <h4 style="font-size:0.6rem; color:var(--accent-orange); margin-bottom:15px; letter-spacing:1px;">GESPEICHERTE ÜBUNGEN (ARCHIV)</h4>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:15px;">
-                            ${drillsArchive.length > 0 ? drillsArchive.map((d, i) => `
-                                <div style="background:rgba(0,0,0,0.4); border:1px solid #333; padding:15px; border-radius:10px; position:relative;">
-                                    <div style="font-size:0.75rem; font-weight:900; color:#fff; margin-bottom:5px;">${d.name.toUpperCase()}</div>
-                                    <div style="font-size:0.55rem; color:var(--text-dim); margin-bottom:12px;">${d.date}</div>
-                                    <div style="display:flex; gap:5px;">
-                                        <button class="tactic-btn" style="flex:1; font-size:0.5rem; cursor:pointer;" onclick="SektorTraining.loadFromArchive(${i})">LADEN</button>
-                                        <button class="tactic-btn" style="color:var(--status-error); font-size:0.5rem; cursor:pointer;" onclick="SektorTraining.deleteFromArchive(${i})">X</button>
-                                    </div>
-                                </div>
-                            `).join('') : '<p style="font-size:0.6rem; color:#444;">Archiv ist leer. Nutze das Board, um Übungen zu erstellen.</p>'}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="fifa-card" style="border-color:var(--neon-green); background: rgba(57, 255, 20, 0.02); text-align:left; cursor:default; display:flex; flex-direction:column; position:sticky; top:0; height: fit-content; padding: 20px; border-radius: 12px;">
-                    <h4 style="font-size:0.6rem; color:var(--neon-green); margin-bottom:20px; letter-spacing:1px;">A4 TAGESPLAN-EDITOR</h4>
-                    
-                    <div style="flex:1;">
-                        <input type="text" id="drill-name" placeholder="Name der Übung..." class="login-input" style="width:100%; margin-bottom:10px; background: #000; border: 1px solid #333; color: #fff; padding: 10px;">
-                        <textarea id="drill-desc" placeholder="Ablauf & Coaching-Punkte..." class="login-input" style="width:100%; height:80px; margin-bottom:15px; background: #000; border: 1px solid #333; color: #fff; padding: 10px; resize: none;"></textarea>
-                        
-                        <button class="login-btn" style="width:100%; font-size:0.7rem; background: var(--neon-green); color: #000; font-weight: bold; border: none; padding: 12px; cursor: pointer;" onclick="SektorTraining.addDrillToPlan()">
-                            ÜBUNG IN PLAN ÜBERNEHMEN
-                        </button>
-
-                        <div style="margin-top:25px; border-top:1px solid #333; padding-top:20px;">
-                            <h4 style="font-size:0.55rem; color:var(--accent-gold); margin-bottom:10px;">AKTUELLER TAGESABLAUF:</h4>
-                            <div id="session-list-summary" style="font-size:0.75rem; color:#fff;">
-                                ${this.renderSessionSummary()}
+                        <div id="toni-suggestion-output" style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 10px; min-height: 200px; border-left: 4px solid var(--neon-green); color: #fff; font-size: 0.9rem; line-height: 1.6;">
+                            <div style="opacity:0.3; text-align:center; padding-top:60px;">
+                                <i class="fas fa-brain" style="font-size: 2rem;"></i><br>Warte auf Fokus-Eingabe...
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <button class="login-btn" style="width:100%; background:#fff; color:#000; margin-top:20px; padding: 12px; font-weight: bold; cursor: pointer;" onclick="window.print()">
-                        <i class="fas fa-print"></i> PLAN DRUCKEN (A4)
-                    </button>
+                <div style="display:flex; flex-direction:column; gap:20px;">
+                    <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 15px; border: 1px solid #333;">
+                        <h4 style="color:#fff; font-size:0.8rem; margin-bottom:15px;">GESPEICHERTE ÜBUNGEN</h4>
+                        <div id="mini-archive-list" style="max-height: 400px; overflow-y:auto;">
+                            </div>
+                        <button class="tactic-btn" style="width:100%; margin-top:15px;" onclick="window.SektorTraining.createNewSession()">+ MANUELLE ÜBUNG</button>
+                    </div>
                 </div>
             </div>
-            
-            <div id="a4-print-layout" class="only-print"></div>
         `;
+        this.renderMiniArchive();
     },
 
-    setMode: function(mode) {
-        this.currentMode = mode;
-        if(window.arena) {
-            window.arena.setPitchMode(mode);
-            // Kleines Feedback für Toni
-            if(window.ToniTTS) ToniTTS.speak(`Spielfeld auf ${mode} umgestellt.`, "warm");
-        }
-        this.render();
-    },
+    async askToni() {
+        const input = document.getElementById('training-focus-input');
+        const output = document.getElementById('toni-suggestion-output');
+        if (!input.value) return;
 
-    renderAttendanceList: function(squad) {
-        return squad.map(p => {
-            const isAtTraining = p.isPresent;
-            return `
-                <div onclick="SektorTraining.toggleAttendance('${p.id}')" 
-                     style="padding:10px; border:1px solid ${isAtTraining ? 'var(--accent-orange)' : '#333'}; border-radius:8px; cursor:pointer; background:${isAtTraining ? 'rgba(255,106,0,0.15)' : 'rgba(0,0,0,0.4)'}; text-align:center; transition:0.2s;">
-                    <div style="font-size:0.9rem; font-weight:900; color:${isAtTraining ? '#fff' : '#666'}">${p.number}</div>
-                    <div style="font-size:0.55rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:${isAtTraining ? '#fff' : '#666'}">${p.name.toUpperCase()}</div>
-                </div>
-            `;
-        }).join('');
-    },
+        output.innerHTML = `<span class="thinking">Toni entwirft die Einheit...</span>`;
 
-    toggleAttendance: function(id) {
-        if (window.ToniDB) {
-            const players = window.ToniDB.getPlayers();
-            const idx = players.findIndex(p => p.id === id);
-            if(idx > -1) {
-                players[idx].isPresent = !players[idx].isPresent;
-                window.ToniDB.savePlayer(players[idx]);
-                this.render();
+        const prompt = `Erstelle eine Fußball-Übung für das Training. 
+                        Fokus: ${input.value}. 
+                        Anzahl Spieler: ${window.Database.players.length}.
+                        Struktur: 1. Aufbau, 2. Ablauf, 3. Coaching Points.
+                        Halte es kurz und präzise.`;
+
+        if (window.aiOnline) {
+            // Wir nutzen die globale handleCommand Logik indirekt
+            try {
+                const savedIP = localStorage.getItem('toni_mac_ip') || 'localhost';
+                const response = await fetch(`http://${savedIP}:11434/api/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'phi3', 
+                        prompt: prompt,
+                        stream: false
+                    })
+                });
+                const data = await response.json();
+                output.innerHTML = `<div class="fadeIn"><strong>TONIS VORSCHLAG:</strong><br><br>${data.response.replace(/\n/g, '<br>')}</div>
+                <button class="pro-btn-gold" style="margin-top:20px; width:100%;" onclick="window.SektorTraining.saveSuggestion('${input.value}')">IN MAPPE ÜBERNEHMEN</button>`;
+                window.ToniVoice.speak("Hier ist mein Vorschlag für die Einheit, Coach. Fokus liegt auf der Intensität.");
+            } catch (e) {
+                output.innerHTML = "Fehler: KI-Verbindung unterbrochen.";
             }
+        } else {
+            output.innerHTML = "Toni ist offline. Bitte verbinde mich am MacBook, um kreative Übungen zu generieren!";
         }
     },
 
-    // ... (restliche Funktionen loadFromArchive, deleteFromArchive, addDrillToPlan, renderSessionSummary, removeDrill, preparePrintLayout bleiben gleich)
-    loadFromArchive: function(index) {
-        const archive = JSON.parse(localStorage.getItem('toni_drills')) || [];
-        const drill = archive[index];
-        if(drill && window.arena) {
-            window.arena.players = drill.players;
-            window.arena.trainingObjects = drill.objects || [];
-            if(drill.pitchMode) window.arena.setPitchMode(drill.pitchMode);
-            window.arena.render();
-            if(window.BriefcaseUI) window.BriefcaseUI.toggle();
-            if(window.ToniTTS) ToniTTS.speak(`Übung ${drill.name} geladen.`, "warm");
+    saveSuggestion(title) {
+        const output = document.getElementById('toni-suggestion-output').innerText;
+        const newSession = {
+            title: title || "KI-Übung",
+            desc: output,
+            duration: 20,
+            players: window.Database.players.length,
+            img: null
+        };
+        if (!window.Database.trainingSessions) window.Database.trainingSessions = [];
+        window.Database.trainingSessions.unshift(newSession);
+        window.Database.save();
+        this.renderMiniArchive();
+        alert("Übung in die Mappe kopiert!");
+    },
+
+    renderMiniArchive() {
+        const list = document.getElementById('mini-archive-list');
+        const sessions = window.Database.trainingSessions || [];
+        if (sessions.length === 0) {
+            list.innerHTML = `<p style="font-size:0.7rem; color:#444;">Noch kein Archiv vorhanden.</p>`;
+            return;
         }
-    },
-    deleteFromArchive: function(index) {
-        if(confirm("Übung aus dem Archiv löschen?")) {
-            let archive = JSON.parse(localStorage.getItem('toni_drills')) || [];
-            archive.splice(index, 1);
-            localStorage.setItem('toni_drills', JSON.stringify(archive));
-            this.render();
-        }
-    },
-    addDrillToPlan: function() {
-        const nameInput = document.getElementById('drill-name');
-        const descInput = document.getElementById('drill-desc');
-        const name = nameInput.value.trim();
-        const desc = descInput.value.trim();
-        if(!name) return alert("Bitte Namen für die Übung eingeben.");
-        const snapshot = window.arena ? window.arena.getSnapshot() : null;
-        this.sessionPlan.push({ name, desc, snapshot });
-        nameInput.value = ""; descInput.value = "";
-        this.render();
-        this.preparePrintLayout();
-    },
-    renderSessionSummary: function() {
-        if(this.sessionPlan.length === 0) return "<span style='color:#444'>Noch keine Übungen hinzugefügt...</span>";
-        return this.sessionPlan.map((d, i) => `
-            <div style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:0.7rem;">${i+1}. ${d.name}</span>
-                <i class="fas fa-trash" style="color:var(--status-error); cursor:pointer; font-size:0.6rem;" onclick="SektorTraining.removeDrill(${i})"></i>
+        list.innerHTML = sessions.map((s, idx) => `
+            <div style="padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; margin-bottom:10px; border-left: 2px solid var(--neon-green);">
+                <div style="font-size:0.75rem; font-weight:bold; color:var(--neon-green);">${s.title}</div>
+                <div style="font-size:0.6rem; color:#666;">${s.players} Spieler | ${s.duration} Min.</div>
             </div>
         `).join('');
-    },
-    removeDrill: function(i) {
-        this.sessionPlan.splice(i, 1);
-        this.render();
-        this.preparePrintLayout();
-    },
-    preparePrintLayout: function() {
-        const printArea = document.getElementById('a4-print-layout');
-        if(!printArea) return;
-        const date = new Date().toLocaleDateString('de-DE');
-        printArea.innerHTML = `
-            <div class="print-page" style="padding:15mm; font-family: sans-serif; color:#000; background:#fff;">
-                <div style="display:flex; justify-content:space-between; border-bottom:3px solid #000; padding-bottom:10px; margin-bottom:20px;">
-                    <div>
-                        <h1 style="margin:0; font-size:22pt; letter-spacing:-1px;">TRAININGSPLAN</h1>
-                        <p style="margin:0; font-size:10pt; font-weight:bold;">COACH: BJÖRN | TONI 2.0 AI SYSTEM</p>
-                    </div>
-                    <div style="text-align:right;">
-                        <p style="margin:0; font-size:10pt;">DATUM: ${date}</p>
-                    </div>
-                </div>
-                ${this.sessionPlan.map((d, i) => `
-                    <div style="margin-bottom: 30px; page-break-inside: avoid; border-bottom: 1px solid #eee; padding-bottom: 20px;">
-                        <h2 style="font-size:14pt; margin:0 0 10px 0; background:#000; color:#fff; padding:5px 10px;">${i+1}. ${d.name.toUpperCase()}</h2>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                            <img src="${d.snapshot}" style="width:100%; border:1px solid #000; border-radius:4px;">
-                            <div style="font-size:10pt; line-height:1.5;">
-                                <strong style="text-decoration:underline;">ABLAUF & COACHING:</strong><br>
-                                ${d.desc.replace(/\n/g, '<br>')}
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
     }
 };
