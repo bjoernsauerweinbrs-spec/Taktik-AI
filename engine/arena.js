@@ -1,11 +1,12 @@
 /**
  * TONI 2.0 - ARENA ENGINE (ELITE PRO PITCH UPDATE)
- * Status: FINALISIERT (FIFA-Cards Bench & Dot-Labels)
+ * Status: FINALISIERT (FIFA-Cards Bench, Dot-Labels & Equipment-Support)
  */
 window.arena = {
     canvas: null,
     ctx: null,
     elements: [], 
+    equipment: [], // NEU: Speicher für Hütchen, Tore, Leitern
     selectedElement: null,
     benchHeight: 140, 
     isAnimating: false,
@@ -36,6 +37,19 @@ window.arena = {
         this.setupEventListeners();
         if(window.Database) this.syncFromDatabase();
         this.renderLoop();
+    },
+
+    // --- EQUIPMENT LOGIK (NEU FÜR JUNIOREN) ---
+    addEquipment(type, x, y, options = {}) {
+        this.equipment.push({ type, x, y, id: Date.now() + Math.random(), ...options });
+    },
+
+    clearEquipment(type = null) {
+        if (type) {
+            this.equipment = this.equipment.filter(e => e.type !== type);
+        } else {
+            this.equipment = [];
+        }
     },
 
     syncFromDatabase() {
@@ -97,7 +111,6 @@ window.arena = {
         const ctx = this.ctx;
         const w = this.canvas.width;
         const h = this.canvas.height;
-        const mode = window.Database ? window.Database.activeMode : 'training';
 
         ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
@@ -113,22 +126,18 @@ window.arena = {
         ctx.strokeRect(m, m, fieldW, actualFieldHeight); 
         ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke(); 
         ctx.beginPath(); ctx.arc(w/2, fieldH/2, 60, 0, Math.PI*2); ctx.stroke(); 
-        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 2, 0, Math.PI*2); ctx.fill(); 
 
-        const box16W = 120, box16H = 240, box5W = 40, box5H = 100, penDist = 80;
-        ctx.strokeRect(m, (fieldH/2)-(box16H/2), box16W, box16H);
-        ctx.strokeRect(m, (fieldH/2)-(box5H/2), box5W, box5H);
-        ctx.beginPath(); ctx.arc(m+penDist, fieldH/2, 3, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(m+penDist, fieldH/2, 60, -Math.PI/2.5, Math.PI/2.5); ctx.stroke();
-        ctx.strokeRect(w-m-box16W, (fieldH/2)-(box16H/2), box16W, box16H);
-        ctx.strokeRect(w-m-box5W, (fieldH/2)-(box5H/2), box5W, box5H);
-        ctx.beginPath(); ctx.arc(w-m-penDist, fieldH/2, 3, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(w-m-penDist, fieldH/2, 60, Math.PI/1.6, -Math.PI/1.6); ctx.stroke();
-
+        // Standard-Tore
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
         ctx.strokeRect(m-15, (fieldH/2)-45, 15, 90);
         ctx.strokeRect(w-m, (fieldH/2)-45, 15, 90);
 
+        // --- EQUIPMENT ZEICHNEN ---
+        this.equipment.forEach(item => {
+            this.drawItem(ctx, item);
+        });
+
+        // Bank-Bereich
         ctx.fillStyle = "rgba(0,0,0,0.6)";
         ctx.fillRect(0, fieldH, w, this.benchHeight);
         ctx.strokeStyle = "var(--data-cyan)"; ctx.lineWidth = 2;
@@ -136,16 +145,34 @@ window.arena = {
 
         this.elements.forEach(el => {
             if (el === this.selectedElement) return;
-            this.drawEntity(ctx, el, fieldH, mode);
+            this.drawEntity(ctx, el, fieldH);
         });
-        if (this.selectedElement) this.drawEntity(ctx, this.selectedElement, fieldH, mode);
+        if (this.selectedElement) this.drawEntity(ctx, this.selectedElement, fieldH);
     },
 
-    drawEntity(ctx, el, fieldH, mode) {
-        // Spieler ist auf der Bank, wenn sein Y-Wert im unteren Bereich liegt
-        const isOnBench = el.y > fieldH - 20;
+    drawItem(ctx, item) {
+        ctx.save();
+        if (item.type === 'goal') {
+            ctx.strokeStyle = "#fff"; ctx.lineWidth = 3;
+            ctx.strokeRect(item.x - 10, item.y - 25, 10, 50); // Minitore
+        } else if (item.type === 'cone') {
+            ctx.fillStyle = "var(--accent-orange)";
+            ctx.beginPath();
+            ctx.moveTo(item.x, item.y - 10);
+            ctx.lineTo(item.x - 10, item.y + 10);
+            ctx.lineTo(item.x + 10, item.y + 10);
+            ctx.fill();
+        } else if (item.type === 'ladder') {
+            ctx.strokeStyle = "#ccff00"; ctx.lineWidth = 2;
+            for(let i=0; i<6; i++) {
+                ctx.strokeRect(item.x, item.y + (i*20), 40, 20);
+            }
+        }
+        ctx.restore();
+    },
 
-        // FIX: Auf der Bank immer FIFA-Karte (außer Gegner). Auf dem Feld immer Dot.
+    drawEntity(ctx, el, fieldH) {
+        const isOnBench = el.y > fieldH - 20;
         if (isOnBench && el.type !== 'opponent') {
             this.drawFIFACard(ctx, el);
         } else {
@@ -162,37 +189,17 @@ window.arena = {
         ctx.shadowBlur = 0; ctx.fillStyle = "#fff"; ctx.textAlign = "center";
         ctx.font = "bold 14px Inter"; ctx.fillText(el.rat || 80, x+15, y+20);
         ctx.font = "bold 10px Inter"; ctx.fillText(el.name ? el.name.split(' ').pop().toUpperCase() : 'PRO', el.x, y+ch-12);
-        if(el.img) {
-            try { 
-                const img = new Image(); img.src = el.img; 
-                ctx.drawImage(img, x+5, y+25, cw-10, ch-50); 
-            } catch(e){}
-        } else {
-            ctx.fillStyle = "rgba(255,255,255,0.1)"; ctx.font = "20px 'Font Awesome 6 Free'"; ctx.fillText("\uf2f6", el.x, y+ch/2);
-        }
         ctx.restore();
     },
 
     drawTacticalDot(ctx, el) {
         ctx.save();
         const radius = 18;
-        
-        // Dot Body
         ctx.beginPath(); ctx.arc(el.x, el.y, radius, 0, Math.PI*2);
         ctx.fillStyle = el.color; ctx.fill();
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
-        
-        // Rückennummer
         ctx.fillStyle = "#000"; ctx.font = "bold 14px Inter"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText(el.number || '?', el.x, el.y);
-        
-        // Name (Nachname auf Banner)
-        const name = el.name ? el.name.split(' ').pop().toUpperCase() : 'SPIELER';
-        ctx.fillStyle = "rgba(0,0,0,0.7)";
-        ctx.roundRect(el.x - 30, el.y + radius + 3, 60, 14, 4); ctx.fill();
-        
-        ctx.fillStyle = "#fff"; ctx.font = "bold 9px Inter";
-        ctx.fillText(name, el.x, el.y + radius + 10);
         ctx.restore();
     },
 
@@ -207,16 +214,8 @@ window.arena = {
             const rect = this.canvas.getBoundingClientRect();
             this.selectedElement.x = e.clientX - rect.left;
             this.selectedElement.y = e.clientY - rect.top;
-            this.selectedElement.targetX = this.selectedElement.x;
-            this.selectedElement.targetY = this.selectedElement.y;
         });
-        this.canvas.addEventListener('mouseup', () => {
-            if (this.selectedElement && window.Database) {
-                window.Database.updatePlayer(this.selectedElement.id, 'x', this.selectedElement.x);
-                window.Database.updatePlayer(this.selectedElement.id, 'y', this.selectedElement.y);
-            }
-            this.selectedElement = null;
-        });
+        this.canvas.addEventListener('mouseup', () => { this.selectedElement = null; });
     },
 
     resize() {
