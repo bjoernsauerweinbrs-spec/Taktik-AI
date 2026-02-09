@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - SEKTOR JUNIOREN
- * Status: STABILISIERT & FUNINO-READY
+ * Status: ELITE UPDATE (Kader-Deploy & Technik-Equipment)
  */
 window.SektorJunioren = {
     currentYouth: null,
@@ -8,15 +8,12 @@ window.SektorJunioren = {
 
     open() {
         console.log("Sektor Junioren wird gestartet...");
-        
-        // 1. Erzwungener Sichtbarkeits-Fix für das Overlay
         const overlay = document.getElementById('briefcase-overlay');
         if (overlay) {
             overlay.style.display = 'flex';
             overlay.classList.remove('hidden');
         }
 
-        // UI Elemente referenzieren
         const title = document.getElementById('sector-title');
         const content = document.getElementById('active-content');
         const briefcaseContent = document.getElementById('briefcase-content');
@@ -26,7 +23,6 @@ window.SektorJunioren = {
             return;
         }
 
-        // Trainer-Abfrage (nur wenn noch kein Coach gesetzt wurde)
         if (this.currentCoach === "Coach Toni") {
             const coach = prompt("Welcher Trainer leitet die heutige Einheit?", this.currentCoach);
             if (coach) this.currentCoach = coach;
@@ -34,7 +30,6 @@ window.SektorJunioren = {
 
         if(title) title.innerText = "JUNIOREN-ZENTRALE";
         
-        // Hauptansicht rendern
         content.innerHTML = `
             <div style="text-align:center; margin-bottom:20px; border-bottom: 1px solid rgba(57,255,20,0.3); padding-bottom: 15px;">
                 <p style="color:var(--neon-green); font-family: 'Orbitron'; letter-spacing: 2px;">
@@ -75,49 +70,85 @@ window.SektorJunioren = {
     selectTeam(team) {
         this.currentYouth = team;
         const detailView = document.getElementById('youth-detail-view');
-        
         detailView.style.display = 'block';
         
-        let actionButtons = `
-            <button class="pro-btn" style="flex:1;" onclick="alert('Kader für ${team} wird geladen...')">KADER</button>
-            <button class="pro-btn-gold" style="flex:1;" onclick="alert('YouTube-Suche für ${team} startet...')">VIDEOS</button>
-        `;
-
-        // Spezial-Button für Funino (G-Jugend)
-        if(team === "G-Jugend") {
-            actionButtons += `<button class="pro-btn" style="flex:1; border-color:var(--neon-green);" onclick="window.SektorJunioren.drawFuninoField()">ARENA-SETUP (4 TORE)</button>`;
-        }
+        // Holen der Spieler aus den Presets
+        const allPlayers = window.YouthPresets?.musterspieler || [];
+        const filteredPlayers = allPlayers.filter(p => p.jugend === team);
 
         detailView.innerHTML = `
-            <h4 style="color: var(--neon-green); margin-top: 0;">FOKUS: ${team}</h4>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
-                ${actionButtons}
+            <h4 style="color: var(--neon-green); margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px;">FOKUS: ${team}</h4>
+            
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; margin-top: 15px;">
+                <div>
+                    <p style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Kader wählen (Beamen):</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+                        ${filteredPlayers.map(p => `
+                            <button class="pro-btn" style="font-size: 0.7rem; padding: 5px;" onclick="window.SektorJunioren.deployPlayer('${p.id}', '${p.name}')">
+                                ${p.name.split(' ')[0]}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <p style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Training-Setup:</p>
+                    <button class="pro-btn-gold" onclick="window.SektorJunioren.drawFuninoField()">FUNINO (4 TORE)</button>
+                    <button class="pro-btn" onclick="window.SektorJunioren.addTrainingTool('cone')">+ HÜTCHEN-PARCOURS</button>
+                    <button class="pro-btn" onclick="window.SektorJunioren.addTrainingTool('ladder')">+ KOORDI-LEITER</button>
+                </div>
             </div>
         `;
+    },
+
+    deployPlayer(id, name) {
+        if (!window.arena) return;
         
-        console.log(`Team ausgewählt: ${team}`);
+        // Spieler-Objekt für die Arena bauen
+        const newPlayer = {
+            id: 'youth-' + id,
+            name: name,
+            type: 'player',
+            x: 200 + Math.random() * 400,
+            y: 150 + Math.random() * 200,
+            targetX: 200 + Math.random() * 400,
+            targetY: 150 + Math.random() * 200,
+            color: 'var(--neon-green)',
+            number: '?'
+        };
+
+        window.arena.elements.push(newPlayer);
+        if(window.ToniVoice) window.ToniVoice.speak(`${name} ist auf dem Feld.`);
+        window.BriefcaseUI.toggle(); // Schließen zur Ansicht
+    },
+
+    addTrainingTool(type) {
+        if (!window.arena) return;
+        
+        if (type === 'cone') {
+            for(let i=0; i<5; i++) {
+                window.arena.addEquipment('cone', 300 + (i*60), 200);
+            }
+        } else if (type === 'ladder') {
+            window.arena.addEquipment('ladder', 400, 100);
+        }
+        
+        if(window.ToniVoice) window.ToniVoice.speak("Equipment wurde platziert.");
+        window.BriefcaseUI.toggle();
     },
 
     drawFuninoField() {
-        if (!window.arena) {
-            alert("Fehler: Arena-Engine nicht gefunden!");
-            return;
-        }
-
-        // Tore auf dem Feld platzieren (Beispiel-Koordinaten)
-        window.arena.clearEquipment('goal');
+        if (!window.arena) return;
+        window.arena.clearEquipment();
         
-        // Vier Minitore für Funino
         const goals = [
-            {x: 50, y: 100, type: 'mini'}, {x: 50, y: 300, type: 'mini'},
-            {x: 750, y: 100, type: 'mini'}, {x: 750, y: 300, type: 'mini'}
+            {x: 65, y: 120}, {x: 65, y: 380},
+            {x: 735, y: 120}, {x: 735, y: 380}
         ];
 
-        goals.forEach(g => {
-            window.arena.addEquipment('goal', g.x, g.y);
-        });
-
-        alert("Funino-Spielfeld aktiviert! TONI hat die 4 Minitore platziert.");
-        window.BriefcaseUI.toggle(); // Schließt die Tasche, um das Feld zu sehen
+        goals.forEach(g => window.arena.addEquipment('goal', g.x, g.y));
+        
+        if(window.ToniVoice) window.ToniVoice.speak("Funino-Setup mit vier Toren ist bereit.");
+        window.BriefcaseUI.toggle();
     }
 };
