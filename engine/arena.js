@@ -1,14 +1,14 @@
 /**
- * TONI 2.0 - ARENA ENGINE (ELITE PRO PITCH UPDATE)
- * Status: FINALISIERT (FIFA-Cards Bench, Dot-Labels & Equipment-Support)
+ * TONI 2.0 - ARENA ENGINE (RECOVERY & PRO-PITCH UPDATE)
+ * Status: REPARIERT (Linien-Fix, Karten-Lesbarkeit & Funino-Logic)
  */
 window.arena = {
     canvas: null,
     ctx: null,
     elements: [], 
-    equipment: [], // NEU: Speicher für Hütchen, Tore, Leitern
+    equipment: [], 
     selectedElement: null,
-    benchHeight: 140, 
+    benchHeight: 160, // Erhöht für bessere Karten-Ansicht
     isAnimating: false,
 
     formations: {
@@ -39,17 +39,13 @@ window.arena = {
         this.renderLoop();
     },
 
-    // --- EQUIPMENT LOGIK (NEU FÜR JUNIOREN) ---
     addEquipment(type, x, y, options = {}) {
         this.equipment.push({ type, x, y, id: Date.now() + Math.random(), ...options });
     },
 
     clearEquipment(type = null) {
-        if (type) {
-            this.equipment = this.equipment.filter(e => e.type !== type);
-        } else {
-            this.equipment = [];
-        }
+        if (type) this.equipment = this.equipment.filter(e => e.type !== type);
+        else this.equipment = [];
     },
 
     syncFromDatabase() {
@@ -60,40 +56,20 @@ window.arena = {
 
         this.elements = players
             .filter(p => p.assignment !== 'none')
-            .map((p, i) => {
-                let color = 'var(--neon-green)';
-                if (mode === 'training' && p.assignment === 'training') color = '#ccff00';
-                else if (p.team === 'B') color = 'var(--accent-gold)';
-
-                return {
-                    ...p,
-                    type: 'player',
-                    x: p.x || (80 + (i % 8) * 90),
-                    y: p.y || (h - 70),
-                    targetX: p.x || (80 + (i % 8) * 90),
-                    targetY: p.y || (h - 70),
-                    color: color
-                };
-            });
+            .map((p, i) => ({
+                ...p,
+                type: 'player',
+                x: p.x || (80 + (i % 8) * 90),
+                y: p.y || (h - 80),
+                targetX: p.x || (80 + (i % 8) * 90),
+                targetY: p.y || (h - 80),
+                color: (p.team === 'B') ? 'var(--accent-gold)' : 'var(--neon-green)'
+            }));
         
         if(mode === 'match') this.createOpponentTeam();
     },
 
-    createOpponentTeam() {
-        const form = this.formations['4-4-2'];
-        form.forEach((opp, i) => {
-            this.elements.push({
-                id: 'opp-' + i, type: 'opponent', number: i+1,
-                x: this.canvas.width + 50, y: opp.y * this.canvas.height,
-                targetX: opp.x * this.canvas.width, targetY: opp.y * (this.canvas.height - this.benchHeight),
-                color: '#ff3b30', name: 'GEGNER', pos: opp.p
-            });
-        });
-        this.isAnimating = true;
-    },
-
     update() {
-        if (!this.isAnimating) return;
         let moving = false;
         this.elements.forEach(el => {
             const dx = el.targetX - el.x;
@@ -101,9 +77,9 @@ window.arena = {
             if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
                 el.x += dx * 0.1; el.y += dy * 0.1;
                 moving = true;
-            } else { el.x = el.targetX; el.y = el.targetY; }
+            }
         });
-        if (!moving) this.isAnimating = false;
+        this.isAnimating = moving;
     },
 
     render() {
@@ -111,33 +87,35 @@ window.arena = {
         const ctx = this.ctx;
         const w = this.canvas.width;
         const h = this.canvas.height;
+        const fieldH = h - this.benchHeight;
+        const m = 50;
 
+        // Pitch Background
         ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
         
-        const m = 50; 
-        const fieldH = h - this.benchHeight;
-        const fieldW = w - (m * 2);
-        const actualFieldHeight = fieldH - (m * 2);
-        
+        // PRO-LINE MARKINGS
         ctx.strokeStyle = "rgba(57, 255, 20, 0.4)";
         ctx.lineWidth = 2;
+        ctx.strokeRect(m, m, w - (m*2), fieldH - (m*2)); // Border
+        ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke(); // Center Line
+        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 60, 0, Math.PI*2); ctx.stroke(); // Circle
 
-        ctx.strokeRect(m, m, fieldW, actualFieldHeight); 
-        ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke(); 
-        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 60, 0, Math.PI*2); ctx.stroke(); 
+        // Strafräume
+        this.drawBox(ctx, m, fieldH/2, 1); // Links
+        this.drawBox(ctx, w-m, fieldH/2, -1); // Rechts
 
-        // Standard-Tore
-        ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
-        ctx.strokeRect(m-15, (fieldH/2)-45, 15, 90);
-        ctx.strokeRect(w-m, (fieldH/2)-45, 15, 90);
+        // Standard-Tore (Nur wenn kein Funino-Equipment aktiv)
+        if (this.equipment.filter(e => e.type === 'goal').length === 0) {
+            ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
+            ctx.strokeRect(m-15, (fieldH/2)-45, 15, 90);
+            ctx.strokeRect(w-m, (fieldH/2)-45, 15, 90);
+        }
 
-        // --- EQUIPMENT ZEICHNEN ---
-        this.equipment.forEach(item => {
-            this.drawItem(ctx, item);
-        });
+        // Equipment
+        this.equipment.forEach(item => this.drawItem(ctx, item));
 
-        // Bank-Bereich
+        // Bench Area
         ctx.fillStyle = "rgba(0,0,0,0.6)";
         ctx.fillRect(0, fieldH, w, this.benchHeight);
         ctx.strokeStyle = "var(--data-cyan)"; ctx.lineWidth = 2;
@@ -150,55 +128,50 @@ window.arena = {
         if (this.selectedElement) this.drawEntity(ctx, this.selectedElement, fieldH);
     },
 
+    drawBox(ctx, x, centerY, dir) {
+        ctx.strokeRect(x, centerY - 120, 130 * dir, 240); // 16m
+        ctx.strokeRect(x, centerY - 50, 45 * dir, 100);  // 5m
+        ctx.beginPath(); ctx.arc(x + 90 * dir, centerY, 3, 0, Math.PI*2); ctx.fill(); // Spot
+    },
+
     drawItem(ctx, item) {
         ctx.save();
         if (item.type === 'goal') {
             ctx.strokeStyle = "#fff"; ctx.lineWidth = 3;
-            ctx.strokeRect(item.x - 10, item.y - 25, 10, 50); // Minitore
+            ctx.strokeRect(item.x - 10, item.y - 25, 10, 50);
         } else if (item.type === 'cone') {
             ctx.fillStyle = "var(--accent-orange)";
-            ctx.beginPath();
-            ctx.moveTo(item.x, item.y - 10);
-            ctx.lineTo(item.x - 10, item.y + 10);
-            ctx.lineTo(item.x + 10, item.y + 10);
-            ctx.fill();
-        } else if (item.type === 'ladder') {
-            ctx.strokeStyle = "#ccff00"; ctx.lineWidth = 2;
-            for(let i=0; i<6; i++) {
-                ctx.strokeRect(item.x, item.y + (i*20), 40, 20);
-            }
+            ctx.beginPath(); ctx.moveTo(item.x, item.y-10); ctx.lineTo(item.x-10, item.y+10); ctx.lineTo(item.x+10, item.y+10); ctx.fill();
         }
         ctx.restore();
     },
 
     drawEntity(ctx, el, fieldH) {
         const isOnBench = el.y > fieldH - 20;
-        if (isOnBench && el.type !== 'opponent') {
-            this.drawFIFACard(ctx, el);
-        } else {
-            this.drawTacticalDot(ctx, el);
-        }
+        if (isOnBench && el.type !== 'opponent') this.drawFIFACard(ctx, el);
+        else this.drawTacticalDot(ctx, el);
     },
 
     drawFIFACard(ctx, el) {
         ctx.save();
-        const cw = 75, ch = 100, x = el.x-cw/2, y = el.y-ch/2;
+        const cw = 70, ch = 95, x = el.x-cw/2, y = el.y-ch/2;
         ctx.shadowBlur = 10; ctx.shadowColor = el.color;
         ctx.fillStyle = "#111"; ctx.fillRect(x, y, cw, ch);
         ctx.strokeStyle = el.color; ctx.lineWidth = 2; ctx.strokeRect(x, y, cw, ch);
-        ctx.shadowBlur = 0; ctx.fillStyle = "#fff"; ctx.textAlign = "center";
-        ctx.font = "bold 14px Inter"; ctx.fillText(el.rat || 80, x+15, y+20);
-        ctx.font = "bold 10px Inter"; ctx.fillText(el.name ? el.name.split(' ').pop().toUpperCase() : 'PRO', el.x, y+ch-12);
+        ctx.shadowBlur = 0; ctx.fillStyle = "#fff";
+        ctx.font = "bold 16px Orbitron"; 
+        ctx.fillText(el.rat || 80, x+10, y+25); // Rating nach unten verschoben
+        ctx.font = "bold 9px Inter"; ctx.textAlign = "center";
+        ctx.fillText(el.name ? el.name.split(' ').pop().toUpperCase() : 'PRO', el.x, y+ch-10);
         ctx.restore();
     },
 
     drawTacticalDot(ctx, el) {
         ctx.save();
-        const radius = 18;
-        ctx.beginPath(); ctx.arc(el.x, el.y, radius, 0, Math.PI*2);
+        ctx.beginPath(); ctx.arc(el.x, el.y, 18, 0, Math.PI*2);
         ctx.fillStyle = el.color; ctx.fill();
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
-        ctx.fillStyle = "#000"; ctx.font = "bold 14px Inter"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillStyle = "#000"; ctx.font = "bold 13px Inter"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText(el.number || '?', el.x, el.y);
         ctx.restore();
     },
@@ -207,13 +180,15 @@ window.arena = {
         this.canvas.addEventListener('mousedown', (e) => {
             const rect = this.canvas.getBoundingClientRect();
             const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-            this.selectedElement = this.elements.find(el => Math.sqrt((mx-el.x)**2 + (my-el.y)**2) < 45);
+            this.selectedElement = this.elements.find(el => Math.sqrt((mx-el.x)**2 + (my-el.y)**2) < 40);
         });
         this.canvas.addEventListener('mousemove', (e) => {
             if (!this.selectedElement) return;
             const rect = this.canvas.getBoundingClientRect();
             this.selectedElement.x = e.clientX - rect.left;
             this.selectedElement.y = e.clientY - rect.top;
+            this.selectedElement.targetX = this.selectedElement.x;
+            this.selectedElement.targetY = this.selectedElement.y;
         });
         this.canvas.addEventListener('mouseup', () => { this.selectedElement = null; });
     },
