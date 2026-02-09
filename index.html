@@ -66,7 +66,7 @@
 
     <div id="video-intro-overlay">
         <video id="intro-video-element" playsinline webkit-playsinline preload="auto" muted>
-            <source src="Gemini_generated_video_DF1C8BC8.mp4" type="video/mp4">
+            <source src="gemini_generated_video_DF1C8BC8.mp4" type="video/mp4">
             TONI 2.0 INITIALISIERUNG...
         </video>
     </div>
@@ -83,7 +83,6 @@
     </div>
 
     <script>
-        // Vorab-Check für das Video-Element
         const video = document.getElementById('intro-video-element');
         
         function check() {
@@ -104,31 +103,30 @@
             loginUI.style.display = 'none';
             overlay.style.display = 'flex';
             
-            // 1. Ton einschalten (jetzt erlaubt, da User auf 'Entrance' geklickt hat)
+            // 1. Hardware-Beschleunigter Start
             video.muted = false; 
             video.volume = 1.0;
-            
-            // 2. Video von vorn starten
             video.currentTime = 0;
+            
+            // 2. Erzwungener Puffer-Refresh
+            video.load();
 
-            // 3. Erhöhter Safety-Timer (15 Sek) gegen schwarze Bildschirme am Handy
+            // 3. Safety-Timer (15 Sek)
             const safetyLeash = setTimeout(() => {
-                console.log("Safety-Timer triggered: Video hat zu lange geladen.");
                 window.location.href = 'app.html';
             }, 15000);
 
-            // 4. Play-Versuch mit Fehler-Abfang
-            const playPromise = video.play();
-
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    console.log("Video läuft mit Ton.");
-                }).catch(e => {
-                    console.warn("Autoplay-Fehler, versuche Muted-Fallback:", e);
-                    video.muted = true;
-                    video.play();
+            // 4. Play mit Fehler-Handling
+            video.play().then(() => {
+                console.log("TONI Intro aktiv.");
+            }).catch(e => {
+                console.warn("Versuche lautlosen Notstart...");
+                video.muted = true;
+                video.play().catch(() => {
+                    clearTimeout(safetyLeash);
+                    window.location.href = 'app.html';
                 });
-            }
+            });
 
             video.onended = function() {
                 clearTimeout(safetyLeash);
