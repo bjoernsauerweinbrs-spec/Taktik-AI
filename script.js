@@ -1,10 +1,9 @@
 /**
  * TONI 2.0 - MASTER BRIDGE SCRIPT (RECOVERY UPDATE)
- * Status: REPARIERT (CoachInfo Null-Check Fix)
+ * Fokus: Junioren-Routing & CoachInfo Fix
  */
 
 // --- 0. GLOBALE INITIALISIERUNG ---
-// Fix: Verhindert den Absturz, falls der Speicher noch leer ist
 window.coachInfo = JSON.parse(localStorage.getItem('toni_coach_data')) || { name: null, verein: null };
 
 // --- 1. TONI VOICE ENGINE ---
@@ -44,17 +43,20 @@ window.ToniVoice = {
     }
 };
 
-// --- 2. NAVIGATION & ROUTER ---
+// --- 2. NAVIGATION & ROUTER (JUNIOREN-UPDATE) ---
 function openSection(name) {
     console.log("Routing aktiv -> Sektor:", name);
     
+    // Sicherstellen, dass die Aktentasche offen ist
     if (window.BriefcaseUI && !window.BriefcaseUI.isOpen) {
         window.BriefcaseUI.toggle();
     }
 
     setTimeout(() => {
         try {
-            const target = {
+            // Die "Ziele-Map" - Hier habe ich 'junioren' hinzugefügt!
+            const targetMap = {
+                'junioren': window.SektorJunioren,
                 'kabine': window.SektorSporttasche,
                 'analyse': window.SektorAnalyse,
                 'management': window.SektorManagement,
@@ -65,15 +67,18 @@ function openSection(name) {
                 'matchday': window.SektorMatchday,
                 'taktik': window.SektorTaktik,
                 'settings': window.SektorSettings
-            }[name];
+            };
+
+            const target = targetMap[name];
 
             if (target && typeof target.open === 'function') {
                 target.open();
             } else {
-                throw new Error(`Sektor '${name}' nicht bereit.`);
+                throw new Error(`Sektor '${name}' nicht bereit oder Objekt fehlt.`);
             }
         } catch (err) {
             console.error("KRITISCH: Sektor-Ladefehler:", err);
+            alert("Fehler: " + err.message);
         }
     }, 150);
 }
@@ -93,7 +98,6 @@ async function handleCommand(command) {
     toniMsg.style.color = "var(--neon-green)";
     chatBox.appendChild(toniMsg);
 
-    // Initiales Onboarding
     if (!window.coachInfo.name) {
         window.coachInfo.name = command;
         localStorage.setItem('toni_coach_data', JSON.stringify(window.coachInfo));
@@ -150,12 +154,12 @@ async function checkAIStatus() {
         if (response.ok) {
             window.aiOnline = true;
             light.style.background = 'var(--neon-green)';
-            label.innerText = 'ONLINE';
+            if(label) label.innerText = 'ONLINE';
         } else { throw new Error(); }
     } catch (err) {
         window.aiOnline = false;
         light.style.background = '#555';
-        label.innerText = 'OFFLINE';
+        if(label) label.innerText = 'OFFLINE';
     }
 }
 
@@ -174,13 +178,9 @@ window.addEventListener('DOMContentLoaded', () => {
             console.log("Arena wird scharf geschaltet...");
             window.arena.init('main-canvas');
             window.arena.resize();
-            if (typeof window.arena.syncFromDatabase === 'function') {
-                window.arena.syncFromDatabase();
-            }
         }
     }, 800);
 
-    // Sicherer Check auf coachInfo.name
     if (window.coachInfo && !window.coachInfo.name) {
         const chatBox = document.getElementById('chat-box');
         if (chatBox) {
