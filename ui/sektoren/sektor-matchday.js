@@ -1,9 +1,19 @@
 /**
  * TONI 2.0 - SEKTOR MATCHDAY (STABILISIERTE ELITE-EDITION)
- * Fokus: Taktik-Setup, Gegner-Check & Clipping-Fix.
+ * Fokus: Taktik-Setup, Gegner-Check & Dynamische Klopp/Nagelsmann Motivation.
  */
 window.SektorMatchday = {
     isGrassrootsMode: true, 
+
+    // Die "Vollgas" Datenbank für TONIs Kabinenansprachen
+    speechDatabase: [
+        "Ich will heute keine taktischen Roboter sehen! Ich will, dass ihr diesen Platz liebt. Jagt dem Ball hinterher, als wäre er das Letzte, was es heute zu essen gibt! VOLLGAS-FUSSBALL!",
+        "Struktur ist die Basis, aber Leidenschaft gewinnt Schlachten. Sobald sie unsere rote Zone betreten, schnappt die Falle zu. Maximale Kompaktzeit, Jungs. Wir kontrollieren den Raum!",
+        "Mentalitätsmonster-Modus an! Wir lassen sie im Aufbau kommen, aber im Umschaltspiel sind wir tödlich. Zeigt ihnen, dass wir heute jeden Grashalm in diesem Stadion kontrollieren!",
+        "Präzision in jedem Pass, Feuer in jedem Zweikampf. Wir sind physisch und mental bei 100%. Jetzt transformieren wir das Training in absolute Dominanz. Geht raus und holt euch das!",
+        "Wenn wir den Ball verlieren, will ich, dass ihr sie jagt, bis sie vergessen, wie man Fußball spielt. Gegenpressing ist der beste Spielmacher der Welt!",
+        "Männer, taktisch haben wir sie analysiert, aber am Ende entscheidet das Herz. Werft alles rein, was ihr habt. Für den Verein, für das Team, für den Sieg!"
+    ],
 
     open() {
         const content = document.querySelector('.briefcase-window');
@@ -17,17 +27,21 @@ window.SektorMatchday = {
 
         // Taktik-Vorbereitung: Toni stellt das Board im Hintergrund ein
         if (window.arena) {
-            window.arena.setFormation('B', '3-4-3'); // Trainer-Team
-            window.arena.setFormation('A', '4-4-2'); // Toni-Team (Gegner)
-            window.ToniVoice.speak("Matchday-Setup geladen. Ich habe das 3-4-3 gegen mein 4-4-2 auf dem Board vorbereitet.");
+            window.arena.setFormation('B', '3-4-3'); // Trainer-Team (Nagelsmann-Style)
+            window.arena.setFormation('A', '4-4-2'); // Toni-Team (Gegner-Pressing)
+            
+            const initialText = "Matchday-Setup geladen. Ich habe das 3-4-3 gegen mein 4-4-2 auf dem Board vorbereitet.";
+            if(window.ToniVoice) window.ToniVoice.speak(initialText);
         }
     },
 
     render() {
         const content = document.querySelector('.briefcase-window');
-        // Sicherstellung, dass Daten existieren
         const plan = (window.Database && window.Database.matchPlan) ? window.Database.matchPlan : { opponentInfo: "Keine Daten." };
         const coach = window.coachInfo || { name: "Coach", verein: "Dein Verein" };
+
+        // Zufälligen Start-Spruch wählen
+        const startSpeech = this.speechDatabase[Math.floor(Math.random() * this.speechDatabase.length)];
 
         content.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom: 2px solid var(--accent-orange); padding-bottom: 20px;">
@@ -46,7 +60,7 @@ window.SektorMatchday = {
                 </div>
             </div>
 
-            <div class="management-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <div class="management-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
                 
                 <div style="display:flex; flex-direction:column; gap:20px;">
                     <div style="background: rgba(255,106,0,0.05); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,106,0,0.2);">
@@ -74,11 +88,11 @@ window.SektorMatchday = {
 
                 <div style="display:flex; flex-direction:column; gap:20px;">
                     <div style="background: #000; padding: 25px; border-radius: 15px; border: 1px solid var(--neon-green); position:relative; box-shadow: 0 0 20px rgba(57,255,20,0.1);">
-                        <h3 style="color:var(--neon-green); font-size: 0.9rem; margin-bottom:10px;"><i class="fas fa-comment-dots"></i> TONI'S KABINEN-ANSAGE</h3>
+                        <h3 style="color:var(--neon-green); font-size: 0.9rem; margin-bottom:10px;"><i class="fas fa-comment-dots"></i> TONIS MOTIVATIONS-ZENTRALE</h3>
                         <p id="toni-motivation-speech" style="font-style:italic; font-size: 1rem; color:#fff; line-height:1.6; padding: 10px 0;">
-                            "Coach ${coach.name}, die Statistiken sprechen für uns. Gehen wir raus und dominieren das Zentrum!"
+                            "${startSpeech}"
                         </p>
-                        <button class="pro-btn-gold" style="margin-top:10px; background:var(--neon-green); color:#000; width:100%;" onclick="window.SektorMatchday.getNewSpeech()">NEUE ANSPRACHE GENERIEREN</button>
+                        <button class="pro-btn-gold" style="margin-top:10px; background:var(--neon-green); color:#000; width:100%;" onclick="window.SektorMatchday.getNewSpeech()">ANSPRACHE VARIIEREN (CLOPO-MODE)</button>
                     </div>
 
                     <div id="logistics-box" style="display: ${this.isGrassrootsMode ? 'block' : 'none'}; background: rgba(255,255,255,0.02); padding: 25px; border-radius: 15px; border: 1px solid #333;">
@@ -134,28 +148,22 @@ window.SektorMatchday = {
 
     async scanOpponent() {
         const box = document.getElementById('opponent-info-box');
-        box.innerHTML = `<span class="thinking">Toni analysiert Scouting-Berichte...</span>`;
+        box.innerHTML = `<span class="thinking">Toni scannt Scouting-Daten...</span>`;
         
         setTimeout(() => {
             box.innerHTML = `
                 <b style="color:var(--accent-gold);">KI-ERGEBNIS:</b><br>
-                - Gegner nutzt 4-4-2 mit hohen Außenverteidigern.<br>
-                - Schwachstelle: Raum hinter den Außen bei Ballverlust.<br>
-                - Strategie: Schnelle Diagonalbälle in die Schnittstellen.
+                - Gegner nutzt 4-4-2 mit Fokus auf kompaktes Zentrum.<br>
+                - Schwachstelle: Schnittstellenbälle bei schnellem Umschaltspiel.<br>
+                - Strategie: Unsere 3er-Kette fächert breit auf, um das Pressing zu ziehen.
             `;
-            window.ToniVoice.speak("Analyse abgeschlossen. Der Gegner ist anfällig für Konter über die Flügel.");
+            if(window.ToniVoice) window.ToniVoice.speak("Analyse abgeschlossen. Coach, wir sollten die Tiefe suchen.");
         }, 2000);
     },
 
     getNewSpeech() {
-        const coach = window.coachInfo || { name: "Coach" };
-        const quotes = [
-            `Männer, hört auf Coach ${coach.name}. Heute wird Geschichte geschrieben!`,
-            "Gras fressen, Punkte holen, Kabinenfest feiern. Los jetzt!",
-            "Einer für alle, alle für den Verein! Geht raus und zeigt es ihnen."
-        ];
-        const random = quotes[Math.floor(Math.random() * quotes.length)];
+        const random = this.speechDatabase[Math.floor(Math.random() * this.speechDatabase.length)];
         document.getElementById('toni-motivation-speech').innerText = `"${random}"`;
-        window.ToniVoice.speak(random);
+        if(window.ToniVoice) window.ToniVoice.speak(random);
     }
 };
