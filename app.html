@@ -154,8 +154,33 @@
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
                 if(chat) chat.innerHTML += `<p style="color:var(--neon-green); margin:0;"><b>TONI:</b> System bereit. Willkommen zurück, Coach.</p>`;
-            }, 1000);
+                
+                // Automatischer System-Check nach Start
+                runToniSystemCheck();
+            }, 1500);
         };
+
+        function runToniSystemCheck() {
+            console.log("--- TONI 2.0 SYSTEM CHECK ---");
+            const sectors = [
+                { name: "Junioren", obj: "SektorJunioren" },
+                { name: "Matchday", obj: "SektorMatchday" },
+                { name: "Kabine", obj: "SektorSporttasche" },
+                { name: "Analyse", obj: "SektorAnalyse" }
+            ];
+            let errors = [];
+            sectors.forEach(s => {
+                if (!window[s.obj]) {
+                    console.error(`❌ FEHLER: ${s.name} nicht geladen!`);
+                    errors.push(s.name);
+                } else {
+                    console.log(`✅ ${s.name} ist bereit.`);
+                }
+            });
+            if(errors.length > 0) {
+                alert("SYSTEM-WARNUNG: " + errors.join(", ") + " fehlen! Check die Konsole (F12).");
+            }
+        }
     </script>
 </body>
 </html>
