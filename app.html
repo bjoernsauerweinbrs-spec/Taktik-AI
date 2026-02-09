@@ -15,9 +15,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
 
     <style>
-        /* Kurzer Fix für das Aktentaschen-Modal, damit es sauber über der Arena liegt */
         .briefcase-overlay {
-            display: none; /* Wird via JS gesteuert */
+            display: none; 
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
@@ -39,19 +38,25 @@
             box-shadow: 0 0 50px rgba(57, 255, 20, 0.1);
         }
         .hidden { display: none !important; }
+        
+        /* Pulse Animation für den Live-Status */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
     <script>
-        // Sicherheits-Check: Nur mit gültigem Login
         if(sessionStorage.getItem('toni_auth') !== 'true') window.location.href = 'index.html';
     </script>
 
     <div class="pro-layout-container">
         
         <nav class="sidebar-minimal">
-            <div class="control-unit" onclick="window.BriefcaseUI.toggle()" title="Zentrale öffnen">
+            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggle()" title="Zentrale öffnen">
                 <i class="fas fa-briefcase"></i>
                 <span>TASCHE</span>
             </div>
@@ -61,12 +66,12 @@
                 <span style="font-size:10px;">ONLINE</span>
             </div>
 
-            <div class="control-unit" id="mic-trigger" onclick="window.BriefcaseUI.toggleVoice()" title="Mit Toni sprechen">
+            <div class="control-unit" id="mic-trigger" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggleVoice()" title="Mit Toni sprechen">
                 <i class="fas fa-microphone" id="main-mic-btn"></i>
                 <span>TONI</span>
             </div>
 
-            <div class="control-unit" onclick="window.BriefcaseUI.switchSektor('system')" title="Setup">
+            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.switchSektor('settings')" title="Setup">
                 <i class="fas fa-sliders-h"></i>
                 <span>SETUP</span>
             </div>
@@ -99,8 +104,7 @@
             </div>
             
             <div class="chat-container" style="display: flex; flex-direction: column; height: calc(100% - 50px);">
-                <div id="chat-box" style="flex:1; overflow-y:auto; padding:15px; font-size: 0.85rem; color: #ccc;">
-                    </div>
+                <div id="chat-box" style="flex:1; overflow-y:auto; padding:15px; font-size: 0.85rem; color: #ccc;"></div>
                 <div class="chat-input-area" style="padding:15px; background: rgba(13,20,33,0.98); border-top: 1px solid rgba(57, 255, 20, 0.2);">
                     <input type="text" id="command-input" class="pro-textarea" placeholder="Befehl an Toni senden..." style="width:100%; background:transparent; border:none; color:var(--neon-green); outline:none;">
                 </div>
@@ -111,34 +115,43 @@
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 id="sector-title" style="color: #fff; font-size: 1rem; margin: 0;">ZENTRALE AKTENTASCHE</h2>
-                <i class="fas fa-times" onclick="window.BriefcaseUI.toggle()" style="cursor: pointer; color: #666;"></i>
+                <h2 id="sector-title" style="color: #fff; font-size: 1rem; margin: 0; font-family: 'Orbitron';">ZENTRALE AKTENTASCHE</h2>
+                <i class="fas fa-times" onclick="window.BriefcaseUI.toggle()" style="cursor: pointer; color: #666; font-size: 1.5rem;"></i>
             </div>
-            <div id="briefcase-nav"></div> <div id="briefcase-content" class="hidden">
-                <div id="active-content"></div> </div>
+            <div id="briefcase-nav"></div> 
+            <div id="briefcase-content" class="hidden">
+                <div id="active-content"></div> 
+            </div>
         </div>
     </div>
 
     <script src="logic/database.js"></script>
     <script src="engine/arena.js"></script>
-    
     <script src="ui/aktentasche-ui.js"></script>
     
     <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
+    <script src="ui/sektoren/sektor-stadion.js"></script>
+    <script src="ui/sektoren/sektor-settings.js"></script>
+    <script src="ui/sektoren/sektor-management.js"></script>
+    <script src="ui/sektoren/sektor-video.js"></script>
+    <script src="ui/sektoren/sektor-matchday.js"></script>
+    <script src="ui/sektoren/sektor-training.js"></script>
+    <script src="ui/sektoren/sektor-material.js"></script>
+    <script src="ui/sektoren/sektor-taktik.js"></script>
+    
     <script src="script.js"></script>
 
     <script>
-        // Initialisierung nach dem Laden
         window.onload = () => {
+            console.log("TONI 2.0 Dashboard lädt...");
             if(window.arena) window.arena.init('main-canvas');
             if(window.BriefcaseUI) window.BriefcaseUI.init();
             
-            // Toni Begrüßung nach dem Video-Intro
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
-                chat.innerHTML += `<p style="color:var(--neon-green)"><b>TONI:</b> System bereit. Willkommen zurück, Coach.</p>`;
-            }, 2000);
+                if(chat) chat.innerHTML += `<p style="color:var(--neon-green); margin:0;"><b>TONI:</b> System bereit. Willkommen zurück, Coach.</p>`;
+            }, 1000);
         };
     </script>
 </body>
