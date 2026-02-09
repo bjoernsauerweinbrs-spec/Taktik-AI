@@ -1,7 +1,7 @@
 /**
- * TONI 2.0 - ARENA ENGINE (RECOVERY 14:00 STAND)
- * Status: UPDATE FINALISIERT
- * Fokus: Modus-Sync, Transformation & Layering-Fix
+ * TONI 2.0 - ARENA ENGINE (ELITE PRO PITCH UPDATE)
+ * Status: FINALISIERT
+ * Fokus: Profi-Markierungen & Transformation & Layering-Fix
  */
 window.arena = {
     canvas: null,
@@ -41,7 +41,6 @@ window.arena = {
 
     syncFromDatabase() {
         if(!this.canvas || !window.Database) return;
-        
         const players = window.Database.players || [];
         const mode = window.Database.activeMode || 'training';
         const h = this.canvas.height;
@@ -89,9 +88,7 @@ window.arena = {
             if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
                 el.x += dx * 0.1; el.y += dy * 0.1;
                 moving = true;
-            } else {
-                el.x = el.targetX; el.y = el.targetY;
-            }
+            } else { el.x = el.targetX; el.y = el.targetY; }
         });
         if (!moving) this.isAnimating = false;
     },
@@ -103,33 +100,54 @@ window.arena = {
         const h = this.canvas.height;
         const mode = window.Database.activeMode;
 
-        // 1. Spielfeld
+        // 1. Hintergrund & Rasen
         ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
         
-        const m = 50;
+        const m = 50; 
         const fieldH = h - this.benchHeight;
-        ctx.strokeStyle = "rgba(57, 255, 20, 0.3)";
-        ctx.strokeRect(m, m, w - m*2, fieldH - m*2);
-        ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke();
-        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 60, 0, Math.PI*2); ctx.stroke();
+        const fieldW = w - (m * 2);
+        const actualFieldHeight = fieldH - (m * 2);
+        
+        ctx.strokeStyle = "rgba(57, 255, 20, 0.4)";
+        ctx.lineWidth = 2;
+
+        // --- PROFIMARKIERUNGEN ---
+        ctx.strokeRect(m, m, fieldW, actualFieldHeight); // Außenlinie
+        ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke(); // Mitte
+        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 60, 0, Math.PI*2); ctx.stroke(); // Kreis
+        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 2, 0, Math.PI*2); ctx.fill(); // Punkt Mitte
+
+        // Strafräume
+        const box16W = 120, box16H = 240, box5W = 40, box5H = 100, penDist = 80;
+        // Links
+        ctx.strokeRect(m, (fieldH/2)-(box16H/2), box16W, box16H);
+        ctx.strokeRect(m, (fieldH/2)-(box5H/2), box5W, box5H);
+        ctx.beginPath(); ctx.arc(m+penDist, fieldH/2, 3, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(m+penDist, fieldH/2, 60, -Math.PI/2.5, Math.PI/2.5); ctx.stroke();
+        // Rechts
+        ctx.strokeRect(w-m-box16W, (fieldH/2)-(box16H/2), box16W, box16H);
+        ctx.strokeRect(w-m-box5W, (fieldH/2)-(box5H/2), box5W, box5H);
+        ctx.beginPath(); ctx.arc(w-m-penDist, fieldH/2, 3, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(w-m-penDist, fieldH/2, 60, Math.PI/1.6, -Math.PI/1.6); ctx.stroke();
+
+        // Tore
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
+        ctx.strokeRect(m-15, (fieldH/2)-45, 15, 90);
+        ctx.strokeRect(w-m, (fieldH/2)-45, 15, 90);
 
         // 2. Bank-Bereich
         ctx.fillStyle = "rgba(0,0,0,0.6)";
         ctx.fillRect(0, fieldH, w, this.benchHeight);
-        ctx.strokeStyle = "var(--data-cyan)";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "var(--data-cyan)"; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(0, fieldH); ctx.lineTo(w, fieldH); ctx.stroke();
 
-        // 3. Spieler (Layering-Fix: Selected am Ende zeichnen)
+        // 3. Spieler (Layering-Fix)
         this.elements.forEach(el => {
             if (el === this.selectedElement) return;
             this.drawEntity(ctx, el, fieldH, mode);
         });
-
-        if (this.selectedElement) {
-            this.drawEntity(ctx, this.selectedElement, fieldH, mode);
-        }
+        if (this.selectedElement) this.drawEntity(ctx, this.selectedElement, fieldH, mode);
     },
 
     drawEntity(ctx, el, fieldH, mode) {
@@ -143,28 +161,17 @@ window.arena = {
 
     drawFIFACard(ctx, el) {
         ctx.save();
-        const cw = 75; const ch = 100;
-        const x = el.x - cw/2; const y = el.y - ch/2;
+        const cw = 75, ch = 100, x = el.x-cw/2, y = el.y-ch/2;
         ctx.shadowBlur = 10; ctx.shadowColor = el.color;
         ctx.fillStyle = "#111"; ctx.fillRect(x, y, cw, ch);
         ctx.strokeStyle = el.color; ctx.lineWidth = 2; ctx.strokeRect(x, y, cw, ch);
-        ctx.shadowBlur = 0;
-        
-        // Rating & Name
-        ctx.fillStyle = "#fff"; ctx.textAlign = "center";
-        ctx.font = "bold 14px Inter"; ctx.fillText(el.rat || 80, x + 15, y + 20);
-        ctx.font = "bold 10px Inter"; ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, y + ch - 12);
-        
-        // Bild-Logik (Prüft ob Image-Daten existieren)
+        ctx.shadowBlur = 0; ctx.fillStyle = "#fff"; ctx.textAlign = "center";
+        ctx.font = "bold 14px Inter"; ctx.fillText(el.rat || 80, x+15, y+20);
+        ctx.font = "bold 10px Inter"; ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, y+ch-12);
         if(el.img) {
-            try {
-                const img = new Image();
-                img.src = el.img;
-                ctx.drawImage(img, x + 5, y + 25, cw - 10, ch - 50);
-            } catch(e) { /* Fallback falls Bild korrupt */ }
+            try { const img = new Image(); img.src = el.img; ctx.drawImage(img, x+5, y+25, cw-10, ch-50); } catch(e){}
         } else {
-            ctx.fillStyle = "rgba(255,255,255,0.1)";
-            ctx.font = "20px 'Font Awesome 6 Free'"; ctx.fillText("\uf2f6", el.x, y + ch/2);
+            ctx.fillStyle = "rgba(255,255,255,0.1)"; ctx.font = "20px 'Font Awesome 6 Free'"; ctx.fillText("\uf2f6", el.x, y+ch/2);
         }
         ctx.restore();
     },
@@ -176,15 +183,14 @@ window.arena = {
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
         ctx.fillStyle = "#000"; ctx.font = "bold 14px Inter"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText(el.number, el.x, el.y);
-        ctx.fillStyle = "#fff"; ctx.font = "bold 10px Inter"; ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, el.y + 30);
+        ctx.fillStyle = "#fff"; ctx.font = "bold 10px Inter"; ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, el.y+30);
         ctx.restore();
     },
 
     setupEventListeners() {
         this.canvas.addEventListener('mousedown', (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left; const my = e.clientY - rect.top;
-            // Radius auf 40 erhöht für besseres Greifen der Karten
+            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
             this.selectedElement = this.elements.find(el => Math.sqrt((mx-el.x)**2 + (my-el.y)**2) < 45);
         });
         this.canvas.addEventListener('mousemove', (e) => {
@@ -205,10 +211,9 @@ window.arena = {
     },
 
     resize() {
-        const container = document.getElementById('stage-container');
-        if(!container) return;
-        this.canvas.width = container.clientWidth;
-        this.canvas.height = container.clientHeight;
+        const c = document.getElementById('stage-container');
+        if(!c) return;
+        this.canvas.width = c.clientWidth; this.canvas.height = c.clientHeight;
     },
 
     renderLoop() { this.update(); this.render(); requestAnimationFrame(() => this.renderLoop()); }
