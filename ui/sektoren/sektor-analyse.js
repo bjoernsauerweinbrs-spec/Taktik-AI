@@ -1,14 +1,16 @@
 /**
  * TONI 2.0 - SEKTOR ANALYSE (ELITE PERFORMANCE HUB)
- * Fokus: Bio-Metrische Daten, Manuelle Eingabe & Proaktive Warn-Logik (Smart-Alerts).
+ * Status: FINALISIERT (Smart-Alerts & Diagnostik-Editor)
  */
 window.SektorAnalyse = {
     selectedPlayerId: null,
 
     open() {
+        console.log("Analyse-Zentrum wird initialisiert...");
         const title = document.getElementById('sector-title');
         if(title) title.innerText = "PERFORMANCE ANALYSE-ZENTRUM";
         
+        // Initial den ersten verfügbaren Spieler wählen
         if (!this.selectedPlayerId && window.Database?.players?.length > 0) {
             this.selectedPlayerId = window.Database.players[0].id;
         }
@@ -16,7 +18,9 @@ window.SektorAnalyse = {
         this.render();
     },
 
-    // Die "Gehirn-Logik" für die Warnungen
+    /**
+     * KI-Logik: Prüft biometrische Schwellenwerte
+     */
     getAlerts(player) {
         const alerts = [];
         const fat = parseFloat(player.fat) || 0;
@@ -24,7 +28,7 @@ window.SektorAnalyse = {
         const hrRest = parseFloat(player.hrRest) || 0;
 
         if (fat > 13.5) alerts.push({ type: 'danger', msg: `KÖRPERFETT-ALARM: ${fat}% liegt über dem Profi-Limit (max 13.5%).` });
-        if (sleep < 75) alerts.push({ type: 'warning', msg: `REGENERATIONS-MANGEL: Schlaf-Index (${sleep}) kritisch. Verletzungsgefahr erhöht!` });
+        if (sleep < 75) alerts.push({ type: 'warning', msg: `REGENERATIONS-MANGEL: Schlaf-Index (${sleep}) kritisch. Verletzungsgefahr!` });
         if (hrRest > 60) alerts.push({ type: 'warning', msg: `PULS-ANOMALIE: Ruhepuls (${hrRest}) erhöht. Mögliche Überlastung.` });
         
         return alerts;
@@ -46,7 +50,7 @@ window.SektorAnalyse = {
                         return `
                         <div onclick="window.SektorAnalyse.selectPlayer('${p.id}')" 
                              style="padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; border: 1px solid ${this.selectedPlayerId === p.id ? (hasDanger ? 'var(--status-error)' : 'var(--neon-green)') : '#222'}; background: ${this.selectedPlayerId === p.id ? 'rgba(57,255,20,0.1)' : 'transparent'}; transition: 0.3s;">
-                            <div style="font-weight: bold; font-size: 0.85rem;">${p.name}</div>
+                            <div style="font-weight: bold; font-size: 0.85rem; color:#fff;">${p.name}</div>
                             <div style="font-size: 0.65rem; color: ${hasDanger ? 'var(--status-error)' : '#888'};">
                                 ${hasDanger ? '<i class="fas fa-exclamation-triangle"></i> ANOMALIE' : 'Bereitschaft: <span style="color:var(--neon-green)">Optimal</span>'}
                             </div>
@@ -65,12 +69,12 @@ window.SektorAnalyse = {
 
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px;">
                         <div>
-                            <h2 style="margin:0; font-size: 1.5rem; color: #fff; text-transform: uppercase;">${player.name}</h2>
+                            <h2 style="margin:0; font-size: 1.5rem; color: #fff; text-transform: uppercase; font-family:'Orbitron';">${player.name}</h2>
                             <span style="color: var(--neon-green); font-size: 0.7rem; letter-spacing: 2px;">VITAL-DIAGNOSTIK SESSION: 2026</span>
                         </div>
                         <div style="display:flex; gap:10px;">
                             <button class="pro-btn-gold" onclick="window.SektorAnalyse.openDataEditor()" style="font-size:0.7rem;">
-                                <i class="fas fa-edit"></i> DIAGNOSE-DATEN EINPFLEGEN
+                                <i class="fas fa-edit"></i> DATEN EINPFLEGEN
                             </button>
                             <button class="tactic-btn" onclick="window.SektorAnalyse.syncWearable()" style="font-size:0.7rem;">
                                 <i class="fas fa-sync"></i> SYNC WEARABLE
@@ -79,9 +83,8 @@ window.SektorAnalyse = {
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        
                         <div style="background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 15px; padding: 20px;">
-                            <h3 style="font-size: 0.8rem; color: var(--accent-orange); margin-bottom: 15px;"><i class="fas fa-weight"></i> BODY COMPOSITION (WAAGE)</h3>
+                            <h3 style="font-size: 0.8rem; color: var(--accent-orange); margin-bottom: 15px;"><i class="fas fa-weight"></i> BODY COMPOSITION</h3>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 ${this.renderStatCard("KÖRPERFETT", (player.fat || "11.2") + " %", (parseFloat(player.fat) > 13.5 ? "KRITISCH" : "NIEDRIG"), (parseFloat(player.fat) > 13.5 ? "var(--status-error)" : "var(--neon-green)"))}
                                 ${this.renderStatCard("MUSKELMASSE", (player.muscle || "44.8") + " kg", "OPTIMAL", "var(--neon-green)")}
@@ -91,11 +94,11 @@ window.SektorAnalyse = {
                         </div>
 
                         <div style="background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 15px; padding: 20px;">
-                            <h3 style="font-size: 0.8rem; color: var(--data-cyan); margin-bottom: 15px;"><i class="fas fa-stopwatch-20"></i> PERFORMANCE (WEARABLE)</h3>
+                            <h3 style="font-size: 0.8rem; color: var(--data-cyan); margin-bottom: 15px;"><i class="fas fa-stopwatch-20"></i> PERFORMANCE</h3>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 ${this.renderStatCard("VO2 MAX", (player.vo2 || "62") + " ml/kg", "PROFI", "var(--accent-gold)")}
                                 ${this.renderStatCard("HRV (RECOVERY)", (player.hrv || "88") + " ms", "ERHOLT", "var(--neon-green)")}
-                                ${this.renderStatCard("SCHLAF-INDEX", (player.sleep || "92") + "/100", (parseFloat(player.sleep) < 75 ? "MANGEL" : "DEEP"), (parseFloat(player.sleep) < 75 ? "var(--status-error)" : "var(--data-cyan)"))}
+                                ${this.renderStatCard("SCHLAF-INDEX", (player.sleep || "92") + "/100", (parseFloat(player.sleep) < 75 ? "MANGEL" : "ERHOLT"), (parseFloat(player.sleep) < 75 ? "var(--status-error)" : "var(--data-cyan)"))}
                                 ${this.renderStatCard("PULS (RUHE)", (player.hrRest || "48") + " BPM", (parseFloat(player.hrRest) > 60 ? "ERHÖHT" : "ATHLET"), (parseFloat(player.hrRest) > 60 ? "var(--accent-orange)" : "var(--neon-green)"))}
                             </div>
                         </div>
@@ -126,8 +129,7 @@ window.SektorAnalyse = {
     },
 
     openDataEditor() {
-        const players = window.Database?.players || [];
-        const player = players.find(p => p.id === this.selectedPlayerId);
+        const player = window.Database.players.find(p => p.id === this.selectedPlayerId);
         if(!player) return;
 
         const overlay = document.createElement('div');
@@ -163,6 +165,7 @@ window.SektorAnalyse = {
             player.vo2 = document.getElementById('inp-vo2').value;
             player.hrRest = document.getElementById('inp-hr').value;
             player.sleep = document.getElementById('inp-sleep').value;
+
             if(window.Database.save) window.Database.save();
             document.getElementById('diagnose-editor-overlay').remove();
             this.render();
@@ -170,7 +173,7 @@ window.SektorAnalyse = {
             const alerts = this.getAlerts(player);
             if(window.ToniVoice) {
                 if(alerts.length > 0) window.ToniVoice.speak("Daten gespeichert. Achtung Coach, kritische Bio-Werte erkannt!");
-                else window.ToniVoice.speak("Daten für " + player.name + " erfolgreich aktualisiert.");
+                else window.ToniVoice.speak("Daten erfolgreich aktualisiert.");
             }
         }
     },
