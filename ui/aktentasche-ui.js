@@ -1,20 +1,35 @@
 /**
  * TONI 2.0 - AKTENTASCHE UI (ELITE RECOVERY)
- * Fix: Alle Sektoren verknüpft, Clipping-Schutz & stabile Navigation.
+ * Status: FINALISIERT & SYNCHRONISIERT
+ * Fix: ID-Matching mit app.html (briefcase-overlay) & Routing-Schutz.
  */
 window.BriefcaseUI = {
     isOpen: false,
 
+    init() {
+        console.log("Briefcase UI System initialisiert.");
+        // Falls beim Laden noch Reste im Modal sind, säubern wir es
+        const content = document.getElementById('active-content');
+        if(content) content.innerHTML = '';
+    },
+
     toggle() {
-        const modal = document.getElementById('briefcase-modal');
-        if (!modal) return;
+        // FIX: Wir greifen auf die ID aus der app.html zu (briefcase-overlay)
+        const overlay = document.getElementById('briefcase-overlay');
+        if (!overlay) {
+            console.error("Fehler: briefcase-overlay nicht in app.html gefunden!");
+            return;
+        }
+
         this.isOpen = !this.isOpen;
         
-        modal.style.display = this.isOpen ? 'flex' : 'none';
-        modal.style.zIndex = "100000"; 
-
         if (this.isOpen) {
+            overlay.style.display = 'flex';
+            overlay.classList.remove('hidden');
             this.renderMainGrid();
+        } else {
+            overlay.style.display = 'none';
+            overlay.classList.add('hidden');
         }
     },
 
@@ -22,30 +37,35 @@ window.BriefcaseUI = {
      * Haupt-Navigator (3x3 Grid)
      */
     renderMainGrid() {
-        const content = document.querySelector('.briefcase-window');
-        if (!content) return;
+        // Wir nutzen den Container innerhalb des Windows für das Grid
+        const windowBody = document.querySelector('.briefcase-window');
+        if (!windowBody) return;
 
-        // CSS Fix: Verhindert das Abschneiden der Karten und sorgt für Scrollbarkeit
-        content.style.overflowY = "auto";
-        content.style.maxHeight = "90vh";
-        content.style.paddingBottom = "50px"; 
+        // Clipping-Schutz & Scrollbarkeit für Mobile/MacBook
+        windowBody.style.overflowY = "auto";
+        windowBody.style.paddingBottom = "50px"; 
 
-        content.innerHTML = `
-            <div class="kabine-header" style="text-align:center; margin-bottom: 30px;">
-                <h2 style="color: var(--neon-green); letter-spacing: 5px; text-transform: uppercase; margin-bottom:5px;">ZENTRALE</h2>
-                <p style="color: #666; font-size: 0.7rem; letter-spacing: 2px;">STRATEGIC HUB & UNIT CONTROL</p>
-                <hr style="border: 0; border-top: 1px solid rgba(57, 255, 20, 0.2); margin-top: 15px; width: 60%; margin-left: auto; margin-right: auto;">
+        // Titel und Grid rendern
+        windowBody.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <div>
+                    <h2 style="color: var(--neon-green); letter-spacing: 5px; text-transform: uppercase; margin:0; font-family: 'Orbitron'; font-size: 1.2rem;">ZENTRALE</h2>
+                    <p style="color: #666; font-size: 0.6rem; letter-spacing: 2px; margin: 5px 0 0 0;">STRATEGIC HUB & UNIT CONTROL</p>
+                </div>
+                <i class="fas fa-times" onclick="window.BriefcaseUI.toggle()" style="cursor: pointer; color: #666; font-size: 1.5rem;"></i>
             </div>
             
-            <div class="management-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+            <hr style="border: 0; border-top: 1px solid rgba(57, 255, 20, 0.2); margin-bottom: 30px;">
+
+            <div class="management-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                 <div class="mgmt-card" onclick="openSection('kabine')">
                     <div class="card-header"><i class="fas fa-users"></i> KABINE</div>
                     <p>Kader & Spielerprofile</p>
                 </div>
 
                 <div class="mgmt-card" onclick="openSection('analyse')">
-                    <div class="card-header"><i class="fas fa-heartbeat pulse-anim"></i> ANALYSE</div>
-                    <p>Vital-Check & Körperfett</p>
+                    <div class="card-header"><i class="fas fa-heartbeat"></i> ANALYSE</div>
+                    <p>Vital-Check & Performance</p>
                 </div>
 
                 <div class="mgmt-card" onclick="openSection('management')">
@@ -84,10 +104,15 @@ window.BriefcaseUI = {
                 </div>
             </div>
             
-            <div style="text-align: center; margin-top: 40px; padding-bottom: 20px;">
-                <button class="pro-btn-gold" style="width: 250px; padding: 15px; border-radius: 30px;" onclick="window.BriefcaseUI.toggle()">ARENA BETRETEN</button>
+            <div style="text-align: center; margin-top: 40px;">
+                <button class="pro-btn-gold" style="padding: 15px 40px; border-radius: 30px; cursor:pointer;" onclick="window.BriefcaseUI.toggle()">ZURÜCK ZUR ARENA</button>
             </div>
         `;
+    },
+
+    toggleVoice() {
+        console.log("Sprachsteuerung aktiviert...");
+        // Hier kommt später die Toni-Voice Logik rein
     }
 };
 
@@ -95,18 +120,25 @@ window.BriefcaseUI = {
  * Globaler Router für die Aktentasche
  */
 window.openSection = function(section) {
-    console.log("Öffne Sektor:", section);
-    switch(section) {
-        case 'kabine': window.SektorSporttasche.open(); break;
-        case 'analyse': window.SektorAnalyse.open(); break;
-        case 'management': window.SektorManagement.open(); break;
-        case 'stadion': window.SektorStadion.open(); break;
-        case 'training': window.SektorTraining.open(); break;
-        case 'material': window.SektorMaterial.open(); break;
-        case 'video': window.SektorVideo.open(); break;
-        case 'matchday': window.SektorMatchday.open(); break;
-        case 'taktik': window.SektorTaktik.open(); break;
-        case 'settings': window.SektorSettings.open(); break;
-        default: console.warn("Sektor nicht gefunden:", section);
+    console.log("Routing nach:", section);
+    
+    // Kleiner Schutz, falls ein Sektor-Skript noch nicht geladen wurde
+    try {
+        switch(section) {
+            case 'kabine': if(window.SektorSporttasche) window.SektorSporttasche.open(); break;
+            case 'analyse': if(window.SektorAnalyse) window.SektorAnalyse.open(); break;
+            case 'management': if(window.SektorManagement) window.SektorManagement.open(); break;
+            case 'stadion': if(window.SektorStadion) window.SektorStadion.open(); break;
+            case 'training': if(window.SektorTraining) window.SektorTraining.open(); break;
+            case 'material': if(window.SektorMaterial) window.SektorMaterial.open(); break;
+            case 'video': if(window.SektorVideo) window.SektorVideo.open(); break;
+            case 'matchday': if(window.SektorMatchday) window.SektorMatchday.open(); break;
+            case 'taktik': if(window.SektorTaktik) window.SektorTaktik.open(); break;
+            case 'settings': if(window.SektorSettings) window.SektorSettings.open(); break;
+            default: console.warn("Sektor unbekannt:", section);
+        }
+    } catch (e) {
+        alert("Sektor " + section + " wird noch geladen oder Datei fehlt.");
+        console.error(e);
     }
 };
