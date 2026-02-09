@@ -1,20 +1,17 @@
 /**
  * TONI 2.0 - AKTENTASCHE UI (ELITE RECOVERY)
- * Status: FINALISIERT & SYNCHRONISIERT
- * Fix: ID-Matching mit app.html (briefcase-overlay) & Routing-Schutz.
+ * Status: FINALISIERT & JUNIOREN-MODUL INTEGRIERT
  */
 window.BriefcaseUI = {
     isOpen: false,
 
     init() {
         console.log("Briefcase UI System initialisiert.");
-        // Falls beim Laden noch Reste im Modal sind, säubern wir es
         const content = document.getElementById('active-content');
         if(content) content.innerHTML = '';
     },
 
     toggle() {
-        // FIX: Wir greifen auf die ID aus der app.html zu (briefcase-overlay)
         const overlay = document.getElementById('briefcase-overlay');
         if (!overlay) {
             console.error("Fehler: briefcase-overlay nicht in app.html gefunden!");
@@ -34,18 +31,15 @@ window.BriefcaseUI = {
     },
 
     /**
-     * Haupt-Navigator (3x3 Grid)
+     * Haupt-Navigator (Erweitert um Junioren)
      */
     renderMainGrid() {
-        // Wir nutzen den Container innerhalb des Windows für das Grid
         const windowBody = document.querySelector('.briefcase-window');
         if (!windowBody) return;
 
-        // Clipping-Schutz & Scrollbarkeit für Mobile/MacBook
         windowBody.style.overflowY = "auto";
         windowBody.style.paddingBottom = "50px"; 
 
-        // Titel und Grid rendern
         windowBody.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                 <div>
@@ -58,6 +52,12 @@ window.BriefcaseUI = {
             <hr style="border: 0; border-top: 1px solid rgba(57, 255, 20, 0.2); margin-bottom: 30px;">
 
             <div class="management-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                
+                <div class="mgmt-card" onclick="openSection('junioren')" style="border: 1px solid var(--neon-green); box-shadow: 0 0 15px rgba(57, 255, 20, 0.1);">
+                    <div class="card-header" style="color: var(--neon-green);"><i class="fas fa-graduation-cap"></i> JUNIOREN</div>
+                    <p>G- bis A-Jugend Verwaltung</p>
+                </div>
+
                 <div class="mgmt-card" onclick="openSection('kabine')">
                     <div class="card-header"><i class="fas fa-users"></i> KABINE</div>
                     <p>Kader & Spielerprofile</p>
@@ -112,19 +112,18 @@ window.BriefcaseUI = {
 
     toggleVoice() {
         console.log("Sprachsteuerung aktiviert...");
-        // Hier kommt später die Toni-Voice Logik rein
     }
 };
 
 /**
- * Globaler Router für die Aktentasche
+ * Globaler Router (Aktualisiert)
  */
 window.openSection = function(section) {
     console.log("Routing nach:", section);
     
-    // Kleiner Schutz, falls ein Sektor-Skript noch nicht geladen wurde
     try {
         switch(section) {
+            case 'junioren': if(window.SektorJunioren) window.SektorJunioren.open(); break;
             case 'kabine': if(window.SektorSporttasche) window.SektorSporttasche.open(); break;
             case 'analyse': if(window.SektorAnalyse) window.SektorAnalyse.open(); break;
             case 'management': if(window.SektorManagement) window.SektorManagement.open(); break;
