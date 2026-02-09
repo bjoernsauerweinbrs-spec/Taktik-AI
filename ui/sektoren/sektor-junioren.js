@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - SEKTOR JUNIOREN
- * Status: ELITE UPDATE (Kader, Equipment & Video-Schnittstelle)
+ * Status: ELITE UPDATE (Pitch-Switch & Video-Coaching Integration)
  */
 window.SektorJunioren = {
     currentYouth: null,
@@ -42,7 +42,7 @@ window.SektorJunioren = {
             </div>
 
             <div id="youth-detail-view" style="margin-top: 30px; padding: 20px; background: rgba(57, 255, 20, 0.05); border: 1px solid rgba(57, 255, 20, 0.2); border-radius: 10px; display: none;">
-                </div>
+            </div>
         `;
         
         briefcaseContent.classList.remove('hidden');
@@ -88,19 +88,31 @@ window.SektorJunioren = {
                             </button>
                         `).join('')}
                     </div>
-                    <button class="pro-btn-gold" style="width:100%; margin-top:15px;" onclick="window.SektorJunioren.openVideoCoach()">
+                    <button class="pro-btn-gold" style="width:100%; margin-top:15px;" onclick="window.SektorAnalyse.open()">
+                        <i class="fas fa-chart-line"></i> VITAL-CHECK STARTEN
+                    </button>
+                    <button class="pro-btn-gold" style="width:100%; margin-top:10px;" onclick="window.SektorJunioren.openVideoCoach()">
                         <i class="fas fa-play-circle"></i> VIDEO-COACHING ÖFFNEN
                     </button>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <p style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Training-Setup:</p>
-                    <button class="pro-btn-gold" onclick="window.SektorJunioren.drawFuninoField()">FUNINO (4 TORE)</button>
+                    <p style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Arena-Konfiguration:</p>
+                    <button class="pro-btn-gold" onclick="window.SektorJunioren.triggerPitchSwitch('${team === 'G-Jugend' ? 'funino' : 'classic'}')">
+                        ${team === 'G-Jugend' ? 'FUNINO-PITCH (4 TORE)' : 'STANDARD-PITCH'}
+                    </button>
                     <button class="pro-btn" onclick="window.SektorJunioren.addTrainingTool('cone')">+ HÜTCHEN-PARCOURS</button>
                     <button class="pro-btn" onclick="window.SektorJunioren.addTrainingTool('ladder')">+ KOORDI-LEITER</button>
                 </div>
             </div>
         `;
+    },
+
+    // --- NEU: Greenkeeper Animation Trigger ---
+    triggerPitchSwitch(mode) {
+        if (!window.arena) return;
+        window.BriefcaseUI.toggle(); // Tasche schließen für Sicht auf Animation
+        window.arena.switchPitchMode(mode);
     },
 
     openVideoCoach() {
@@ -117,11 +129,11 @@ window.SektorJunioren = {
                 <button onclick="document.getElementById('video-coach-overlay').remove()" style="background:none; border:1px solid #fff; color:#fff; cursor:pointer; padding:5px 15px; font-family:'Orbitron';">CLOSE [X]</button>
             </div>
             <iframe width="100%" height="550px" src="${url}" frameborder="0" allowfullscreen style="border:2px solid var(--neon-green); border-radius:10px; max-width:900px;"></iframe>
-            <p style="color:#888; margin-top:15px; font-size:0.8rem; letter-spacing:1px;">TONI scannt YouTube nach passenden Übungseinheiten...</p>
+            <p style="color:#888; margin-top:15px; font-size:0.8rem; letter-spacing:1px;">TONI durchsucht YouTube für ${this.currentYouth}...</p>
         `;
         
         document.body.appendChild(videoOverlay);
-        if(window.ToniVoice) window.ToniVoice.speak("Ich habe das Video-Coaching für die " + this.currentYouth + " gestartet. Hier sind die aktuellsten Technik-Übungen.");
+        if(window.ToniVoice) window.ToniVoice.speak("Video-Coaching für die " + this.currentYouth + " wird geladen.");
     },
 
     deployPlayer(id, name) {
@@ -133,7 +145,7 @@ window.SektorJunioren = {
             color: 'var(--neon-green)', number: '?'
         };
         window.arena.elements.push(newPlayer);
-        if(window.ToniVoice) window.ToniVoice.speak(`${name} ist bereit.`);
+        if(window.ToniVoice) window.ToniVoice.speak(`${name} ist auf dem Platz.`);
         window.BriefcaseUI.toggle();
     },
 
@@ -144,16 +156,7 @@ window.SektorJunioren = {
         } else if (type === 'ladder') {
             window.arena.addEquipment('ladder', 400, 100);
         }
-        if(window.ToniVoice) window.ToniVoice.speak("Equipment platziert.");
-        window.BriefcaseUI.toggle();
-    },
-
-    drawFuninoField() {
-        if (!window.arena) return;
-        window.arena.clearEquipment();
-        const goals = [{x: 65, y: 120}, {x: 65, y: 380}, {x: 735, y: 120}, {x: 735, y: 380}];
-        goals.forEach(g => window.arena.addEquipment('goal', g.x, g.y));
-        if(window.ToniVoice) window.ToniVoice.speak("Funino-Setup bereit.");
+        if(window.ToniVoice) window.ToniVoice.speak("Trainingsequipment platziert.");
         window.BriefcaseUI.toggle();
     }
 };
