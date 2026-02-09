@@ -2,11 +2,12 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TONI 2.0 | ELITE COCKPIT</title>
     
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
@@ -15,35 +16,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
 
     <style>
-        .briefcase-overlay {
-            display: none; 
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .briefcase-window {
-            width: 90%;
-            max-width: 1200px;
-            height: 85vh;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            border-radius: 20px;
-            padding: 30px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 50px rgba(57, 255, 20, 0.1);
-        }
         .hidden { display: none !important; }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
+        #main-canvas { cursor: crosshair; touch-action: none; }
+        /* Sicherung gegen versehentliches Markieren am Handy */
+        * { -webkit-tap-highlight-color: transparent; outline: none; }
     </style>
 </head>
 <body>
@@ -81,8 +57,8 @@
             </div>
         </nav>
 
-        <main id="stage-container" style="position: relative; flex: 1; background: #000;">
-            <div id="equipment-palette">
+        <main id="stage-container">
+            <div id="equipment-palette" style="position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 5;">
                 <div class="tool-btn" onclick="window.arena.setTool('drag')"><i class="fas fa-mouse-pointer"></i></div>
                 <div class="tool-btn" onclick="window.arena.setTool('cone')"><i class="fas fa-triangle-exclamation" style="color: var(--accent-orange);"></i></div>
                 <div class="tool-btn" onclick="window.arena.setTool('ball')"><i class="fas fa-futbol"></i></div>
@@ -97,15 +73,15 @@
         </main>
 
         <aside class="analysis-panel">
-            <div class="video-preview" style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05); display: flex; align-items: center;">
-                <i class="fas fa-satellite-dish" style="margin-right: 10px; font-size: 0.8rem; color: var(--neon-green); animation: pulse 2s infinite;"></i>
-                <span style="font-size: 0.7rem; letter-spacing: 1px; color: #fff;">LIVE ANALYSE ACTIVE</span>
+            <div class="video-preview" style="padding:20px; border-bottom:1px solid rgba(255,255,255,0.05); display: flex; align-items: center; background: rgba(0,0,0,0.3);">
+                <i class="fas fa-satellite-dish" style="margin-right: 12px; font-size: 0.9rem; color: var(--neon-green); animation: pulse 2s infinite;"></i>
+                <span style="font-size: 0.75rem; letter-spacing: 2px; color: #fff; font-family: 'Orbitron';">LIVE ANALYSE ACTIVE</span>
             </div>
             
-            <div class="chat-container" style="display: flex; flex-direction: column; height: calc(100% - 50px);">
-                <div id="chat-box" style="flex:1; overflow-y:auto; padding:15px; font-size: 0.85rem; color: #ccc;"></div>
-                <div class="chat-input-area" style="padding:15px; background: rgba(13,20,33,0.98); border-top: 1px solid rgba(57, 255, 20, 0.2);">
-                    <input type="text" id="command-input" class="pro-textarea" placeholder="Befehl an Toni senden..." style="width:100%; background:transparent; border:none; color:var(--neon-green); outline:none;">
+            <div class="chat-container">
+                <div id="chat-box"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="command-input" placeholder="Befehl an Toni senden...">
                 </div>
             </div>
         </aside>
@@ -113,9 +89,9 @@
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 id="sector-title" style="color: #fff; font-size: 1rem; margin: 0; font-family: 'Orbitron';">ZENTRALE AKTENTASCHE</h2>
-                <i class="fas fa-times" onclick="window.BriefcaseUI.toggle()" style="cursor: pointer; color: #666; font-size: 1.5rem;"></i>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+                <h2 id="sector-title" style="color: var(--neon-green); font-size: 1.2rem; margin: 0; font-family: 'Orbitron'; letter-spacing: 3px;">ZENTRALE</h2>
+                <i class="fas fa-times" onclick="window.BriefcaseUI.toggle()" style="cursor: pointer; color: var(--status-error); font-size: 1.5rem;"></i>
             </div>
             <div id="briefcase-nav"></div> 
             <div id="briefcase-content" class="hidden">
@@ -129,35 +105,26 @@
     <script src="ui/aktentasche-ui.js"></script>
     
     <script src="data/youth-presets.js"></script>
-    <script src="logic/youth-manager.js"></script>
     <script src="ui/sektoren/sektor-junioren.js"></script>
-
     <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
-    <script src="ui/sektoren/sektor-stadion.js"></script>
-    <script src="ui/sektoren/sektor-settings.js"></script>
-    <script src="ui/sektoren/sektor-management.js"></script>
-    <script src="ui/sektoren/sektor-video.js"></script>
     <script src="ui/sektoren/sektor-matchday.js"></script>
-    <script src="ui/sektoren/sektor-training.js"></script>
-    <script src="ui/sektoren/sektor-material.js"></script>
-    <script src="ui/sektoren/sektor-taktik.js"></script>
+    <script src="ui/sektoren/sektor-settings.js"></script>
     
     <script src="script.js"></script>
 
     <script>
         window.onload = () => {
             console.log("TONI 2.0 Dashboard lädt...");
+            // Arena mit dem Canvas verbinden
             if(window.arena) window.arena.init('main-canvas');
             if(window.BriefcaseUI) window.BriefcaseUI.init();
             
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
-                if(chat) chat.innerHTML += `<p style="color:var(--neon-green); margin:0;"><b>TONI:</b> System bereit. Willkommen zurück, Coach.</p>`;
-                
-                // Automatischer System-Check nach Start
+                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> System bereit. Elite-Cockpit 2026 aktiv.</div>`;
                 runToniSystemCheck();
-            }, 1500);
+            }, 1000);
         };
 
         function runToniSystemCheck() {
@@ -168,18 +135,10 @@
                 { name: "Kabine", obj: "SektorSporttasche" },
                 { name: "Analyse", obj: "SektorAnalyse" }
             ];
-            let errors = [];
             sectors.forEach(s => {
-                if (!window[s.obj]) {
-                    console.error(`❌ FEHLER: ${s.name} nicht geladen!`);
-                    errors.push(s.name);
-                } else {
-                    console.log(`✅ ${s.name} ist bereit.`);
-                }
+                if (!window[s.obj]) console.warn(`⚠️ Warnung: ${s.name} nicht geladen.`);
+                else console.log(`✅ ${s.name} aktiv.`);
             });
-            if(errors.length > 0) {
-                alert("SYSTEM-WARNUNG: " + errors.join(", ") + " fehlen! Check die Konsole (F12).");
-            }
         }
     </script>
 </body>
