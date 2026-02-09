@@ -1,7 +1,6 @@
 /**
  * TONI 2.0 - ARENA ENGINE (ELITE PRO PITCH UPDATE)
- * Status: FINALISIERT
- * Fokus: Profi-Markierungen & Transformation & Layering-Fix
+ * Status: FINALISIERT (FIFA-Cards Bench & Dot-Labels)
  */
 window.arena = {
     canvas: null,
@@ -98,9 +97,8 @@ window.arena = {
         const ctx = this.ctx;
         const w = this.canvas.width;
         const h = this.canvas.height;
-        const mode = window.Database.activeMode;
+        const mode = window.Database ? window.Database.activeMode : 'training';
 
-        // 1. Hintergrund & Rasen
         ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
         
@@ -112,37 +110,30 @@ window.arena = {
         ctx.strokeStyle = "rgba(57, 255, 20, 0.4)";
         ctx.lineWidth = 2;
 
-        // --- PROFIMARKIERUNGEN ---
-        ctx.strokeRect(m, m, fieldW, actualFieldHeight); // Außenlinie
-        ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke(); // Mitte
-        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 60, 0, Math.PI*2); ctx.stroke(); // Kreis
-        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 2, 0, Math.PI*2); ctx.fill(); // Punkt Mitte
+        ctx.strokeRect(m, m, fieldW, actualFieldHeight); 
+        ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke(); 
+        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 60, 0, Math.PI*2); ctx.stroke(); 
+        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 2, 0, Math.PI*2); ctx.fill(); 
 
-        // Strafräume
         const box16W = 120, box16H = 240, box5W = 40, box5H = 100, penDist = 80;
-        // Links
         ctx.strokeRect(m, (fieldH/2)-(box16H/2), box16W, box16H);
         ctx.strokeRect(m, (fieldH/2)-(box5H/2), box5W, box5H);
         ctx.beginPath(); ctx.arc(m+penDist, fieldH/2, 3, 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(m+penDist, fieldH/2, 60, -Math.PI/2.5, Math.PI/2.5); ctx.stroke();
-        // Rechts
         ctx.strokeRect(w-m-box16W, (fieldH/2)-(box16H/2), box16W, box16H);
         ctx.strokeRect(w-m-box5W, (fieldH/2)-(box5H/2), box5W, box5H);
         ctx.beginPath(); ctx.arc(w-m-penDist, fieldH/2, 3, 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(w-m-penDist, fieldH/2, 60, Math.PI/1.6, -Math.PI/1.6); ctx.stroke();
 
-        // Tore
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
         ctx.strokeRect(m-15, (fieldH/2)-45, 15, 90);
         ctx.strokeRect(w-m, (fieldH/2)-45, 15, 90);
 
-        // 2. Bank-Bereich
         ctx.fillStyle = "rgba(0,0,0,0.6)";
         ctx.fillRect(0, fieldH, w, this.benchHeight);
         ctx.strokeStyle = "var(--data-cyan)"; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(0, fieldH); ctx.lineTo(w, fieldH); ctx.stroke();
 
-        // 3. Spieler (Layering-Fix)
         this.elements.forEach(el => {
             if (el === this.selectedElement) return;
             this.drawEntity(ctx, el, fieldH, mode);
@@ -151,8 +142,11 @@ window.arena = {
     },
 
     drawEntity(ctx, el, fieldH, mode) {
+        // Spieler ist auf der Bank, wenn sein Y-Wert im unteren Bereich liegt
         const isOnBench = el.y > fieldH - 20;
-        if (mode === 'match' && isOnBench && el.type !== 'opponent') {
+
+        // FIX: Auf der Bank immer FIFA-Karte (außer Gegner). Auf dem Feld immer Dot.
+        if (isOnBench && el.type !== 'opponent') {
             this.drawFIFACard(ctx, el);
         } else {
             this.drawTacticalDot(ctx, el);
@@ -167,9 +161,12 @@ window.arena = {
         ctx.strokeStyle = el.color; ctx.lineWidth = 2; ctx.strokeRect(x, y, cw, ch);
         ctx.shadowBlur = 0; ctx.fillStyle = "#fff"; ctx.textAlign = "center";
         ctx.font = "bold 14px Inter"; ctx.fillText(el.rat || 80, x+15, y+20);
-        ctx.font = "bold 10px Inter"; ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, y+ch-12);
+        ctx.font = "bold 10px Inter"; ctx.fillText(el.name ? el.name.split(' ').pop().toUpperCase() : 'PRO', el.x, y+ch-12);
         if(el.img) {
-            try { const img = new Image(); img.src = el.img; ctx.drawImage(img, x+5, y+25, cw-10, ch-50); } catch(e){}
+            try { 
+                const img = new Image(); img.src = el.img; 
+                ctx.drawImage(img, x+5, y+25, cw-10, ch-50); 
+            } catch(e){}
         } else {
             ctx.fillStyle = "rgba(255,255,255,0.1)"; ctx.font = "20px 'Font Awesome 6 Free'"; ctx.fillText("\uf2f6", el.x, y+ch/2);
         }
@@ -178,12 +175,24 @@ window.arena = {
 
     drawTacticalDot(ctx, el) {
         ctx.save();
-        ctx.beginPath(); ctx.arc(el.x, el.y, 18, 0, Math.PI*2);
+        const radius = 18;
+        
+        // Dot Body
+        ctx.beginPath(); ctx.arc(el.x, el.y, radius, 0, Math.PI*2);
         ctx.fillStyle = el.color; ctx.fill();
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+        
+        // Rückennummer
         ctx.fillStyle = "#000"; ctx.font = "bold 14px Inter"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.fillText(el.number, el.x, el.y);
-        ctx.fillStyle = "#fff"; ctx.font = "bold 10px Inter"; ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, el.y+30);
+        ctx.fillText(el.number || '?', el.x, el.y);
+        
+        // Name (Nachname auf Banner)
+        const name = el.name ? el.name.split(' ').pop().toUpperCase() : 'SPIELER';
+        ctx.fillStyle = "rgba(0,0,0,0.7)";
+        ctx.roundRect(el.x - 30, el.y + radius + 3, 60, 14, 4); ctx.fill();
+        
+        ctx.fillStyle = "#fff"; ctx.font = "bold 9px Inter";
+        ctx.fillText(name, el.x, el.y + radius + 10);
         ctx.restore();
     },
 
