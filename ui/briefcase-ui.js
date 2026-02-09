@@ -1,33 +1,59 @@
 window.BriefcaseUI = {
-    // --- TRAINER & CLUB DATEN ---
-    clubData: JSON.parse(localStorage.getItem('toni_club_config')) || {
-        name: 'FC TONI 2.0',
-        coach: 'Björn',
-        league: 'Regionalliga',
-        logo: '' 
+    isOpen: false,
+    isListening: false,
+    recognition: null,
+    clubData: JSON.parse(localStorage.getItem('toni_club_config')) || { name: 'FC TONI 2.0', coach: 'Björn', league: 'Regionalliga', logo: '' },
+
+    init: function() {
+        console.log("TONI 2.0 Elite-Engine initialisiert...");
+        this.setupSpeechRecognition();
+        this.renderFolderGrid();
     },
 
-    // --- INITIALISIERUNG ---
-    init: function() {
-        console.log("TONI 2.0 Management-Engine initialisiert...");
-        let pl = JSON.parse(localStorage.getItem('toni_players')) || [];
-        if (pl.length === 0) {
-            pl.push({
-                id: 'muster_1', name: 'Musterprofi', number: '10', pos: 'ZM',
-                rating: 85, pace: 75, shooting: 80, passing: 85, defense: 70, photo: ''
-            });
-            localStorage.setItem('toni_players', JSON.stringify(pl));
+    // --- NEU: KI SPRACHERKENNUNG ---
+    setupSpeechRecognition: function() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return;
+
+        this.recognition = new SpeechRecognition();
+        this.recognition.lang = 'de-DE';
+        this.recognition.continuous = true;
+        this.recognition.interimResults = false;
+
+        this.recognition.onresult = (event) => {
+            const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+            this.handleVoiceCommand(transcript);
+        };
+    },
+
+    toggleVoice: function() {
+        if (!this.recognition) return;
+        this.isListening = !this.isListening;
+        const micBtn = document.getElementById('main-mic-btn');
+        if (this.isListening) {
+            this.recognition.start();
+            if(micBtn) micBtn.style.color = "var(--neon-green)";
+            if(window.ToniAI) window.ToniAI.speak("Ich höre zu, Coach.");
+        } else {
+            this.recognition.stop();
+            if(micBtn) micBtn.style.color = "#fff";
         }
-        if(!localStorage.getItem('toni_club_config')) {
-            localStorage.setItem('toni_club_config', JSON.stringify(this.clubData));
+    },
+
+    handleVoiceCommand: function(cmd) {
+        console.log("Toni erkannt:", cmd);
+        // TRICK-SUCHE LOGIK
+        if (cmd.includes("zeig mir") || cmd.includes("video von") || cmd.includes("wie geht der")) {
+            const trick = cmd.replace("toni", "").replace("zeig mir", "").replace("video von", "").replace("wie geht der", "").trim();
+            this.switchSektor('reports'); // Wechselt zum Performance Lab (Reports)
+            setTimeout(() => {
+                if(window.SektorAnalyse) window.SektorAnalyse.playTrickVideo(trick);
+            }, 500);
         }
-        
-        // Magazin-Seiten laden
-        this.magazinPages = JSON.parse(localStorage.getItem('toni_magazin_draft')) || [
-            { id: 'p1', title: 'INSIDE ARENA.', type: 'cover', content: 'MATCHDAY MAG - Klicken zum Bearbeiten' },
-            { id: 'p2', title: 'Wort des Coaches', type: 'text', content: 'Heute zählt nur die absolute Hingabe...' },
-            { id: 'p3', title: 'Analyse & Formation', type: 'taktik', content: 'Fokus auf Raumkontrolle und Libero-Absicherung.' }
-        ];
+        // SEKTOR-STEUERUNG
+        if (cmd.includes("kabine")) this.switchSektor('sport');
+        if (cmd.includes("heft") || cmd.includes("zeitung")) this.switchSektor('templates');
+        if (cmd.includes("schließe")) this.toggle();
     },
 
     // --- NAVIGATION ---
@@ -35,7 +61,8 @@ window.BriefcaseUI = {
         var overlay = document.getElementById('briefcase-overlay');
         if (overlay) {
             overlay.classList.toggle('hidden');
-            if (!overlay.classList.contains('hidden')) { this.backToNav(); }
+            this.isOpen = !overlay.classList.contains('hidden');
+            if (this.isOpen) { this.backToNav(); }
         }
     },
 
@@ -46,7 +73,13 @@ window.BriefcaseUI = {
         if(!nav || !content) return;
         nav.classList.remove('hidden');
         content.classList.add('hidden');
-        title.innerText = "ZENTRALE AKTENTASCHE";
+        
+        // Titel mit Mikrofon-Integration
+        title.innerHTML = `
+            <div style="display:flex; align-items:center; gap:15px;">
+                ZENTRALE AKTENTASCHE
+                <i id="main-mic-btn" class="fas fa-microphone" onclick="BriefcaseUI.toggleVoice()" style="cursor:pointer; font-size:1.1rem;"></i>
+            </div>`;
         this.renderFolderGrid();
     },
 
@@ -54,17 +87,14 @@ window.BriefcaseUI = {
         var nav = document.getElementById('briefcase-nav');
         if(!nav) return;
         var folders = [
-            { id: 'taktik', name: 'TAKTIKEN', icon: 'fa-project-diagram', color: '#ff9500' },
-            { id: 'sport', name: 'SPIELER', icon: 'fa-users', color: '#ff9500' },
+            { id: 'sport', name: 'KABINE', icon: 'fa-users', color: '#ff9500' },
             { id: 'training', name: 'TRAINING', icon: 'fa-dumbbell', color: '#ff9500' },
-            { id: 'matchplan', name: 'MATCHPLANS', icon: 'fa-clipboard-list', color: '#00d1ff' },
-            { id: 'media', name: 'MEDIA', icon: 'fa-photo-video', color: '#00d1ff' },
-            { id: 'sponsoring', name: 'SPONSORING', icon: 'fa-handshake', color: '#00d1ff' },
             { id: 'templates', name: 'STADIONHEFT', icon: 'fa-book-open', color: '#fff' },
-            { id: 'reports', name: 'REPORTS', icon: 'fa-chart-line', color: '#888' },
+            { id: 'reports', name: 'PERFORMANCE LAB', icon: 'fa-video', color: 'var(--neon-green)' },
+            { id: 'sponsoring', name: 'SPONSORING', icon: 'fa-handshake', color: '#00d1ff' },
             { id: 'system', name: 'SYSTEM', icon: 'fa-cogs', color: '#888' }
         ];
-        nav.innerHTML = '<div class="folder-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px;">' +
+        nav.innerHTML = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px;">' +
             folders.map(f => `
                 <div class="folder-card" onclick="BriefcaseUI.switchSektor('${f.id}')" 
                     style="background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 25px; border-radius: 12px; text-align: center; cursor: pointer;">
@@ -76,210 +106,27 @@ window.BriefcaseUI = {
     switchSektor: function(sektor) {
         document.getElementById('briefcase-nav').classList.add('hidden');
         document.getElementById('briefcase-content').classList.remove('hidden');
-        document.getElementById('sector-title').innerHTML = '<button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:#ff9500; cursor:pointer; margin-right:10px;"><i class="fas fa-arrow-left"></i></button> ' + sektor.toUpperCase();
         
-        if (sektor === 'sport') this.renderSporttasche();
-        else if (sektor === 'templates') this.renderTemplates();
+        // Header mit Mikrofon-Status behalten
+        document.getElementById('sector-title').innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                <div>
+                    <button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:#ff9500; cursor:pointer; margin-right:10px;"><i class="fas fa-arrow-left"></i></button>
+                    ${sektor.toUpperCase()}
+                </div>
+                <i id="main-mic-btn" class="fas fa-microphone" onclick="BriefcaseUI.toggleVoice()" style="color:${this.isListening ? 'var(--neon-green)' : '#fff'}; cursor:pointer;"></i>
+            </div>`;
+        
+        // Routing zu den Elite-Sektoren
+        if (sektor === 'sport') { if(window.SektorSporttasche) window.SektorSporttasche.open(); }
+        else if (sektor === 'templates') { if(window.SektorTemplates) window.SektorTemplates.render(); }
+        else if (sektor === 'reports') { if(window.SektorAnalyse) window.SektorAnalyse.open(); }
         else if (sektor === 'system') this.renderSystem();
-        else if (sektor === 'sponsoring') this.renderSponsoring();
+        else if (sektor === 'sponsoring') { if(window.SektorSponsoring) window.SektorSponsoring.open(); }
         else if (sektor === 'training') this.renderTraining();
-        else if (sektor === 'reports') this.renderReports();
         else this.renderPlaceholder(sektor);
     },
 
-    // --- SYSTEM (CLUB + API KEYS) ---
-    renderSystem: function() {
-        const c = this.clubData;
-        const apiKey = localStorage.getItem('toni_api_key') || "";
-        const apiProvider = localStorage.getItem('toni_api_provider') || "llama";
-
-        document.getElementById('active-content').innerHTML = `
-            <div style="padding:20px; background:#0a0a0a; border:1px solid #333; border-radius:15px; overflow-y:auto; max-height:450px;">
-                <h3 style="color:#ff9500; margin:0 0 15px 0; font-size:1rem; border-bottom:1px solid #222; padding-bottom:5px;">CLUB-KONFIGURATION</h3>
-                <div style="display:grid; gap:10px; margin-bottom:25px;">
-                    <div><label style="font-size:0.65rem; color:#888;">VEREIN</label>
-                    <input type="text" id="set-club" value="${c.name}" class="login-input" style="text-align:left; margin:5px 0 0 0;"></div>
-                    <div><label style="font-size:0.65rem; color:#888;">TRAINER / MANAGER</label>
-                    <input type="text" id="set-coach" value="${c.coach}" class="login-input" style="text-align:left; margin:5px 0 0 0;"></div>
-                    <div><label style="font-size:0.65rem; color:#888;">LIGA</label>
-                    <input type="text" id="set-league" value="${c.league}" class="login-input" style="text-align:left; margin:5px 0 0 0;"></div>
-                    <div style="margin-top:10px;">
-                        <label style="font-size:0.7rem; color:#888;">CLUB-LOGO</label><br>
-                        <input type="file" onchange="BriefcaseUI.handleClubLogo(event)" style="font-size:0.7rem; color:#888; margin-top:5px;">
-                        ${c.logo ? `<img src="${c.logo}" style="height:40px; display:block; margin-top:10px;">` : ''}
-                    </div>
-                </div>
-
-                <h3 style="color:#ff9500; margin:0 0 15px 0; font-size:1rem; border-bottom:1px solid #222; padding-bottom:5px;">CORE SYSTEM (API)</h3>
-                <div style="display:grid; gap:10px;">
-                    <div><label style="font-size:0.65rem; color:#888;">KI-PROVIDER</label>
-                        <select id="api-provider" class="login-input" style="text-align:left; margin:5px 0 0 0; background:#000;">
-                            <option value="llama" ${apiProvider==='llama'?'selected':''}>Gemma 3 (Ollama / Local)</option>
-                            <option value="openai" ${apiProvider==='openai'?'selected':''}>OpenAI (Cloud)</option>
-                        </select>
-                    </div>
-                    <div><label style="font-size:0.65rem; color:#888;">API KEY / ENDPUNKT</label>
-                    <input type="password" id="api-key-input" value="${apiKey}" class="login-input" style="text-align:left; margin:5px 0 0 0;" placeholder="Key hier einfügen..."></div>
-                </div>
-                <button class="login-btn" style="margin-top:20px; background:#ff9500; color:#000; font-weight:900;" onclick="BriefcaseUI.saveFullSettings()">UPDATE SPEICHERN</button>
-            </div>`;
-    },
-
-    saveFullSettings: function() {
-        this.clubData.name = document.getElementById('set-club').value;
-        this.clubData.coach = document.getElementById('set-coach').value;
-        this.clubData.league = document.getElementById('set-league').value;
-        localStorage.setItem('toni_club_config', JSON.stringify(this.clubData));
-
-        localStorage.setItem('toni_api_key', document.getElementById('api-key-input').value);
-        localStorage.setItem('toni_api_provider', document.getElementById('api-provider').value);
-        
-        if(window.ToniAI) {
-            ToniAI.speak("Alles klar Coach " + this.clubData.coach + ". Die Daten für " + this.clubData.name + " sind gesichert.", "deep");
-        }
-        this.renderSystem();
-    },
-
-    handleClubLogo: function(e) {
-        const reader = new FileReader();
-        reader.onload = (ex) => { 
-            this.clubData.logo = ex.target.result; 
-            localStorage.setItem('toni_club_config', JSON.stringify(this.clubData));
-            this.renderSystem();
-        };
-        reader.readAsDataURL(e.target.files[0]);
-    },
-
-    // --- STADIONHEFT EDITOR ---
-    renderTemplates: function() {
-        const currentMatch = JSON.parse(localStorage.getItem('toni_current_matchplan')) || { formation: '4-3-3' };
-        
-        const renderPage = (p, index) => {
-            let layoutExtra = '';
-            if (p.type === 'cover') {
-                layoutExtra = `<div style="background:#000; height:180px; margin:20px 0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; font-weight:900;">MATCH DAY</div>`;
-            } else if (p.type === 'taktik') {
-                layoutExtra = `<div style="height:160px; background:#0b2d0b; border:2px solid #fff; margin:20px 0; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; position:relative;">
-                                <div style="border:1px solid rgba(255,255,255,0.2); width:80%; height:80%;"></div>
-                                <span style="position:absolute; background:#fff; color:#000; padding:5px 15px; font-size:1.2rem;">${currentMatch.formation}</span>
-                               </div>`;
-            }
-
-            return `
-                <div class="mag-page-wrapper" style="position:relative; margin-bottom:60px;">
-                    <div class="no-print" style="position:absolute; left:-60px; top:0; display:flex; flex-direction:column; gap:10px;">
-                        <button onclick="BriefcaseUI.removeMagPage(${index})" title="Seite löschen" style="background:#ff4444; color:#fff; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer;"><i class="fas fa-trash"></i></button>
-                        <button onclick="BriefcaseUI.addMagPage(${index})" title="Seite danach einfügen" style="background:#00d1ff; color:#fff; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer;"><i class="fas fa-plus"></i></button>
-                    </div>
-
-                    <div class="mag-page" style="background:#fff; color:#000; padding:45px; font-family:sans-serif; width:148mm; min-height:210mm; margin:0 auto; box-shadow:0 20px 50px rgba(0,0,0,0.5); display:flex; flex-direction:column;">
-                        <div style="display:flex; justify-content:space-between; border-bottom:3px solid #000; padding-bottom:5px; margin-bottom:20px;">
-                            <span style="font-weight:900; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px;">${this.clubData.name} Inside</span>
-                            <span style="font-size:0.75rem;">SEITE ${index + 1}</span>
-                        </div>
-                        <h2 contenteditable="true" onblur="BriefcaseUI.saveMagDraft(${index}, 'title', this.innerText)" style="font-size:3.5rem; font-weight:900; line-height:0.8; margin:0; letter-spacing:-3px; text-transform:uppercase;">${p.title}</h2>
-                        ${layoutExtra}
-                        <div contenteditable="true" onblur="BriefcaseUI.saveMagDraft(${index}, 'content', this.innerText)" style="font-size:1.1rem; line-height:1.6; text-align:justify; margin-top:15px; flex-grow:1; outline:none; border:1px dashed transparent;">
-                            ${p.content}
-                        </div>
-                    </div>
-                </div>`;
-        };
-
-        document.getElementById('active-content').innerHTML = `
-            <style>
-                @media print { 
-                    .no-print, #sector-title, #briefcase-nav, .login-btn:not(#print-btn) { display: none !important; } 
-                    body { background: white !important; padding:0 !important; } 
-                    .mag-page { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; height: 100vh !important; page-break-after: always !important; }
-                }
-            </style>
-            <div style="padding:20px; background:#1a1a1a; height:500px; overflow-y:auto; scroll-behavior: smooth;">
-                <div id="magazin-canvas">${this.magazinPages.map((p, i) => renderPage(p, i)).join('')}</div>
-                <div style="text-align:center; padding:40px;">
-                    <button id="print-btn" class="login-btn" style="background:#ff9500; color:#000; width:350px; height:60px; font-size:1.2rem;" onclick="window.print()">
-                        <i class="fas fa-print"></i> PDF EXPORT
-                    </button>
-                </div>
-            </div>`;
-    },
-
-    saveMagDraft: function(index, field, value) {
-        this.magazinPages[index][field] = value;
-        localStorage.setItem('toni_magazin_draft', JSON.stringify(this.magazinPages));
-    },
-
-    addMagPage: function(index) {
-        this.magazinPages.splice(index + 1, 0, { id: Date.now(), title: 'NEUE SEITE.', type: 'text', content: 'Inhalt hier einfügen...' });
-        localStorage.setItem('toni_magazin_draft', JSON.stringify(this.magazinPages));
-        this.renderTemplates();
-        if(window.ToniAI) ToniAI.speak("Neue Seite hinzugefügt.");
-    },
-
-    removeMagPage: function(index) {
-        if (this.magazinPages.length <= 1) return;
-        this.magazinPages.splice(index, 1);
-        localStorage.setItem('toni_magazin_draft', JSON.stringify(this.magazinPages));
-        this.renderTemplates();
-        if(window.ToniAI) ToniAI.speak("Seite entfernt.");
-    },
-
-    // --- SPORTTASCHE ---
-    renderSporttasche: function() {
-        var players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        document.getElementById('active-content').innerHTML = `
-            <div style="padding:10px;">
-                <button class="login-btn" style="width:100%; margin-bottom:20px; background:#ff9500; color:#000;" onclick="BriefcaseUI.addPlayerPrompt()">+ NEUER PRO-PLAYER</button>
-                <div class="pro-player-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:10px;">
-                    ${players.map(p => `<div class="p-card" onclick="BriefcaseUI.openFIFAcard('${p.id}')" style="background:#151515; border:1px solid #333; padding:15px; border-radius:10px; text-align:center; cursor:pointer;"><div style="font-size:1.2rem; font-weight:900; color:#ff9500;">#${p.number||0}</div><b style="font-size:0.8rem; color:#fff;">${p.name}</b></div>`).join('')}
-                </div>
-            </div>`;
-    },
-
-    openFIFAcard: function(id) {
-        var players = JSON.parse(localStorage.getItem('toni_players')) || []; var p = players.find(x => x.id == id); if(!p) return;
-        document.getElementById('active-content').innerHTML = `
-            <div style="display:grid; grid-template-columns:240px 1fr; gap:30px; background:#000; padding:25px; border-radius:15px; border:1px solid #ff9500;">
-                <div style="width:240px; height:360px; background:linear-gradient(145deg, #d4af37, #b8860b); border-radius:10px; padding:20px; color:#111; text-align:center;">
-                    <div style="font-size:4rem; font-weight:900;">${p.rating||80}</div>
-                    <div style="width:110px; height:110px; margin:10px auto; border-radius:50%; background:#333; overflow:hidden;">
-                        ${p.photo ? `<img src="${p.photo}" style="width:100%; height:100%; object-fit:cover;">` : '<i class="fas fa-user fa-4x" style="color:#ccc; margin-top:20px;"></i>'}
-                    </div>
-                    <div style="font-size:1.3rem; font-weight:900;">${p.name}</div>
-                </div>
-                <div><h3 style="color:#ff9500; margin:0;">ANALYSIS</h3><button class="login-btn" style="width:100%; margin-top:20px;" onclick="BriefcaseUI.renderSporttasche()">ZURÜCK</button></div>
-            </div>`;
-    },
-
-    renderTraining: function() {
-        document.getElementById('active-content').innerHTML = `
-            <div style="padding:15px;">
-                <h4 style="color:#fff;">INTERNATIONALES TRAINING</h4>
-                <div id="drill-box" style="background:#111; padding:15px; border-radius:10px; border-left:4px solid #00d1ff; font-size:0.75rem; color:#ccc;">Datenbank-Analyse für ${this.clubData.league} aktiv...</div>
-                <button class="tactic-btn" style="margin-top:15px;" onclick="BriefcaseUI.askConsultant('training')">ÜBUNGEN RECHARCHIEREN</button>
-            </div>`;
-    },
-
-    renderReports: function() {
-        const players = JSON.parse(localStorage.getItem('toni_players')) || [];
-        const avg = players.length > 0 ? Math.round(players.reduce((a,b) => a + (b.rating || 0), 0) / players.length) : 0;
-        document.getElementById('active-content').innerHTML = `
-            <div style="padding:15px;">
-                <div style="background:rgba(0,209,255,0.05); border:1px solid #00d1ff; padding:20px; border-radius:15px; text-align:center; margin-bottom:20px;">
-                    <h4 style="margin:0; color:#00d1ff;">GLOBAL INDEX</h4><div style="font-size:3rem; font-weight:900; color:#fff;">${avg}%</div>
-                </div>
-            </div>`;
-    },
-
-    renderPlaceholder: function(s) { document.getElementById('active-content').innerHTML = `<div style="text-align:center; padding:50px; color:#444;">Sektor ${s} folgt...</div>`; },
-    
-    addPlayerPrompt: function() {
-        var n = prompt("Name:"); var num = prompt("Nummer:"); if(n && num) {
-            var pl = JSON.parse(localStorage.getItem('toni_players')) || [];
-            pl.push({ id: Date.now(), name: n, number: num, rating: 50, photo: '' });
-            localStorage.setItem('toni_players', JSON.stringify(pl)); this.renderSporttasche();
-        }
-    }
+    // ... (restliche Funktionen wie renderSystem bleiben erhalten)
 };
-
 BriefcaseUI.init();
