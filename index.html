@@ -53,7 +53,7 @@
             background: #000; z-index: 9999;
             justify-content: center; align-items: center;
         }
-        #intro-video-element { width: 100%; height: 100%; object-fit: cover; }
+        #intro-video-element { width: 100%; height: 100%; object-fit: cover; background: #000; }
         .fade-out { opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none; }
 
         .system-status {
@@ -65,7 +65,7 @@
 <body>
 
     <div id="video-intro-overlay">
-        <video id="intro-video-element" playsinline webkit-playsinline preload="auto">
+        <video id="intro-video-element" playsinline webkit-playsinline preload="auto" muted>
             <source src="Gemini_generated_video_DF1C8BC8.mp4" type="video/mp4">
             TONI 2.0 INITIALISIERUNG...
         </video>
@@ -83,6 +83,9 @@
     </div>
 
     <script>
+        // Vorab-Check für das Video-Element
+        const video = document.getElementById('intro-video-element');
+        
         function check() {
             const val = document.getElementById('pass').value;
             if(val === 'toni2026') {
@@ -97,32 +100,35 @@
         function startIntro() {
             const loginUI = document.getElementById('login-ui');
             const overlay = document.getElementById('video-intro-overlay');
-            const video = document.getElementById('intro-video-element');
 
             loginUI.style.display = 'none';
             overlay.style.display = 'flex';
             
-            // Video-Setup für Ton (aktiviert durch Klick)
+            // 1. Ton einschalten (jetzt erlaubt, da User auf 'Entrance' geklickt hat)
             video.muted = false; 
             video.volume = 1.0;
-            video.load(); 
+            
+            // 2. Video von vorn starten
+            video.currentTime = 0;
 
-            // Safety-Timer auf 12 Sek erhöht für besseres Buffering
+            // 3. Erhöhter Safety-Timer (15 Sek) gegen schwarze Bildschirme am Handy
             const safetyLeash = setTimeout(() => {
+                console.log("Safety-Timer triggered: Video hat zu lange geladen.");
                 window.location.href = 'app.html';
-            }, 12000);
+            }, 15000);
 
-            // Play-Versuch
-            video.play().then(() => {
-                console.log("Video gestartet.");
-            }).catch(e => {
-                console.warn("Audio-Autoplay blockiert, versuche Muted-Start...");
-                video.muted = true;
-                video.play().catch(() => {
-                    clearTimeout(safetyLeash);
-                    window.location.href = 'app.html';
+            // 4. Play-Versuch mit Fehler-Abfang
+            const playPromise = video.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log("Video läuft mit Ton.");
+                }).catch(e => {
+                    console.warn("Autoplay-Fehler, versuche Muted-Fallback:", e);
+                    video.muted = true;
+                    video.play();
                 });
-            });
+            }
 
             video.onended = function() {
                 clearTimeout(safetyLeash);
