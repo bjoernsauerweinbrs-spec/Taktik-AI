@@ -65,7 +65,7 @@
 <body>
 
     <div id="video-intro-overlay">
-        <video id="intro-video-element" playsinline>
+        <video id="intro-video-element" playsinline muted>
             <source src="Gemini_generated_video_DF1C8BC8.mp4" type="video/mp4">
             TONI 2.0 INITIALISIERUNG...
         </video>
@@ -101,12 +101,22 @@
             loginUI.style.display = 'none';
             overlay.style.display = 'flex';
             
+            // Mobile-Fix: Video stumm erzwingen
+            video.muted = true;
+            
+            // Backup-Timer: Falls das Video hängen bleibt, nach 9.5 Sek auf jeden Fall weiterleiten
+            const safetyLeash = setTimeout(() => {
+                window.location.href = 'app.html';
+            }, 9500);
+
             video.play().catch(e => {
-                video.muted = true; // Fallback für Browser-Autoplay-Regeln
-                video.play();
+                console.warn("Video-Autoplay blockiert, springe direkt zur App.");
+                clearTimeout(safetyLeash);
+                window.location.href = 'app.html';
             });
 
             video.onended = function() {
+                clearTimeout(safetyLeash); // Backup-Timer löschen
                 overlay.classList.add('fade-out');
                 setTimeout(() => {
                     window.location.href = 'app.html';
