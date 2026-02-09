@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - SEKTOR KABINE (RESTORED & FIFA ENHANCED)
- * Stand: Heute Mittag + Bearbeitbare Stats & Foto-Upload
+ * TONI 2.0 - SEKTOR KABINE (RECOVERY 14:00)
+ * Fokus: Strikt getrennte Ebenen [TRAINING] & [SPIEL]
  */
 window.SektorSporttasche = {
     open() {
@@ -11,6 +11,12 @@ window.SektorSporttasche = {
         this.render();
     },
 
+    // Schaltet den Modus global um und rendert neu
+    switchMode(newMode) {
+        window.Database.setMode(newMode);
+        this.render();
+    },
+
     render() {
         const content = document.querySelector('.briefcase-window');
         const mode = window.Database.activeMode || 'training';
@@ -18,10 +24,24 @@ window.SektorSporttasche = {
 
         content.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom: 2px solid var(--neon-green); padding-bottom: 15px;">
-                <h2 style="color:var(--neon-green); margin:0; letter-spacing:2px; text-transform:uppercase;">KABINE: ${window.coachInfo.verein || 'UNSER KADER'}</h2>
-                <div style="display:flex; gap:10px;">
-                    <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
+                <div style="display:flex; gap:15px; align-items:center;">
+                    <h2 style="color:var(--neon-green); margin:0; letter-spacing:1px; text-transform:uppercase; font-size:1.1rem;">KABINE</h2>
+                    
+                    <div style="display:flex; background:#000; border:1px solid #333; border-radius:8px; padding:3px;">
+                        <button onclick="window.SektorSporttasche.switchMode('training')" 
+                            style="padding:8px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.7rem; transition:0.3s;
+                            ${mode === 'training' ? 'background:var(--neon-green); color:#000;' : 'background:transparent; color:#666;'}">
+                            TRAINING
+                        </button>
+                        <button onclick="window.SektorSporttasche.switchMode('match')" 
+                            style="padding:8px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.7rem; transition:0.3s;
+                            ${mode === 'match' ? 'background:var(--accent-gold); color:#000;' : 'background:transparent; color:#666;'}">
+                            SPIEL
+                        </button>
+                    </div>
                 </div>
+                
+                <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
             </div>
 
             <div class="fifa-cards-grid" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
@@ -29,22 +49,23 @@ window.SektorSporttasche = {
                     let options = "";
                     let teamColor = p.team === 'B' ? '#ccff00' : 'var(--accent-gold)';
                     
+                    // EBENEN-LOGIK FÜR DROPDOWNS
                     if (mode === 'training') {
                         options = `
-                            <option value="both" ${p.assignment === 'both' ? 'selected' : ''}>Ohne Leibchen</option>
-                            <option value="training" ${p.assignment === 'training' ? 'selected' : ''}>Leibchen</option>
-                            <option value="none" ${p.assignment === 'none' ? 'selected' : ''}>Abwesend</option>
+                            <option value="both" ${p.assignment === 'both' ? 'selected' : ''}>OHNE LEIBCHEN</option>
+                            <option value="training" ${p.assignment === 'training' ? 'selected' : ''}>MIT LEIBCHEN</option>
+                            <option value="none" ${p.assignment === 'none' ? 'selected' : ''}>ABWESEND</option>
                         `;
                     } else {
                         options = `
-                            <option value="both" ${p.assignment === 'both' ? 'selected' : ''}>Startelf</option>
-                            <option value="match" ${p.assignment === 'match' ? 'selected' : ''}>Ersatzbank</option>
-                            <option value="none" ${p.assignment === 'none' ? 'selected' : ''}>Nicht im Kader</option>
+                            <option value="both" ${p.assignment === 'both' ? 'selected' : ''}>KADER (NOMINIERT)</option>
+                            <option value="none" ${p.assignment === 'none' ? 'selected' : ''}>NICHT IM KADER</option>
                         `;
                     }
 
                     return `
-                        <div class="fifa-card" style="background: rgba(0,0,0,0.6); border: 2px solid ${teamColor}; border-radius: 12px; width: 220px; padding: 15px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                        <div class="fifa-card" style="background: rgba(0,0,0,0.6); border: 2px solid ${mode === 'training' ? 'var(--neon-green)' : 'var(--accent-gold)'}; border-radius: 12px; width: 220px; padding: 15px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                            
                             <div style="color:#fff; font-weight:900; font-size:1.4rem; position:absolute; top:10px; left:15px; cursor:pointer;" 
                                  onclick="window.SektorSporttasche.edit(${p.id}, 'rat')">${p.rat || 80}</div>
                             
@@ -69,8 +90,8 @@ window.SektorSporttasche = {
                                 <div style="color:#aaa; cursor:pointer;" onclick="window.SektorSporttasche.edit(${p.id}, 'phy')">PHY <span style="color:#fff;">${p.phy || 70}</span></div>
                             </div>
 
-                            <select onchange="window.Database.updatePlayer(${p.id}, 'assignment', this.value); window.SektorSporttasche.render(); if(window.arena) window.arena.syncFromDatabase();" 
-                                    style="width:100%; margin-top:12px; background:#000; color:var(--neon-green); border:1px solid #444; padding:8px; border-radius:6px; font-weight:bold; font-size:0.75rem; cursor:pointer; text-transform:uppercase;">
+                            <select onchange="window.Database.updatePlayer(${p.id}, 'assignment', this.value); window.SektorSporttasche.render();" 
+                                    style="width:100%; margin-top:12px; background:#000; color:${mode === 'training' ? 'var(--neon-green)' : 'var(--accent-gold)'}; border:1px solid #444; padding:8px; border-radius:6px; font-weight:bold; font-size:0.75rem; cursor:pointer; text-transform:uppercase;">
                                 ${options}
                             </select>
                         </div>
@@ -80,7 +101,6 @@ window.SektorSporttasche = {
         `;
     },
 
-    // Die "Scharfmacher"-Funktionen für FIFA-Karten
     edit(id, key) {
         const p = window.Database.players.find(x => x.id === id);
         if (!p) return;
@@ -89,7 +109,6 @@ window.SektorSporttasche = {
             const newVal = isNaN(val) ? val : parseInt(val);
             window.Database.updatePlayer(id, key, newVal);
             this.render();
-            if(window.arena) window.arena.syncFromDatabase();
         }
     },
 
@@ -100,7 +119,6 @@ window.SektorSporttasche = {
         reader.onload = () => {
             window.Database.updatePlayer(id, 'img', reader.result);
             this.render();
-            if(window.arena) window.arena.syncFromDatabase();
         };
         reader.readAsDataURL(file);
     }
