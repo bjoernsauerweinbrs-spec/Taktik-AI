@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - SEKTOR JUNIOREN
- * Status: ELITE UPDATE (Kader-Deploy & Technik-Equipment)
+ * Status: ELITE UPDATE (Kader, Equipment & Video-Schnittstelle)
  */
 window.SektorJunioren = {
     currentYouth: null,
@@ -72,7 +72,6 @@ window.SektorJunioren = {
         const detailView = document.getElementById('youth-detail-view');
         detailView.style.display = 'block';
         
-        // Holen der Spieler aus den Presets
         const allPlayers = window.YouthPresets?.musterspieler || [];
         const filteredPlayers = allPlayers.filter(p => p.jugend === team);
 
@@ -81,7 +80,7 @@ window.SektorJunioren = {
             
             <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; margin-top: 15px;">
                 <div>
-                    <p style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Kader wählen (Beamen):</p>
+                    <p style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Kader (Beamen) & Analyse:</p>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
                         ${filteredPlayers.map(p => `
                             <button class="pro-btn" style="font-size: 0.7rem; padding: 5px;" onclick="window.SektorJunioren.deployPlayer('${p.id}', '${p.name}')">
@@ -89,6 +88,9 @@ window.SektorJunioren = {
                             </button>
                         `).join('')}
                     </div>
+                    <button class="pro-btn-gold" style="width:100%; margin-top:15px;" onclick="window.SektorJunioren.openVideoCoach()">
+                        <i class="fas fa-play-circle"></i> VIDEO-COACHING ÖFFNEN
+                    </button>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -101,54 +103,57 @@ window.SektorJunioren = {
         `;
     },
 
+    openVideoCoach() {
+        const query = this.currentYouth + " Fussball Technik Training";
+        const url = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}`;
+        
+        const videoOverlay = document.createElement('div');
+        videoOverlay.id = "video-coach-overlay";
+        videoOverlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:20000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;";
+        
+        videoOverlay.innerHTML = `
+            <div style="width:100%; max-width:900px; display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid var(--neon-green); padding-bottom:10px;">
+                <h3 style="color:var(--neon-green); margin:0; font-family:'Orbitron'; text-transform:uppercase;">TONI VIDEO-COACH: ${this.currentYouth}</h3>
+                <button onclick="document.getElementById('video-coach-overlay').remove()" style="background:none; border:1px solid #fff; color:#fff; cursor:pointer; padding:5px 15px; font-family:'Orbitron';">CLOSE [X]</button>
+            </div>
+            <iframe width="100%" height="550px" src="${url}" frameborder="0" allowfullscreen style="border:2px solid var(--neon-green); border-radius:10px; max-width:900px;"></iframe>
+            <p style="color:#888; margin-top:15px; font-size:0.8rem; letter-spacing:1px;">TONI scannt YouTube nach passenden Übungseinheiten...</p>
+        `;
+        
+        document.body.appendChild(videoOverlay);
+        if(window.ToniVoice) window.ToniVoice.speak("Ich habe das Video-Coaching für die " + this.currentYouth + " gestartet. Hier sind die aktuellsten Technik-Übungen.");
+    },
+
     deployPlayer(id, name) {
         if (!window.arena) return;
-        
-        // Spieler-Objekt für die Arena bauen
         const newPlayer = {
-            id: 'youth-' + id,
-            name: name,
-            type: 'player',
-            x: 200 + Math.random() * 400,
-            y: 150 + Math.random() * 200,
-            targetX: 200 + Math.random() * 400,
-            targetY: 150 + Math.random() * 200,
-            color: 'var(--neon-green)',
-            number: '?'
+            id: 'youth-' + id, name: name, type: 'player',
+            x: 200 + Math.random() * 400, y: 150 + Math.random() * 200,
+            targetX: 200 + Math.random() * 400, targetY: 150 + Math.random() * 200,
+            color: 'var(--neon-green)', number: '?'
         };
-
         window.arena.elements.push(newPlayer);
-        if(window.ToniVoice) window.ToniVoice.speak(`${name} ist auf dem Feld.`);
-        window.BriefcaseUI.toggle(); // Schließen zur Ansicht
+        if(window.ToniVoice) window.ToniVoice.speak(`${name} ist bereit.`);
+        window.BriefcaseUI.toggle();
     },
 
     addTrainingTool(type) {
         if (!window.arena) return;
-        
         if (type === 'cone') {
-            for(let i=0; i<5; i++) {
-                window.arena.addEquipment('cone', 300 + (i*60), 200);
-            }
+            for(let i=0; i<5; i++) window.arena.addEquipment('cone', 300 + (i*60), 200);
         } else if (type === 'ladder') {
             window.arena.addEquipment('ladder', 400, 100);
         }
-        
-        if(window.ToniVoice) window.ToniVoice.speak("Equipment wurde platziert.");
+        if(window.ToniVoice) window.ToniVoice.speak("Equipment platziert.");
         window.BriefcaseUI.toggle();
     },
 
     drawFuninoField() {
         if (!window.arena) return;
         window.arena.clearEquipment();
-        
-        const goals = [
-            {x: 65, y: 120}, {x: 65, y: 380},
-            {x: 735, y: 120}, {x: 735, y: 380}
-        ];
-
+        const goals = [{x: 65, y: 120}, {x: 65, y: 380}, {x: 735, y: 120}, {x: 735, y: 380}];
         goals.forEach(g => window.arena.addEquipment('goal', g.x, g.y));
-        
-        if(window.ToniVoice) window.ToniVoice.speak("Funino-Setup mit vier Toren ist bereit.");
+        if(window.ToniVoice) window.ToniVoice.speak("Funino-Setup bereit.");
         window.BriefcaseUI.toggle();
     }
 };
