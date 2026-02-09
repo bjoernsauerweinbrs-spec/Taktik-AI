@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - ZENTRALE STEUEREINHEIT (PRO-ROUTING)
- * Fokus: Präzise Sektor-Trennung und Container-Bereinigung.
+ * Fokus: Integration von Stadionheft & Sponsoring in das Folder-System.
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -43,11 +43,13 @@ window.BriefcaseUI = {
         const nav = document.getElementById('briefcase-nav');
         if(!nav) return;
 
+        // Dein erweitertes Folder-Set (Sponsoring & Zeitung integriert)
         const folders = [
             { id: 'sport', name: 'MANNSCHAFTSKABINE', icon: 'fa-users', color: 'var(--accent-gold)' },
             { id: 'training', name: 'TRAININGSBETRIEB', icon: 'fa-dumbbell', color: 'var(--accent-orange)' },
             { id: 'analyse', name: 'PERFORMANCE LAB', icon: 'fa-chart-line', color: 'var(--neon-green)' },
             { id: 'templates', name: 'STADIONHEFT', icon: 'fa-book-open', color: '#fff' },
+            { id: 'sponsoring', name: 'SPONSORING & FINANZEN', icon: 'fa-handshake', color: 'var(--accent-gold)' },
             { id: 'system', name: 'SYSTEM-SETUP', icon: 'fa-cogs', color: '#888' }
         ];
 
@@ -55,7 +57,7 @@ window.BriefcaseUI = {
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; padding: 20px;">
                 ${folders.map(f => `
                     <div class="fifa-card" onclick="BriefcaseUI.switchSektor('${f.id}')" 
-                         style="padding: 50px 20px; text-align: center; cursor: pointer; transition: 0.3s; border:1px solid rgba(255,255,255,0.1);">
+                         style="padding: 50px 20px; text-align: center; cursor: pointer; transition: 0.3s; border:1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4);">
                         <i class="fas ${f.icon}" style="font-size: 3rem; color: ${f.color}; margin-bottom: 25px; display: block;"></i>
                         <span style="font-weight: 900; letter-spacing: 2px; font-size: 0.8rem; color:#fff;">${f.name}</span>
                     </div>
@@ -72,10 +74,7 @@ window.BriefcaseUI = {
         
         if(!nav || !content || !active) return;
 
-        // CRITICAL: Hard Clear des Containers vor dem Sektor-Wechsel
         active.innerHTML = ""; 
-        console.log(`TONI Routing: Wechsle zu Sektor [${sektor}]`);
-
         nav.classList.add('hidden');
         content.classList.remove('hidden');
         
@@ -84,6 +83,7 @@ window.BriefcaseUI = {
             'training': 'TRAININGSBETRIEB',
             'analyse': 'PERFORMANCE LAB',
             'templates': 'STADIONHEFT',
+            'sponsoring': 'FINANZ-ZENTRALE',
             'system': 'SYSTEM-SETUP'
         };
 
@@ -93,7 +93,7 @@ window.BriefcaseUI = {
             </button> ${sectorNames[sektor] || sektor.toUpperCase()}
         `;
 
-        // Routing-Logik
+        // Routing-Logik mit neuen Modulen
         switch(sektor) {
             case 'sport':
                 if(window.SektorSporttasche) window.SektorSporttasche.render();
@@ -105,8 +105,12 @@ window.BriefcaseUI = {
                 if(window.SektorAnalyse) window.SektorAnalyse.render();
                 break;
             case 'templates':
-                // Wenn hier immer noch Analyse erscheint, muss die Sektor-Template Datei gefixt werden
-                if(window.SektorTemplates) window.SektorTemplates.render();
+                // Stadionheft / Zeitung
+                if(window.SektorStadionzeitung) window.SektorStadionzeitung.render();
+                break;
+            case 'sponsoring':
+                // Sponsoring Dashboard
+                if(window.SektorSponsoring) window.SektorSponsoring.open();
                 break;
             case 'system':
                 if(window.SektorSystem) window.SektorSystem.render();
