@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - DATABASE (MASTER LOGISTICS & SPONSORING)
- * Fokus: Datensicherheit, Sponsoren-Pool & Zeitungs-Slots
+ * TONI 2.0 - DATABASE (MASTER LOGISTICS, SPONSORING & BIOMETRICS)
+ * Status: VOLLSTÄNDIG & ERWEITERT (Smart-Alert Ready)
  */
 
 // 1. GLOBALER SPONSOREN-POOL
@@ -40,7 +40,7 @@ window.Database = {
             this.matchPlan = parsed.matchPlan || this.matchPlan;
             this.inventory = parsed.inventory || this.inventory;
             
-            this.repairPlayerData(); // Datensicherheit & Erweiterung
+            this.repairPlayerData(); 
         } else {
             this.createDemoTeam();
         }
@@ -70,25 +70,45 @@ window.Database = {
             p.phy = p.phy || 70;
             p.img = p.img || null;
 
-            // NEU: SPONSORING & MEDIEN SLOTS
+            // SPONSORING & MEDIEN SLOTS
             if (p.sponsorId === undefined) p.sponsorId = null; 
             if (p.isNewspaperStar === undefined) p.isNewspaperStar = false;
             
-            // POSITIONEN (Falls undefined, ab auf die Bank)
+            // --- NEU: BIOMETRISCHE DIAGNOSE-DATEN ---
+            p.fat = p.fat || 11.5;      // Körperfett %
+            p.weight = p.weight || 78;  // Gewicht kg
+            p.muscle = p.muscle || 44;  // Muskelmasse kg
+            p.water = p.water || 62;    // Wasser %
+            p.sleep = p.sleep || 90;    // Schlaf-Index 0-100
+            p.hrRest = p.hrRest || 50;  // Ruhepuls BPM
+            p.hrv = p.hrv || 85;        // HRV ms
+            p.vo2 = p.vo2 || 60;        // VO2 Max
+
+            // POSITIONEN (Auf die Bank)
             if (p.x === undefined) p.x = 100;
             if (p.y === undefined) p.y = 550; 
 
-            // TEAM ZUWEISUNG (Training/Match Logik)
+            // TEAM ZUWEISUNG
             p.assignment = p.assignment || 'both';
         });
         this.save();
-        console.log("TONI Database: Daten-Reparatur & Sponsoren-Check OK.");
+        console.log("TONI Database: Daten-Reparatur & Biometrie-Check OK.");
     },
 
     createDemoTeam() {
         this.players = [
-            { id: 1, name: "Max Master", pos: "ST", number: 9, x: 300, y: 550, rat: 85, pac: 90, sho: 88, pas: 75, dri: 82, def: 30, phy: 75, assignment: 'both', sponsorId: 'sp_1' },
-            { id: 2, name: "Finn Flügel", pos: "LM", number: 7, x: 100, y: 550, rat: 80, pac: 92, sho: 75, pas: 78, dri: 85, def: 45, phy: 65, assignment: 'both', sponsorId: null }
+            { 
+                id: 1, name: "Max Master", pos: "ST", number: 9, x: 300, y: 550, 
+                rat: 85, pac: 90, sho: 88, pas: 75, dri: 82, def: 30, phy: 75, 
+                assignment: 'both', sponsorId: 'sp_1', isNewspaperStar: true,
+                fat: 10.5, sleep: 95, hrRest: 45
+            },
+            { 
+                id: 2, name: "Finn Flügel", pos: "LM", number: 7, x: 100, y: 550, 
+                rat: 80, pac: 92, sho: 75, pas: 78, dri: 85, def: 45, phy: 65, 
+                assignment: 'both', sponsorId: null, isNewspaperStar: false,
+                fat: 14.2, sleep: 65, hrRest: 62 // Beispiel für Smart-Alert Trigger
+            }
         ];
         this.save();
     },
