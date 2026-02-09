@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - ARENA ENGINE (ELITE MODULAR EDITION)
- * Status: VOLLSTÄNDIG & SICHER (Pitch-Layer, Card-Layer, Input-Layer)
+ * Status: VOLLSTÄNDIG & SICHER (Pitch-Layer, Greenkeeper-Transition, Card-Layer)
  */
 window.arena = {
     canvas: null,
@@ -8,8 +8,13 @@ window.arena = {
     elements: [], 
     equipment: [], 
     selectedElement: null,
-    benchHeight: 180, // Mehr Platz für das neue Schild-Design
+    benchHeight: 180,
     isAnimating: false,
+    
+    // --- NEU: PITCH-MODUS & TRANSITION ---
+    currentPitchMode: 'classic', // 'classic' oder 'funino'
+    isTransitioning: false,
+    greenkeeperPos: -200,
 
     formations: {
         '3-4-3': [ 
@@ -39,34 +44,110 @@ window.arena = {
         this.renderLoop();
     },
 
-    // --- MODUL 1: PITCH ENGINE (Markierungen & Linien) ---
+    // --- MODUL 1: PITCH ENGINE (Classic vs. Funino) ---
     drawPitch(ctx, w, fieldH) {
         const m = 50;
         ctx.strokeStyle = "rgba(57, 255, 20, 0.4)";
         ctx.lineWidth = 2;
 
-        // Außenlinie & Mittellinie
+        // Außenlinie
         ctx.strokeRect(m, m, w - (m*2), fieldH - (m*2));
-        ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke();
         
-        // Mittelkreis & Spot
-        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 65, 0, Math.PI*2); ctx.stroke();
-        ctx.fillStyle = "rgba(57, 255, 20, 0.6)";
-        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 3, 0, Math.PI*2); ctx.fill();
+        if (this.currentPitchMode === 'classic') {
+            // CLASSIC LAYOUT
+            ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke();
+            ctx.beginPath(); ctx.arc(w/2, fieldH/2, 65, 0, Math.PI*2); ctx.stroke();
+            ctx.fillStyle = "rgba(57, 255, 20, 0.6)";
+            ctx.beginPath(); ctx.arc(w/2, fieldH/2, 3, 0, Math.PI*2); ctx.fill();
 
-        // Strafräume
-        const drawBox = (x, dir) => {
-            ctx.strokeRect(x, fieldH/2 - 120, 130 * dir, 240); // 16m
-            ctx.strokeRect(x, fieldH/2 - 50, 45 * dir, 100);  // 5m
-            ctx.beginPath(); ctx.arc(x + 90 * dir, fieldH/2, 3, 0, Math.PI*2); ctx.fill(); 
-        };
-        drawBox(m, 1); drawBox(w-m, -1);
+            const drawBox = (x, dir) => {
+                ctx.strokeRect(x, fieldH/2 - 120, 130 * dir, 240); // 16m
+                ctx.strokeRect(x, fieldH/2 - 50, 45 * dir, 100);  // 5m
+                ctx.beginPath(); ctx.arc(x + 90 * dir, fieldH/2, 3, 0, Math.PI*2); ctx.fill(); 
+            };
+            drawBox(m, 1); drawBox(w-m, -1);
 
-        // Standard-Tore (Nur wenn kein Funino-Equipment)
-        if (this.equipment.filter(e => e.type === 'goal').length === 0) {
-            ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
-            ctx.strokeRect(m-15, (fieldH/2)-45, 15, 90);
-            ctx.strokeRect(w-m, (fieldH/2)-45, 15, 90);
+            // Große Tore
+            if (this.equipment.filter(e => e.type === 'goal').length === 0) {
+                ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
+                ctx.strokeRect(m-15, (fieldH/2)-45, 15, 90);
+                ctx.strokeRect(w-m, (fieldH/2)-45, 15, 90);
+            }
+        } else {
+            // FUNINO LAYOUT (G-JUGEND)
+            ctx.setLineDash([10, 10]); // Schusszonen-Markierung
+            ctx.beginPath(); ctx.moveTo(m + 120, m); ctx.lineTo(m + 120, fieldH-m); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(w - m - 120, m); ctx.lineTo(w - m - 120, fieldH-m); ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Mittellinie (schwach)
+            ctx.strokeStyle = "rgba(57, 255, 20, 0.2)";
+            ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke();
+
+            // 4 Minitore (Fix integriert)
+            ctx.strokeStyle = "#fff"; ctx.lineWidth = 3;
+            const tW = 12, tH = 50;
+            ctx.strokeRect(m-tW, fieldH/2-110-tH/2, tW, tH); // Oben links
+            ctx.strokeRect(m-tW, fieldH/2+110-tH/2, tW, tH); // Unten links
+            ctx.strokeRect(w-m, fieldH/2-110-tH/2, tW, tH);  // Oben rechts
+            ctx.strokeRect(w-m, fieldH/2+110-tH/2, tW, tH);  // Unten rechts
+        }
+    },
+
+    // --- NEU: GREENKEEPER ENGINE ---
+    switchPitchMode(newMode) {
+        if (this.currentPitchMode === newMode || this.isTransitioning) return;
+        
+        this.isTransitioning = true;
+        this.greenkeeperPos = -300;
+        
+        if(window.ToniVoice) {
+            window.ToniVoice.speak(newMode === 'funino' ? 
+                "Greenkeeper rücken aus. Umbau auf Funino-Spielfeld." : 
+                "Rückbau auf Standard-Spielfeld läuft.");
+        }
+
+        // Modus-Switch erfolgt genau in der Mitte der Animation
+        const checkInterval = setInterval(() => {
+            if (this.greenkeeperPos > this.canvas.width / 2 && this.isTransitioning) {
+                this.currentPitchMode = newMode;
+                clearInterval(checkInterval);
+            }
+        }, 50);
+    },
+
+    drawGreenkeeper(ctx, w, h) {
+        if (!this.isTransitioning) return;
+        
+        this.greenkeeperPos += 20; // Geschwindigkeit
+
+        ctx.save();
+        // Der Scan-Balken (Greenkeeper)
+        const gradient = ctx.createLinearGradient(this.greenkeeperPos, 0, this.greenkeeperPos + 200, 0);
+        gradient.addColorStop(0, 'transparent');
+        gradient.addColorStop(0.5, 'rgba(57, 255, 20, 0.15)');
+        gradient.addColorStop(1, 'rgba(57, 255, 20, 0.4)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(this.greenkeeperPos, 0, 200, h);
+        
+        // Die Führungslinie
+        ctx.strokeStyle = "var(--neon-green)";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(this.greenkeeperPos + 200, 0);
+        ctx.lineTo(this.greenkeeperPos + 200, h);
+        ctx.stroke();
+
+        // Info-Text
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 12px Orbitron";
+        ctx.fillText("SYSTEM RECONFIGURING PITCH...", this.greenkeeperPos + 10, 30);
+        ctx.restore();
+
+        // Ende der Animation prüfen
+        if (this.greenkeeperPos > w + 200) {
+            this.isTransitioning = false;
         }
     },
 
@@ -75,27 +156,16 @@ window.arena = {
         ctx.save();
         const cw = 80, ch = 110;
         const x = el.x - cw/2, y = el.y - ch/2;
-
-        // FIFA Schild-Form (Hex-Tech Style)
         ctx.beginPath();
-        ctx.moveTo(x, y + 15);
-        ctx.lineTo(x + cw/2, y);
-        ctx.lineTo(x + cw, y + 15);
-        ctx.lineTo(x + cw, y + ch - 20);
-        ctx.lineTo(x + cw/2, y + ch);
-        ctx.lineTo(x, y + ch - 20);
+        ctx.moveTo(x, y + 15); ctx.lineTo(x + cw/2, y); ctx.lineTo(x + cw, y + 15);
+        ctx.lineTo(x + cw, y + ch - 20); ctx.lineTo(x + cw/2, y + ch); ctx.lineTo(x, y + ch - 20);
         ctx.closePath();
-
-        // Style
         ctx.shadowBlur = 15; ctx.shadowColor = el.color;
         ctx.fillStyle = "#0a0a0a"; ctx.fill();
         ctx.strokeStyle = el.color; ctx.lineWidth = 2; ctx.stroke();
-
-        // Content
         ctx.shadowBlur = 0; ctx.fillStyle = "#fff";
         ctx.font = "bold 18px Orbitron";
         ctx.fillText(el.rat || 80, x + 12, y + 35);
-        
         ctx.font = "900 10px Inter"; ctx.textAlign = "center";
         ctx.fillText(el.name ? el.name.split(' ').pop().toUpperCase() : 'PRO', el.x, y + ch - 15);
         ctx.restore();
@@ -111,25 +181,16 @@ window.arena = {
         ctx.restore();
     },
 
-    // --- MODUL 3: LOGIK & SYNC ---
     syncFromDatabase() {
         if(!this.canvas || !window.Database) return;
         const players = window.Database.players || [];
         const mode = window.Database.activeMode || 'training';
         const h = this.canvas.height;
-
-        this.elements = players
-            .filter(p => p.assignment !== 'none')
-            .map((p, i) => ({
-                ...p,
-                type: 'player',
-                x: p.x || (85 + (i % 8) * 95),
-                y: p.y || (h - 90),
-                targetX: p.x || (85 + (i % 8) * 95),
-                targetY: p.y || (h - 90),
-                color: (p.team === 'B') ? 'var(--accent-gold)' : 'var(--neon-green)'
-            }));
-        
+        this.elements = players.filter(p => p.assignment !== 'none').map((p, i) => ({
+            ...p, type: 'player', x: p.x || (85 + (i % 8) * 95), y: p.y || (h - 90),
+            targetX: p.x || (85 + (i % 8) * 95), targetY: p.y || (h - 90),
+            color: (p.team === 'B') ? 'var(--accent-gold)' : 'var(--neon-green)'
+        }));
         if(mode === 'match') this.createOpponentTeam();
     },
 
@@ -137,7 +198,6 @@ window.arena = {
         const form = this.formations['4-4-2']; 
         const h = this.canvas.height - this.benchHeight;
         const w = this.canvas.width;
-
         form.forEach((opp, i) => {
             this.elements.push({
                 id: 'opp-' + i, type: 'opponent', name: 'GEGNER', number: i + 1,
@@ -150,26 +210,25 @@ window.arena = {
     update() {
         let moving = false;
         this.elements.forEach(el => {
-            const dx = el.targetX - el.x;
-            const dy = el.targetY - el.y;
-            if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-                el.x += dx * 0.1; el.y += dy * 0.1;
-                moving = true;
-            }
+            const dx = el.targetX - el.x; const dy = el.targetY - el.y;
+            if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) { el.x += dx * 0.1; el.y += dy * 0.1; moving = true; }
         });
         this.isAnimating = moving;
     },
 
     render() {
         if(!this.ctx) return;
-        const w = this.canvas.width;
-        const h = this.canvas.height;
+        const w = this.canvas.width; const h = this.canvas.height;
         const fieldH = h - this.benchHeight;
 
         this.ctx.fillStyle = "#050a05";
         this.ctx.fillRect(0, 0, w, h);
         
         this.drawPitch(this.ctx, w, fieldH);
+        
+        // --- GREENKEEPER LAYER ---
+        this.drawGreenkeeper(this.ctx, w, fieldH);
+
         this.equipment.forEach(item => this.drawItem(this.ctx, item));
 
         // Bench Area
