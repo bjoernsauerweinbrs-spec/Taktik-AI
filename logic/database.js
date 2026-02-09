@@ -1,11 +1,19 @@
 /**
- * TONI 2.0 - DATABASE (MASTER LOGISTICS UPDATE - REPAIRED)
- * Fokus: Erweiterung für FIFA-Stats & Modus-Logik
- * Stand: 14:00 Uhr Recovery
+ * TONI 2.0 - DATABASE (MASTER LOGISTICS & SPONSORING)
+ * Fokus: Datensicherheit, Sponsoren-Pool & Zeitungs-Slots
  */
+
+// 1. GLOBALER SPONSOREN-POOL
+window.SponsorPool = [
+    { id: 'sp_1', name: "Fly Emirates", logo: "✈️", fee: 5000, color: "#d71920" },
+    { id: 'sp_2', name: "Adidas", logo: "👟", fee: 4500, color: "#000000" },
+    { id: 'sp_3', name: "Sparkasse", logo: "🏦", fee: 3000, color: "#ff0000" },
+    { id: 'sp_4', name: "Lokal-Hero", logo: "🍺", fee: 1500, color: "#f1c40f" }
+];
+
 window.Database = {
     players: [],
-    activeMode: 'training', // 'training' oder 'match'
+    activeMode: 'training',
     coachProfile: { name: null, verein: null, position: null, onboardingDone: false },
     
     inventory: {
@@ -20,7 +28,7 @@ window.Database = {
     matchPlan: { lineupImg: null, notes: "", motivation: "", opponentInfo: "", opponentTeam: "", formations: { toni: "4-4-2", trainer: "3-4-3" } },
 
     init() {
-        console.log("TONI Database: Initialisierung gestartet...");
+        console.log("TONI Database: Initialisierung mit Sponsoring...");
         const savedData = localStorage.getItem('toni_pro_db');
         const savedProfile = localStorage.getItem('toni_coach_data');
         const savedMode = localStorage.getItem('toni_active_mode');
@@ -32,7 +40,7 @@ window.Database = {
             this.matchPlan = parsed.matchPlan || this.matchPlan;
             this.inventory = parsed.inventory || this.inventory;
             
-            this.repairPlayerData();
+            this.repairPlayerData(); // Datensicherheit & Erweiterung
         } else {
             this.createDemoTeam();
         }
@@ -51,7 +59,8 @@ window.Database = {
         if (!this.players) return;
         this.players.forEach(p => {
             if (!p.id) p.id = Date.now() + Math.random();
-            // Sicherstellen, dass alle FIFA-Stats existieren
+            
+            // FIFA-STATS (Werte schützen)
             p.rat = p.rat || 70;
             p.pac = p.pac || 70;
             p.sho = p.sho || 70;
@@ -60,18 +69,26 @@ window.Database = {
             p.def = p.def || 70;
             p.phy = p.phy || 70;
             p.img = p.img || null;
-            // Standard-Zuweisung
-            p.assignment = p.assignment || 'both'; // 'both', 'training' (Leibchen), 'match' (Ersatz), 'none'
+
+            // NEU: SPONSORING & MEDIEN SLOTS
+            if (p.sponsorId === undefined) p.sponsorId = null; 
+            if (p.isNewspaperStar === undefined) p.isNewspaperStar = false;
+            
+            // POSITIONEN (Falls undefined, ab auf die Bank)
             if (p.x === undefined) p.x = 100;
-            if (p.y === undefined) p.y = 500; // Start auf der Bank (unten)
+            if (p.y === undefined) p.y = 550; 
+
+            // TEAM ZUWEISUNG (Training/Match Logik)
+            p.assignment = p.assignment || 'both';
         });
         this.save();
+        console.log("TONI Database: Daten-Reparatur & Sponsoren-Check OK.");
     },
 
     createDemoTeam() {
         this.players = [
-            { id: 1, name: "Max Master", pos: "ST", number: 9, x: 300, y: 550, rat: 85, pac: 90, sho: 88, pas: 75, dri: 82, def: 30, phy: 75, assignment: 'both' },
-            { id: 2, name: "Finn Flügel", pos: "LM", number: 7, x: 100, y: 550, rat: 80, pac: 92, sho: 75, pas: 78, dri: 85, def: 45, phy: 65, assignment: 'both' }
+            { id: 1, name: "Max Master", pos: "ST", number: 9, x: 300, y: 550, rat: 85, pac: 90, sho: 88, pas: 75, dri: 82, def: 30, phy: 75, assignment: 'both', sponsorId: 'sp_1' },
+            { id: 2, name: "Finn Flügel", pos: "LM", number: 7, x: 100, y: 550, rat: 80, pac: 92, sho: 75, pas: 78, dri: 85, def: 45, phy: 65, assignment: 'both', sponsorId: null }
         ];
         this.save();
     },
@@ -81,7 +98,6 @@ window.Database = {
         if (index !== -1) {
             this.players[index][key] = value;
             this.save();
-            // Signal an Arena, falls sich Position oder Status geändert hat
             if (window.arena && typeof window.arena.syncFromDatabase === 'function') {
                 window.arena.syncFromDatabase();
             }
