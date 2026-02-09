@@ -1,13 +1,14 @@
 /**
  * TONI 2.0 - ARENA ENGINE (RECOVERY 14:00 STAND)
- * Fokus: Modus-Sync & Transformation (Karte zu Punkt)
+ * Status: UPDATE FINALISIERT
+ * Fokus: Modus-Sync, Transformation & Layering-Fix
  */
 window.arena = {
     canvas: null,
     ctx: null,
     elements: [], 
     selectedElement: null,
-    benchHeight: 140, // Platz für die FIFA-Karten unten
+    benchHeight: 140, 
     isAnimating: false,
 
     formations: {
@@ -46,7 +47,7 @@ window.arena = {
         const h = this.canvas.height;
 
         this.elements = players
-            .filter(p => p.assignment !== 'none') // Nur aktive Spieler
+            .filter(p => p.assignment !== 'none')
             .map((p, i) => {
                 let color = 'var(--neon-green)';
                 if (mode === 'training' && p.assignment === 'training') color = '#ccff00';
@@ -120,17 +121,24 @@ window.arena = {
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(0, fieldH); ctx.lineTo(w, fieldH); ctx.stroke();
 
-        // 3. Spieler & Transformation
+        // 3. Spieler (Layering-Fix: Selected am Ende zeichnen)
         this.elements.forEach(el => {
-            const isOnBench = el.y > fieldH - 20;
-
-            // TRANSFORMATION LOGIK
-            if (mode === 'match' && isOnBench) {
-                this.drawFIFACard(ctx, el);
-            } else {
-                this.drawTacticalDot(ctx, el);
-            }
+            if (el === this.selectedElement) return;
+            this.drawEntity(ctx, el, fieldH, mode);
         });
+
+        if (this.selectedElement) {
+            this.drawEntity(ctx, this.selectedElement, fieldH, mode);
+        }
+    },
+
+    drawEntity(ctx, el, fieldH, mode) {
+        const isOnBench = el.y > fieldH - 20;
+        if (mode === 'match' && isOnBench && el.type !== 'opponent') {
+            this.drawFIFACard(ctx, el);
+        } else {
+            this.drawTacticalDot(ctx, el);
+        }
     },
 
     drawFIFACard(ctx, el) {
@@ -140,12 +148,22 @@ window.arena = {
         ctx.shadowBlur = 10; ctx.shadowColor = el.color;
         ctx.fillStyle = "#111"; ctx.fillRect(x, y, cw, ch);
         ctx.strokeStyle = el.color; ctx.lineWidth = 2; ctx.strokeRect(x, y, cw, ch);
-        ctx.shadowBlur = 0; ctx.fillStyle = "#fff"; ctx.textAlign = "center";
+        ctx.shadowBlur = 0;
+        
+        // Rating & Name
+        ctx.fillStyle = "#fff"; ctx.textAlign = "center";
         ctx.font = "bold 14px Inter"; ctx.fillText(el.rat || 80, x + 15, y + 20);
-        ctx.font = "bold 10px Inter"; ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, y + ch - 15);
+        ctx.font = "bold 10px Inter"; ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, y + ch - 12);
+        
+        // Bild-Logik (Prüft ob Image-Daten existieren)
         if(el.img) {
-            // Platzhalter für Bild-Logik falls vorhanden
+            try {
+                const img = new Image();
+                img.src = el.img;
+                ctx.drawImage(img, x + 5, y + 25, cw - 10, ch - 50);
+            } catch(e) { /* Fallback falls Bild korrupt */ }
         } else {
+            ctx.fillStyle = "rgba(255,255,255,0.1)";
             ctx.font = "20px 'Font Awesome 6 Free'"; ctx.fillText("\uf2f6", el.x, y + ch/2);
         }
         ctx.restore();
@@ -166,7 +184,8 @@ window.arena = {
         this.canvas.addEventListener('mousedown', (e) => {
             const rect = this.canvas.getBoundingClientRect();
             const mx = e.clientX - rect.left; const my = e.clientY - rect.top;
-            this.selectedElement = this.elements.find(el => Math.sqrt((mx-el.x)**2 + (my-el.y)**2) < 40);
+            // Radius auf 40 erhöht für besseres Greifen der Karten
+            this.selectedElement = this.elements.find(el => Math.sqrt((mx-el.x)**2 + (my-el.y)**2) < 45);
         });
         this.canvas.addEventListener('mousemove', (e) => {
             if (!this.selectedElement) return;
