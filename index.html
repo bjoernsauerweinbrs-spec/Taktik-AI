@@ -65,7 +65,7 @@
 <body>
 
     <div id="video-intro-overlay">
-        <video id="intro-video-element" playsinline muted preload="auto">
+        <video id="intro-video-element" playsinline preload="auto">
             <source src="Gemini_generated_video_DF1C8BC8.mp4" type="video/mp4">
             TONI 2.0 INITIALISIERUNG...
         </video>
@@ -103,11 +103,12 @@
             loginUI.style.display = 'none';
             overlay.style.display = 'flex';
             
-            // 2. Video-Setup
-            video.muted = true;
-            video.load(); // Erzwingt das Laden der Datei
+            // 2. Video-Setup: Wir schalten den Ton EIN, da der User gerade geklickt hat (Entrance)
+            video.muted = false; 
+            video.volume = 1.0;
+            video.load(); 
 
-            // 3. Safety-Timer (9.5 Sekunden) - Falls Video nicht lädt oder klemmt
+            // 3. Safety-Timer (9.5 Sekunden)
             const safetyLeash = setTimeout(() => {
                 console.log("Safety-Timer triggered.");
                 window.location.href = 'app.html';
@@ -115,14 +116,18 @@
 
             // 4. Video abspielen
             video.play().then(() => {
-                console.log("Video started successfully.");
+                console.log("Video gestartet mit Audio.");
             }).catch(e => {
-                console.warn("Autoplay blockiert oder Datei fehlt:", e);
-                clearTimeout(safetyLeash);
-                window.location.href = 'app.html'; // Fallback: Direkt zur App
+                console.warn("Autoplay trotz Klick blockiert, versuche Muted-Start:", e);
+                // Fallback: Falls der Browser trotzdem meckert, stumm versuchen
+                video.muted = true;
+                video.play().catch(() => {
+                    clearTimeout(safetyLeash);
+                    window.location.href = 'app.html';
+                });
             });
 
-            // 5. Sauberes Ende
+            // 5. Übergang zur App nach Videoende
             video.onended = function() {
                 clearTimeout(safetyLeash);
                 overlay.classList.add('fade-out');
