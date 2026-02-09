@@ -1,14 +1,13 @@
 /**
- * TONI 2.0 - ARENA ENGINE (ELITE RECOVERY + FIFA CARDS)
- * Status: REPARIERT (Farben-Sync & Canvas Null-Check)
+ * TONI 2.0 - ARENA ENGINE (RECOVERY 14:00 STAND)
+ * Fokus: Modus-Sync & Transformation (Karte zu Punkt)
  */
 window.arena = {
     canvas: null,
     ctx: null,
     elements: [], 
-    arrows: [], 
     selectedElement: null,
-    benchHeight: 130, 
+    benchHeight: 140, // Platz für die FIFA-Karten unten
     isAnimating: false,
 
     formations: {
@@ -31,67 +30,43 @@ window.arena = {
 
     init(canvasId) {
         this.canvas = document.getElementById(canvasId);
-        if(!this.canvas) return console.error("Arena: Canvas-Element nicht gefunden!");
+        if(!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
-        
         this.resize();
         this.setupEventListeners();
-        
-        if(window.Database) {
-            this.syncFromDatabase();
-            setTimeout(() => this.applyStartTactics(), 500);
-        }
-        
+        if(window.Database) this.syncFromDatabase();
         this.renderLoop();
     },
 
-    applyStartTactics() {
-        console.log("TONI: Formations-Sync (3-4-3 vs 4-4-2)");
-        this.setFormation('player', '3-4-3');
-        this.setFormation('opponent', '4-4-2');
-    },
-
     syncFromDatabase() {
-        if(!this.canvas || !window.Database || !window.Database.players) {
-            return;
-        }
+        if(!this.canvas || !window.Database) return;
         
-        const players = window.Database.players;
-        const h = this.canvas.height;
-        const w = this.canvas.width;
+        const players = window.Database.players || [];
         const mode = window.Database.activeMode || 'training';
+        const h = this.canvas.height;
 
-        this.elements = players.map((p, i) => {
-            // FARB-LOGIK: 
-            // Training & Leibchen -> Gelb (#ccff00)
-            // Alles andere -> Dein Standard Neon-Grün
-            let playerColor = 'var(--neon-green)';
-            if (mode === 'training' && p.assignment === 'training') {
-                playerColor = '#ccff00'; 
-            } else if (p.team === 'B') {
-                playerColor = 'var(--accent-gold)';
-            }
+        this.elements = players
+            .filter(p => p.assignment !== 'none') // Nur aktive Spieler
+            .map((p, i) => {
+                let color = 'var(--neon-green)';
+                if (mode === 'training' && p.assignment === 'training') color = '#ccff00';
+                else if (p.team === 'B') color = 'var(--accent-gold)';
 
-            return {
-                id: p.id,
-                type: 'player',
-                number: p.number || (i+1),
-                x: p.x || (60 + (i % 8) * 85), 
-                y: p.y || (h - 65),
-                targetX: p.x || (60 + (i % 8) * 85),
-                targetY: p.y || (h - 65),
-                color: playerColor, // Dynamisch zugewiesen
-                name: p.name || 'Spieler',
-                pos: p.pos || '?',
-                assignment: p.assignment // Für Filterung beim Zeichnen
-            };
-        });
+                return {
+                    ...p,
+                    type: 'player',
+                    x: p.x || (80 + (i % 8) * 90),
+                    y: p.y || (h - 70),
+                    targetX: p.x || (80 + (i % 8) * 90),
+                    targetY: p.y || (h - 70),
+                    color: color
+                };
+            });
         
         if(mode === 'match') this.createOpponentTeam();
     },
 
     createOpponentTeam() {
-        if(!this.canvas) return;
         const form = this.formations['4-4-2'];
         form.forEach((opp, i) => {
             this.elements.push({
@@ -104,21 +79,6 @@ window.arena = {
         this.isAnimating = true;
     },
 
-    setFormation(type, formationKey) {
-        if(!this.canvas) return;
-        const form = this.formations[formationKey];
-        if(!form) return;
-
-        const team = this.elements.filter(el => el.type === type);
-        team.forEach((el, i) => {
-            if(form[i]) {
-                el.targetX = form[i].x * this.canvas.width;
-                el.targetY = form[i].y * (this.canvas.height - this.benchHeight);
-            }
-        });
-        this.isAnimating = true;
-    },
-
     update() {
         if (!this.isAnimating) return;
         let moving = false;
@@ -126,53 +86,46 @@ window.arena = {
             const dx = el.targetX - el.x;
             const dy = el.targetY - el.y;
             if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-                el.x += dx * 0.1;
-                el.y += dy * 0.1;
+                el.x += dx * 0.1; el.y += dy * 0.1;
                 moving = true;
             } else {
-                el.x = el.targetX;
-                el.y = el.targetY;
+                el.x = el.targetX; el.y = el.targetY;
             }
         });
         if (!moving) this.isAnimating = false;
     },
 
     render() {
-        if(!this.ctx || !this.canvas) return;
+        if(!this.ctx) return;
         const ctx = this.ctx;
         const w = this.canvas.width;
         const h = this.canvas.height;
+        const mode = window.Database.activeMode;
 
         // 1. Spielfeld
         ctx.fillStyle = "#051205";
         ctx.fillRect(0, 0, w, h);
         
-        ctx.strokeStyle = "rgba(57, 255, 20, 0.3)";
-        ctx.lineWidth = 2;
         const m = 50;
         const fieldH = h - this.benchHeight;
+        ctx.strokeStyle = "rgba(57, 255, 20, 0.3)";
         ctx.strokeRect(m, m, w - m*2, fieldH - m*2);
         ctx.beginPath(); ctx.moveTo(w/2, m); ctx.lineTo(w/2, fieldH-m); ctx.stroke();
-        ctx.beginPath(); ctx.arc(w/2, (fieldH)/2, 60, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(w/2, fieldH/2, 60, 0, Math.PI*2); ctx.stroke();
 
-        // 2. Trainer-Bank
+        // 2. Bank-Bereich
         ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(0, h - this.benchHeight, w, this.benchHeight);
+        ctx.fillRect(0, fieldH, w, this.benchHeight);
         ctx.strokeStyle = "var(--data-cyan)";
         ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, h - this.benchHeight); ctx.lineTo(w, h - this.benchHeight); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, fieldH); ctx.lineTo(w, fieldH); ctx.stroke();
 
-        // 3. Tore
-        ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
-        ctx.strokeRect(m-15, (fieldH)/2 - 50, 15, 100);
-        ctx.strokeRect(w-m, (fieldH)/2 - 50, 15, 100);
-
-        // 4. Spieler zeichnen
+        // 3. Spieler & Transformation
         this.elements.forEach(el => {
-            // Filter: Spieler, die "Abwesend" oder "Nicht im Kader" sind, werden ignoriert
-            if (el.assignment === 'none') return;
+            const isOnBench = el.y > fieldH - 20;
 
-            if (el.y > h - this.benchHeight - 20) {
+            // TRANSFORMATION LOGIK
+            if (mode === 'match' && isOnBench) {
                 this.drawFIFACard(ctx, el);
             } else {
                 this.drawTacticalDot(ctx, el);
@@ -182,21 +135,19 @@ window.arena = {
 
     drawFIFACard(ctx, el) {
         ctx.save();
-        const cw = 70; const ch = 90;
+        const cw = 75; const ch = 100;
         const x = el.x - cw/2; const y = el.y - ch/2;
         ctx.shadowBlur = 10; ctx.shadowColor = el.color;
-        ctx.fillStyle = "#111";
-        ctx.fillRect(x, y, cw, ch);
-        ctx.strokeStyle = el.color; ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, cw, ch);
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 12px Inter"; ctx.textAlign = "center";
-        ctx.fillText(el.number, el.x, y + 25);
-        ctx.font = "8px Inter";
-        ctx.fillText(el.pos, el.x, y + 40);
-        ctx.font = "bold 9px Inter";
-        ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, y + 75);
+        ctx.fillStyle = "#111"; ctx.fillRect(x, y, cw, ch);
+        ctx.strokeStyle = el.color; ctx.lineWidth = 2; ctx.strokeRect(x, y, cw, ch);
+        ctx.shadowBlur = 0; ctx.fillStyle = "#fff"; ctx.textAlign = "center";
+        ctx.font = "bold 14px Inter"; ctx.fillText(el.rat || 80, x + 15, y + 20);
+        ctx.font = "bold 10px Inter"; ctx.fillText(el.name.split(' ').pop().toUpperCase(), el.x, y + ch - 15);
+        if(el.img) {
+            // Platzhalter für Bild-Logik falls vorhanden
+        } else {
+            ctx.font = "20px 'Font Awesome 6 Free'"; ctx.fillText("\uf2f6", el.x, y + ch/2);
+        }
         ctx.restore();
     },
 
@@ -214,9 +165,8 @@ window.arena = {
     setupEventListeners() {
         this.canvas.addEventListener('mousedown', (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-            this.selectedElement = this.elements.find(el => Math.sqrt((mx-el.x)**2 + (my-el.y)**2) < 35);
+            const mx = e.clientX - rect.left; const my = e.clientY - rect.top;
+            this.selectedElement = this.elements.find(el => Math.sqrt((mx-el.x)**2 + (my-el.y)**2) < 40);
         });
         this.canvas.addEventListener('mousemove', (e) => {
             if (!this.selectedElement) return;
@@ -227,7 +177,7 @@ window.arena = {
             this.selectedElement.targetY = this.selectedElement.y;
         });
         this.canvas.addEventListener('mouseup', () => {
-            if (this.selectedElement && window.Database && window.Database.updatePlayer) {
+            if (this.selectedElement && window.Database) {
                 window.Database.updatePlayer(this.selectedElement.id, 'x', this.selectedElement.x);
                 window.Database.updatePlayer(this.selectedElement.id, 'y', this.selectedElement.y);
             }
@@ -237,14 +187,10 @@ window.arena = {
 
     resize() {
         const container = document.getElementById('stage-container');
-        if(!container || !this.canvas) return;
+        if(!container) return;
         this.canvas.width = container.clientWidth;
         this.canvas.height = container.clientHeight;
     },
 
-    renderLoop() { 
-        this.update(); 
-        this.render(); 
-        requestAnimationFrame(() => this.renderLoop()); 
-    }
+    renderLoop() { this.update(); this.render(); requestAnimationFrame(() => this.renderLoop()); }
 };
