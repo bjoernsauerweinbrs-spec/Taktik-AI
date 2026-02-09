@@ -1,9 +1,10 @@
 /**
  * TONI 2.0 - ZENTRALE STEUEREINHEIT (PRO-ROUTING)
- * Fokus: Integration von Stadionheft & Sponsoring in das Folder-System.
+ * Fokus: Integration von Stadionheft, Sponsoring & Mikrofon-Aktivierung.
  */
 window.BriefcaseUI = {
     isOpen: false,
+    isListening: false,
 
     init: function() {
         console.log("TONI 2.0 Briefcase System: Online.");
@@ -27,6 +28,27 @@ window.BriefcaseUI = {
         }
     },
 
+    // NEU: Mikrofon-Steuerung (für KI Live-Talk)
+    toggleVoice: function() {
+        this.isListening = !this.isListening;
+        const micBtn = document.getElementById('main-mic-btn');
+        if(!micBtn) return;
+
+        if(this.isListening) {
+            micBtn.style.color = "var(--neon-green)";
+            micBtn.style.textShadow = "0 0 15px var(--neon-green)";
+            micBtn.classList.add('fa-beat');
+            if(window.ToniTTS) ToniTTS.speak("Ich höre zu, Coach.", "warm");
+            // Hier Trigger für WebSpeechAPI oder dein Gateway
+            if(window.ToniGateway) window.ToniGateway.startListening();
+        } else {
+            micBtn.style.color = "#fff";
+            micBtn.style.textShadow = "none";
+            micBtn.classList.remove('fa-beat');
+            if(window.ToniGateway) window.ToniGateway.stopListening();
+        }
+    },
+
     backToNav: function() {
         const nav = document.getElementById('briefcase-nav');
         const content = document.getElementById('briefcase-content');
@@ -34,7 +56,17 @@ window.BriefcaseUI = {
         
         if(nav) nav.classList.remove('hidden');
         if(content) content.classList.add('hidden');
-        if(title) title.innerText = "ZENTRALE AKTENTASCHE";
+        
+        // Header mit Mikrofon-Anker
+        if(title) {
+            title.innerHTML = `
+                <div style="display:flex; align-items:center; gap:20px;">
+                    ZENTRALE AKTENTASCHE
+                    <i id="main-mic-btn" class="fas fa-microphone" onclick="BriefcaseUI.toggleVoice()" 
+                       style="cursor:pointer; font-size:1.2rem; transition:0.3s;" title="KI Sprachsteuerung"></i>
+                </div>
+            `;
+        }
         
         this.renderFolderGrid();
     },
@@ -43,7 +75,6 @@ window.BriefcaseUI = {
         const nav = document.getElementById('briefcase-nav');
         if(!nav) return;
 
-        // Dein erweitertes Folder-Set (Sponsoring & Zeitung integriert)
         const folders = [
             { id: 'sport', name: 'MANNSCHAFTSKABINE', icon: 'fa-users', color: 'var(--accent-gold)' },
             { id: 'training', name: 'TRAININGSBETRIEB', icon: 'fa-dumbbell', color: 'var(--accent-orange)' },
@@ -88,12 +119,18 @@ window.BriefcaseUI = {
         };
 
         title.innerHTML = `
-            <button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:var(--neon-green); cursor:pointer; margin-right:15px; font-size:1.5rem;">
-                <i class="fas fa-arrow-left"></i>
-            </button> ${sectorNames[sektor] || sektor.toUpperCase()}
+            <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                <div style="display:flex; align-items:center;">
+                    <button onclick="BriefcaseUI.backToNav()" style="background:none; border:none; color:var(--neon-green); cursor:pointer; margin-right:15px; font-size:1.5rem;">
+                        <i class="fas fa-arrow-left"></i>
+                    </button> 
+                    ${sectorNames[sektor] || sektor.toUpperCase()}
+                </div>
+                <i id="main-mic-btn" class="fas fa-microphone" onclick="BriefcaseUI.toggleVoice()" 
+                   style="cursor:pointer; font-size:1.2rem; margin-right:20px; color:${this.isListening ? 'var(--neon-green)' : '#fff'}"></i>
+            </div>
         `;
 
-        // Routing-Logik mit neuen Modulen
         switch(sektor) {
             case 'sport':
                 if(window.SektorSporttasche) window.SektorSporttasche.render();
@@ -105,11 +142,9 @@ window.BriefcaseUI = {
                 if(window.SektorAnalyse) window.SektorAnalyse.render();
                 break;
             case 'templates':
-                // Stadionheft / Zeitung
-                if(window.SektorStadionzeitung) window.SektorStadionzeitung.render();
+                if(window.SektorTemplates) window.SektorTemplates.render();
                 break;
             case 'sponsoring':
-                // Sponsoring Dashboard
                 if(window.SektorSponsoring) window.SektorSponsoring.open();
                 break;
             case 'system':
