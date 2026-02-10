@@ -41,7 +41,7 @@
                 <i class="fas fa-microphone" id="main-mic-btn"></i>
                 <span>TONI</span>
             </div>
-            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.switchSektor('system')" title="Kader & Setup">
+            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.switchSektor('system')" title="Setup">
                 <i class="fas fa-sliders-h"></i>
                 <span>SETUP</span>
             </div>
@@ -96,12 +96,14 @@
     <script src="engine/arena.js"></script>
     <script src="ui/aktentasche-ui.js"></script>
     <script src="data/youth-presets.js"></script>
+    
     <script src="ui/sektoren/sektor-junioren.js"></script>
     <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
-    <script src="ui/sektoren/sektor-sponsoring.js"></script>
+    <script src="ui/sektoren/sektor-management.js"></script>
     <script src="ui/sektoren/sektor-templates.js"></script>
     <script src="ui/sektoren/sektor-settings.js"></script>
+    
     <script src="script.js"></script>
 
     <script>
@@ -114,51 +116,64 @@
             
             if(window.ToniVoice) window.ToniVoice.speak("Kader für " + teamName + " geladen.");
             
-            if(window.SektorSporttasche) {
+            // Fokus-Wechsel zur Kabine
+            if(window.BriefcaseUI) {
                 if(!window.BriefcaseUI.isOpen) window.BriefcaseUI.toggle();
-                window.BriefcaseUI.switchSektor('sport');
+                window.openSection('kabine');
             }
         };
 
-        // --- TEST-SPIELER INJECTOR (Damit es voll aussieht) ---
+        // --- TEST-SPIELER INJECTOR (Elite Kader 2026) ---
         function injectTestPlayers() {
             if(!window.Database || !window.Database.players) return;
-            if(window.Database.players.length > 0) return; // Nur wenn leer
+            // Wir prüfen, ob bereits echte Daten da sind. Falls < 3, füllen wir auf.
+            if(window.Database.players.length > 2) return; 
 
             const testData = [
-                { id: 101, name: "Max Mustermann", team: "Senioren", rat: 88, pos: "ST", assignment: "both" },
-                { id: 102, name: "Leon Goretzka", team: "Senioren", rat: 82, pos: "MF", assignment: "both" },
-                { id: 201, name: "Bambini Ben", team: "G-Jugend", rat: 92, pos: "ST", assignment: "both", sleep: 95 },
-                { id: 202, name: "Flitzer Felix", team: "G-Jugend", rat: 78, pos: "TW", assignment: "both", sleep: 65 },
-                { id: 301, name: "F-Jugend Finn", team: "F-Jugend", rat: 85, pos: "ABW", assignment: "both" }
+                { id: 101, name: "Max Mustermann", team: "Senioren", rat: 88, pos: "ST", assignment: "both", pac: 90, sho: 85, pas: 78, dri: 84, def: 40, phy: 75 },
+                { id: 102, name: "Leon Goretzka", team: "Senioren", rat: 82, pos: "MF", assignment: "both", pac: 75, sho: 78, pas: 85, dri: 80, def: 72, phy: 84 },
+                { id: 201, name: "Bambini Ben", team: "G-Jugend", rat: 92, pos: "ST", assignment: "both", sleep: 95, pac: 95, sho: 90 },
+                { id: 202, name: "Flitzer Felix", team: "G-Jugend", rat: 78, pos: "TW", assignment: "both", sleep: 65, pac: 80, def: 85 },
+                { id: 301, name: "F-Jugend Finn", team: "F-Jugend", rat: 85, pos: "ABW", assignment: "both", pac: 70, def: 90 }
             ];
 
-            testData.forEach(p => window.Database.players.push(p));
+            testData.forEach(p => {
+                // Nur hinzufügen, wenn ID nicht existiert
+                if(!window.Database.players.find(x => x.id === p.id)) {
+                    window.Database.players.push(p);
+                }
+            });
+            
             if(window.Database.save) window.Database.save();
-            console.log("✅ Test-Spieler injiziert.");
+            console.log("✅ Kader-Check: Test-Spieler aktiv.");
         }
 
         window.onload = () => {
             console.log("TONI 2.0 Dashboard lädt...");
+            
             if(window.arena) window.arena.init('main-canvas');
             if(window.BriefcaseUI) window.BriefcaseUI.init();
             
-            // Spieler nur laden, wenn noch keine da sind
+            // Datenbank-Abgleich
             injectTestPlayers();
 
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
-                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> System bereit. Elite-Cockpit 2026 aktiv.</div>`;
+                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> System bereit. Elite-Cockpit 2026 aktiv. Team-Kontext: ${window.currentTeamContext}</div>`;
                 runToniSystemCheck();
             }, 1000);
         };
 
         function runToniSystemCheck() {
             console.log("--- TONI 2.0 SYSTEM CHECK ---");
-            const sectors = ["SektorJunioren", "SektorSporttasche", "SektorAnalyse", "SektorSponsoring", "SektorTemplates"];
+            // Wir mappen die Sektoren-Namen zur Prüfung
+            const sectors = ["SektorJunioren", "SektorSporttasche", "SektorAnalyse", "SektorManagement", "SektorTemplates"];
             sectors.forEach(s => {
-                if (!window[s]) console.warn(`⚠️ Warnance: ${s} nicht geladen.`);
-                else console.log(`✅ ${s} aktiv.`);
+                if (!window[s]) {
+                    console.warn(`⚠️ Warnung: ${s} nicht gefunden.`);
+                } else {
+                    console.log(`✅ ${s} einsatzbereit.`);
+                }
             });
         }
     </script>
