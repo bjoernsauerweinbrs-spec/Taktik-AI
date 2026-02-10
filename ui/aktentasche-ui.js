@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - AKTENTASCHE UI (ELITE RECOVERY & TRANSFER UPDATE)
- * Status: ALLE KACHELN + TRANSFER-ZENTRUM AKTIV
+ * Status: NAVIGATION FIX (Transfer & Stadion Buttons repariert)
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -160,9 +160,9 @@ window.BriefcaseUI = {
         if(window.Database && window.Database.players) {
             window.Database.players.push(newP);
             if(window.Database.save) window.Database.save();
-            nameInp.value = ""; // Reset
+            nameInp.value = ""; 
             this.renderTransferCenter();
-            if(window.ToniVoice) window.ToniVoice.speak(`${newP.name} ist jetzt Teil der Mannschaft.`);
+            if(window.ToniVoice) window.ToniVoice.speak(`${newP.name} ist jetzt im Verein.`);
         }
     },
 
@@ -190,12 +190,19 @@ window.openSection = function(section) {
 
     try {
         switch(section) {
-            case 'transfer': window.BriefcaseUI.renderTransferCenter(); break;
+            case 'transfer': 
+                window.BriefcaseUI.renderTransferCenter(); 
+                break;
+            case 'stadion': 
+                if(window.SektorTemplates) {
+                    window.SektorTemplates.render();
+                    setTimeout(() => window.SektorTemplates.switchTab('magazine'), 50);
+                }
+                break;
             case 'junioren': if(window.SektorJunioren) window.SektorJunioren.open(); break;
             case 'kabine': if(window.SektorSporttasche) window.SektorSporttasche.open(); break;
             case 'analyse': if(window.SektorAnalyse) window.SektorAnalyse.open(); break;
             case 'management': if(window.SektorManagement) window.SektorManagement.open(); break;
-            case 'stadion': if(window.SektorStadion) window.SektorStadion.open(); break;
             case 'training': if(window.SektorTraining) window.SektorTraining.open(); break;
             case 'material': if(window.SektorMaterial) window.SektorMaterial.open(); break;
             case 'video': if(window.SektorVideo) window.SektorVideo.open(); break;
