@@ -114,6 +114,23 @@
     <script src="script.js"></script>
 
     <script>
+       // Zentrale Team-Steuerung für TONI 2.0
+window.currentTeamContext = "Senioren"; // Standardwert
+
+window.selectTeam = function(teamName) {
+    window.currentTeamContext = teamName;
+    console.log("⚽️ Kontext-Wechsel: " + teamName);
+    
+    // Feedback für den Coach
+    if(window.ToniVoice) window.ToniVoice.speak("Kader für " + teamName + " geladen.");
+    
+    // Öffnet direkt die Kabine mit dem neuen Filter
+    if(window.SektorSporttasche) {
+        if(!window.BriefcaseUI.isOpen) window.BriefcaseUI.toggle();
+        window.BriefcaseUI.switchSektor('sport');
+    }
+};
+
         window.onload = () => {
             console.log("TONI 2.0 Dashboard lädt...");
             // Arena mit dem Canvas verbinden
