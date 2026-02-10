@@ -1,0 +1,79 @@
+/* ARENA - FIFA MINI CARDS (BENCH) */
+.fifa-card-mini {
+    width: 85px;
+    height: 120px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 2px solid var(--neon-green);
+    border-radius: 4px;
+    position: relative;
+    cursor: grab;
+    transition: all 0.2s ease;
+    display: inline-block;
+    margin-right: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    font-family: 'Orbitron', sans-serif;
+}
+
+.fifa-card-mini:hover {
+    transform: translateY(-5px) scale(1.05);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
+}
+
+/* Rating & Position (Top Left) */
+.mini-rat {
+    position: absolute;
+    top: 10px;
+    left: 8px;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+}
+
+.mini-pos {
+    position: absolute;
+    top: 28px;
+    left: 8px;
+    font-size: 0.5rem;
+    color: var(--accent-gold);
+    font-weight: bold;
+}
+
+/* Rückennummer (Top Right) */
+.mini-number {
+    position: absolute;
+    top: 10px;
+    right: 8px;
+    font-size: 0.65rem;
+    color: var(--neon-green);
+    opacity: 0.8;
+}
+
+/* Name (Bottom Area) */
+.mini-name {
+    position: absolute;
+    bottom: 15px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.55rem;
+    color: #fff;
+    letter-spacing: 1px;
+    background: rgba(0,0,0,0.6);
+    padding: 3px 0;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Deko-Linien für den FIFA-Look */
+.fifa-card-mini::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.05) 50%, transparent 55%);
+    pointer-events: none;
+}
