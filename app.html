@@ -19,11 +19,14 @@
         .hidden { display: none !important; }
         #main-canvas { cursor: crosshair; touch-action: none; }
         * { -webkit-tap-highlight-color: transparent; outline: none; }
+        /* Sicherstellen, dass das Overlay über allem liegt */
+        .briefcase-overlay { z-index: 9999; }
     </style>
 </head>
 <body>
 
     <script>
+        // Sicherheits-Check
         if(sessionStorage.getItem('toni_auth') !== 'true') window.location.href = 'index.html';
     </script>
 
@@ -81,21 +84,17 @@
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
-                <h2 id="sector-title" style="color: var(--neon-green); font-size: 1.2rem; margin: 0; font-family: 'Orbitron'; letter-spacing: 3px;">ZENTRALE</h2>
-                <i class="fas fa-times" onclick="window.BriefcaseUI.toggle()" style="cursor: pointer; color: var(--status-error); font-size: 1.5rem;"></i>
-            </div>
-            <div id="briefcase-nav"></div> 
-            <div id="briefcase-content" class="hidden">
+            <div id="briefcase-nav"></div> <div id="briefcase-content" class="hidden">
                 <div id="active-content"></div> 
             </div>
         </div>
     </div>
 
     <script src="logic/database.js"></script>
+    <script src="data/youth-presets.js"></script>
+    
     <script src="engine/arena.js"></script>
     <script src="ui/aktentasche-ui.js"></script>
-    <script src="data/youth-presets.js"></script>
     
     <script src="ui/sektoren/sektor-junioren.js"></script>
     <script src="ui/sektoren/sektor-sporttasche.js"></script>
@@ -107,7 +106,6 @@
     <script src="script.js"></script>
 
     <script>
-        // --- ZENTRALE TEAM-STEUERUNG ---
         window.currentTeamContext = "Senioren"; 
 
         window.selectTeam = function(teamName) {
@@ -116,17 +114,14 @@
             
             if(window.ToniVoice) window.ToniVoice.speak("Kader für " + teamName + " geladen.");
             
-            // Fokus-Wechsel zur Kabine
             if(window.BriefcaseUI) {
                 if(!window.BriefcaseUI.isOpen) window.BriefcaseUI.toggle();
                 window.openSection('kabine');
             }
         };
 
-        // --- TEST-SPIELER INJECTOR (Elite Kader 2026) ---
         function injectTestPlayers() {
             if(!window.Database || !window.Database.players) return;
-            // Wir prüfen, ob bereits echte Daten da sind. Falls < 3, füllen wir auf.
             if(window.Database.players.length > 2) return; 
 
             const testData = [
@@ -138,42 +133,33 @@
             ];
 
             testData.forEach(p => {
-                // Nur hinzufügen, wenn ID nicht existiert
                 if(!window.Database.players.find(x => x.id === p.id)) {
                     window.Database.players.push(p);
                 }
             });
             
             if(window.Database.save) window.Database.save();
-            console.log("✅ Kader-Check: Test-Spieler aktiv.");
         }
 
         window.onload = () => {
-            console.log("TONI 2.0 Dashboard lädt...");
-            
             if(window.arena) window.arena.init('main-canvas');
             if(window.BriefcaseUI) window.BriefcaseUI.init();
             
-            // Datenbank-Abgleich
             injectTestPlayers();
 
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
-                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> System bereit. Elite-Cockpit 2026 aktiv. Team-Kontext: ${window.currentTeamContext}</div>`;
+                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> System bereit. Elite-Cockpit 2026 aktiv.</div>`;
                 runToniSystemCheck();
             }, 1000);
         };
 
         function runToniSystemCheck() {
-            console.log("--- TONI 2.0 SYSTEM CHECK ---");
-            // Wir mappen die Sektoren-Namen zur Prüfung
+            // Prüfung der Sektoren-Objekte
             const sectors = ["SektorJunioren", "SektorSporttasche", "SektorAnalyse", "SektorManagement", "SektorTemplates"];
             sectors.forEach(s => {
-                if (!window[s]) {
-                    console.warn(`⚠️ Warnung: ${s} nicht gefunden.`);
-                } else {
-                    console.log(`✅ ${s} einsatzbereit.`);
-                }
+                if (!window[s]) console.warn(`⚠️ Warnung: ${s} fehlt!`);
+                else console.log(`✅ ${s} aktiv.`);
             });
         }
     </script>
