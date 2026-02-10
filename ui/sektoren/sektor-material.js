@@ -1,17 +1,17 @@
 /**
  * TONI 2.0 - SEKTOR MATERIAL (LAGER & LOGISTIK)
- * Fokus: Bestandsaufnahme von Equipment, Medizin & Trikots.
- * Status: DATABASE-SYNC AKTIVIERT
+ * Status: FINAL RECOVERY - Self-Healing & Sponsoring-Update
  */
 window.SektorMaterial = {
     
     init() {
-        // Lädt Bestand aus der Database oder nutzt Standardwerte
-        if (!window.Database.inventory || window.Database.inventory.length === 0) {
+        // Sicherstellen, dass das Inventar-Objekt existiert und ein Array ist
+        if (!window.Database.inventory || !Array.isArray(window.Database.inventory)) {
+            console.log("📦 Sektor Material: Initialisiere Bestands-Datenbank...");
             window.Database.inventory = [
                 { id: 1, name: "Trikotsatz (Heim)", status: "Vollständig", count: 18, category: "Textil" },
                 { id: 2, name: "Trainingsbälle (Gr. 5)", status: "Prüfen", count: 22, category: "Equipment" },
-                { id: 3, name: "Sani-Koffer (Erste Hilfe)", status: "Ablauf prüfen", count: 2, category: "Medizin" },
+                { id: 3, name: "Sani-Koffer (Erste Hilfe)", status: "Vollständig", count: 2, category: "Medizin" },
                 { id: 4, name: "Markierungshauben", status: "Vollständig", count: 50, category: "Training" }
             ];
             if(window.Database.save) window.Database.save();
@@ -19,11 +19,11 @@ window.SektorMaterial = {
     },
 
     open() {
-        this.init(); // Sicherstellen, dass Daten da sind
+        this.init(); 
         const content = document.querySelector('.briefcase-window');
         if (!content) return;
 
-        // Layout-Schutz gegen Clipping & Scroll-Fix
+        // Layout-Schutz gegen Clipping
         content.style.paddingBottom = "150px";
         content.style.overflowY = "auto";
 
@@ -32,11 +32,19 @@ window.SektorMaterial = {
 
     render() {
         const content = document.querySelector('.briefcase-window');
-        const inventory = window.Database.inventory;
+        
+        // --- SELF-HEALING LOGIK (FIX FÜR MAP-ERROR) ---
+        let inventory = window.Database.inventory;
+        if (!Array.isArray(inventory)) {
+            console.error("Daten-Fehler: Inventory ist kein Array! Notfall-Reset aktiv.");
+            window.Database.inventory = [];
+            inventory = [];
+        }
+
         const verein = (window.coachInfo && window.coachInfo.verein) ? window.coachInfo.verein : "DEIN VEREIN";
         
         content.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom: 2px solid var(--data-cyan); padding-bottom: 20px;">
+            <div class="fadeIn" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom: 2px solid var(--data-cyan); padding-bottom: 20px;">
                 <div>
                     <h2 style="color:var(--data-cyan); letter-spacing: 2px; font-family:'Orbitron'; font-size:1.1rem;">LAGER-VERWALTUNG</h2>
                     <span style="color: #666; font-size: 0.7rem; text-transform: uppercase; letter-spacing:1px;">${verein} | LOGISTIK-HUB</span>
@@ -60,11 +68,11 @@ window.SektorMaterial = {
                             </tr>
                         </thead>
                         <tbody id="inventory-table-body">
-                            ${inventory.map((item, index) => `
+                            ${inventory.length > 0 ? inventory.map((item) => `
                                 <tr style="border-bottom: 1px solid #111; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                                     <td style="padding: 15px; font-weight: 900; color: #fff;">${item.name.toUpperCase()}</td>
                                     <td style="padding: 15px; color: #666;">${item.category}</td>
-                                    <td style="padding: 15px; font-family:'Orbitron'; color:var(--data-cyan);">${item.count}</td>
+                                    <td style="padding: 15px; font-family:'Orbitron'; color:var(--data-cyan); font-size: 1rem;">${item.count}</td>
                                     <td style="padding: 15px;">
                                         <span style="display: flex; align-items: center; gap: 8px; color: ${item.status === 'Vollständig' ? 'var(--neon-green)' : 'var(--accent-orange)'}">
                                             <div style="width:6px; height:6px; border-radius:50%; background:currentColor; box-shadow: 0 0 8px currentColor;"></div>
@@ -76,17 +84,26 @@ window.SektorMaterial = {
                                         <button onclick="window.SektorMaterial.deleteItem(${item.id})" style="background:none; border:none; color:#444; cursor:pointer; margin-left:10px;"><i class="fas fa-trash-alt"></i></button>
                                     </td>
                                 </tr>
-                            `).join('')}
+                            `).join('') : `<tr><td colspan="5" style="padding:40px; text-align:center; color:#444;">KEIN BESTAND GEFUNDEN</td></tr>`}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <div style="margin-top:25px; background: rgba(57, 255, 20, 0.05); padding: 20px; border-radius: 15px; border: 1px dashed var(--neon-green);">
-                <h3 style="color: var(--neon-green); font-size: 0.8rem; margin: 0 0 10px 0; font-family:'Orbitron';"><i class="fas fa-box-open"></i> TONI'S LOGISTIK-CHECK</h3>
-                <p style="font-size: 0.75rem; color: #aaa; line-height: 1.6; margin:0;">
-                    "Coach, für das nächste Training der <b>${window.currentTeamContext || 'Senioren'}</b> sind alle Trikotsätze einsatzbereit. Denke daran, die Bälle regelmäßig auf den richtigen Druck zu prüfen!"
-                </p>
+            <div style="margin-top:25px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="background: rgba(57, 255, 20, 0.05); padding: 20px; border-radius: 15px; border: 1px dashed var(--neon-green);">
+                    <h3 style="color: var(--neon-green); font-size: 0.8rem; margin: 0 0 10px 0; font-family:'Orbitron';"><i class="fas fa-box-open"></i> LOGISTIK-STATUS</h3>
+                    <p style="font-size: 0.75rem; color: #aaa; line-height: 1.6; margin:0;">
+                        "Coach, für die Einheiten der <b>${window.currentTeamContext || 'Senioren'}</b> sind alle Trikotsätze bereit. Denke an die Ballkontrolle!"
+                    </p>
+                </div>
+
+                <div style="background: rgba(212, 175, 55, 0.05); padding: 20px; border-radius: 15px; border: 1px dashed var(--accent-gold); opacity: 0.7;">
+                    <h3 style="color: var(--accent-gold); font-size: 0.8rem; margin: 0 0 10px 0; font-family:'Orbitron';"><i class="fas fa-handshake"></i> SPONSORING-SLOT</h3>
+                    <p style="font-size: 0.75rem; color: #888; line-height: 1.6; margin:0;">
+                        Sponsoring-Pool wird im nächsten Update synchronisiert. Material-Bestellungen sind dann direkt hier verknüpft.
+                    </p>
+                </div>
             </div>
         `;
     },
