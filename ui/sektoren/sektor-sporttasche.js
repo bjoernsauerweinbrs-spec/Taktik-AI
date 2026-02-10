@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - AKTENTASCHE UI (MASTER ROUTER)
- * Status: FINALISIERT - 4-KATEGORIEN-SYSTEM & RECOVERY FIX
+ * TONI 2.0 - AKTENTASCHE UI (MASTER HUB & ROUTER)
+ * Status: VOLLSTÄNDIG KONTROLLIERT & AKTUALISIERT
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -24,7 +24,7 @@ window.BriefcaseUI = {
         this.isOpen = !this.isOpen;
 
         if (this.isOpen) {
-            // Erzwingt die Sichtbarkeit gegenüber CSS-Konflikten
+            // Brute-Force Sichtbarkeit: Entfernt Klassen und erzwingt Flex-Layout
             overlay.classList.remove('hidden');
             overlay.style.setProperty('display', 'flex', 'important');
             this.renderMainGrid();
@@ -35,12 +35,13 @@ window.BriefcaseUI = {
     },
 
     /**
-     * ZENTRALE MIT 4 KATEGORIEN
+     * HUB-LAYOUT: Die 4 Haupt-Sektoren
      */
     renderMainGrid() {
         const windowBody = document.querySelector('.briefcase-window');
         if (!windowBody) return;
 
+        // Reset: Content-Bereich verstecken, Nav zeigen
         windowBody.style.overflowY = "auto";
         windowBody.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
@@ -95,7 +96,7 @@ window.BriefcaseUI = {
             </div>
 
             <div id="back-to-hub" class="hidden" style="text-align: center; margin-top: 30px; padding-bottom: 50px;">
-                <button class="pro-btn" style="border-color: var(--neon-green); color: var(--neon-green); background: none; padding: 10px 20px; cursor: pointer;" onclick="window.BriefcaseUI.renderMainGrid()">← ZURÜCK ZUR ZENTRALE</button>
+                <button class="pro-btn" style="border: 1px solid var(--neon-green); color: var(--neon-green); background: none; padding: 10px 20px; cursor: pointer;" onclick="window.BriefcaseUI.renderMainGrid()">← ZURÜCK ZUR ZENTRALE</button>
             </div>
         `;
     },
@@ -105,7 +106,7 @@ window.BriefcaseUI = {
         if (!active) return;
         const players = window.Database ? (window.Database.players || []) : [];
         active.innerHTML = `
-            <div style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 15px; border: 1px solid #333; text-align: center;">
+            <div class="fadeIn" style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 15px; border: 1px solid #333; text-align: center;">
                 <h3 style="color: var(--neon-green); font-family: 'Orbitron'; margin-bottom: 15px;">TRANSFER-ZENTRUM</h3>
                 <p>Aktueller Kader: <b>${players.length} Spieler</b> im System.</p>
                 <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
@@ -115,7 +116,7 @@ window.BriefcaseUI = {
 };
 
 /**
- * GLOBALER ROUTER - REPARIERT FÜR ALLE SEKTOREN
+ * GLOBALER ROUTER - STEUERT ALLE SEKTOREN
  */
 window.openSection = function(section) {
     const nav = document.getElementById('briefcase-nav');
@@ -123,9 +124,11 @@ window.openSection = function(section) {
     const backBtn = document.getElementById('back-to-hub');
     const activeContent = document.getElementById('active-content');
 
+    // UI State Switch
     if(nav) nav.style.display = 'none';
     if(content) content.classList.remove('hidden');
     if(backBtn) backBtn.classList.remove('hidden');
+    if(activeContent) activeContent.innerHTML = ""; // Clear previous content
 
     try {
         switch(section) {
@@ -172,12 +175,16 @@ window.openSection = function(section) {
                 break;
 
             default:
-                if(activeContent) activeContent.innerHTML = `<p style="text-align:center; padding:50px;">Sektor <b>${section.toUpperCase()}</b> wird kalibriert...</p>`;
+                if(activeContent) activeContent.innerHTML = `
+                    <div style="text-align:center; padding:50px; color:#666;">
+                        <i class="fas fa-tools" style="font-size:2rem; margin-bottom:15px;"></i><br>
+                        Sektor <b>${section.toUpperCase()}</b> wird kalibriert...
+                    </div>`;
         }
     } catch (e) {
         console.error("Routing-Fehler:", e);
     }
 };
 
-// Sofort-Initialisierung
+// Initialisierung beim Laden
 window.BriefcaseUI.init();
