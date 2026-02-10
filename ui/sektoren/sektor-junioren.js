@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - SEKTOR JUNIOREN
- * Status: ELITE UPDATE (Pitch-Switch & Global Team-Context Integration)
+ * TONI 2.0 - SEKTOR JUNIOREN (ELITE MANAGEMENT UPDATE)
+ * Status: FINALISIERT (Management-Konsole & Multi-Sektor Integration)
  */
 window.SektorJunioren = {
     currentYouth: null,
@@ -67,17 +67,11 @@ window.SektorJunioren = {
         `).join('');
     },
 
-    // Brücken-Funktion: Kombiniert Detail-View mit globalem Kontext
     handleTeamSelect(teamLabel) {
-        // 1. Globalen Kontext umschalten (für Kabine & Analyse)
         if(window.selectTeam) {
-            // Wir rufen selectTeam auf, aber verhindern das automatische Schließen der Junioren-Zentrale,
-            // damit der Coach noch die Arena-Tools nutzen kann.
             window.currentTeamContext = teamLabel;
             console.log("⚽️ Team-Kontext gesetzt auf: " + teamLabel);
         }
-        
-        // 2. Lokale Detail-Ansicht in der Junioren-Zentrale öffnen
         this.selectTeam(teamLabel);
     },
 
@@ -91,37 +85,53 @@ window.SektorJunioren = {
 
         detailView.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom:15px;">
-                <h4 style="color: var(--neon-green); margin:0;">FOKUS: ${team}</h4>
-                <button class="pro-btn" onclick="window.BriefcaseUI.switchSektor('sport')" style="font-size:0.6rem; padding:4px 10px;">
-                    <i class="fas fa-users"></i> ZUR KABINE
-                </button>
+                <h4 style="color: var(--neon-green); margin:0; font-family:'Orbitron'; text-transform:uppercase;">FOKUS: ${team}</h4>
+                <div style="display:flex; gap:10px;">
+                    <button class="pro-btn" onclick="window.BriefcaseUI.switchSektor('sport')" style="font-size:0.6rem; padding:4px 10px;">
+                        <i class="fas fa-users"></i> KABINE
+                    </button>
+                </div>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px;">
-                <div>
-                    <p style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Kader-Beamen (Schnell-Start):</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
-                        ${filteredPlayers.map(p => `
-                            <button class="pro-btn" style="font-size: 0.7rem; padding: 5px;" onclick="window.SektorJunioren.deployPlayer('${p.id}', '${p.name}')">
-                                ${p.name.split(' ')[0]}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <button class="pro-btn-gold" style="width:100%; margin-top:15px;" onclick="window.BriefcaseUI.switchSektor('reports')">
-                        <i class="fas fa-chart-line"></i> VITAL-CHECK STARTEN
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                
+                <div style="display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid #333;">
+                    <p style="font-size: 0.65rem; color: var(--data-cyan); text-transform: uppercase; margin:0 0 5px 0; letter-spacing:1px;">Management-Konsole:</p>
+                    
+                    <button class="pro-btn-gold" onclick="window.BriefcaseUI.switchSektor('templates'); window.SektorTemplates.switchTab('magazine');" style="text-align:left; padding:10px; font-size:0.75rem;">
+                        <i class="fas fa-book-open"></i> STADIONZEITUNG
                     </button>
-                    <button class="pro-btn-gold" style="width:100%; margin-top:10px;" onclick="window.SektorJunioren.openVideoCoach()">
-                        <i class="fas fa-play-circle"></i> VIDEO-COACHING ÖFFNEN
+                    
+                    <button class="pro-btn-gold" onclick="window.BriefcaseUI.switchSektor('training')" style="text-align:left; padding:10px; font-size:0.75rem;">
+                        <i class="fas fa-dumbbell"></i> TRAINING PLANEN
+                    </button>
+                    
+                    <button class="pro-btn-gold" onclick="window.BriefcaseUI.switchSektor('sport'); window.SektorSporttasche.switchMode('match');" style="text-align:left; padding:10px; font-size:0.75rem;">
+                        <i class="fas fa-chess-board"></i> TAKTIK & AUFSTELLUNG
+                    </button>
+                    
+                    <button class="pro-btn-gold" onclick="window.BriefcaseUI.switchSektor('reports')" style="text-align:left; padding:10px; font-size:0.75rem;">
+                        <i class="fas fa-chart-line"></i> PERFORMANCE ANALYSE
                     </button>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <p style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Arena-Konfiguration:</p>
-                    <button class="pro-btn-gold" onclick="window.SektorJunioren.triggerPitchSwitch('${team === 'G-Jugend' ? 'funino' : 'classic'}')">
-                        ${team === 'G-Jugend' ? 'FUNINO-PITCH (4 TORE)' : 'STANDARD-PITCH'}
+                    <p style="font-size: 0.65rem; color: #888; text-transform: uppercase; margin:0;">Arena & Kader:</p>
+                    <button class="pro-btn-gold" style="font-size:0.7rem;" onclick="window.SektorJunioren.triggerPitchSwitch('${team === 'G-Jugend' ? 'funino' : 'classic'}')">
+                        ${team === 'G-Jugend' ? 'FUNINO PITCH' : 'STANDARD PITCH'}
                     </button>
-                    <button class="pro-btn" onclick="window.SektorJunioren.addTrainingTool('cone')">+ HÜTCHEN-PARCOURS</button>
-                    <button class="pro-btn" onclick="window.SektorJunioren.addTrainingTool('ladder')">+ KOORDI-LEITER</button>
+                    
+                    <div style="margin-top:5px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                        ${filteredPlayers.map(p => `
+                            <button class="pro-btn" style="font-size: 0.65rem; padding: 5px;" onclick="window.SektorJunioren.deployPlayer('${p.id}', '${p.name}')">
+                                ${p.name.split(' ')[0]}
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <button class="pro-btn" style="margin-top:5px; font-size:0.7rem;" onclick="window.SektorJunioren.openVideoCoach()">
+                        <i class="fas fa-play-circle"></i> VIDEO-COACHING
+                    </button>
                 </div>
             </div>
         `;
@@ -136,20 +146,16 @@ window.SektorJunioren = {
     openVideoCoach() {
         const query = this.currentYouth + " Fussball Technik Training";
         const url = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}`;
-        
         const videoOverlay = document.createElement('div');
         videoOverlay.id = "video-coach-overlay";
         videoOverlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:20000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;";
-        
         videoOverlay.innerHTML = `
             <div style="width:100%; max-width:900px; display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid var(--neon-green); padding-bottom:10px;">
                 <h3 style="color:var(--neon-green); margin:0; font-family:'Orbitron'; text-transform:uppercase;">TONI VIDEO-COACH: ${this.currentYouth}</h3>
                 <button onclick="document.getElementById('video-coach-overlay').remove()" style="background:none; border:1px solid #fff; color:#fff; cursor:pointer; padding:5px 15px; font-family:'Orbitron';">CLOSE [X]</button>
             </div>
             <iframe width="100%" height="550px" src="${url}" frameborder="0" allowfullscreen style="border:2px solid var(--neon-green); border-radius:10px; max-width:900px;"></iframe>
-            <p style="color:#888; margin-top:15px; font-size:0.8rem; letter-spacing:1px;">TONI durchsucht YouTube für ${this.currentYouth}...</p>
         `;
-        
         document.body.appendChild(videoOverlay);
         if(window.ToniVoice) window.ToniVoice.speak("Video-Coaching für die " + this.currentYouth + " wird geladen.");
     },
@@ -164,17 +170,6 @@ window.SektorJunioren = {
         };
         window.arena.elements.push(newPlayer);
         if(window.ToniVoice) window.ToniVoice.speak(`${name} ist auf dem Platz.`);
-        window.BriefcaseUI.toggle();
-    },
-
-    addTrainingTool(type) {
-        if (!window.arena) return;
-        if (type === 'cone') {
-            for(let i=0; i<5; i++) window.arena.addEquipment('cone', 300 + (i*60), 200);
-        } else if (type === 'ladder') {
-            window.arena.addEquipment('ladder', 400, 100);
-        }
-        if(window.ToniVoice) window.ToniVoice.speak("Trainingsequipment platziert.");
         window.BriefcaseUI.toggle();
     }
 };
