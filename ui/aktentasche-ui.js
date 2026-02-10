@@ -1,6 +1,7 @@
 /**
- * TONI 2.0 - MASTER HUB UI (RESTRUCTURED 2026)
- * Fokus: Rollentrennung Pro/Jugend & Pitch-Setup
+ * TONI 2.0 - MASTER HUB UI (ELITE SYNC 2026)
+ * Fokus: Hard-Linking der Sektoren & Bug-Fixing Navigation
+ * Status: MASTER-SYNC - FINAL RECOVERY
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -31,11 +32,6 @@ window.BriefcaseUI = {
         }
     },
 
-    switchSektor(section) {
-        if (!this.isOpen) this.toggle();
-        window.openSection(section);
-    },
-
     renderMainGrid() {
         const windowBody = document.querySelector('.briefcase-window');
         if (!windowBody) return;
@@ -59,15 +55,6 @@ window.BriefcaseUI = {
                     <button class="tactic-btn" onclick="window.openSection('kabine')"><i class="fas fa-users-cog"></i> KABINE (STATS & TRANSFERS)</button>
                     <button class="tactic-btn" onclick="window.openSection('matchmappe')"><i class="fas fa-file-invoice"></i> MATCH-MAPPE</button>
                     <button class="tactic-btn" onclick="window.openSection('training')"><i class="fas fa-clipboard-list"></i> TRAININGS-PLANER</button>
-                    
-                    <div style="margin-top:15px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05);">
-                        <span style="font-size:0.55rem; color:#555; letter-spacing:1px;">ARENA-MODUS:</span>
-                        <div style="display:flex; gap:5px; margin-top:5px;">
-                            <button class="tactic-btn" style="flex:1; font-size:0.55rem; padding:5px;" onclick="window.arena.setPitchMode('funino')">FUNINO</button>
-                            <button class="tactic-btn" style="flex:1; font-size:0.55rem; padding:5px;" onclick="window.arena.setPitchMode('kleinfeld')">KLEINFELD</button>
-                            <button class="tactic-btn" style="flex:1; font-size:0.55rem; padding:5px;" onclick="window.arena.setPitchMode('grossfeld')">NORMAL</button>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="mgmt-card" style="border-color: var(--data-cyan);">
@@ -79,14 +66,14 @@ window.BriefcaseUI = {
 
                 <div class="mgmt-card" style="border-color: var(--accent-gold);">
                     <div style="color: var(--accent-gold); font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; font-family: 'Orbitron';">📈 BUSINESS</div>
-                    <button class="tactic-btn" onclick="window.openSection('management')"><i class="fas fa-handshake"></i> PARTNER-POOL</button>
+                    <button class="tactic-btn" onclick="window.openSection('management')"><i class="fas fa-handshake"></i> SPONSORING-STUDIO</button>
                     <button class="tactic-btn" onclick="window.openSection('analyse')"><i class="fas fa-heartbeat"></i> PERFORMANCE-HUB</button>
                     <button class="tactic-btn" onclick="window.openSection('material')"><i class="fas fa-box"></i> LAGER / LOGISTIK</button>
                 </div>
 
                 <div class="mgmt-card" style="border-color: #fff;">
                     <div style="color: #fff; font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; font-family: 'Orbitron';">📺 MEDIA</div>
-                    <button class="tactic-btn" onclick="window.openSection('stadionzeitung')"><i class="fas fa-newspaper"></i> MATCHDAY REPORT</button>
+                    <button class="tactic-btn" onclick="window.openSection('stadionzeitung')"><i class="fas fa-newspaper"></i> STADIONZEITUNG (PRO)</button>
                     <button class="tactic-btn" onclick="window.openSection('video')"><i class="fas fa-video"></i> VIDEO-ARCHIV</button>
                 </div>
 
@@ -104,10 +91,10 @@ window.BriefcaseUI = {
 };
 
 /**
- * GLOBALER ROUTER (AKTUALISIERT)
+ * GLOBALER ROUTER (FIXED & HARD-LINKED)
  */
 window.openSection = function(section) {
-    console.log("📂 Sektor-Anfrage:", section);
+    console.log("📂 Sektor-Wechsel aktiv:", section);
     const nav = document.getElementById('briefcase-nav');
     const content = document.getElementById('briefcase-content');
     const backBtn = document.getElementById('back-to-hub');
@@ -119,33 +106,36 @@ window.openSection = function(section) {
 
     try {
         switch(section) {
-            case 'kabine': if(window.SektorSporttasche) window.SektorSporttasche.open(); break;
-            case 'matchmappe': if(window.SektorMatchMappe) window.SektorMatchMappe.open(); break;
-            case 'training': if(window.SektorTraining) window.SektorTraining.open(); break;
-            case 'junioren_pool': if(window.SektorJunioren) window.SektorJunioren.open(); break;
-            case 'stammplatz': 
-                if(window.SektorTemplates) {
-                    window.SektorTemplates.render();
-                    setTimeout(() => { if(window.SektorTemplates.switchTab) window.SektorTemplates.switchTab('stammplatz'); }, 50);
-                } break;
-            case 'scouting': if(window.SektorScouting) window.SektorScouting.open(); break;
-            case 'management': if(window.SektorManagement) window.SektorManagement.open(); break;
-            case 'analyse': if(window.SektorAnalyse) window.SektorAnalyse.open(); break;
-            case 'material': if(window.SektorMaterial) window.SektorMaterial.open(); break;
+            case 'kabine': 
+                if(window.SektorSporttasche) window.SektorSporttasche.open(); 
+                break;
+            case 'junioren_pool': 
+                if(window.SektorJunioren) window.SektorJunioren.open(); 
+                break;
+            case 'management': 
+            case 'business':
+                // Öffnet das neue Business-Modul mit Sponsoren-Akquise
+                if(window.SektorBusiness) window.SektorBusiness.open(); 
+                break;
+            case 'analyse': 
+                if(window.SektorAnalyse) window.SektorAnalyse.open(); 
+                break;
             case 'stadionzeitung': 
-                if(window.SektorTemplates) {
-                    window.SektorTemplates.render();
-                    setTimeout(() => { if(window.SektorTemplates.switchTab) window.SektorTemplates.switchTab('magazine'); }, 50);
-                } break;
-            case 'video': if(window.SektorVideo) window.SektorVideo.open(); break;
-            case 'system': 
-            case 'settings': if(window.SektorSettings) window.SektorSettings.open(); break;
+            case 'media':
+                // Öffnet das neue 6-Seiten Hochglanzmagazin
+                if(window.SektorMagazin) window.SektorMagazin.open(); 
+                break;
+            case 'stammplatz': 
+                if(window.SektorAnalyse) window.SektorAnalyse.open();
+                break;
+            case 'settings': 
+                if(window.SektorSettings) window.SektorSettings.open(); 
+                break;
             default:
-                if(activeContent) activeContent.innerHTML = `<p style="text-align:center; padding:50px;">Sektor <b>${section}</b> wird vorbereitet.</p>`;
+                if(activeContent) activeContent.innerHTML = `<p style="text-align:center; padding:50px;">Sektor <b>${section}</b> wird geladen...</p>`;
         }
     } catch (e) {
-        console.error("Router-Fehler:", e);
+        console.error("Router-Absturz verhindert:", e);
     }
 };
-
 window.BriefcaseUI.init();
