@@ -18,14 +18,16 @@ window.ToniVoice = {
         if (SpeechRecognition) {
             this.recognition = new SpeechRecognition();
             this.recognition.lang = 'de-DE';
-            this.recognition.continuous = false; // Für präzise Befehle
+            this.recognition.continuous = false;
             this.recognition.onresult = (e) => {
                 const text = e.results[0][0].transcript;
                 console.log("🎤 Voice-Input:", text);
                 handleCommand(text);
             };
             this.recognition.onend = () => {
-                if(this.isListening) this.recognition.start(); // Auto-Restart im Live-Modus
+                if(this.isListening) {
+                    try { this.recognition.start(); } catch(e) {}
+                }
             };
         }
     },
@@ -33,29 +35,30 @@ window.ToniVoice = {
     startListening() {
         if (!this.recognition) return;
         this.isListening = true;
-        const mic = document.getElementById('mic-trigger');
-        if (mic) mic.style.color = 'var(--neon-green)';
-        this.recognition.start();
+        const micBtn = document.getElementById('main-mic-btn');
+        if (micBtn) micBtn.style.color = 'var(--neon-green)';
+        try { this.recognition.start(); } catch(e) {}
         console.log("🎙️ TONI hört jetzt live zu...");
     },
     stopListening() {
         this.isListening = false;
-        const mic = document.getElementById('mic-trigger');
-        if (mic) mic.style.color = '';
+        const micBtn = document.getElementById('main-mic-btn');
+        if (micBtn) micBtn.style.color = '';
         this.recognition?.stop();
     },
     speak(text) {
         this.synth.cancel();
         const ut = new SpeechSynthesisUtterance(text);
         const voices = this.synth.getVoices();
-        ut.voice = voices.find(v => v.lang === 'de-DE') || voices[0];
+        ut.voice = voices.find(v => v.lang.includes('de-DE')) || voices[0];
         ut.pitch = 0.9; 
         ut.rate = 1.0;
         this.synth.speak(ut);
     }
 };
 
-// --- 2. NAVIGATION & ROUTER (ELITE MAPPING) ---
+// --- 2. NAVIGATION & ROUTER (SYNCHRONISIERT) ---
+// Wir nutzen die globale openSection, die auch von der Aktentasche genutzt wird
 window.openSection = function(name) {
     console.log("🛰️ Bridge-Routing -> Sektor:", name);
     
@@ -70,27 +73,29 @@ window.openSection = function(name) {
                 'kabine': window.SektorSporttasche,
                 'analyse': window.SektorAnalyse,
                 'management': window.SektorManagement,
-                'stadion': window.SektorTemplates, // Umleitung auf Templates
-                'stammplatz': window.SektorTemplates, // Sticker-Studio
+                'stadion': window.SektorTemplates,
+                'stammplatz': window.SektorTemplates,
                 'material': window.SektorMaterial,
                 'video': window.SektorVideo,
-                'settings': window.SektorSettings || window.SektorSystem
+                'settings': window.SektorSettings || window.SektorSystem,
+                'system': window.SektorSettings
             };
 
             const target = targetMap[name];
 
             if (target && typeof target.open === 'function') {
                 target.open();
-                // Spezial-Tab für Templates
                 if(name === 'stadion' && target.switchTab) target.switchTab('magazine');
                 if(name === 'stammplatz' && target.switchTab) target.switchTab('stammplatz');
+            } else if (name === 'transfer') {
+                if(window.BriefcaseUI.renderTransferCenter) window.BriefcaseUI.renderTransferCenter();
             } else {
-                throw new Error(`Sektor '${name}' nicht initialisiert.`);
+                throw new Error(`Sektor '${name}' nicht bereit.`);
             }
         } catch (err) {
             console.error("KRITISCH:", err);
-            const chat = document.getElementById('chat-box');
-            if(chat) chat.innerHTML += `<p style="color:red"><b>FEHLER:</b> ${err.message}</p>`;
+            const activeContent = document.getElementById('active-content');
+            if(activeContent) activeContent.innerHTML = `<p style="color:red; text-align:center; padding:20px;"><b>FEHLER:</b> ${err.message}</p>`;
         }
     }, 200);
 };
@@ -102,26 +107,29 @@ async function handleCommand(command) {
     const inputField = document.getElementById('command-input');
     const cmdLower = command.toLowerCase();
     
-    // Chat-Eintrag
-    const userMsg = document.createElement('p');
-    userMsg.innerHTML = `<span style="color:var(--text-dim)">Coach:</span> ${command}`;
+    // UI Feedback
+    const userMsg = document.createElement('div');
+    userMsg.style.marginBottom = "10px";
+    userMsg.innerHTML = `<span style="color:var(--text-dim); font-size:0.7rem;">COACH:</span><br>${command}`;
     chatBox.appendChild(userMsg);
     if(inputField) inputField.value = ""; 
 
-    const toniMsg = document.createElement('p');
+    const toniMsg = document.createElement('div');
     toniMsg.style.color = "var(--neon-green)";
+    toniMsg.style.marginBottom = "15px";
     chatBox.appendChild(toniMsg);
 
     // SPEZIAL-BEFEHL: SPIELMODUS (Saved Info 2026-02-07)
     if (cmdLower.includes("spielmodus") || cmdLower.includes("starten")) {
-        let resp = "Spielmodus wird aktiviert. Toni-Elf steht im 4-4-2, Trainer-Team im 3-4-3. Alle Systeme bereit.";
-        toniMsg.innerHTML = `<strong>Toni:</strong> ${resp}`;
+        let resp = "Spielmodus initiiert. Toni-Elf rückt ein ins 4-4-2. Trainer-Team formiert sich im 3-4-3. Alle Analyse-Systeme sind live.";
+        toniMsg.innerHTML = `<strong>TONI:</strong> ${resp}`;
         window.ToniVoice.speak(resp);
         
         if(window.arena && window.arena.setupFormation) {
             window.arena.setupFormation('Toni', '4-4-2');
             window.arena.setupFormation('Trainer', '3-4-3');
         }
+        chatBox.scrollTop = chatBox.scrollHeight;
         return;
     }
 
@@ -129,33 +137,44 @@ async function handleCommand(command) {
     if (!window.coachInfo.name) {
         window.coachInfo.name = command;
         localStorage.setItem('toni_coach_data', JSON.stringify(window.coachInfo));
-        let resp = `Sehr angenehm, Coach ${command}! Von welchem Verein reden wir heute?`;
-        toniMsg.innerHTML = `<strong>Toni:</strong> ${resp}`;
+        let resp = `Sehr angenehm, Coach ${command}! Für welchen Verein ziehen wir heute die Fäden?`;
+        toniMsg.innerHTML = `<strong>TONI:</strong> ${resp}`;
         window.ToniVoice.speak(resp);
+        chatBox.scrollTop = chatBox.scrollHeight;
         return;
     }
 
-    // AI OFFLINE/ONLINE LOGIK (Ollama phi3)
+    if (!window.coachInfo.verein) {
+        window.coachInfo.verein = command;
+        localStorage.setItem('toni_coach_data', JSON.stringify(window.coachInfo));
+        let resp = `Alles klar, ${window.coachInfo.verein} ist registriert. Aktiviere mich im Setup für die volle Mac-Power!`;
+        toniMsg.innerHTML = `<strong>TONI:</strong> ${resp}`;
+        window.ToniVoice.speak(resp);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return;
+    }
+
+    // AI OFFLINE/ONLINE LOGIK
     if (window.aiOnline) {
-        toniMsg.innerHTML = `<strong>Toni:</strong> <span class="thinking">Denke nach...</span>`;
+        toniMsg.innerHTML = `<strong>TONI:</strong> <span class="thinking">Verarbeite Daten...</span>`;
         try {
             const savedIP = localStorage.getItem('toni_mac_ip') || 'localhost';
             const response = await fetch(`http://${savedIP}:11434/api/generate`, {
                 method: 'POST',
                 body: JSON.stringify({
                     model: 'phi3', 
-                    prompt: `Antworte als TONI 2.0 Fußball-KI. Kurz und präzise. Coach: ${window.coachInfo.name}. Verein: ${window.coachInfo.verein}. Befehl: ${command}`,
+                    prompt: `Du bist TONI 2.0, eine loyale und intelligente Fußball-KI. Antworte kurz, präzise und mit einem Hauch Wit. Coach: ${window.coachInfo.name}. Verein: ${window.coachInfo.verein}. Befehl: ${command}`,
                     stream: false
                 })
             });
             const data = await response.json();
-            toniMsg.innerHTML = `<strong>Toni:</strong> ${data.response}`;
+            toniMsg.innerHTML = `<strong>TONI:</strong> ${data.response}`;
             window.ToniVoice.speak(data.response);
         } catch (e) {
-            toniMsg.innerHTML = `<strong>Toni:</strong> Verbindung zum Mac-Server unterbrochen.`;
+            toniMsg.innerHTML = `<strong>TONI:</strong> Verbindung zum Mac-Backend verloren. Check die IP im Setup!`;
         }
     } else {
-        toniMsg.innerHTML = `<strong>Toni:</strong> Ich bin aktuell offline. Aktiviere mich im Setup-Sektor!`;
+        toniMsg.innerHTML = `<strong>TONI:</strong> Ich bin im Standby-Modus. Aktiviere die Online-Schnittstelle im Setup!`;
     }
     chatBox.scrollTop = chatBox.scrollHeight;
 }
@@ -184,13 +203,12 @@ async function checkAIStatus() {
 window.addEventListener('DOMContentLoaded', () => {
     window.ToniVoice.init();
     checkAIStatus();
-    setInterval(checkAIStatus, 8000);
+    setInterval(checkAIStatus, 10000);
 
     if (window.Database && typeof window.Database.init === 'function') {
         window.Database.init();
     }
 
-    // Arena-Start mit Sicherheits-Timeout
     setTimeout(() => {
         if (window.arena && typeof window.arena.init === 'function') {
             window.arena.init('main-canvas');
