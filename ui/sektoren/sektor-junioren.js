@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - SEKTOR JUNIOREN
- * Status: ELITE UPDATE (Pitch-Switch & Video-Coaching Integration)
+ * Status: ELITE UPDATE (Pitch-Switch & Global Team-Context Integration)
  */
 window.SektorJunioren = {
     currentYouth: null,
@@ -60,11 +60,25 @@ window.SektorJunioren = {
         ];
 
         return teams.map(t => `
-            <div class="mgmt-card" onclick="window.SektorJunioren.selectTeam('${t.label}')" style="cursor:pointer; transition: 0.3s;">
+            <div class="mgmt-card" onclick="window.SektorJunioren.handleTeamSelect('${t.label}')" style="cursor:pointer; transition: 0.3s; position:relative;">
                 <div class="card-header"><i class="fas fa-graduation-cap"></i> ${t.label}</div>
                 <p style="font-size: 0.7rem; color: #888;">${t.sub}</p>
             </div>
         `).join('');
+    },
+
+    // Brücken-Funktion: Kombiniert Detail-View mit globalem Kontext
+    handleTeamSelect(teamLabel) {
+        // 1. Globalen Kontext umschalten (für Kabine & Analyse)
+        if(window.selectTeam) {
+            // Wir rufen selectTeam auf, aber verhindern das automatische Schließen der Junioren-Zentrale,
+            // damit der Coach noch die Arena-Tools nutzen kann.
+            window.currentTeamContext = teamLabel;
+            console.log("⚽️ Team-Kontext gesetzt auf: " + teamLabel);
+        }
+        
+        // 2. Lokale Detail-Ansicht in der Junioren-Zentrale öffnen
+        this.selectTeam(teamLabel);
     },
 
     selectTeam(team) {
@@ -76,11 +90,16 @@ window.SektorJunioren = {
         const filteredPlayers = allPlayers.filter(p => p.jugend === team);
 
         detailView.innerHTML = `
-            <h4 style="color: var(--neon-green); margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px;">FOKUS: ${team}</h4>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom:15px;">
+                <h4 style="color: var(--neon-green); margin:0;">FOKUS: ${team}</h4>
+                <button class="pro-btn" onclick="window.BriefcaseUI.switchSektor('sport')" style="font-size:0.6rem; padding:4px 10px;">
+                    <i class="fas fa-users"></i> ZUR KABINE
+                </button>
+            </div>
             
-            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; margin-top: 15px;">
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px;">
                 <div>
-                    <p style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Kader (Beamen) & Analyse:</p>
+                    <p style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Kader-Beamen (Schnell-Start):</p>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
                         ${filteredPlayers.map(p => `
                             <button class="pro-btn" style="font-size: 0.7rem; padding: 5px;" onclick="window.SektorJunioren.deployPlayer('${p.id}', '${p.name}')">
@@ -88,7 +107,7 @@ window.SektorJunioren = {
                             </button>
                         `).join('')}
                     </div>
-                    <button class="pro-btn-gold" style="width:100%; margin-top:15px;" onclick="window.SektorAnalyse.open()">
+                    <button class="pro-btn-gold" style="width:100%; margin-top:15px;" onclick="window.BriefcaseUI.switchSektor('reports')">
                         <i class="fas fa-chart-line"></i> VITAL-CHECK STARTEN
                     </button>
                     <button class="pro-btn-gold" style="width:100%; margin-top:10px;" onclick="window.SektorJunioren.openVideoCoach()">
@@ -108,10 +127,9 @@ window.SektorJunioren = {
         `;
     },
 
-    // --- NEU: Greenkeeper Animation Trigger ---
     triggerPitchSwitch(mode) {
         if (!window.arena) return;
-        window.BriefcaseUI.toggle(); // Tasche schließen für Sicht auf Animation
+        window.BriefcaseUI.toggle(); 
         window.arena.switchPitchMode(mode);
     },
 
