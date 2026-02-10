@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - SEKTOR KABINE (MULTI-TEAM EDITION)
- * Fokus: Dynamische Filterung nach Jahrgang/Team & Kader-Sauberkeit.
+ * Status: ROUTING-FIX (Verknüpfung zu Transfer & Kader repariert)
  */
 window.SektorSporttasche = {
     open() {
@@ -13,21 +13,21 @@ window.SektorSporttasche = {
     },
 
     switchMode(newMode) {
-        if(window.Database && window.Database.setMode) {
-            window.Database.setMode(newMode);
+        if(window.Database && window.Database.activeMode !== undefined) {
+            window.Database.activeMode = newMode;
+            if(window.Database.save) window.Database.save();
             this.render();
         }
     },
 
     render() {
         const content = document.querySelector('.briefcase-window');
-        const mode = window.Database ? window.Database.activeMode : 'training';
-        
-        // KRITISCH: Den aktuell gewählten Team-Kontext ermitteln
-        // Falls kein Team gewählt ist (global), zeigen wir alle an.
+        if (!content) return;
+
+        const mode = window.Database ? (window.Database.activeMode || 'training') : 'training';
         const currentContext = window.currentTeamContext || "Senioren"; 
         
-        let players = window.Database ? window.Database.players : [];
+        let players = window.Database ? (window.Database.players || []) : [];
         
         // FILTER-LOGIK: Nur Spieler des aktuellen Teams anzeigen
         players = players.filter(p => p.team === currentContext);
@@ -49,7 +49,7 @@ window.SektorSporttasche = {
                     <span style="font-size:0.6rem; color:#666; letter-spacing:1px;">AKTIVE ANSICHT: <b style="color:var(--data-cyan);">${currentContext.toUpperCase()}</b></span>
                 </div>
                 <div style="display:flex; gap:10px;">
-                    <button class="tactic-btn" onclick="window.BriefcaseUI.switchSektor('system')" style="font-size:0.6rem; border-color:#555;">KADER VERWALTEN</button>
+                    <button class="tactic-btn" onclick="window.openSection('transfer')" style="font-size:0.6rem; border-color:var(--accent-gold); color:var(--accent-gold);">KADER VERWALTEN</button>
                     <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
                 </div>
             </div>
@@ -59,7 +59,7 @@ window.SektorSporttasche = {
                     `<div style="text-align:center; padding:50px; color:#444; border:2px dashed #222; border-radius:15px; width:100%;">
                         <i class="fas fa-user-plus" style="font-size:2rem; margin-bottom:10px;"></i><br>
                         Keine Spieler für <b>${currentContext}</b> gefunden.<br>
-                        <button onclick="window.BriefcaseUI.switchSektor('system')" style="background:none; border:none; color:var(--neon-green); cursor:pointer; text-decoration:underline; font-size:0.8rem; margin-top:10px;">Jetzt Spieler hinzufügen</button>
+                        <button onclick="window.openSection('transfer')" style="background:none; border:none; color:var(--neon-green); cursor:pointer; text-decoration:underline; font-size:0.8rem; margin-top:10px;">Jetzt Spieler hinzufügen</button>
                     </div>` : 
                     players.map(p => {
                         let cardColor = 'var(--neon-green)';
@@ -74,7 +74,7 @@ window.SektorSporttasche = {
                             <div class="fifa-card" style="background: #0a0a0a; border: 2px solid ${cardColor}; border-radius: 15px; width: 210px; min-height: 320px; padding: 15px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: flex; flex-direction: column;">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                                     <div style="color:#fff; font-family:'Orbitron'; font-weight:900; font-size:1.8rem; cursor:pointer;" onclick="window.SektorSporttasche.edit(${p.id}, 'rat')">${p.rat || 80}</div>
-                                    <div title="Vital-Status" onclick="window.SektorAnalyse.open()" style="width:12px; height:12px; border-radius:50%; background:${vitalColor}; box-shadow: 0 0 10px ${vitalColor}; cursor:pointer; margin-top:5px;"></div>
+                                    <div title="Vital-Status" onclick="window.openSection('analyse')" style="width:12px; height:12px; border-radius:50%; background:${vitalColor}; box-shadow: 0 0 10px ${vitalColor}; cursor:pointer; margin-top:5px;"></div>
                                 </div>
                                 <div style="text-align:center; margin-top:-5px;">
                                     <div style="width: 85px; height: 85px; background: #111; border-radius: 50%; border: 2px solid ${cardColor}; margin: 0 auto; overflow:hidden; cursor:pointer; position:relative;" onclick="document.getElementById('img-up-${p.id}').click()">
@@ -113,12 +113,18 @@ window.SektorSporttasche = {
     },
 
     edit(id, key) {
+        if (!window.Database || !window.Database.players) return;
         const p = window.Database.players.find(x => x.id === id);
         if (!p) return;
         const val = prompt(`${key.toUpperCase()} ändern:`, p[key]);
         if (val !== null && val.trim() !== "") {
             const newVal = isNaN(val) ? val : parseInt(val);
-            window.Database.updatePlayer(id, key, newVal);
+            if(window.Database.updatePlayer) {
+                window.Database.updatePlayer(id, key, newVal);
+            } else {
+                p[key] = newVal;
+                if(window.Database.save) window.Database.save();
+            }
             this.render();
         }
     },
@@ -128,7 +134,13 @@ window.SektorSporttasche = {
         if (!file) return;
         const reader = new FileReader();
         reader.onload = () => {
-            window.Database.updatePlayer(id, 'img', reader.result);
+            if(window.Database.updatePlayer) {
+                window.Database.updatePlayer(id, 'img', reader.result);
+            } else {
+                const p = window.Database.players.find(x => x.id === id);
+                if(p) p.img = reader.result;
+                if(window.Database.save) window.Database.save();
+            }
             this.render();
         };
         reader.readAsDataURL(file);
