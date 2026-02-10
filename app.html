@@ -20,10 +20,11 @@
         #main-canvas { cursor: crosshair; touch-action: none; }
         * { -webkit-tap-highlight-color: transparent; outline: none; }
         
-        /* ELITE Z-INDEX RECOVERY */
+        /* ELITE Z-INDEX RECOVERY - Garantierte Klick-Ebenen */
         .briefcase-overlay { z-index: 1000000 !important; }
         .sidebar-minimal { z-index: 100001 !important; position: relative; }
-        #stage-container { z-index: 1; }
+        #stage-container { z-index: 1; position: relative; }
+        .control-unit { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -31,28 +32,33 @@
     <script>
         // Sicherheits-Check
         if(sessionStorage.getItem('toni_auth') !== 'true') window.location.href = 'index.html';
-        // Coach-Info Fallback
-        window.coachInfo = { verein: "Mein Verein", name: "Coach" };
+        
+        // Globale Coach-Daten Initialisierung
+        window.coachInfo = JSON.parse(localStorage.getItem('toni_coach_data')) || { verein: "Mein Verein", name: "Coach" };
     </script>
 
     <div class="pro-layout-container">
         <nav class="sidebar-minimal">
-            <div class="control-unit" onclick="console.log('Sidebar: Tasche klick'); if(window.BriefcaseUI) window.BriefcaseUI.toggle()" title="Zentrale öffnen">
+            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggle()" title="Zentrale öffnen">
                 <i class="fas fa-briefcase"></i>
                 <span>TASCHE</span>
             </div>
+            
             <div class="control-unit" id="ai-status-unit">
-                <div id="ai-status-light" style="width:8px; height:8px; border-radius:50%; background:var(--neon-green); margin:0 auto 5px; box-shadow: 0 0 10px var(--neon-green);"></div>
-                <span style="font-size:10px;">ONLINE</span>
+                <div id="ai-status-light" style="width:8px; height:8px; border-radius:50%; background: #555; margin:0 auto 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); transition: 0.3s;"></div>
+                <span id="ai-status-label" style="font-size:10px;">CHECKING</span>
             </div>
+            
             <div class="control-unit" id="mic-trigger" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggleVoice()" title="Mit Toni sprechen">
                 <i class="fas fa-microphone" id="main-mic-btn"></i>
                 <span>TONI</span>
             </div>
+            
             <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.switchSektor('system')" title="Setup">
                 <i class="fas fa-sliders-h"></i>
                 <span>SETUP</span>
             </div>
+            
             <div class="control-unit" onclick="location.reload()" title="Neustart">
                 <i class="fas fa-sync-alt"></i>
                 <span>RESET</span>
@@ -144,7 +150,7 @@
             injectTestPlayers();
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
-                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> System bereit.</div>`;
+                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> System bereit. Elite-Cockpit 2026 aktiv.</div>`;
                 runToniSystemCheck();
             }, 1000);
         };
