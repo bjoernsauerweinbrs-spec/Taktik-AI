@@ -1,195 +1,81 @@
 /**
- * TONI 2.0 - AKTENTASCHE UI (MASTER HUB & ROUTER)
- * Status: VOLLSTÄNDIG - switchSektor & toggleVoice REPARIERT
+ * TONI 2.0 - SEKTOR SPORTTASCHE (KABINE / FIFA-CARDS)
+ * Status: REPARIERT & KONTROLLIERT
  */
-window.BriefcaseUI = {
-    isOpen: false,
+window.SektorSporttasche = {
+    
+    open() {
+        const activeContent = document.getElementById('active-content');
+        if (!activeContent) return;
 
-    init() {
-        console.log("🚀 TONI Zentrale: System-Check startet...");
-        const overlay = document.getElementById('briefcase-overlay');
-        if (overlay) {
-            overlay.classList.add('hidden');
-            overlay.style.display = 'none';
-        }
+        // Sicherstellen, dass der Bereich für die Karten bereit ist
+        this.render();
     },
 
-    toggle() {
-        const overlay = document.getElementById('briefcase-overlay');
-        if (!overlay) {
-            console.error("FEHLER: 'briefcase-overlay' nicht gefunden!");
-            return;
-        }
+    render() {
+        const activeContent = document.getElementById('active-content');
+        const team = window.currentTeamContext || "Senioren";
+        
+        // Spieler aus der Datenbank filtern
+        const players = (window.Database && window.Database.players) 
+            ? window.Database.players.filter(p => p.team === team) 
+            : [];
 
-        this.isOpen = !this.isOpen;
-
-        if (this.isOpen) {
-            // Brute-Force Sichtbarkeit gegen CSS-Blockaden
-            overlay.classList.remove('hidden');
-            overlay.style.setProperty('display', 'flex', 'important');
-            this.renderMainGrid();
-        } else {
-            overlay.style.setProperty('display', 'none', 'important');
-            overlay.classList.add('hidden');
-        }
-    },
-
-    // REPARATUR: Erlaubt den Direkt-Zugriff aus der Sidebar (z.B. Setup)
-    switchSektor(section) {
-        if (!this.isOpen) this.toggle();
-        window.openSection(section);
-    },
-
-    // REPARATUR: Verbindung zur Sprachsteuerung (Mikrofon-Button)
-    toggleVoice() {
-        if (window.ToniVoice && typeof window.ToniVoice.toggle === 'function') {
-            window.ToniVoice.toggle();
-        } else {
-            console.warn("ToniVoice System noch nicht bereit.");
-            const mic = document.getElementById('main-mic-btn');
-            if(mic) {
-                mic.style.color = 'var(--status-error)';
-                setTimeout(() => { mic.style.color = ''; }, 1000);
-            }
-        }
-    },
-
-    renderMainGrid() {
-        const windowBody = document.querySelector('.briefcase-window');
-        if (!windowBody) return;
-
-        windowBody.style.overflowY = "auto";
-        windowBody.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                <div>
-                    <h2 style="color: var(--neon-green); font-family: 'Orbitron'; letter-spacing: 5px; margin:0;">ZENTRALE</h2>
-                    <p style="color: #666; font-size: 0.6rem; letter-spacing: 2px; margin: 5px 0 0 0;">STRATEGIC HUB & UNIT CONTROL</p>
-                </div>
-                <i class="fas fa-times" onclick="window.BriefcaseUI.toggle()" style="cursor: pointer; color: var(--status-error); font-size: 1.5rem; padding:10px;"></i>
-            </div>
-            
-            <hr style="border: 0; border-top: 1px solid rgba(57, 255, 20, 0.2); margin-bottom: 30px;">
-
-            <div id="briefcase-nav" class="management-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                
-                <div class="mgmt-card" style="border: 1px solid var(--neon-green); padding: 20px; background: rgba(57, 255, 20, 0.03);">
-                    <div style="color: var(--neon-green); font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; font-family: 'Orbitron';">⚽ SPIEL & TRAINING</div>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <button class="tactic-btn" onclick="window.openSection('kabine')"><i class="fas fa-users"></i> KABINE (FIFA-CARDS)</button>
-                        <button class="tactic-btn" onclick="window.openSection('junioren')"><i class="fas fa-graduation-cap"></i> JUNIOREN</button>
-                        <button class="tactic-btn" onclick="window.openSection('transfer')"><i class="fas fa-exchange-alt"></i> TRANSFER</button>
+        activeContent.innerHTML = `
+            <div class="fadeIn">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                    <div>
+                        <h3 style="color:var(--neon-green); font-family:'Orbitron'; margin:0;">KABINE: ${team.toUpperCase()}</h3>
+                        <p style="color:#666; font-size:0.7rem; margin-top:5px;">KADER-STÄRKE: ${players.length} SPIELER</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="tactic-btn" style="font-size:0.6rem;" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
                     </div>
                 </div>
 
-                <div class="mgmt-card" style="border: 1px solid #fff; padding: 20px; background: rgba(255, 255, 255, 0.03);">
-                    <div style="color: #fff; font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; font-family: 'Orbitron';">📰 MEDIEN & PRESSE</div>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <button class="tactic-btn" onclick="window.openSection('stadion')"><i class="fas fa-newspaper"></i> STADIONZEITUNG</button>
-                        <button class="tactic-btn" onclick="window.openSection('stammplatz')"><i class="fas fa-id-badge"></i> STICKER-STUDIO</button>
-                    </div>
+                <div class="fifa-cards-grid" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: flex-start;">
+                    ${players.length > 0 ? players.map(p => this.createCardHTML(p)).join('') : this.renderEmptyState()}
                 </div>
-
-                <div class="mgmt-card" style="border: 1px solid var(--accent-gold); padding: 20px; background: rgba(255, 204, 0, 0.03);">
-                    <div style="color: var(--accent-gold); font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; font-family: 'Orbitron';">📈 BUSINESS & ANALYSE</div>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <button class="tactic-btn" onclick="window.openSection('management')"><i class="fas fa-handshake"></i> PARTNER-POOL</button>
-                        <button class="tactic-btn" onclick="window.openSection('analyse')"><i class="fas fa-chart-line"></i> PERFORMANCE</button>
-                    </div>
-                </div>
-
-                <div class="mgmt-card" style="border: 1px solid var(--data-cyan); padding: 20px; background: rgba(0, 255, 255, 0.03);">
-                    <div style="color: var(--data-cyan); font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; font-family: 'Orbitron';">📦 LOGISTIK & SKILLS</div>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <button class="tactic-btn" onclick="window.openSection('material')"><i class="fas fa-box-open"></i> LAGER & BESTAND</button>
-                        <button class="tactic-btn" onclick="window.openSection('video')"><i class="fas fa-video"></i> VIDEO-ANALYSE</button>
-                    </div>
-                </div>
-
-            </div>
-            
-            <div id="briefcase-content" class="hidden" style="margin-top: 30px; min-height: 400px;">
-                <div id="active-content" class="fadeIn"></div>
-            </div>
-
-            <div id="back-to-hub" class="hidden" style="text-align: center; margin-top: 30px; padding-bottom: 50px;">
-                <button class="pro-btn" style="border-color: var(--neon-green); color: var(--neon-green); background: none; padding: 10px 20px; cursor: pointer;" onclick="window.BriefcaseUI.renderMainGrid()">← ZURÜCK ZUR ZENTRALE</button>
             </div>
         `;
     },
 
-    renderTransferCenter() {
-        const active = document.getElementById('active-content');
-        if (!active) return;
-        const players = window.Database ? (window.Database.players || []) : [];
-        active.innerHTML = `
-            <div class="fadeIn" style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 15px; border: 1px solid #333; text-align: center;">
-                <h3 style="color: var(--neon-green); font-family: 'Orbitron'; margin-bottom: 15px;">TRANSFER-ZENTRUM</h3>
-                <p>Aktueller Kader: <b>${players.length} Spieler</b> im System.</p>
-                <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
-                <button class="pro-btn-gold" onclick="window.openSection('kabine')">ZUR KABINE (STATS BEARBEITEN)</button>
-            </div>`;
+    createCardHTML(p) {
+        // Optimierte Karte für bessere Lesbarkeit der Werte
+        return `
+            <div class="fifa-card" style="cursor:pointer;" onclick="console.log('Analyse für ${p.name}')">
+                <div class="card-inner">
+                    <div style="position:absolute; top:35px; left:22px; text-align:center; line-height:1;">
+                        <div style="font-size:1.8rem; font-weight:900; font-family:'Orbitron'; color:#fff;">${p.rat || 50}</div>
+                        <div style="font-size:0.7rem; font-weight:bold; color:var(--accent-gold); margin-top:2px;">${p.pos || 'ST'}</div>
+                    </div>
+
+                    <div style="margin-top:105px; width:100%; text-align:center;">
+                        <div style="font-weight:900; font-size:0.85rem; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:3px; display:inline-block; width:80%;">
+                            ${p.name.toUpperCase()}
+                        </div>
+                    </div>
+
+                    <div class="card-stats-grid" style="margin-top:10px; font-size:0.65rem;">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:2px 10px; width:100%; padding:0 15px;">
+                            <div style="display:flex; justify-content:space-between;"><span>PAC</span> <b style="color:var(--neon-green);">${p.pac || 50}</b></div>
+                            <div style="display:flex; justify-content:space-between;"><span>DRI</span> <b style="color:var(--neon-green);">${p.dri || 50}</b></div>
+                            <div style="display:flex; justify-content:space-between;"><span>SHO</span> <b style="color:var(--neon-green);">${p.sho || 50}</b></div>
+                            <div style="display:flex; justify-content:space-between;"><span>DEF</span> <b style="color:var(--neon-green);">${p.def || 50}</b></div>
+                            <div style="display:flex; justify-content:space-between;"><span>PAS</span> <b style="color:var(--neon-green);">${p.pas || 50}</b></div>
+                            <div style="display:flex; justify-content:space-between;"><span>PHY</span> <b style="color:var(--neon-green);">${p.phy || 50}</b></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderEmptyState() {
+        return `
+            <div style="width:100%; padding:50px; text-align:center; background:rgba(255,255,255,0.02); border-radius:15px; border:1px dashed #333;">
+                <p style="color:#555; font-size:0.8rem;">KEINE SPIELER IM KADER GEFUNDEN.<br>NUTZE DAS TRANSFER-ZENTRUM.</p>
+            </div>
+        `;
     }
 };
-
-/**
- * GLOBALER ROUTER - STEUERT ALLE SEKTOREN
- */
-window.openSection = function(section) {
-    const nav = document.getElementById('briefcase-nav');
-    const content = document.getElementById('briefcase-content');
-    const backBtn = document.getElementById('back-to-hub');
-    const activeContent = document.getElementById('active-content');
-
-    if(nav) nav.style.display = 'none';
-    if(content) content.classList.remove('hidden');
-    if(backBtn) backBtn.classList.remove('hidden');
-    if(activeContent) activeContent.innerHTML = ""; 
-
-    try {
-        switch(section) {
-            case 'management':
-                if(window.SektorManagement) window.SektorManagement.open();
-                break;
-            case 'stadion':
-                if(window.SektorTemplates) {
-                    window.SektorTemplates.render();
-                    setTimeout(() => { if(window.SektorTemplates.switchTab) window.SektorTemplates.switchTab('magazine'); }, 50);
-                }
-                break;
-            case 'stammplatz':
-                if(window.SektorTemplates) {
-                    window.SektorTemplates.render();
-                    setTimeout(() => { if(window.SektorTemplates.switchTab) window.SektorTemplates.switchTab('stammplatz'); }, 50);
-                }
-                break;
-            case 'kabine':
-                if(window.SektorSporttasche) window.SektorSporttasche.open();
-                break;
-            case 'junioren':
-                if(window.SektorJunioren) window.SektorJunioren.open();
-                break;
-            case 'transfer':
-                window.BriefcaseUI.renderTransferCenter();
-                break;
-            case 'analyse':
-                if(window.SektorAnalyse) window.SektorAnalyse.open();
-                break;
-            case 'material':
-                if(window.SektorMaterial) window.SektorMaterial.open();
-                break;
-            case 'video':
-                if(window.SektorVideo) window.SektorVideo.open();
-                break;
-            case 'system':
-                if(window.SektorSettings) window.SektorSettings.open();
-                break;
-            default:
-                if(activeContent) activeContent.innerHTML = `<p style="text-align:center; padding:50px;">Sektor <b>${section}</b> wird kalibriert...</p>`;
-        }
-    } catch (e) {
-        console.error("Routing-Fehler:", e);
-    }
-};
-
-// Initialisierung beim Laden
-window.BriefcaseUI.init();
