@@ -1,7 +1,7 @@
 /**
- * TONI 2.0 - ARENA ENGINE CORE (ELITE BRANDING UPDATE)
- * Fokus: Taktik-Board, Kader-Integration, Mobile-Touch & Sponsor-Rotation
- * Status: MASTER-SYNC 2026 - FINAL VISUAL RECOVERY
+ * TONI 2.0 - ARENA ENGINE CORE (ELITE BRANDING & PITCH UPDATE)
+ * Fokus: Taktik-Board, Kader-Integration, Sponsoren-Rotation & Full Pitch Markings
+ * Status: MASTER-SYNC 2026 - COMPLETED VISUAL RECOVERY
  */
 window.Arena = {
     canvas: null,
@@ -17,12 +17,17 @@ window.Arena = {
         if (!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
         
+        // Initialer Formation-Sync
         this.applyDefaultFormations();
+        
         this.setupEventListeners();
         this.startAnimationLoop();
         this.renderBench();
     },
 
+    /**
+     * Startet das Rendering-System inkl. Banner-Rotation
+     */
     startAnimationLoop() {
         const loop = (time) => {
             this.update(time);
@@ -33,6 +38,7 @@ window.Arena = {
     },
 
     update(time) {
+        // Sponsor-Rotation alle X Sekunden
         if (time - this.lastRotation > this.rotationSpeed) {
             const sponsors = window.Database?.sponsors || [];
             if (sponsors.length > 0) {
@@ -48,15 +54,17 @@ window.Arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // 1. Spielfeld & Linien (FIX: Sattes Champions-Grün)
+        // 1. Spielfeld (Sattes Champions-Grün)
         ctx.fillStyle = "#348C31"; 
         ctx.fillRect(0, 0, w, h);
+        
+        // 2. Alle Spielfeldmarkierungen (16m, 5m, Tore etc.)
         this.drawPitchLines(ctx, w, h);
 
-        // 2. Dynamische Werbebanden (FIX: Höher & Deutlicher)
+        // 3. Dynamische Werbebanden (Oben & Unten)
         this.drawBanners(ctx, w, h);
 
-        // 3. Aktive Spieler
+        // 4. Aktive Spieler auf dem Feld
         const team = window.currentTeamContext || "Senioren";
         const playersOnField = (window.Database?.players || []).filter(p => 
             (team === "Senioren" ? p.team === "Senioren" : p.jugend === team) && p.onField
@@ -65,46 +73,105 @@ window.Arena = {
         playersOnField.forEach(p => this.drawPlayerOnBoard(p));
     },
 
+    /**
+     * Zeichnet alle offiziellen Spielfeldmarkierungen inkl. 16m und Toren
+     */
     drawPitchLines(ctx, w, h) {
-        ctx.strokeStyle = "rgba(255,255,255,0.4)"; // Linien etwas heller
+        ctx.strokeStyle = "rgba(255,255,255,0.5)"; // Weiße Linien
         ctx.lineWidth = 2;
-        // Spielfeld-Offset angepasst an neue Bandenhöhe (40px)
-        ctx.strokeRect(30, 50, w - 60, h - 100);
+
+        const offsetV = 50; // Versatz wegen der Banden oben/unten
+        const offsetH = 30; // Versatz von den Seiten
+        const fieldW = w - (offsetH * 2);
+        const fieldH = h - (offsetV * 2);
+
+        // Außenlinie
+        ctx.strokeRect(offsetH, offsetV, fieldW, fieldH);
+
+        // Mittellinie & Mittelkreis
         ctx.beginPath();
-        ctx.moveTo(w / 2, 50);
-        ctx.lineTo(w / 2, h - 50);
+        ctx.moveTo(w / 2, offsetV);
+        ctx.lineTo(w / 2, h - offsetV);
         ctx.stroke();
         
         ctx.beginPath();
         ctx.arc(w / 2, h / 2, 70, 0, Math.PI * 2);
         ctx.stroke();
+
+        // --- LINKS (TONI SEITE) ---
+        // 16-Meter Raum
+        ctx.strokeRect(offsetH, h / 2 - 120, 100, 240);
+        // 5-Meter Raum
+        ctx.strokeRect(offsetH, h / 2 - 50, 35, 100);
+        // Elfmeterpunkt
+        ctx.beginPath();
+        ctx.arc(offsetH + 75, h / 2, 2, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.5)";
+        ctx.fill();
+        // Strafraum-Halbkreis
+        ctx.beginPath();
+        ctx.arc(offsetH + 75, h / 2, 50, -Math.PI/2.5, Math.PI/2.5);
+        ctx.stroke();
+
+        // --- RECHTS (TRAINER SEITE) ---
+        // 16-Meter Raum
+        ctx.strokeRect(w - offsetH - 100, h / 2 - 120, 100, 240);
+        // 5-Meter Raum
+        ctx.strokeRect(w - offsetH - 35, h / 2 - 50, 35, 100);
+        // Elfmeterpunkt
+        ctx.beginPath();
+        ctx.arc(w - offsetH - 75, h / 2, 2, 0, Math.PI * 2);
+        ctx.fill();
+        // Strafraum-Halbkreis
+        ctx.beginPath();
+        ctx.arc(w - offsetH - 75, h / 2, 50, Math.PI * 0.6, Math.PI * 1.4);
+        ctx.stroke();
+
+        // --- TORE (Visuelle Darstellung) ---
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#fff";
+        // Tor Links
+        ctx.beginPath();
+        ctx.moveTo(offsetH, h / 2 - 40);
+        ctx.lineTo(offsetH - 10, h / 2 - 40);
+        ctx.lineTo(offsetH - 10, h / 2 + 40);
+        ctx.lineTo(offsetH, h / 2 + 40);
+        ctx.stroke();
+
+        // Tor Rechts
+        ctx.beginPath();
+        ctx.moveTo(w - offsetH, h / 2 - 40);
+        ctx.lineTo(w - offsetH + 10, h / 2 - 40);
+        ctx.lineTo(w - offsetH + 10, h / 2 + 40);
+        ctx.lineTo(w - offsetH, h / 2 + 40);
+        ctx.stroke();
     },
 
     drawBanners(ctx, w, h) {
         const sponsors = window.Database?.sponsors || [];
-        const bannerHeight = 40; // Erhöht von 30 auf 40
+        const bannerHeight = 40; 
 
-        // Schwarze Hochglanz-Banden
+        // Schwarze Banden
         ctx.fillStyle = "#000";
         ctx.fillRect(0, 0, w, bannerHeight); 
         ctx.fillRect(0, h - bannerHeight, w, bannerHeight); 
 
-        // Sponsoren-Projektion
+        // Logo Projektion
         if (sponsors.length > 0) {
             const currentSponsor = sponsors[this.activeSponsorIndex];
             const img = new Image();
             img.src = currentSponsor.logo;
             
-            ctx.globalAlpha = 1.0; // Volle Sichtbarkeit
+            ctx.globalAlpha = 1.0; 
             for (let i = 0; i < 5; i++) {
                 try {
-                    // Logos größer und zentrierter in der Bande
                     ctx.drawImage(img, 80 + (i * (w/5)), 8, 80, 24);
                 } catch(e) {}
             }
+            ctx.globalAlpha = 1.0;
         }
 
-        // TONI 2.0 Branding (Leuchtendes Cyan)
+        // TONI 2.0 Branding
         ctx.fillStyle = "var(--data-cyan)";
         ctx.font = "bold 12px Orbitron";
         ctx.textAlign = "right";
@@ -140,9 +207,6 @@ window.Arena = {
         }
     },
 
-    /**
-     * FIX: Spezifische X/Y Koordinaten für 4-4-2 und 3-4-3
-     */
     applyDefaultFormations() {
         const team = window.currentTeamContext || "Senioren";
         const players = window.Database?.players || [];
@@ -156,14 +220,12 @@ window.Arena = {
             if ((team === "Senioren" ? p.team === "Senioren" : p.jugend === team)) {
                 p.onField = true;
                 if (p.assignment === 'Toni') {
-                    // 4-4-2 Logik (Linke Seite)
-                    const rows = [0.1, 0.25, 0.45, 0.65]; // GK, DEF, MID, ATT
-                    // Einfache Verteilung basierend auf Index
+                    // 4-4-2 Raster
                     p.x = w * 0.1 + (Math.floor(toniIdx / 3) * 120);
                     p.y = (h * 0.2) + ((toniIdx % 4) * 120);
                     toniIdx++;
                 } else {
-                    // 3-4-3 Logik (Rechte Seite)
+                    // 3-4-3 Raster
                     p.x = w * 0.9 - (Math.floor(trainerIdx / 3) * 120);
                     p.y = (h * 0.2) + ((trainerIdx % 4) * 120);
                     trainerIdx++;
