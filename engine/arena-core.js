@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - ARENA ENGINE CORE (ELITE BRANDING UPDATE)
  * Fokus: Taktik-Board, Kader-Integration, Mobile-Touch & Sponsor-Rotation
- * Status: MASTER-SYNC 2026 - FULL BUSINESS INTEGRATION
+ * Status: MASTER-SYNC 2026 - FINAL VISUAL RECOVERY
  */
 window.Arena = {
     canvas: null,
@@ -9,7 +9,7 @@ window.Arena = {
     showNames: true,
     activeSponsorIndex: 0,
     lastRotation: 0,
-    rotationSpeed: 5000, // Alle 5 Sek. Wechsel
+    rotationSpeed: 5000, 
 
     init() {
         console.log("🏟️ Arena Engine: Initialisiere High-End Spielfeld...");
@@ -17,17 +17,12 @@ window.Arena = {
         if (!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
         
-        // Initialer Formation-Sync
         this.applyDefaultFormations();
-        
         this.setupEventListeners();
         this.startAnimationLoop();
         this.renderBench();
     },
 
-    /**
-     * Startet das Rendering-System inkl. Banner-Rotation
-     */
     startAnimationLoop() {
         const loop = (time) => {
             this.update(time);
@@ -38,7 +33,6 @@ window.Arena = {
     },
 
     update(time) {
-        // Sponsor-Rotation alle X Sekunden
         if (time - this.lastRotation > this.rotationSpeed) {
             const sponsors = window.Database?.sponsors || [];
             if (sponsors.length > 0) {
@@ -54,15 +48,15 @@ window.Arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // 1. Spielfeld & Linien
-        ctx.fillStyle = "#1b3d2f"; 
+        // 1. Spielfeld & Linien (FIX: Sattes Champions-Grün)
+        ctx.fillStyle = "#348C31"; 
         ctx.fillRect(0, 0, w, h);
         this.drawPitchLines(ctx, w, h);
 
-        // 2. Dynamische Werbebanden (Oben & Unten)
+        // 2. Dynamische Werbebanden (FIX: Höher & Deutlicher)
         this.drawBanners(ctx, w, h);
 
-        // 3. Aktive Spieler auf dem Feld
+        // 3. Aktive Spieler
         const team = window.currentTeamContext || "Senioren";
         const playersOnField = (window.Database?.players || []).filter(p => 
             (team === "Senioren" ? p.team === "Senioren" : p.jugend === team) && p.onField
@@ -72,83 +66,82 @@ window.Arena = {
     },
 
     drawPitchLines(ctx, w, h) {
-        ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        ctx.strokeStyle = "rgba(255,255,255,0.4)"; // Linien etwas heller
         ctx.lineWidth = 2;
-        // Außen & Mitte
-        ctx.strokeRect(20, 35, w - 40, h - 70);
+        // Spielfeld-Offset angepasst an neue Bandenhöhe (40px)
+        ctx.strokeRect(30, 50, w - 60, h - 100);
         ctx.beginPath();
-        ctx.moveTo(w / 2, 35);
-        ctx.lineTo(w / 2, h - 35);
+        ctx.moveTo(w / 2, 50);
+        ctx.lineTo(w / 2, h - 50);
         ctx.stroke();
-        // Mittelkreis
+        
         ctx.beginPath();
-        ctx.arc(w / 2, h / 2, 60, 0, Math.PI * 2);
+        ctx.arc(w / 2, h / 2, 70, 0, Math.PI * 2);
         ctx.stroke();
     },
 
     drawBanners(ctx, w, h) {
         const sponsors = window.Database?.sponsors || [];
-        if (sponsors.length === 0) return;
+        const bannerHeight = 40; // Erhöht von 30 auf 40
 
-        const currentSponsor = sponsors[this.activeSponsorIndex];
-        
-        // Schwarze Banden-Basis
+        // Schwarze Hochglanz-Banden
         ctx.fillStyle = "#000";
-        ctx.fillRect(0, 0, w, 30); // Oben
-        ctx.fillRect(0, h - 30, w, 30); // Unten
+        ctx.fillRect(0, 0, w, bannerHeight); 
+        ctx.fillRect(0, h - bannerHeight, w, bannerHeight); 
 
-        // Sponsor-Logo-Projektion
-        if (currentSponsor && currentSponsor.logo) {
+        // Sponsoren-Projektion
+        if (sponsors.length > 0) {
+            const currentSponsor = sponsors[this.activeSponsorIndex];
             const img = new Image();
             img.src = currentSponsor.logo;
-            ctx.globalAlpha = 0.7;
-            for (let i = 0; i < 4; i++) {
+            
+            ctx.globalAlpha = 1.0; // Volle Sichtbarkeit
+            for (let i = 0; i < 5; i++) {
                 try {
-                    ctx.drawImage(img, 60 + (i * (w/4)), 7, 50, 15);
+                    // Logos größer und zentrierter in der Bande
+                    ctx.drawImage(img, 80 + (i * (w/5)), 8, 80, 24);
                 } catch(e) {}
             }
-            ctx.globalAlpha = 1.0;
         }
 
-        // TONI 2.0 - System Branding (Permanent)
-        ctx.fillStyle = "rgba(0, 209, 255, 0.4)";
-        ctx.font = "bold 9px Orbitron";
+        // TONI 2.0 Branding (Leuchtendes Cyan)
+        ctx.fillStyle = "var(--data-cyan)";
+        ctx.font = "bold 12px Orbitron";
         ctx.textAlign = "right";
-        ctx.fillText("TONI 2.0 // ANALYTICAL PARTNER", w - 30, h - 12);
+        ctx.fillText("TONI 2.0 // ANALYTICAL PARTNER", w - 30, h - 15);
     },
 
     drawPlayerOnBoard(p) {
         const ctx = this.ctx;
-        // Farbe: Toni = Neon-Grün, Trainer = Rot
         const color = p.assignment === 'Toni' ? '#39ff14' : '#ff3b30';
 
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = color;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, 22, 0, Math.PI * 2);
         ctx.fillStyle = color;
         ctx.fill();
         ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.stroke();
         
         ctx.shadowBlur = 0;
 
         ctx.fillStyle = "#fff";
-        ctx.font = "bold 14px Orbitron";
+        ctx.font = "bold 16px Orbitron";
         ctx.textAlign = "center";
-        ctx.fillText(p.number || "0", p.x, p.y + 5);
+        ctx.fillText(p.number || "0", p.x, p.y + 6);
 
         if (this.showNames) {
-            ctx.fillStyle = "rgba(255,255,255,0.8)";
-            ctx.font = "9px Orbitron";
-            ctx.fillText(p.name.split(' ').pop().toUpperCase(), p.x, p.y + 38);
+            ctx.font = "bold 10px Orbitron";
+            ctx.fillStyle = "#fff";
+            ctx.fillText(p.name.split(' ').pop().toUpperCase(), p.x, p.y + 42);
         }
     },
 
     /**
-     * Wendet die gewünschten Standard-Formationen an
+     * FIX: Spezifische X/Y Koordinaten für 4-4-2 und 3-4-3
      */
     applyDefaultFormations() {
         const team = window.currentTeamContext || "Senioren";
@@ -156,15 +149,24 @@ window.Arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
+        let toniIdx = 0;
+        let trainerIdx = 0;
+
         players.forEach(p => {
             if ((team === "Senioren" ? p.team === "Senioren" : p.jugend === team)) {
                 p.onField = true;
                 if (p.assignment === 'Toni') {
-                    // Beispiel-Setup 4-4-2 (Linke Seite)
-                    p.x = w * 0.2; p.y = h / 2; // Beispiel-Platzierung
+                    // 4-4-2 Logik (Linke Seite)
+                    const rows = [0.1, 0.25, 0.45, 0.65]; // GK, DEF, MID, ATT
+                    // Einfache Verteilung basierend auf Index
+                    p.x = w * 0.1 + (Math.floor(toniIdx / 3) * 120);
+                    p.y = (h * 0.2) + ((toniIdx % 4) * 120);
+                    toniIdx++;
                 } else {
-                    // Beispiel-Setup 3-4-3 (Rechte Seite)
-                    p.x = w * 0.8; p.y = h / 2;
+                    // 3-4-3 Logik (Rechte Seite)
+                    p.x = w * 0.9 - (Math.floor(trainerIdx / 3) * 120);
+                    p.y = (h * 0.2) + ((trainerIdx % 4) * 120);
+                    trainerIdx++;
                 }
             }
         });
@@ -194,7 +196,6 @@ window.Arena = {
             const rect = this.canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-
             if (window.MobileTactics && window.MobileTactics.selectedPlayerId) {
                 window.MobileTactics.handleBoardTap(x, y);
             }
@@ -209,6 +210,6 @@ window.Arena = {
             }
         });
         this.draw();
-        if(window.ToniVoice) window.ToniVoice.speak("Spielfeld bereinigt.");
+        if(window.ToniVoice) window.ToniVoice.speak("Board gesäubert.");
     }
 };
