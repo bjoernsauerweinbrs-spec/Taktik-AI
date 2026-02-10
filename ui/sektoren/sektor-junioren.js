@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - SEKTOR JUNIOREN (ELITE MANAGEMENT UPDATE)
- * Status: FINALISIERT (Management-Konsole & Multi-Sektor Integration)
+ * Status: FINALISIERT (Management-Konsole & Multi-Sektor Navigation Fix)
  */
 window.SektorJunioren = {
     currentYouth: null,
@@ -75,6 +75,21 @@ window.SektorJunioren = {
         this.selectTeam(teamLabel);
     },
 
+    /**
+     * ZENTRALE NAVIGATION-LOGIK (FIX FÜR STADIONZEITUNG)
+     */
+    goToMagazine() {
+        // 1. Sektor wechseln
+        window.BriefcaseUI.switchSektor('templates');
+        
+        // 2. Delay für Initialisierung des Ziel-Sektors
+        setTimeout(() => {
+            if (window.SektorTemplates) {
+                window.SektorTemplates.switchTab('magazine');
+            }
+        }, 80);
+    },
+
     selectTeam(team) {
         this.currentYouth = team;
         const detailView = document.getElementById('youth-detail-view');
@@ -98,7 +113,7 @@ window.SektorJunioren = {
                 <div style="display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid #333;">
                     <p style="font-size: 0.65rem; color: var(--data-cyan); text-transform: uppercase; margin:0 0 5px 0; letter-spacing:1px;">Management-Konsole:</p>
                     
-                    <button class="pro-btn-gold" onclick="window.BriefcaseUI.switchSektor('templates'); window.SektorTemplates.switchTab('magazine');" style="text-align:left; padding:10px; font-size:0.75rem;">
+                    <button class="pro-btn-gold" onclick="window.SektorJunioren.goToMagazine()" style="text-align:left; padding:10px; font-size:0.75rem;">
                         <i class="fas fa-book-open"></i> STADIONZEITUNG
                     </button>
                     
@@ -106,7 +121,7 @@ window.SektorJunioren = {
                         <i class="fas fa-dumbbell"></i> TRAINING PLANEN
                     </button>
                     
-                    <button class="pro-btn-gold" onclick="window.BriefcaseUI.switchSektor('sport'); window.SektorSporttasche.switchMode('match');" style="text-align:left; padding:10px; font-size:0.75rem;">
+                    <button class="pro-btn-gold" onclick="window.BriefcaseUI.switchSektor('sport'); setTimeout(() => window.SektorSporttasche.switchMode('match'), 50);" style="text-align:left; padding:10px; font-size:0.75rem;">
                         <i class="fas fa-chess-board"></i> TAKTIK & AUFSTELLUNG
                     </button>
                     
