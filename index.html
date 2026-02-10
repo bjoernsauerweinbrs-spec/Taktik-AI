@@ -113,9 +113,12 @@
     <script>
         const video = document.getElementById('intro-video-element');
         
+        /**
+         * Master-Auth Logik 2026
+         */
         function check() {
             const val = document.getElementById('pass').value;
-            // Dein Passwort
+            // Dein System-Passwort
             if(val === 'toni2026') {
                 sessionStorage.setItem('toni_auth', 'true');
                 startIntro();
@@ -125,6 +128,9 @@
             }
         }
 
+        /**
+         * Startet die filmische Einleitung und schaltet das Interface frei
+         */
         function startIntro() {
             const loginUI = document.getElementById('login-ui');
             const overlay = document.getElementById('video-intro-overlay');
@@ -132,20 +138,20 @@
             loginUI.style.display = 'none';
             overlay.style.display = 'flex';
             
-            // Video-Konfiguration
-            video.muted = false; // Wir wollen die Begrüßung hören!
+            // Video-Konfiguration für maximale Immersion
+            video.muted = false; 
             video.volume = 1.0;
             
-            // Play-Befehl mit User-Interaktion-Garantie
+            // Play-Befehl (Durch Button-Klick ist Audio erlaubt)
             video.play().then(() => {
-                console.log("TONI Intro mit Audio gestartet.");
+                console.log("TONI Intro-Sequenz läuft...");
             }).catch(e => {
-                console.error("Audio-Blockade durch Browser. Starte stumm...");
+                console.warn("Audio-Autoplay verhindert, starte stumm.");
                 video.muted = true;
                 video.play();
             });
 
-            // Automatische Weiterleitung nach Videoende
+            // Dynamischer Übergang nach Video-Ende
             video.onended = function() {
                 overlay.classList.add('fade-out');
                 setTimeout(() => {
@@ -153,7 +159,7 @@
                 }, 1000);
             };
 
-            // Safety-Fallback falls Video hakt (nach 12 Sek)
+            // Safety-Fallback (12 Sek), falls das Video-File fehlt oder hakt
             setTimeout(() => {
                 if(overlay.style.display === 'flex') {
                     window.location.href = 'app.html';
@@ -161,10 +167,17 @@
             }, 12000);
         }
 
-        // Enter-Taste Support
+        // Unterstützung für die Enter-Taste
         document.getElementById('pass').addEventListener('keypress', (e) => { 
             if (e.key === 'Enter') check(); 
         });
+
+        // Prüfung beim Laden: Wenn bereits eingeloggt, direkt zur App (optional)
+        window.onload = () => {
+            if(sessionStorage.getItem('toni_auth') === 'true') {
+                // Hier könntest du direkt weiterleiten, wenn gewünscht.
+            }
+        };
     </script>
 </body>
 </html>
