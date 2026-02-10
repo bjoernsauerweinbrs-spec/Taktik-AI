@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - AKTENTASCHE UI (MASTER HUB & ROUTER)
- * Status: VOLLSTÄNDIG KONTROLLIERT & AKTUALISIERT
+ * Status: VOLLSTÄNDIG - switchSektor & toggleVoice REPARIERT
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -24,7 +24,7 @@ window.BriefcaseUI = {
         this.isOpen = !this.isOpen;
 
         if (this.isOpen) {
-            // Brute-Force Sichtbarkeit: Entfernt Klassen und erzwingt Flex-Layout
+            // Brute-Force Sichtbarkeit gegen CSS-Blockaden
             overlay.classList.remove('hidden');
             overlay.style.setProperty('display', 'flex', 'important');
             this.renderMainGrid();
@@ -34,14 +34,30 @@ window.BriefcaseUI = {
         }
     },
 
-    /**
-     * HUB-LAYOUT: Die 4 Haupt-Sektoren
-     */
+    // REPARATUR: Erlaubt den Direkt-Zugriff aus der Sidebar (z.B. Setup)
+    switchSektor(section) {
+        if (!this.isOpen) this.toggle();
+        window.openSection(section);
+    },
+
+    // REPARATUR: Verbindung zur Sprachsteuerung (Mikrofon-Button)
+    toggleVoice() {
+        if (window.ToniVoice && typeof window.ToniVoice.toggle === 'function') {
+            window.ToniVoice.toggle();
+        } else {
+            console.warn("ToniVoice System noch nicht bereit.");
+            const mic = document.getElementById('main-mic-btn');
+            if(mic) {
+                mic.style.color = 'var(--status-error)';
+                setTimeout(() => { mic.style.color = ''; }, 1000);
+            }
+        }
+    },
+
     renderMainGrid() {
         const windowBody = document.querySelector('.briefcase-window');
         if (!windowBody) return;
 
-        // Reset: Content-Bereich verstecken, Nav zeigen
         windowBody.style.overflowY = "auto";
         windowBody.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
@@ -57,16 +73,16 @@ window.BriefcaseUI = {
             <div id="briefcase-nav" class="management-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                 
                 <div class="mgmt-card" style="border: 1px solid var(--neon-green); padding: 20px; background: rgba(57, 255, 20, 0.03);">
-                    <div style="color: var(--neon-green); font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; letter-spacing: 1px; font-family: 'Orbitron';">⚽ SPIEL & TRAINING</div>
+                    <div style="color: var(--neon-green); font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; font-family: 'Orbitron';">⚽ SPIEL & TRAINING</div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <button class="tactic-btn" onclick="window.openSection('kabine')"><i class="fas fa-users"></i> KABINE (FIFA-CARDS)</button>
-                        <button class="tactic-btn" onclick="window.openSection('junioren')"><i class="fas fa-graduation-cap"></i> JUNIOREN-ZENTRALE</button>
-                        <button class="tactic-btn" onclick="window.openSection('transfer')"><i class="fas fa-exchange-alt"></i> TRANSFER & KADER</button>
+                        <button class="tactic-btn" onclick="window.openSection('junioren')"><i class="fas fa-graduation-cap"></i> JUNIOREN</button>
+                        <button class="tactic-btn" onclick="window.openSection('transfer')"><i class="fas fa-exchange-alt"></i> TRANSFER</button>
                     </div>
                 </div>
 
                 <div class="mgmt-card" style="border: 1px solid #fff; padding: 20px; background: rgba(255, 255, 255, 0.03);">
-                    <div style="color: #fff; font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; letter-spacing: 1px; font-family: 'Orbitron';">📰 MEDIEN & PRESSE</div>
+                    <div style="color: #fff; font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; font-family: 'Orbitron';">📰 MEDIEN & PRESSE</div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <button class="tactic-btn" onclick="window.openSection('stadion')"><i class="fas fa-newspaper"></i> STADIONZEITUNG</button>
                         <button class="tactic-btn" onclick="window.openSection('stammplatz')"><i class="fas fa-id-badge"></i> STICKER-STUDIO</button>
@@ -74,15 +90,15 @@ window.BriefcaseUI = {
                 </div>
 
                 <div class="mgmt-card" style="border: 1px solid var(--accent-gold); padding: 20px; background: rgba(255, 204, 0, 0.03);">
-                    <div style="color: var(--accent-gold); font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; letter-spacing: 1px; font-family: 'Orbitron';">📈 BUSINESS & ORGA</div>
+                    <div style="color: var(--accent-gold); font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; font-family: 'Orbitron';">📈 BUSINESS & ANALYSE</div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <button class="tactic-btn" onclick="window.openSection('management')"><i class="fas fa-handshake"></i> PARTNER-POOL</button>
-                        <button class="tactic-btn" onclick="window.openSection('analyse')"><i class="fas fa-chart-line"></i> PERFORMANCE-CHECK</button>
+                        <button class="tactic-btn" onclick="window.openSection('analyse')"><i class="fas fa-chart-line"></i> PERFORMANCE</button>
                     </div>
                 </div>
 
                 <div class="mgmt-card" style="border: 1px solid var(--data-cyan); padding: 20px; background: rgba(0, 255, 255, 0.03);">
-                    <div style="color: var(--data-cyan); font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; letter-spacing: 1px; font-family: 'Orbitron';">📦 LOGISTIK & SKILLS</div>
+                    <div style="color: var(--data-cyan); font-weight: 900; margin-bottom: 15px; font-size: 0.75rem; font-family: 'Orbitron';">📦 LOGISTIK & SKILLS</div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <button class="tactic-btn" onclick="window.openSection('material')"><i class="fas fa-box-open"></i> LAGER & BESTAND</button>
                         <button class="tactic-btn" onclick="window.openSection('video')"><i class="fas fa-video"></i> VIDEO-ANALYSE</button>
@@ -92,11 +108,11 @@ window.BriefcaseUI = {
             </div>
             
             <div id="briefcase-content" class="hidden" style="margin-top: 30px; min-height: 400px;">
-                <div id="active-content"></div>
+                <div id="active-content" class="fadeIn"></div>
             </div>
 
             <div id="back-to-hub" class="hidden" style="text-align: center; margin-top: 30px; padding-bottom: 50px;">
-                <button class="pro-btn" style="border: 1px solid var(--neon-green); color: var(--neon-green); background: none; padding: 10px 20px; cursor: pointer;" onclick="window.BriefcaseUI.renderMainGrid()">← ZURÜCK ZUR ZENTRALE</button>
+                <button class="pro-btn" style="border-color: var(--neon-green); color: var(--neon-green); background: none; padding: 10px 20px; cursor: pointer;" onclick="window.BriefcaseUI.renderMainGrid()">← ZURÜCK ZUR ZENTRALE</button>
             </div>
         `;
     },
@@ -124,62 +140,51 @@ window.openSection = function(section) {
     const backBtn = document.getElementById('back-to-hub');
     const activeContent = document.getElementById('active-content');
 
-    // UI State Switch
     if(nav) nav.style.display = 'none';
     if(content) content.classList.remove('hidden');
     if(backBtn) backBtn.classList.remove('hidden');
-    if(activeContent) activeContent.innerHTML = ""; // Clear previous content
+    if(activeContent) activeContent.innerHTML = ""; 
 
     try {
         switch(section) {
             case 'management':
                 if(window.SektorManagement) window.SektorManagement.open();
                 break;
-            
             case 'stadion':
                 if(window.SektorTemplates) {
                     window.SektorTemplates.render();
                     setTimeout(() => { if(window.SektorTemplates.switchTab) window.SektorTemplates.switchTab('magazine'); }, 50);
                 }
                 break;
-
             case 'stammplatz':
                 if(window.SektorTemplates) {
                     window.SektorTemplates.render();
                     setTimeout(() => { if(window.SektorTemplates.switchTab) window.SektorTemplates.switchTab('stammplatz'); }, 50);
                 }
                 break;
-
             case 'kabine':
                 if(window.SektorSporttasche) window.SektorSporttasche.open();
                 break;
-
             case 'junioren':
                 if(window.SektorJunioren) window.SektorJunioren.open();
                 break;
-
             case 'transfer':
                 window.BriefcaseUI.renderTransferCenter();
                 break;
-
             case 'analyse':
                 if(window.SektorAnalyse) window.SektorAnalyse.open();
                 break;
-
             case 'material':
                 if(window.SektorMaterial) window.SektorMaterial.open();
                 break;
-
             case 'video':
                 if(window.SektorVideo) window.SektorVideo.open();
                 break;
-
+            case 'system':
+                if(window.SektorSettings) window.SektorSettings.open();
+                break;
             default:
-                if(activeContent) activeContent.innerHTML = `
-                    <div style="text-align:center; padding:50px; color:#666;">
-                        <i class="fas fa-tools" style="font-size:2rem; margin-bottom:15px;"></i><br>
-                        Sektor <b>${section.toUpperCase()}</b> wird kalibriert...
-                    </div>`;
+                if(activeContent) activeContent.innerHTML = `<p style="text-align:center; padding:50px;">Sektor <b>${section}</b> wird kalibriert...</p>`;
         }
     } catch (e) {
         console.error("Routing-Fehler:", e);
