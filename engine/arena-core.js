@@ -1,7 +1,7 @@
 /**
- * TONI 2.0 - ARENA ENGINE CORE (ELITE BRANDING & PITCH UPDATE)
- * Fokus: Taktik-Board, Kader-Integration, Sponsoren-Rotation & Full Pitch Markings
- * Status: MASTER-SYNC 2026 - COMPLETED VISUAL RECOVERY
+ * TONI 2.0 - ARENA ENGINE CORE (BLACK-TECH ELITE UPDATE)
+ * Fokus: Schwarzes Spielfeld, leuchtende Neon-Markierungen & Sponsoren-Rotation
+ * Status: MASTER-SYNC 2026 - PITCH RESTORED
  */
 window.Arena = {
     canvas: null,
@@ -12,7 +12,7 @@ window.Arena = {
     rotationSpeed: 5000, 
 
     init() {
-        console.log("🏟️ Arena Engine: Initialisiere High-End Spielfeld...");
+        console.log("🏟️ Arena Engine: Initialisiere High-Tech Spielfeld...");
         this.canvas = document.getElementById('tactic-board');
         if (!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
@@ -25,9 +25,6 @@ window.Arena = {
         this.renderBench();
     },
 
-    /**
-     * Startet das Rendering-System inkl. Banner-Rotation
-     */
     startAnimationLoop() {
         const loop = (time) => {
             this.update(time);
@@ -38,7 +35,6 @@ window.Arena = {
     },
 
     update(time) {
-        // Sponsor-Rotation alle X Sekunden
         if (time - this.lastRotation > this.rotationSpeed) {
             const sponsors = window.Database?.sponsors || [];
             if (sponsors.length > 0) {
@@ -54,17 +50,17 @@ window.Arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // 1. Spielfeld (Sattes Champions-Grün)
-        ctx.fillStyle = "#348C31"; 
+        // 1. Spielfeld (FIX: Zurück auf Deep Black / Matrix-Style)
+        ctx.fillStyle = "#050505"; 
         ctx.fillRect(0, 0, w, h);
         
-        // 2. Alle Spielfeldmarkierungen (16m, 5m, Tore etc.)
+        // 2. Leuchtende Spielfeldmarkierungen
         this.drawPitchLines(ctx, w, h);
 
-        // 3. Dynamische Werbebanden (Oben & Unten)
+        // 3. Dynamische Werbebanden
         this.drawBanners(ctx, w, h);
 
-        // 4. Aktive Spieler auf dem Feld
+        // 4. Aktive Spieler
         const team = window.currentTeamContext || "Senioren";
         const playersOnField = (window.Database?.players || []).filter(p => 
             (team === "Senioren" ? p.team === "Senioren" : p.jugend === team) && p.onField
@@ -74,14 +70,17 @@ window.Arena = {
     },
 
     /**
-     * Zeichnet alle offiziellen Spielfeldmarkierungen inkl. 16m und Toren
+     * Zeichnet leuchtende Neon-Markierungen auf schwarzem Grund
      */
     drawPitchLines(ctx, w, h) {
-        ctx.strokeStyle = "rgba(255,255,255,0.5)"; // Weiße Linien
-        ctx.lineWidth = 2;
+        // LEUCHT-EFFEKT: Neon-Grün Glow
+        ctx.strokeStyle = "rgba(57, 255, 20, 0.4)"; 
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#39FF14";
+        ctx.lineWidth = 1.5;
 
-        const offsetV = 50; // Versatz wegen der Banden oben/unten
-        const offsetH = 30; // Versatz von den Seiten
+        const offsetV = 50; 
+        const offsetH = 30; 
         const fieldW = w - (offsetH * 2);
         const fieldH = h - (offsetV * 2);
 
@@ -99,64 +98,45 @@ window.Arena = {
         ctx.stroke();
 
         // --- LINKS (TONI SEITE) ---
-        // 16-Meter Raum
-        ctx.strokeRect(offsetH, h / 2 - 120, 100, 240);
-        // 5-Meter Raum
-        ctx.strokeRect(offsetH, h / 2 - 50, 35, 100);
+        ctx.strokeRect(offsetH, h / 2 - 120, 100, 240); // 16m
+        ctx.strokeRect(offsetH, h / 2 - 50, 35, 100);  // 5m
+        
         // Elfmeterpunkt
         ctx.beginPath();
         ctx.arc(offsetH + 75, h / 2, 2, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255,255,255,0.5)";
+        ctx.fillStyle = "#39FF14";
         ctx.fill();
-        // Strafraum-Halbkreis
-        ctx.beginPath();
-        ctx.arc(offsetH + 75, h / 2, 50, -Math.PI/2.5, Math.PI/2.5);
-        ctx.stroke();
 
         // --- RECHTS (TRAINER SEITE) ---
-        // 16-Meter Raum
-        ctx.strokeRect(w - offsetH - 100, h / 2 - 120, 100, 240);
-        // 5-Meter Raum
-        ctx.strokeRect(w - offsetH - 35, h / 2 - 50, 35, 100);
+        ctx.strokeRect(w - offsetH - 100, h / 2 - 120, 100, 240); // 16m
+        ctx.strokeRect(w - offsetH - 35, h / 2 - 50, 35, 100);   // 5m
+        
         // Elfmeterpunkt
         ctx.beginPath();
         ctx.arc(w - offsetH - 75, h / 2, 2, 0, Math.PI * 2);
         ctx.fill();
-        // Strafraum-Halbkreis
-        ctx.beginPath();
-        ctx.arc(w - offsetH - 75, h / 2, 50, Math.PI * 0.6, Math.PI * 1.4);
-        ctx.stroke();
 
-        // --- TORE (Visuelle Darstellung) ---
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = "#fff";
+        // --- TORE (In Cyan-Leuchten abgesetzt) ---
+        ctx.strokeStyle = "rgba(0, 209, 255, 0.8)";
+        ctx.shadowColor = "#00d1ff";
+        
         // Tor Links
-        ctx.beginPath();
-        ctx.moveTo(offsetH, h / 2 - 40);
-        ctx.lineTo(offsetH - 10, h / 2 - 40);
-        ctx.lineTo(offsetH - 10, h / 2 + 40);
-        ctx.lineTo(offsetH, h / 2 + 40);
-        ctx.stroke();
-
+        ctx.strokeRect(offsetH - 10, h / 2 - 40, 10, 80);
         // Tor Rechts
-        ctx.beginPath();
-        ctx.moveTo(w - offsetH, h / 2 - 40);
-        ctx.lineTo(w - offsetH + 10, h / 2 - 40);
-        ctx.lineTo(w - offsetH + 10, h / 2 + 40);
-        ctx.lineTo(w - offsetH, h / 2 + 40);
-        ctx.stroke();
+        ctx.strokeRect(w - offsetH, h / 2 - 40, 10, 80);
+
+        // Schatten-Reset für Performance
+        ctx.shadowBlur = 0;
     },
 
     drawBanners(ctx, w, h) {
         const sponsors = window.Database?.sponsors || [];
         const bannerHeight = 40; 
 
-        // Schwarze Banden
         ctx.fillStyle = "#000";
         ctx.fillRect(0, 0, w, bannerHeight); 
         ctx.fillRect(0, h - bannerHeight, w, bannerHeight); 
 
-        // Logo Projektion
         if (sponsors.length > 0) {
             const currentSponsor = sponsors[this.activeSponsorIndex];
             const img = new Image();
@@ -168,10 +148,8 @@ window.Arena = {
                     ctx.drawImage(img, 80 + (i * (w/5)), 8, 80, 24);
                 } catch(e) {}
             }
-            ctx.globalAlpha = 1.0;
         }
 
-        // TONI 2.0 Branding
         ctx.fillStyle = "var(--data-cyan)";
         ctx.font = "bold 12px Orbitron";
         ctx.textAlign = "right";
@@ -220,12 +198,10 @@ window.Arena = {
             if ((team === "Senioren" ? p.team === "Senioren" : p.jugend === team)) {
                 p.onField = true;
                 if (p.assignment === 'Toni') {
-                    // 4-4-2 Raster
                     p.x = w * 0.1 + (Math.floor(toniIdx / 3) * 120);
                     p.y = (h * 0.2) + ((toniIdx % 4) * 120);
                     toniIdx++;
                 } else {
-                    // 3-4-3 Raster
                     p.x = w * 0.9 - (Math.floor(trainerIdx / 3) * 120);
                     p.y = (h * 0.2) + ((trainerIdx % 4) * 120);
                     trainerIdx++;
