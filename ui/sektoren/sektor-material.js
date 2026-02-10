@@ -1,18 +1,19 @@
 /**
- * TONI 2.0 - SEKTOR MATERIAL (LAGER & LOGISTIK)
- * Status: FINAL RECOVERY - Self-Healing & Sponsoring-Update
+ * TONI 2.0 - SEKTOR MATERIAL (ELITE LOGISTICS HUB)
+ * Fokus: Inventar-Präzision, Sponsoring-Link & Self-Healing
+ * Status: MASTER-SYNC 2026
  */
 window.SektorMaterial = {
     
     init() {
-        // Sicherstellen, dass das Inventar-Objekt existiert und ein Array ist
+        // Self-Healing: Datenbank-Integrität prüfen
         if (!window.Database.inventory || !Array.isArray(window.Database.inventory)) {
-            console.log("📦 Sektor Material: Initialisiere Bestands-Datenbank...");
+            console.log("📦 Logistik-Hub: Initialisiere Bestands-System...");
             window.Database.inventory = [
-                { id: 1, name: "Trikotsatz (Heim)", status: "Vollständig", count: 18, category: "Textil" },
-                { id: 2, name: "Trainingsbälle (Gr. 5)", status: "Prüfen", count: 22, category: "Equipment" },
-                { id: 3, name: "Sani-Koffer (Erste Hilfe)", status: "Vollständig", count: 2, category: "Medizin" },
-                { id: 4, name: "Markierungshauben", status: "Vollständig", count: 50, category: "Training" }
+                { id: 1, name: "Trikotsatz (Heim)", status: "Vollständig", count: 18, category: "Textil", provider: "Global Sports Tech" },
+                { id: 2, name: "Trainingsbälle (Gr. 5)", status: "Prüfen", count: 22, category: "Equipment", provider: "Vereins-Budget" },
+                { id: 3, name: "Sani-Koffer (Elite)", status: "Vollständig", count: 2, category: "Medizin", provider: "Regio-Drink" },
+                { id: 4, name: "Hütchen-Set (Markierung)", status: "Vollständig", count: 50, category: "Training", provider: "Internal" }
             ];
             if(window.Database.save) window.Database.save();
         }
@@ -23,8 +24,8 @@ window.SektorMaterial = {
         const content = document.querySelector('.briefcase-window');
         if (!content) return;
 
-        // Layout-Schutz gegen Clipping
-        content.style.paddingBottom = "150px";
+        // Layout-Optimization
+        content.style.paddingBottom = "100px";
         content.style.overflowY = "auto";
 
         this.render();
@@ -32,112 +33,110 @@ window.SektorMaterial = {
 
     render() {
         const content = document.querySelector('.briefcase-window');
-        
-        // --- SELF-HEALING LOGIK (FIX FÜR MAP-ERROR) ---
-        let inventory = window.Database.inventory;
-        if (!Array.isArray(inventory)) {
-            console.error("Daten-Fehler: Inventory ist kein Array! Notfall-Reset aktiv.");
-            window.Database.inventory = [];
-            inventory = [];
-        }
+        const inventory = window.Database.inventory || [];
+        const verein = window.coachInfo?.verein || "DEIN VEREIN";
+        const alerts = inventory.filter(i => i.status !== 'Vollständig').length;
 
-        const verein = (window.coachInfo && window.coachInfo.verein) ? window.coachInfo.verein : "DEIN VEREIN";
-        
         content.innerHTML = `
-            <div class="fadeIn" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom: 2px solid var(--data-cyan); padding-bottom: 20px;">
-                <div>
-                    <h2 style="color:var(--data-cyan); letter-spacing: 2px; font-family:'Orbitron'; font-size:1.1rem;">LAGER-VERWALTUNG</h2>
-                    <span style="color: #666; font-size: 0.7rem; text-transform: uppercase; letter-spacing:1px;">${verein} | LOGISTIK-HUB</span>
+            <div class="fadeIn">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; border-bottom: 2px solid var(--data-cyan); padding-bottom:15px;">
+                    <div>
+                        <h2 style="color:var(--data-cyan); font-family:'Orbitron'; margin:0; font-size:1.1rem; letter-spacing:2px;">LAGER-LOGISTIK</h2>
+                        <p style="color:#666; font-size:0.6rem; text-transform:uppercase; margin-top:4px;">${verein} | INVENTAR & BESTAND</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="pro-btn-gold" style="font-size:0.6rem;" onclick="window.SektorMaterial.addItem()">+ MATERIAL HINZUFÜGEN</button>
+                        <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
+                    </div>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="pro-btn-gold" style="font-size:0.65rem; padding: 8px 12px;" onclick="window.SektorMaterial.addItem()">+ MATERIAL</button>
-                    <button class="tactic-btn" style="font-size:0.65rem;" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
-                </div>
-            </div>
 
-            <div style="background: rgba(0,0,0,0.3); border-radius: 15px; border: 1px solid #222; overflow: hidden;">
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem;">
+                <div style="background: rgba(0,0,0,0.2); border: 1px solid #333; border-radius: 12px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left;">
                         <thead>
-                            <tr style="background: rgba(0, 209, 255, 0.1); color: var(--data-cyan); font-family:'Orbitron';">
-                                <th style="padding: 15px;">MATERIAL</th>
+                            <tr style="background: rgba(0, 209, 255, 0.05); color: var(--data-cyan); font-family:'Orbitron'; font-size:0.6rem;">
+                                <th style="padding: 15px;">POS. BEZEICHNUNG</th>
                                 <th style="padding: 15px;">KATEGORIE</th>
-                                <th style="padding: 15px;">ANZ.</th>
+                                <th style="padding: 15px;">BESTAND</th>
+                                <th style="padding: 15px;">SPONSOR / QUELLE</th>
                                 <th style="padding: 15px;">STATUS</th>
                                 <th style="padding: 15px; text-align:right;">AKTION</th>
                             </tr>
                         </thead>
-                        <tbody id="inventory-table-body">
-                            ${inventory.length > 0 ? inventory.map((item) => `
-                                <tr style="border-bottom: 1px solid #111; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                        <tbody>
+                            ${inventory.map(item => `
+                                <tr style="border-bottom: 1px solid #111; transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                                     <td style="padding: 15px; font-weight: 900; color: #fff;">${item.name.toUpperCase()}</td>
-                                    <td style="padding: 15px; color: #666;">${item.category}</td>
-                                    <td style="padding: 15px; font-family:'Orbitron'; color:var(--data-cyan); font-size: 1rem;">${item.count}</td>
+                                    <td style="padding: 15px; color: #555;">${item.category}</td>
+                                    <td style="padding: 15px; font-family:'Orbitron'; color:var(--data-cyan);">${item.count}</td>
+                                    <td style="padding: 15px; color: var(--accent-gold); font-size:0.7rem;">${item.provider || 'N/A'}</td>
                                     <td style="padding: 15px;">
-                                        <span style="display: flex; align-items: center; gap: 8px; color: ${item.status === 'Vollständig' ? 'var(--neon-green)' : 'var(--accent-orange)'}">
-                                            <div style="width:6px; height:6px; border-radius:50%; background:currentColor; box-shadow: 0 0 8px currentColor;"></div>
-                                            ${item.status}
+                                        <span style="color: ${item.status === 'Vollständig' ? 'var(--neon-green)' : 'var(--status-error)'}; font-size:0.7rem; font-weight:bold;">
+                                            ● ${item.status.toUpperCase()}
                                         </span>
                                     </td>
                                     <td style="padding: 15px; text-align:right;">
-                                        <button class="tactic-btn" style="padding: 5px 10px; font-size:0.6rem;" onclick="window.SektorMaterial.editItem(${item.id})">EDIT</button>
-                                        <button onclick="window.SektorMaterial.deleteItem(${item.id})" style="background:none; border:none; color:#444; cursor:pointer; margin-left:10px;"><i class="fas fa-trash-alt"></i></button>
+                                        <button class="tactic-btn" style="padding:4px 8px; font-size:0.6rem;" onclick="window.SektorMaterial.editItem(${item.id})">EDIT</button>
+                                        <button onclick="window.SektorMaterial.deleteItem(${item.id})" style="background:none; border:none; color:#333; cursor:pointer; margin-left:10px;"><i class="fas fa-trash"></i></button>
                                     </td>
                                 </tr>
-                            `).join('') : `<tr><td colspan="5" style="padding:40px; text-align:center; color:#444;">KEIN BESTAND GEFUNDEN</td></tr>`}
+                            `).join('')}
                         </tbody>
                     </table>
                 </div>
-            </div>
 
-            <div style="margin-top:25px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div style="background: rgba(57, 255, 20, 0.05); padding: 20px; border-radius: 15px; border: 1px dashed var(--neon-green);">
-                    <h3 style="color: var(--neon-green); font-size: 0.8rem; margin: 0 0 10px 0; font-family:'Orbitron';"><i class="fas fa-box-open"></i> LOGISTIK-STATUS</h3>
-                    <p style="font-size: 0.75rem; color: #aaa; line-height: 1.6; margin:0;">
-                        "Coach, für die Einheiten der <b>${window.currentTeamContext || 'Senioren'}</b> sind alle Trikotsätze bereit. Denke an die Ballkontrolle!"
-                    </p>
-                </div>
+                <div style="margin-top:25px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="background: rgba(57, 255, 20, 0.03); padding: 20px; border-radius: 12px; border: 1px dashed ${alerts > 0 ? 'var(--status-error)' : 'var(--neon-green)'};">
+                        <h4 style="color: var(--neon-green); font-size: 0.75rem; margin: 0 0 10px 0; font-family:'Orbitron';">TONI LOGISTIK-FEEDBACK</h4>
+                        <p style="font-size: 0.75rem; color: #888; line-height: 1.5; margin:0;">
+                            ${alerts > 0 ? 
+                                `"Coach, wir haben ${alerts} kritische Bestände. Die Ausrüstung der <b>${window.currentTeamContext || 'Mannschaft'}</b> muss vor der nächsten Einheit geprüft werden."` : 
+                                `"Material-Check abgeschlossen. Das Equipment ist im optimalen Zustand für das kommende Training."`}
+                        </p>
+                    </div>
 
-                <div style="background: rgba(212, 175, 55, 0.05); padding: 20px; border-radius: 15px; border: 1px dashed var(--accent-gold); opacity: 0.7;">
-                    <h3 style="color: var(--accent-gold); font-size: 0.8rem; margin: 0 0 10px 0; font-family:'Orbitron';"><i class="fas fa-handshake"></i> SPONSORING-SLOT</h3>
-                    <p style="font-size: 0.75rem; color: #888; line-height: 1.6; margin:0;">
-                        Sponsoring-Pool wird im nächsten Update synchronisiert. Material-Bestellungen sind dann direkt hier verknüpft.
-                    </p>
+                    <div style="background: rgba(212, 175, 55, 0.03); padding: 20px; border-radius: 12px; border: 1px dashed var(--accent-gold);">
+                        <h4 style="color: var(--accent-gold); font-size: 0.75rem; margin: 0 0 10px 0; font-family:'Orbitron';">SPONSORING-POTENTIAL</h4>
+                        <p style="font-size: 0.75rem; color: #888; line-height: 1.5; margin:0;">
+                            Fehlendes Material kann direkt als "Sponsoring-Paket" für Partner wie <b>${window.Database.sponsors?.[0]?.name || 'Partner'}</b> ausgeschrieben werden.
+                        </p>
+                    </div>
                 </div>
             </div>
         `;
     },
 
     addItem() {
-        const name = prompt("Bezeichnung des neuen Materials:");
+        const name = prompt("Name des Materials (z.B. Trainingsleibchen):");
         if (!name) return;
-        const category = prompt("Kategorie (z.B. Equipment, Medizin, Textil):", "Equipment");
+        const category = prompt("Kategorie (Textil, Equipment, Medizin):", "Equipment");
+        const provider = prompt("Sponsor / Quelle:", "Verein");
         
         window.Database.inventory.push({
             id: Date.now(),
             name: name,
-            status: "Neu",
-            count: 0,
-            category: category || "Diverses"
+            status: "Vollständig",
+            count: 1,
+            category: category,
+            provider: provider
         });
         this.saveAndRender();
+        if(window.ToniVoice) window.ToniVoice.speak(`${name} wurde dem Inventar hinzugefügt.`);
     },
 
     editItem(id) {
         const item = window.Database.inventory.find(i => i.id === id);
         if (item) {
-            const newCount = prompt(`Neue Anzahl für ${item.name}:`, item.count);
-            if (newCount !== null) {
-                item.count = parseInt(newCount) || 0;
-                const newStatus = prompt(`Status für ${item.name} (z.B. Vollständig, Prüfen):`, item.status);
-                if (newStatus) item.status = newStatus;
+            const count = prompt(`Bestand für ${item.name}:`, item.count);
+            if (count !== null) {
+                item.count = parseInt(count) || 0;
+                item.status = item.count < 5 ? "Prüfen" : "Vollständig";
                 this.saveAndRender();
             }
         }
     },
 
     deleteItem(id) {
-        if(confirm("Material dauerhaft aus der Liste löschen?")) {
+        if(confirm("Material dauerhaft aus dem Lager entfernen?")) {
             window.Database.inventory = window.Database.inventory.filter(i => i.id !== id);
             this.saveAndRender();
         }
