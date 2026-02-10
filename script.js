@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - MASTER BRIDGE SCRIPT (ELITE RECOVERY)
  * Fokus: Sektor-Routing, Voice-Sync & Formations-Logik
- * Stand: 10.02.2026
+ * Status: 10.02.2026 - ROUTER REPARIERT
  */
 
 // --- 0. GLOBALE INITIALISIERUNG ---
@@ -57,14 +57,37 @@ window.ToniVoice = {
     }
 };
 
-// --- 2. NAVIGATION & ROUTER (SYNCHRONISIERT) ---
-// Wir nutzen die globale openSection, die auch von der Aktentasche genutzt wird
+// --- 2. NAVIGATION & ROUTER (BULLETPROOF VERSION) ---
 window.openSection = function(name) {
-    console.log("🛰️ Bridge-Routing -> Sektor:", name);
+    console.log("🛰️ Router empfängt Befehl für:", name);
     
+    // 1. UI-Referenzen sicherstellen
+    const nav = document.getElementById('briefcase-nav');
+    const contentArea = document.getElementById('briefcase-content');
+    const activeDiv = document.getElementById('active-content');
+    const backBtn = document.getElementById('back-to-hub');
+
+    // Sicherheits-Check
+    if (!contentArea || !activeDiv) {
+        console.error("KRITISCH: HTML-Container fehlen!");
+        return;
+    }
+
+    // Aktentasche öffnen, falls geschlossen
     if (window.BriefcaseUI && !window.BriefcaseUI.isOpen) {
         window.BriefcaseUI.toggle();
     }
+
+    // UI umschalten: Hub aus, Content an
+    if (nav) nav.style.display = 'none';
+    contentArea.classList.remove('hidden');
+    contentArea.style.display = 'block'; 
+    if (backBtn) backBtn.classList.remove('hidden');
+    
+    // Kurzzeitiges Feedback
+    activeDiv.innerHTML = `<div style="text-align:center; padding:50px; color:var(--neon-green); font-family:'Orbitron';">
+        <i class="fas fa-sync fa-spin"></i> LADE SEKTOR: ${name.toUpperCase()}...
+    </div>`;
 
     setTimeout(() => {
         try {
@@ -83,21 +106,31 @@ window.openSection = function(name) {
 
             const target = targetMap[name];
 
-            if (target && typeof target.open === 'function') {
+            if (name === 'transfer') {
+                if(window.BriefcaseUI && window.BriefcaseUI.renderTransferCenter) {
+                    window.BriefcaseUI.renderTransferCenter();
+                } else { throw new Error("Transfer-Logik nicht in BriefcaseUI gefunden."); }
+            } 
+            else if (target && typeof target.open === 'function') {
                 target.open();
+                // Tab-Steuerung für Templates
                 if(name === 'stadion' && target.switchTab) target.switchTab('magazine');
                 if(name === 'stammplatz' && target.switchTab) target.switchTab('stammplatz');
-            } else if (name === 'transfer') {
-                if(window.BriefcaseUI.renderTransferCenter) window.BriefcaseUI.renderTransferCenter();
-            } else {
-                throw new Error(`Sektor '${name}' nicht bereit.`);
+            } 
+            else {
+                throw new Error(`Sektor '${name}' ist nicht bereit oder das Skript wurde nicht geladen.`);
             }
         } catch (err) {
-            console.error("KRITISCH:", err);
-            const activeContent = document.getElementById('active-content');
-            if(activeContent) activeContent.innerHTML = `<p style="color:red; text-align:center; padding:20px;"><b>FEHLER:</b> ${err.message}</p>`;
+            console.error("🚨 ROUTING-FEHLER:", err.message);
+            activeDiv.innerHTML = `
+                <div style="background:rgba(255,0,0,0.1); border:1px solid var(--status-error); padding:30px; color:var(--status-error); border-radius:15px; text-align:center;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:2rem;"></i><br><br>
+                    <b style="font-family:'Orbitron';">LADE-FEHLER</b><br>
+                    <p style="font-size:0.8rem; margin:10px 0;">${err.message}</p>
+                    <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()" style="margin-top:10px;">ZURÜCK ZUM HUB</button>
+                </div>`;
         }
-    }, 200);
+    }, 150);
 };
 
 // --- 3. TONI CORE COMMAND LOGIK ---
@@ -107,7 +140,6 @@ async function handleCommand(command) {
     const inputField = document.getElementById('command-input');
     const cmdLower = command.toLowerCase();
     
-    // UI Feedback
     const userMsg = document.createElement('div');
     userMsg.style.marginBottom = "10px";
     userMsg.innerHTML = `<span style="color:var(--text-dim); font-size:0.7rem;">COACH:</span><br>${command}`;
@@ -119,7 +151,6 @@ async function handleCommand(command) {
     toniMsg.style.marginBottom = "15px";
     chatBox.appendChild(toniMsg);
 
-    // SPEZIAL-BEFEHL: SPIELMODUS (Saved Info 2026-02-07)
     if (cmdLower.includes("spielmodus") || cmdLower.includes("starten")) {
         let resp = "Spielmodus initiiert. Toni-Elf rückt ein ins 4-4-2. Trainer-Team formiert sich im 3-4-3. Alle Analyse-Systeme sind live.";
         toniMsg.innerHTML = `<strong>TONI:</strong> ${resp}`;
@@ -133,7 +164,6 @@ async function handleCommand(command) {
         return;
     }
 
-    // COACH-SETUP LOGIK
     if (!window.coachInfo.name) {
         window.coachInfo.name = command;
         localStorage.setItem('toni_coach_data', JSON.stringify(window.coachInfo));
@@ -154,7 +184,6 @@ async function handleCommand(command) {
         return;
     }
 
-    // AI OFFLINE/ONLINE LOGIK
     if (window.aiOnline) {
         toniMsg.innerHTML = `<strong>TONI:</strong> <span class="thinking">Verarbeite Daten...</span>`;
         try {
@@ -163,7 +192,7 @@ async function handleCommand(command) {
                 method: 'POST',
                 body: JSON.stringify({
                     model: 'phi3', 
-                    prompt: `Du bist TONI 2.0, eine loyale und intelligente Fußball-KI. Antworte kurz, präzise und mit einem Hauch Wit. Coach: ${window.coachInfo.name}. Verein: ${window.coachInfo.verein}. Befehl: ${command}`,
+                    prompt: `Du bist TONI 2.0, eine loyale und intelligente Fußball-KI. Coach: ${window.coachInfo.name}. Verein: ${window.coachInfo.verein}. Befehl: ${command}`,
                     stream: false
                 })
             });
@@ -174,7 +203,7 @@ async function handleCommand(command) {
             toniMsg.innerHTML = `<strong>TONI:</strong> Verbindung zum Mac-Backend verloren. Check die IP im Setup!`;
         }
     } else {
-        toniMsg.innerHTML = `<strong>TONI:</strong> Ich bin im Standby-Modus. Aktiviere die Online-Schnittstelle im Setup!`;
+        toniMsg.innerHTML = `<strong>TONI:</strong> Ich bin im Standby. Aktiviere die Online-Schnittstelle im Setup!`;
     }
     chatBox.scrollTop = chatBox.scrollHeight;
 }
