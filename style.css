@@ -26,12 +26,15 @@ body, html {
     overflow: hidden; 
 }
 
-/* Scrollbar-Design für Mappen */
+/* Hilfsklassen */
+.hidden { display: none !important; }
+
+/* Scrollbar-Design */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
 ::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: 10px; }
 
-/* 1. HAUPT-LAYOUT (ARENA-STABILITÄT) */
+/* 1. HAUPT-LAYOUT */
 .pro-layout-container {
     display: grid;
     grid-template-columns: 90px 1fr 380px;
@@ -41,7 +44,7 @@ body, html {
     z-index: 1;
 }
 
-/* 2. SIDEBAR */
+/* 2. SIDEBAR - ERHÖHTER Z-INDEX FÜR KLICK-GARANTIE */
 .sidebar-minimal { 
     background: #020408; 
     border-right: 1px solid rgba(57, 255, 20, 0.3); 
@@ -49,7 +52,8 @@ body, html {
     flex-direction: column; 
     align-items: center; 
     padding-top: 25px;
-    z-index: 10;
+    z-index: 1000 !important; /* Über dem Stage-Container */
+    position: relative;
 }
 
 .control-unit { 
@@ -58,19 +62,21 @@ body, html {
     text-align: center; 
     color: var(--text-dim); 
     transition: 0.3s;
+    position: relative;
+    z-index: 1001;
 }
 .control-unit:hover { color: var(--neon-green); transform: scale(1.1); }
-.control-unit i { font-size: 24px; display: block; margin-bottom: 5px; }
-.control-unit span { font-size: 10px; font-family: 'Orbitron'; text-transform: uppercase; }
+.control-unit i { font-size: 24px; display: block; margin-bottom: 5px; pointer-events: none; }
+.control-unit span { font-size: 10px; font-family: 'Orbitron'; text-transform: uppercase; pointer-events: none; }
 
-/* 3. ARENA (CENTRAL BOARD FIX) */
+/* 3. ARENA */
 #stage-container {
     background: radial-gradient(circle, #0A1A0A 0%, #000 100%);
     display: flex; 
     justify-content: center; 
     align-items: center;
     position: relative;
-    z-index: 2;
+    z-index: 10;
     overflow: hidden;
     height: 100vh;
 }
@@ -84,14 +90,14 @@ body, html {
     display: block;
 }
 
-/* 4. CHAT-PANEL (INPUT UNTEN FIXIERT) */
+/* 4. CHAT-PANEL */
 .analysis-panel { 
     background: var(--panel-dark); 
     border-left: 1px solid rgba(255,255,255,0.05); 
     display: flex; 
     flex-direction: column; 
     height: 100vh;
-    z-index: 3;
+    z-index: 20;
 }
 
 .chat-container {
@@ -117,19 +123,18 @@ body, html {
     flex-shrink: 0; 
 }
 
-/* 5. BRIEFCASE (KORRIGIERTE SICHTBARKEIT) */
+/* 5. BRIEFCASE - ABSOLUTE PRIORITÄT */
 .briefcase-overlay { 
     position: fixed; 
     top: 0; left: 0; 
     width: 100vw; height: 100vh; 
     background: rgba(0, 0, 0, 0.95); 
-    display: none; /* JS schaltet dies auf 'flex' */
+    display: none; 
     align-items: center; justify-content: center; 
-    z-index: 99999 !important; /* Erhöhter Z-Index damit nichts drüber liegt */
+    z-index: 999999 !important; /* Über allem anderen */
     backdrop-filter: blur(20px);
 }
 
-/* FIX: Diese Klasse erzwingt das Öffnen */
 .briefcase-overlay:not(.hidden) {
     display: flex !important;
 }
@@ -145,7 +150,7 @@ body, html {
     position: relative;
 }
 
-/* 4-Kategorien Grid */
+/* Hub-Elemente */
 .management-grid {
     margin-top: 20px;
     display: grid;
@@ -161,13 +166,8 @@ body, html {
     flex-direction: column;
     justify-content: flex-start;
 }
+.mgmt-card:hover { transform: translateY(-5px); box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
 
-.mgmt-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-}
-
-/* Taktik Buttons in der Tasche */
 .tactic-btn {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -179,41 +179,20 @@ body, html {
     font-size: 0.7rem;
     transition: 0.2s;
     display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 5px;
+    align-items: center; gap: 10px; margin-top: 5px;
 }
+.tactic-btn:hover { background: rgba(255, 255, 255, 0.08); color: #fff; border-color: var(--neon-green); }
 
-.tactic-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    border-color: var(--neon-green);
-    box-shadow: 0 0 15px rgba(57, 255, 20, 0.1);
-}
-
-/* 6. FIFA CARDS RECOVERY (FIXED CLIP-PATH) */
-.fifa-cards-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 25px;
-    justify-content: center;
-    padding: 20px 0;
-}
-
+/* 6. FIFA CARDS */
+.fifa-cards-grid { display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; padding: 20px 0; }
 .fifa-card {
-    width: 210px;
-    height: 310px;
-    background: var(--card-dark);
-    position: relative; 
-    cursor: pointer; 
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 210px; height: 310px; background: var(--card-dark);
+    position: relative; cursor: pointer; transition: 0.3s;
     clip-path: polygon(0% 8%, 50% 0%, 100% 8%, 100% 92%, 50% 100%, 0% 92%);
     border: 1px solid rgba(255,255,255,0.05);
 }
 
-.fifa-card:hover { transform: scale(1.05); border-color: var(--neon-green); z-index: 5; }
-
-/* --- MOBILE & HANDY UPDATE (RESPONSIVE CORE) --- */
+/* --- MOBILE UPDATE --- */
 @media (max-width: 1200px) {
     .pro-layout-container { grid-template-columns: 80px 1fr; }
     .analysis-panel { display: none; }
@@ -226,32 +205,21 @@ body, html {
         flex-direction: row; justify-content: space-around; padding-top: 0;
         border-right: none; border-top: 1px solid rgba(57, 255, 20, 0.3);
         background: rgba(2, 4, 8, 0.98); backdrop-filter: blur(15px);
+        z-index: 100000 !important;
     }
     .control-unit { margin-bottom: 0; padding: 10px; }
     .control-unit span { display: none; } 
-    
     #stage-container { height: calc(100vh - 75px); }
-    
     .briefcase-window { width: 100%; height: 100%; border-radius: 0; padding: 20px; }
     .management-grid { grid-template-columns: 1fr; }
     .fifa-card { width: 165px; height: 240px; }
 }
 
-/* UTILS & ANIMATIONS */
+/* ANIMATIONS */
 .fadeIn { animation: fadeInAnim 0.4s ease forwards; }
 @keyframes fadeInAnim { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 .pro-btn-gold { 
-    background: var(--card-gold); 
-    color: #000; border: none; padding: 12px 24px; 
-    font-weight: bold; border-radius: 50px; cursor: pointer;
-    text-transform: uppercase; letter-spacing: 1px;
-    font-family: 'Orbitron', sans-serif;
+    background: var(--card-gold); color: #000; border: none; padding: 12px 24px; font-weight: bold; border-radius: 50px; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 1px; font-family: 'Orbitron', sans-serif;
 }
-
-.pro-textarea { 
-    width: 100%; background: #000; border: 1px solid #333; 
-    color: #fff; padding: 12px; border-radius: 8px; 
-    font-family: 'Inter', sans-serif; outline: none;
-}
-.pro-textarea:focus { border-color: var(--neon-green); }
