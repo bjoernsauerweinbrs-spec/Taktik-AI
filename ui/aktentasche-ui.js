@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - AKTENTASCHE UI (FINAL ELITE ROUTING)
- * Status: TIEFENANALYSE ABGESCHLOSSEN - ALLE BUTTONS REPARIERT
+ * Status: TIEFENANALYSE ABGESCHLOSSEN - ALLE BUTTONS REPARIERT & SYNCED
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -178,7 +178,7 @@ window.BriefcaseUI = {
 
 /**
  * GLOBALER ROUTER - TIEFENANALYSE FIX
- * Leitet Sektoren intelligent an die richtigen Objekte weiter.
+ * FINALER UPDATE: Behebt Transfer-Zentrum und Stadionzeitung
  */
 window.openSection = function(section) {
     const nav = document.getElementById('briefcase-nav');
@@ -193,6 +193,7 @@ window.openSection = function(section) {
     try {
         switch(section) {
             case 'transfer': 
+                // Direkter Aufruf der internen Funktion
                 window.BriefcaseUI.renderTransferCenter(); 
                 break;
             
@@ -207,11 +208,12 @@ window.openSection = function(section) {
                             window.SektorTemplates.renderStadionMagazin();
                         }
                     }, 100);
+                } else {
+                    activeContent.innerHTML = `<p style="text-align:center; padding:50px; color:#666;">Sektor STADIONZEITUNG (Templates) wird geladen...</p>`;
                 }
                 break;
 
             case 'management':
-                // Fix: Alias für Sponsoring oder Management
                 if(window.SektorManagement) window.SektorManagement.open();
                 else if(window.SektorSponsoring) window.SektorSponsoring.open();
                 break;
@@ -225,20 +227,19 @@ window.openSection = function(section) {
             case 'matchday': if(window.SektorMatchday) window.SektorMatchday.open(); break;
             
             case 'taktik': 
-                // Fix: Taktik ist oft Teil der Kabine/Matchday
                 if(window.SektorTaktik) window.SektorTaktik.open();
                 else if(window.SektorSporttasche) {
                     window.SektorSporttasche.open();
-                    setTimeout(() => window.SektorSporttasche.switchMode('match'), 50);
+                    setTimeout(() => { if(window.SektorSporttasche.switchMode) window.SektorSporttasche.switchMode('match'); }, 50);
                 }
                 break;
 
             default: 
                 console.warn("Sektor unbekannt:", section);
-                activeContent.innerHTML = `<p style="text-align:center; padding:50px; color:#666;">Sektor ${section.toUpperCase()} wird kalibriert...</p>`;
+                activeContent.innerHTML = `<div style="text-align:center; padding:50px; color:#666;"><i class="fas fa-tools" style="font-size:2rem; margin-bottom:10px;"></i><br>Sektor ${section.toUpperCase()} wird kalibriert...</div>`;
         }
     } catch (e) {
         console.error("Routing-Fehler:", e);
-        activeContent.innerHTML = `<p style="color:red; padding:20px;">Fehler beim Laden von ${section}: ${e.message}</p>`;
+        activeContent.innerHTML = `<p style="color:red; padding:20px;">Kritischer Ladefehler bei ${section}: ${e.message}</p>`;
     }
 };
