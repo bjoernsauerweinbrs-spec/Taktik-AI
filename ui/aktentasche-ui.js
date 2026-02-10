@@ -177,12 +177,13 @@ window.BriefcaseUI = {
 };
 
 /**
- * GLOBALER ROUTER
+ * GLOBALER ROUTER - STABILISIERT
  */
 window.openSection = function(section) {
     const nav = document.getElementById('briefcase-nav');
     const content = document.getElementById('briefcase-content');
     const backBtn = document.getElementById('back-to-hub');
+    const activeContent = document.getElementById('active-content');
 
     if(nav) nav.style.display = 'none';
     if(content) content.classList.remove('hidden');
@@ -196,7 +197,13 @@ window.openSection = function(section) {
             case 'stadion': 
                 if(window.SektorTemplates) {
                     window.SektorTemplates.render();
-                    setTimeout(() => window.SektorTemplates.switchTab('magazine'), 50);
+                    setTimeout(() => {
+                        if(typeof window.SektorTemplates.switchTab === 'function') {
+                            window.SektorTemplates.switchTab('magazine');
+                        }
+                    }, 100);
+                } else {
+                    activeContent.innerHTML = "<p style='color:orange; text-align:center; padding:20px;'>Sektor 'Templates' (Stadionzeitung) nicht bereit.</p>";
                 }
                 break;
             case 'junioren': if(window.SektorJunioren) window.SektorJunioren.open(); break;
@@ -211,6 +218,6 @@ window.openSection = function(section) {
             default: console.warn("Sektor unbekannt:", section);
         }
     } catch (e) {
-        console.error("Sektor-Ladefehler:", e);
+        console.error("Routing-Fehler:", e);
     }
 };
