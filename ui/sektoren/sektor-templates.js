@@ -1,20 +1,20 @@
 /**
  * TONI 2.0 - TEMPLATE & MEDIA HUB (PRO-EDITION)
- * Fokus: Sticker-Studio (Academy) & Stadionzeitung (Media)
+ * Fokus: Panini-Style Sticker-Studio & Stadionzeitung
  * Status: MASTER-SYNC 2026 - FINAL RECOVERY
  */
 window.SektorTemplates = {
     activeTab: 'magazine', 
 
     /**
-     * ROUTER-ANSCHLUSS: Synchronisiert mit window.openSection
+     * ROUTER-ANSCHLUSS
      */
     open: function() {
         this.render();
     },
 
     /**
-     * Tab-Umschaltung mit automatischer Re-Initialisierung
+     * Tab-Umschaltung
      */
     switchTab: function(tab) {
         this.activeTab = tab;
@@ -31,16 +31,28 @@ window.SektorTemplates = {
                     .no-print { display: none !important; } 
                     body { background: #fff !important; color: #000 !important; }
                     .magazine-container { box-shadow: none !important; margin: 0 !important; width: 100% !important; border:none !important; }
+                    .sticker-sheet { border: 1px dashed #ccc !important; }
                 }
                 .magazine-container { background: #fff; color: #000; width: 210mm; min-height: 297mm; margin: 0 auto; box-shadow: 0 0 50px rgba(0,0,0,0.8); font-family: 'Inter', sans-serif; }
                 .tab-btn { padding: 10px 20px; border: none; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; transition: 0.3s; background: rgba(255,255,255,0.05); color: #888; border-radius: 4px; border: 1px solid #333; }
                 .tab-btn.active.mag { border-color: var(--data-cyan); color: var(--data-cyan); background: rgba(0, 209, 255, 0.1); }
                 .tab-btn.active.stk { border-color: var(--neon-green); color: var(--neon-green); background: rgba(57, 255, 20, 0.1); }
-                .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 20px; background: #fff; }
                 
-                /* Elite Card CSS Simulation */
-                .elite-sticker { border: 4px solid #000; padding: 15px; position: relative; background: #fff; clip-path: polygon(10% 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0 90%, 0 10%); }
-                .elite-sticker.gold { border-color: #D4AF37; box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.2); }
+                /* PANINI STYLE STICKER CSS */
+                .panini-sticker { 
+                    width: 55mm; height: 75mm; background: #fff; border: 4px solid #fff; 
+                    box-shadow: 0 0 0 1px #ddd, 3px 3px 10px rgba(0,0,0,0.1); 
+                    position: relative; overflow: hidden; display: inline-block; margin: 10px;
+                    border-radius: 2px;
+                }
+                .panini-inner { border: 2px solid #00529b; height: calc(100% - 4px); position: relative; padding: 5px; }
+                .panini-inner.gold { border-color: #d4af37; background: linear-gradient(135deg, #fff 0%, #fff7e6 100%); }
+                .glitter-fx { 
+                    position: absolute; top:0; left:0; width:100%; height:100%; 
+                    background: url('https://www.transparenttextures.com/patterns/stardust.png'); 
+                    opacity: 0.15; pointer-events: none; 
+                }
+                .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 20px; justify-items: center; background:#fff; }
             </style>
 
             <div class="fadeIn" style="padding:10px 30px 30px 30px; color: #fff; height: 82vh; overflow-y: auto;">
@@ -52,7 +64,7 @@ window.SektorTemplates = {
                     </div>
                     <div style="display:flex; gap:10px;">
                         <button class="pro-btn-gold" onclick="window.print()" style="font-size:0.7rem;">
-                            <i class="fas fa-file-pdf"></i> EXPORT / DRUCKEN
+                            <i class="fas fa-print"></i> JETZT DRUCKEN
                         </button>
                         <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()" style="font-size:0.7rem;">ZENTRALE</button>
                     </div>
@@ -66,7 +78,7 @@ window.SektorTemplates = {
     },
 
     /**
-     * STADIONZEITUNG: Das Layout für den Media-Sektor
+     * STADIONZEITUNG
      */
     renderMagazine: function() {
         const team = window.currentTeamContext || 'ERSTE MANNSCHAFT';
@@ -99,110 +111,10 @@ window.SektorTemplates = {
                         <div style="margin-top:50px; text-align:center; color:#000;">
                             <h2 style="font-size:4rem; font-weight:900; margin:0; line-height:0.8; font-family:'Orbitron';">VORWÄRTS<br>${window.coachInfo.verein?.toUpperCase() || 'TEAM'}</h2>
                             <p style="margin-top:25px; font-size:1.2rem; border-left: 6px solid var(--data-cyan); padding:10px 20px; display: inline-block; font-weight:bold; background:#f9f9f9;">
-                                "${coach}: Die Vorbereitung war intensiv. Jetzt zählt der Fokus!"
+                                "${coach}: Bereit für den nächsten Heimsieg!"
                             </p>
                         </div>
                     </div>
 
                     <div style="background:#000; color:#fff; padding:30px; display:grid; grid-template-columns: repeat(2, 1fr); gap:15px;">
-                        <div style="grid-column: 1/-1; border-bottom:2px solid var(--data-cyan); margin-bottom:10px; font-weight:900; font-size:0.8rem; letter-spacing:4px; color:var(--data-cyan); font-family:'Orbitron';">DAS HEUTIGE AUFGEBOT</div>
-                        ${players.length > 0 ? players.slice(0,16).map(p => `
-                            <div style="font-size:0.9rem; font-weight:bold; text-transform:uppercase; font-family:'Inter';">
-                                <span style="color:var(--data-cyan); font-family:'Orbitron'; margin-right:10px;">${p.pos || '•'}</span> ${p.name}
-                            </div>
-                        `).join('') : '<div style="grid-column:1/-1; text-align:center; opacity:0.3;">Kader-Daten nicht verfügbar.</div>'}
-                    </div>
-                </div>
-            </div>
-        `;
-    },
-
-    /**
-     * MISSION STAMMPLATZ: Das Layout für den Academy-Sektor
-     */
-    renderStammplatz: function() {
-        return `
-            <div class="fadeIn" style="display: grid; grid-template-columns: 1fr 300px; gap: 30px;">
-                <div style="background:rgba(255,255,255,0.03); border:1px solid #333; padding:40px; border-radius:15px; text-align:center;">
-                    <i class="fas fa-bolt" style="font-size:3.5rem; color:var(--neon-green); margin-bottom:25px; filter: drop-shadow(0 0 10px var(--neon-green));"></i>
-                    <h3 style="font-family:'Orbitron'; color:var(--neon-green); letter-spacing:2px;">MISSION STAMMPLATZ</h3>
-                    <p style="font-size:0.8rem; color:#888; max-width:450px; margin: 15px auto;">Generiere Sammelbilder für die <b>${window.currentTeamContext || 'Academy'}</b>. Jedes Bild basiert auf den Live-Stats der Datenbank.</p>
-                    <button class="pro-btn-gold" onclick="window.SektorTemplates.generateStickers()" style="margin-top:20px; border-color:var(--neon-green); color:var(--neon-green);">STICKER-STUDIO STARTEN</button>
-                    
-                    <div id="sticker-sheet-container" class="magazine-container" style="margin-top:40px; display:none; padding:15mm; background:#fff; border:none;"></div>
-                </div>
-
-                <div style="display:flex; flex-direction:column; gap:20px;">
-                    <div style="background:rgba(0,209,255,0.05); padding:20px; border-radius:12px; border:1px solid var(--data-cyan);">
-                        <h4 style="font-size:0.7rem; color:var(--data-cyan); letter-spacing:2px; margin-bottom:10px; font-family:'Orbitron';">ALBUM-SERVICE</h4>
-                        <p style="font-size:0.65rem; color:#888; margin-bottom:15px;">Drucke das Cover für das offizielle Sammelalbum aus.</p>
-                        <button class="tactic-btn" style="width:100%; border-color:var(--data-cyan); color:var(--data-cyan);" onclick="window.SektorTemplates.printAlbum()">COVER DRUCKEN</button>
-                    </div>
-                </div>
-            </div>
-        `;
-    },
-
-    generateStickers: function() {
-        const team = window.currentTeamContext || 'Academy';
-        const players = (window.Database?.players || []).filter(p => p.team === team || p.jugend === team);
-        const container = document.getElementById('sticker-sheet-container');
-        
-        container.style.display = 'block';
-        container.innerHTML = `
-            <div style="text-align:center; border-bottom:6px solid #000; padding-bottom:15px; margin-bottom:30px; color:#000;">
-                <h2 style="margin:0; font-family:'Orbitron'; font-size:1.8rem; letter-spacing:3px;">MISSION STAMMPLATZ: ${team.toUpperCase()}</h2>
-                <div style="font-weight:900; letter-spacing:5px; font-size:0.8rem;">OFFIZIELLES SAMMELBILD-SET 2026</div>
-            </div>
-            <div class="sticker-grid">
-                ${players.map(p => {
-                    const isGold = p.rat >= 85;
-                    return `
-                        <div class="elite-sticker ${isGold ? 'gold' : ''}">
-                            <div style="font-family:'Orbitron'; font-weight:900; font-size:1.8rem; position:absolute; top:10px; left:15px;">${p.rat || 80}</div>
-                            <div style="position:absolute; top:40px; left:15px; font-size:0.6rem; font-weight:bold; color:#666;">${p.pos || 'ST'}</div>
-                            
-                            <div style="width:120px; height:120px; background:#f0f0f0; margin:20px auto 10px auto; overflow:hidden; display:flex; align-items:center; justify-content:center; border-bottom:3px solid #000;">
-                                ${p.img ? `<img src="${p.img}" style="width:100%; height:100%; object-fit:cover;">` : `<i class="fas fa-user-circle" style="font-size:4rem; color:#ddd;"></i>`}
-                            </div>
-                            
-                            <div style="background:#000; color:#fff; padding:8px; font-weight:900; font-size:0.8rem; text-transform:uppercase; font-family:'Orbitron';">
-                                ${p.name.split(' ').pop()}
-                            </div>
-                            
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:2px; margin-top:8px; font-size:0.55rem; font-weight:bold; font-family:'Orbitron';">
-                                <div style="border-right:1px solid #eee;">PAC: ${p.pac || 80}</div>
-                                <div>SHO: ${p.sho || 75}</div>
-                                <div style="border-right:1px solid #eee;">PAS: ${p.pas || 78}</div>
-                                <div>DRI: ${p.dri || 82}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-        if(window.ToniVoice) window.ToniVoice.speak("Das Sticker-Sheet für die " + team + " wurde im Studio generiert.");
-        container.scrollIntoView({ behavior: 'smooth' });
-    },
-
-    printAlbum: function() {
-        const content = document.getElementById('active-content');
-        content.innerHTML = `
-            <div class="magazine-container fadeIn" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:50px; border: 30px solid #000; min-height:280mm; color:#000; position:relative;">
-                <div style="position:absolute; top:20px; left:20px; font-family:'Orbitron'; font-size:0.8rem; font-weight:bold;">OFFICIAL PRODUCT 2026</div>
-                <h1 style="font-family:'Orbitron'; font-size:5rem; margin-bottom:0; letter-spacing:-2px;">MISSION</h1>
-                <h1 style="font-family:'Orbitron'; font-size:6rem; margin-top:-20px; background:#000; color:#fff; padding:0 30px;">STAMMPLATZ</h1>
-                <div style="width:200px; height:200px; border:8px solid #000; margin:50px 0; display:flex; align-items:center; justify-content:center;">
-                    <i class="fas fa-star" style="font-size:6rem;"></i>
-                </div>
-                <h2 style="font-size:2.5rem; text-transform:uppercase; letter-spacing:10px; font-family:'Orbitron';">SAMMELALBUM</h2>
-                <div style="font-weight:900; font-size:2rem; border-top:5px solid #000; padding-top:10px; font-family:'Orbitron';">EDITION: ${window.coachInfo.verein?.toUpperCase() || 'PRO'}</div>
-                <p style="margin-top:120px; font-family:'Orbitron'; font-size:0.7rem; color:#666;">POWERED BY TONI 2.0 BIOMETRIC ENGINE</p>
-            </div>
-            <div class="no-print" style="text-align:center; margin-top:30px; padding-bottom:50px;">
-                <button class="pro-btn-gold" onclick="window.print()">ALBUM COVER DRUCKEN</button>
-                <button class="tactic-btn" onclick="window.SektorTemplates.render()">ZURÜCK ZUM STUDIO</button>
-            </div>
-        `;
-    }
-};
+                        <div style="grid-column: 1/-1; border-bottom:2px solid var
