@@ -117,16 +117,21 @@ body, html {
     flex-shrink: 0; 
 }
 
-/* 5. BRIEFCASE (CLIPPING-SCHUTZ & HUB-LAYOUT) */
+/* 5. BRIEFCASE (KORRIGIERTE SICHTBARKEIT) */
 .briefcase-overlay { 
     position: fixed; 
     top: 0; left: 0; 
     width: 100vw; height: 100vh; 
     background: rgba(0, 0, 0, 0.95); 
-    display: none; 
+    display: none; /* JS schaltet dies auf 'flex' */
     align-items: center; justify-content: center; 
-    z-index: 99999; 
+    z-index: 99999 !important; /* Erhöhter Z-Index damit nichts drüber liegt */
     backdrop-filter: blur(20px);
+}
+
+/* FIX: Diese Klasse erzwingt das Öffnen */
+.briefcase-overlay:not(.hidden) {
+    display: flex !important;
 }
 
 .briefcase-window { 
@@ -215,7 +220,6 @@ body, html {
 }
 
 @media (max-width: 650px) {
-    /* Sidebar wird zur Bottom-Navigation */
     .pro-layout-container { grid-template-columns: 1fr; }
     .sidebar-minimal {
         position: fixed; bottom: 0; left: 0; width: 100vw; height: 75px;
@@ -224,11 +228,10 @@ body, html {
         background: rgba(2, 4, 8, 0.98); backdrop-filter: blur(15px);
     }
     .control-unit { margin-bottom: 0; padding: 10px; }
-    .control-unit span { display: none; } /* Text auf Handy ausblenden für Clean-Look */
+    .control-unit span { display: none; } 
     
     #stage-container { height: calc(100vh - 75px); }
     
-    /* Briefcase-Anpassung für Handy */
     .briefcase-window { width: 100%; height: 100%; border-radius: 0; padding: 20px; }
     .management-grid { grid-template-columns: 1fr; }
     .fifa-card { width: 165px; height: 240px; }
