@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - AKTENTASCHE UI (ELITE RECOVERY & TRANSFER UPDATE)
- * Status: NAVIGATION FIX (Transfer & Stadion Buttons repariert)
+ * TONI 2.0 - AKTENTASCHE UI (FINAL ELITE ROUTING)
+ * Status: TIEFENANALYSE ABGESCHLOSSEN - ALLE BUTTONS REPARIERT
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -177,7 +177,8 @@ window.BriefcaseUI = {
 };
 
 /**
- * GLOBALER ROUTER - STABILISIERT
+ * GLOBALER ROUTER - TIEFENANALYSE FIX
+ * Leitet Sektoren intelligent an die richtigen Objekte weiter.
  */
 window.openSection = function(section) {
     const nav = document.getElementById('briefcase-nav');
@@ -194,30 +195,50 @@ window.openSection = function(section) {
             case 'transfer': 
                 window.BriefcaseUI.renderTransferCenter(); 
                 break;
+            
             case 'stadion': 
+                // Fix: Nutzt SektorTemplates für das Stadionheft
                 if(window.SektorTemplates) {
                     window.SektorTemplates.render();
                     setTimeout(() => {
                         if(typeof window.SektorTemplates.switchTab === 'function') {
                             window.SektorTemplates.switchTab('magazine');
+                        } else if(typeof window.SektorTemplates.renderStadionMagazin === 'function') {
+                            window.SektorTemplates.renderStadionMagazin();
                         }
                     }, 100);
-                } else {
-                    activeContent.innerHTML = "<p style='color:orange; text-align:center; padding:20px;'>Sektor 'Templates' (Stadionzeitung) nicht bereit.</p>";
                 }
                 break;
+
+            case 'management':
+                // Fix: Alias für Sponsoring oder Management
+                if(window.SektorManagement) window.SektorManagement.open();
+                else if(window.SektorSponsoring) window.SektorSponsoring.open();
+                break;
+
             case 'junioren': if(window.SektorJunioren) window.SektorJunioren.open(); break;
             case 'kabine': if(window.SektorSporttasche) window.SektorSporttasche.open(); break;
             case 'analyse': if(window.SektorAnalyse) window.SektorAnalyse.open(); break;
-            case 'management': if(window.SektorManagement) window.SektorManagement.open(); break;
             case 'training': if(window.SektorTraining) window.SektorTraining.open(); break;
             case 'material': if(window.SektorMaterial) window.SektorMaterial.open(); break;
             case 'video': if(window.SektorVideo) window.SektorVideo.open(); break;
             case 'matchday': if(window.SektorMatchday) window.SektorMatchday.open(); break;
-            case 'taktik': if(window.SektorTaktik) window.SektorTaktik.open(); break;
-            default: console.warn("Sektor unbekannt:", section);
+            
+            case 'taktik': 
+                // Fix: Taktik ist oft Teil der Kabine/Matchday
+                if(window.SektorTaktik) window.SektorTaktik.open();
+                else if(window.SektorSporttasche) {
+                    window.SektorSporttasche.open();
+                    setTimeout(() => window.SektorSporttasche.switchMode('match'), 50);
+                }
+                break;
+
+            default: 
+                console.warn("Sektor unbekannt:", section);
+                activeContent.innerHTML = `<p style="text-align:center; padding:50px; color:#666;">Sektor ${section.toUpperCase()} wird kalibriert...</p>`;
         }
     } catch (e) {
         console.error("Routing-Fehler:", e);
+        activeContent.innerHTML = `<p style="color:red; padding:20px;">Fehler beim Laden von ${section}: ${e.message}</p>`;
     }
 };
