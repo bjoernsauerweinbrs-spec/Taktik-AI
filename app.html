@@ -19,8 +19,11 @@
         .hidden { display: none !important; }
         #main-canvas { cursor: crosshair; touch-action: none; }
         * { -webkit-tap-highlight-color: transparent; outline: none; }
-        /* Sicherstellen, dass das Overlay über allem liegt */
-        .briefcase-overlay { z-index: 9999; }
+        
+        /* ELITE Z-INDEX RECOVERY */
+        .briefcase-overlay { z-index: 1000000 !important; }
+        .sidebar-minimal { z-index: 100001 !important; position: relative; }
+        #stage-container { z-index: 1; }
     </style>
 </head>
 <body>
@@ -28,11 +31,13 @@
     <script>
         // Sicherheits-Check
         if(sessionStorage.getItem('toni_auth') !== 'true') window.location.href = 'index.html';
+        // Coach-Info Fallback
+        window.coachInfo = { verein: "Mein Verein", name: "Coach" };
     </script>
 
     <div class="pro-layout-container">
         <nav class="sidebar-minimal">
-            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggle()" title="Zentrale öffnen">
+            <div class="control-unit" onclick="console.log('Sidebar: Tasche klick'); if(window.BriefcaseUI) window.BriefcaseUI.toggle()" title="Zentrale öffnen">
                 <i class="fas fa-briefcase"></i>
                 <span>TASCHE</span>
             </div>
@@ -84,7 +89,8 @@
 
     <div id="briefcase-overlay" class="briefcase-overlay hidden">
         <div class="briefcase-window">
-            <div id="briefcase-nav"></div> <div id="briefcase-content" class="hidden">
+            <div id="briefcase-nav"></div> 
+            <div id="briefcase-content" class="hidden">
                 <div id="active-content"></div> 
             </div>
         </div>
@@ -92,7 +98,6 @@
 
     <script src="logic/database.js"></script>
     <script src="data/youth-presets.js"></script>
-    
     <script src="engine/arena.js"></script>
     <script src="ui/aktentasche-ui.js"></script>
     
@@ -102,6 +107,8 @@
     <script src="ui/sektoren/sektor-management.js"></script>
     <script src="ui/sektoren/sektor-templates.js"></script>
     <script src="ui/sektoren/sektor-settings.js"></script>
+    <script src="ui/sektoren/sektor-material.js"></script>
+    <script src="ui/sektoren/sektor-video.js"></script>
     
     <script src="script.js"></script>
 
@@ -111,9 +118,7 @@
         window.selectTeam = function(teamName) {
             window.currentTeamContext = teamName;
             console.log("⚽️ Kontext-Wechsel: " + teamName);
-            
             if(window.ToniVoice) window.ToniVoice.speak("Kader für " + teamName + " geladen.");
-            
             if(window.BriefcaseUI) {
                 if(!window.BriefcaseUI.isOpen) window.BriefcaseUI.toggle();
                 window.openSection('kabine');
@@ -123,40 +128,29 @@
         function injectTestPlayers() {
             if(!window.Database || !window.Database.players) return;
             if(window.Database.players.length > 2) return; 
-
             const testData = [
                 { id: 101, name: "Max Mustermann", team: "Senioren", rat: 88, pos: "ST", assignment: "both", pac: 90, sho: 85, pas: 78, dri: 84, def: 40, phy: 75 },
-                { id: 102, name: "Leon Goretzka", team: "Senioren", rat: 82, pos: "MF", assignment: "both", pac: 75, sho: 78, pas: 85, dri: 80, def: 72, phy: 84 },
-                { id: 201, name: "Bambini Ben", team: "G-Jugend", rat: 92, pos: "ST", assignment: "both", sleep: 95, pac: 95, sho: 90 },
-                { id: 202, name: "Flitzer Felix", team: "G-Jugend", rat: 78, pos: "TW", assignment: "both", sleep: 65, pac: 80, def: 85 },
-                { id: 301, name: "F-Jugend Finn", team: "F-Jugend", rat: 85, pos: "ABW", assignment: "both", pac: 70, def: 90 }
+                { id: 102, name: "Leon Goretzka", team: "Senioren", rat: 82, pos: "MF", assignment: "both", pac: 75, sho: 78, pas: 85, dri: 80, def: 72, phy: 84 }
             ];
-
             testData.forEach(p => {
-                if(!window.Database.players.find(x => x.id === p.id)) {
-                    window.Database.players.push(p);
-                }
+                if(!window.Database.players.find(x => x.id === p.id)) window.Database.players.push(p);
             });
-            
             if(window.Database.save) window.Database.save();
         }
 
         window.onload = () => {
             if(window.arena) window.arena.init('main-canvas');
             if(window.BriefcaseUI) window.BriefcaseUI.init();
-            
             injectTestPlayers();
-
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
-                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> System bereit. Elite-Cockpit 2026 aktiv.</div>`;
+                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> System bereit.</div>`;
                 runToniSystemCheck();
             }, 1000);
         };
 
         function runToniSystemCheck() {
-            // Prüfung der Sektoren-Objekte
-            const sectors = ["SektorJunioren", "SektorSporttasche", "SektorAnalyse", "SektorManagement", "SektorTemplates"];
+            const sectors = ["SektorJunioren", "SektorSporttasche", "SektorAnalyse", "SektorManagement", "SektorTemplates", "SektorMaterial", "SektorVideo"];
             sectors.forEach(s => {
                 if (!window[s]) console.warn(`⚠️ Warnung: ${s} fehlt!`);
                 else console.log(`✅ ${s} aktiv.`);
