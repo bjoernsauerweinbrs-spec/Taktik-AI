@@ -1,6 +1,6 @@
 /**
  * TONI 2.0 - AKTENTASCHE UI (ELITE ROUTER & CATEGORY LAYOUT)
- * Status: 4-KATEGORIEN-SYSTEM AKTIVIERT
+ * Status: REPARIERT - TOGGLE-LOGIK STABILISIERT
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -11,20 +11,34 @@ window.BriefcaseUI = {
 
     toggle() {
         const overlay = document.getElementById('briefcase-overlay');
-        if (!overlay) return;
+        if (!overlay) {
+            console.error("Kritisches Problem: 'briefcase-overlay' nicht im DOM gefunden!");
+            return;
+        }
+
         this.isOpen = !this.isOpen;
-        overlay.style.display = this.isOpen ? 'flex' : 'none';
+
         if (this.isOpen) {
+            // Erst die Klasse weg, dann Display auf Flex für das Layout
             overlay.classList.remove('hidden');
+            overlay.style.display = 'flex';
             this.renderMainGrid();
+        } else {
+            overlay.style.display = 'none';
+            overlay.classList.add('hidden');
         }
     },
 
     renderMainGrid() {
+        // Sicherstellen, dass wir das richtige Element ansprechen
         const windowBody = document.querySelector('.briefcase-window');
-        if (!windowBody) return;
+        if (!windowBody) {
+            console.error("Kritisches Problem: '.briefcase-window' nicht gefunden!");
+            return;
+        }
 
         windowBody.style.overflowY = "auto";
+        // Wir setzen das HTML neu, um sicherzustellen, dass die Kacheln (Nav) sichtbar sind
         windowBody.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                 <div>
@@ -98,9 +112,7 @@ window.BriefcaseUI = {
     }
 };
 
-/**
- * GLOBALER ROUTER - REPARIERT & SYNCHRONISIERT
- */
+// GLOBALER ROUTER BLEIBT IDENTISCH
 window.openSection = function(section) {
     const nav = document.getElementById('briefcase-nav');
     const content = document.getElementById('briefcase-content');
@@ -113,64 +125,27 @@ window.openSection = function(section) {
 
     try {
         switch(section) {
-            case 'management':
-                if(window.SektorManagement) window.SektorManagement.open();
-                break;
-            
-            case 'stadion':
+            case 'management': if(window.SektorManagement) window.SektorManagement.open(); break;
+            case 'stadion': 
                 if(window.SektorTemplates) {
                     window.SektorTemplates.render();
-                    setTimeout(() => {
-                        if(window.SektorTemplates.switchTab) {
-                            window.SektorTemplates.switchTab('magazine');
-                        }
-                    }, 50);
+                    setTimeout(() => { if(window.SektorTemplates.switchTab) window.SektorTemplates.switchTab('magazine'); }, 50);
                 }
                 break;
-
-            case 'stammplatz':
+            case 'stammplatz': 
                 if(window.SektorTemplates) {
                     window.SektorTemplates.render();
-                    setTimeout(() => {
-                        if(window.SektorTemplates.switchTab) {
-                            window.SektorTemplates.switchTab('stammplatz');
-                        }
-                    }, 50);
+                    setTimeout(() => { if(window.SektorTemplates.switchTab) window.SektorTemplates.switchTab('stammplatz'); }, 50);
                 }
                 break;
-
-            case 'kabine':
-                if(window.SektorSporttasche) window.SektorSporttasche.open();
-                break;
-
-            case 'junioren':
-                if(window.SektorJunioren) window.SektorJunioren.open();
-                break;
-
-            case 'transfer':
-                window.BriefcaseUI.renderTransferCenter();
-                break;
-
-            case 'analyse':
-                if(window.SektorAnalyse) window.SektorAnalyse.open();
-                break;
-
-            case 'material':
-                if(window.SektorMaterial) window.SektorMaterial.open();
-                break;
-
-            case 'video':
-                if(window.SektorVideo) window.SektorVideo.open();
-                break;
-
+            case 'kabine': if(window.SektorSporttasche) window.SektorSporttasche.open(); break;
+            case 'junioren': if(window.SektorJunioren) window.SektorJunioren.open(); break;
+            case 'transfer': window.BriefcaseUI.renderTransferCenter(); break;
+            case 'analyse': if(window.SektorAnalyse) window.SektorAnalyse.open(); break;
+            case 'material': if(window.SektorMaterial) window.SektorMaterial.open(); break;
+            case 'video': if(window.SektorVideo) window.SektorVideo.open(); break;
             default:
-                if(activeContent) activeContent.innerHTML = `
-                    <div style="text-align:center; padding:50px; color:#666;">
-                        <i class="fas fa-tools" style="font-size:2rem; margin-bottom:10px;"></i><br>
-                        Sektor <b>${section.toUpperCase()}</b> wird kalibriert...
-                    </div>`;
+                if(activeContent) activeContent.innerHTML = `<p style="text-align:center; padding:50px;">Sektor ${section.toUpperCase()} kalibrieren...</p>`;
         }
-    } catch (e) {
-        console.error("Routing-Fehler:", e);
-    }
+    } catch (e) { console.error("Routing-Fehler:", e); }
 };
