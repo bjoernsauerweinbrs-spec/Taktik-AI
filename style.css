@@ -44,7 +44,7 @@ body, html {
     z-index: 1;
 }
 
-/* 2. SIDEBAR - ERHÖHTER Z-INDEX FÜR KLICK-GARANTIE */
+/* 2. SIDEBAR - ELITE KLICK-GARANTIE */
 .sidebar-minimal { 
     background: #020408; 
     border-right: 1px solid rgba(57, 255, 20, 0.3); 
@@ -52,7 +52,7 @@ body, html {
     flex-direction: column; 
     align-items: center; 
     padding-top: 25px;
-    z-index: 1000 !important; /* Über dem Stage-Container */
+    z-index: 1000 !important; 
     position: relative;
 }
 
@@ -64,6 +64,7 @@ body, html {
     transition: 0.3s;
     position: relative;
     z-index: 1001;
+    pointer-events: all;
 }
 .control-unit:hover { color: var(--neon-green); transform: scale(1.1); }
 .control-unit i { font-size: 24px; display: block; margin-bottom: 5px; pointer-events: none; }
@@ -100,13 +101,6 @@ body, html {
     z-index: 20;
 }
 
-.chat-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; 
-}
-
 #chat-box {
     flex: 1;
     overflow-y: auto; 
@@ -131,7 +125,7 @@ body, html {
     background: rgba(0, 0, 0, 0.95); 
     display: none; 
     align-items: center; justify-content: center; 
-    z-index: 999999 !important; /* Über allem anderen */
+    z-index: 1000000 !important; 
     backdrop-filter: blur(20px);
 }
 
@@ -145,12 +139,12 @@ body, html {
     width: 94%; height: 90%; 
     border-radius: 20px; 
     padding: 40px; 
-    padding-bottom: 120px; 
+    padding-bottom: 60px; 
     overflow-y: auto;
     position: relative;
 }
 
-/* Hub-Elemente */
+/* Grid-Layout */
 .management-grid {
     margin-top: 20px;
     display: grid;
@@ -164,7 +158,8 @@ body, html {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .mgmt-card:hover { transform: translateY(-5px); box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
 
@@ -205,12 +200,12 @@ body, html {
         flex-direction: row; justify-content: space-around; padding-top: 0;
         border-right: none; border-top: 1px solid rgba(57, 255, 20, 0.3);
         background: rgba(2, 4, 8, 0.98); backdrop-filter: blur(15px);
-        z-index: 100000 !important;
+        z-index: 1000000 !important;
     }
     .control-unit { margin-bottom: 0; padding: 10px; }
     .control-unit span { display: none; } 
     #stage-container { height: calc(100vh - 75px); }
-    .briefcase-window { width: 100%; height: 100%; border-radius: 0; padding: 20px; }
+    .briefcase-window { width: 100%; height: 100%; border-radius: 0; padding: 20px; padding-bottom: 100px; }
     .management-grid { grid-template-columns: 1fr; }
     .fifa-card { width: 165px; height: 240px; }
 }
