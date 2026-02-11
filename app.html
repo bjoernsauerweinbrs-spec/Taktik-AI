@@ -13,13 +13,13 @@
 
     <style>
         .hidden { display: none !important; }
-        #main-canvas { cursor: crosshair; touch-action: none; background: #050505; }
+        #tactic-board { cursor: crosshair; touch-action: none; background: #050505; display: block; }
         * { -webkit-tap-highlight-color: transparent; outline: none; }
         
         /* Z-INDEX RECOVERY & OVERLAYS */
-        #briefcase-overlay { z-index: 1000000 !important; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:flex; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
+        #briefcase-overlay { z-index: 1000000 !important; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:flex; align-items:center; justify-content:center; backdrop-filter: blur(10px); }
         .sidebar-minimal { z-index: 100001 !important; position: relative; }
-        #stage-container { z-index: 1; position: relative; background: #000; overflow: hidden; }
+        #stage-container { z-index: 1; position: relative; background: #000; overflow: hidden; display: flex; flex-direction: column; }
         
         @keyframes pulse-glow {
             0% { box-shadow: 0 0 5px #39FF14; opacity: 0.6; }
@@ -31,40 +31,39 @@
         #arena-bench-list { 
             display: flex; gap: 10px; padding: 15px; overflow-x: auto; 
             background: rgba(0,0,0,0.8); border-top: 1px solid #333;
-            height: 150px; box-sizing: border-box;
+            height: 150px; box-sizing: border-box; width: 100%;
         }
         
-        #sector-title { font-family: 'Orbitron'; color: var(--neon-green); padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; }
+        #sector-title { font-family: 'Orbitron'; color: #39FF14; padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
     <script>
-        // Sicherheits-Check & Coach-Daten
         if(sessionStorage.getItem('toni_auth') !== 'true') window.location.href = 'index.html';
         window.coachInfo = JSON.parse(localStorage.getItem('toni_coach_data')) || { verein: "Mein Verein", name: "Coach" };
     </script>
 
     <div class="pro-layout-container">
         <nav class="sidebar-minimal">
-            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggle()" title="Aktentasche">
+            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggle()" title="Zentrale öffnen">
                 <i class="fas fa-briefcase"></i>
-                <span>TASCHE</span>
+                <span>ZENTRALE</span>
             </div>
             
             <div class="control-unit" id="ai-status-unit">
-                <div id="ai-status-light" class="ai-online" style="width:10px; height:10px; border-radius:50%; background: #39FF14; margin:0 auto 5px; transition: 0.3s;"></div>
+                <div id="ai-status-light" class="ai-online" style="width:10px; height:10px; border-radius:50%; background: #39FF14; margin:0 auto 5px;"></div>
                 <span id="ai-status-label" style="font-size:9px; color:#39FF14;">ONLINE</span>
             </div>
             
-            <div class="control-unit" id="mic-trigger" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggleVoice()" title="Mit Toni sprechen">
+            <div class="control-unit" id="mic-trigger" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggleVoice()" title="Mikrofon">
                 <i class="fas fa-microphone" id="main-mic-btn" style="color: #fff;"></i>
-                <span>MIC</span>
+                <span>VOICE</span>
             </div>
             
-            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.switchSektor('newspaper')" title="Stadionzeitung">
-                <i class="fas fa-newspaper"></i>
-                <span>PRESSE</span>
+            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.switchSektor('settings')" title="Konfiguration">
+                <i class="fas fa-sliders-h"></i>
+                <span>SETUP</span>
             </div>
             
             <div class="control-unit" onclick="location.reload()" title="System Reboot">
@@ -80,13 +79,13 @@
 
         <aside class="analysis-panel">
             <div class="video-preview" style="padding:20px; border-bottom:1px solid rgba(255,255,255,0.05); display: flex; align-items: center; background: rgba(0,0,0,0.3);">
-                <i class="fas fa-satellite-dish" style="margin-right: 12px; font-size: 0.9rem; color: var(--neon-green); animation: pulse 2s infinite;"></i>
-                <span style="font-size: 0.75rem; letter-spacing: 2px; color: #fff; font-family: 'Orbitron';">LIVE ANALYSE ACTIVE</span>
+                <i class="fas fa-satellite-dish" style="margin-right: 12px; font-size: 0.9rem; color: #39FF14; animation: pulse 2s infinite;"></i>
+                <span style="font-size: 0.75rem; letter-spacing: 2px; color: #fff; font-family: 'Orbitron';">LIVE ANALYSE</span>
             </div>
             <div class="chat-container">
                 <div id="chat-box"></div>
                 <div class="chat-input-area">
-                    <input type="text" id="command-input" placeholder="Befehl an Toni senden...">
+                    <input type="text" id="command-input" placeholder="Befehl an Toni...">
                 </div>
             </div>
         </aside>
@@ -128,8 +127,8 @@
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
                 if(chat) {
-                    chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> Interface synchronisiert. Kader-Setup abgeschlossen.</div>`;
-                    if(window.ToniVoice) window.ToniVoice.speak("Willkommen zurück, Coach. Alle Systeme sind bereit.");
+                    chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> System synchronisiert. Alle Sektoren einsatzbereit.</div>`;
+                    if(window.ToniVoice) window.ToniVoice.speak("System online. Zentrale bereit.");
                 }
             }, 1000);
         };
