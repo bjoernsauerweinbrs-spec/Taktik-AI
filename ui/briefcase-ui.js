@@ -1,7 +1,7 @@
 /**
- * TONI 2.0 - KI-BÜRO (BRIEFCASE ELITE UPDATE)
- * Fokus: Transfer-Zentrum, Stadionzeitung & Sektor-Management
- * Status: MASTER-SYNC 2026 - NEWSPAPER INTEGRATED
+ * TONI 2.0 - KI-BÜRO (BRIEFCASE ELITE MASTER)
+ * Fokus: Transfer-Zentrum, Stadionzeitung, Finanzen & Labor-Sync
+ * Status: MASTER-SYNC 2026 - ALL SECTORS INTEGRATED
  */
 window.BriefcaseUI = {
     isOpen: false,
@@ -52,6 +52,7 @@ window.BriefcaseUI = {
     handleVoiceCommand: function(cmd) {
         if (cmd.includes("sponsoring")) this.switchSektor('sponsoring');
         if (cmd.includes("kabine")) this.switchSektor('sport');
+        if (cmd.includes("finanzen") || cmd.includes("geld")) this.switchSektor('finanzen');
         if (cmd.includes("zeitung") || cmd.includes("magazin")) this.switchSektor('newspaper');
         if (cmd.includes("transfer") || cmd.includes("spieler")) this.switchSektor('system');
         if (cmd.includes("schließe")) this.toggle();
@@ -88,8 +89,8 @@ window.BriefcaseUI = {
             { id: 'sport', name: 'KABINE', icon: 'fa-users', color: 'var(--accent-gold)', desc: 'Kader & Taktik' },
             { id: 'reports', name: 'LABOR', icon: 'fa-microscope', color: 'var(--data-cyan)', desc: 'Bio-Analyse' },
             { id: 'sponsoring', name: 'SPONSORING', icon: 'fa-handshake', color: '#00d1ff', desc: 'Deals & Events' },
+            { id: 'finanzen', name: 'FINANZEN', icon: 'fa-wallet', color: 'var(--neon-green)', desc: 'Budget & Saldo' },
             { id: 'newspaper', name: 'STADIONZEITUNG', icon: 'fa-newspaper', color: '#fff', desc: 'E-Paper & Print' },
-            { id: 'templates', name: 'STAMMPLATZ', icon: 'fa-trophy', color: '#ffcc00', desc: 'Sticker & Alben' },
             { id: 'system', name: 'TRANSFER & KADER', icon: 'fa-exchange-alt', color: 'var(--status-error)', desc: 'Management' }
         ];
         nav.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 20px;">
@@ -114,7 +115,7 @@ window.BriefcaseUI = {
         else if (sektor === 'sport') { if(window.SektorSporttasche) window.SektorSporttasche.open(); }
         else if (sektor === 'reports') { if(window.SektorAnalyse) window.SektorAnalyse.open(); }
         else if (sektor === 'sponsoring') { if(window.SektorSponsoring) window.SektorSponsoring.open(); }
-        else if (sektor === 'templates') { if(window.SektorTemplates) window.SektorTemplates.render(); }
+        else if (sektor === 'finanzen') { if(window.SektorFinanzen) window.SektorFinanzen.open(); }
         else if (sektor === 'newspaper') { if(window.SektorStadionzeitung) window.SektorStadionzeitung.open(); }
         else this.renderPlaceholder(sektor);
     },
