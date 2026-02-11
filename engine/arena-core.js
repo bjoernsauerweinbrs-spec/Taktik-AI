@@ -1,6 +1,6 @@
 /**
- * TONI 2.0 - ARENA ENGINE CORE (ELITE GLOW & INPUT SYNC)
- * Fokus: Neon-Markierungen, Glow-Sponsoring & Command-Input-Fix
+ * TONI 2.0 - ARENA ENGINE CORE (ELITE GLOW & LOGIC SYNC)
+ * Fokus: Namen-Logik (Nur Trainer-Team), Glow-Sponsoring & Command-Input-Fix
  * Status: MASTER-SYNC 2026 - FULL RECOVERY COMPLETED
  */
 window.Arena = {
@@ -37,7 +37,7 @@ window.Arena = {
     initChatListener() {
         const input = document.getElementById('command-input');
         if (input) {
-            // Verhindert doppelte Listener
+            // Verhindert doppelte Listener durch Klonen
             input.replaceWith(input.cloneNode(true));
             const newInput = document.getElementById('command-input');
             
@@ -59,7 +59,6 @@ window.Arena = {
             chatBox.innerHTML += `<div class="chat-msg user"><b>DU:</b> ${cmd}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
             
-            // Simulierter KI-Response (wird von script.js/ToniVoice übernommen)
             setTimeout(() => {
                 if(window.ToniVoice) window.ToniVoice.speak("Analysiere Eingabe: " + cmd);
             }, 500);
@@ -100,12 +99,15 @@ window.Arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
+        // 1. Spielfeld (Deep Black)
         ctx.fillStyle = "#050505"; 
         ctx.fillRect(0, 0, w, h);
         
+        // 2. Markierungen & Banden
         this.drawPitchLines(ctx, w, h);
         this.drawBanners(ctx, w, h);
 
+        // 3. Spieler-Rendering
         const team = window.currentTeamContext || "Senioren";
         const playersOnField = (window.Database?.players || []).filter(p => 
             (team === "Senioren" ? p.team === "Senioren" : p.jugend === team) && p.onField
@@ -161,7 +163,6 @@ window.Arena = {
                 try { ctx.drawImage(img, 80 + (i * (w/5)), 8, 80, 24); } catch(e) {}
             }
         } else {
-            // TONI 2.0 EIGENWERBUNG GLOW
             ctx.shadowBlur = 20;
             ctx.shadowColor = "#39FF14";
             ctx.fillStyle = "#39FF14";
@@ -180,7 +181,10 @@ window.Arena = {
 
     drawPlayerOnBoard(p) {
         const ctx = this.ctx;
-        const color = p.assignment === 'Toni' ? '#39ff14' : '#ff3b30';
+        const isToni = p.assignment === 'Toni';
+        const color = isToni ? '#39ff14' : '#ff3b30'; // Toni=Grün, Trainer=Rot
+
+        // 1. Glow & Kreis
         ctx.shadowBlur = 15;
         ctx.shadowColor = color;
         ctx.beginPath();
@@ -191,10 +195,25 @@ window.Arena = {
         ctx.lineWidth = 3;
         ctx.stroke();
         ctx.shadowBlur = 0;
+
+        // 2. Nummer (Für alle zentriert)
         ctx.fillStyle = "#fff";
         ctx.font = "bold 16px Orbitron";
         ctx.textAlign = "center";
         ctx.fillText(p.number || "0", p.x, p.y + 6);
+
+        // 3. Namen-Rendering (Nur für Team Trainer / Rot)
+        if (!isToni && this.showNames && p.name) {
+            ctx.font = "bold 11px Orbitron";
+            ctx.fillStyle = "#fff";
+            const lastName = p.name.split(' ').pop().toUpperCase();
+            
+            // Dezenter Text-Schatten für bessere Lesbarkeit
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = "#000";
+            ctx.fillText(lastName, p.x, p.y + 42);
+            ctx.shadowBlur = 0;
+        }
     },
 
     applyDefaultFormations() {
