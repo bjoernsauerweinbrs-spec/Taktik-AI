@@ -17,16 +17,14 @@
 
     <style>
         .hidden { display: none !important; }
-        /* Spielfeld-Hintergrund für den High-Tech Look */
         #main-canvas { cursor: crosshair; touch-action: none; background: #050505; }
         * { -webkit-tap-highlight-color: transparent; outline: none; }
         
-        /* Z-INDEX RECOVERY */
-        .briefcase-overlay { z-index: 1000000 !important; }
+        /* Z-INDEX RECOVERY & OVERLAYS */
+        #briefcase-overlay { z-index: 1000000 !important; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; }
         .sidebar-minimal { z-index: 100001 !important; position: relative; }
-        #stage-container { z-index: 1; position: relative; background: #000; }
+        #stage-container { z-index: 1; position: relative; background: #000; overflow: hidden; }
         
-        /* PULSIERENDER KI-STATUS */
         @keyframes pulse-glow {
             0% { box-shadow: 0 0 5px #39FF14; opacity: 0.6; }
             50% { box-shadow: 0 0 20px #39FF14; opacity: 1; }
@@ -36,13 +34,17 @@
 
         #arena-bench-list { 
             display: flex; gap: 10px; padding: 15px; overflow-x: auto; 
-            background: rgba(0,0,0,0.5); border-top: 1px solid #333;
+            background: rgba(0,0,0,0.8); border-top: 1px solid #333;
+            height: 150px; box-sizing: border-box;
         }
+        
+        #sector-title { font-family: 'Orbitron'; color: var(--neon-green); padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
     <script>
+        // Sicherheits-Check & Coach-Daten
         if(sessionStorage.getItem('toni_auth') !== 'true') window.location.href = 'index.html';
         window.coachInfo = JSON.parse(localStorage.getItem('toni_coach_data')) || { verein: "Mein Verein", name: "Coach" };
     </script>
@@ -64,9 +66,9 @@
                 <span>MIC</span>
             </div>
             
-            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.switchSektor('settings')" title="Setup">
-                <i class="fas fa-sliders-h"></i>
-                <span>SETUP</span>
+            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.switchSektor('newspaper')" title="Stadionzeitung">
+                <i class="fas fa-newspaper"></i>
+                <span>PRESSE</span>
             </div>
             
             <div class="control-unit" onclick="location.reload()" title="System Reboot">
@@ -94,9 +96,9 @@
         </aside>
     </div>
 
-    <div id="briefcase-overlay" class="briefcase-overlay hidden">
+    <div id="briefcase-overlay" class="hidden">
         <div class="briefcase-window">
-            <div id="briefcase-nav"></div> 
+            <div id="sector-title"></div> <div id="briefcase-nav"></div> 
             <div id="briefcase-content" class="hidden">
                 <div id="active-content"></div> 
             </div>
@@ -104,28 +106,32 @@
     </div>
 
     <script src="engine/database-core.js"></script>
-    <script src="engine/arena-core.js"></script>
+    <script src="engine/voice-core.js"></script> <script src="engine/arena-core.js"></script>
     <script src="engine/mobile-tactics.js"></script>
 
-    <script src="ui/aktentasche-ui.js"></script>
-    <script src="ui/sektoren/sektor-sporttasche.js"></script>
+    <script src="ui/aktentasche-ui.js"></script> <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
-    <script src="ui/sektoren/sektor-magazin.js"></script>
-    <script src="ui/sektoren/sektor-business.js"></script>
+    <script src="ui/sektoren/sektor-stadionzeitung.js"></script> <script src="ui/sektoren/sektor-sponsoring.js"></script> <script src="ui/sektoren/sektor-finanzen.js"></script>
     <script src="ui/sektoren/sektor-settings.js"></script>
 
     <script>
         window.currentTeamContext = "Senioren"; 
 
         window.onload = () => {
+            // Initialisierungskette
             if(window.Database) window.Database.init();
+            if(window.ToniVoice) window.ToniVoice.initRecognition(); // Voice Engine Start
             if(window.Arena) window.Arena.init();
             if(window.BriefcaseUI) window.BriefcaseUI.init();
             if(window.MobileTactics) window.MobileTactics.init();
 
+            // Status Meldung
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
-                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> Interface synchronisiert. Status: Online.</div>`;
+                if(chat) {
+                    chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> Interface synchronisiert. 27 Einheiten geladen. Status: Kampfbereit.</div>`;
+                    if(window.ToniVoice) window.ToniVoice.speak("Interface synchronisiert. Ich bin online.");
+                }
             }, 1000);
         };
     </script>
