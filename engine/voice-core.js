@@ -1,85 +1,96 @@
 /**
- * TONI 2.0 - VOICE CORE (SPEECH ENGINE)
- * Fokus: Mikrofon-Steuerung & KI-Sprachausgabe
- * Status: MASTER-SYNC 2026 - INITIAL BUILD
+ * TONI 2.0 - VOICE CORE (PRO SYNC 2026)
+ * Fokus: Bidirektionale Kommunikation & Akustisches Feedback
+ * Status: ETAPPE 1.3 - KOMMUNIKATION VERSIEGELT
  */
 window.ToniVoice = {
     synth: window.speechSynthesis,
     isMuted: false,
+    recognition: null,
 
     /**
-     * Lässt TONI einen Text laut vorlesen
+     * Lässt TONI einen Text laut vorlesen und im Chat einblenden
      */
     speak(text) {
         if (this.isMuted || !this.synth) return;
 
-        // Laufende Sprache abbrechen, um Überlappungen zu vermeiden
-        this.synth.cancel();
+        this.synth.cancel(); // Vorherige Sprache stoppen
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'de-DE';
-        utterance.pitch = 0.9; // Etwas tiefer für den "KI-Sound"
-        utterance.rate = 1.0;  // Normale Geschwindigkeit
+        utterance.pitch = 0.95;
+        utterance.rate = 1.0;
 
-        // Versuche eine männliche, professionelle Stimme zu finden
         const voices = this.synth.getVoices();
-        const preferredVoice = voices.find(v => v.lang.includes('de') && v.name.includes('Google'));
-        if (preferredVoice) utterance.voice = preferredVoice;
+        const maleVoice = voices.find(v => v.lang.includes('de') && (v.name.includes('Microsoft') || v.name.includes('Google')));
+        if (maleVoice) utterance.voice = maleVoice;
+
+        // Antwort im Chat einblenden
+        const chatBox = document.getElementById('chat-box');
+        if (chatBox) {
+            chatBox.innerHTML += `<div class="chat-msg system"><b>TONI:</b> ${text}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
 
         this.synth.speak(utterance);
     },
 
-    /**
-     * Initialisiert die Spracherkennung (Mikrofon)
-     */
     initRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (!SpeechRecognition) {
-            console.error("Browser unterstützt keine Spracherkennung.");
-            return;
-        }
+        if (!SpeechRecognition) return;
 
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'de-DE';
-        recognition.continuous = true;
-        recognition.interimResults = false;
+        this.recognition = new SpeechRecognition();
+        this.recognition.lang = 'de-DE';
+        this.recognition.continuous = false; // Auf Einzelsegment-Erkennung für präzise Befehle
+        this.recognition.interimResults = false;
 
-        recognition.onresult = (event) => {
-            const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
-            console.log("🎤 TONI hört:", transcript);
+        this.recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript.toLowerCase();
             this.handleVoiceCommand(transcript);
         };
 
-        recognition.onerror = (event) => {
-            console.warn("🎤 Mikrofon-Fehler:", event.error);
+        this.recognition.onend = () => {
+            // Visueller Reset des Mikro-Buttons, falls gewünscht
+            const micBtn = document.getElementById('main-mic-btn');
+            if (micBtn) micBtn.style.color = "#fff";
         };
-
-        // Startet das Mikrofon (muss durch User-Interaktion getriggert werden)
-        this.recognition = recognition;
     },
 
     handleVoiceCommand(cmd) {
-        // Visuelles Feedback im Chat
+        // Anzeige des gehörten Textes
         const chatBox = document.getElementById('chat-box');
         if (chatBox) {
             chatBox.innerHTML += `<div class="chat-msg user" style="color:var(--data-cyan)">🎤 ${cmd}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Logik-Weiterleitung an das KI-Büro
-        if (window.BriefcaseUI) {
-            window.BriefcaseUI.handleVoiceCommand(cmd);
+        // --- INTELLIGENTE ANTWORT-LOGIK ---
+        if (cmd.includes("kabine") || cmd.includes("spieler")) {
+            this.speak("Ich öffne die Spielerkabine. Der Kader wird geladen.");
+            if(window.BriefcaseUI) { window.BriefcaseUI.toggle(); window.openSection('kabine'); }
+        } 
+        else if (cmd.includes("finanzen") || cmd.includes("geld")) {
+            this.speak("Finanzstatus wird abgerufen. Die Sponsorenverträge sind stabil.");
+            if(window.BriefcaseUI) { window.BriefcaseUI.toggle(); window.openSection('finanzen'); }
         }
-    },
-
-    toggleMute() {
-        this.isMuted = !this.isMuted;
-        this.speak(this.isMuted ? "Sprachausgabe deaktiviert." : "Sprachausgabe aktiv.");
+        else if (cmd.includes("zeitung") || cmd.includes("presse")) {
+            this.speak("Redaktionssystem wird hochgefahren. Die neue Ausgabe ist bereit.");
+            if(window.BriefcaseUI) { window.BriefcaseUI.toggle(); window.openSection('stadionzeitung'); }
+        }
+        else if (cmd.includes("labor") || cmd.includes("analyse")) {
+            this.speak("Analysezentrum aktiviert. Biometrische Daten werden synchronisiert.");
+            if(window.BriefcaseUI) { window.BriefcaseUI.toggle(); window.openSection('analyse'); }
+        }
+        else if (cmd.includes("schließe") || cmd.includes("danke")) {
+            this.speak("Verstanden. Ich bleibe im Standby.");
+            if(window.BriefcaseUI && window.BriefcaseUI.isOpen) window.BriefcaseUI.toggle();
+        }
+        else {
+            this.speak("Befehl analysiert: " + cmd + ". Ich bin mir nicht sicher, wie ich hier helfen kann, Coach.");
+        }
     }
 };
 
-// Initialisierung bei Systemstart
 window.addEventListener('DOMContentLoaded', () => {
     window.ToniVoice.initRecognition();
 });
