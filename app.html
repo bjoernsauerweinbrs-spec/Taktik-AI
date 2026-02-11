@@ -9,11 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    <link rel="icon" href="data:;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==">
 
     <style>
         .hidden { display: none !important; }
@@ -21,7 +17,7 @@
         * { -webkit-tap-highlight-color: transparent; outline: none; }
         
         /* Z-INDEX RECOVERY & OVERLAYS */
-        #briefcase-overlay { z-index: 1000000 !important; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; }
+        #briefcase-overlay { z-index: 1000000 !important; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:flex; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
         .sidebar-minimal { z-index: 100001 !important; position: relative; }
         #stage-container { z-index: 1; position: relative; background: #000; overflow: hidden; }
         
@@ -38,7 +34,7 @@
             height: 150px; box-sizing: border-box;
         }
         
-        #sector-title { font-family: 'Orbitron'; color: var(--neon-green); padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        #sector-title { font-family: 'Orbitron'; color: var(--neon-green); padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -98,7 +94,8 @@
 
     <div id="briefcase-overlay" class="hidden">
         <div class="briefcase-window">
-            <div id="sector-title"></div> <div id="briefcase-nav"></div> 
+            <div id="sector-title"></div> 
+            <div id="briefcase-nav"></div> 
             <div id="briefcase-content" class="hidden">
                 <div id="active-content"></div> 
             </div>
@@ -106,31 +103,33 @@
     </div>
 
     <script src="engine/database-core.js"></script>
-    <script src="engine/voice-core.js"></script> <script src="engine/arena-core.js"></script>
+    <script src="engine/voice-core.js"></script> 
+    <script src="engine/arena-core.js"></script>
     <script src="engine/mobile-tactics.js"></script>
 
-    <script src="ui/aktentasche-ui.js"></script> <script src="ui/sektoren/sektor-sporttasche.js"></script>
+    <script src="ui/aktentasche-ui.js"></script> 
+    <script src="ui/sektoren/sektor-sporttasche.js"></script>
     <script src="ui/sektoren/sektor-analyse.js"></script>
-    <script src="ui/sektoren/sektor-stadionzeitung.js"></script> <script src="ui/sektoren/sektor-sponsoring.js"></script> <script src="ui/sektoren/sektor-finanzen.js"></script>
+    <script src="ui/sektoren/sektor-stadionzeitung.js"></script> 
+    <script src="ui/sektoren/sektor-sponsoring.js"></script> 
+    <script src="ui/sektoren/sektor-finanzen.js"></script>
     <script src="ui/sektoren/sektor-settings.js"></script>
 
     <script>
         window.currentTeamContext = "Senioren"; 
 
         window.onload = () => {
-            // Initialisierungskette
             if(window.Database) window.Database.init();
-            if(window.ToniVoice) window.ToniVoice.initRecognition(); // Voice Engine Start
+            if(window.ToniVoice) window.ToniVoice.initRecognition(); 
             if(window.Arena) window.Arena.init();
             if(window.BriefcaseUI) window.BriefcaseUI.init();
             if(window.MobileTactics) window.MobileTactics.init();
 
-            // Status Meldung
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
                 if(chat) {
-                    chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> Interface synchronisiert. 27 Einheiten geladen. Status: Kampfbereit.</div>`;
-                    if(window.ToniVoice) window.ToniVoice.speak("Interface synchronisiert. Ich bin online.");
+                    chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> Interface synchronisiert. Kader-Setup abgeschlossen.</div>`;
+                    if(window.ToniVoice) window.ToniVoice.speak("Willkommen zurück, Coach. Alle Systeme sind bereit.");
                 }
             }, 1000);
         };
