@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - DATABASE CORE (ELITE EDIT SYNC 2026)
- * Fokus: 11 Stammspieler + 5 Bankspieler, editierbar & geschützt
- * Status: MASTER-SYNC COMPLETED - FINAL 11+5 SETUP
+ * Fokus: 11+5 Trainer-Kader vs. 11 Toni-Gegner
+ * Status: STEP 1 COMPLETED - FULL SQUAD SYNC
  */
 window.Database = {
     players: [],
@@ -15,7 +15,7 @@ window.Database = {
             this.sponsors = data.sponsors || [];
         }
 
-        // Sicherheits-Check: Nur fehlende Strukturen ergänzen
+        // Master-Inject: Erstellt das volle 22+5 Setup
         this.injectEliteSeedData();
         
         console.log("📂 TONI-Datenbank: " + this.players.length + " Einheiten bereit zur Bearbeitung.");
@@ -34,44 +34,64 @@ window.Database = {
     },
 
     injectEliteSeedData() {
+        // Wir definieren hier das komplette Feld-Setup
         const musterKader = [
-            // --- SENIOREN STAMM (11 SPIELER AUF DEM FELD) ---
-            { id: 101, name: "TW VORLAGE", team: "Senioren", jugend: "", pos: "TW", number: "1", rat: 80, dob: "1995-01-01", height: 190, weight: 85, pac: 50, sho: 30, pas: 75, dri: 60, def: 40, phy: 80, onField: true, x: 100, y: 400, assignment: "Trainer" },
-            { id: 102, name: "AB VORLAGE 1", team: "Senioren", jugend: "", pos: "AB", number: "2", rat: 75, dob: "1996-01-01", height: 185, weight: 80, pac: 75, sho: 40, pas: 70, dri: 65, def: 80, phy: 82, onField: true, x: 300, y: 200, assignment: "Trainer" },
-            { id: 103, name: "AB VORLAGE 2", team: "Senioren", jugend: "", pos: "AB", number: "4", rat: 75, dob: "1996-01-01", height: 188, weight: 82, pac: 70, sho: 45, pas: 65, dri: 60, def: 82, phy: 85, onField: true, x: 300, y: 400, assignment: "Trainer" },
-            { id: 104, name: "AB VORLAGE 3", team: "Senioren", jugend: "", pos: "AB", number: "5", rat: 75, dob: "1996-01-01", height: 184, weight: 78, pac: 78, sho: 42, pas: 68, dri: 66, def: 78, phy: 78, onField: true, x: 300, y: 600, assignment: "Trainer" },
-            { id: 105, name: "MF VORLAGE 1", team: "Senioren", jugend: "", pos: "MF", number: "6", rat: 78, dob: "1997-01-01", height: 180, weight: 75, pac: 75, sho: 65, pas: 82, dri: 78, def: 72, phy: 74, onField: true, x: 550, y: 300, assignment: "Trainer" },
-            { id: 106, name: "MF VORLAGE 2", team: "Senioren", jugend: "", pos: "MF", number: "8", rat: 78, dob: "1997-01-01", height: 182, weight: 77, pac: 72, sho: 70, pas: 80, dri: 76, def: 75, phy: 78, onField: true, x: 550, y: 500, assignment: "Trainer" },
-            { id: 107, name: "MF VORLAGE 3", team: "Senioren", jugend: "", pos: "MF", number: "7", rat: 78, dob: "1997-01-01", height: 175, weight: 70, pac: 85, sho: 75, pas: 78, dri: 84, def: 40, phy: 65, onField: true, x: 750, y: 150, assignment: "Trainer" },
-            { id: 108, name: "MF VORLAGE 4", team: "Senioren", jugend: "", pos: "MF", number: "10", rat: 82, dob: "1998-01-01", height: 178, weight: 72, pac: 82, sho: 80, pas: 85, dri: 88, def: 45, phy: 68, onField: true, x: 750, y: 400, assignment: "Trainer" },
-            { id: 109, name: "ST VORLAGE 1", team: "Senioren", jugend: "", pos: "ST", number: "11", rat: 80, dob: "1998-01-01", height: 180, weight: 76, pac: 88, sho: 82, pas: 70, dri: 84, def: 30, phy: 70, onField: true, x: 750, y: 650, assignment: "Trainer" },
-            { id: 110, name: "ST VORLAGE 2", team: "Senioren", jugend: "", pos: "ST", number: "9", rat: 85, dob: "1994-01-01", height: 188, weight: 88, pac: 78, sho: 90, pas: 75, dri: 80, def: 35, phy: 85, onField: true, x: 950, y: 300, assignment: "Trainer" },
-            { id: 111, name: "ST VORLAGE 3", team: "Senioren", jugend: "", pos: "ST", number: "13", rat: 78, dob: "1994-01-01", height: 185, weight: 84, pac: 76, sho: 84, pas: 70, dri: 78, def: 38, phy: 82, onField: true, x: 950, y: 500, assignment: "Trainer" },
+            // --- TRAINER-MANNSCHAFT (ROT) - STAMM 11 ---
+            { id: 101, name: "TW TRAINER", team: "Senioren", jugend: "", pos: "TW", number: "1", rat: 80, dob: "1995-01-01", height: 190, weight: 85, onField: true, assignment: "Trainer" },
+            { id: 102, name: "AB LINKS", team: "Senioren", jugend: "", pos: "AB", number: "2", rat: 75, onField: true, assignment: "Trainer" },
+            { id: 103, name: "AB MITTE L", team: "Senioren", jugend: "", pos: "AB", number: "4", rat: 75, onField: true, assignment: "Trainer" },
+            { id: 104, name: "AB MITTE R", team: "Senioren", jugend: "", pos: "AB", number: "5", rat: 75, onField: true, assignment: "Trainer" },
+            { id: 105, name: "AB RECHTS", team: "Senioren", jugend: "", pos: "AB", number: "3", rat: 75, onField: true, assignment: "Trainer" },
+            { id: 106, name: "MF LINKS", team: "Senioren", jugend: "", pos: "MF", number: "7", rat: 78, onField: true, assignment: "Trainer" },
+            { id: 107, name: "MF MITTE L", team: "Senioren", jugend: "", pos: "MF", number: "6", rat: 78, onField: true, assignment: "Trainer" },
+            { id: 108, name: "MF MITTE R", team: "Senioren", jugend: "", pos: "MF", number: "8", rat: 78, onField: true, assignment: "Trainer" },
+            { id: 109, name: "MF RECHTS", team: "Senioren", jugend: "", pos: "MF", number: "11", rat: 78, onField: true, assignment: "Trainer" },
+            { id: 110, name: "ST LINKS", team: "Senioren", jugend: "", pos: "ST", number: "9", rat: 85, onField: true, assignment: "Trainer" },
+            { id: 111, name: "ST RECHTS", team: "Senioren", jugend: "", pos: "ST", number: "10", rat: 82, onField: true, assignment: "Trainer" },
 
-            // --- SENIOREN ERSATZBANK (5 SPIELER ALS FIFA CARDS) ---
-            { id: 120, name: "ERSATZ TW", team: "Senioren", jugend: "", pos: "TW", number: "22", rat: 72, dob: "2000-01-01", height: 192, weight: 88, onField: false, assignment: "Trainer" },
-            { id: 121, name: "ERSATZ 1", team: "Senioren", jugend: "", pos: "AB", number: "14", rat: 70, dob: "2001-01-01", height: 184, weight: 78, onField: false, assignment: "Trainer" },
-            { id: 122, name: "ERSATZ 2", team: "Senioren", jugend: "", pos: "MF", number: "16", rat: 72, dob: "2002-01-01", height: 178, weight: 72, onField: false, assignment: "Trainer" },
-            { id: 123, name: "ERSATZ 3", team: "Senioren", jugend: "", pos: "MF", number: "18", rat: 71, dob: "2002-01-01", height: 176, weight: 70, onField: false, assignment: "Trainer" },
-            { id: 124, name: "ERSATZ 4", team: "Senioren", jugend: "", pos: "ST", number: "20", rat: 74, dob: "2003-01-01", height: 180, weight: 75, onField: false, assignment: "Trainer" }
+            // --- TRAINER-MANNSCHAFT (ROT) - ERSATZBANK 5 ---
+            { id: 120, name: "ERSATZ TW", team: "Senioren", jugend: "", pos: "TW", number: "22", rat: 72, onField: false, assignment: "Trainer" },
+            { id: 121, name: "ERSATZ 1", team: "Senioren", jugend: "", pos: "AB", number: "14", rat: 70, onField: false, assignment: "Trainer" },
+            { id: 122, name: "ERSATZ 2", team: "Senioren", jugend: "", pos: "MF", number: "16", rat: 72, onField: false, assignment: "Trainer" },
+            { id: 123, name: "ERSATZ 3", team: "Senioren", jugend: "", pos: "MF", number: "18", rat: 71, onField: false, assignment: "Trainer" },
+            { id: 124, name: "ERSATZ 4", team: "Senioren", jugend: "", pos: "ST", number: "20", rat: 74, onField: false, assignment: "Trainer" },
+
+            // --- TONI-MANNSCHAFT (GRÜN) - STAMM 11 ---
+            { id: 501, name: "TONI TW", team: "Senioren", jugend: "", pos: "TW", number: "1", rat: 88, onField: true, assignment: "Toni" },
+            { id: 502, name: "TONI AB 1", team: "Senioren", jugend: "", pos: "AB", number: "2", rat: 82, onField: true, assignment: "Toni" },
+            { id: 503, name: "TONI AB 2", team: "Senioren", jugend: "", pos: "AB", number: "4", rat: 84, onField: true, assignment: "Toni" },
+            { id: 504, name: "TONI AB 3", team: "Senioren", jugend: "", pos: "AB", number: "5", rat: 82, onField: true, assignment: "Toni" },
+            { id: 505, name: "TONI MF 1", team: "Senioren", jugend: "", pos: "MF", number: "6", rat: 85, onField: true, assignment: "Toni" },
+            { id: 506, name: "TONI MF 2", team: "Senioren", jugend: "", pos: "MF", number: "8", rat: 86, onField: true, assignment: "Toni" },
+            { id: 507, name: "TONI MF 3", team: "Senioren", jugend: "", pos: "MF", number: "10", rat: 90, onField: true, assignment: "Toni" },
+            { id: 508, name: "TONI MF 4", team: "Senioren", jugend: "", pos: "MF", number: "7", rat: 85, onField: true, assignment: "Toni" },
+            { id: 509, name: "TONI ST 1", team: "Senioren", jugend: "", pos: "ST", number: "11", rat: 84, onField: true, assignment: "Toni" },
+            { id: 510, name: "TONI ST 2", team: "Senioren", jugend: "", pos: "ST", number: "9", rat: 91, onField: true, assignment: "Toni" },
+            { id: 511, name: "TONI ST 3", team: "Senioren", jugend: "", pos: "ST", number: "13", rat: 82, onField: true, assignment: "Toni" }
         ];
 
-        let addedCount = 0;
+        // Wir prüfen nur auf die IDs, um den LocalStorage nicht zu wipen,
+        // fügen aber alles Fehlende hinzu.
         musterKader.forEach(mPlayer => {
             const exists = this.players.find(p => p.id === mPlayer.id);
             if (!exists) {
-                this.players.push(mPlayer);
-                addedCount++;
+                // Standardwerte für neue Spieler ergänzen
+                const fullPlayer = {
+                    pac: 70, sho: 70, pas: 70, dri: 70, def: 70, phy: 70,
+                    height: 180, weight: 75,
+                    ...mPlayer
+                };
+                this.players.push(fullPlayer);
             }
         });
 
-        if (addedCount > 0) this.save();
+        this.save();
     },
 
     save() {
         const data = { players: this.players, sponsors: this.sponsors };
         localStorage.setItem('toni_database_2026', JSON.stringify(data));
-        console.log("💾 Daten im LocalStorage versiegelt.");
+        console.log("💾 Master-Datenbank versiegelt.");
     }
 };
 
