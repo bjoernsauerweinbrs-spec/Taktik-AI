@@ -1,123 +1,68 @@
 /**
- * TONI 2.0 - ARENA ENGINE CORE (ELITE BOARD SYSTEM)
- * Fokus: Unzerstörbare Markierungen, Tore & Formations-Sync
- * Status: ETAPPE 1.2 - FUNDAMENT VERSIEGELT
+ * TONI 2.0 - ARENA ENGINE CORE (PRO NEON SYNC)
+ * Fokus: Neon-Glow Pitch, Drag-and-Drop Support & Branding
+ * Status: ETAPPE 1.1 - FUNDAMENT & INTERAKTION VERSIEGELT
  */
 window.Arena = {
     canvas: null,
     ctx: null,
     showNames: true,
-    activeSponsorIndex: 0,
-    lastRotation: 0,
-    rotationSpeed: 5000,
+    draggedPlayer: null,
 
     init() {
-        console.log("🏟️ Arena Engine: Initialisiere High-Tech Spielfeld...");
         this.canvas = document.getElementById('tactic-board');
         if (!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
         
-        // Initialer Kader-Positionierungs-Sync
         this.applyDefaultFormations();
-        
-        // Listener & Chat-Logic
         this.setupEventListeners();
-        this.initChatListener(); 
         
-        // Start des permanenten Render-Loops
         this.startAnimationLoop();
         this.renderBench();
-        this.triggerWelcome();
-    },
-
-    /**
-     * Setzt die Basis-Formationen: Trainer (4-4-2, Links) vs. Toni (3-4-3, Rechts)
-     */
-    applyDefaultFormations() {
-        const team = window.currentTeamContext || "Senioren";
-        const players = window.Database?.players || [];
-        const w = this.canvas.width;
-        const h = this.canvas.height;
-
-        const activeSquad = players.filter(p => (team === "Senioren" ? p.team === "Senioren" : p.jugend === team));
-
-        // Trainer Team (Rot) - Links
-        const trainerPlayers = activeSquad.filter(p => p.assignment === 'Trainer').slice(0, 11);
-        this.calculatePositions(trainerPlayers, [1, 4, 4, 2], 'left', w, h);
-
-        // Toni Team (Grün) - Rechts
-        const toniPlayers = activeSquad.filter(p => p.assignment === 'Toni').slice(0, 11);
-        this.calculatePositions(toniPlayers, [1, 3, 4, 3], 'right', w, h);
-    },
-
-    calculatePositions(players, lines, side, canvasW, canvasH) {
-        let pIdx = 0;
-        const sectionW = canvasW / 2;
-        const xOffset = side === 'left' ? 0 : sectionW;
-
-        lines.forEach((count, lineIdx) => {
-            for (let i = 0; i < count; i++) {
-                if (!players[pIdx]) break;
-                players[pIdx].onField = true;
-                
-                let relativeX = (lineIdx / (lines.length - 0.5)) * sectionW;
-                if (side === 'right') relativeX = sectionW - relativeX;
-                
-                players[pIdx].x = xOffset + relativeX + (side === 'left' ? 60 : -60);
-                players[pIdx].y = (canvasH / (count + 1)) * (i + 1);
-                pIdx++;
-            }
-        });
     },
 
     startAnimationLoop() {
-        const loop = (time) => {
-            this.update(time);
+        const loop = () => {
             this.draw();
             requestAnimationFrame(loop);
         };
         requestAnimationFrame(loop);
     },
 
-    update(time) {
-        if (time - this.lastRotation > this.rotationSpeed) {
-            const sponsors = window.Database?.sponsors || [];
-            this.activeSponsorIndex = sponsors.length > 0 ? (this.activeSponsorIndex + 1) % sponsors.length : 0;
-            this.lastRotation = time;
-        }
-    },
-
-    /**
-     * HAUPT-ZEICHENFUNKTION (Jeder Frame baut das Feld neu auf)
-     */
     draw() {
-        if (!this.ctx) return;
         const ctx = this.ctx;
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // 1. Spielfeld Hintergrund (Deep Black)
-        ctx.fillStyle = "#050505";
+        // 1. Spielfeld (Deep Black)
+        ctx.fillStyle = "#05080F";
         ctx.fillRect(0, 0, w, h);
 
-        // 2. Markierungen & Tore (Hard-Coded Basis)
+        // 2. Markierungen mit NEON-GLOW
         this.drawPitchGeometry(ctx, w, h);
+        
+        // 3. Bandenwerbung (TONI 2.0 Branding)
+        this.drawBanners(ctx, w, h);
 
-        // 3. Spieler-Rendering (Ebene über dem Feld)
+        // 4. Spieler-Rendering
         const team = window.currentTeamContext || "Senioren";
-        const playersOnField = (window.Database?.players || []).filter(p => 
+        const players = (window.Database?.players || []).filter(p => 
             (team === "Senioren" ? p.team === "Senioren" : p.jugend === team) && p.onField
         );
 
-        playersOnField.forEach(p => this.renderPlayer(ctx, p));
+        players.forEach(p => this.renderPlayer(ctx, p));
     },
 
     drawPitchGeometry(ctx, w, h) {
-        ctx.strokeStyle = "rgba(57, 255, 20, 0.4)";
-        ctx.lineWidth = 2;
-        ctx.shadowBlur = 0;
+        const neonGreen = "#39FF14";
+        const neonBlue = "#00D1FF";
 
-        const pad = 50; // Padding vom Rand
+        ctx.strokeStyle = neonGreen;
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = neonGreen;
+
+        const pad = 60;
         const fieldW = w - (pad * 2);
         const fieldH = h - (pad * 2);
 
@@ -132,28 +77,41 @@ window.Arena = {
         ctx.arc(w / 2, h / 2, 80, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Strafräume (16m)
+        // Strafräume
         ctx.strokeRect(pad, h / 2 - 160, 130, 320); // Links
         ctx.strokeRect(w - pad - 130, h / 2 - 160, 130, 320); // Rechts
 
-        // TORE (FEST VERANKERT IN BLAU)
-        ctx.strokeStyle = "#00d1ff";
-        ctx.lineWidth = 4;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "#00d1ff";
+        // TORE (FEST VERANKERT & MASSIVER GLOW)
+        ctx.strokeStyle = neonBlue;
+        ctx.shadowColor = neonBlue;
+        ctx.lineWidth = 5;
+        ctx.strokeRect(pad - 20, h / 2 - 50, 20, 100); // Tor L
+        ctx.strokeRect(w - pad, h / 2 - 50, 20, 100);    // Tor R
         
-        // Tor Links
-        ctx.strokeRect(pad - 15, h / 2 - 50, 15, 100);
-        // Tor Rechts
-        ctx.strokeRect(w - pad, h / 2 - 50, 15, 100);
-        
+        ctx.shadowBlur = 0; // Reset für Performance
+    },
+
+    drawBanners(ctx, w, h) {
+        ctx.fillStyle = "#020408";
+        ctx.fillRect(0, 0, w, 45);
+        ctx.fillRect(0, h - 45, w, 45);
+
+        ctx.fillStyle = "#39FF14";
+        ctx.font = "bold 12px Orbitron";
+        ctx.textAlign = "center";
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#39FF14";
+
+        for (let i = 0; i < 5; i++) {
+            ctx.fillText("TONI 2.0 ELITE SYSTEMS", 150 + (i * 250), 28);
+            ctx.fillText("BIOMETRIC ANALYSIS ACTIVE", 150 + (i * 250), h - 18);
+        }
         ctx.shadowBlur = 0;
-        ctx.lineWidth = 2;
     },
 
     renderPlayer(ctx, p) {
         const isToni = p.assignment === 'Toni';
-        const color = isToni ? '#39ff14' : '#ff3b30';
+        const color = isToni ? '#39FF14' : '#FF3B30';
 
         ctx.shadowBlur = 15;
         ctx.shadowColor = color;
@@ -167,15 +125,79 @@ window.Arena = {
         ctx.shadowBlur = 0;
 
         ctx.fillStyle = "#fff";
-        ctx.font = "bold 15px Orbitron";
+        ctx.font = "bold 14px Orbitron";
         ctx.textAlign = "center";
         ctx.fillText(p.number || "0", p.x, p.y + 6);
 
         if (!isToni && this.showNames && p.name) {
             ctx.font = "bold 10px Orbitron";
             const name = p.name.split(' ').pop().toUpperCase();
-            ctx.fillText(name, p.x, p.y + 40);
+            ctx.fillText(name, p.x, p.y + 42);
         }
+    },
+
+    setupEventListeners() {
+        // DRAG & DROP LOGIK
+        this.canvas.addEventListener('mousedown', (e) => this.handleStart(e));
+        this.canvas.addEventListener('mousemove', (e) => this.handleMove(e));
+        this.canvas.addEventListener('mouseup', () => this.handleEnd());
+        
+        // Touch Support
+        this.canvas.addEventListener('touchstart', (e) => this.handleStart(e.touches[0]));
+        this.canvas.addEventListener('touchmove', (e) => this.handleMove(e.touches[0]));
+        this.canvas.addEventListener('touchend', () => this.handleEnd());
+    },
+
+    handleStart(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+        const mouseY = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+
+        // Finde den geklickten Spieler (Nur Trainer-Team erlaubt zu verschieben)
+        this.draggedPlayer = window.Database.players.find(p => 
+            p.onField && p.assignment === 'Trainer' && 
+            Math.hypot(p.x - mouseX, p.y - mouseY) < 30
+        );
+    },
+
+    handleMove(e) {
+        if (!this.draggedPlayer) return;
+        const rect = this.canvas.getBoundingClientRect();
+        this.draggedPlayer.x = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+        this.draggedPlayer.y = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+    },
+
+    handleEnd() {
+        if (this.draggedPlayer) window.Database.save();
+        this.draggedPlayer = null;
+    },
+
+    applyDefaultFormations() {
+        const team = window.currentTeamContext || "Senioren";
+        const players = window.Database?.players || [];
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const activeSquad = players.filter(p => (team === "Senioren" ? p.team === "Senioren" : p.jugend === team));
+
+        this.calculatePositions(activeSquad.filter(p => p.assignment === 'Trainer').slice(0, 11), [1, 4, 4, 2], 'left', w, h);
+        this.calculatePositions(activeSquad.filter(p => p.assignment === 'Toni').slice(0, 11), [1, 3, 4, 3], 'right', w, h);
+    },
+
+    calculatePositions(players, lines, side, canvasW, canvasH) {
+        let pIdx = 0;
+        const sectionW = canvasW / 2;
+        const xOffset = side === 'left' ? 0 : sectionW;
+        lines.forEach((count, lineIdx) => {
+            for (let i = 0; i < count; i++) {
+                if (!players[pIdx]) break;
+                players[pIdx].onField = true;
+                let relX = (lineIdx / (lines.length - 0.5)) * sectionW;
+                if (side === 'right') relX = sectionW - relX;
+                players[pIdx].x = xOffset + relX + (side === 'left' ? 60 : -60);
+                players[pIdx].y = (canvasH / (count + 1)) * (i + 1);
+                pIdx++;
+            }
+        });
     },
 
     renderBench() {
@@ -187,17 +209,11 @@ window.Arena = {
         );
         
         bench.innerHTML = substitutes.map(p => `
-            <div class="fifa-card-mini" style="border: 1px solid #333; background: #111; padding: 10px; border-radius: 5px; text-align: center; min-width: 80px;">
-                <div style="font-size: 10px; color: #666;">${p.pos}</div>
-                <div style="font-weight: bold; font-size: 12px; color: #fff;">${p.name.split(' ').pop()}</div>
-                <div style="font-size: 14px; color: #39ff14;">${p.rat}</div>
+            <div class="fifa-card-mini">
+                <div class="mini-rat">${p.rat}</div>
+                <div class="mini-pos">${p.pos}</div>
+                <div style="font-size: 8px; font-weight: bold; margin-top: 2px;">${p.name.split(' ').pop().toUpperCase()}</div>
             </div>
         `).join('');
-    },
-
-    setupEventListeners() { /* Tap/Drag Logic Link */ },
-    initChatListener() { /* Input Handler */ },
-    handleCommand(cmd) { /* Voice/Text Command Handler */ },
-    triggerWelcome() { /* Intro Speech */ },
-    drawBanners() { /* Sponsor Render */ }
+    }
 };
