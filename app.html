@@ -17,7 +17,8 @@
 
     <style>
         .hidden { display: none !important; }
-        #main-canvas { cursor: crosshair; touch-action: none; background: #1b3d2f; }
+        /* Spielfeld-Hintergrund für den High-Tech Look */
+        #main-canvas { cursor: crosshair; touch-action: none; background: #050505; }
         * { -webkit-tap-highlight-color: transparent; outline: none; }
         
         /* Z-INDEX RECOVERY */
@@ -25,7 +26,14 @@
         .sidebar-minimal { z-index: 100001 !important; position: relative; }
         #stage-container { z-index: 1; position: relative; background: #000; }
         
-        /* FIFA MINI CARDS (BENCH) STYLES */
+        /* PULSIERENDER KI-STATUS */
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px #39FF14; opacity: 0.6; }
+            50% { box-shadow: 0 0 20px #39FF14; opacity: 1; }
+            100% { box-shadow: 0 0 5px #39FF14; opacity: 0.6; }
+        }
+        .ai-online { animation: pulse-glow 2s infinite; }
+
         #arena-bench-list { 
             display: flex; gap: 10px; padding: 15px; overflow-x: auto; 
             background: rgba(0,0,0,0.5); border-top: 1px solid #333;
@@ -35,10 +43,7 @@
 <body>
 
     <script>
-        // Sicherheits-Check: Nur mit Auth-Key betreten
         if(sessionStorage.getItem('toni_auth') !== 'true') window.location.href = 'index.html';
-        
-        // Globale Coach-Daten
         window.coachInfo = JSON.parse(localStorage.getItem('toni_coach_data')) || { verein: "Mein Verein", name: "Coach" };
     </script>
 
@@ -49,38 +54,36 @@
                 <span>TASCHE</span>
             </div>
             
-            <div class="control-unit" id="mic-trigger" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggleVoice()" title="AI Voice Control">
-                <i class="fas fa-microphone" id="main-mic-btn" style="color: var(--neon-green);"></i>
-                <span>TONI AI</span>
+            <div class="control-unit" id="ai-status-unit">
+                <div id="ai-status-light" class="ai-online" style="width:10px; height:10px; border-radius:50%; background: #39FF14; margin:0 auto 5px; transition: 0.3s;"></div>
+                <span id="ai-status-label" style="font-size:9px; color:#39FF14;">ONLINE</span>
             </div>
-
-            <div class="control-unit" onclick="window.SektorMagazin.open()" title="Stadionzeitung">
-                <i class="fas fa-newspaper"></i>
-                <span>MEDIA</span>
+            
+            <div class="control-unit" id="mic-trigger" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggleVoice()" title="Mit Toni sprechen">
+                <i class="fas fa-microphone" id="main-mic-btn" style="color: #fff;"></i>
+                <span>MIC</span>
             </div>
-
-            <div class="control-unit" onclick="window.SektorBusiness.open()" title="Sponsoring & Finanzen">
-                <i class="fas fa-chart-line"></i>
-                <span>BUSINESS</span>
+            
+            <div class="control-unit" onclick="if(window.BriefcaseUI) window.BriefcaseUI.switchSektor('settings')" title="Setup">
+                <i class="fas fa-sliders-h"></i>
+                <span>SETUP</span>
             </div>
             
             <div class="control-unit" onclick="location.reload()" title="System Reboot">
                 <i class="fas fa-sync-alt"></i>
-                <span>REBOOT</span>
+                <span>RESET</span>
             </div>
         </nav>
 
         <main id="stage-container">
             <canvas id="tactic-board" width="1200" height="800" style="width:100%; height:calc(100% - 150px);"></canvas>
-            
-            <div id="arena-bench-list">
-                </div>
+            <div id="arena-bench-list"></div>
         </main>
 
         <aside class="analysis-panel">
             <div class="video-preview" style="padding:20px; border-bottom:1px solid rgba(255,255,255,0.05); display: flex; align-items: center; background: rgba(0,0,0,0.3);">
                 <i class="fas fa-satellite-dish" style="margin-right: 12px; font-size: 0.9rem; color: var(--neon-green); animation: pulse 2s infinite;"></i>
-                <span style="font-size: 0.75rem; letter-spacing: 2px; color: #fff; font-family: 'Orbitron'; uppercase">Live-Sync: 2026 Active</span>
+                <span style="font-size: 0.75rem; letter-spacing: 2px; color: #fff; font-family: 'Orbitron';">LIVE ANALYSE ACTIVE</span>
             </div>
             <div class="chat-container">
                 <div id="chat-box"></div>
@@ -115,31 +118,16 @@
         window.currentTeamContext = "Senioren"; 
 
         window.onload = () => {
-            // 1. Datenbank & Speicher laden
             if(window.Database) window.Database.init();
-
-            // 2. Arena initialisieren
             if(window.Arena) window.Arena.init();
-
-            // 3. UI-Komponenten starten
             if(window.BriefcaseUI) window.BriefcaseUI.init();
             if(window.MobileTactics) window.MobileTactics.init();
 
-            // 4. System-Ready Meldung
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
-                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> Alle Sektoren (Media, Business, Arena) synchronisiert. System 2026 bereit.</div>`;
-                runToniSystemCheck();
+                if(chat) chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> Interface synchronisiert. Status: Online.</div>`;
             }, 1000);
         };
-
-        function runToniSystemCheck() {
-            const sectors = ["SektorSporttasche", "SektorAnalyse", "SektorMagazin", "SektorBusiness", "Arena", "Database"];
-            sectors.forEach(s => {
-                if (!window[s]) console.error(`❌ KRITISCHER FEHLER: ${s} fehlt!`);
-                else console.log(`✅ MODUL AKTIV: ${s}`);
-            });
-        }
     </script>
 </body>
 </html>
