@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - ARENA ENGINE CORE (BLACK-TECH ELITE UPDATE)
- * Fokus: Schwarzes Spielfeld, leuchtende Neon-Markierungen & Sponsoren-Rotation
- * Status: MASTER-SYNC 2026 - PITCH RESTORED
+ * Fokus: Schwarzes Spielfeld, leuchtende Neon-Markierungen & Glow-Sponsoring
+ * Status: MASTER-SYNC 2026 - PITCH & BANNER RESTORED
  */
 window.Arena = {
     canvas: null,
@@ -17,9 +17,7 @@ window.Arena = {
         if (!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
         
-        // Initialer Formation-Sync
         this.applyDefaultFormations();
-        
         this.setupEventListeners();
         this.startAnimationLoop();
         this.renderBench();
@@ -36,10 +34,10 @@ window.Arena = {
 
     update(time) {
         if (time - this.lastRotation > this.rotationSpeed) {
+            // Wir zählen TONI 2.0 als festen Teil der Rotation (+1)
             const sponsors = window.Database?.sponsors || [];
-            if (sponsors.length > 0) {
-                this.activeSponsorIndex = (this.activeSponsorIndex + 1) % sponsors.length;
-            }
+            const totalSlots = sponsors.length + 1; 
+            this.activeSponsorIndex = (this.activeSponsorIndex + 1) % totalSlots;
             this.lastRotation = time;
         }
     },
@@ -50,17 +48,12 @@ window.Arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // 1. Spielfeld (FIX: Zurück auf Deep Black / Matrix-Style)
         ctx.fillStyle = "#050505"; 
         ctx.fillRect(0, 0, w, h);
         
-        // 2. Leuchtende Spielfeldmarkierungen
         this.drawPitchLines(ctx, w, h);
-
-        // 3. Dynamische Werbebanden
         this.drawBanners(ctx, w, h);
 
-        // 4. Aktive Spieler
         const team = window.currentTeamContext || "Senioren";
         const playersOnField = (window.Database?.players || []).filter(p => 
             (team === "Senioren" ? p.team === "Senioren" : p.jugend === team) && p.onField
@@ -69,11 +62,7 @@ window.Arena = {
         playersOnField.forEach(p => this.drawPlayerOnBoard(p));
     },
 
-    /**
-     * Zeichnet leuchtende Neon-Markierungen auf schwarzem Grund
-     */
     drawPitchLines(ctx, w, h) {
-        // LEUCHT-EFFEKT: Neon-Grün Glow
         ctx.strokeStyle = "rgba(57, 255, 20, 0.4)"; 
         ctx.shadowBlur = 10;
         ctx.shadowColor = "#39FF14";
@@ -84,10 +73,7 @@ window.Arena = {
         const fieldW = w - (offsetH * 2);
         const fieldH = h - (offsetV * 2);
 
-        // Außenlinie
         ctx.strokeRect(offsetH, offsetV, fieldW, fieldH);
-
-        // Mittellinie & Mittelkreis
         ctx.beginPath();
         ctx.moveTo(w / 2, offsetV);
         ctx.lineTo(w / 2, h - offsetV);
@@ -97,63 +83,70 @@ window.Arena = {
         ctx.arc(w / 2, h / 2, 70, 0, Math.PI * 2);
         ctx.stroke();
 
-        // --- LINKS (TONI SEITE) ---
-        ctx.strokeRect(offsetH, h / 2 - 120, 100, 240); // 16m
-        ctx.strokeRect(offsetH, h / 2 - 50, 35, 100);  // 5m
+        ctx.strokeRect(offsetH, h / 2 - 120, 100, 240); // 16m Links
+        ctx.strokeRect(w - offsetH - 100, h / 2 - 120, 100, 240); // 16m Rechts
+        ctx.strokeRect(offsetH, h / 2 - 50, 35, 100);  // 5m Links
+        ctx.strokeRect(w - offsetH - 35, h / 2 - 50, 35, 100); // 5m Rechts
         
-        // Elfmeterpunkt
         ctx.beginPath();
         ctx.arc(offsetH + 75, h / 2, 2, 0, Math.PI * 2);
         ctx.fillStyle = "#39FF14";
         ctx.fill();
-
-        // --- RECHTS (TRAINER SEITE) ---
-        ctx.strokeRect(w - offsetH - 100, h / 2 - 120, 100, 240); // 16m
-        ctx.strokeRect(w - offsetH - 35, h / 2 - 50, 35, 100);   // 5m
-        
-        // Elfmeterpunkt
         ctx.beginPath();
         ctx.arc(w - offsetH - 75, h / 2, 2, 0, Math.PI * 2);
         ctx.fill();
 
-        // --- TORE (In Cyan-Leuchten abgesetzt) ---
         ctx.strokeStyle = "rgba(0, 209, 255, 0.8)";
         ctx.shadowColor = "#00d1ff";
-        
-        // Tor Links
-        ctx.strokeRect(offsetH - 10, h / 2 - 40, 10, 80);
-        // Tor Rechts
-        ctx.strokeRect(w - offsetH, h / 2 - 40, 10, 80);
+        ctx.strokeRect(offsetH - 10, h / 2 - 40, 10, 80); // Tor Links
+        ctx.strokeRect(w - offsetH, h / 2 - 40, 10, 80); // Tor Rechts
 
-        // Schatten-Reset für Performance
         ctx.shadowBlur = 0;
     },
 
+    /**
+     * Zeichnet die Werbebanden mit Glow-Effekt und TONI 2.0 Integration
+     */
     drawBanners(ctx, w, h) {
         const sponsors = window.Database?.sponsors || [];
         const bannerHeight = 40; 
+        const totalSlots = sponsors.length + 1;
 
         ctx.fillStyle = "#000";
         ctx.fillRect(0, 0, w, bannerHeight); 
         ctx.fillRect(0, h - bannerHeight, w, bannerHeight); 
 
-        if (sponsors.length > 0) {
-            const currentSponsor = sponsors[this.activeSponsorIndex];
+        ctx.textAlign = "center";
+        
+        // Slot-Logik: Letzter Slot ist immer TONI 2.0 Eigenwerbung
+        if (this.activeSponsorIndex < sponsors.length) {
+            // SPONSOREN-GLOW
+            const s = sponsors[this.activeSponsorIndex];
             const img = new Image();
-            img.src = currentSponsor.logo;
+            img.src = s.logo;
             
-            ctx.globalAlpha = 1.0; 
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "rgba(255, 255, 255, 0.5)"; // Weißer Glow für externe Logos
             for (let i = 0; i < 5; i++) {
-                try {
-                    ctx.drawImage(img, 80 + (i * (w/5)), 8, 80, 24);
-                } catch(e) {}
+                try { ctx.drawImage(img, 80 + (i * (w/5)), 8, 80, 24); } catch(e) {}
+            }
+        } else {
+            // TONI 2.0 EIGENWERBUNG GLOW
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "#39FF14"; // Neon-Grüner Glow
+            ctx.fillStyle = "#39FF14";
+            ctx.font = "900 16px Orbitron";
+            for (let i = 0; i < 5; i++) {
+                ctx.fillText("TONI 2.0", 120 + (i * (w/5)), 26);
+                ctx.fillText("ELITE SYSTEMS", 120 + (i * (w/5)), h - 14);
             }
         }
 
-        ctx.fillStyle = "var(--data-cyan)";
-        ctx.font = "bold 12px Orbitron";
+        ctx.shadowBlur = 0; // Reset
+        ctx.fillStyle = "rgba(0, 209, 255, 0.6)";
+        ctx.font = "bold 10px Orbitron";
         ctx.textAlign = "right";
-        ctx.fillText("TONI 2.0 // ANALYTICAL PARTNER", w - 30, h - 15);
+        ctx.fillText("MASTER HUB SYNC ACTIVE", w - 20, h - 15);
     },
 
     drawPlayerOnBoard(p) {
