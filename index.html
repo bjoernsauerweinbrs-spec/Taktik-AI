@@ -6,6 +6,8 @@
     <title>TONI 2.0 - ACCESS CONTROL</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="icon" href="data:;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==">
 
     <style>
         body { 
@@ -113,10 +115,11 @@
         
         function check() {
             const val = document.getElementById('pass').value;
+            // Master-Passwort Check
             if(val === 'toni2026') {
                 sessionStorage.setItem('toni_auth', 'true');
                 
-                // Sprach-Engine "aufwecken" (User-Geste erforderlich für Audio)
+                // Sprach-Engine "aufwecken" (Geste für Browser-Audio-Policy)
                 if ('speechSynthesis' in window) {
                     const wakeup = new SpeechSynthesisUtterance("");
                     window.speechSynthesis.speak(wakeup);
@@ -148,17 +151,23 @@
             });
 
             video.onended = function() {
-                overlay.classList.add('fade-out');
-                setTimeout(() => {
-                    window.location.href = 'app.html';
-                }, 1000);
+                proceedToApp();
             };
 
+            // Safety-Fallback (12 Sek), falls Video hakt
             setTimeout(() => {
                 if(overlay.style.display === 'flex' && !overlay.classList.contains('fade-out')) {
-                    window.location.href = 'app.html';
+                    proceedToApp();
                 }
             }, 12000);
+        }
+
+        function proceedToApp() {
+            const overlay = document.getElementById('video-intro-overlay');
+            overlay.classList.add('fade-out');
+            setTimeout(() => {
+                window.location.href = 'app.html';
+            }, 1000);
         }
 
         document.getElementById('pass').addEventListener('keypress', (e) => { 
