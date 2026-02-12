@@ -1,7 +1,7 @@
 /**
- * TONI 2.0 - ARENA ENGINE CORE (ELITE NEON GEOMETRY)
- * Fokus: Vollständige Pitch-Geometrie (5m, 16m, Halbkreis, Spot) & Drag-Logic
- * Status: ETAPPE 1.3 - SPIELFELD-GEOMETRIE VOLLSTÄNDIG VERSIEGELT
+ * TONI 2.0 - ARENA ENGINE CORE (ELITE STATS SYNC)
+ * Fokus: Pitch-Geometrie, FIFA Card Stats & Dynamisches Ranking
+ * Status: ETAPPE 1.5 - KARTEN-LOGIK VERSIEGELT
  */
 window.Arena = {
     canvas: null,
@@ -34,17 +34,12 @@ window.Arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // 1. Spielfeld Hintergrund (Deep Black/Navy)
         ctx.fillStyle = "#05080F";
         ctx.fillRect(0, 0, w, h);
 
-        // 2. Markierungen mit NEON-GLOW
         this.drawPitchGeometry(ctx, w, h);
-        
-        // 3. Bandenwerbung (TONI 2.0 Branding)
         this.drawBanners(ctx, w, h);
 
-        // 4. Spieler-Rendering
         const team = window.currentTeamContext || "Senioren";
         const players = (window.Database?.players || []).filter(p => 
             (team === "Senioren" ? p.team === "Senioren" : p.jugend === team) && p.onField
@@ -53,73 +48,54 @@ window.Arena = {
         players.forEach(p => this.renderPlayer(ctx, p));
     },
 
+    /**
+     * Bestimmt den Rang basierend auf dem Rating (für CSS-Anbindung)
+     */
+    getPlayerRank(rating) {
+        if (rating >= 90) return "elite";
+        if (rating >= 80) return "gold";
+        if (rating >= 70) return "silver";
+        return "bronze";
+    },
+
     drawPitchGeometry(ctx, w, h) {
         const neonGreen = "#39FF14";
         const neonBlue = "#00D1FF";
-
         ctx.strokeStyle = neonGreen;
         ctx.lineWidth = 2;
         ctx.shadowBlur = 12;
         ctx.shadowColor = neonGreen;
 
-        const pad = 60; // Spielfeld-Abstand vom Canvas-Rand
+        const pad = 60;
         const fW = w - (pad * 2);
         const fH = h - (pad * 2);
         const midX = w / 2;
         const midY = h / 2;
 
-        // --- BASIS-MARKIERUNGEN ---
-        // Außenlinie
         ctx.strokeRect(pad, pad, fW, fH);
-        // Mittellinie
-        ctx.beginPath();
-        ctx.moveTo(midX, pad); ctx.lineTo(midX, h - pad);
-        ctx.stroke();
-        // Mittelkreis & Anstoßpunkt
+        ctx.beginPath(); ctx.moveTo(midX, pad); ctx.lineTo(midX, h - pad); ctx.stroke();
         ctx.beginPath(); ctx.arc(midX, midY, 80, 0, Math.PI * 2); ctx.stroke();
         ctx.fillStyle = neonGreen;
         ctx.beginPath(); ctx.arc(midX, midY, 3, 0, Math.PI * 2); ctx.fill();
 
-        // --- STRAFRAUM-DETAILS (LINKS & RECHTS) ---
-        this.drawAreaDetails(ctx, pad, midY, 1);       // Links (Trainer)
-        this.drawAreaDetails(ctx, w - pad, midY, -1);  // Rechts (Toni)
+        this.drawAreaDetails(ctx, pad, midY, 1);
+        this.drawAreaDetails(ctx, w - pad, midY, -1);
 
-        // --- TORE (MASSIVER GLOW IN CYBER BLUE) ---
         ctx.strokeStyle = neonBlue;
         ctx.shadowColor = neonBlue;
         ctx.lineWidth = 5;
-        ctx.strokeRect(pad - 20, midY - 50, 20, 100); // Tor Links
-        ctx.strokeRect(w - pad, midY - 50, 20, 100);    // Tor Rechts
-        
-        ctx.shadowBlur = 0; // Reset für Performance
+        ctx.strokeRect(pad - 20, midY - 50, 20, 100);
+        ctx.strokeRect(w - pad, midY - 50, 20, 100);
+        ctx.shadowBlur = 0;
     },
 
-    /**
-     * Zeichnet 16m, 5m, Spot und Arc für eine Seite
-     */
     drawAreaDetails(ctx, x, y, side) {
-        const penaltyBoxW = 135 * side;
-        const goalBoxW = 45 * side;
-        const spotDist = 90 * side; // Elfmeterpunkt-Distanz
-
-        // 16-Meter-Raum (Strafraum)
-        ctx.strokeRect(x, y - 160, penaltyBoxW, 320);
-        
-        // 5-Meter-Raum (Torraum)
-        ctx.strokeRect(x, y - 60, goalBoxW, 120);
-
-        // Elfmeterpunkt
-        ctx.fillStyle = "#39FF14";
-        ctx.beginPath();
-        ctx.arc(x + spotDist, y, 3, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Strafraum-Halbkreis (Arc / Das "D")
-        ctx.beginPath();
-        // Start/Endwinkel dynamisch je nach Seite (side 1 = rechts offen, side -1 = links offen)
+        ctx.strokeRect(x, y - 160, 135 * side, 320);
+        ctx.strokeRect(x, y - 60, 45 * side, 120);
+        ctx.beginPath(); ctx.arc(x + (90 * side), y, 3, 0, Math.PI * 2); ctx.fill();
         const startAng = side === 1 ? -0.65 : Math.PI - 0.65;
         const endAng = side === 1 ? 0.65 : Math.PI + 0.65;
-        ctx.arc(x + spotDist, y, 75, startAng, endAng, side === -1);
+        ctx.arc(x + (90 * side), y, 75, startAng, endAng, side === -1);
         ctx.stroke();
     },
 
@@ -127,13 +103,11 @@ window.Arena = {
         ctx.fillStyle = "#020408";
         ctx.fillRect(0, 0, w, 45);
         ctx.fillRect(0, h - 45, w, 45);
-
         ctx.fillStyle = "#39FF14";
         ctx.font = "bold 12px Orbitron";
         ctx.textAlign = "center";
         ctx.shadowBlur = 10;
         ctx.shadowColor = "#39FF14";
-
         for (let i = 0; i < 5; i++) {
             ctx.fillText("TONI 2.0 ELITE SYSTEMS", 150 + (i * 250), 28);
             ctx.fillText("BIOMETRIC ANALYSIS ACTIVE", 150 + (i * 250), h - 18);
@@ -142,11 +116,19 @@ window.Arena = {
     },
 
     renderPlayer(ctx, p) {
-        const isToni = p.assignment === 'Toni';
-        const color = isToni ? '#39FF14' : '#FF3B30';
+        const rank = this.getPlayerRank(p.rat);
+        let color = '#FF3B30'; // Default Trainer Team
+        if (p.assignment === 'Toni') color = '#39FF14';
+        
+        // Elite-Spieler bekommen einen speziellen Glow auf dem Feld
+        if (rank === "elite") {
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = "#00D1FF";
+        } else {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = color;
+        }
 
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = color;
         ctx.beginPath();
         ctx.arc(p.x, p.y, 22, 0, Math.PI * 2);
         ctx.fillStyle = color;
@@ -161,7 +143,7 @@ window.Arena = {
         ctx.textAlign = "center";
         ctx.fillText(p.number || "0", p.x, p.y + 6);
 
-        if (!isToni && this.showNames && p.name) {
+        if (this.showNames && p.name) {
             ctx.font = "bold 10px Orbitron";
             const name = p.name.split(' ').pop().toUpperCase();
             ctx.fillText(name, p.x, p.y + 42);
@@ -172,7 +154,6 @@ window.Arena = {
         this.canvas.addEventListener('mousedown', (e) => this.handleStart(e));
         this.canvas.addEventListener('mousemove', (e) => this.handleMove(e));
         this.canvas.addEventListener('mouseup', () => this.handleEnd());
-        
         this.canvas.addEventListener('touchstart', (e) => this.handleStart(e.touches[0]));
         this.canvas.addEventListener('touchmove', (e) => this.handleMove(e.touches[0]));
         this.canvas.addEventListener('touchend', () => this.handleEnd());
@@ -182,7 +163,6 @@ window.Arena = {
         const rect = this.canvas.getBoundingClientRect();
         const mouseX = (e.clientX - rect.left) * (this.canvas.width / rect.width);
         const mouseY = (e.clientY - rect.top) * (this.canvas.height / rect.height);
-
         this.draggedPlayer = window.Database.players.find(p => 
             p.onField && p.assignment === 'Trainer' && 
             Math.hypot(p.x - mouseX, p.y - mouseY) < 30
@@ -207,7 +187,6 @@ window.Arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
         const activeSquad = players.filter(p => (team === "Senioren" ? p.team === "Senioren" : p.jugend === team));
-
         this.calculatePositions(activeSquad.filter(p => p.assignment === 'Trainer').slice(0, 11), [1, 4, 4, 2], 'left', w, h);
         this.calculatePositions(activeSquad.filter(p => p.assignment === 'Toni').slice(0, 11), [1, 3, 4, 3], 'right', w, h);
     },
@@ -229,6 +208,9 @@ window.Arena = {
         });
     },
 
+    /**
+     * Erzeugt die Elite FIFA Mini-Cards für die Ersatzbank
+     */
     renderBench() {
         const bench = document.getElementById('arena-bench-list');
         if (!bench) return;
@@ -237,12 +219,21 @@ window.Arena = {
             (team === "Senioren" ? p.team === "Senioren" : p.jugend === team) && !p.onField && p.assignment === 'Trainer'
         );
         
-        bench.innerHTML = substitutes.map(p => `
-            <div class="fifa-card-mini">
-                <div class="mini-rat">${p.rat}</div>
-                <div class="mini-pos">${p.pos}</div>
-                <div class="mini-name">${p.name.split(' ').pop().toUpperCase()}</div>
-            </div>
-        `).join('');
+        bench.innerHTML = substitutes.map(p => {
+            const rank = this.getPlayerRank(p.rat);
+            return `
+                <div class="fifa-card-mini" data-rank="${rank}" data-id="${p.id}" onclick="window.MobileTactics.handleBenchClick('${p.id}')">
+                    <div class="mini-rat">${p.rat}</div>
+                    <div class="mini-pos">${p.pos}</div>
+                    <div class="mini-name">${p.name.split(' ').pop().toUpperCase()}</div>
+                    
+                    <div class="hidden-stats" style="display:none;" 
+                         data-pac="${p.pac || 50}" data-sho="${p.sho || 50}" 
+                         data-pas="${p.pas || 50}" data-dri="${p.dri || 50}" 
+                         data-def="${p.def || 50}" data-phy="${p.phy || 50}">
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 };
