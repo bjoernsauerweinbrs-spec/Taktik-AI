@@ -1,127 +1,166 @@
 /**
- * TONI 2.0 - SEKTOR STADIONZEITUNG (ELITE PUB - 4 SEITEN LOGO EDITION)
- * Fokus: Magazin-Layout, A5-Heft, Live-Daten-Sync & Druck-Optimierung
- * Status: ETAPPE 4 - REDAKTION VERSIEGELT
+ * TONI 2.0 - SEKTOR STADIONZEITUNG (ELITE PUBLISHING HUB)
+ * Fokus: Modulares Layout, CMS-Editing & Print-Optimierung
+ * Status: ETAPPE 5 - REDAKTION VOLLSTÄNDIG VERSIEGELT
  */
 window.SektorStadionzeitung = {
-    logoUrl: "https://r.jina.ai/i/442578508f7546688753235b0d01d418",
     
     open() {
-        const activeContent = document.getElementById('active-content');
-        if (!activeContent) return;
+        const content = document.getElementById('active-content');
+        if (!content) return;
+        
+        // Initialisierung der Daten falls nicht vorhanden
+        if (!window.Database.magazine) {
+            window.Database.magazine = {
+                pages: [
+                    { type: 'cover', title: 'MATCHDAY', subtitle: 'Die offizielle Stadionzeitung', date: 'Februar 2026', img: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800' },
+                    { type: 'article', headline: 'Der Coach im Interview', text: 'Wir haben große Pläne für die Rückrunde...', img: '' }
+                ]
+            };
+        }
         this.render();
     },
 
     render() {
-        const activeContent = document.getElementById('active-content');
-        const team = window.currentTeamContext || "Senioren";
-        
-        // Live-Daten Abgleich: Wer ist der Star des Tages?
-        const players = (window.Database && window.Database.players) 
-            ? window.Database.players.filter(p => (team === "Senioren" ? p.team === "Senioren" : p.jugend === team))
-            : [];
-        
-        const topPlayer = players.length > 0 
-            ? [...players].sort((a,b) => b.rat - a.rat)[0] 
-            : {name: "Musterstar", rat: 99, number: 10};
+        const content = document.getElementById('active-content');
+        const magazine = window.Database.magazine;
 
-        activeContent.innerHTML = `
-            <style>
-                @media print {
-                    @page { size: A4 landscape; margin: 0; }
-                    body * { visibility: hidden; }
-                    #mag-print-area, #mag-print-area * { visibility: visible; }
-                    #mag-print-area { position: absolute; left: 0; top: 0; width: 297mm; height: 210mm; background: #fff !important; }
-                    .mag-page { border: none !important; }
-                    .no-print { display: none !important; }
-                }
-                .mag-container { display: flex; flex-direction: column; gap: 40px; align-items: center; padding-bottom: 50px; }
-                .mag-spread { display: flex; width: 297mm; height: 210mm; background: #111; box-shadow: 0 0 50px #000; overflow: hidden; border: 1px solid #333; }
-                .mag-page { width: 148.5mm; height: 210mm; background: #0a0a0a; color: #fff; padding: 25px; box-sizing: border-box; position: relative; border-right: 1px solid #222; overflow: hidden; }
-                .mag-header { font-family: 'Orbitron'; font-weight: 900; color: #39FF14; border-bottom: 2px solid #39FF14; padding-bottom: 10px; margin-bottom: 20px; font-size: 0.7rem; display: flex; justify-content: space-between; align-items: center; }
-                .editable-text:hover { background: rgba(57, 255, 20, 0.1); cursor: text; border-radius: 4px; outline: none; }
-                .sponsor-box { border: 1px dashed #444; padding: 15px; text-align: center; background: rgba(255,255,255,0.02); }
-                .club-logo-small { height: 35px; filter: drop-shadow(0 0 5px #39FF14); }
-                .club-logo-large { width: 120px; filter: drop-shadow(0 0 15px #39FF14); margin-bottom: 20px; }
-            </style>
-
-            <div class="fadeIn mag-container">
-                <div class="no-print" style="width: 100%; max-width: 1100px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:15px;">
-                    <div>
-                        <h2 style="color:var(--accent-gold); font-family:'Orbitron'; margin:0;">STADIONZEITUNG: ${team.toUpperCase()}</h2>
-                        <span style="color:#666; font-size:0.6rem;">STATUS: MASTER-SYNC AKTIV | DRUCKFORMAT: A4 QUER</span>
+        content.innerHTML = `
+            <div class="fadeIn" style="display: grid; grid-template-columns: 1fr 300px; gap: 25px; height: 100%;">
+                
+                <div style="overflow-y: auto; padding-right: 15px; background: rgba(255,255,255,0.02); border-radius: 15px; padding: 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h2 style="color:var(--neon-green); font-family:'Orbitron'; font-size:1rem; margin:0;">STADIONZEITUNG PREVIEW</h2>
+                        <button class="pro-btn-gold" onclick="window.print()" style="font-size:0.6rem;"><i class="fas fa-print"></i> DRUCK-EXPORT</button>
                     </div>
-                    <div style="display:flex; gap:10px;">
-                        <button class="pro-btn-gold" onclick="window.print()"><i class="fas fa-print"></i> DRUCKEN</button>
-                        <button class="tactic-btn" onclick="window.BriefcaseUI.renderMainGrid()">ZENTRALE</button>
+
+                    <div id="magazine-preview-container" style="display: flex; flex-direction: column; gap: 40px; align-items: center;">
+                        ${magazine.pages.map((p, idx) => this.renderPageHTML(p, idx)).join('')}
                     </div>
                 </div>
 
-                <div id="mag-print-area" class="mag-spread">
-                    <div class="mag-page" style="background: #050505; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                        <img src="${this.logoUrl}" class="club-logo-large">
-                        <div style="font-family:'Orbitron'; font-size: 1.2rem; color: #fff; letter-spacing: 3px;">FC TONI 2.0</div>
-                        <div style="font-size: 0.5rem; color: #39FF14; margin-bottom: 40px;">OFFIZIELLES VEREINSORGAN</div>
-                        <div class="sponsor-box" style="width: 80%; border: 1px solid var(--accent-gold); padding: 20px;">
-                            <div style="font-family:'Orbitron'; font-size: 1.2rem; color: var(--accent-gold);">TITAN LEASING</div>
-                            <div style="font-size: 0.6rem; letter-spacing: 2px; margin-top: 5px;">PREMIUM PARTNER</div>
-                        </div>
-                        <div style="margin-top: 40px; font-size: 0.5rem; color: #444; font-family: 'Orbitron';">ESTABLISHED 2026 | POWERED BY TONI KI</div>
-                    </div>
-
-                    <div class="mag-page" style="background: linear-gradient(180deg, rgba(0,0,0,0) 40%, #000 100%), url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80'); background-size: cover;">
-                        <div class="mag-header" style="border:none;">
-                            <img src="${this.logoUrl}" class="club-logo-small">
-                            <span style="display:block; text-align:right;">AUSGABE 02/2026</span>
-                        </div>
-                        <div style="margin-top: 250px;">
-                            <div style="background: #39FF14; color:#000; display:inline-block; padding: 5px 15px; font-family:'Orbitron'; font-weight:900; transform: skew(-10deg);">MATCHDAY STAR</div>
-                            <h1 class="editable-text" contenteditable="true" style="font-family:'Orbitron'; font-size:2.8rem; margin:10px 0; line-height:0.9; text-shadow: 2px 2px 10px #000;">${topPlayer.name.toUpperCase()}</h1>
-                            <p class="editable-text" contenteditable="true" style="font-size:0.8rem; color: #39FF14; font-family:'Orbitron';">DER ELITE-CHECK ZUM HEUTIGEN SPIELTAG</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mag-spread">
-                    <div class="mag-page">
-                        <div class="mag-header">
-                            <img src="${this.logoUrl}" style="height:20px;">
-                            <span>02 | INTERN</span>
-                        </div>
-                        <h2 style="font-family:'Orbitron'; font-size:1.2rem; color:var(--accent-gold);">KADER-NEWS</h2>
-                        <div style="margin-top: 20px;">
-                            ${players.slice(0, 8).map(p => `
-                                <div style="display:flex; justify-content:space-between; border-bottom: 1px solid #222; padding: 8px 0; font-size: 0.7rem;">
-                                    <span>#${p.number} ${p.name}</span>
-                                    <span style="color:#39FF14">${p.rat} OVR</span>
+                <div style="background: rgba(0,0,0,0.3); border-left: 1px solid #222; padding: 20px; display:flex; flex-direction:column;">
+                    <h3 style="color:#fff; font-family:'Orbitron'; font-size:0.7rem; margin-bottom:20px;">REDAKTION-TOOLS</h3>
+                    
+                    <button class="tactic-btn" style="width:100%; margin-bottom:10px; border-color:var(--neon-green);" onclick="window.SektorStadionzeitung.addPage()">
+                        <i class="fas fa-plus"></i> NEUE SEITE HINZUFÜGEN
+                    </button>
+                    
+                    <div style="flex:1; overflow-y:auto; margin-top:20px;">
+                        <p style="font-size:0.6rem; color:#666; margin-bottom:10px;">SEITEN-STRUKTUR</p>
+                        ${magazine.pages.map((p, idx) => `
+                            <div style="background:#111; padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid #222;">
+                                <span style="font-size:0.7rem; color:#fff;">S.${idx+1} [${p.type.toUpperCase()}]</span>
+                                <div style="display:flex; gap:8px;">
+                                    <i class="fas fa-edit" onclick="window.SektorStadionzeitung.openEditor(${idx})" style="color:var(--data-cyan); cursor:pointer; font-size:0.8rem;"></i>
+                                    <i class="fas fa-trash" onclick="window.SektorStadionzeitung.removePage(${idx})" style="color:var(--status-error); cursor:pointer; font-size:0.8rem;"></i>
                                 </div>
-                            `).join('')}
-                        </div>
-                        <div class="editable-text" contenteditable="true" style="margin-top: 25px; font-size: 0.7rem; line-height: 1.6; color: #aaa;">
-                            Klicken zum Bearbeiten: Die aktuelle Formkurve zeigt steil nach oben. Das Team ist bereit für die nächste Herausforderung unter Flutlicht.
-                        </div>
-                    </div>
-
-                    <div class="mag-page">
-                        <div class="mag-header">
-                            <span>03 | TAKTIK-HUB</span>
-                            <img src="${this.logoUrl}" style="height:20px;">
-                        </div>
-                        <div style="width: 100%; height: 180px; background: #050505; border: 1px solid #333; position: relative; margin-bottom: 20px; border-radius: 5px;">
-                            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:80%; height:1px; background:rgba(57,255,20,0.2);"></div>
-                            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:60px; height:60px; border:1px solid rgba(57,255,20,0.2); border-radius:50%;"></div>
-                            <div style="text-align:center; padding-top: 80px; font-family:'Orbitron'; font-size:0.5rem; color:#39FF14;">FORMATION: MASTER ANALYSIS</div>
-                        </div>
-                        <h4 style="font-family:'Orbitron'; font-size:0.7rem; margin-bottom:10px;">TRAINER-NOTIZEN</h4>
-                        <div class="editable-text" contenteditable="true" style="font-size: 0.65rem; line-height: 1.5; color: #ccc;">
-                            Taktische Marschroute: Kompaktes Zentrum und schnelles Spiel über die Außenbahnen. Fokus auf Belastungssteuerung.
-                        </div>
-                        <div style="position:absolute; bottom:25px; left:25px; right:25px;" class="sponsor-box">
-                            <div style="font-size: 0.5rem; font-family:'Orbitron'; color:var(--data-cyan);">NEON ENERGY | PARTNER DES ERFOLGS</div>
-                        </div>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
             </div>
+
+            <div id="mag-editor-modal" class="hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#0a0a0a; border:2px solid var(--neon-green); padding:30px; border-radius:20px; z-index:1000005; width:500px; box-shadow:0 0 150px #000; color:#fff; font-family:'Orbitron';">
+                <div id="mag-editor-content"></div>
+            </div>
         `;
+    },
+
+    renderPageHTML(p, idx) {
+        const club = window.coachInfo?.verein || "UNSER VEREIN";
+        
+        // High-Level Layouts je nach Typ
+        if (p.type === 'cover') {
+            return `
+                <div class="mag-page" style="width:400px; height:560px; background:#fff; color:#000; position:relative; box-shadow:0 20px 50px rgba(0,0,0,0.5); overflow:hidden;">
+                    <div style="height:60%; background:url('${p.img}') center/cover;"></div>
+                    <div style="padding:30px; text-align:center;">
+                        <div style="font-size:0.8rem; letter-spacing:4px; color:#666;">${club}</div>
+                        <h1 style="font-size:2.5rem; margin:10px 0; font-weight:900;">${p.title}</h1>
+                        <div style="width:50px; height:3px; background:#000; margin:15px auto;"></div>
+                        <p style="font-size:0.9rem; font-style:italic;">${p.subtitle}</p>
+                        <div style="position:absolute; bottom:20px; left:0; width:100%; font-size:0.7rem; color:#999;">AUSGABE: ${p.date}</div>
+                    </div>
+                </div>`;
+        }
+        
+        return `
+            <div class="mag-page" style="width:400px; height:560px; background:#fff; color:#000; padding:40px; box-shadow:0 20px 50px rgba(0,0,0,0.5); font-family:serif;">
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:20px; font-family:sans-serif; font-size:0.6rem; color:#999;">
+                    <span>${club} // INTERN</span>
+                    <span>SEITE ${idx+1}</span>
+                </div>
+                <h2 style="font-size:1.8rem; font-family:sans-serif; font-weight:900; line-height:1.1; margin-bottom:15px;">${p.headline || 'Überschrift'}</h2>
+                ${p.img ? `<div style="width:100%; height:150px; background:url('${p.img}') center/cover; margin-bottom:15px;"></div>` : ''}
+                <p style="font-size:0.9rem; line-height:1.6; white-space:pre-wrap;">${p.text || 'Inhalt hier einfügen...'}</p>
+            </div>`;
+    },
+
+    openEditor(idx) {
+        const p = window.Database.magazine.pages[idx];
+        const modal = document.getElementById('mag-editor-modal');
+        const content = document.getElementById('mag-editor-content');
+        modal.classList.remove('hidden');
+
+        let inputs = '';
+        if (p.type === 'cover') {
+            inputs = `
+                <label>TITEL</label><input type="text" id="edit-mag-title" value="${p.title}" style="width:100%; background:#111; color:#fff; border:1px solid #333; padding:10px; margin-bottom:15px;">
+                <label>UNTERTITEL</label><input type="text" id="edit-mag-subtitle" value="${p.subtitle}" style="width:100%; background:#111; color:#fff; border:1px solid #333; padding:10px; margin-bottom:15px;">
+                <label>BILD-URL (TITELBILD)</label><input type="text" id="edit-mag-img" value="${p.img}" style="width:100%; background:#111; color:#fff; border:1px solid #333; padding:10px; margin-bottom:15px;">
+            `;
+        } else {
+            inputs = `
+                <label>ÜBERSCHRIFT</label><input type="text" id="edit-mag-headline" value="${p.headline || ''}" style="width:100%; background:#111; color:#fff; border:1px solid #333; padding:10px; margin-bottom:15px;">
+                <label>BILD-URL (OPTIONAL)</label><input type="text" id="edit-mag-img" value="${p.img || ''}" style="width:100%; background:#111; color:#fff; border:1px solid #333; padding:10px; margin-bottom:15px;">
+                <label>ARTIKEL-TEXT</label><textarea id="edit-mag-text" style="width:100%; height:150px; background:#111; color:#fff; border:1px solid #333; padding:10px; margin-bottom:15px;">${p.text || ''}</textarea>
+            `;
+        }
+
+        content.innerHTML = `
+            <h3 style="color:var(--neon-green); font-size:0.8rem; margin-bottom:20px;">SEITE ${idx+1} BEARBEITEN</h3>
+            ${inputs}
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="pro-btn-gold" style="flex:1;" onclick="window.SektorStadionzeitung.savePage(${idx})">SPEICHERN</button>
+                <button class="tactic-btn" style="flex:1;" onclick="document.getElementById('mag-editor-modal').classList.add('hidden')">ABBRECHEN</button>
+            </div>
+        `;
+    },
+
+    savePage(idx) {
+        const p = window.Database.magazine.pages[idx];
+        if (p.type === 'cover') {
+            p.title = document.getElementById('edit-mag-title').value;
+            p.subtitle = document.getElementById('edit-mag-subtitle').value;
+            p.img = document.getElementById('edit-mag-img').value;
+        } else {
+            p.headline = document.getElementById('edit-mag-headline').value;
+            p.text = document.getElementById('edit-mag-text').value;
+            p.img = document.getElementById('edit-mag-img').value;
+        }
+        window.Database.save();
+        document.getElementById('mag-editor-modal').classList.add('hidden');
+        this.render();
+    },
+
+    addPage() {
+        window.Database.magazine.pages.push({
+            type: 'article',
+            headline: 'Neue Seite',
+            text: 'Hier Text eingeben...',
+            img: ''
+        });
+        window.Database.save();
+        this.render();
+    },
+
+    removePage(idx) {
+        if (idx === 0) return alert("Das Cover kann nicht gelöscht werden.");
+        if (confirm("Seite wirklich entfernen?")) {
+            window.Database.magazine.pages.splice(idx, 1);
+            window.Database.save();
+            this.render();
+        }
     }
 };
