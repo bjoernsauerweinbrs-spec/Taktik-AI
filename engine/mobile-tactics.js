@@ -1,87 +1,129 @@
 /**
- * TONI 2.0 - MOBILE TACTICS CONTROLLER
- * Fokus: Tap-to-Sub & Quick-Hotkeys für das Smartphone
- * Status: 2026 MOBILE OPTIMIZED
+ * TONI 2.0 - MOBILE TACTICS CONTROLLER (ELITE SYNC)
+ * Fokus: Ein-/Auswechslung, Board-Interaktion & Hotkeys
+ * Status: ETAPPE 1.4 - STEUERUNG VERSIEGELT
  */
 window.MobileTactics = {
-    selectedPlayerId: null,
+    selectedBenchId: null,
 
     init() {
-        console.log("📱 Mobile Tactics: Touch-Schnittstelle aktiv.");
+        console.log("📱 Mobile Tactics: Steuerungssystem synchronisiert.");
+        this.setupBoardInteractions();
         this.createHotkeyOverlay();
     },
 
     /**
-     * Wird aufgerufen, wenn eine Mini-Card auf der Bank getippt wird
+     * Logik für die Ersatzbank (Mini-Cards)
      */
-    handleBenchTap(playerId) {
-        this.selectedPlayerId = playerId;
+    handleBenchClick(playerId) {
+        // Falls bereits ausgewählt, Auswahl aufheben
+        if (this.selectedBenchId === playerId) {
+            this.selectedBenchId = null;
+            this.refreshBenchUI();
+            return;
+        }
+
+        this.selectedBenchId = playerId;
+        this.refreshBenchUI();
         
-        // Visuelles Feedback: Alle Karten normal, gewählte Karte leuchtet
-        document.querySelectorAll('.fifa-card-mini').forEach(card => {
-            card.style.borderColor = 'rgba(255,255,255,0.1)';
-            card.style.boxShadow = 'none';
-        });
-
-        const activeCard = event.currentTarget;
-        activeCard.style.borderColor = 'var(--neon-green)';
-        activeCard.style.boxShadow = '0 0 15px var(--neon-green)';
-        
-        if(window.ToniVoice) window.ToniVoice.speak("Einheit bereit zum Einwechseln.");
-    },
-
-    /**
-     * Wird aufgerufen, wenn das Spielfeld (Canvas) getippt wird
-     */
-    handleBoardTap(x, y) {
-        if (!this.selectedPlayerId) return;
-
-        const player = window.Database.players.find(p => p.id == this.selectedPlayerId);
-        if (player) {
-            // Koordinaten dem Spieler zuweisen
-            player.x = x;
-            player.y = y;
-            player.onField = true;
-
-            // Auswahl aufheben
-            this.selectedPlayerId = null;
-            
-            // Arena neu zeichnen
-            if(window.Arena.draw) window.Arena.draw();
-            if(window.ToniVoice) window.ToniVoice.speak(player.name.split(' ').pop() + " auf Position.");
+        if(window.ToniVoice) {
+            const player = window.Database.players.find(p => p.id == playerId);
+            window.ToniVoice.speak(player.name.split(' ').pop() + " bereit zum Einsatz.");
         }
     },
 
     /**
-     * Mobile Hotkeys für schnellen Zugriff am Spielfeldrand
+     * Verknüpft das Spielfeld mit der Einwechslungs-Logik
      */
-    createHotkeyOverlay() {
-        if (document.getElementById('mobile-hotkeys')) return;
+    setupBoardInteractions() {
+        const canvas = document.getElementById('tactic-board');
+        if (!canvas) return;
 
-        const overlay = document.createElement('div');
-        overlay.id = 'mobile-hotkeys';
-        overlay.className = 'no-print';
-        overlay.style = `
-            position: fixed; bottom: 20px; right: 20px; 
-            display: flex; flex-direction: column; gap: 10px; z-index: 10000;
-        `;
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
 
-        overlay.innerHTML = `
-            <button onclick="window.Arena.resetBoard()" class="tactic-btn" style="width:50px; height:50px; border-radius:50%; background:rgba(0,0,0,0.8); border:1px solid #ff3b30; color:#ff3b30;">
-                <i class="fas fa-undo"></i>
-            </button>
-            <button onclick="window.MobileTactics.toggleNames()" class="tactic-btn" style="width:50px; height:50px; border-radius:50%; background:rgba(0,0,0,0.8); border:1px solid var(--data-cyan); color:var(--data-cyan);">
-                <i class="fas fa-font"></i>
-            </button>
-            <button onclick="window.BriefcaseUI.renderMainGrid()" class="tactic-btn" style="width:50px; height:50px; border-radius:50%; background:rgba(0,0,0,0.8); border:1px solid var(--accent-gold); color:var(--accent-gold);">
-                <i class="fas fa-briefcase"></i>
-            </button>
-        `;
-        document.body.appendChild(overlay);
+            // 1. Wenn ein Bank-Spieler ausgewählt ist -> Einwechseln
+            if (this.selectedBenchId) {
+                this.executeSubstitution(x, y);
+            } 
+            // 2. Wenn kein Bank-Spieler gewählt ist -> Prüfen ob Spieler angeklickt für Auswechslung
+            else {
+                this.checkForRemoval(x, y);
+            }
+        });
     },
 
-    toggleNames() {
-        window.Arena.showNames = !window.Arena.showNames;
-        window.Arena.draw();
+    /**
+     * Bringt einen Spieler von der Bank aufs Feld
+     */
+    executeSubstitution(x, y) {
+        const player = window.Database.players.find(p => p.id == this.selectedBenchId);
+        if (player) {
+            player.onField = true;
+            player.x = x;
+            player.y = y;
+            
+            this.selectedBenchId = null; // Auswahl zurücksetzen
+            window.Database.save();
+            
+            if (window.Arena) {
+                window.Arena.draw();
+                window.Arena.renderBench();
+            }
+            this.refreshBenchUI();
+        }
+    },
+
+    /**
+     * Nimmt einen Spieler vom Feld (Rechtsklick oder Doppel-Tap simulieren)
+     * Hier: Wenn man auf einen Spieler klickt, der schon auf dem Feld ist.
+     */
+    checkForRemoval(x, y) {
+        const player = window.Database.players.find(p => 
+            p.onField && Math.hypot(p.x - x, p.y - y) < 25
+        );
+
+        if (player) {
+            player.onField = false;
+            window.Database.save();
+            if (window.Arena) {
+                window.Arena.draw();
+                window.Arena.renderBench();
+            }
+        }
+    },
+
+    /**
+     * Aktualisiert das visuelle Feedback auf der Ersatzbank
+     */
+    refreshBenchUI() {
+        document.querySelectorAll('.fifa-card-mini').forEach(card => {
+            card.style.borderColor = 'var(--accent-gold)';
+            card.style.boxShadow = 'none';
+        });
+
+        if (this.selectedBenchId) {
+            // Wir suchen das Element über ein Daten-Attribut (muss in Arena.renderBench ergänzt werden)
+            const activeCard = document.querySelector(`[data-id="${this.selectedBenchId}"]`);
+            if (activeCard) {
+                activeCard.style.borderColor = 'var(--neon-green)';
+                activeCard.style.boxShadow = '0 0 20px var(--neon-green)';
+            }
+        }
+    },
+
+    createHotkeyOverlay() {
+        if (document.getElementById('mobile-hotkeys')) return;
+        const overlay = document.createElement('div');
+        overlay.id = 'mobile-hotkeys';
+        overlay.style = "position: fixed; bottom: 90px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000;";
+        
+        overlay.innerHTML = `
+            <button onclick="location.reload()" class="send-btn" style="background:#111; color:#ff3b30; border:1px solid #ff3b30;"><i class="fas fa-power-off"></i></button>
+            <button onclick="window.BriefcaseUI.toggle()" class="send-btn"><i class="fas fa-folder-open"></i></button>
+        `;
+        document.body.appendChild(overlay);
     }
 };
