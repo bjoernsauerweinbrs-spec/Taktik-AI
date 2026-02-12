@@ -1,7 +1,7 @@
 /**
- * TONI 2.0 - ARENA ENGINE CORE (PRO NEON SYNC)
- * Fokus: Neon-Glow Pitch, Drag-and-Drop Support & Branding
- * Status: ETAPPE 1.1 - FUNDAMENT & INTERAKTION VERSIEGELT
+ * TONI 2.0 - ARENA ENGINE CORE (ELITE NEON GEOMETRY)
+ * Fokus: Vollständige Pitch-Geometrie (5m, 16m, Halbkreis, Spot) & Drag-Logic
+ * Status: ETAPPE 1.3 - SPIELFELD-GEOMETRIE VOLLSTÄNDIG VERSIEGELT
  */
 window.Arena = {
     canvas: null,
@@ -34,7 +34,7 @@ window.Arena = {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // 1. Spielfeld (Deep Black)
+        // 1. Spielfeld Hintergrund (Deep Black/Navy)
         ctx.fillStyle = "#05080F";
         ctx.fillRect(0, 0, w, h);
 
@@ -59,36 +59,68 @@ window.Arena = {
 
         ctx.strokeStyle = neonGreen;
         ctx.lineWidth = 2;
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 12;
         ctx.shadowColor = neonGreen;
 
-        const pad = 60;
-        const fieldW = w - (pad * 2);
-        const fieldH = h - (pad * 2);
+        const pad = 60; // Spielfeld-Abstand vom Canvas-Rand
+        const fW = w - (pad * 2);
+        const fH = h - (pad * 2);
+        const midX = w / 2;
+        const midY = h / 2;
 
-        // Außenlinien & Mitte
-        ctx.strokeRect(pad, pad, fieldW, fieldH);
+        // --- BASIS-MARKIERUNGEN ---
+        // Außenlinie
+        ctx.strokeRect(pad, pad, fW, fH);
+        // Mittellinie
         ctx.beginPath();
-        ctx.moveTo(w / 2, pad); ctx.lineTo(w / 2, h - pad);
+        ctx.moveTo(midX, pad); ctx.lineTo(midX, h - pad);
         ctx.stroke();
+        // Mittelkreis & Anstoßpunkt
+        ctx.beginPath(); ctx.arc(midX, midY, 80, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = neonGreen;
+        ctx.beginPath(); ctx.arc(midX, midY, 3, 0, Math.PI * 2); ctx.fill();
 
-        // Mittelkreis
-        ctx.beginPath();
-        ctx.arc(w / 2, h / 2, 80, 0, Math.PI * 2);
-        ctx.stroke();
+        // --- STRAFRAUM-DETAILS (LINKS & RECHTS) ---
+        this.drawAreaDetails(ctx, pad, midY, 1);       // Links (Trainer)
+        this.drawAreaDetails(ctx, w - pad, midY, -1);  // Rechts (Toni)
 
-        // Strafräume
-        ctx.strokeRect(pad, h / 2 - 160, 130, 320); // Links
-        ctx.strokeRect(w - pad - 130, h / 2 - 160, 130, 320); // Rechts
-
-        // TORE (FEST VERANKERT & MASSIVER GLOW)
+        // --- TORE (MASSIVER GLOW IN CYBER BLUE) ---
         ctx.strokeStyle = neonBlue;
         ctx.shadowColor = neonBlue;
         ctx.lineWidth = 5;
-        ctx.strokeRect(pad - 20, h / 2 - 50, 20, 100); // Tor L
-        ctx.strokeRect(w - pad, h / 2 - 50, 20, 100);    // Tor R
+        ctx.strokeRect(pad - 20, midY - 50, 20, 100); // Tor Links
+        ctx.strokeRect(w - pad, midY - 50, 20, 100);    // Tor Rechts
         
         ctx.shadowBlur = 0; // Reset für Performance
+    },
+
+    /**
+     * Zeichnet 16m, 5m, Spot und Arc für eine Seite
+     */
+    drawAreaDetails(ctx, x, y, side) {
+        const penaltyBoxW = 135 * side;
+        const goalBoxW = 45 * side;
+        const spotDist = 90 * side; // Elfmeterpunkt-Distanz
+
+        // 16-Meter-Raum (Strafraum)
+        ctx.strokeRect(x, y - 160, penaltyBoxW, 320);
+        
+        // 5-Meter-Raum (Torraum)
+        ctx.strokeRect(x, y - 60, goalBoxW, 120);
+
+        // Elfmeterpunkt
+        ctx.fillStyle = "#39FF14";
+        ctx.beginPath();
+        ctx.arc(x + spotDist, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Strafraum-Halbkreis (Arc / Das "D")
+        ctx.beginPath();
+        // Start/Endwinkel dynamisch je nach Seite (side 1 = rechts offen, side -1 = links offen)
+        const startAng = side === 1 ? -0.65 : Math.PI - 0.65;
+        const endAng = side === 1 ? 0.65 : Math.PI + 0.65;
+        ctx.arc(x + spotDist, y, 75, startAng, endAng, side === -1);
+        ctx.stroke();
     },
 
     drawBanners(ctx, w, h) {
@@ -137,12 +169,10 @@ window.Arena = {
     },
 
     setupEventListeners() {
-        // DRAG & DROP LOGIK
         this.canvas.addEventListener('mousedown', (e) => this.handleStart(e));
         this.canvas.addEventListener('mousemove', (e) => this.handleMove(e));
         this.canvas.addEventListener('mouseup', () => this.handleEnd());
         
-        // Touch Support
         this.canvas.addEventListener('touchstart', (e) => this.handleStart(e.touches[0]));
         this.canvas.addEventListener('touchmove', (e) => this.handleMove(e.touches[0]));
         this.canvas.addEventListener('touchend', () => this.handleEnd());
@@ -153,7 +183,6 @@ window.Arena = {
         const mouseX = (e.clientX - rect.left) * (this.canvas.width / rect.width);
         const mouseY = (e.clientY - rect.top) * (this.canvas.height / rect.height);
 
-        // Finde den geklickten Spieler (Nur Trainer-Team erlaubt zu verschieben)
         this.draggedPlayer = window.Database.players.find(p => 
             p.onField && p.assignment === 'Trainer' && 
             Math.hypot(p.x - mouseX, p.y - mouseY) < 30
@@ -212,7 +241,7 @@ window.Arena = {
             <div class="fifa-card-mini">
                 <div class="mini-rat">${p.rat}</div>
                 <div class="mini-pos">${p.pos}</div>
-                <div style="font-size: 8px; font-weight: bold; margin-top: 2px;">${p.name.split(' ').pop().toUpperCase()}</div>
+                <div class="mini-name">${p.name.split(' ').pop().toUpperCase()}</div>
             </div>
         `).join('');
     }
