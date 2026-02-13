@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - VOICE CORE (PRO SYNC 2026)
  * Fokus: Bidirektionale Kommunikation & Akustisches Feedback
- * Status: ETAPPE 1.3 - KOMMUNIKATION VERSIEGELT
+ * Status: CLEAN & SYNCED 2026
  */
 window.ToniVoice = {
     synth: window.speechSynthesis,
@@ -9,39 +9,55 @@ window.ToniVoice = {
     recognition: null,
 
     /**
-     * Lässt TONI einen Text laut vorlesen und im Chat einblenden
+     * TONI spricht: Lautausgabe & Chat-Eintrag
      */
     speak(text) {
         if (this.isMuted || !this.synth) return;
 
-        this.synth.cancel(); // Vorherige Sprache stoppen
+        // Laufende Sprachausgabe abbrechen für sofortige Reaktion
+        this.synth.cancel(); 
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'de-DE';
-        utterance.pitch = 0.95;
+        utterance.pitch = 0.9; // Etwas tiefer für markanten Klang
         utterance.rate = 1.0;
 
+        // Stimme wählen (Asynchroner Schutz)
         const voices = this.synth.getVoices();
-        const maleVoice = voices.find(v => v.lang.includes('de') && (v.name.includes('Microsoft') || v.name.includes('Google')));
-        if (maleVoice) utterance.voice = maleVoice;
+        const preferredVoice = voices.find(v => v.lang.includes('de') && v.name.includes('Stefan')) || 
+                              voices.find(v => v.lang.includes('de') && v.name.includes('Google')) ||
+                              voices[0];
+        
+        if (preferredVoice) utterance.voice = preferredVoice;
 
-        // Antwort im Chat einblenden
+        // Visuelles Feedback im Chat
         const chatBox = document.getElementById('chat-box');
         if (chatBox) {
-            chatBox.innerHTML += `<div class="chat-msg system"><b>TONI:</b> ${text}</div>`;
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            chatBox.innerHTML += `
+                <div class="chat-msg system fadeIn" style="border-left: 2px solid var(--neon-green); background: rgba(57, 255, 20, 0.03); padding: 10px; margin-bottom: 8px;">
+                    <span style="font-size: 0.5rem; color: #555; display: block;">${time} - TONI KI</span>
+                    <span style="color: #fff; font-size: 0.8rem;">${text}</span>
+                </div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         this.synth.speak(utterance);
     },
 
+    /**
+     * Sprachsteuerung initialisieren
+     */
     initRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) return;
+        if (!SpeechRecognition) {
+            console.warn("Spracherkennung wird von diesem Browser nicht unterstützt.");
+            return;
+        }
 
         this.recognition = new SpeechRecognition();
         this.recognition.lang = 'de-DE';
-        this.recognition.continuous = false; // Auf Einzelsegment-Erkennung für präzise Befehle
+        this.recognition.continuous = false;
         this.recognition.interimResults = false;
 
         this.recognition.onresult = (event) => {
@@ -50,47 +66,77 @@ window.ToniVoice = {
         };
 
         this.recognition.onend = () => {
-            // Visueller Reset des Mikro-Buttons, falls gewünscht
             const micBtn = document.getElementById('main-mic-btn');
-            if (micBtn) micBtn.style.color = "#fff";
+            if (micBtn) micBtn.classList.remove('active');
+        };
+
+        this.recognition.onerror = (err) => {
+            console.error("Voice Error:", err.error);
         };
     },
 
+    /**
+     * Logik-Zentrale für Sprachbefehle
+     */
     handleVoiceCommand(cmd) {
-        // Anzeige des gehörten Textes
+        console.log("🎤 Befehl empfangen:", cmd);
+        
+        // Chat-Anzeige des Nutzers
         const chatBox = document.getElementById('chat-box');
         if (chatBox) {
-            chatBox.innerHTML += `<div class="chat-msg user" style="color:var(--data-cyan)">🎤 ${cmd}</div>`;
+            chatBox.innerHTML += `<div class="chat-msg user" style="color:var(--data-cyan); font-size: 0.8rem; text-align: right; margin-bottom: 10px;">"${cmd}"</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // --- INTELLIGENTE ANTWORT-LOGIK ---
-        if (cmd.includes("kabine") || cmd.includes("spieler")) {
-            this.speak("Ich öffne die Spielerkabine. Der Kader wird geladen.");
-            if(window.BriefcaseUI) { window.BriefcaseUI.toggle(); window.openSection('kabine'); }
+        // NAVIGATION & AKTIONEN
+        if (cmd.includes("kabine") || cmd.includes("kader") || cmd.includes("spieler")) {
+            this.speak("Ich öffne die Kabine. Alle Einheiten sind bereit.");
+            window.openSection('kabine');
         } 
-        else if (cmd.includes("finanzen") || cmd.includes("geld")) {
-            this.speak("Finanzstatus wird abgerufen. Die Sponsorenverträge sind stabil.");
-            if(window.BriefcaseUI) { window.BriefcaseUI.toggle(); window.openSection('finanzen'); }
+        else if (cmd.includes("sponsoring") || cmd.includes("geld") || cmd.includes("finanzen") || cmd.includes("kontor")) {
+            this.speak("Öffne das Kontor. Die Sponsorenverträge werden geladen.");
+            window.openSection('sponsoring');
         }
-        else if (cmd.includes("zeitung") || cmd.includes("presse")) {
-            this.speak("Redaktionssystem wird hochgefahren. Die neue Ausgabe ist bereit.");
-            if(window.BriefcaseUI) { window.BriefcaseUI.toggle(); window.openSection('stadionzeitung'); }
+        else if (cmd.includes("zeitung") || cmd.includes("presse") || cmd.includes("stadion")) {
+            this.speak("Redaktion wird hochgefahren. Die neue Stadionzeitung liegt bereit.");
+            window.openSection('stadionzeitung');
         }
-        else if (cmd.includes("labor") || cmd.includes("analyse")) {
-            this.speak("Analysezentrum aktiviert. Biometrische Daten werden synchronisiert.");
-            if(window.BriefcaseUI) { window.BriefcaseUI.toggle(); window.openSection('analyse'); }
+        else if (cmd.includes("labor") || cmd.includes("analyse") || cmd.includes("werte")) {
+            this.speak("Analysezentrum aktiviert. Biometrische Scans werden synchronisiert.");
+            window.openSection('analyse');
         }
-        else if (cmd.includes("schließe") || cmd.includes("danke")) {
-            this.speak("Verstanden. Ich bleibe im Standby.");
+        else if (cmd.includes("zentrale") || cmd.includes("menü") || cmd.includes("briefcase")) {
+            this.speak("Kehre zurück in die Zentrale.");
+            if(window.BriefcaseUI) window.BriefcaseUI.renderMainGrid();
+        }
+        else if (cmd.includes("schließe") || cmd.includes("danke") || cmd.includes("standby")) {
+            this.speak("Verstanden. Ich bleibe im Hintergrund aktiv.");
             if(window.BriefcaseUI && window.BriefcaseUI.isOpen) window.BriefcaseUI.toggle();
         }
+        else if (cmd.includes("reload") || cmd.includes("neu laden") || cmd.includes("reboot")) {
+            this.speak("System-Reboot eingeleitet.");
+            setTimeout(() => location.reload(), 1000);
+        }
         else {
-            this.speak("Befehl analysiert: " + cmd + ". Ich bin mir nicht sicher, wie ich hier helfen kann, Coach.");
+            this.speak("Ich habe den Befehl gehört, Coach. Aber für '" + cmd + "' fehlen mir noch die Zugriffsberechtigungen.");
+        }
+    },
+
+    startListening() {
+        if (!this.recognition) this.initRecognition();
+        try {
+            this.recognition.start();
+            const micBtn = document.getElementById('main-mic-btn');
+            if (micBtn) micBtn.classList.add('active');
+        } catch (e) {
+            console.log("Erkennung bereits aktiv.");
         }
     }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
-    window.ToniVoice.initRecognition();
-});
+// Automatischer Start bei Stimmenänderung (Chrome Fix)
+if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = () => {
+        console.log("🔊 Stimmen-Datenbank geladen.");
+    };
+}
