@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - SEKTOR ANALYSE (ELITE PERFORMANCE HUB)
- * Fokus: Full Biometrie, Pulsierendes Herz & SpO2 Sync
- * Status: ETAPPE 4.5 - LABOR VOLLSTÄNDIG VERSIEGELT
+ * Fokus: Full Biometrie, Pulsierendes Herz & Radar-Sync
+ * Status: CLEAN & SYNCED 2026
  */
 window.SektorAnalyse = {
     selectedPlayerId: null,
@@ -29,11 +29,10 @@ window.SektorAnalyse = {
         const player = players.find(p => p.id == this.selectedPlayerId) || players[0];
         
         if (!player) {
-            content.innerHTML = `<div style="padding:40px; text-align:center; color:#444; font-family:'Orbitron';">DATENBANK-SYNC FEHLGESCHLAGEN. BITTE KADER LADEN.</div>`;
+            content.innerHTML = `<div style="padding:40px; text-align:center; color:#444; font-family:'Orbitron';">KEINE DATEN VERFÜGBAR.</div>`;
             return;
         }
 
-        // BMI Berechnung
         const heightM = (player.height || 180) / 100;
         const bmi = ((player.weight || 75) / (heightM * heightM)).toFixed(1);
 
@@ -56,13 +55,13 @@ window.SektorAnalyse = {
             <div class="fadeIn" style="display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: 100%; overflow: hidden;">
                 
                 <div style="background: rgba(0,0,0,0.4); border-radius: 15px; padding: 15px; overflow-y: auto; border: 1px solid rgba(0,209,255,0.1);">
-                    <h3 style="font-size: 0.6rem; color: var(--data-cyan); letter-spacing: 2px; margin-bottom: 20px; font-family:'Orbitron';">BIO-MONITORING UNITS</h3>
+                    <h3 style="font-size: 0.6rem; color: var(--data-cyan); letter-spacing: 2px; margin-bottom: 20px; font-family:'Orbitron';">BIO-MONITORING</h3>
                     ${players.map(p => `
                         <div onclick="window.SektorAnalyse.selectPlayer('${p.id}')" 
                              style="padding: 12px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; border: 1px solid ${this.selectedPlayerId == p.id ? 'var(--data-cyan)' : '#222'}; 
                              background: ${this.selectedPlayerId == p.id ? 'rgba(0,209,255,0.08)' : 'rgba(255,255,255,0.02)'}; transition: 0.2s;">
                             <div style="font-weight: bold; font-size: 0.75rem; color:#fff; font-family:'Orbitron';">${p.name.toUpperCase()}</div>
-                            <div style="font-size: 0.55rem; color: #666;">PULS: ${p.rhr || '--'} BPM | SPO2: ${p.spo2 || '--'}%</div>
+                            <div style="font-size: 0.55rem; color: #666;">PULS: ${p.rhr || '--'} | SpO2: ${p.spo2 || '--'}%</div>
                         </div>`).join('')}
                 </div>
 
@@ -70,61 +69,50 @@ window.SektorAnalyse = {
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px;">
                         <div>
                             <h2 style="margin:0; font-size: 1.8rem; color: #fff; font-family:'Orbitron';">${player.name.toUpperCase()}</h2>
-                            <span style="color:var(--data-cyan); font-size:0.6rem; letter-spacing:1px;">ELITE PERFORMANCE PROFILE</span>
+                            <span style="color:var(--data-cyan); font-size:0.6rem; letter-spacing:1px;">PERFORMANCE HUB</span>
                         </div>
-                        <button onclick="window.SektorAnalyse.openEditor()" class="pro-btn-gold" style="font-size:0.65rem;"><i class="fas fa-microscope"></i> LABOR-INPUT</button>
+                        <button onclick="window.SektorAnalyse.openEditor()" class="pro-btn-gold" style="font-size:0.65rem;"><i class="fas fa-microscope"></i> LABOR-EDIT</button>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 320px; gap: 20px;">
-                        
                         <div style="display: grid; gap: 20px;">
                             <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 30px;">
-                                <div class="biometric-heart">
-                                    <i class="fas fa-heart-pulse"></i>
-                                </div>
+                                <div class="biometric-heart"><i class="fas fa-heart-pulse"></i></div>
                                 <div style="flex:1; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                     ${this.miniStat("RUHEPULS", (player.rhr || 60) + " BPM", "var(--neon-red)")}
-                                    ${this.miniStat("SPO2 SENSOR", (player.spo2 || 98) + " %", "var(--data-cyan)")}
+                                    ${this.miniStat("SpO2", (player.spo2 || 98) + " %", "var(--data-cyan)")}
                                 </div>
                             </div>
-
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                                 <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 12px; padding: 15px;">
-                                    <h4 style="font-size: 0.55rem; color: var(--neon-green); font-family:'Orbitron'; margin-bottom:12px;">KÖRPER-INDEX</h4>
+                                    <h4 style="font-size: 0.55rem; color: var(--neon-green); font-family:'Orbitron'; margin-bottom:12px;">BODY-INDEX</h4>
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                         ${this.miniStat("BMI", bmi)}
-                                        ${this.miniStat("FETT %", player.fat + " %")}
+                                        ${this.miniStat("FETT", player.fat + " %")}
                                         ${this.miniStat("MUSKEL", player.muscle + " KG")}
-                                        ${this.miniStat("WASSER", player.water + " %")}
                                     </div>
                                 </div>
                                 <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 12px; padding: 15px;">
-                                    <h4 style="font-size: 0.55rem; color: var(--accent-gold); font-family:'Orbitron'; margin-bottom:12px;">UHREN-SYNC (WATCH)</h4>
+                                    <h4 style="font-size: 0.55rem; color: var(--accent-gold); font-family:'Orbitron'; margin-bottom:12px;">WATCH-SYNC</h4>
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                        ${this.miniStat("RECOVERY", (player.recovery || 0) + "%")}
-                                        ${this.miniStat("SCHLAF", (player.sleep || 0) + " H")}
-                                        ${this.miniStat("STRESS", player.stress || "LOW")}
-                                        ${this.miniStat("VO2 MAX", player.vo2 || "--")}
+                                        ${this.miniStat("REC", (player.recovery || 0) + "%")}
+                                        ${this.miniStat("SLEEP", (player.sleep || 0) + " H")}
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div style="background: #000; border: 1px solid #222; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; align-items: center;">
-                            <h4 style="font-size: 0.55rem; color: #fff; font-family:'Orbitron'; margin-bottom:20px; letter-spacing:1px;">PERFORMANCE RADAR</h4>
+                        <div style="background: #000; border: 1px solid #222; border-radius: 12px; padding: 20px;">
                             <canvas id="radarChart" width="280" height="280"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
         `;
-        
         setTimeout(() => this.drawRadar(player), 50);
     },
 
     miniStat(l, v, color = "#fff") {
-        return `
-            <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; border-left: 2px solid ${color === "#fff" ? 'rgba(255,255,255,0.1)' : color};">
+        return `<div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; border-left: 2px solid ${color};">
                 <div style="font-size:0.45rem; color:#666; margin-bottom:4px; font-family:'Orbitron';">${l}</div>
                 <div style="font-size:0.9rem; color:${color}; font-family:'Orbitron'; font-weight:bold;">${v}</div>
             </div>`;
@@ -139,10 +127,7 @@ window.SektorAnalyse = {
         const labels = ["PAC", "SHO", "PAS", "DRI", "DEF", "PHY"];
 
         ctx.clearRect(0,0,280,280);
-        
-        // 1. Hintergrund-Netz
         ctx.strokeStyle = "rgba(255,255,255,0.1)";
-        ctx.lineWidth = 1;
         for(let j=1; j<=4; j++) {
             ctx.beginPath();
             for(let i=0; i<6; i++) {
@@ -154,26 +139,10 @@ window.SektorAnalyse = {
             ctx.closePath(); ctx.stroke();
         }
 
-        // 2. Achsen
-        for(let i=0; i<6; i++) {
-            let ang = (Math.PI/3) * i - Math.PI/2;
-            ctx.beginPath(); ctx.moveTo(cx,cy);
-            ctx.lineTo(cx + r * Math.cos(ang), cy + r * Math.sin(ang));
-            ctx.stroke();
-            
-            ctx.font = "bold 9px Orbitron";
-            ctx.fillStyle = "#fff";
-            ctx.textAlign = "center";
-            ctx.fillText(labels[i], cx + (r+20) * Math.cos(ang), cy + (r+20) * Math.sin(ang) + 4);
-        }
-
-        // 3. Daten-Fläche (Neon Green Glow)
         ctx.beginPath();
         ctx.strokeStyle = "#39FF14";
         ctx.fillStyle = "rgba(57, 255, 20, 0.2)";
         ctx.lineWidth = 2;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#39FF14";
         for(let i=0; i<6; i++) {
             let ang = (Math.PI/3) * i - Math.PI/2;
             let valR = (stats[i]/100) * r;
@@ -182,7 +151,6 @@ window.SektorAnalyse = {
             i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
         }
         ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.shadowBlur = 0;
     },
 
     selectPlayer(id) { this.selectedPlayerId = id; this.render(); },
@@ -194,27 +162,17 @@ window.SektorAnalyse = {
         overlay.id = "labor-editor-overlay";
         overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.96); z-index:9999999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(20px);";
         overlay.innerHTML = `
-            <div style="background:#05080F; border:2px solid var(--data-cyan); padding:35px; border-radius:15px; width:520px; font-family:'Orbitron'; color:#fff; box-shadow:0 0 50px rgba(0,209,255,0.2);">
-                <h3 style="color:var(--data-cyan); margin-bottom:25px; font-size:0.9rem; letter-spacing:2px;">LABOR-INPUT: ${p.name.toUpperCase()}</h3>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; max-height:60vh; overflow-y:auto; padding-right:10px;">
-                    ${["height", "weight", "fat", "muscle", "water", "rhr", "spo2", "vo2", "recovery", "sleep"].map(f => `
-                        <div>
-                            <label style="font-size:0.5rem; color:#666;">${f.toUpperCase()}</label>
-                            <input type="number" id="ed-${f}" value="${p[f]||0}" step="0.1" style="width:100%; background:#000; border:1px solid #333; color:var(--data-cyan); padding:10px; border-radius:4px; font-family:'Orbitron';">
-                        </div>
+            <div style="background:#05080F; border:2px solid var(--data-cyan); padding:35px; border-radius:15px; width:520px; font-family:'Orbitron'; color:#fff;">
+                <h3 style="color:var(--data-cyan); margin-bottom:25px; font-size:0.9rem;">LABOR-INPUT: ${p.name.toUpperCase()}</h3>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                    ${["height", "weight", "fat", "muscle", "rhr", "spo2", "recovery", "sleep"].map(f => `
+                        <div><label style="font-size:0.5rem; color:#666;">${f.toUpperCase()}</label>
+                        <input type="number" id="ed-${f}" value="${p[f]||0}" step="0.1" style="width:100%; background:#000; border:1px solid #333; color:var(--data-cyan); padding:10px; border-radius:4px; font-family:'Orbitron';"></div>
                     `).join('')}
-                    <div style="grid-column:1/-1;">
-                        <label style="font-size:0.5rem; color:#666;">STRESSLEVEL (WATCH)</label>
-                        <select id="ed-stress" style="width:100%; background:#000; border:1px solid #333; color:var(--data-cyan); padding:10px; border-radius:4px; font-family:'Orbitron';">
-                            <option value="LOW" ${p.stress === 'LOW' ? 'selected' : ''}>LOW</option>
-                            <option value="MED" ${p.stress === 'MED' ? 'selected' : ''}>MED</option>
-                            <option value="HIGH" ${p.stress === 'HIGH' ? 'selected' : ''}>HIGH</option>
-                        </select>
-                    </div>
                 </div>
                 <div style="display:flex; gap:15px; margin-top:30px;">
-                    <button onclick="document.getElementById('labor-editor-overlay').remove()" style="flex:1; background:#111; color:#fff; border:1px solid #333; padding:15px; cursor:pointer; font-family:'Orbitron'; font-size:0.7rem;">ABBRUCH</button>
-                    <button onclick="window.SektorAnalyse.saveData()" style="flex:2; background:var(--data-cyan); color:#000; border:none; padding:15px; cursor:pointer; font-weight:bold; font-family:'Orbitron'; font-size:0.7rem;">BIOMETRIE-SYNC</button>
+                    <button onclick="document.getElementById('labor-editor-overlay').remove()" style="flex:1; background:#111; color:#fff; border:1px solid #333; padding:15px; cursor:pointer;">STOP</button>
+                    <button onclick="window.SektorAnalyse.saveData()" style="flex:2; background:var(--data-cyan); color:#000; border:none; padding:15px; cursor:pointer; font-weight:bold;">DATEN-SYNC</button>
                 </div>
             </div>`;
         document.body.appendChild(overlay);
@@ -223,15 +181,12 @@ window.SektorAnalyse = {
     saveData() {
         const p = window.Database.players.find(x => x.id == this.selectedPlayerId);
         if(p) {
-            ["height", "weight", "fat", "muscle", "water", "rhr", "spo2", "vo2", "recovery", "sleep"].forEach(f => {
+            ["height", "weight", "fat", "muscle", "rhr", "spo2", "recovery", "sleep"].forEach(f => {
                 p[f] = parseFloat(document.getElementById('ed-'+f).value);
             });
-            p.stress = document.getElementById('ed-stress').value;
-            
             window.Database.save();
             document.getElementById('labor-editor-overlay').remove();
             this.render();
-            if(window.ToniVoice) window.ToniVoice.speak("Biometrische Daten für " + p.name.split(' ').pop() + " versiegelt.");
         }
     }
 };
