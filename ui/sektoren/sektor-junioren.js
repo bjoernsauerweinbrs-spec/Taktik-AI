@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - SEKTOR JUGENDBEREICH (ACADEMY HUB)
  * Fokus: Jugend-Management, Pitch-Sync & Mission Stammplatz
- * Status: CLEAN & SYNCED 2026
+ * Status: SMART SYNC AKTIVIERT 2026
  */
 window.SektorJugendbereich = {
     currentYouth: null,
@@ -12,10 +12,9 @@ window.SektorJugendbereich = {
         const content = document.getElementById('active-content');
         if (!content) return;
 
-        // Trainer-Abfrage (nur wenn noch Standard)
-        if (this.currentCoach === "Coach Toni") {
-            const coach = prompt("Welcher Trainer leitet die heutige Academy-Einheit?", this.currentCoach);
-            if (coach) this.currentCoach = coach;
+        // Trainer-Abfrage beim ersten Start (nur falls Name noch Standard)
+        if (this.currentCoach === "Coach Toni" && window.coachInfo?.name) {
+            this.currentCoach = window.coachInfo.name;
         }
 
         this.render();
@@ -47,7 +46,7 @@ window.SektorJugendbereich = {
     renderYouthButtons() {
         const teams = [
             { id: 'G', label: "G-JUGEND", sub: "FUNINO / U7", pitch: 'funino', icon: 'fa-child' },
-            { id: 'F', label: "F-JUGEND", sub: "KLEINFELD / U9", pitch: 'kleinfeld', icon: 'fa-kids' },
+            { id: 'F', label: "F-JUGEND", sub: "KLEINFELD / U9", pitch: 'kleinfeld', icon: 'fa-hands-holding-child' },
             { id: 'E', label: "E-JUGEND", sub: "KLEINFELD / U11", pitch: 'kleinfeld', icon: 'fa-user-graduate' },
             { id: 'D', label: "D-JUGEND", sub: "KOMPAKT / U13", pitch: 'kleinfeld', icon: 'fa-users-rectangle' },
             { id: 'C', label: "C-JUGEND", sub: "GROSSFELD / U15", pitch: 'grossfeld', icon: 'fa-shield-halved' }
@@ -55,7 +54,9 @@ window.SektorJugendbereich = {
 
         return teams.map(t => `
             <div class="mgmt-card" onclick="window.SektorJugendbereich.selectTeam('${t.label}', '${t.pitch}')" 
-                 style="cursor:pointer; border: 1px solid rgba(0, 209, 255, 0.2); text-align:center; padding:20px;">
+                 style="cursor:pointer; border: 1px solid rgba(0, 209, 255, 0.2); text-align:center; padding:20px; transition: 0.3s;"
+                 onmouseover="this.style.borderColor='var(--data-cyan)'; this.style.background='rgba(0,209,255,0.05)';"
+                 onmouseout="this.style.borderColor='rgba(0, 209, 255, 0.2)'; this.style.background='transparent';">
                 <i class="fas ${t.icon}" style="color:var(--data-cyan); font-size:1.5rem; margin-bottom:10px;"></i>
                 <div style="color:var(--data-cyan); font-weight:900; font-family:'Orbitron'; font-size:0.8rem;">${t.label}</div>
                 <p style="font-size: 0.5rem; color: #666; margin-top:5px; letter-spacing:1px;">${t.sub}</p>
@@ -68,15 +69,16 @@ window.SektorJugendbereich = {
         window.currentTeamContext = team; 
         
         const detailView = document.getElementById('youth-detail-view');
-        if (!detailView) return;
-
         detailView.style.display = 'block';
         detailView.classList.add('fadeIn');
         
         detailView.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
                 <h4 style="color: var(--neon-green); margin:0; font-family:'Orbitron'; font-size:1rem;">ACADEMY FOKUS: ${team}</h4>
-                <button class="tactic-btn" onclick="window.openSection('kabine')" style="font-size:0.6rem;">KADER ÖFFNEN</button>
+                <div style="display:flex; gap:10px;">
+                    <button class="tactic-btn" onclick="window.openSection('kabine')" style="font-size:0.6rem;">KADER</button>
+                    <button class="tactic-btn" onclick="window.SektorJugendbereich.triggerPitchSwitch('${pitchMode}')" style="border-color:var(--neon-green); color:var(--neon-green); font-size:0.6rem;">ARENA SYNC</button>
+                </div>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -84,33 +86,24 @@ window.SektorJugendbereich = {
                     <p style="font-size: 0.5rem; color: var(--data-cyan); text-transform: uppercase; letter-spacing:1px;">Academy Tools:</p>
                     
                     <button class="pro-btn-gold" onclick="window.openSection('stadionzeitung')" style="text-align:left; font-size:0.7rem;">
-                        <i class="fas fa-newspaper"></i> MATCHDAY REPORT (DRUCK)
+                        <i class="fas fa-newspaper"></i> MATCHDAY REPORT
                     </button>
                     
                     <button class="pro-btn-gold" onclick="window.SektorJugendbereich.openStickerAlbum()" style="text-align:left; font-size:0.7rem;">
                         <i class="fas fa-id-badge"></i> MISSION STAMMPLATZ (STICKER)
                     </button>
-                    
-                    <button class="pro-btn-gold" onclick="window.openSection('training')" style="text-align:left; font-size:0.7rem;">
-                        <i class="fas fa-clipboard-list"></i> TRAININGSEINHEIT PLANEN
-                    </button>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <p style="font-size: 0.5rem; color: var(--neon-green); text-transform: uppercase; letter-spacing:1px;">Arena-Steuerung:</p>
-                    
-                    <button class="tactic-btn" style="border-color:var(--neon-green); color:var(--neon-green); font-size:0.7rem; text-align:left;" 
-                            onclick="window.SektorJugendbereich.triggerPitchSwitch('${pitchMode}')">
-                        <i class="fas fa-layer-group"></i> ARENA AUF ${pitchMode.toUpperCase()} UMSTELLEN
-                    </button>
-                    
-                    <button class="tactic-btn" style="font-size:0.7rem; text-align:left;" onclick="window.SektorJugendbereich.openVideoCoach()">
-                        <i class="fas fa-play-circle"></i> VIDEO-COACHING ÜBUNGEN
-                    </button>
-                    
-                    <div style="background:rgba(57, 255, 20, 0.05); padding:12px; border-radius:8px; border:1px dashed var(--neon-green); margin-top:5px;">
-                        <span style="font-size:0.55rem; color:var(--neon-green); line-height:1.4;">Toni-Hinweis: Fokus für die ${team} heute auf Spielintelligenz.</span>
+                    <p style="font-size: 0.5rem; color: var(--neon-green); text-transform: uppercase; letter-spacing:1px;">Status-Check:</p>
+                    <div style="background:rgba(57, 255, 20, 0.05); padding:12px; border-radius:8px; border:1px dashed var(--neon-green);">
+                        <span style="font-size:0.55rem; color:var(--neon-green); line-height:1.4;">
+                            <i class="fas fa-info-circle"></i> Toni-Tipp: Bei der <b>${team}</b> heute Fokus auf "Spielfreude und viele Ballkontakte".
+                        </span>
                     </div>
+                    <button class="tactic-btn" style="font-size:0.7rem; text-align:left;" onclick="window.SektorVideo.open()">
+                        <i class="fas fa-play-circle"></i> VIDEO-COACHING ÖFFNEN
+                    </button>
                 </div>
             </div>
         `;
@@ -118,38 +111,21 @@ window.SektorJugendbereich = {
     },
 
     triggerPitchSwitch(mode) {
-        if (window.Arena) {
-            window.BriefcaseUI.toggle(); // Schließt Zentrale
-            // Ruft die Feld-Konfiguration in der Arena-Core auf
-            if (typeof window.Arena.setPitchMode === "function") {
-                window.Arena.setPitchMode(mode);
-            }
-            if(window.ToniVoice) window.ToniVoice.speak("Arena wird auf " + mode + " konfiguriert.");
+        if (window.Arena && typeof window.Arena.setPitchMode === 'function') {
+            window.Arena.setPitchMode(mode);
+            if(window.ToniVoice) window.ToniVoice.speak("Arena-Transformation eingeleitet. Pitch auf " + mode + " versiegelt.");
+            
+            // Briefcase schließen für freie Sicht aufs Feld
+            setTimeout(() => {
+                if(window.BriefcaseUI) window.BriefcaseUI.toggle();
+            }, 1000);
+        } else {
+            alert("Arena-Engine nicht bereit für Transformation.");
         }
     },
 
     openStickerAlbum() {
-        alert("Mission Stammplatz: Sticker-Album wird für " + this.currentYouth + " generiert...");
-    },
-
-    openVideoCoach() {
-        const query = this.currentYouth + " Fussball Jugendtraining Technik Übungen";
-        const url = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}`;
-        
-        const videoOverlay = document.createElement('div');
-        videoOverlay.id = "video-coach-overlay";
-        videoOverlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; backdrop-filter:blur(15px);";
-        
-        videoOverlay.innerHTML = `
-            <div style="width:100%; max-width:1100px; display:flex; justify-content:space-between; margin-bottom:20px; border-bottom:2px solid var(--data-cyan); padding-bottom:15px;">
-                <div>
-                    <h3 style="color:var(--data-cyan); margin:0; font-family:'Orbitron'; text-transform:uppercase; letter-spacing:2px;">ACADEMY VIDEO-COACH: ${this.currentYouth}</h3>
-                    <span style="color:#666; font-size:0.6rem;">INTELLIGENTE ÜBUNGSAUSWAHL DURCH TONI KI</span>
-                </div>
-                <button onclick="document.getElementById('video-coach-overlay').remove()" style="background:none; border:1px solid #ff3b30; color:#ff3b30; cursor:pointer; padding:8px 20px; font-family:'Orbitron'; font-size:0.7rem; border-radius:5px;">SCHLIESSEN [X]</button>
-            </div>
-            <iframe width="100%" height="75%" src="${url}" frameborder="0" allowfullscreen style="border:2px solid var(--data-cyan); border-radius:15px; max-width:1100px; box-shadow:0 0 100px rgba(0,209,255,0.3);"></iframe>
-        `;
-        document.body.appendChild(videoOverlay);
+        if(window.ToniVoice) window.ToniVoice.speak("Mission Stammplatz aktiviert. Sticker-Album für " + this.currentYouth + " wird vorbereitet.");
+        alert("Mission Stammplatz: Sticker-Album wird generiert...");
     }
 };
