@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - SEKTOR SETTINGS (SYSTEM & COACH SETUP)
  * Fokus: KI-Brücke, Smartphone-Sync & Profil-Management
- * Status: ETAPPE 9 - SYSTEM-ZENTRALE VERSIEGELT
+ * Status: CLEAN & SYNCED 2026
  */
 window.SektorSettings = {
     timer: null,
@@ -99,7 +99,7 @@ window.SektorSettings = {
         const ip = document.getElementById('mac-ip-input').value.trim();
         localStorage.setItem('toni_mac_ip', ip);
         if(window.ToniVoice) window.ToniVoice.speak("IP-Adresse synchronisiert. Brücke wird aufgebaut.");
-        location.reload(); // Wichtig für den neuen Verbindungsaufbau
+        location.reload(); 
     },
 
     saveProfile() {
