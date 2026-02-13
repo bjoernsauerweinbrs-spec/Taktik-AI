@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | ELITE COCKPIT 2026</title>
+    <title>TONI 2.0 | ELITE TACTICAL COCKPIT</title>
     
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,19 +13,31 @@
 
     <style>
         .hidden { display: none !important; }
-        /* Fix für das MacBook: Das Board darf nicht größer als sein Container sein */
+        
+        /* Elite-Zentrierung für das MacBook-Display */
         #tactic-board { 
             max-width: 100%; 
             max-height: 100%; 
             display: block; 
             object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(57, 255, 20, 0.2));
         }
+
         * { -webkit-tap-highlight-color: transparent; outline: none; }
         
-        #briefcase-overlay { z-index: 1000000 !important; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:flex; align-items:center; justify-content:center; backdrop-filter: blur(10px); }
-        .sidebar-minimal { z-index: 100001 !important; position: relative; }
-        
-        /* Flexbox-Fix für das Zentrum */
+        #briefcase-overlay { 
+            z-index: 1000000 !important; 
+            position: fixed; 
+            top:0; left:0; 
+            width:100%; height:100%; 
+            background:rgba(0,0,0,0.95); 
+            display:flex; 
+            align-items:center; 
+            justify-content:center; 
+            backdrop-filter: blur(15px); 
+        }
+
+        /* Flexbox-Fix für die 3-Spalten-Struktur */
         #stage-container { 
             z-index: 1; 
             position: relative; 
@@ -43,29 +55,41 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            padding: 10px;
+            padding: 20px;
         }
         
         @keyframes pulse-glow {
             0% { box-shadow: 0 0 5px #39FF14; opacity: 0.6; }
-            50% { box-shadow: 0 0 20px #39FF14; opacity: 1; }
+            50% { box-shadow: 0 0 25px #39FF14; opacity: 1; }
             100% { box-shadow: 0 0 5px #39FF14; opacity: 0.6; }
         }
         .ai-online { animation: pulse-glow 2s infinite; }
 
         #arena-bench-list { 
-            display: flex; gap: 10px; padding: 15px; overflow-x: auto; 
-            background: rgba(0,0,0,0.8); border-top: 1px solid #333;
-            height: 150px; box-sizing: border-box; width: 100%;
+            display: flex; gap: 15px; padding: 15px; overflow-x: auto; 
+            background: rgba(10, 10, 10, 0.9); border-top: 1px solid #39FF1422;
+            height: 160px; box-sizing: border-box; width: 100%;
             flex-shrink: 0;
         }
         
-        #sector-title { font-family: 'Orbitron'; color: #39FF14; padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; }
+        #sector-title { 
+            font-family: 'Orbitron'; 
+            color: #39FF14; 
+            font-size: 1.4rem;
+            padding: 20px; 
+            border-bottom: 1px solid rgba(57, 255, 20, 0.2); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
     </style>
 </head>
 <body>
 
     <script>
+        // Sicherheits-Check & Coach-Daten
         if(sessionStorage.getItem('toni_auth') !== 'true') window.location.href = 'index.html';
         window.coachInfo = JSON.parse(localStorage.getItem('toni_coach_data')) || { verein: "Mein Verein", name: "Coach" };
     </script>
@@ -78,11 +102,11 @@
             </div>
             
             <div class="control-unit" id="ai-status-unit">
-                <div id="ai-status-light" class="ai-online" style="width:10px; height:10px; border-radius:50%; background: #39FF14; margin:0 auto 5px;"></div>
-                <span id="ai-status-label" style="font-size:9px; color:#39FF14;">ONLINE</span>
+                <div id="ai-status-light" class="ai-online" style="width:12px; height:12px; border-radius:50%; background: #39FF14; margin:0 auto 8px;"></div>
+                <span id="ai-status-label" style="font-size:10px; color:#39FF14; font-family:'Orbitron';">ONLINE</span>
             </div>
             
-            <div class="control-unit" id="mic-trigger" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggleVoice()" title="Mikrofon">
+            <div class="control-unit" id="mic-trigger" onclick="if(window.BriefcaseUI) window.BriefcaseUI.toggleVoice()" title="Sprachsteuerung">
                 <i class="fas fa-microphone" id="main-mic-btn" style="color: #fff;"></i>
                 <span>VOICE</span>
             </div>
@@ -93,7 +117,7 @@
             </div>
             
             <div class="control-unit" onclick="location.reload()" title="System Reboot">
-                <i class="fas fa-sync-alt"></i>
+                <i class="fas fa-power-off"></i>
                 <span>RESET</span>
             </div>
         </nav>
@@ -106,7 +130,7 @@
         </main>
 
         <aside class="analysis-panel">
-            <div class="video-preview" style="padding:20px; border-bottom:1px solid rgba(255,255,255,0.05); display: flex; align-items: center; background: rgba(0,0,0,0.3);">
+            <div class="video-preview-header">
                 <i class="fas fa-satellite-dish" style="margin-right: 12px; font-size: 0.9rem; color: #39FF14; animation: pulse 2s infinite;"></i>
                 <span style="font-size: 0.75rem; letter-spacing: 2px; color: #fff; font-family: 'Orbitron';">LIVE ANALYSE</span>
             </div>
@@ -134,18 +158,18 @@
     <script src="engine/voice-core.js"></script> 
     <script src="engine/arena-core.js"></script>
     <script src="engine/mobile-tactics.js"></script>
-    <script src="ui/aktentasche-ui.js"></script> 
-    <script src="ui/sektoren/sektor-sporttasche.js"></script>
-    <script src="ui/sektoren/sektor-analyse.js"></script>
-    <script src="ui/sektoren/sektor-stadionzeitung.js"></script> 
-    <script src="ui/sektoren/sektor-sponsoring.js"></script> 
-    <script src="ui/sektoren/sektor-finanzen.js"></script>
-    <script src="ui/sektoren/sektor-settings.js"></script>
+
+    <script type="module" src="ui/aktentasche-ui.js"></script> 
+    <script type="module" src="ui/sektoren/sektor-sporttasche.js"></script>
+    <script type="module" src="ui/sektoren/sektor-analyse.js"></script>
+    <script type="module" src="ui/sektoren/sektor-stadionzeitung.js"></script> 
+    <script type="module" src="ui/sektoren/sektor-jugendbereich.js"></script> <script type="module" src="ui/sektoren/sektor-videoanalyse.js"></script> <script type="module" src="ui/sektoren/sektor-sponsoring.js"></script> 
+    <script type="module" src="ui/sektoren/sektor-finanzen.js"></script>
+    <script type="module" src="ui/sektoren/sektor-settings.js"></script>
 
     <script>
         window.currentTeamContext = "Senioren"; 
 
-        // Hilfsfunktion für den Senden-Button & Enter
         function sendMessage() {
             const input = document.getElementById('command-input');
             const cmd = input.value.trim();
@@ -169,7 +193,7 @@
             setTimeout(() => {
                 const chat = document.getElementById('chat-box');
                 if(chat) {
-                    chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> Cockpit-Sync abgeschlossen.</div>`;
+                    chat.innerHTML += `<div class="chat-msg system"><b>TONI:</b> Cockpit-Sync abgeschlossen. Alle Systeme auf Elite-Status.</div>`;
                     if(window.ToniVoice) window.ToniVoice.speak("Cockpit synchronisiert. Ich bin bereit.");
                 }
             }, 1000);
