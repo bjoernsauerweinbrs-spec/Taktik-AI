@@ -7,50 +7,50 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <link rel="stylesheet" href="style.css"> 
     
     <style>
-        :root {
-            --neon-green: #39FF14;
-            --data-cyan: #00D1FF;
-            --accent-gold: #D4AF37;
-        }
-        body { background: #000; margin: 0; overflow: hidden; font-family: 'Inter', sans-serif; color: #fff; }
-        .main-interface { display: grid; grid-template-columns: 80px 1fr 350px; height: 100vh; }
-        
+        /* Lokale Korrekturen für maximale Stabilität */
         #briefcase-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 1000;
-            display: none; backdrop-filter: blur(15px);
+            background: rgba(0,0,0,0.96); z-index: 1000;
+            display: none; backdrop-filter: blur(20px);
         }
         .hidden { display: none !important; }
         
-        /* Sorgt dafür, dass das Board den Platz voll ausfüllt */
-        main { position: relative; overflow: hidden; background: #05080F; }
-        #tactic-board { width: 100%; height: 100%; display: block; }
+        /* Board-Container Fix */
+        #stage-container { position: relative; overflow: hidden; }
+        .board-wrapper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        #tactic-board { display: block; }
     </style>
 </head>
 <body>
 
-    <div class="main-interface">
-        <aside style="border-right: 1px solid #222; display: flex; flex-direction: column; align-items: center; padding: 20px 0;">
-            <div id="main-mic-btn" onclick="window.ToniVoice.toggle()" style="cursor:pointer; font-size: 1.5rem; margin-bottom: 40px;">
+    <div class="pro-layout-container">
+        
+        <aside class="sidebar-minimal">
+            <div class="control-unit" id="main-mic-btn" onclick="window.ToniVoice.toggle()">
                 <i class="fas fa-microphone"></i>
+                <span>VOICE</span>
             </div>
-            <div onclick="window.BriefcaseUI.toggle()" style="cursor:pointer; font-size: 1.5rem; color: var(--neon-green);">
-                <i class="fas fa-briefcase"></i>
+            <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
+                <i class="fas fa-briefcase" style="color: var(--neon-green);"></i>
+                <span>COCKPIT</span>
             </div>
         </aside>
 
-        <main>
-            <canvas id="tactic-board"></canvas>
+        <main id="stage-container">
+            <div class="board-wrapper">
+                <canvas id="tactic-board"></canvas>
+            </div>
         </main>
 
-        <aside style="border-left: 1px solid #222; background: #05080F; display: flex; flex-direction: column;">
-            <div id="live-biometrics" style="flex: 1; padding: 20px; border-bottom: 1px solid #222;">
-                <h3 style="font-family:'Orbitron'; font-size: 0.7rem; color: var(--data-cyan);">LIVE ANALYSIS</h3>
+        <aside class="analysis-panel">
+            <div id="live-biometrics" style="padding: 20px; border-bottom: 1px solid rgba(57, 255, 20, 0.1);">
+                <h3 style="font-family:'Orbitron'; font-size: 0.6rem; color: var(--data-cyan); letter-spacing: 2px;">LIVE ANALYST</h3>
             </div>
-            <div id="chat-box" style="height: 250px; overflow-y: auto; padding: 15px; font-size: 0.8rem; background: rgba(0,0,0,0.3);">
+            <div id="chat-box">
                 <div class="chat-msg system"><b>TONI:</b> System bereit, Coach.</div>
             </div>
         </aside>
@@ -58,14 +58,14 @@
 
     <div id="briefcase-overlay">
         <button id="back-to-hub" class="hidden" onclick="window.BriefcaseUI.renderMainGrid()" 
-                style="position:fixed; top:30px; left:30px; z-index:1100; background:none; border:1px solid #fff; color:#fff; padding:10px 20px; font-family:'Orbitron'; cursor:pointer;">
+                style="position:fixed; top:40px; left:40px; z-index:1100; background:none; border:1px solid var(--neon-green); color:var(--neon-green); padding:10px 25px; font-family:'Orbitron'; cursor:pointer; font-size: 0.7rem;">
             <i class="fas fa-th"></i> ZENTRALE
         </button>
 
-        <div id="briefcase-nav" style="padding: 100px 50px;"></div>
+        <div id="briefcase-nav"></div>
 
-        <div id="briefcase-content" class="hidden" style="padding: 100px 50px; height: 100vh; overflow-y: auto;">
-            <div id="active-content"></div>
+        <div id="briefcase-content" class="hidden">
+            <div id="active-content" style="padding: 60px;"></div>
         </div>
     </div>
 
@@ -86,24 +86,29 @@
     <script src="ui/briefcase-ui.js"></script>
 
     <script>
+        // Funktion zur Board-Kalibrierung
+        function calibrateBoard() {
+            const board = document.getElementById('tactic-board');
+            const wrapper = board.parentElement;
+            if (board && wrapper) {
+                board.width = wrapper.clientWidth;
+                board.height = wrapper.clientHeight;
+                if(window.Arena && typeof window.Arena.draw === 'function') window.Arena.draw();
+                console.log("📐 Board kalibriert auf:", board.width, "x", board.height);
+            }
+        }
+
         window.addEventListener('load', () => {
             console.log("--- ⚡ TONI SYSTEM INITIALISIERUNG ---");
 
-            // 1. BOARD-REPARATUR (Fix für zerstörte Optik)
-            const board = document.getElementById('tactic-board');
-            if (board) {
-                board.width = board.clientWidth;
-                board.height = board.clientHeight;
-                console.log("✅ Taktik-Board kalibriert:", board.width, "x", board.height);
-            }
+            calibrateBoard();
 
-            // 2. DIAGNOSE-SYSTEM (Check ob alles geladen ist)
+            // DIAGNOSE-SYSTEM
             const check = {
                 "Datenbank": window.Database,
                 "Arena": window.Arena,
                 "Briefcase": window.BriefcaseUI,
-                "Sektor_Kabine": window.SektorSporttasche,
-                "Sektor_Analyse": window.SektorAnalyse
+                "Kabine": window.SektorSporttasche
             };
 
             for (let name in check) {
@@ -114,12 +119,12 @@
                 }
             }
 
-            // 3. START
             if(window.Arena) window.Arena.init();
             if(window.BriefcaseUI) window.BriefcaseUI.init();
-            
-            console.log("⚽ TONI 2.0 Interface versiegelt.");
         });
+
+        // Verhindert das "Zerstören" des Boards beim Ändern der Fenstergröße
+        window.addEventListener('resize', calibrateBoard);
     </script>
 </body>
 </html>
