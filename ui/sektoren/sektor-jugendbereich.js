@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - SEKTOR JUGENDBEREICH (ACADEMY HUB)
  * Fokus: Jugend-Management, Pitch-Sync & Mission Stammplatz
- * Status: ETAPPE 5.1 - ACADEMY VERSIEGELT
+ * Status: CLEAN & SYNCED 2026
  */
 window.SektorJugendbereich = {
     currentYouth: null,
@@ -12,7 +12,7 @@ window.SektorJugendbereich = {
         const content = document.getElementById('active-content');
         if (!content) return;
 
-        // Trainer-Abfrage beim ersten Start
+        // Trainer-Abfrage (nur wenn noch Standard)
         if (this.currentCoach === "Coach Toni") {
             const coach = prompt("Welcher Trainer leitet die heutige Academy-Einheit?", this.currentCoach);
             if (coach) this.currentCoach = coach;
@@ -68,6 +68,8 @@ window.SektorJugendbereich = {
         window.currentTeamContext = team; 
         
         const detailView = document.getElementById('youth-detail-view');
+        if (!detailView) return;
+
         detailView.style.display = 'block';
         detailView.classList.add('fadeIn');
         
@@ -107,7 +109,7 @@ window.SektorJugendbereich = {
                     </button>
                     
                     <div style="background:rgba(57, 255, 20, 0.05); padding:12px; border-radius:8px; border:1px dashed var(--neon-green); margin-top:5px;">
-                        <span style="font-size:0.55rem; color:var(--neon-green); line-height:1.4;">Toni-Hinweis: Für die ${team} empfehle ich heute Fokus auf den ersten Kontakt.</span>
+                        <span style="font-size:0.55rem; color:var(--neon-green); line-height:1.4;">Toni-Hinweis: Fokus für die ${team} heute auf Spielintelligenz.</span>
                     </div>
                 </div>
             </div>
@@ -117,15 +119,17 @@ window.SektorJugendbereich = {
 
     triggerPitchSwitch(mode) {
         if (window.Arena) {
-            window.BriefcaseUI.toggle(); // Schließt Zentrale für freie Sicht
-            // Hier würde die Arena-Logik für Funino/Kleinfeld greifen
+            window.BriefcaseUI.toggle(); // Schließt Zentrale
+            // Ruft die Feld-Konfiguration in der Arena-Core auf
+            if (typeof window.Arena.setPitchMode === "function") {
+                window.Arena.setPitchMode(mode);
+            }
             if(window.ToniVoice) window.ToniVoice.speak("Arena wird auf " + mode + " konfiguriert.");
         }
     },
 
     openStickerAlbum() {
         alert("Mission Stammplatz: Sticker-Album wird für " + this.currentYouth + " generiert...");
-        // Hier folgt später die Sticker-Logik
     },
 
     openVideoCoach() {
