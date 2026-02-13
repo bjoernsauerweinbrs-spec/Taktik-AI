@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - SEKTOR SPONSORING & BUSINESS (ELITE SYNC 2026)
  * Fokus: Deal-Management, Event-Kalkulation & KI-Marketing
- * Status: ETAPPE 5.3 - KONTOR VOLLSTÄNDIG VERSIEGELT
+ * Status: CLEAN & SYNCED 2026
  */
 window.SektorSponsoring = {
     
@@ -74,7 +74,7 @@ window.SektorSponsoring = {
                                 <input type="number" id="event-people" value="150" oninput="window.SektorSponsoring.recalcEvent()" style="width:100%; background:#000; border:1px solid #333; color:#fff; padding:12px; border-radius:6px; margin-top:8px; font-family:'Orbitron'; font-size:1.1rem; text-align:center;">
                             </div>
                             <div id="event-result" style="background:#000; padding:15px; border-radius:8px; border:1px solid #222;">
-                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -92,7 +92,7 @@ window.SektorSponsoring = {
 
                     <div style="background:rgba(0,0,0,0.3); border:1px solid #222; border-radius:15px; padding:20px; flex:1;">
                         <h4 style="font-size:0.6rem; color:#666; letter-spacing:1px; margin-bottom:15px;">BUSINESS LOG</h4>
-                        <div id="business-log" style="font-size:0.55rem; color:#444; line-height:1.8;">
+                        <div id="business-log" style="font-size:0.55rem; color:#444; font-family:monospace; line-height:1.8;">
                             [SYSTEM] Sponsoring-Modul online...<br>
                             [DB] ${activeDeals.length} Verträge geladen...<br>
                             [KI] Strategie-Update verfügbar...
@@ -109,13 +109,15 @@ window.SektorSponsoring = {
     },
 
     recalcEvent() {
-        const people = parseInt(document.getElementById('event-people').value) || 0;
+        const input = document.getElementById('event-people');
+        if(!input) return;
+        const people = parseInt(input.value) || 0;
         const results = document.getElementById('event-result');
         if(!results) return;
 
-        const wurst = Math.ceil(people * 1.4); // 1.4 Würste pro Gast (Schnitt)
-        const getraenke = Math.ceil(people * 0.85); // 0.85 Liter pro Gast
-        const gewinn = people * 4.50; // Ø 4.50€ Profit pro Gast
+        const wurst = Math.ceil(people * 1.4);
+        const getraenke = Math.ceil(people * 0.85);
+        const gewinn = people * 4.50;
 
         results.innerHTML = `
             <div style="font-size:0.55rem; color:#666; margin-bottom:10px;">KALKULIERTER BEDARF:</div>
@@ -222,8 +224,12 @@ window.SektorSponsoring = {
     },
 
     saveNew() {
-        const name = document.getElementById('sp-name').value;
-        const income = document.getElementById('sp-income').value;
+        const nameInput = document.getElementById('sp-name');
+        const incomeInput = document.getElementById('sp-income');
+        if(!nameInput || !incomeInput) return;
+        
+        const name = nameInput.value;
+        const income = incomeInput.value;
         if(!name || !income) return;
 
         const newSponsor = {
@@ -238,7 +244,7 @@ window.SektorSponsoring = {
         window.Database.save();
         document.getElementById('sponsor-modal').classList.add('hidden');
         this.render();
-        if(window.ToniVoice) window.ToniVoice.speak(`Der Deal mit ${name} wurde erfolgreich verbucht.`);
+        if(window.ToniVoice) window.ToniVoice.speak(`Der Deal mit ${name} wurde versiegelt.`);
     },
 
     remove(id) {
