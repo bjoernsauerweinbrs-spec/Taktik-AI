@@ -1,7 +1,7 @@
 /**
  * TONI 2.0 - SEKTOR SKILLS & VIDEOANALYSE (MEDIA HUB)
  * Fokus: Split-Screen Vergleich, Skill-Bibliothek & Biometrie-Scan
- * Status: ETAPPE 6.1 - MEDIA HUB VERSIEGELT
+ * Status: CLEAN & SYNCED 2026
  */
 window.SektorVideo = {
     currentDrill: "Dribbling Basics",
@@ -74,13 +74,12 @@ window.SektorVideo = {
                             <option value="Zidane Turn">ZIDANE TURN</option>
                             <option value="Erster Kontakt">ERSTER KONTAKT</option>
                             <option value="Torschuss Technik">TORSCHUSS PRO</option>
-                            <option value="Umschaltspiel">UMSCHALTSPIEL</option>
                         </select>
                     </div>
 
                     <div style="flex:1; display:flex; gap:10px; background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; border:1px solid #333;">
                         <input type="text" id="video-command-input" placeholder="Toni, analysiere die Körperhaltung..." 
-                            style="flex:1; background:transparent; border:none; color:#fff; outline:none; font-size:0.75rem; font-family:'Inter';">
+                            style="flex:1; background:transparent; border:none; color:#fff; outline:none; font-size:0.75rem;">
                         <button class="send-btn" onclick="window.SektorVideo.sendLocalCommand()"><i class="fas fa-microchip"></i></button>
                     </div>
 
@@ -105,7 +104,7 @@ window.SektorVideo = {
         this.updateYouTubeReferenz(type);
         const label = document.getElementById('video-status-label');
         if (label) label.innerText = `UNIT: ${type.toUpperCase()} | TARGET: ${window.currentTeamContext?.toUpperCase() || 'SENIOREN'}`;
-        if (window.ToniVoice) window.ToniVoice.speak(`Lade Skill-Referenz für ${type}.`);
+        if (window.ToniVoice) window.ToniVoice.speak(`Lade Übung ${type}.`);
     },
 
     updateYouTubeReferenz(query) {
@@ -128,12 +127,12 @@ window.SektorVideo = {
             video.srcObject = this.stream;
             if (btn) {
                 btn.innerHTML = `<i class="fas fa-stop"></i> STOP SCAN`;
-                btn.style.background = "var(--neon-red)";
+                btn.style.background = "#ff3131";
                 btn.onclick = () => this.stopCamera();
             }
-            document.getElementById('toni-video-feedback').innerText = "BIOMETRISCHER LIVE-SCAN AKTIV";
+            document.getElementById('toni-video-feedback').innerText = "LIVE-SCAN AKTIV";
             this.runVisionLoop();
-        } catch (err) { alert("Kamera-Zugriff verweigert."); }
+        } catch (err) { alert("Kamera-Fehler."); }
     },
 
     stopCamera() {
@@ -164,40 +163,30 @@ window.SektorVideo = {
             video.srcObject = null;
             video.src = URL.createObjectURL(file);
             this.toggleUpload(false);
-            document.getElementById('toni-video-feedback').innerText = "DATEI-ANALYSE LÄUFT...";
+            document.getElementById('toni-video-feedback').innerText = "DATEI-ANALYSE...";
         }
     },
 
     runVisionLoop() {
         const canvas = document.getElementById('skeleton-canvas');
         if (!canvas || !this.stream) return;
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Simulierter Vektor-Glow (Skelett-Tracking)
-        ctx.strokeStyle = "#39FF14";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(100, 100); ctx.lineTo(100, 200); // Simulierter Rücken
-        ctx.stroke();
-
         this.animationFrame = requestAnimationFrame(() => this.runVisionLoop());
     },
 
     transferToBoard() {
         const fb = document.getElementById('toni-video-feedback');
-        fb.innerText = "SYNCHRONISIERE VEKTOREN...";
+        fb.innerText = "VEKTOR-SYNC...";
         setTimeout(() => {
-            fb.innerHTML = `<span style="color:var(--neon-green)">VEKTOR-SYNC ERFOLGREICH</span>`;
-            if (window.ToniVoice) window.ToniVoice.speak("Bewegungsdaten an Arena übertragen.");
+            fb.innerHTML = `<span style="color:var(--neon-green)">SYNC ERFOLGREICH</span>`;
+            if (window.ToniVoice) window.ToniVoice.speak("Daten übertragen.");
             setTimeout(() => { fb.innerText = "SCANNER BEREIT"; }, 2000);
-        }, 1500);
+        }, 1000);
     },
 
     sendLocalCommand() {
         const inp = document.getElementById('video-command-input');
-        if (inp.value && window.ToniVoice) {
-            window.ToniVoice.handleVoiceCommand(inp.value);
+        if (inp.value && window.handleCommand) {
+            window.handleCommand(inp.value);
             inp.value = "";
         }
     }
