@@ -2,177 +2,51 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 - ACCESS CONTROL</title>
-    
+    <title>TONI 2.0 - ELITE ACCESS</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    
-    <link rel="icon" href="data:;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==">
-
     <style>
-        body { 
-            background: #050505; 
-            color: #39FF14; 
-            font-family: 'Orbitron', sans-serif; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-            overflow: hidden; 
-        }
-        
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, rgba(57, 255, 20, 0.05) 0%, transparent 70%);
-            z-index: 1;
-        }
-
-        .login-box { 
-            border: 1px solid #39FF14; 
-            padding: 50px; 
-            background: rgba(0,0,0,0.95); 
-            text-align: center; 
-            box-shadow: 0 0 50px rgba(57, 255, 20, 0.15); 
-            border-radius: 5px; 
-            transition: 0.5s;
-            max-width: 400px;
-            width: 90%;
-            z-index: 10;
-            position: relative;
-        }
-
-        h2 { letter-spacing: 5px; margin-bottom: 30px; font-size: 1.5rem; text-shadow: 0 0 10px rgba(57, 255, 20, 0.5); }
-        
-        input { 
-            background: #000; border: 1px solid #39FF14; color: #39FF14; 
-            padding: 15px; margin-bottom: 20px; width: 100%; box-sizing: border-box;
-            text-align: center; font-size: 1.1rem; outline: none; 
-            font-family: 'Orbitron', sans-serif; border-radius: 3px;
-            box-shadow: inset 0 0 10px rgba(57, 255, 20, 0.1);
-        }
-
-        button { 
-            background: #39FF14; color: #000; border: none; padding: 15px 30px; 
-            font-weight: bold; cursor: pointer; width: 100%; letter-spacing: 2px; 
-            transition: 0.3s; font-family: 'Orbitron', sans-serif; border-radius: 3px;
-            text-transform: uppercase;
-        }
-
-        button:hover { 
-            background: #fff; 
-            box-shadow: 0 0 30px #39FF14;
-            transform: scale(1.02);
-        }
-
-        #video-intro-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000; z-index: 9999;
-            justify-content: center; align-items: center;
-        }
-        
-        #intro-video-element { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            background: #000; 
-        }
-
-        .fade-out { opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none; }
-
-        .system-status {
-            margin-top: 25px; font-size: 0.6rem; color: rgba(57, 255, 20, 0.4);
-            letter-spacing: 1px; line-height: 1.5;
-        }
+        body { background: #000; color: #39FF14; font-family: 'Orbitron', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+        .login-box { text-align: center; border: 1px solid #39FF14; padding: 50px; background: rgba(0,0,0,0.9); box-shadow: 0 0 30px rgba(57, 255, 20, 0.2); z-index: 10; }
+        input { background: #000; border: 1px solid #39FF14; color: #39FF14; padding: 15px; width: 100%; text-align: center; font-size: 1.2rem; margin-bottom: 20px; outline: none; }
+        button { background: #39FF14; color: #000; border: none; padding: 15px 40px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; }
+        #intro-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; justify-content: center; align-items: center; }
+        video { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body>
 
-    <div id="video-intro-overlay">
-        <video id="intro-video-element" playsinline webkit-playsinline preload="auto">
-            <source src="gemini_generated_video_73393587.mp4" type="video/mp4">
-            INITIALISIERE TONI 2.0 INTERFACE...
+    <div id="intro-overlay">
+        <video id="toni-video" playsinline>
+            <source src="media/intro.mp4" type="video/mp4">
         </video>
     </div>
 
     <div class="login-box" id="login-ui">
         <h2>IDENTIFICATION</h2>
         <input type="password" id="pass" placeholder="PASSWORD" autofocus>
-        <br>
-        <button onclick="check()">ENTRANCE</button>
-        <div class="system-status">
-            TONI 2.0 BIOMETRIC INTERFACE READY<br>
-            <span style="font-size: 0.5rem; opacity: 0.5;">SENSORS ONLINE | VOICE ENGINE STANDBY</span>
-        </div>
+        <button onclick="unlock()">ENTRANCE</button>
     </div>
 
     <script>
-        const video = document.getElementById('intro-video-element');
-        
-        function check() {
+        function unlock() {
             const val = document.getElementById('pass').value;
-            // Master-Passwort Check
             if(val === 'toni2026') {
-                sessionStorage.setItem('toni_auth', 'true');
+                document.getElementById('login-ui').style.display = 'none';
+                const overlay = document.getElementById('intro-overlay');
+                const video = document.getElementById('toni-video');
+                overlay.style.display = 'flex';
                 
-                // Sprach-Engine "aufwecken" (Geste für Browser-Audio-Policy)
-                if ('speechSynthesis' in window) {
-                    const wakeup = new SpeechSynthesisUtterance("");
-                    window.speechSynthesis.speak(wakeup);
-                }
-
-                startIntro();
+                video.play();
+                video.onended = () => {
+                    // TONI Begrüßung vorbereiten
+                    sessionStorage.setItem('toni_greet', 'true');
+                    window.location.href = 'app.html';
+                };
             } else {
                 alert("ACCESS DENIED");
-                document.getElementById('pass').value = '';
             }
         }
-
-        function startIntro() {
-            const loginUI = document.getElementById('login-ui');
-            const overlay = document.getElementById('video-intro-overlay');
-
-            loginUI.style.display = 'none';
-            overlay.style.display = 'flex';
-            
-            video.muted = false; 
-            video.volume = 1.0;
-            
-            video.play().then(() => {
-                console.log("TONI Intro-Sequenz läuft...");
-            }).catch(e => {
-                console.warn("Audio-Autoplay verhindert, starte stumm.");
-                video.muted = true;
-                video.play();
-            });
-
-            video.onended = function() {
-                proceedToApp();
-            };
-
-            // Safety-Fallback (12 Sek), falls Video hakt
-            setTimeout(() => {
-                if(overlay.style.display === 'flex' && !overlay.classList.contains('fade-out')) {
-                    proceedToApp();
-                }
-            }, 12000);
-        }
-
-        function proceedToApp() {
-            const overlay = document.getElementById('video-intro-overlay');
-            overlay.classList.add('fade-out');
-            setTimeout(() => {
-                window.location.href = 'app.html';
-            }, 1000);
-        }
-
-        document.getElementById('pass').addEventListener('keypress', (e) => { 
-            if (e.key === 'Enter') check(); 
-        });
     </script>
 </body>
 </html>
+
