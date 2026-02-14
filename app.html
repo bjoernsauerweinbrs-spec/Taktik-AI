@@ -2,81 +2,68 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 - ELITE COCKPIT</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TONI 2.0 - COCKPIT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root { --neon-green: #39FF14; --panel-bg: #0D1421; --data-cyan: #00D1FF; }
-        body { background: #05080F; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
-        
-        /* Das 3-Spalten Layout */
-        .cockpit-container { display: grid; grid-template-columns: 90px 1fr 380px; height: 100vh; width: 100vw; }
-        
-        /* Spalte 1: Briefcase & Navigation */
-        .sidebar { background: #020408; border-right: 1px solid rgba(57,255,20,0.1); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 30px; }
-        .nav-icon { color: var(--neon-green); font-size: 1.8rem; cursor: pointer; transition: 0.3s; }
-        .ai-status { width: 12px; height: 12px; border-radius: 50%; background: #555; box-shadow: 0 0 10px #000; }
-        .ai-online { background: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); }
-
-        /* Spalte 2: Die Master Arena */
-        .arena-center { background: radial-gradient(circle, #0a150a 0%, #000 100%); position: relative; display: flex; align-items: center; justify-content: center; }
-        #tactic-board { width: 100%; height: 100%; }
-
-        /* Spalte 3: AI Communication */
-        .comm-panel { background: var(--panel-bg); border-left: 1px solid rgba(57,255,20,0.1); display: flex; flex-direction: column; }
-        .chat-display { flex: 1; padding: 20px; overflow-y: auto; font-size: 0.9rem; line-height: 1.6; }
-        .voice-control { height: 100px; background: #080C14; border-top: 1px solid rgba(57,255,20,0.2); display: flex; align-items: center; justify-content: center; }
-        .mic-btn { font-size: 2rem; color: #555; cursor: pointer; transition: 0.3s; }
-        .mic-active { color: var(--neon-green); filter: drop-shadow(0 0 10px var(--neon-green)); }
-        
-        /* Overlay Aktentasche */
-        #briefcase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: none; backdrop-filter: blur(20px); }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="cockpit-container">
-        <aside class="sidebar">
-            <div class="ai-status" id="status-dot"></div>
-            <i class="fas fa-briefcase nav-icon" onclick="toggleBriefcase()"></i>
-            <i class="fas fa-cog nav-icon" style="color: #444; margin-top: auto;"></i>
+    <div class="pro-cockpit">
+        <aside class="sidebar-nav">
+            <div id="status-dot" class="ai-status-dot"></div>
+            <div class="nav-item" onclick="toggleBriefcase()"><i class="fas fa-briefcase"></i></div>
+            <div class="nav-item"><i class="fas fa-users"></i></div>
+            <div class="nav-item" style="margin-top:auto; margin-bottom:30px;"><i class="fas fa-cog"></i></div>
         </aside>
 
-        <main class="arena-center">
+        <main class="arena-main" id="arena-container">
             <canvas id="tactic-board"></canvas>
         </main>
 
         <aside class="comm-panel">
-            <div style="padding: 20px; border-bottom: 1px solid #222;">
-                <h3 style="font-family:'Orbitron'; font-size: 0.7rem; color: var(--data-cyan);">TONI 2.0 LIVE FEED</h3>
+            <div style="padding: 20px; border-bottom: 1px solid rgba(57,255,20,0.1);">
+                <h4 style="font-family:'Orbitron'; color: var(--data-cyan); font-size: 0.7rem; letter-spacing: 2px;">TONI 2.0 INTELLIGENCE</h4>
             </div>
-            <div id="chat-box" class="chat-display"></div>
-            <div class="voice-control">
-                <i class="fas fa-microphone mic-btn" id="main-mic" onclick="toggleMic()"></i>
+            <div id="chat-box" class="chat-window"></div>
+            <div class="mic-section">
+                <i class="fas fa-microphone mic-trigger" id="main-mic" onclick="window.ToniBrain.toggleMic()"></i>
             </div>
         </aside>
     </div>
 
-    <div id="briefcase-overlay"></div>
+    <div id="briefcase-overlay">
+        </div>
 
     <script src="engine/toni-brain.js"></script>
     <script src="engine/pitch-engine.js"></script>
-    
+
     <script>
-        window.addEventListener('load', () => {
-            // Board Skalierung
+        function calibrate() {
             const board = document.getElementById('tactic-board');
-            board.width = board.clientWidth;
-            board.height = board.clientHeight;
-            
-            // TONI Begrüßung auslösen
-            if(sessionStorage.getItem('toni_greet')) {
-                setTimeout(() => {
-                    if(window.ToniBrain) window.ToniBrain.firstGreeting();
-                    sessionStorage.removeItem('toni_greet');
-                }, 1000);
+            const container = document.getElementById('arena-container');
+            if(board && container) {
+                board.width = container.clientWidth;
+                board.height = container.clientHeight;
+                if(window.PitchEngine) window.PitchEngine.draw();
             }
+        }
+
+        window.addEventListener('load', () => {
+            if(!sessionStorage.getItem('toni_auth')) window.location.href = 'index.html';
+            
+            calibrate();
+            if(window.PitchEngine) window.PitchEngine.init();
+            if(window.ToniBrain) window.ToniBrain.firstGreeting();
         });
+
+        window.addEventListener('resize', calibrate);
+
+        function toggleBriefcase() {
+            const ov = document.getElementById('briefcase-overlay');
+            ov.style.display = ov.style.display === 'block' ? 'none' : 'block';
+        }
     </script>
 </body>
 </html>
