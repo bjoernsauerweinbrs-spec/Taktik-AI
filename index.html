@@ -2,51 +2,46 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 - ELITE ACCESS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TONI 2.0 - LOGIN</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #000; color: #39FF14; font-family: 'Orbitron', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        .login-box { text-align: center; border: 1px solid #39FF14; padding: 50px; background: rgba(0,0,0,0.9); box-shadow: 0 0 30px rgba(57, 255, 20, 0.2); z-index: 10; }
-        input { background: #000; border: 1px solid #39FF14; color: #39FF14; padding: 15px; width: 100%; text-align: center; font-size: 1.2rem; margin-bottom: 20px; outline: none; }
-        button { background: #39FF14; color: #000; border: none; padding: 15px 40px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; }
-        #intro-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; justify-content: center; align-items: center; }
+        :root { --neon-green: #39FF14; }
+        body { background: #000; color: var(--neon-green); font-family: 'Orbitron', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .login-container { text-align: center; border: 1px solid var(--neon-green); padding: 40px; background: rgba(0,0,0,0.9); box-shadow: 0 0 30px rgba(57, 255, 20, 0.2); z-index: 10; width: 350px; }
+        input { background: #000; border: 1px solid var(--neon-green); color: var(--neon-green); padding: 15px; width: 100%; box-sizing: border-box; text-align: center; font-size: 1.2rem; margin-bottom: 20px; outline: none; }
+        button { background: var(--neon-green); color: #000; border: none; padding: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; transition: 0.3s; }
+        button:hover { background: #fff; box-shadow: 0 0 20px var(--neon-green); }
+        #video-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; }
         video { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body>
-
-    <div id="intro-overlay">
-        <video id="toni-video" playsinline>
+    <div id="video-overlay">
+        <video id="intro-video" playsinline>
             <source src="media/intro.mp4" type="video/mp4">
         </video>
     </div>
-
-    <div class="login-box" id="login-ui">
-        <h2>IDENTIFICATION</h2>
-        <input type="password" id="pass" placeholder="PASSWORD" autofocus>
-        <button onclick="unlock()">ENTRANCE</button>
+    <div class="login-container" id="login-box">
+        <h2 style="margin-top:0;">ACCESS CONTROL</h2>
+        <input type="password" id="pass" placeholder="PASSWORD" autofocus onkeydown="if(event.key==='Enter') unlock()">
+        <button onclick="unlock()">ENTER COCKPIT</button>
     </div>
-
     <script>
         function unlock() {
-            const val = document.getElementById('pass').value;
-            if(val === 'toni2026') {
-                document.getElementById('login-ui').style.display = 'none';
-                const overlay = document.getElementById('intro-overlay');
-                const video = document.getElementById('toni-video');
-                overlay.style.display = 'flex';
-                
-                video.play();
+            const pass = document.getElementById('pass').value;
+            if(pass === 'toni2026') {
+                document.getElementById('login-box').style.display = 'none';
+                const overlay = document.getElementById('video-overlay');
+                const video = document.getElementById('intro-video');
+                overlay.style.display = 'block';
+                video.play().catch(e => console.log("Autoplay blocked"));
                 video.onended = () => {
-                    // TONI Begrüßung vorbereiten
-                    sessionStorage.setItem('toni_greet', 'true');
+                    sessionStorage.setItem('toni_auth', 'true');
                     window.location.href = 'app.html';
                 };
-            } else {
-                alert("ACCESS DENIED");
-            }
+            } else { alert("ACCESS DENIED"); }
         }
     </script>
 </body>
 </html>
-
