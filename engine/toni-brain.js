@@ -1,24 +1,17 @@
-window.ToniBrain = {
-    isListening: false,
-    synth: window.speechSynthesis,
+// Ergänzung in window.ToniBrain
+window.ToniBrain.handleCommand = function(command) {
+    const cmd = command.toLowerCase();
     
-    speak(text) {
-        const ut = new SpeechSynthesisUtterance(text);
-        ut.lang = 'de-DE';
-        ut.pitch = 0.9;
-        ut.rate = 1.0;
-        this.synth.speak(ut);
-        
-        // Text in den Chat schreiben
-        const chat = document.getElementById('chat-box');
-        const msg = document.createElement('div');
-        msg.innerHTML = `<b style="color:#39FF14">TONI:</b> ${text}`;
-        chat.appendChild(msg);
-        chat.scrollTop = chat.scrollHeight;
-    },
-
-    firstGreeting() {
-        this.speak("Hallo, ich bin TONI 2.0, dein persönlicher Co-Trainer. Mit wem habe ich das Vergnügen?");
-        document.getElementById('status-dot').classList.add('ai-online');
+    if (cmd.includes("funino") || cmd.includes("g-jugend")) {
+        window.PitchEngine.setMode('funino');
+        this.speak("Stelle den Platz auf Funino um. Vier Minitore sind bereit.");
+    } 
+    else if (cmd.includes("kleinfeld") || cmd.includes("jugend")) {
+        window.PitchEngine.setMode('kleinfeld');
+        this.speak("Wechsle auf Kleinfeld für das Jugendtraining.");
+    }
+    else if (cmd.includes("großfeld") || cmd.includes("senioren")) {
+        window.PitchEngine.setMode('grossfeld');
+        this.speak("Großfeld aktiviert. Volle Distanz für die Senioren.");
     }
 };
