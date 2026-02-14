@@ -2,119 +2,81 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TONI 2.0 - ELITE COCKPIT</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css"> 
-    
     <style>
-        #briefcase-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.96); z-index: 1000;
-            display: none; backdrop-filter: blur(20px);
-        }
-        .hidden { display: none !important; }
-        #stage-container { position: relative; overflow: hidden; flex: 1; background: #000; }
-        .board-wrapper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        #tactic-board { display: block; border: 1px solid rgba(57, 255, 20, 0.1); }
+        :root { --neon-green: #39FF14; --panel-bg: #0D1421; --data-cyan: #00D1FF; }
+        body { background: #05080F; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
+        
+        /* Das 3-Spalten Layout */
+        .cockpit-container { display: grid; grid-template-columns: 90px 1fr 380px; height: 100vh; width: 100vw; }
+        
+        /* Spalte 1: Briefcase & Navigation */
+        .sidebar { background: #020408; border-right: 1px solid rgba(57,255,20,0.1); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 30px; }
+        .nav-icon { color: var(--neon-green); font-size: 1.8rem; cursor: pointer; transition: 0.3s; }
+        .ai-status { width: 12px; height: 12px; border-radius: 50%; background: #555; box-shadow: 0 0 10px #000; }
+        .ai-online { background: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); }
+
+        /* Spalte 2: Die Master Arena */
+        .arena-center { background: radial-gradient(circle, #0a150a 0%, #000 100%); position: relative; display: flex; align-items: center; justify-content: center; }
+        #tactic-board { width: 100%; height: 100%; }
+
+        /* Spalte 3: AI Communication */
+        .comm-panel { background: var(--panel-bg); border-left: 1px solid rgba(57,255,20,0.1); display: flex; flex-direction: column; }
+        .chat-display { flex: 1; padding: 20px; overflow-y: auto; font-size: 0.9rem; line-height: 1.6; }
+        .voice-control { height: 100px; background: #080C14; border-top: 1px solid rgba(57,255,20,0.2); display: flex; align-items: center; justify-content: center; }
+        .mic-btn { font-size: 2rem; color: #555; cursor: pointer; transition: 0.3s; }
+        .mic-active { color: var(--neon-green); filter: drop-shadow(0 0 10px var(--neon-green)); }
+        
+        /* Overlay Aktentasche */
+        #briefcase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: none; backdrop-filter: blur(20px); }
     </style>
 </head>
 <body>
 
-    <div class="pro-layout-container">
-        <aside class="sidebar-minimal">
-            <div class="control-unit" id="main-mic-btn" onclick="window.ToniVoice.toggle()">
-                <i class="fas fa-microphone"></i>
-                <span>VOICE</span>
-            </div>
-            <div class="control-unit" onclick="window.BriefcaseUI.toggle()">
-                <i class="fas fa-briefcase" style="color: var(--neon-green);"></i>
-                <span>COCKPIT</span>
-            </div>
+    <div class="cockpit-container">
+        <aside class="sidebar">
+            <div class="ai-status" id="status-dot"></div>
+            <i class="fas fa-briefcase nav-icon" onclick="toggleBriefcase()"></i>
+            <i class="fas fa-cog nav-icon" style="color: #444; margin-top: auto;"></i>
         </aside>
 
-        <main id="stage-container">
-            <div class="board-wrapper">
-                <canvas id="tactic-board"></canvas>
-            </div>
+        <main class="arena-center">
+            <canvas id="tactic-board"></canvas>
         </main>
 
-        <aside class="analysis-panel">
-            <div id="live-biometrics" style="padding: 20px; border-bottom: 1px solid rgba(57, 255, 20, 0.1);">
-                <h3 style="font-family:'Orbitron'; font-size: 0.6rem; color: var(--data-cyan); letter-spacing: 2px;">LIVE ANALYST</h3>
+        <aside class="comm-panel">
+            <div style="padding: 20px; border-bottom: 1px solid #222;">
+                <h3 style="font-family:'Orbitron'; font-size: 0.7rem; color: var(--data-cyan);">TONI 2.0 LIVE FEED</h3>
             </div>
-            <div id="chat-box" style="flex:1; overflow-y:auto; padding:15px; font-size:0.8rem;">
-                <div class="chat-msg system"><b>TONI:</b> System stabilisiert. Warte auf Befehl.</div>
+            <div id="chat-box" class="chat-display"></div>
+            <div class="voice-control">
+                <i class="fas fa-microphone mic-btn" id="main-mic" onclick="toggleMic()"></i>
             </div>
         </aside>
     </div>
 
-    <div id="briefcase-overlay">
-        <button id="back-to-hub" class="hidden" onclick="window.BriefcaseUI.renderMainGrid()" 
-                style="position:fixed; top:40px; left:40px; z-index:1100; background:none; border:1px solid var(--neon-green); color:var(--neon-green); padding:10px 25px; font-family:'Orbitron'; cursor:pointer; font-size: 0.7rem;">
-            <i class="fas fa-th"></i> ZENTRALE
-        </button>
-        <div id="briefcase-nav"></div>
-        <div id="briefcase-content" class="hidden">
-            <div id="active-content" style="padding: 60px;"></div>
-        </div>
-    </div>
+    <div id="briefcase-overlay"></div>
 
-    <script src="engine/database-core.js"></script>
-    <script src="engine/voice-core.js"></script>
-    <script src="engine/bridge.js"></script>
-    <script src="engine/arena-core.js"></script>
-    <script src="engine/mobile-tactics.js"></script>
-
-    <script src="ui/sektoren/sektor-sporttasche.js"></script>
-    <script src="ui/sektoren/sektor-analyse.js"></script>
-    <script src="ui/sektoren/sektor-junioren.js"></script>
-    <script src="ui/sektoren/sektor-stadionzeitung.js"></script>
-    <script src="ui/sektoren/sektor-sponsoring.js"></script>
-    <script src="ui/sektoren/sektor-videoanalyse.js"></script>
-    <script src="ui/sektoren/sektor-settings.js"></script>
-
-    <script src="ui/briefcase-ui.js"></script>
-
+    <script src="engine/toni-brain.js"></script>
+    <script src="engine/pitch-engine.js"></script>
+    
     <script>
-        function calibrate() {
-            const board = document.getElementById('tactic-board');
-            const wrapper = board.parentElement;
-            if (board && wrapper) {
-                board.width = wrapper.clientWidth;
-                board.height = wrapper.clientHeight;
-                if(window.Arena && window.Arena.draw) window.Arena.draw();
-            }
-        }
-
         window.addEventListener('load', () => {
-            calibrate();
+            // Board Skalierung
+            const board = document.getElementById('tactic-board');
+            board.width = board.clientWidth;
+            board.height = board.clientHeight;
             
-            // SYSTEM-DIAGNOSE STARTEN
-            console.log("--- 🔎 TONI 2.0 DIAGNOSE ---");
-            const components = {
-                "Datenbank": window.Database,
-                "Arena-Kern": window.Arena,
-                "UI-Zentrale": window.BriefcaseUI,
-                "Kabine": window.SektorSporttasche,
-                "Analyse": window.SektorAnalyse
-            };
-
-            for (let name in components) {
-                if (components[name]) {
-                    console.log(`✅ ${name}: Bereit`);
-                } else {
-                    console.error(`🚨 ${name}: FEHLT ODER ABGESTÜRZT! Prüfe die Datei auf 'export'-Wörter.`);
-                }
+            // TONI Begrüßung auslösen
+            if(sessionStorage.getItem('toni_greet')) {
+                setTimeout(() => {
+                    if(window.ToniBrain) window.ToniBrain.firstGreeting();
+                    sessionStorage.removeItem('toni_greet');
+                }, 1000);
             }
-
-            if(window.Arena) window.Arena.init();
-            if(window.BriefcaseUI) window.BriefcaseUI.init();
         });
-
-        window.addEventListener('resize', calibrate);
     </script>
 </body>
 </html>
