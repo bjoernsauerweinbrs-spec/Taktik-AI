@@ -1,60 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;700&display=swap');
+/* Erweitere oder ersetze deine style.css mit diesen Sticker-Styles */
 
-:root {
-    --bg-deep: #020408; --neon-green: #39FF14; --data-cyan: #00D1FF;
-    --toty-gold: linear-gradient(135deg, #d4af37 0%, #f9f06b 50%, #b8860b 100%);
-    --font-header: 'Orbitron', sans-serif;
+.sticker-slot {
+    width: 160px; height: 210px;
+    border: 2px dashed rgba(255,255,255,0.1);
+    position: relative; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; background: rgba(0,0,0,0.2);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg-deep); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
-
-/* 3-Spalten Cockpit */
-.pro-cockpit { display: grid; grid-template-columns: 100px 1fr 400px; height: 100vh; }
-
-.sidebar-nav { background: #000; border-right: 1px solid #111; display: flex; flex-direction: column; align-items: center; padding: 30px 0; gap: 30px; }
-.nav-item { cursor: pointer; color: #444; text-align: center; transition: 0.3s; }
-.nav-item:hover, .nav-item.active { color: var(--neon-green); transform: scale(1.1); }
-.nav-item i { font-size: 1.8rem; display: block; }
-.nav-item span { font-size: 0.5rem; font-family: var(--font-header); font-weight: bold; }
-
-.ai-status-dot { width: 12px; height: 12px; border-radius: 50%; background: #111; border: 2px solid #000; margin-bottom: 20px; transition: 0.5s; }
-.status-online { background: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); }
-
-.arena-main { background: radial-gradient(circle, #0a150a 0%, #000 100%); position: relative; }
-.comm-panel { background: rgba(13, 20, 33, 0.8); backdrop-filter: blur(20px); border-left: 1px solid #111; display: flex; flex-direction: column; }
-.chat-window { flex: 1; padding: 30px; overflow-y: auto; font-size: 0.85rem; }
-
-/* FIFA CARD TOTY */
-.fifa-card {
-    width: 220px; height: 320px; position: relative; background: #000;
-    clip-path: polygon(0% 12%, 50% 0%, 100% 12%, 100% 88%, 50% 100%, 0% 88%);
-    border: 1px solid var(--data-cyan); transition: 0.4s; box-shadow: 0 0 20px rgba(0,209,255,0.2);
-}
-.fifa-card:hover { transform: translateY(-10px); border-color: #fff; box-shadow: 0 20px 40px rgba(0,209,255,0.4); }
-
-.card-img { 
-    width: 100%; height: 60%; background-size: cover; background-position: top center; 
-    position: relative; border-bottom: 1px solid rgba(255,255,255,0.1); 
+.sticker-active {
+    background: #fff; border: 5px solid #fff; border-bottom: 25px solid #fff;
+    transform: rotate(-2deg); box-shadow: 10px 10px 30px rgba(0,0,0,0.5);
 }
 
-/* DRAG & DROP OVERLAY */
-.drop-active { filter: brightness(1.5) contrast(1.2); border: 2px solid var(--neon-green) !important; }
-.card-img::after { 
-    content: 'DRAG PHOTO'; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(57, 255, 20, 0.2); display: flex; align-items: center; justify-content: center;
-    font-size: 0.6rem; font-family: var(--font-header); opacity: 0; transition: 0.3s;
+.sticker-img-container {
+    width: 100%; height: 100%;
+    background-size: cover; background-position: center;
+    display: flex; align-items: center; justify-content: center;
 }
-.card-img:hover::after { opacity: 1; }
 
-/* PANINI STICKER */
-.sticker-slot { width: 160px; height: 220px; background: rgba(255,255,255,0.05); border: 2px dashed #333; transition: 0.3s; }
-.sticker-active { background: #fff; border: 6px solid #fff; border-bottom: 25px solid #fff; transform: rotate(-2deg); box-shadow: 5px 5px 15px #000; }
+.sticker-empty .sticker-img-container { opacity: 0.2; filter: grayscale(1); }
 
-/* LABOR BARS */
-.bio-bar-bg { height: 10px; background: #000; border-radius: 5px; margin-top: 10px; overflow: hidden; border: 1px solid #222; }
-.bio-bar-fill { height: 100%; background: linear-gradient(90deg, var(--data-cyan), var(--neon-green)); width: 0%; transition: width 1.5s ease; }
+.sticker-plus { font-size: 2rem; color: var(--data-cyan); }
 
-/* OVERLAY */
-#briefcase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(25px); overflow-y: auto; }
-.mgmt-grid { display: flex; flex-wrap: wrap; gap: 30px; padding: 50px; justify-content: center; }
+.sticker-label {
+    position: absolute; bottom: -22px; width: 100%;
+    display: flex; flex-direction: column; text-align: center;
+    font-family: 'Orbitron'; pointer-events: none;
+}
+
+.sticker-active .st-name { color: #000; font-size: 0.6rem; font-weight: 900; }
+.sticker-active .st-team { color: #555; font-size: 0.4rem; font-weight: bold; }
+
+.sticker-empty .st-name { color: #444; font-size: 0.6rem; }
+.sticker-empty .st-team { display: none; }
+
+/* Drag Hover Effekt */
+.sticker-slot:hover { border-color: var(--data-cyan); background: rgba(0,209,255,0.05); }
