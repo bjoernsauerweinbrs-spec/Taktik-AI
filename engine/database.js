@@ -1,50 +1,57 @@
+/**
+ * TONI 2.0 - UNIVERSAL DATABASE (ELITE VERSION)
+ * Alles ist so voreingestellt, dass du nur noch Bilder in die Ordner ziehen musst.
+ */
+
 window.ToniDatabase = {
-    // --- KADER ---
+    // --- SENIOREN KADER (FIFA TOTY LOOK) ---
+    // Benenne deine Bilder einfach p1.png, p2.png im Ordner assets/img/players/
     players: [
-        { id: 1, name: "Musterprofi", pos: "ST", rating: 94, pace: 99, sho: 92, pas: 88, dri: 91, def: 45, phy: 84, type: 'toty', photo: 'https://via.placeholder.com/200x250/000/00d1ff?text=PRO' }
+        { id: 1, name: "DEIN STÜRMER", pos: "ST", rating: 94, pace: 99, sho: 92, pas: 88, dri: 91, def: 45, phy: 84, type: 'toty', photo: 'assets/img/players/p1.png' },
+        { id: 2, name: "DEIN KAPITÄN", pos: "ZM", rating: 91, pace: 82, sho: 85, pas: 94, dri: 88, def: 75, phy: 80, type: 'toty', photo: 'assets/img/players/p2.png' }
+    ],
+
+    // --- JUNIOREN AKADEMIE (PANINI LOOK) ---
+    // Benenne deine Bilder einfach j1.png, j2.png im Ordner assets/img/juniors/
+    juniors: [
+        { id: 101, name: "NINO", team: "G-JUGEND", collected: true, photo: 'assets/img/juniors/j1.png' },
+        { id: 102, name: "LUKAS", team: "F-JUGEND", collected: false, photo: 'assets/img/juniors/j2.png' },
+        { id: 103, name: "TONI JR.", team: "E-JUGEND", collected: true, photo: 'assets/img/juniors/j3.png' }
+    ],
+
+    // --- MANAGER BEREICH (SPONSOREN) ---
+    // Benenne die Logos s1.png, s2.png im Ordner assets/img/sponsors/
+    sponsors: [
+        { id: 1, name: "HAUPTSPONSOR", level: "GOLD", logo: "assets/img/sponsors/s1.png" },
+        { id: 2, name: "LOKALER PARTNER", level: "SILBER", logo: "assets/img/sponsors/s2.png" }
     ],
 
     // --- BIOMETRIE ---
     biometrics: {
         weight: { val: 78.5, unit: 'kg', max: 100, label: "GEWICHT" },
-        kfa: { val: 11.2, unit: '%', max: 25, label: "KÖRPERFETT (KFA)" },
-        rhr: { val: 48, unit: 'bpm', max: 80, label: "RUHEPULS (RHR)", reverse: true },
+        kfa: { val: 11.2, unit: '%', max: 25, label: "KÖRPERFETT" },
+        rhr: { val: 48, unit: 'bpm', max: 80, label: "RUHEPULS", reverse: true },
         vo2: { val: 62, unit: 'ml/kg', max: 75, label: "VO2 MAX" }
     },
 
     // --- STADIONZEITUNG ---
     newspaper: {
-        title: "STADION-KURIER ELITE",
-        issue: "Ausgabe #24 - Saison 2026",
-        greeting: "Willkommen im Stadion, Coach! Heute zählt nur der Sieg. TONI hat die Taktik bereits geschärft.",
-        sponsor1: "Global Energy Corp",
-        sponsor2: "Elite Sports Gear",
-        mainMatch: "E-Jugend vs. Spitzenreiter"
+        title: "STADION-KURIER",
+        issue: "AUSGABE #01",
+        greeting: "Willkommen Coach! Das neue High-Level System ist bereit für den Einsatz.",
+        sponsor1: "DEIN SPONSOR 1",
+        sponsor2: "DEIN SPONSOR 2",
+        mainMatch: "NÄCHSTES SPIEL: HEIMSIEG"
     },
 
-    // --- JUNIOREN (PANINI) ---
-    juniors: [
-        { id: 101, name: "Nino", team: "G-Jugend", collected: true, photo: 'https://via.placeholder.com/150x200?text=NINO' },
-        { id: 102, name: "Lukas", team: "F-Jugend", collected: false, photo: 'https://via.placeholder.com/150x200?text=LUKAS' }
-    ],
-
-    // --- MANAGER BEREICH (SPONSORS & EVENTS) ---
-    sponsors: [
-        { id: 1, name: "Premium Bank", level: "GOLD", logo: "https://via.placeholder.com/100x50?text=BANK" },
-        { id: 2, name: "Local Pizza", level: "BRONZE", logo: "https://via.placeholder.com/100x50?text=PIZZA" }
-    ],
+    // --- MANAGER FUNKTIONEN ---
     events: [
-        { id: 1, title: "Sommerfest 2026", date: "15.07.2026", type: "SOCIAL" },
-        { id: 2, title: "Trainingslager", date: "01.08.2026", type: "PRO" }
+        { id: 1, title: "SAISONERÖFFNUNG", date: "01.03.2026", type: "EVENT" }
     ],
 
-    // --- UPDATE LOGIK ---
     updatePlayer(id, key, value) { const p = this.players.find(x => x.id == id); if(p) p[key] = value; },
     updateBiometric(key, value) { if(this.biometrics[key]) this.biometrics[key].val = parseFloat(value); },
     updateNews(key, value) { if(this.newspaper.hasOwnProperty(key)) this.newspaper[key] = value; },
     toggleSticker(id) { const j = this.juniors.find(x => x.id == id); if(j) j.collected = !j.collected; },
-    
-    addEvent(title, date) {
-        this.events.push({ id: Date.now(), title, date, type: "NEU" });
-    }
+    addEvent(title, date) { this.events.push({ id: Date.now(), title, date, type: "NEU" }); }
 };
