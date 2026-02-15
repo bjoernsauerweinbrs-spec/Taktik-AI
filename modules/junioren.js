@@ -1,39 +1,58 @@
 window.SektorJunioren = {
     render() {
         const grid = document.getElementById('briefcase-grid');
-        grid.innerHTML = ""; // Clear
-        grid.style.display = "block";
-
-        const albumTitle = document.createElement('h1');
-        albumTitle.innerHTML = "MISSION STAMMPLATZ - STICKERALBUM";
-        albumTitle.style.textAlign = "center";
-        albumTitle.style.fontFamily = "Orbitron";
-        albumTitle.style.color = "var(--neon-green)";
-        albumTitle.style.marginBottom = "20px";
-        grid.appendChild(albumTitle);
-
-        const albumContainer = document.createElement('div');
-        albumContainer.className = 'album-page';
+        grid.innerHTML = "";
+        grid.className = 'mgmt-grid';
+        grid.style.background = "rgba(255,255,255,0.02)";
 
         window.ToniDatabase.juniors.forEach(j => {
             const slot = document.createElement('div');
+            // Wenn gesammelt: White-Sticker-Look, sonst grauer Slot
             slot.className = j.collected ? 'sticker-slot sticker-active' : 'sticker-slot sticker-empty';
-            slot.onclick = () => {
-                window.ToniDatabase.toggleSticker(j.id);
-                this.render();
-                if(j.collected) window.ToniBrain.speak(`${j.name} hat seinen Platz im Album sicher!`);
-            };
-
+            slot.id = `drop-junior-${j.id}`;
+            
             slot.innerHTML = `
-                <div class="sticker-img" style="background-image: url('${j.photo}')"></div>
-                ${j.collected ? `<div class="sticker-name">${j.name.toUpperCase()}</div>` : `<i class="fas fa-plus" style="color:#222"></i>`}
-                <div style="position:absolute; top:-10px; right:-10px; background:var(--data-cyan); color:#000; font-size:0.5rem; padding:2px 5px; font-family:'Orbitron';">
-                    ${j.team}
+                <div class="sticker-img-container" style="background-image: url('${j.photo}')">
+                    ${!j.collected ? '<div class="sticker-plus"><i class="fas fa-plus"></i></div>' : ''}
+                </div>
+                <div class="sticker-label">
+                    <span class="st-name">${j.name}</span>
+                    <span class="st-team">${j.team}</span>
                 </div>
             `;
-            albumContainer.appendChild(slot);
+            
+            grid.appendChild(slot);
+            this.initDrop(j.id);
+        });
+    },
+
+    initDrop(id) {
+        const el = document.getElementById(`drop-junior-${id}`);
+        
+        el.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            el.style.borderColor = "var(--neon-green)";
+            el.style.transform = "scale(1.05)";
         });
 
-        grid.appendChild(albumContainer);
+        el.addEventListener('dragleave', () => {
+            el.style.borderColor = "";
+            el.style.transform = "";
+        });
+
+        el.addEventListener('drop', (e) => {
+            e.preventDefault();
+            el.style.transform = "";
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    window.ToniDatabase.updatePhoto('junior', id, ev.target.result);
+                    this.render(); // Sofort-Update des Albums
+                    window.ToniBrain.speak(`Super! Der Sticker von ${window.ToniDatabase.juniors.find(x=>x.id==id).name} ist eingeklebt.`);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     }
 };
