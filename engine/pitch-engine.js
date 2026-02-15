@@ -10,7 +10,7 @@ window.PitchEngine = {
     draw() {
         // SCHUTZ-CHECK: Wenn kein Canvas da ist, brich ab
         if (!this.canvas || !this.ctx) return;
-
+ 
         const w = this.canvas.width;
         const h = this.canvas.height;
         const ctx = this.ctx;
