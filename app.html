@@ -15,7 +15,8 @@
             <div id="status-dot" class="ai-status-dot"></div>
             <div class="nav-item" onclick="toggleBriefcase()"><i class="fas fa-briefcase"></i><span>ZENTRALE</span></div>
             <div class="nav-item" onclick="openKabine()"><i class="fas fa-users"></i><span>KABINE</span></div>
-            <div class="nav-item" onclick="openLabor()"><i class="fas fa-heartbeat" style="color: var(--data-cyan);"></i><span>LABOR</span></div>
+            <div class="nav-item" onclick="openLabor()"><i class="fas fa-heartbeat"></i><span>LABOR</span></div>
+            <div class="nav-item" onclick="openZeitung()"><i class="fas fa-newspaper" style="color: #fff;"></i><span>KURIER</span></div>
             <div class="nav-item" style="margin-top:auto; margin-bottom:30px;"><i class="fas fa-cog"></i><span>SETUP</span></div>
         </aside>
 
@@ -47,6 +48,7 @@
     <script src="engine/pitch-engine.js"></script>
     <script src="modules/kabine.js"></script>
     <script src="modules/labor.js"></script>
+    <script src="modules/zeitung.js"></script>
 
     <script>
         if(!sessionStorage.getItem('toni_auth')) window.location.href = 'index.html';
@@ -55,18 +57,12 @@
             const board = document.getElementById('tactic-board');
             const container = document.getElementById('arena-container');
             if(board && container) {
-                board.width = container.clientWidth;
-                board.height = container.clientHeight;
-                if(window.PitchEngine && window.PitchEngine.draw) window.PitchEngine.draw();
+                board.width = container.clientWidth; board.height = container.clientHeight;
+                if(window.PitchEngine) window.PitchEngine.draw();
             }
         }
 
-        window.addEventListener('load', () => {
-            calibrate();
-            window.PitchEngine.init();
-            window.ToniBrain.firstGreeting();
-        });
-
+        window.addEventListener('load', () => { calibrate(); window.PitchEngine.init(); window.ToniBrain.firstGreeting(); });
         window.addEventListener('resize', calibrate);
 
         function toggleBriefcase() {
@@ -75,17 +71,20 @@
         }
 
         function openKabine() {
-            document.getElementById('briefcase-grid').className = 'mgmt-grid'; // Grid Layout für Karten
-            toggleBriefcase();
-            window.SektorKabine.render();
-            window.ToniBrain.speak("Mannschaftskabine geöffnet.");
+            document.getElementById('briefcase-grid').className = 'mgmt-grid';
+            toggleBriefcase(); window.SektorKabine.render();
         }
 
         function openLabor() {
-            document.getElementById('briefcase-grid').className = ''; // Kein Grid Layout für Labor
+            document.getElementById('briefcase-grid').className = '';
+            toggleBriefcase(); window.SektorLabor.render();
+        }
+
+        function openZeitung() {
+            document.getElementById('briefcase-grid').className = '';
             toggleBriefcase();
-            window.SektorLabor.render();
-            window.ToniBrain.speak("Elite Labor für Biometrie-Daten geöffnet.");
+            window.SektorZeitung.render();
+            window.ToniBrain.speak("Stadionkurier geöffnet. Du kannst die Texte jetzt bearbeiten.");
         }
     </script>
 </body>
