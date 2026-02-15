@@ -1,9 +1,10 @@
-/* --- TONI 2.0 LUXUS DESIGN --- */
+/* --- TONI 2.0 MASTER CSS --- */
 :root {
     --bg-deep: #05080F;
     --panel-dark: #0D1421;
     --neon-green: #39FF14;
     --data-cyan: #00D1FF;
+    --accent-gold: #D4AF37;
     --text-main: #FFFFFF;
     --font-header: 'Orbitron', sans-serif;
     --font-body: 'Inter', sans-serif;
@@ -12,7 +13,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body, html { width: 100%; height: 100%; background: var(--bg-deep); color: var(--text-main); overflow: hidden; font-family: var(--font-body); }
 
-/* Das 3-Spalten Cockpit */
+/* Grid System */
 .pro-cockpit {
     display: grid;
     grid-template-columns: 90px 1fr 380px;
@@ -20,48 +21,55 @@ body, html { width: 100%; height: 100%; background: var(--bg-deep); color: var(-
     width: 100vw;
 }
 
-/* Sidebar Links */
+/* Sidebar Nav */
 .sidebar-nav {
     background: #020408;
     border-right: 1px solid rgba(57, 255, 20, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 30px;
+    padding: 30px 0;
     gap: 40px;
 }
 
-.nav-item { cursor: pointer; text-align: center; color: #444; transition: 0.3s; }
-.nav-item:hover, .nav-item.active { color: var(--neon-green); filter: drop-shadow(0 0 8px var(--neon-green)); }
-.nav-item i { font-size: 1.8rem; }
-.ai-status-dot { width: 12px; height: 12px; border-radius: 50%; background: #222; margin-bottom: 20px; transition: 0.5s; }
+.ai-status-dot { width: 14px; height: 14px; border-radius: 50%; background: #222; margin-bottom: 20px; transition: 0.5s; border: 2px solid #000; }
 .status-online { background: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); }
 
-/* Center: Arena */
+.nav-item { cursor: pointer; text-align: center; color: #444; transition: 0.3s; }
+.nav-item i { font-size: 1.8rem; margin-bottom: 5px; display: block; }
+.nav-item span { font-size: 0.5rem; font-family: var(--font-header); font-weight: bold; }
+.nav-item:hover, .nav-item.active { color: var(--neon-green); filter: drop-shadow(0 0 8px var(--neon-green)); }
+
+/* Arena Main */
 .arena-main {
     background: radial-gradient(circle at center, #0a150a 0%, #000 100%);
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
 }
-#tactic-board { display: block; }
+#tactic-board { display: block; transition: 0.3s; }
+.pitch-label { position: absolute; top: 20px; left: 20px; font-family: var(--font-header); font-size: 0.6rem; color: rgba(255,255,255,0.3); border-left: 2px solid var(--neon-green); padding-left: 10px; pointer-events: none; }
 
-/* Rechts: Communication */
-.comm-panel {
-    background: var(--panel-dark);
-    border-left: 1px solid rgba(57, 255, 20, 0.1);
-    display: flex;
-    flex-direction: column;
-}
+/* Communication Panel */
+.comm-panel { background: var(--panel-dark); border-left: 1px solid rgba(57, 255, 20, 0.1); display: flex; flex-direction: column; }
+.comm-header { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .chat-window { flex: 1; overflow-y: auto; padding: 25px; font-size: 0.85rem; background: rgba(0,0,0,0.2); }
-.mic-section { height: 120px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; }
-.mic-trigger { font-size: 2.5rem; color: #333; cursor: pointer; transition: 0.3s; }
-.mic-trigger.active { color: var(--neon-green); filter: drop-shadow(0 0 15px var(--neon-green)); }
 
-/* Overlays */
-#briefcase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 1000; display: none; backdrop-filter: blur(20px); }
+.mic-section { height: 160px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+.mic-container { width: 70px; height: 70px; background: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; border: 1px solid #222; }
+.mic-container i { font-size: 1.8rem; color: #333; transition: 0.3s; z-index: 2; }
+.mic-container.active i { color: var(--neon-green); filter: drop-shadow(0 0 10px var(--neon-green)); }
+#mic-status { font-family: var(--font-header); font-size: 0.5rem; letter-spacing: 2px; color: #444; }
+
+/* Pulse Animation */
+.pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--neon-green); display: none; animation: pulse 1.5s infinite; }
+.mic-container.active .pulse-ring { display: block; }
+@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
+
+/* Briefcase Overlay */
+#briefcase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(25px); }
+.briefcase-content { width: 90%; max-width: 1200px; height: 80%; }
+.mgmt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-top: 20px; }
 
 /* Scrollbars */
 ::-webkit-scrollbar { width: 4px; }
