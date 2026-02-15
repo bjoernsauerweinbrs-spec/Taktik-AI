@@ -1,56 +1,43 @@
-/* TONI 2.0 - ELITE MASTER DESIGN (TARGET STATE) */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;700&display=swap');
-
-:root {
-    --bg-deep: #020408;
-    --neon-green: #39FF14;
-    --data-cyan: #00D1FF;
-    --glass: rgba(13, 20, 33, 0.95);
-    --font-header: 'Orbitron', sans-serif;
-}
-
+:root { --bg: #020408; --neon: #39FF14; --cyan: #00D1FF; --font-h: 'Orbitron'; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body, html { width: 100%; height: 100%; background: var(--bg-deep); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
-
-/* 3-SPALTEN LAYOUT FIX */
-.pro-cockpit { display: grid; grid-template-columns: 100px 1fr 400px; height: 100vh; width: 100vw; }
-
-.sidebar-nav { background: #000; border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; padding: 30px 0; gap: 30px; z-index: 10; }
+body { background: var(--bg); color: #fff; font-family: 'Inter'; overflow: hidden; }
+.pro-cockpit { display: grid; grid-template-columns: 100px 1fr 400px; height: 100vh; }
+.sidebar-nav { background: #000; border-right: 1px solid #111; display: flex; flex-direction: column; align-items: center; padding: 30px 0; gap: 30px; }
 .nav-item { cursor: pointer; color: #444; text-align: center; transition: 0.3s; width: 100%; }
-.nav-item:hover, .nav-item.active { color: var(--neon-green); filter: drop-shadow(0 0 10px var(--neon-green)); }
-.nav-item i { font-size: 1.8rem; display: block; margin-bottom: 5px; }
-.nav-item span { font-size: 0.5rem; font-family: var(--font-header); font-weight: bold; text-transform: uppercase; }
+.nav-item:hover { color: var(--neon); filter: drop-shadow(0 0 8px var(--neon)); }
+.nav-item i { font-size: 1.8rem; display: block; }
+.nav-item span { font-size: 0.5rem; font-family: var(--font-h); font-weight: bold; }
+.ai-status-dot { width: 12px; height: 12px; border-radius: 50%; background: #111; margin-bottom: 20px; }
+.status-online { background: var(--neon); box-shadow: 0 0 15px var(--neon); }
+.arena-main { background: radial-gradient(circle, #0a150a 0%, #000 100%); width: 100%; height: 100%; }
+.comm-panel { background: rgba(13,20,33,0.9); backdrop-filter: blur(20px); border-left: 1px solid #111; display: flex; flex-direction: column; }
+.chat-window { flex: 1; padding: 25px; overflow-y: auto; font-size: 0.8rem; }
+.mic-section { height: 150px; display: flex; align-items: center; justify-content: center; }
+.mic-container { width: 70px; height: 70px; background: #000; border: 1px solid #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+.mic-container.active i { color: var(--neon); filter: drop-shadow(0 0 10px var(--neon)); }
+.pulse-ring { position: absolute; width: 100%; height: 100%; border: 2px solid var(--neon); border-radius: 50%; animation: p 2s infinite; display: none; }
+.mic-container.active .pulse-ring { display: block; }
+@keyframes p { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
 
-/* ARENA FIX (Vollbild & Zentriert) */
-.arena-main { background: radial-gradient(circle, #0a150a 0%, #000 100%); position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-#tactic-board { width: 100%; height: 100%; display: block; }
+#briefcase-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(25px); }
+.briefcase-content { width: 90%; max-width: 1200px; height: 85%; overflow-y: auto; padding: 40px; }
+.mgmt-grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; }
 
-/* RECHTE SPALTE (AI FEED) */
-.comm-panel { background: var(--glass); border-left: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; backdrop-filter: blur(20px); }
-.chat-window { flex: 1; padding: 30px; overflow-y: auto; }
-.mic-section { height: 150px; display: flex; align-items: center; justify-content: center; border-top: 1px solid rgba(255,255,255,0.05); }
-
-/* --- AKTENTASCHE MODULE --- */
-#briefcase-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(30px); }
-.briefcase-content { width: 90%; max-width: 1200px; height: 85%; overflow-y: auto; padding: 50px; }
-
-/* FIFA TOTY CARDS (Target Style) */
-.mgmt-grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; width: 100%; }
-.fifa-card {
-    width: 230px; height: 330px; background: linear-gradient(135deg, #001a1a 0%, #000 100%);
-    clip-path: polygon(0% 15%, 50% 0%, 100% 15%, 100% 85%, 50% 100%, 0% 85%);
-    border: 1px solid var(--data-cyan); position: relative; transition: 0.4s;
-    box-shadow: 0 0 20px rgba(0,209,255,0.2); cursor: pointer;
-}
-.card-img { width: 100%; height: 60%; background-size: cover; background-position: center top; position: relative; }
+/* FIFA CARD */
+.fifa-card { width: 220px; height: 320px; background: linear-gradient(135deg, #001a1a 0%, #000 100%); clip-path: polygon(0% 15%, 50% 0%, 100% 15%, 100% 85%, 50% 100%, 0% 85%); border: 1px solid var(--cyan); position: relative; cursor: pointer; transition: 0.4s; }
+.fifa-card:hover { transform: translateY(-10px); box-shadow: 0 0 30px var(--cyan); }
+.card-img { width: 100%; height: 60%; background-size: cover; background-position: top; position: relative; }
+.card-img::after { content: 'DROP'; position: absolute; width:100%; height:100%; background:rgba(57,255,20,0.2); display:flex; align-items:center; justify-content:center; opacity:0; transition:0.3s; font-family:var(--font-h); font-size:0.6rem; }
+.card-img:hover::after { opacity: 1; }
 .card-info { padding: 15px; text-align: center; }
-.card-rating { font-family: var(--font-header); font-size: 1.8rem; color: var(--data-cyan); font-weight: 900; }
-.card-name { font-weight: bold; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; margin: 5px 0; }
+.card-rating { font-family: var(--font-h); font-size: 1.8rem; color: var(--cyan); }
+.card-name { font-weight: bold; font-size: 0.8rem; margin-top: 5px; }
 
-/* STICKER ALBUM (Panini Style) */
-.sticker-slot { width: 160px; height: 210px; border: 2px dashed #333; background: rgba(255,255,255,0.03); position: relative; transition: 0.3s; }
+/* LABOR */
+.bar-bg { height: 10px; background: #000; border-radius: 5px; overflow: hidden; border: 1px solid #222; margin: 10px 0 20px 0; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--neon)); box-shadow: 0 0 10px var(--neon); transition: 1s; }
+
+/* PANINI */
+.sticker-slot { width: 160px; height: 210px; border: 2px dashed #333; position: relative; transition: 0.3s; }
 .sticker-active { background: #fff; border: 5px solid #fff; border-bottom: 25px solid #fff; transform: rotate(-2deg); box-shadow: 5px 5px 20px #000; color: #000; }
-
-/* LABOR BARS */
-.bar-bg { height: 10px; background: #000; border: 1px solid #222; border-radius: 5px; overflow: hidden; margin-top: 10px; }
-.bar-fill { height: 100%; background: linear-gradient(90deg, var(--data-cyan), var(--neon-green)); box-shadow: 0 0 10px var(--neon-green); transition: 1s ease; }
