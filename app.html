@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 - COCKPIT</title>
+    <title>TONI 2.0 - ELITE COCKPIT</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,46 +15,73 @@
     <div class="pro-cockpit">
         <aside class="sidebar-nav">
             <div id="status-dot" class="ai-status-dot"></div>
-            <div class="nav-item" onclick="toggleBriefcase()"><i class="fas fa-briefcase"></i></div>
-            <div class="nav-item"><i class="fas fa-users"></i></div>
-            <div class="nav-item" style="margin-top:auto; margin-bottom:30px;"><i class="fas fa-cog"></i></div>
+            <div class="nav-item active" onclick="toggleBriefcase()">
+                <i class="fas fa-briefcase"></i>
+                <span>ZENTRALE</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>KADER</span>
+            </div>
+            <div class="nav-item" style="margin-top:auto; margin-bottom:30px;">
+                <i class="fas fa-cog"></i>
+                <span>SETUP</span>
+            </div>
         </aside>
 
         <main class="arena-main" id="arena-container">
+            <div class="pitch-label" id="pitch-info">GROSSFELD SENIOREN</div>
             <canvas id="tactic-board"></canvas>
         </main>
 
         <aside class="comm-panel">
-            <div style="padding: 20px; border-bottom: 1px solid rgba(57,255,20,0.1);">
-                <h4 style="font-family:'Orbitron'; color: var(--data-cyan); font-size: 0.7rem; letter-spacing: 2px;">TONI 2.0 INTELLIGENCE</h4>
+            <div class="comm-header">
+                <h3 style="font-family:'Orbitron'; font-size: 0.7rem; color: var(--data-cyan); letter-spacing: 2px;">TONI 2.0 INTELLIGENCE</h3>
             </div>
-            <div id="chat-box" class="chat-window"></div>
+            
+            <div id="chat-box" class="chat-window">
+                </div>
+
             <div class="mic-section">
-                <i class="fas fa-microphone mic-trigger" id="main-mic" onclick="window.ToniBrain.toggleMic()"></i>
+                <div class="mic-container" id="mic-trigger" onclick="window.ToniBrain.toggleMic()">
+                    <i class="fas fa-microphone" id="mic-icon"></i>
+                    <div class="pulse-ring"></div>
+                </div>
+                <p id="mic-status">VOICE OFF</p>
             </div>
         </aside>
     </div>
 
-    <div id="briefcase-overlay">
+    <div id="briefcase-overlay" onclick="if(event.target === this) toggleBriefcase()">
+        <div class="briefcase-content">
+            <h2 style="font-family:'Orbitron'; color: var(--neon-green); text-align: center; margin-bottom: 40px;">MANAGEMENT ZENTRALE</h2>
+            <div class="mgmt-grid" id="briefcase-grid">
+                </div>
         </div>
+    </div>
 
     <script src="engine/toni-brain.js"></script>
     <script src="engine/pitch-engine.js"></script>
 
     <script>
+        // Sicherheits-Check: Nur mit Login
+        if(!sessionStorage.getItem('toni_auth')) {
+            window.location.href = 'index.html';
+        }
+
+        // Automatische Kalibrierung für MacBook & Mobile
         function calibrate() {
             const board = document.getElementById('tactic-board');
             const container = document.getElementById('arena-container');
             if(board && container) {
-                board.width = container.clientWidth;
-                board.height = container.clientHeight;
-                if(window.PitchEngine) window.PitchEngine.draw();
+                const rect = container.getBoundingClientRect();
+                board.width = rect.width;
+                board.height = rect.height;
+                if(window.PitchEngine && window.PitchEngine.draw) window.PitchEngine.draw();
             }
         }
 
         window.addEventListener('load', () => {
-            if(!sessionStorage.getItem('toni_auth')) window.location.href = 'index.html';
-            
             calibrate();
             if(window.PitchEngine) window.PitchEngine.init();
             if(window.ToniBrain) window.ToniBrain.firstGreeting();
@@ -62,7 +91,7 @@
 
         function toggleBriefcase() {
             const ov = document.getElementById('briefcase-overlay');
-            ov.style.display = ov.style.display === 'block' ? 'none' : 'block';
+            ov.style.display = (ov.style.display === 'flex') ? 'none' : 'flex';
         }
     </script>
 </body>
