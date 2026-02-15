@@ -2,62 +2,53 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TONI 2.0 - ELITE COCKPIT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="pro-cockpit">
         <aside class="sidebar-nav">
-            <div id="status-dot" class="ai-status-dot"></div>
             <div class="nav-item" onclick="toggleBriefcase()"><i class="fas fa-briefcase"></i><span>ZENTRALE</span></div>
             <div class="nav-item" onclick="openKabine()"><i class="fas fa-users"></i><span>KABINE</span></div>
             <div class="nav-item" onclick="openLabor()"><i class="fas fa-heartbeat"></i><span>LABOR</span></div>
-            <div class="nav-item" onclick="openJunioren()"><i class="fas fa-award"></i><span>JUGEND</span></div>
-            <div class="nav-item" style="margin-top:auto;"><i class="fas fa-cog"></i><span>SETUP</span></div>
         </aside>
 
         <main class="arena-main" id="arena-container">
-            <div class="pitch-label">MASTER ARENA</div>
             <canvas id="tactic-board"></canvas>
         </main>
 
         <aside class="comm-panel">
             <div class="chat-window" id="chat-box"></div>
             <div class="mic-section">
-                <div class="mic-container" id="mic-trigger" onclick="window.ToniBrain.toggleMic()">
-                    <i class="fas fa-microphone"></i><div class="pulse-ring"></div>
-                </div>
+                <i class="fas fa-microphone" style="font-size:2rem; cursor:pointer;" onclick="window.ToniBrain.toggleMic()"></i>
             </div>
         </aside>
     </div>
 
     <div id="briefcase-overlay" onclick="if(event.target === this) toggleBriefcase()">
-        <div class="briefcase-content"><div id="briefcase-grid"></div></div>
+        <div class="briefcase-content" id="briefcase-grid"></div>
     </div>
 
     <script src="engine/database.js"></script>
     <script src="engine/toni-brain.js"></script>
     <script src="engine/pitch-engine.js"></script>
     <script src="modules/kabine.js"></script>
-    <script src="modules/labor.js"></script>
-    <script src="modules/junioren.js"></script>
 
     <script>
-        function toggleBriefcase() {
+        function calibrate() {
+            const c = document.getElementById('tactic-board'), container = document.getElementById('arena-container');
+            c.width = container.clientWidth; c.height = container.clientHeight;
+            if(window.PitchEngine) window.PitchEngine.draw();
+        }
+        function toggleBriefcase() { 
             const ov = document.getElementById('briefcase-overlay');
             ov.style.display = (ov.style.display === 'flex') ? 'none' : 'flex';
         }
         function openKabine() { toggleBriefcase(); window.SektorKabine.render(); }
-        function openLabor() { toggleBriefcase(); window.SektorLabor.render(); }
-        function openJunioren() { toggleBriefcase(); window.SektorJunioren.render(); }
-
-        window.addEventListener('load', () => {
-            window.PitchEngine.init();
-            window.ToniBrain.firstGreeting();
-        });
+        
+        window.addEventListener('load', () => { calibrate(); window.PitchEngine.init(); });
+        window.addEventListener('resize', calibrate);
     </script>
 </body>
 </html>
