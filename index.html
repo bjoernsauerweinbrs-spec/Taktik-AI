@@ -2,82 +2,37 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TONI 2.0 - LOGIN</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --neon-green: #39FF14; }
         body { background: #000; color: var(--neon-green); font-family: 'Orbitron', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        .login-container { text-align: center; border: 1px solid var(--neon-green); padding: 40px; background: rgba(0,0,0,0.9); box-shadow: 0 0 30px rgba(57, 255, 20, 0.2); z-index: 10; width: 320px; }
-        input { background: #000; border: 1px solid var(--neon-green); color: var(--neon-green); padding: 15px; width: 100%; box-sizing: border-box; text-align: center; font-size: 1.1rem; margin-bottom: 20px; outline: none; border-radius: 0; -webkit-appearance: none; }
-        button { background: var(--neon-green); color: #000; border: none; padding: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; transition: 0.3s; font-family: 'Orbitron'; }
-        
-        #video-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100vw; height: 100vh; 
-            background: #000; 
-            z-index: 100; 
-        }
+        .login-container { text-align: center; border: 1px solid var(--neon-green); padding: 40px; background: rgba(0,0,0,0.9); box-shadow: 0 0 30px rgba(57, 255, 20, 0.2); width: 320px; z-index: 10; }
+        input { background: #000; border: 1px solid var(--neon-green); color: var(--neon-green); padding: 15px; width: 100%; box-sizing: border-box; text-align: center; font-size: 1.1rem; margin-bottom: 20px; outline: none; }
+        button { background: var(--neon-green); color: #000; border: none; padding: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; transition: 0.3s; }
+        #video-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        
-        #skip-layer {
-            position: absolute; bottom: 20px; right: 20px; z-index: 110;
-            color: var(--neon-green); border: 1px solid var(--neon-green);
-            padding: 8px 15px; font-size: 0.6rem; cursor: pointer; background: rgba(0,0,0,0.5);
-        }
     </style>
 </head>
 <body>
-
-    <div id="video-overlay">
-        <div id="skip-layer" onclick="goToCockpit()">SKIP INTRO</div>
-        <video id="intro-video" playsinline muted preload="auto">
-            <source src="intro.mp4" type="video/mp4">
-        </video>
-    </div>
-
+    <div id="video-overlay"><video id="intro-video" playsinline muted><source src="intro.mp4" type="video/mp4"></video></div>
     <div class="login-container" id="login-box">
-        <h2 style="font-size: 0.9rem; letter-spacing: 3px; margin-bottom: 30px;">IDENTITY CHECK</h2>
+        <h2>ACCESS CONTROL</h2>
         <input type="password" id="pass" placeholder="PASSWORD" autofocus onkeydown="if(event.key==='Enter') unlock()">
-        <button onclick="unlock()">ACCESS SYSTEM</button>
+        <button onclick="unlock()">ENTER COCKPIT</button>
     </div>
-
     <script>
         function unlock() {
-            const pass = document.getElementById('pass').value;
-            if(pass === 'toni2026') {
-                const video = document.getElementById('intro-video');
+            if(document.getElementById('pass').value === 'toni2026') {
                 document.getElementById('login-box').style.display = 'none';
+                const v = document.getElementById('intro-video');
                 document.getElementById('video-overlay').style.display = 'block';
-
-                // Video-Start-Sequenz für Mobil & Desktop
-                video.play().then(() => {
-                    // Sobald es läuft, versuchen wir den Ton nach 500ms zu aktivieren
-                    setTimeout(() => { video.muted = false; }, 500);
-                }).catch(err => {
-                    console.error("Autoplay verhindert:", err);
-                    // Fallback: Wenn das Video gar nicht will, direkt weiter
-                    setTimeout(goToCockpit, 2000);
-                });
-
-                video.onended = goToCockpit;
-                
-                // Sicherheit: Falls die Datei fehlt (Error-Event)
-                video.onerror = () => {
-                    console.error("Videodatei nicht gefunden oder Pfad falsch.");
-                    goToCockpit();
-                };
-            } else {
-                alert("ACCESS DENIED");
+                v.play().then(() => { v.muted = false; }).catch(() => { setTimeout(go, 1000); });
+                v.onended = go;
             }
         }
-
-        function goToCockpit() {
-            sessionStorage.setItem('toni_auth', 'true');
-            window.location.href = 'app.html';
-        }
+        function go() { sessionStorage.setItem('toni_auth', 'true'); window.location.href = 'app.html'; }
     </script>
 </body>
 </html>
