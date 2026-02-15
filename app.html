@@ -2,16 +2,22 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TONI 2.0 - ELITE COCKPIT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="pro-cockpit">
         <aside class="sidebar-nav">
+            <div id="status-dot" class="ai-status-dot status-online"></div>
             <div class="nav-item" onclick="toggleBriefcase()"><i class="fas fa-briefcase"></i><span>ZENTRALE</span></div>
-            <div class="nav-item" onclick="openKabine()"><i class="fas fa-users"></i><span>KABINE</span></div>
-            <div class="nav-item" onclick="openLabor()"><i class="fas fa-heartbeat"></i><span>LABOR</span></div>
+            <div class="nav-item" onclick="openModule('Kabine')"><i class="fas fa-users"></i><span>KABINE</span></div>
+            <div class="nav-item" onclick="openModule('Labor')"><i class="fas fa-heartbeat"></i><span>LABOR</span></div>
+            <div class="nav-item" onclick="openModule('Junioren')"><i class="fas fa-award"></i><span>JUGEND</span></div>
+            <div class="nav-item" onclick="openModule('Zeitung')"><i class="fas fa-newspaper"></i><span>KURIER</span></div>
+            <div class="nav-item" onclick="openModule('Setup')" style="margin-top:auto;"><i class="fas fa-cog"></i><span>SETUP</span></div>
         </aside>
 
         <main class="arena-main" id="arena-container">
@@ -21,7 +27,9 @@
         <aside class="comm-panel">
             <div class="chat-window" id="chat-box"></div>
             <div class="mic-section">
-                <i class="fas fa-microphone" style="font-size:2rem; cursor:pointer;" onclick="window.ToniBrain.toggleMic()"></i>
+                <div class="mic-container" id="mic-trigger" onclick="window.ToniBrain.toggleMic()">
+                    <i class="fas fa-microphone"></i><div class="pulse-ring"></div>
+                </div>
             </div>
         </aside>
     </div>
@@ -34,8 +42,13 @@
     <script src="engine/toni-brain.js"></script>
     <script src="engine/pitch-engine.js"></script>
     <script src="modules/kabine.js"></script>
+    <script src="modules/labor.js"></script>
+    <script src="modules/junioren.js"></script>
+    <script src="modules/zeitung.js"></script>
+    <script src="modules/setup.js"></script>
 
     <script>
+        if(!sessionStorage.getItem('toni_auth')) window.location.href = 'index.html';
         function calibrate() {
             const c = document.getElementById('tactic-board'), container = document.getElementById('arena-container');
             c.width = container.clientWidth; c.height = container.clientHeight;
@@ -45,9 +58,12 @@
             const ov = document.getElementById('briefcase-overlay');
             ov.style.display = (ov.style.display === 'flex') ? 'none' : 'flex';
         }
-        function openKabine() { toggleBriefcase(); window.SektorKabine.render(); }
-        
-        window.addEventListener('load', () => { calibrate(); window.PitchEngine.init(); });
+        function openModule(name) {
+            toggleBriefcase();
+            window['Sektor' + name].render();
+            window.ToniBrain.speak(name + " geladen.");
+        }
+        window.addEventListener('load', () => { calibrate(); window.PitchEngine.init(); window.ToniBrain.firstGreeting(); });
         window.addEventListener('resize', calibrate);
     </script>
 </body>
