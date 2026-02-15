@@ -1,8 +1,5 @@
 window.ToniBrain = {
-    isListening: false,
-    recognition: null,
-    synth: window.speechSynthesis,
-    mentorVoice: null,
+    isListening: false, recognition: null, synth: window.speechSynthesis, mentorVoice: null,
 
     init() {
         const setVoice = () => {
@@ -24,8 +21,7 @@ window.ToniBrain = {
     speak(text) {
         if(this.synth.speaking) this.synth.cancel();
         const ut = new SpeechSynthesisUtterance(text);
-        ut.voice = this.mentorVoice;
-        ut.pitch = 0.85; ut.rate = 0.95;
+        ut.voice = this.mentorVoice; ut.pitch = 0.85; ut.rate = 0.95;
         this.log(text, 'toni');
         this.synth.speak(ut);
     },
@@ -34,32 +30,20 @@ window.ToniBrain = {
         const box = document.getElementById('chat-box');
         if(!box) return;
         const msg = document.createElement('div');
-        msg.style.marginBottom = "20px";
-        msg.style.paddingLeft = "15px";
+        msg.style.marginBottom = "20px"; msg.style.paddingLeft = "15px";
         msg.style.borderLeft = `2px solid ${sender==='toni'?'#39FF14':'#00D1FF'}`;
-        msg.innerHTML = `<small style="color:${sender==='toni'?'#39FF14':'#00D1FF'}; font-family:'Orbitron'; font-size:0.55rem; letter-spacing:1px;">${sender==='toni'?'TONI':'COACH'}</small><br><span style="font-size:0.85rem; color:#ccc;">${text}</span>`;
-        box.appendChild(msg);
-        box.scrollTop = box.scrollHeight;
+        msg.innerHTML = `<small style="color:${sender==='toni'?'#39FF14':'#00D1FF'}; font-family:'Orbitron'; font-size:0.55rem;">${sender==='toni'?'TONI':'COACH'}</small><br><span style="font-size:0.85rem;">${text}</span>`;
+        box.appendChild(msg); box.scrollTop = box.scrollHeight;
     },
 
     toggleMic() {
         this.isListening = !this.isListening;
         const btn = document.getElementById('mic-trigger');
-        const status = document.getElementById('mic-status');
         const dot = document.getElementById('status-dot');
-        
         if(this.isListening) {
-            this.recognition.start();
-            btn.classList.add('active');
-            status.innerHTML = "LISTENING...";
-            status.style.color = "#39FF14";
-            dot.style.background = "#FF3131";
+            this.recognition.start(); btn.classList.add('active'); dot.style.background = "#FF3131";
         } else {
-            this.recognition.stop();
-            btn.classList.remove('active');
-            status.innerHTML = "VOICE OFF";
-            status.style.color = "#444";
-            dot.style.background = "#39FF14";
+            this.recognition.stop(); btn.classList.remove('active'); dot.style.background = "#39FF14";
         }
     },
 
@@ -67,26 +51,23 @@ window.ToniBrain = {
         this.log(cmd, 'user');
         const t = cmd.toLowerCase();
 
-        if(t.includes("funino") || t.includes("g-jugend")) {
+        if(t.includes("funino")) {
             window.PitchEngine.setMode('funino');
-            document.getElementById('pitch-info').innerHTML = "FUNINO G-JUGEND";
-            this.speak("Ich habe das Spielfeld auf Funino umgestellt. Vier Tore sind aktiv.");
-        } else if(t.includes("großfeld") || t.includes("senioren")) {
+            this.speak("Spielfeld auf Funino umgestellt.");
+        } else if(t.includes("großfeld")) {
             window.PitchEngine.setMode('grossfeld');
-            document.getElementById('pitch-info').innerHTML = "GROSSFELD SENIOREN";
-            this.speak("Großfeld aktiviert. Die Arena ist bereit für die Senioren.");
-        } else if(t.includes("internet") || t.includes("online")) {
-            this.speak("Für den vollen Cloud-Zugriff müssen wir das Setup im Menü abschließen. Dort erkläre ich dir alles.");
+            this.speak("Großfeld aktiviert.");
+        } else if(t.includes("setup") || t.includes("handy") || t.includes("verbinden")) {
+            openSetup(); // In app.html definiert
+            this.speak("Ich öffne das Setup-Zentrum für die Handy-Verbindung.");
         } else {
-            this.speak("Habe ich verstanden. Soll ich ein spezielles Modul für dich öffnen?");
+            this.speak("Habe ich verstanden. Was kann ich noch für dich tun?");
         }
     },
 
     firstGreeting() {
         this.init();
         document.getElementById('status-dot').classList.add('status-online');
-        setTimeout(() => {
-            this.speak("Hallo, ich bin TONI 2.0, dein persönlicher Co-Trainer. Mit wem habe ich das Vergnügen?");
-        }, 1200);
+        setTimeout(() => this.speak("Hallo, ich bin TONI 2.0, dein persönlicher Co-Trainer. Mit wem habe ich das Vergnügen?"), 1200);
     }
 };
