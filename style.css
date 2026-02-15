@@ -8,13 +8,13 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body, html { width: 100%; height: 100%; background: var(--bg-deep); color: var(--text-main); overflow: hidden; font-family: var(--font-body); }
 
-/* Layout Grid */
+/* Grid Layout */
 .pro-cockpit { display: grid; grid-template-columns: 90px 1fr 380px; height: 100vh; width: 100vw; }
 .sidebar-nav { background: #020408; border-right: 1px solid rgba(57,255,20,0.1); display: flex; flex-direction: column; align-items: center; padding: 30px 0; gap: 40px; }
 .ai-status-dot { width: 14px; height: 14px; border-radius: 50%; background: #222; border: 2px solid #000; transition: 0.5s; }
 .status-online { background: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); }
 .nav-item { cursor: pointer; text-align: center; color: #444; transition: 0.3s; }
-.nav-item i { font-size: 1.8rem; display: block; }
+.nav-item i { font-size: 1.8rem; display: block; margin-bottom: 5px; }
 .nav-item span { font-size: 0.5rem; font-family: var(--font-header); font-weight: bold; }
 .nav-item:hover, .nav-item.active { color: var(--neon-green); filter: drop-shadow(0 0 8px var(--neon-green)); }
 
@@ -24,13 +24,13 @@ body, html { width: 100%; height: 100%; background: var(--bg-deep); color: var(-
 .pitch-label { position: absolute; top: 20px; left: 20px; font-family: var(--font-header); font-size: 0.6rem; color: rgba(255,255,255,0.3); border-left: 2px solid var(--neon-green); padding-left: 10px; }
 
 /* Communication Panel */
-.comm-panel { background: var(--panel-dark); border-left: 1px solid rgba(57,255,20,0.1); display: flex; flex-direction: column; }
+.comm-panel { background: var(--panel-dark); border-left: 1px solid rgba(57, 255, 20, 0.1); display: flex; flex-direction: column; }
 .chat-window { flex: 1; overflow-y: auto; padding: 25px; font-size: 0.85rem; background: rgba(0,0,0,0.2); }
 .mic-section { height: 160px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
 .mic-container { width: 70px; height: 70px; background: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; border: 1px solid #222; }
 .mic-container.active i { color: var(--neon-green); filter: drop-shadow(0 0 15px var(--neon-green)); }
 
-/* FIFA CARD DESIGN */
+/* FIFA & STICKER CARDS */
 .fifa-card { width: 220px; height: 310px; position: relative; background: linear-gradient(135deg, #001a1a 0%, #000 50%, #00d1ff 100%); clip-path: polygon(0% 15%, 50% 0%, 100% 15%, 100% 85%, 50% 100%, 0% 85%); border: 1px solid var(--data-cyan); transition: 0.4s; cursor: pointer; }
 .fifa-card:hover { transform: scale(1.05) translateY(-10px); box-shadow: 0 20px 40px rgba(0,209,255,0.3); }
 .card-img { width: 100%; height: 60%; background-size: cover; background-position: top center; }
@@ -40,24 +40,23 @@ body, html { width: 100%; height: 100%; background: var(--bg-deep); color: var(-
 .sticker-card { width: 200px; height: 280px; position: relative; background: #fff; border: 8px solid #fff; border-bottom: 25px solid #fff; box-shadow: 5px 5px 15px rgba(0,0,0,0.5); transform: rotate(-2deg); color: #000; transition: 0.3s; }
 .sticker-card:hover { transform: rotate(0deg) scale(1.1); }
 
-/* --- ELITE LABOR DESIGN --- */
-.labor-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding: 20px; width: 100%; }
-.lab-panel { background: rgba(0,0,0,0.5); border: 1px solid var(--data-cyan); padding: 30px; border-radius: 5px; }
-.lab-header { font-family: var(--font-header); color: var(--data-cyan); font-size: 1rem; margin-bottom: 30px; border-bottom: 1px solid rgba(0,209,255,0.2); padding-bottom: 10px; }
+/* --- STADIONZEITUNG DESIGN --- */
+.news-page {
+    background: #f4f4f4; color: #111; width: 800px; min-height: 1000px; margin: 40px auto; padding: 60px;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5); position: relative; display: flex; flex-direction: column;
+}
+.news-header { border-bottom: 4px solid #111; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+.news-title { font-family: var(--font-header); font-size: 2.5rem; letter-spacing: -1px; }
+.news-meta { text-transform: uppercase; font-size: 0.7rem; letter-spacing: 2px; color: #666; }
 
-.data-row { margin-bottom: 25px; }
-.data-label { font-size: 0.8rem; color: #aaa; margin-bottom: 5px; display: flex; justify-content: space-between; }
-.data-value { font-family: var(--font-header); font-size: 1.2rem; color: var(--neon-green); cursor: pointer; transition: 0.3s; }
-.data-value:hover { color: #fff; text-shadow: 0 0 10px var(--neon-green); }
-.data-unit { font-size: 0.8rem; color: #666; margin-left: 5px; }
+.news-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 40px; }
+.editorial { font-size: 1.1rem; line-height: 1.6; border-right: 1px solid #ddd; padding-right: 30px; cursor: pointer; }
+.news-sidebar { display: flex; flex-direction: column; gap: 30px; }
 
-.bio-bar-bg { height: 8px; background: #111; border-radius: 4px; overflow: hidden; margin-top: 8px; border: 1px solid #222; }
-.bio-bar-fill { height: 100%; background: linear-gradient(to right, var(--data-cyan), var(--neon-green)); width: 0%; transition: width 1s ease-in-out; }
+.sponsor-box { border: 2px dashed #ccc; padding: 20px; text-align: center; font-size: 0.8rem; cursor: pointer; }
+.match-day-box { background: #111; color: #fff; padding: 20px; text-align: center; font-family: var(--font-header); }
 
 /* Overlays */
 #briefcase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(25px); overflow-y: auto; }
 .briefcase-content { width: 90%; max-width: 1200px; height: 80%; }
 .mgmt-grid { display: flex; flex-wrap: wrap; gap: 30px; padding: 50px; width: 100%; justify-content: center; }
-
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: 10px; }
