@@ -1,8 +1,7 @@
 window.ToniDatabase = {
-    // --- SPIELER KADER ---
+    // --- PROFI KADER ---
     players: [
-        { id: 1, name: "Musterprofi", pos: "ST", rating: 94, pace: 99, sho: 92, pas: 88, dri: 91, def: 45, phy: 84, type: 'toty', photo: 'https://via.placeholder.com/200x250/000/00d1ff?text=PRO' },
-        { id: 2, name: "Nachwuchs-Star", pos: "LW", rating: 78, pace: 85, sho: 70, pas: 75, dri: 80, def: 30, phy: 60, type: 'sticker', photo: 'https://via.placeholder.com/200x250/fff/000?text=JUGEND' }
+        { id: 1, name: "Musterprofi", pos: "ST", rating: 94, pace: 99, sho: 92, pas: 88, dri: 91, def: 45, phy: 84, type: 'toty', photo: 'https://via.placeholder.com/200x250/000/00d1ff?text=PRO' }
     ],
 
     // --- BIOMETRIE ---
@@ -13,7 +12,7 @@ window.ToniDatabase = {
         vo2: { val: 62, unit: 'ml/kg', max: 75, label: "VO2 MAX" }
     },
 
-    // --- STADIONZEITUNG DATEN ---
+    // --- STADIONZEITUNG ---
     newspaper: {
         title: "STADION-KURIER ELITE",
         issue: "Ausgabe #24 - Saison 2026",
@@ -23,16 +22,20 @@ window.ToniDatabase = {
         mainMatch: "E-Jugend vs. Spitzenreiter"
     },
 
-    updatePlayer(id, key, value) {
-        const p = this.players.find(x => x.id == id);
-        if(p) p[key] = value;
-    },
+    // --- JUNIOREN AKADEMIE (PANINI) ---
+    juniors: [
+        { id: 101, name: "Nino", team: "G-Jugend", collected: true, photo: 'https://via.placeholder.com/150x200?text=NINO' },
+        { id: 102, name: "Lukas", team: "F-Jugend", collected: false, photo: 'https://via.placeholder.com/150x200?text=LUKAS' },
+        { id: 103, name: "Toni Jr.", team: "E-Jugend", collected: true, photo: 'https://via.placeholder.com/150x200?text=TONI' },
+        { id: 104, name: "Max", team: "G-Jugend", collected: false, photo: 'https://via.placeholder.com/150x200?text=MAX' }
+    ],
 
-    updateBiometric(key, value) {
-        if(this.biometrics[key]) this.biometrics[key].val = parseFloat(value);
-    },
-
-    updateNews(key, value) {
-        if(this.newspaper.hasOwnProperty(key)) this.newspaper[key] = value;
+    updatePlayer(id, key, value) { const p = this.players.find(x => x.id == id); if(p) p[key] = value; },
+    updateBiometric(key, value) { if(this.biometrics[key]) this.biometrics[key].val = parseFloat(value); },
+    updateNews(key, value) { if(this.newspaper.hasOwnProperty(key)) this.newspaper[key] = value; },
+    
+    toggleSticker(id) {
+        const j = this.juniors.find(x => x.id == id);
+        if(j) j.collected = !j.collected;
     }
 };
