@@ -8,38 +8,28 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body, html { width: 100%; height: 100%; background: var(--bg-deep); color: var(--text-main); overflow: hidden; font-family: var(--font-body); }
 
-/* Layout Grid */
+/* Grid Layout */
 .pro-cockpit { display: grid; grid-template-columns: 90px 1fr 380px; height: 100vh; width: 100vw; }
-.sidebar-nav { background: #020408; border-right: 1px solid rgba(57,255,20,0.1); display: flex; flex-direction: column; align-items: center; padding: 30px 0; gap: 35px; }
+.sidebar-nav { background: #020408; border-right: 1px solid rgba(57,255,20,0.1); display: flex; flex-direction: column; align-items: center; padding: 25px 0; gap: 30px; }
 .ai-status-dot { width: 14px; height: 14px; border-radius: 50%; background: #222; border: 2px solid #000; transition: 0.5s; }
 .status-online { background: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); }
-.nav-item { cursor: pointer; text-align: center; color: #444; transition: 0.3s; }
-.nav-item i { font-size: 1.6rem; display: block; margin-bottom: 5px; }
-.nav-item span { font-size: 0.45rem; font-family: var(--font-header); font-weight: bold; }
-.nav-item:hover, .nav-item.active { color: var(--neon-green); filter: drop-shadow(0 0 8px var(--neon-green)); }
+.nav-item { cursor: pointer; text-align: center; color: #444; transition: 0.3s; width: 100%; padding: 5px 0; }
+.nav-item i { font-size: 1.5rem; display: block; margin-bottom: 5px; }
+.nav-item span { font-size: 0.4rem; font-family: var(--font-header); font-weight: bold; text-transform: uppercase; }
+.nav-item:hover, .nav-item.active { color: var(--neon-green); filter: drop-shadow(0 0 8px var(--neon-green)); background: rgba(57,255,20,0.05); }
 
 /* Arena Center */
 .arena-main { background: radial-gradient(circle at center, #0a150a 0%, #000 100%); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 #tactic-board { display: block; }
 
-/* Panels & Cards */
-.fifa-card { width: 220px; height: 310px; position: relative; background: linear-gradient(135deg, #001a1a 0%, #000 50%, #00d1ff 100%); clip-path: polygon(0% 15%, 50% 0%, 100% 15%, 100% 85%, 50% 100%, 0% 85%); border: 1px solid var(--data-cyan); transition: 0.4s; cursor: pointer; }
-.card-img { width: 100%; height: 60%; background-size: cover; background-position: top center; }
-.card-stats { display: grid; grid-template-columns: 1fr 1fr; font-size: 0.6rem; padding: 5px; gap: 5px; }
+/* --- MANAGER & SPONSOR DESIGN --- */
+.manager-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 30px; }
+.mgmt-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(0,209,255,0.2); padding: 25px; border-radius: 10px; }
+.mgmt-header { font-family: var(--font-header); color: var(--data-cyan); margin-bottom: 20px; font-size: 0.9rem; border-bottom: 1px solid #222; padding-bottom: 10px; }
 
-/* --- PANINI STICKER ALBUM DESIGN --- */
-.album-page { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 30px; padding: 40px; }
-.sticker-slot {
-    width: 150px; height: 210px; background: rgba(255,255,255,0.05); border: 2px dashed #333;
-    position: relative; transition: 0.3s; display: flex; align-items: center; justify-content: center;
-}
-.sticker-active {
-    background: #fff; border: 4px solid #fff; transform: rotate(-2deg);
-    box-shadow: 5px 5px 15px rgba(0,0,0,0.5); border-bottom: 20px solid #fff;
-}
-.sticker-active .sticker-img { width: 100%; height: 100%; background-size: cover; filter: grayscale(0%); opacity: 1; }
-.sticker-empty .sticker-img { width: 80%; height: 80%; background-size: cover; filter: grayscale(100%); opacity: 0.1; }
-.sticker-name { position: absolute; bottom: -18px; left: 0; width: 100%; text-align: center; color: #000; font-family: var(--font-header); font-size: 0.6rem; font-weight: bold; }
+.sponsor-item { display: flex; align-items: center; justify-content: space-between; background: #000; padding: 15px; margin-bottom: 10px; border-left: 3px solid var(--accent-gold); }
+.event-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222; font-size: 0.85rem; }
+.event-date { color: var(--neon-green); font-family: var(--font-header); font-size: 0.7rem; }
 
 /* Communication Panel */
 .comm-panel { background: var(--panel-dark); border-left: 1px solid rgba(57, 255, 20, 0.1); display: flex; flex-direction: column; }
@@ -50,7 +40,7 @@ body, html { width: 100%; height: 100%; background: var(--bg-deep); color: var(-
 
 /* Overlays */
 #briefcase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(25px); overflow-y: auto; }
-.briefcase-content { width: 90%; max-width: 1200px; height: 80%; }
+.briefcase-content { width: 90%; max-width: 1200px; }
 .mgmt-grid { display: flex; flex-wrap: wrap; gap: 30px; padding: 50px; width: 100%; justify-content: center; }
 
 ::-webkit-scrollbar { width: 4px; }
