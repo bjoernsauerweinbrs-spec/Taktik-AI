@@ -15,6 +15,7 @@
             <div id="status-dot" class="ai-status-dot"></div>
             <div class="nav-item" onclick="toggleBriefcase()"><i class="fas fa-briefcase"></i><span>ZENTRALE</span></div>
             <div class="nav-item" onclick="openKabine()"><i class="fas fa-users"></i><span>KABINE</span></div>
+            <div class="nav-item" onclick="openLabor()"><i class="fas fa-heartbeat" style="color: var(--data-cyan);"></i><span>LABOR</span></div>
             <div class="nav-item" style="margin-top:auto; margin-bottom:30px;"><i class="fas fa-cog"></i><span>SETUP</span></div>
         </aside>
 
@@ -37,7 +38,7 @@
 
     <div id="briefcase-overlay" onclick="if(event.target === this) toggleBriefcase()">
         <div class="briefcase-content">
-            <div class="mgmt-grid" id="briefcase-grid"></div>
+            <div id="briefcase-grid"></div>
         </div>
     </div>
 
@@ -45,6 +46,7 @@
     <script src="engine/toni-brain.js"></script>
     <script src="engine/pitch-engine.js"></script>
     <script src="modules/kabine.js"></script>
+    <script src="modules/labor.js"></script>
 
     <script>
         if(!sessionStorage.getItem('toni_auth')) window.location.href = 'index.html';
@@ -55,7 +57,7 @@
             if(board && container) {
                 board.width = container.clientWidth;
                 board.height = container.clientHeight;
-                if(window.PitchEngine) window.PitchEngine.draw();
+                if(window.PitchEngine && window.PitchEngine.draw) window.PitchEngine.draw();
             }
         }
 
@@ -73,9 +75,17 @@
         }
 
         function openKabine() {
+            document.getElementById('briefcase-grid').className = 'mgmt-grid'; // Grid Layout für Karten
             toggleBriefcase();
             window.SektorKabine.render();
-            window.ToniBrain.speak("Ich habe die Kabine geöffnet. Du kannst die Spielerwerte und Fotos jetzt bearbeiten.");
+            window.ToniBrain.speak("Mannschaftskabine geöffnet.");
+        }
+
+        function openLabor() {
+            document.getElementById('briefcase-grid').className = ''; // Kein Grid Layout für Labor
+            toggleBriefcase();
+            window.SektorLabor.render();
+            window.ToniBrain.speak("Elite Labor für Biometrie-Daten geöffnet.");
         }
     </script>
 </body>
