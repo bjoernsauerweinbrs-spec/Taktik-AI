@@ -3,220 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | High-Tech Tactical Board</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>TONI 2.0 - High-Tech Taktik Board</title>
     <style>
         :root {
-            --bg-black: #000000;
-            --neon-green: #39FF14;
-            --panel-gray: #0d0d0d;
-            --ui-border: #1a1a1a;
-            --text-white: #ffffff;
-            --accent-glow: rgba(57, 255, 20, 0.4);
-            --fifa-gold: linear-gradient(135deg, #f5d142 0%, #b8860b 50%, #f5d142 100%);
+            --bg-dark: #121212;
+            --panel-bg: #1e1e1e;
+            --accent-green: #2ecc71;
+            --text-light: #e0e0e0;
+            --border-color: #333;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html { 
-            height: 100%; width: 100%; background-color: var(--bg-black); 
-            color: var(--text-white); font-family: 'Inter', sans-serif; overflow: hidden; 
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden;
         }
 
-        /* --- 3-SPALTEN LAYOUT --- */
-        .app-shell { display: grid; grid-template-columns: 80px 1fr 350px; height: 100vh; }
-
-        /* NAVIGATION */
-        .sidebar-nav { background: var(--panel-gray); border-right: 1px solid var(--ui-border); display: flex; flex-direction: column; align-items: center; padding: 25px 0; gap: 40px; z-index: 100; }
-        .nav-btn { font-size: 30px; cursor: pointer; transition: 0.3s; color: #444; }
-        .nav-btn:hover, .nav-btn.active { color: var(--neon-green); transform: scale(1.1); filter: drop-shadow(0 0 10px var(--neon-green)); }
-
-        /* ARENA */
-        .arena { display: flex; flex-direction: column; padding: 20px; position: relative; background: radial-gradient(circle at center, #080808 0%, #000 100%); }
-        .pitch-container { flex: 1; border: 2px solid var(--neon-green); position: relative; overflow: hidden; box-shadow: inset 0 0 50px rgba(57, 255, 20, 0.1); }
-        .mid-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--neon-green); opacity: 0.5; }
-        .center-circle { position: absolute; left: 50%; top: 50%; width: 140px; height: 140px; border: 2px solid var(--neon-green); border-radius: 50%; transform: translate(-50%, -50%); opacity: 0.5; }
-        
-        /* TORE */
-        .goal { position: absolute; width: 10px; height: 20%; background: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); top: 40%; }
-        .goal-left { left: -5px; border-radius: 0 5px 5px 0; }
-        .goal-right { right: -5px; border-radius: 5px 0 0 5px; }
-
-        /* TONI-BOX */
-        .toni-box { background: var(--panel-gray); border-left: 1px solid var(--ui-border); display: flex; flex-direction: column; padding: 25px; }
-        .toni-status { height: 180px; background: #000; border: 1px solid var(--neon-green); border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .toni-orb { width: 70px; height: 70px; background: var(--neon-green); border-radius: 50%; filter: blur(30px); animation: pulse 3s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(0.9); } 50% { opacity: 0.7; transform: scale(1.1); } }
-
-        /* --- OVERLAYS --- */
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000; padding: 40px; overflow-y: auto; }
-        .close-btn { position: absolute; top: 30px; right: 40px; font-size: 40px; cursor: pointer; color: var(--neon-green); }
-
-        /* KABINE: FIFA CARDS LUXURY */
-        .kabine-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; padding: 20px; }
-        
-        .fifa-card {
-            width: 260px; height: 380px; background: #1a1a1a; border-radius: 15px; position: relative;
-            padding: 20px; border: 2px solid #333; transition: 0.3s;
-            background-image: linear-gradient(160deg, #1a1a1a 0%, #000 100%);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        /* 3-Spalten-Layout */
+        .cockpit {
+            display: grid;
+            grid-template-columns: 80px 1fr 350px;
+            height: 100vh;
         }
-        .fifa-card:hover { border-color: var(--neon-green); transform: translateY(-10px); }
-        .card-ovr { position: absolute; top: 25px; left: 20px; font-size: 42px; font-weight: 900; color: var(--neon-green); line-height: 1; }
-        .card-pos { position: absolute; top: 70px; left: 20px; font-size: 14px; font-weight: bold; color: #888; text-transform: uppercase; }
-        
-        .card-img-container {
-            width: 160px; height: 160px; margin: 0 auto 10px auto; border-radius: 50%;
-            overflow: hidden; border: 2px solid #333; position: relative; background: #050505;
+
+        /* Linke Spalte: Navigation */
+        .nav-sidebar {
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            gap: 30px;
         }
-        .card-img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .upload-hint { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.7); font-size: 9px; text-align: center; padding: 3px; cursor: pointer; opacity: 0; transition: 0.2s; }
-        .card-img-container:hover .upload-hint { opacity: 1; }
 
-        .card-name { font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; color: #fff; }
-        
-        /* FIFA STATS GRID */
-        .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
-        .stat-box { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 5px 10px; border-radius: 5px; }
-        .stat-label { color: #666; font-weight: bold; }
-        .stat-value { color: var(--neon-green); font-weight: 900; background: transparent; border: none; width: 30px; text-align: right; }
+        .nav-icon {
+            width: 50px; height: 50px;
+            background: #2a2a2a;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 20px;
+        }
 
-        /* AKTENTASCHE GRID */
-        .briefcase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 900px; margin: 40px auto; }
-        .kachel { background: #0a0a0a; border: 1px solid #222; border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .kachel:hover { border-color: var(--neon-green); transform: scale(1.05); }
-        .kachel i { font-size: 40px; display: block; margin-bottom: 15px; }
-        .kachel span { font-size: 10px; font-weight: bold; color: var(--neon-green); letter-spacing: 2px; }
+        .nav-icon:hover { background: var(--accent-green); color: black; }
+
+        /* Mittlere Spalte: Arena */
+        .arena {
+            position: relative;
+            background-color: #1a3a1a;
+            background-image: radial-gradient(#2d5a2d 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #pitch {
+            width: 90%; height: 90%;
+            border: 3px solid white;
+            position: relative;
+            background: #27ae60;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        /* Rechte Spalte: Toni-Box */
+        .toni-box {
+            background-color: var(--panel-bg);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-stream {
+            height: 200px;
+            background: black;
+            margin: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: #555;
+        }
+
+        .chat-history {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .input-area {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* Aktentasche Overlay */
+        #briefcase-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .grid-3x3 {
+            display: grid;
+            grid-template-columns: repeat(3, 150px);
+            grid-gap: 20px;
+        }
+
+        .kachel {
+            width: 150px; height: 150px;
+            background: #333;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .kachel:hover { background: var(--accent-green); color: black; }
+
+        /* Spieler-Marker */
+        .player {
+            width: 40px; height: 40px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: move;
+            border: 2px solid white;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
 
-    <div class="app-shell">
-        <nav class="sidebar-nav">
-            <div class="nav-btn" onclick="toggleOverlay('briefcase')">💼</div>
-            <div class="nav-btn" onclick="toggleMic()">🎤</div>
-            <div class="nav-btn" onclick="location.reload()">🔄</div>
-        </nav>
+<div class="cockpit">
+    <nav class="nav-sidebar">
+        <div class="nav-icon" onclick="toggleBriefcase()" title="Aktentasche">💼</div>
+        <div class="nav-icon" title="Mikrofon">🎤</div>
+        <div class="nav-icon" onclick="location.reload()" title="Reset">🔄</div>
+    </nav>
 
-        <main class="arena">
-            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 15px;">
-                <button style="background:none; border:1px solid var(--neon-green); color:var(--neon-green); padding:5px 15px; cursor:pointer; font-size:10px; font-weight:bold;">MATCH-DAY</button>
-                <button style="background:none; border:1px solid #333; color:#444; padding:5px 15px; cursor:pointer; font-size:10px; font-weight:bold;">TRAINING</button>
-            </div>
+    <main class="arena" id="arena">
+        <div id="pitch">
+            <div style="position: absolute; left: 50%; height: 100%; border-left: 2px solid white;"></div>
+            <div style="position: absolute; top: 50%; left: 50%; width: 100px; height: 100px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%);"></div>
             
-            <div class="pitch-container" id="pitch">
-                <div class="mid-line"></div>
-                <div class="center-circle"></div>
-                <div class="goal goal-left"></div>
-                <div class="goal goal-right"></div>
-            </div>
-        </main>
-
-        <aside class="toni-box">
-            <div class="toni-status">
-                <div class="toni-orb"></div>
-                <div style="position: absolute; bottom: 10px; font-size: 9px; letter-spacing: 3px; color: var(--neon-green); font-weight: bold;">TONI 2.0</div>
-            </div>
-            <div id="chat-stream" style="flex:1; background:rgba(0,0,0,0.5); padding:15px; border-radius:8px; font-size:13px; color:#aaa; overflow-y:auto; margin-bottom:15px;">
-                Toni: "Willkommen zurück, Björn. Das Taktikboard ist mit Toren ausgestattet. Die Kabine wartet auf die Bearbeitung der Kaderdaten."
-            </div>
-            <input type="text" placeholder="Befehl an Toni..." style="background:#111; border:1px solid #333; padding:15px; color:white; border-radius:8px;">
-        </aside>
-    </div>
-
-    <div id="overlay-briefcase" class="overlay">
-        <div class="close-btn" onclick="toggleOverlay('briefcase')">×</div>
-        <h2 style="color: var(--neon-green); text-align: center; letter-spacing: 5px; margin-bottom: 40px;">ZENTRAL-ARCHIV</h2>
-        <div class="briefcase-grid">
-            <div class="kachel" onclick="toggleOverlay('kabine')"><i>🏟️</i><span>KABINE (PRO)</span></div>
-            <div class="kachel"><i>❤️</i><span>ANALYSE</span></div>
-            <div class="kachel"><i>👶</i><span>KIDS-CLUB</span></div>
-            <div class="kachel"><i>⚔️</i><span>MATCH-DAY</span></div>
-            <div class="kachel"><i>🚧</i><span>TRAINING</span></div>
-            <div class="kachel"><i>💰</i><span>BUSINESS</span></div>
-            <div class="kachel"><i>📰</i><span>ZEITUNG</span></div>
-            <div class="kachel"><i>📹</i><span>VIDEO-ANALYSE</span></div>
-            <div class="kachel"><i>⚙️</i><span>SETTINGS</span></div>
+            <div class="player" id="p1" style="top: 20%; left: 40%;" draggable="true">10</div>
+            <div class="player" id="p2" style="top: 50%; left: 45%;" draggable="true">8</div>
         </div>
+    </main>
+
+    <aside class="toni-box">
+        <div class="video-stream" id="video-placeholder">
+            [VIDEO ANALYSE STREAM - MEDIAPIPE]
+        </div>
+        <div class="chat-history" id="chat">
+            <div style="color: var(--accent-green);"><b>Toni:</b> Bereit, Coach. Was steht heute an?</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Befehl an Toni...">
+            <button onclick="sendMessage()" style="padding: 10px; background: var(--accent-green); border: none; border-radius: 5px; cursor: pointer;">Send</button>
+        </div>
+    </aside>
+</div>
+
+<div id="briefcase-overlay" onclick="toggleBriefcase()">
+    <div class="grid-3x3">
+        <div class="kachel"><span>🏟️</span><br>KABINE</div>
+        <div class="kachel"><span>📊</span><br>ANALYSE</div>
+        <div class="kachel"><span>👶</span><br>KIDS</div>
+        <div class="kachel"><span>⚽</span><br>MATCH</div>
+        <div class="kachel"><span>🚧</span><br>TRAINING</div>
+        <div class="kachel"><span>💰</span><br>BUSINESS</div>
+        <div class="kachel"><span>📰</span><br>ZEITUNG</div>
+        <div class="kachel"><span>🔍</span><br>SCOUTING</div>
+        <div class="kachel"><span>⚙️</span><br>SYSTEM</div>
     </div>
+</div>
 
-    <div id="overlay-kabine" class="overlay">
-        <div class="close-btn" onclick="toggleOverlay('kabine')">×</div>
-        <h2 style="color: var(--neon-green); margin-bottom: 30px; letter-spacing: 2px;">PRO-KABINE: SPIELER-MANAGEMENT</h2>
-        <div class="kabine-grid" id="player-grid">
-            </div>
-    </div>
+<script>
+    // --- UI LOGIK ---
+    function toggleBriefcase() {
+        const overlay = document.getElementById('briefcase-overlay');
+        overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+    }
 
-    <script>
-        function toggleOverlay(id) {
-            const el = document.getElementById('overlay-' + id);
-            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-            if(id === 'kabine') generateCards();
-        }
+    function sendMessage() {
+        const input = document.getElementById('user-input');
+        const chat = document.getElementById('chat');
+        if (input.value.trim() === "") return;
 
-        // FIFA KARTEN LOGIK
-        const statsKeys = ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'];
+        chat.innerHTML += `<div><b>Coach:</b> ${input.value}</div>`;
         
-        function generateCards() {
-            const grid = document.getElementById('player-grid');
-            if(grid.innerHTML !== "") return; // Nur einmal laden
+        // Simulierter KI-Antwort-Hook
+        setTimeout(() => {
+            chat.innerHTML += `<div style="color: var(--accent-green);"><b>Toni:</b> Ich habe den Befehl "${input.value}" verstanden. (Anbindung an Ollama folgt)</div>`;
+            chat.scrollTop = chat.scrollHeight;
+        }, 1000);
 
-            for(let i = 1; i <= 16; i++) {
-                const card = document.createElement('div');
-                card.className = 'fifa-card';
-                card.id = `player-${i}`;
-                
-                let statsHtml = '';
-                statsKeys.forEach(key => {
-                    statsHtml += `
-                        <div class="stat-box">
-                            <span class="stat-label">${key}</span>
-                            <input type="number" class="stat-value" value="80" min="1" max="99" onchange="updateOVR(${i})">
-                        </div>
-                    `;
-                });
+        input.value = "";
+    }
 
-                card.innerHTML = `
-                    <div class="card-ovr" id="ovr-${i}">80</div>
-                    <div class="card-pos" contenteditable="true">ST</div>
-                    <div class="card-img-container" onclick="triggerUpload(${i})">
-                        <img id="img-${i}" src="https://via.placeholder.com/160/0a0a0a/39FF14?text=IMAGE">
-                        <div class="upload-hint">FOTO ÄNDERN</div>
-                        <input type="file" id="file-${i}" style="display:none" onchange="previewImage(event, ${i})">
-                    </div>
-                    <div class="card-name" contenteditable="true">SPIELER ${i}</div>
-                    <div class="card-stats">${statsHtml}</div>
-                `;
-                grid.appendChild(card);
-            }
+    // --- DRAG AND DROP LOGIK (Basic) ---
+    const players = document.querySelectorAll('.player');
+    const pitch = document.getElementById('pitch');
+
+    players.forEach(player => {
+        player.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', player.id);
+        });
+    });
+
+    pitch.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+
+    pitch.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const id = e.dataTransfer.getData('text');
+        const player = document.getElementById(id);
+        
+        const rect = pitch.getBoundingClientRect();
+        const x = e.clientX - rect.left - 20; // 20 = halbe Breite Marker
+        const y = e.clientY - rect.top - 20;
+
+        player.style.left = `${(x / rect.width) * 100}%`;
+        player.style.top = `${(y / rect.height) * 100}%`;
+    });
+
+    // --- LOKALE SPEICHERUNG ---
+    function saveState() {
+        const state = {
+            chat: document.getElementById('chat').innerHTML,
+            // Hier könnten Spielerpositionen etc. rein
+        };
+        localStorage.setItem('toni_state', JSON.stringify(state));
+    }
+
+    // Laden beim Start
+    window.onload = () => {
+        const saved = localStorage.getItem('toni_state');
+        if (saved) {
+            const state = JSON.parse(saved);
+            // document.getElementById('chat').innerHTML = state.chat;
         }
+    };
+</script>
 
-        function updateOVR(id) {
-            const card = document.getElementById(`player-${id}`);
-            const inputs = card.querySelectorAll('.stat-value');
-            let total = 0;
-            inputs.forEach(input => total += parseInt(input.value));
-            const ovr = Math.round(total / 6);
-            document.getElementById(`ovr-${id}`).innerText = ovr;
-            
-            // Dynamischer Karten-Effekt
-            if(ovr >= 85) card.style.borderColor = "var(--neon-green)";
-            else if(ovr >= 75) card.style.borderColor = "#daa520";
-            else card.style.borderColor = "#333";
-        }
-
-        function triggerUpload(id) {
-            document.getElementById(`file-${id}`).click();
-        }
-
-        function previewImage(event, id) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                const output = document.getElementById(`img-${id}`);
-                output.src = reader.result;
-            }
-            reader.sendAsBinary = true; // Fix für mobile
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    </script>
 </body>
 </html>
