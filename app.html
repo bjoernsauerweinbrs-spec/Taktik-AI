@@ -10,9 +10,8 @@
     <div class="pro-cockpit">
         <aside class="sidebar-nav">
             <div id="status-dot" class="ai-status-dot status-online"></div>
-            <div class="nav-item active" onclick="closeBriefcase()"><i class="fas fa-dt-board"></i><span>TAKTIK</span></div>
-            <div class="nav-item" onclick="toggleBriefcase()"><i class="fas fa-briefcase"></i><span>AKTENTASCHE</span></div>
-            <div class="nav-item" style="margin-top:auto;" onclick="openBriefcaseSection('Setup')"><i class="fas fa-cog"></i><span>SETUP</span></div>
+            <div class="nav-item" onclick="closeBriefcase()"><i class="fas fa-chalkboard"></i><span>TAKTIK</span></div>
+            <div class="nav-item" onclick="toggleBriefcase()"><i class="fas fa-briefcase"></i><span>ZENTRALE</span></div>
         </aside>
 
         <main class="arena-main" id="arena-container">
@@ -21,10 +20,8 @@
 
         <aside class="comm-panel">
             <div class="chat-window" id="chat-box"></div>
-            <div class="mic-section">
-                <div class="mic-container" onclick="window.ToniBrain.toggleMic()">
-                    <i class="fas fa-microphone"></i><div class="pulse-ring"></div>
-                </div>
+            <div class="mic-section" style="height:150px; display:flex; align-items:center; justify-content:center;">
+                <div class="mic-container" onclick="window.ToniBrain.toggleMic()"><i class="fas fa-microphone"></i></div>
             </div>
         </aside>
     </div>
@@ -32,16 +29,14 @@
     <div id="briefcase-overlay">
         <div class="briefcase-window">
             <nav class="briefcase-nav">
-                <div class="bc-nav-item" onclick="renderModule('Kabine')"><i class="fas fa-users"></i> KABINE</div>
-                <div class="bc-nav-item" onclick="renderModule('Labor')"><i class="fas fa-heartbeat"></i> LABOR</div>
-                <div class="bc-nav-item" onclick="renderModule('Jugend')"><i class="fas fa-award"></i> JUGEND</div>
-                <div class="bc-nav-item" onclick="renderModule('Management')"><i class="fas fa-city"></i> MANAGEMENT</div>
-                <div class="bc-nav-item" onclick="renderModule('Video')"><i class="fas fa-video"></i> VIDEO</div>
+                <div class="bc-nav-item" onclick="loadTab('Kabine')">KABINE</div>
+                <div class="bc-nav-item" onclick="loadTab('Labor')">LABOR</div>
+                <div class="bc-nav-item" onclick="loadTab('Junioren')">JUGEND</div>
+                <div class="bc-nav-item" onclick="loadTab('Zeitung')">KURIER</div>
+                <div class="bc-nav-item" onclick="loadTab('Manager')">MANAGER</div>
                 <div class="bc-close" onclick="toggleBriefcase()"><i class="fas fa-times"></i></div>
             </nav>
-            
-            <div id="briefcase-content">
-                </div>
+            <div id="briefcase-content"></div>
         </div>
     </div>
 
@@ -51,6 +46,7 @@
     <script src="modules/kabine.js"></script>
     <script src="modules/labor.js"></script>
     <script src="modules/junioren.js"></script>
+    <script src="modules/zeitung.js"></script>
     <script src="modules/manager.js"></script>
 
     <script>
@@ -59,22 +55,18 @@
             c.width = container.clientWidth; c.height = container.clientHeight;
             if(window.PitchEngine) window.PitchEngine.draw();
         }
-
         function toggleBriefcase() {
             const ov = document.getElementById('briefcase-overlay');
-            const isVisible = ov.style.display === 'flex';
-            ov.style.display = isVisible ? 'none' : 'flex';
-            if(!isVisible) renderModule('Kabine'); // Startet immer mit der Kabine
+            const isOff = ov.style.display === 'none' || ov.style.display === '';
+            ov.style.display = isOff ? 'flex' : 'none';
+            if(isOff) loadTab('Kabine');
         }
-
         function closeBriefcase() { document.getElementById('briefcase-overlay').style.display = 'none'; }
-
-        function renderModule(name) {
-            const content = document.getElementById('briefcase-content');
-            content.innerHTML = "";
-            if(window['Sektor' + name]) window['Sektor' + name].render();
+        function loadTab(name) {
+            document.querySelectorAll('.bc-nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('briefcase-content').innerHTML = "";
+            window['Sektor' + name].render();
         }
-
         window.addEventListener('load', () => { calibrate(); window.PitchEngine.init(); window.ToniBrain.firstGreeting(); });
         window.addEventListener('resize', calibrate);
     </script>
