@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | Tactical Intelligence</title>
+    <title>TONI 2.0 | High-Tech Tactical Board</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
@@ -13,135 +13,79 @@
             --ui-border: #1a1a1a;
             --text-white: #ffffff;
             --accent-glow: rgba(57, 255, 20, 0.4);
+            --fifa-gold: linear-gradient(135deg, #f5d142 0%, #b8860b 50%, #f5d142 100%);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body, html { 
-            height: 100%; width: 100%; 
-            background-color: var(--bg-black); color: var(--text-white); 
-            font-family: 'Segoe UI', sans-serif; overflow: hidden; 
+            height: 100%; width: 100%; background-color: var(--bg-black); 
+            color: var(--text-white); font-family: 'Inter', sans-serif; overflow: hidden; 
         }
 
-        /* --- LAYOUT: 3-SPALTEN-COCKPIT --- */
-        .app-shell {
-            display: grid;
-            grid-template-columns: 80px 1fr 350px;
-            height: 100vh;
-        }
+        /* --- 3-SPALTEN LAYOUT --- */
+        .app-shell { display: grid; grid-template-columns: 80px 1fr 350px; height: 100vh; }
 
-        /* 1. NAVIGATION (Links) */
-        .sidebar-nav {
-            background: var(--panel-gray);
-            border-right: 1px solid var(--ui-border);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 25px 0;
-            gap: 40px;
-        }
-        .nav-btn {
-            font-size: 30px; cursor: pointer; transition: 0.3s; color: #444;
-        }
-        .nav-btn:hover, .nav-btn.active {
-            color: var(--neon-green); transform: scale(1.1); filter: drop-shadow(0 0 10px var(--neon-green));
-        }
+        /* NAVIGATION */
+        .sidebar-nav { background: var(--panel-gray); border-right: 1px solid var(--ui-border); display: flex; flex-direction: column; align-items: center; padding: 25px 0; gap: 40px; z-index: 100; }
+        .nav-btn { font-size: 30px; cursor: pointer; transition: 0.3s; color: #444; }
+        .nav-btn:hover, .nav-btn.active { color: var(--neon-green); transform: scale(1.1); filter: drop-shadow(0 0 10px var(--neon-green)); }
 
-        /* 2. ARENA (Mitte) */
-        .arena {
-            display: flex; flex-direction: column; padding: 20px; position: relative;
-            background: radial-gradient(circle at center, #080808 0%, #000 100%);
-        }
-        .arena-header { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; }
-        .tab-btn {
-            background: #111; border: 1px solid #333; color: #666; padding: 10px 25px;
-            border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; letter-spacing: 2px;
-        }
-        .tab-btn.active { border-color: var(--neon-green); color: var(--neon-green); box-shadow: 0 0 15px var(--accent-glow); }
-
-        /* Spielfeld & Canvas für Zeichnungen */
-        .pitch-container {
-            flex: 1; border: 2px solid var(--neon-green); position: relative; overflow: hidden;
-            background: url('https://www.transparenttextures.com/patterns/dark-matter.png');
-        }
-        #pitch-canvas { position: absolute; top: 0; left: 0; z-index: 5; pointer-events: none; }
-        .field-markings { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-        .center-circle { 
-            position: absolute; left: 50%; top: 50%; width: 150px; height: 150px; 
-            border: 2px solid var(--neon-green); border-radius: 50%; transform: translate(-50%, -50%); 
-        }
-        .mid-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--neon-green); }
-        .penalty-box { position: absolute; border: 2px solid var(--neon-green); width: 16%; height: 40%; top: 30%; }
-        .left-box { left: 0; border-left: none; } .right-box { right: 0; border-right: none; }
+        /* ARENA */
+        .arena { display: flex; flex-direction: column; padding: 20px; position: relative; background: radial-gradient(circle at center, #080808 0%, #000 100%); }
+        .pitch-container { flex: 1; border: 2px solid var(--neon-green); position: relative; overflow: hidden; box-shadow: inset 0 0 50px rgba(57, 255, 20, 0.1); }
+        .mid-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--neon-green); opacity: 0.5; }
+        .center-circle { position: absolute; left: 50%; top: 50%; width: 140px; height: 140px; border: 2px solid var(--neon-green); border-radius: 50%; transform: translate(-50%, -50%); opacity: 0.5; }
         
-        /* Draggable Items */
-        .player-token {
-            width: 40px; height: 40px; background: #222; border: 2px solid var(--neon-green);
-            border-radius: 50%; position: absolute; z-index: 10; cursor: grab;
-            display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;
-        }
+        /* TORE */
+        .goal { position: absolute; width: 10px; height: 20%; background: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); top: 40%; }
+        .goal-left { left: -5px; border-radius: 0 5px 5px 0; }
+        .goal-right { right: -5px; border-radius: 5px 0 0 5px; }
 
-        /* 3. TONI-BOX (Rechts) */
-        .toni-box {
-            background: var(--panel-gray); border-left: 1px solid var(--ui-border);
-            display: flex; flex-direction: column; padding: 25px;
-        }
-        .toni-status {
-            height: 200px; background: #000; border: 1px solid var(--neon-green);
-            border-radius: 12px; margin-bottom: 20px; position: relative;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .toni-orb {
-            width: 80px; height: 80px; background: var(--neon-green);
-            border-radius: 50%; filter: blur(35px); animation: pulse 3s infinite;
-        }
-        @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(0.9); } 50% { opacity: 0.8; transform: scale(1.2); } }
+        /* TONI-BOX */
+        .toni-box { background: var(--panel-gray); border-left: 1px solid var(--ui-border); display: flex; flex-direction: column; padding: 25px; }
+        .toni-status { height: 180px; background: #000; border: 1px solid var(--neon-green); border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .toni-orb { width: 70px; height: 70px; background: var(--neon-green); border-radius: 50%; filter: blur(30px); animation: pulse 3s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(0.9); } 50% { opacity: 0.7; transform: scale(1.1); } }
 
-        .chat-stream {
-            flex: 1; background: rgba(0,0,0,0.5); border: 1px solid #222;
-            border-radius: 8px; padding: 15px; overflow-y: auto; margin-bottom: 15px; font-size: 13px;
-        }
-        .cmd-bar {
-            background: #111; border: 1px solid #333; color: white; padding: 15px;
-            border-radius: 8px; width: 100%; font-size: 14px;
-        }
+        /* --- OVERLAYS --- */
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000; padding: 40px; overflow-y: auto; }
+        .close-btn { position: absolute; top: 30px; right: 40px; font-size: 40px; cursor: pointer; color: var(--neon-green); }
 
-        /* --- OVERLAYS: BRIEFCASE 3x3 --- */
-        .overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000; padding: 40px;
-        }
-        .grid-3x3 {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;
-            max-width: 1000px; margin: 40px auto;
-        }
-        .kachel {
-            background: #0a0a0a; border: 1px solid #222; border-radius: 15px;
-            padding: 30px; text-align: center; cursor: pointer; transition: 0.3s;
-        }
-        .kachel:hover { border-color: var(--neon-green); background: #111; transform: translateY(-5px); }
-        .kachel-icon { font-size: 40px; margin-bottom: 15px; display: block; }
-        .kachel-label { font-size: 11px; font-weight: bold; letter-spacing: 2px; color: var(--neon-green); text-transform: uppercase; }
-
-        /* VIDEO SPLIT SCREEN */
-        .split-view { display: grid; grid-template-columns: 1fr; gap: 10px; height: 100%; }
-        @media (min-width: 900px) { .split-view { grid-template-columns: 1fr 1fr; } }
-        .vid-frame { background: #050505; border: 1px solid #333; border-radius: 10px; position: relative; }
-        .vid-tag { position: absolute; top: 10px; left: 10px; background: var(--neon-green); color: black; padding: 4px 10px; font-size: 10px; font-weight: bold; }
-
-        /* KABINE: FIFA CARDS */
-        .kabine-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        /* KABINE: FIFA CARDS LUXURY */
+        .kabine-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; padding: 20px; }
+        
         .fifa-card {
-            background: #111; border: 2px solid #333; border-radius: 12px; aspect-ratio: 2/3;
-            position: relative; padding: 15px; overflow: hidden;
+            width: 260px; height: 380px; background: #1a1a1a; border-radius: 15px; position: relative;
+            padding: 20px; border: 2px solid #333; transition: 0.3s;
+            background-image: linear-gradient(160deg, #1a1a1a 0%, #000 100%);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
-        .fifa-card.gold { border-color: var(--neon-green); box-shadow: 0 0 15px var(--accent-glow); }
-        .ovr-badge { position: absolute; top: 10px; left: 10px; font-size: 30px; font-weight: 900; color: var(--neon-green); }
+        .fifa-card:hover { border-color: var(--neon-green); transform: translateY(-10px); }
+        .card-ovr { position: absolute; top: 25px; left: 20px; font-size: 42px; font-weight: 900; color: var(--neon-green); line-height: 1; }
+        .card-pos { position: absolute; top: 70px; left: 20px; font-size: 14px; font-weight: bold; color: #888; text-transform: uppercase; }
+        
+        .card-img-container {
+            width: 160px; height: 160px; margin: 0 auto 10px auto; border-radius: 50%;
+            overflow: hidden; border: 2px solid #333; position: relative; background: #050505;
+        }
+        .card-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .upload-hint { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.7); font-size: 9px; text-align: center; padding: 3px; cursor: pointer; opacity: 0; transition: 0.2s; }
+        .card-img-container:hover .upload-hint { opacity: 1; }
 
-        /* PRINT STYLES */
-        @media print {
-            body * { visibility: hidden; }
-            #print-section, #print-section * { visibility: visible; }
-            #print-section { position: absolute; left: 0; top: 0; width: 100%; }
-        }
+        .card-name { font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; color: #fff; }
+        
+        /* FIFA STATS GRID */
+        .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
+        .stat-box { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 5px 10px; border-radius: 5px; }
+        .stat-label { color: #666; font-weight: bold; }
+        .stat-value { color: var(--neon-green); font-weight: 900; background: transparent; border: none; width: 30px; text-align: right; }
+
+        /* AKTENTASCHE GRID */
+        .briefcase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 900px; margin: 40px auto; }
+        .kachel { background: #0a0a0a; border: 1px solid #222; border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .kachel:hover { border-color: var(--neon-green); transform: scale(1.05); }
+        .kachel i { font-size: 40px; display: block; margin-bottom: 15px; }
+        .kachel span { font-size: 10px; font-weight: bold; color: var(--neon-green); letter-spacing: 2px; }
     </style>
 </head>
 <body>
@@ -149,192 +93,130 @@
     <div class="app-shell">
         <nav class="sidebar-nav">
             <div class="nav-btn" onclick="toggleOverlay('briefcase')">💼</div>
-            <div class="nav-btn" id="mic-toggle" onclick="activateVoice()">🎤</div>
+            <div class="nav-btn" onclick="toggleMic()">🎤</div>
             <div class="nav-btn" onclick="location.reload()">🔄</div>
         </nav>
 
         <main class="arena">
-            <div class="arena-header">
-                <button class="tab-btn active" id="mode-match" onclick="setArenaMode('match')">MATCH-DAY</button>
-                <button class="tab-btn" id="mode-train" onclick="setArenaMode('training')">TRAININGS-LAGER</button>
+            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 15px;">
+                <button style="background:none; border:1px solid var(--neon-green); color:var(--neon-green); padding:5px 15px; cursor:pointer; font-size:10px; font-weight:bold;">MATCH-DAY</button>
+                <button style="background:none; border:1px solid #333; color:#444; padding:5px 15px; cursor:pointer; font-size:10px; font-weight:bold;">TRAINING</button>
             </div>
             
             <div class="pitch-container" id="pitch">
-                <div class="field-markings">
-                    <div class="mid-line"></div>
-                    <div class="center-circle"></div>
-                    <div class="penalty-box left-box"></div>
-                    <div class="penalty-box right-box"></div>
-                </div>
-                <canvas id="pitch-canvas"></canvas>
-                </div>
+                <div class="mid-line"></div>
+                <div class="center-circle"></div>
+                <div class="goal goal-left"></div>
+                <div class="goal goal-right"></div>
+            </div>
         </main>
 
         <aside class="toni-box">
             <div class="toni-status">
-                <div class="toni-orb" id="toni-orb"></div>
-                <div style="position: absolute; bottom: 15px; font-size: 10px; font-weight: bold; color: var(--neon-green); letter-spacing: 3px;">TONI 2.0</div>
+                <div class="toni-orb"></div>
+                <div style="position: absolute; bottom: 10px; font-size: 9px; letter-spacing: 3px; color: var(--neon-green); font-weight: bold;">TONI 2.0</div>
             </div>
-            <div class="chat-stream" id="chat-stream">
-                Toni: "System bereit, Björn. Alle taktischen Sektoren sind online."
+            <div id="chat-stream" style="flex:1; background:rgba(0,0,0,0.5); padding:15px; border-radius:8px; font-size:13px; color:#aaa; overflow-y:auto; margin-bottom:15px;">
+                Toni: "Willkommen zurück, Björn. Das Taktikboard ist mit Toren ausgestattet. Die Kabine wartet auf die Bearbeitung der Kaderdaten."
             </div>
-            <input type="text" class="cmd-bar" placeholder="Befehl an Toni (Ollama Engine)..." onkeypress="handleToniCmd(event)">
+            <input type="text" placeholder="Befehl an Toni..." style="background:#111; border:1px solid #333; padding:15px; color:white; border-radius:8px;">
         </aside>
     </div>
 
     <div id="overlay-briefcase" class="overlay">
-        <h2 style="color: var(--neon-green); text-align: center; letter-spacing: 5px;">ZENTRAL-ARCHIV</h2>
-        <div class="grid-3x3">
-            <div class="kachel" onclick="openModule('kabine')"><span class="kachel-icon">🏟️</span><span class="kachel-label">Kabine</span></div>
-            <div class="kachel" onclick="openModule('analyse')"><span class="kachel-icon">❤️</span><span class="kachel-label">Analyse</span></div>
-            <div class="kachel" onclick="openModule('kids')"><span class="kachel-icon">👶</span><span class="kachel-label">Kids-Club</span></div>
-            <div class="kachel" onclick="setArenaMode('match'); toggleOverlay('briefcase');"><span class="kachel-icon">⚔️</span><span class="kachel-label">Match-Day</span></div>
-            <div class="kachel" onclick="setArenaMode('training'); toggleOverlay('briefcase');"><span class="kachel-icon">🚧</span><span class="kachel-label">Training</span></div>
-            <div class="kachel"><span class="kachel-icon">💰</span><span class="kachel-label">Business</span></div>
-            <div class="kachel" onclick="generatePDF()"><span class="kachel-icon">📰</span><span class="kachel-label">Zeitung</span></div>
-            <div class="kachel" onclick="openModule('video')"><span class="kachel-icon">📹</span><span class="kachel-label">Video-Analyse</span></div>
-            <div class="kachel"><span class="kachel-icon">⚙️</span><span class="kachel-label">Settings</span></div>
+        <div class="close-btn" onclick="toggleOverlay('briefcase')">×</div>
+        <h2 style="color: var(--neon-green); text-align: center; letter-spacing: 5px; margin-bottom: 40px;">ZENTRAL-ARCHIV</h2>
+        <div class="briefcase-grid">
+            <div class="kachel" onclick="toggleOverlay('kabine')"><i>🏟️</i><span>KABINE (PRO)</span></div>
+            <div class="kachel"><i>❤️</i><span>ANALYSE</span></div>
+            <div class="kachel"><i>👶</i><span>KIDS-CLUB</span></div>
+            <div class="kachel"><i>⚔️</i><span>MATCH-DAY</span></div>
+            <div class="kachel"><i>🚧</i><span>TRAINING</span></div>
+            <div class="kachel"><i>💰</i><span>BUSINESS</span></div>
+            <div class="kachel"><i>📰</i><span>ZEITUNG</span></div>
+            <div class="kachel"><i>📹</i><span>VIDEO-ANALYSE</span></div>
+            <div class="kachel"><i>⚙️</i><span>SETTINGS</span></div>
         </div>
-        <button class="tab-btn" style="margin: 0 auto; display: block;" onclick="toggleOverlay('briefcase')">ZURÜCK</button>
     </div>
 
-    <div id="overlay-module" class="overlay">
-        <div id="module-content"></div>
-        <button class="tab-btn" style="position: absolute; bottom: 30px; right: 40px;" onclick="toggleOverlay('module')">SCHLIESSEN</button>
+    <div id="overlay-kabine" class="overlay">
+        <div class="close-btn" onclick="toggleOverlay('kabine')">×</div>
+        <h2 style="color: var(--neon-green); margin-bottom: 30px; letter-spacing: 2px;">PRO-KABINE: SPIELER-MANAGEMENT</h2>
+        <div class="kabine-grid" id="player-grid">
+            </div>
     </div>
 
     <script>
-        /* --- KERN-LOGIK: TONI 2.0 --- */
-        const chat = document.getElementById('chat-stream');
-        const ollamaURL = "http://localhost:11434/api/generate"; // Ollama Standard
-
-        // 1. STIMME (Männlich, Tief, Kompetent)
-        let toniVoice = null;
-        function initVoice() {
-            const voices = window.speechSynthesis.getVoices();
-            // Suche nach tiefen männlichen Stimmen (Browserabhängig)
-            toniVoice = voices.find(v => v.name.includes('Google Deutsch') || v.name.includes('Stefan') || v.lang === 'de-DE' && v.name.includes('Male'));
-        }
-        window.speechSynthesis.onvoiceschanged = initVoice;
-
-        function toniSpeak(text) {
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.voice = toniVoice;
-            msg.pitch = 0.8; // Tiefer
-            msg.rate = 0.9;  // Kompetent/Ruhig
-            window.speechSynthesis.speak(msg);
-        }
-
-        // 2. OLLAMA INTEGRATION
-        async function handleToniCmd(e) {
-            if(e.key === 'Enter') {
-                const input = e.target.value;
-                if(!input) return;
-                addLog("Björn", input);
-                e.target.value = "";
-
-                // Pulsieren starten
-                document.getElementById('toni-orb').style.animationDuration = "0.5s";
-
-                try {
-                    const response = await fetch(ollamaURL, {
-                        method: 'POST',
-                        body: JSON.stringify({ model: "llama3", prompt: input, stream: false })
-                    });
-                    const data = await response.json();
-                    addLog("Toni", data.response);
-                    toniSpeak(data.response);
-                } catch (err) {
-                    const fallback = "Ich kann gerade nicht auf Ollama zugreifen, Björn. Aber ich bleibe auf Empfang.";
-                    addLog("Toni", fallback);
-                    toniSpeak(fallback);
-                }
-                document.getElementById('toni-orb').style.animationDuration = "3s";
-            }
-        }
-
-        function addLog(user, msg) {
-            chat.innerHTML += `<div><strong style="color:var(--neon-green)">${user}:</strong> ${msg}</div>`;
-            chat.scrollTop = chat.scrollHeight;
-        }
-
-        // 3. ARENA & TAKTIK
-        function setArenaMode(mode) {
-            const pitch = document.getElementById('pitch');
-            document.getElementById('mode-match').classList.toggle('active', mode === 'match');
-            document.getElementById('mode-train').classList.toggle('active', mode === 'training');
-            
-            if(mode === 'training') {
-                pitch.style.borderColor = "#ffaa00";
-                addLog("Toni", "Trainingsmaterialien geladen. Drag & Drop aktiv.");
-            } else {
-                pitch.style.borderColor = "var(--neon-green)";
-                addLog("Toni", "Match-Modus. 5m-Zone fokussiert.");
-            }
-        }
-
-        // 4. MODULE (Video, Kabine etc.)
-        function openModule(type) {
-            const content = document.getElementById('module-content');
-            toggleOverlay('module');
-            
-            if(type === 'video') {
-                content.innerHTML = `
-                    <h2 style="color:var(--neon-green)">VIDEO-ANALYSE ZENTRUM</h2>
-                    <div class="split-view">
-                        <div class="vid-frame"><div class="vid-tag">PROFI-VORLAGE (YT)</div></div>
-                        <div class="vid-frame"><div class="vid-tag">LIVE-CAM (SMARTPHONE)</div></div>
-                    </div>
-                `;
-            } else if(type === 'kabine') {
-                content.innerHTML = `
-                    <h2 style="color:var(--neon-green); margin-bottom:20px;">KABINE (50+ SPIELER)</h2>
-                    <div class="kabine-grid" id="player-grid"></div>
-                `;
-                generateFIFAKarten();
-            }
-        }
-
-        function generateFIFAKarten() {
-            const grid = document.getElementById('player-grid');
-            for(let i=1; i<=16; i++) {
-                grid.innerHTML += `
-                    <div class="fifa-card gold">
-                        <div class="ovr-badge">88</div>
-                        <div style="text-align:center; font-size:60px; margin-top:40px;">👤</div>
-                        <div style="text-align:center; font-weight:bold; margin-top:10px;">PRO-PLAYER ${i}</div>
-                    </div>
-                `;
-            }
-        }
-
-        // 5. HELFER
         function toggleOverlay(id) {
             const el = document.getElementById('overlay-' + id);
             el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+            if(id === 'kabine') generateCards();
         }
 
-        function generatePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text("STADION-ZEITUNG TONI 2.0", 10, 10);
-            doc.text("Björn's Matchplan für heute...", 10, 20);
-            doc.save("Stadionzeitung.pdf");
-            addLog("Toni", "Stadionzeitung wurde als PDF generiert.");
+        // FIFA KARTEN LOGIK
+        const statsKeys = ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'];
+        
+        function generateCards() {
+            const grid = document.getElementById('player-grid');
+            if(grid.innerHTML !== "") return; // Nur einmal laden
+
+            for(let i = 1; i <= 16; i++) {
+                const card = document.createElement('div');
+                card.className = 'fifa-card';
+                card.id = `player-${i}`;
+                
+                let statsHtml = '';
+                statsKeys.forEach(key => {
+                    statsHtml += `
+                        <div class="stat-box">
+                            <span class="stat-label">${key}</span>
+                            <input type="number" class="stat-value" value="80" min="1" max="99" onchange="updateOVR(${i})">
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="card-ovr" id="ovr-${i}">80</div>
+                    <div class="card-pos" contenteditable="true">ST</div>
+                    <div class="card-img-container" onclick="triggerUpload(${i})">
+                        <img id="img-${i}" src="https://via.placeholder.com/160/0a0a0a/39FF14?text=IMAGE">
+                        <div class="upload-hint">FOTO ÄNDERN</div>
+                        <input type="file" id="file-${i}" style="display:none" onchange="previewImage(event, ${i})">
+                    </div>
+                    <div class="card-name" contenteditable="true">SPIELER ${i}</div>
+                    <div class="card-stats">${statsHtml}</div>
+                `;
+                grid.appendChild(card);
+            }
         }
 
-        function activateVoice() {
-            const mic = document.getElementById('mic-toggle');
-            mic.classList.toggle('active');
-            addLog("Toni", mic.classList.contains('active') ? "Ich höre zu." : "Mikrofon aus.");
+        function updateOVR(id) {
+            const card = document.getElementById(`player-${id}`);
+            const inputs = card.querySelectorAll('.stat-value');
+            let total = 0;
+            inputs.forEach(input => total += parseInt(input.value));
+            const ovr = Math.round(total / 6);
+            document.getElementById(`ovr-${id}`).innerText = ovr;
+            
+            // Dynamischer Karten-Effekt
+            if(ovr >= 85) card.style.borderColor = "var(--neon-green)";
+            else if(ovr >= 75) card.style.borderColor = "#daa520";
+            else card.style.borderColor = "#333";
         }
 
-        // Initialisierung
-        window.onload = () => {
-            const canvas = document.getElementById('pitch-canvas');
-            canvas.width = document.getElementById('pitch').offsetWidth;
-            canvas.height = document.getElementById('pitch').offsetHeight;
-        };
+        function triggerUpload(id) {
+            document.getElementById(`file-${id}`).click();
+        }
+
+        function previewImage(event, id) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const output = document.getElementById(`img-${id}`);
+                output.src = reader.result;
+            }
+            reader.sendAsBinary = true; // Fix für mobile
+            reader.readAsDataURL(event.target.files[0]);
+        }
     </script>
 </body>
 </html>
