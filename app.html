@@ -2,9 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TONI 2.0 - ELITE COCKPIT</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,12 +10,10 @@
     <div class="pro-cockpit">
         <aside class="sidebar-nav">
             <div id="status-dot" class="ai-status-dot status-online"></div>
-            <div class="nav-item" onclick="toggleBriefcase()"><i class="fas fa-briefcase"></i><span>ZENTRALE</span></div>
             <div class="nav-item" onclick="openModule('Kabine')"><i class="fas fa-users"></i><span>KABINE</span></div>
             <div class="nav-item" onclick="openModule('Labor')"><i class="fas fa-heartbeat"></i><span>LABOR</span></div>
             <div class="nav-item" onclick="openModule('Junioren')"><i class="fas fa-award"></i><span>JUGEND</span></div>
-            <div class="nav-item" onclick="openModule('Zeitung')"><i class="fas fa-newspaper"></i><span>KURIER</span></div>
-            <div class="nav-item" onclick="openModule('Setup')" style="margin-top:auto;"><i class="fas fa-cog"></i><span>SETUP</span></div>
+            <div class="nav-item" style="margin-top:auto;"><i class="fas fa-cog"></i><span>SETUP</span></div>
         </aside>
 
         <main class="arena-main" id="arena-container">
@@ -26,16 +22,15 @@
 
         <aside class="comm-panel">
             <div class="chat-window" id="chat-box"></div>
-            <div class="mic-section">
-                <div class="mic-container" id="mic-trigger" onclick="window.ToniBrain.toggleMic()">
-                    <i class="fas fa-microphone"></i><div class="pulse-ring"></div>
-                </div>
+            <div class="mic-section" style="height:150px; display:flex; align-items:center; justify-content:center;">
+                <i class="fas fa-microphone" style="font-size:2rem; color:#333;"></i>
             </div>
         </aside>
     </div>
 
     <div id="briefcase-overlay" onclick="if(event.target === this) toggleBriefcase()">
-        <div class="briefcase-content" id="briefcase-grid"></div>
+        <div class="briefcase-content" id="briefcase-grid">
+            </div>
     </div>
 
     <script src="engine/database.js"></script>
@@ -44,44 +39,34 @@
     <script src="modules/kabine.js"></script>
     <script src="modules/labor.js"></script>
     <script src="modules/junioren.js"></script>
-    <script src="modules/zeitung.js"></script>
-    <script src="modules/setup.js"></script>
 
     <script>
-        if(!sessionStorage.getItem('toni_auth')) window.location.href = 'index.html';
-
         function calibrate() {
-            const canvas = document.getElementById('tactic-board');
+            const c = document.getElementById('tactic-board');
             const container = document.getElementById('arena-container');
-            if (canvas && container && window.PitchEngine.canvas) {
-                canvas.width = container.clientWidth;
-                canvas.height = container.clientHeight;
-                window.PitchEngine.draw();
-            }
+            // FIX: Nutzt die volle verfügbare Größe des MacBook Bildschirms
+            c.width = container.clientWidth;
+            c.height = container.clientHeight;
+            if(window.PitchEngine) window.PitchEngine.draw();
         }
 
-        function toggleBriefcase() { 
+        function toggleBriefcase(show = false) {
             const ov = document.getElementById('briefcase-overlay');
-            ov.style.display = (ov.style.display === 'flex') ? 'none' : 'flex';
+            ov.style.display = show ? 'flex' : 'none';
         }
 
         function openModule(name) {
-            toggleBriefcase();
-            if(window['Sektor' + name]) {
-                window['Sektor' + name].render();
-                window.ToniBrain.speak(name + " geladen.");
-            }
+            const grid = document.getElementById('briefcase-grid');
+            grid.innerHTML = ""; // Alten Müll löschen
+            toggleBriefcase(true);
+            window['Sektor' + name].render();
         }
 
         window.addEventListener('load', () => {
-            // Erst die Engine initialisieren (Canvas zuweisen)
             window.PitchEngine.init();
-            // Dann kalibrieren (Breite/Höhe setzen)
             calibrate();
-            // Dann TONI starten
             window.ToniBrain.firstGreeting();
         });
-
         window.addEventListener('resize', calibrate);
     </script>
 </body>
