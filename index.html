@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pro Coach - Taktikboard</title>
     <style>
-        /* Grunddesign: Tiefschwarz & Neongrün */
         :root {
             --bg-black: #000000;
             --neon-green: #39FF14;
@@ -29,12 +28,12 @@
         .app-container {
             display: grid;
             grid-template-columns: 120px 1fr 280px;
-            grid-template-rows: 1fr 120px; /* Untere Reihe für Auswechselbank */
+            grid-template-rows: 1fr 120px;
             height: 100vh;
             width: 100vw;
         }
 
-        /* Linke Spalte: Aktentasche */
+        /* Links: Aktentasche */
         .sidebar-left {
             background: var(--panel-gray);
             border-right: 1px solid #222;
@@ -48,12 +47,9 @@
             font-size: 40px;
             cursor: pointer;
             filter: drop-shadow(0 0 5px var(--neon-green));
-            transition: transform 0.2s;
         }
 
-        .briefcase:hover { transform: scale(1.1); }
-
-        /* Mittlere Spalte: Spielfeld */
+        /* Mitte: Spielfeld */
         .field-area {
             display: flex;
             justify-content: center;
@@ -69,44 +65,35 @@
             border: 3px solid var(--neon-green);
             position: relative;
             background-color: var(--bg-black);
-            transition: all 0.5s ease;
+            transition: all 0.3s ease;
         }
 
-        /* Spielfeldmarkierungen in Neongrün */
+        /* Markierungen */
         .line { position: absolute; background-color: var(--neon-green); }
-        
         .center-line { left: 50%; top: 0; bottom: 0; width: 2px; transform: translateX(-50%); }
         .center-circle { 
             left: 50%; top: 50%; width: 15%; height: 22.5%; 
             border: 2px solid var(--neon-green); border-radius: 50%; 
             transform: translate(-50%, -50%); 
         }
-
-        /* Strafräume (16m) */
         .box-16 { border: 2px solid var(--neon-green); width: 16%; height: 44%; position: absolute; top: 28%; }
         .left-16 { left: 0; border-left: none; }
         .right-16 { right: 0; border-right: none; }
-
-        /* 5m Räume */
         .box-5 { border: 2px solid var(--neon-green); width: 6%; height: 20%; position: absolute; top: 40%; }
         .left-5 { left: 0; border-left: none; }
         .right-5 { right: 0; border-right: none; }
 
-        /* Tore Logik */
+        /* Tore */
         .goal { position: absolute; width: 8px; height: 15%; background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
-        
-        /* Senior Tore (Mitte) */
         .goal-senior-l { left: -10px; top: 42.5%; }
         .goal-senior-r { right: -10px; top: 42.5%; }
-
-        /* Funino Tore (4 Stück) */
         .goal-funino { display: none; }
         .f-l-top { left: -10px; top: 15%; }
         .f-l-bot { left: -10px; bottom: 15%; }
         .f-r-top { right: -10px; top: 15%; }
         .f-r-bot { right: -10px; bottom: 15%; }
 
-        /* Rechte Spalte: Toni */
+        /* Rechts: Toni */
         .sidebar-right {
             background: var(--panel-gray);
             border-left: 1px solid #222;
@@ -121,11 +108,10 @@
             height: 100px;
             border: 2px solid var(--neon-green);
             border-radius: 50%;
-            margin-bottom: 10px;
-            background: #222; /* Platzhalter für Toni Bild */
+            background: url('dein-toni-bild.png') center/cover; /* Platzhalter */
         }
 
-        /* Untere Zeile: Auswechselbank */
+        /* Unten: Bank */
         .bench-area {
             grid-column: 1 / 4;
             background: #0a0a0a;
@@ -134,27 +120,18 @@
             align-items: center;
             padding: 0 20px;
             gap: 15px;
+            overflow-x: auto;
         }
 
-        /* Mobile Anpassungen */
-        @media (max-width: 768px) {
-            .app-container {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto 1fr auto auto;
-                overflow-y: auto;
-            }
-            .sidebar-left, .sidebar-right { padding: 10px; flex-direction: row; justify-content: space-around; }
-            .sidebar-left { grid-row: 1; border-right: none; border-bottom: 1px solid #222; }
-            .field-area { grid-row: 2; padding: 10px; }
-            .sidebar-right { grid-row: 3; border-left: none; border-top: 1px solid #222; }
-            .bench-area { grid-row: 4; height: 100px; overflow-x: auto; }
-            #soccer-field { width: 95vw; }
-        }
-
-        /* Steuerung (Test-Buttons für die Entwicklung) */
+        /* Steuerung */
         .controls { position: absolute; top: 10px; left: 140px; display: flex; gap: 10px; z-index: 10; }
-        .btn { background: #222; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 5px 10px; cursor: pointer; font-size: 12px; }
-        .btn:hover { background: var(--neon-green); color: black; }
+        .btn { background: #222; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 5px 10px; cursor: pointer; }
+
+        @media (max-width: 900px) {
+            .app-container { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto auto; overflow-y: auto; }
+            .sidebar-left, .sidebar-right { flex-direction: row; padding: 10px; justify-content: space-around; }
+            .bench-area { height: 100px; }
+        }
     </style>
 </head>
 <body>
@@ -167,23 +144,21 @@
 
     <div class="app-container">
         <aside class="sidebar-left">
-            <div class="briefcase" title="Aktentasche">💼</div>
-            <p style="font-size: 10px; margin-top: 5px; color: #666;">TOOLS</p>
+            <div class="briefcase">💼</div>
+            <p style="font-size: 10px; color: #666;">TOOLS</p>
         </aside>
 
         <main class="field-area">
             <div id="soccer-field">
                 <div class="line center-line"></div>
                 <div class="center-circle"></div>
-                
                 <div class="box-16 left-16"></div>
                 <div class="box-16 right-16"></div>
                 <div class="box-5 left-5"></div>
                 <div class="box-5 right-5"></div>
-
+                
                 <div id="goal-l-main" class="goal goal-senior-l"></div>
                 <div id="goal-r-main" class="goal goal-senior-r"></div>
-
                 <div class="goal goal-funino f-l-top"></div>
                 <div class="goal goal-funino f-l-bot"></div>
                 <div class="goal goal-funino f-r-top"></div>
@@ -194,14 +169,12 @@
         <aside class="sidebar-right">
             <div class="toni-avatar"></div>
             <strong style="color: var(--neon-green);">Toni</strong>
-            <p style="font-size: 12px; text-align: center; color: #888;">Co-Trainer bereit.<br>Mikrofon aktiv.</p>
+            <p style="font-size: 12px; color: #888;">KI-Assistent aktiv</p>
         </aside>
 
-        <footer class="bench-area">
-            <span style="color: #444; font-weight: bold; font-size: 12px; text-transform: uppercase;">Bank</span>
-            <div id="players-on-bench" style="display: flex; gap: 10px;">
-                </div>
-        </footer>
+        <footer class="bench-area" id="bench">
+            <span style="color: #444; font-size: 12px;">BANK</span>
+            </footer>
     </div>
 
     <script>
@@ -210,7 +183,6 @@
             const seniorGoals = [document.getElementById('goal-l-main'), document.getElementById('goal-r-main')];
             const funinoGoals = document.querySelectorAll('.goal-funino');
 
-            // Reset
             field.style.transform = "scale(1)";
             seniorGoals.forEach(g => g.style.display = 'none');
             funinoGoals.forEach(g => g.style.display = 'none');
@@ -221,7 +193,7 @@
                 funinoGoals.forEach(g => g.style.display = 'block');
             } else if (mode === 'f-jugend') {
                 seniorGoals.forEach(g => g.style.display = 'block');
-                field.style.transform = "scale(0.85)"; // Spielfeld wird kleiner
+                field.style.transform = "scale(0.85)";
             }
         }
     </script>
