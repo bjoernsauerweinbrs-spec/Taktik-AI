@@ -10,10 +10,9 @@
     <div class="pro-cockpit">
         <aside class="sidebar-nav">
             <div id="status-dot" class="ai-status-dot status-online"></div>
-            <div class="nav-item" onclick="openModule('Kabine')"><i class="fas fa-users"></i><span>KABINE</span></div>
-            <div class="nav-item" onclick="openModule('Labor')"><i class="fas fa-heartbeat"></i><span>LABOR</span></div>
-            <div class="nav-item" onclick="openModule('Junioren')"><i class="fas fa-award"></i><span>JUGEND</span></div>
-            <div class="nav-item" style="margin-top:auto;"><i class="fas fa-cog"></i><span>SETUP</span></div>
+            <div class="nav-item active" onclick="closeBriefcase()"><i class="fas fa-dt-board"></i><span>TAKTIK</span></div>
+            <div class="nav-item" onclick="toggleBriefcase()"><i class="fas fa-briefcase"></i><span>AKTENTASCHE</span></div>
+            <div class="nav-item" style="margin-top:auto;" onclick="openBriefcaseSection('Setup')"><i class="fas fa-cog"></i><span>SETUP</span></div>
         </aside>
 
         <main class="arena-main" id="arena-container">
@@ -22,15 +21,28 @@
 
         <aside class="comm-panel">
             <div class="chat-window" id="chat-box"></div>
-            <div class="mic-section" style="height:150px; display:flex; align-items:center; justify-content:center;">
-                <i class="fas fa-microphone" style="font-size:2rem; color:#333;"></i>
+            <div class="mic-section">
+                <div class="mic-container" onclick="window.ToniBrain.toggleMic()">
+                    <i class="fas fa-microphone"></i><div class="pulse-ring"></div>
+                </div>
             </div>
         </aside>
     </div>
 
-    <div id="briefcase-overlay" onclick="if(event.target === this) toggleBriefcase()">
-        <div class="briefcase-content" id="briefcase-grid">
-            </div>
+    <div id="briefcase-overlay">
+        <div class="briefcase-window">
+            <nav class="briefcase-nav">
+                <div class="bc-nav-item" onclick="renderModule('Kabine')"><i class="fas fa-users"></i> KABINE</div>
+                <div class="bc-nav-item" onclick="renderModule('Labor')"><i class="fas fa-heartbeat"></i> LABOR</div>
+                <div class="bc-nav-item" onclick="renderModule('Jugend')"><i class="fas fa-award"></i> JUGEND</div>
+                <div class="bc-nav-item" onclick="renderModule('Management')"><i class="fas fa-city"></i> MANAGEMENT</div>
+                <div class="bc-nav-item" onclick="renderModule('Video')"><i class="fas fa-video"></i> VIDEO</div>
+                <div class="bc-close" onclick="toggleBriefcase()"><i class="fas fa-times"></i></div>
+            </nav>
+            
+            <div id="briefcase-content">
+                </div>
+        </div>
     </div>
 
     <script src="engine/database.js"></script>
@@ -39,34 +51,31 @@
     <script src="modules/kabine.js"></script>
     <script src="modules/labor.js"></script>
     <script src="modules/junioren.js"></script>
+    <script src="modules/manager.js"></script>
 
     <script>
         function calibrate() {
-            const c = document.getElementById('tactic-board');
-            const container = document.getElementById('arena-container');
-            // FIX: Nutzt die volle verfügbare Größe des MacBook Bildschirms
-            c.width = container.clientWidth;
-            c.height = container.clientHeight;
+            const c = document.getElementById('tactic-board'), container = document.getElementById('arena-container');
+            c.width = container.clientWidth; c.height = container.clientHeight;
             if(window.PitchEngine) window.PitchEngine.draw();
         }
 
-        function toggleBriefcase(show = false) {
+        function toggleBriefcase() {
             const ov = document.getElementById('briefcase-overlay');
-            ov.style.display = show ? 'flex' : 'none';
+            const isVisible = ov.style.display === 'flex';
+            ov.style.display = isVisible ? 'none' : 'flex';
+            if(!isVisible) renderModule('Kabine'); // Startet immer mit der Kabine
         }
 
-        function openModule(name) {
-            const grid = document.getElementById('briefcase-grid');
-            grid.innerHTML = ""; // Alten Müll löschen
-            toggleBriefcase(true);
-            window['Sektor' + name].render();
+        function closeBriefcase() { document.getElementById('briefcase-overlay').style.display = 'none'; }
+
+        function renderModule(name) {
+            const content = document.getElementById('briefcase-content');
+            content.innerHTML = "";
+            if(window['Sektor' + name]) window['Sektor' + name].render();
         }
 
-        window.addEventListener('load', () => {
-            window.PitchEngine.init();
-            calibrate();
-            window.ToniBrain.firstGreeting();
-        });
+        window.addEventListener('load', () => { calibrate(); window.PitchEngine.init(); window.ToniBrain.firstGreeting(); });
         window.addEventListener('resize', calibrate);
     </script>
 </body>
