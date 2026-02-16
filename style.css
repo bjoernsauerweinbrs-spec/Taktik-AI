@@ -1,57 +1,71 @@
-/* TONI 2.0 ELITE - DESIGN BIBEL */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;700&display=swap');
 
 :root {
-    --bg-deep: #020408; --neon-green: #39FF14; --data-cyan: #00D1FF;
-    --glass: rgba(13, 20, 33, 0.95); --font-header: 'Orbitron', sans-serif;
+    --bg-deep: #020408; --neon: #39FF14; --cyan: #00D1FF; --gold: #D4AF37;
+    --glass: rgba(13, 20, 33, 0.95); --font-h: 'Orbitron';
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body, html { width: 100%; height: 100%; background: var(--bg-deep); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
+body { background: var(--bg-deep); color: #fff; font-family: 'Inter'; overflow: hidden; }
 
-/* LAYOUT-STRUKTUR */
-.pro-cockpit { display: grid; grid-template-columns: 100px 1fr 400px; height: 100vh; width: 100vw; }
+/* LAYOUT */
+.pro-cockpit { display: grid; grid-template-columns: 100px 1fr 400px; height: 100vh; }
+.sidebar-nav { background: #000; border-right: 1px solid #111; display: flex; flex-direction: column; align-items: center; padding: 30px 0; gap: 30px; }
+.arena-main { background: radial-gradient(circle, #0a150a 0%, #000 100%); }
+#tactic-board { width: 100%; height: 100%; display: block; }
 
-/* SIDEBAR */
-.sidebar-nav { background: #000; border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; padding: 30px 0; gap: 30px; }
-.nav-item { cursor: pointer; color: #444; text-align: center; transition: 0.3s; width: 100%; }
-.nav-item:hover, .nav-item.active { color: var(--neon-green); filter: drop-shadow(0 0 10px var(--neon-green)); }
-.nav-item i { font-size: 1.8rem; display: block; margin-bottom: 5px; }
-.nav-item span { font-size: 0.5rem; font-family: var(--font-header); font-weight: bold; text-transform: uppercase; }
-
-/* ARENA (PITCH FIX) */
-.arena-main { background: radial-gradient(circle, #0a150a 0%, #000 100%); position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-#tactic-board { display: block; background: rgba(57, 255, 20, 0.02); }
-
-/* AI FEED RECHTS */
-.comm-panel { background: var(--glass); border-left: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; backdrop-filter: blur(20px); }
-.chat-window { flex: 1; padding: 30px; overflow-y: auto; }
-
-/* --- DIE AKTENTASCHE (OVERLAY FIX) --- */
-#briefcase-overlay { 
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-    background: rgba(0,0,0,0.92); z-index: 2000; 
-    display: none; align-items: center; justify-content: center; 
-    backdrop-filter: blur(30px); 
-}
-.briefcase-content { 
-    width: 90%; max-width: 1300px; height: 85%; 
-    background: rgba(255,255,255,0.02); border: 1px solid rgba(57, 255, 20, 0.1);
-    border-radius: 20px; padding: 60px; overflow-y: auto; 
-    box-shadow: 0 0 50px rgba(0,0,0,1);
+/* AKTENTASCHE OVERLAY */
+#briefcase-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.85); z-index: 2000;
+    display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(25px);
 }
 
-/* FIFA & MODUL DESIGN */
+.briefcase-window {
+    width: 95%; height: 90%; background: var(--glass);
+    border: 1px solid rgba(255,255,255,0.05); border-radius: 20px;
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+}
+
+.briefcase-nav {
+    display: flex; background: rgba(0,0,0,0.4); padding: 0 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.05); gap: 40px; align-items: center;
+}
+
+.bc-nav-item {
+    padding: 25px 0; font-family: var(--font-h); font-size: 0.7rem;
+    color: #555; cursor: pointer; transition: 0.3s; letter-spacing: 2px;
+}
+
+.bc-nav-item:hover, .bc-nav-item.active { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
+.bc-close { margin-left: auto; color: #ff3131; cursor: pointer; font-size: 1.2rem; }
+
+#briefcase-content { flex: 1; padding: 60px; overflow-y: auto; }
+
+/* KABINE: FIFA CARDS */
 .mgmt-grid { display: flex; flex-wrap: wrap; gap: 40px; justify-content: center; }
 .fifa-card {
     width: 240px; height: 340px; background: linear-gradient(135deg, #001a1a 0%, #000 100%);
-    clip-path: polygon(0% 15%, 50% 0%, 100% 15%, 100% 85%, 50% 100%, 0% 85%);
-    border: 1px solid var(--data-cyan); position: relative; transition: 0.4s;
+    clip-path: polygon(0% 12%, 50% 0%, 100% 12%, 100% 88%, 50% 100%, 0% 88%);
+    border: 1px solid var(--cyan); position: relative; transition: 0.4s;
 }
-.card-info { padding: 20px; text-align: center; }
-.card-rating { font-family: var(--font-header); font-size: 2rem; color: var(--data-cyan); }
 
-/* LABOR & BARS */
-.bar-container { margin-bottom: 30px; width: 100%; max-width: 600px; }
-.bar-bg { height: 12px; background: #000; border-radius: 6px; overflow: hidden; margin-top: 10px; border: 1px solid #222; }
-.bar-fill { height: 100%; background: linear-gradient(90deg, var(--data-cyan), var(--neon-green)); transition: 1.5s ease; box-shadow: 0 0 15px var(--neon-green); }
+.card-img { width: 100%; height: 60%; background-size: cover; background-position: top; }
+.card-info { padding: 15px; text-align: center; }
+.card-rating { font-family: var(--font-h); font-size: 1.8rem; color: var(--cyan); }
+
+/* LABOR: ELITE ANALYTICS */
+.lab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.lab-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 30px; border-radius: 15px; }
+.bar-bg { height: 8px; background: #000; border-radius: 4px; margin-top: 10px; overflow: hidden; border: 1px solid #222; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--neon)); box-shadow: 0 0 10px var(--neon); }
+
+/* PLANNING TOOLS */
+.plan-btn {
+    background: transparent; border: 1px solid var(--neon); color: var(--neon);
+    padding: 10px 20px; font-family: var(--font-h); font-size: 0.6rem; cursor: pointer;
+    transition: 0.3s; margin-right: 10px;
+}
+.plan-btn.active { background: var(--neon); color: #000; }
