@@ -1,28 +1,23 @@
 window.SektorKabine = {
     render() {
-        const g = document.getElementById('briefcase-grid');
-        g.innerHTML = ""; g.className = 'mgmt-grid';
+        const grid = document.getElementById('briefcase-grid');
+        grid.innerHTML = `<h1 style="font-family:'Orbitron'; margin-bottom:40px; color:var(--data-cyan)">MANNSCHAFTS-KABINE</h1>`;
+        
+        const container = document.createElement('div');
+        container.className = 'mgmt-grid';
+
         window.ToniDatabase.players.forEach(p => {
-            const c = document.createElement('div'); c.className = 'fifa-card';
-            c.innerHTML = `
-                <div class="card-img" id="dp-${p.id}" style="background-image:url('${p.photo}')"></div>
-                <div class="card-info" style="text-align:center; padding:10px;">
-                    <div style="font-family:'Orbitron'; font-size:1.5rem; color:#00D1FF;">${p.rating}</div>
-                    <div style="font-weight:bold; font-size:0.8rem;">${p.name}</div>
-                </div>`;
-            g.appendChild(c);
-            this.initDrop(p.id);
+            const card = document.createElement('div');
+            card.className = 'fifa-card';
+            card.innerHTML = `
+                <div style="height:60%; background-image:url('${p.photo}'); background-size:cover; background-position:top;"></div>
+                <div class="card-info">
+                    <div class="card-rating">${p.rating}</div>
+                    <div style="font-weight:bold; text-transform:uppercase;">${p.name}</div>
+                </div>
+            `;
+            container.appendChild(card);
         });
-    },
-    initDrop(id) {
-        const el = document.getElementById(`dp-${id}`);
-        if(!el) return;
-        el.addEventListener('dragover', (e) => e.preventDefault());
-        el.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const r = new FileReader();
-            r.onload = (ev) => { window.ToniDatabase.updatePhoto('player', id, ev.target.result); this.render(); };
-            r.readAsDataURL(e.dataTransfer.files[0]);
-        });
+        grid.appendChild(container);
     }
 };
