@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pro Coach - Taktikboard</title>
+    <title>Pro Coach - Taktikboard v2</title>
     <style>
         :root {
             --bg-black: #000000;
@@ -13,159 +13,56 @@
         }
 
         * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background-color: var(--bg-black); color: var(--text-white); font-family: sans-serif; overflow: hidden; }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            background-color: var(--bg-black);
-            color: var(--text-white);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden; /* Verhindert Scrollen der ganzen Seite */
-        }
+        .wrapper { display: flex; flex-direction: column; height: 100vh; }
+        .main-content { display: flex; flex: 1; overflow: hidden; }
 
-        /* Haupt-Container: Vertikale Aufteilung (Oben: Arbeitsbereich, Unten: Bank) */
-        .wrapper {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
+        /* Seiten-Panels */
+        .column-left { width: 100px; background: var(--panel-gray); border-right: 1px solid #1a1a1a; display: flex; flex-direction: column; align-items: center; padding-top: 30px; }
+        .column-right { width: 250px; background: var(--panel-gray); border-left: 1px solid #1a1a1a; display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
+        .column-middle { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: relative; }
 
-        /* Der Bereich mit den 3 Spalten */
-        .main-content {
-            display: flex;
-            flex: 1; 
-            overflow: hidden;
-        }
-
-        /* Linke Spalte: Aktentasche */
-        .column-left {
-            width: 100px;
-            background: var(--panel-gray);
-            border-right: 1px solid #1a1a1a;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 30px;
-            flex-shrink: 0;
-        }
-
-        /* Mittlere Spalte: Das Herzstück (Spielfeld) */
-        .column-middle {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            position: relative;
-            background-color: var(--bg-black);
-        }
-
-        /* Rechte Spalte: Toni */
-        .column-right {
-            width: 250px;
-            background: var(--panel-gray);
-            border-left: 1px solid #1a1a1a;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 30px 20px;
-            flex-shrink: 0;
-        }
-
-        /* Die Auswechselbank unten */
-        .bench-area {
-            height: 120px;
-            background: #050505;
-            border-top: 2px solid #1a1a1a;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-shrink: 0;
-        }
-
-        /* --- SPIELFELD DESIGN --- */
+        /* Spielfeld */
         #soccer-field {
-            width: 100%;
-            max-width: 900px;
-            aspect-ratio: 1.5; /* 3:2 Format bleibt stabil */
-            border: 3px solid var(--neon-green);
-            position: relative;
-            background-color: transparent;
-            box-shadow: 0 0 20px rgba(57, 255, 20, 0.05);
-            transition: transform 0.4s ease;
+            width: 100%; max-width: 850px; aspect-ratio: 1.5;
+            border: 3px solid var(--neon-green); position: relative;
+            background-color: transparent; transition: all 0.4s ease-in-out;
         }
 
         .field-line { position: absolute; background-color: var(--neon-green); }
         .center-line { left: 50%; top: 0; bottom: 0; width: 2px; }
-        .center-circle { 
-            left: 50%; top: 50%; width: 16%; height: 24%; 
-            border: 2px solid var(--neon-green); border-radius: 50%; 
-            transform: translate(-50%, -50%); 
-        }
+        
+        /* Standard Markierungen */
+        .standard-mark { transition: opacity 0.3s; }
+        .center-circle { left: 50%; top: 50%; width: 16%; height: 24%; border: 2px solid var(--neon-green); border-radius: 50%; transform: translate(-50%, -50%); position: absolute; }
         .box-16 { border: 2px solid var(--neon-green); width: 16%; height: 44%; position: absolute; top: 28%; }
-        .left-16 { left: 0; border-left: none; }
-        .right-16 { right: 0; border-right: none; }
-        .box-5 { border: 2px solid var(--neon-green); width: 6%; height: 20%; position: absolute; top: 40%; }
-        .left-5 { left: 0; border-left: none; }
-        .right-5 { right: 0; border-right: none; }
+        .left-16 { left: 0; border-left: none; } .right-16 { right: 0; border-right: none; }
+
+        /* Funino Schusszonen (6m) */
+        .funino-zone { display: none; width: 18%; height: 100%; border: 1px dashed var(--neon-green); top: 0; opacity: 0.6; position: absolute; }
+        .zone-left { left: 0; border-left: none; }
+        .zone-right { right: 0; border-right: none; }
 
         /* Tore */
-        .goal { position: absolute; width: 6px; height: 16%; background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
-        .g-senior-l { left: -8px; top: 42%; }
-        .g-senior-r { right: -8px; top: 42%; }
+        .goal { position: absolute; width: 6px; height: 14%; background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+        .g-senior { top: 43%; }
         .g-funino { display: none; }
-        .f-l-1 { left: -8px; top: 15%; }
-        .f-l-2 { left: -8px; bottom: 15%; }
-        .f-r-1 { right: -8px; top: 15%; }
-        .f-r-2 { right: -8px; bottom: 15%; }
 
-        /* --- UI ELEMENTE --- */
-        .briefcase { 
-            font-size: 50px; cursor: pointer; 
-            filter: drop-shadow(0 0 8px var(--neon-green));
-            transition: transform 0.2s;
-        }
-        .briefcase:hover { transform: scale(1.1); }
-
-        .toni-img { 
-            width: 100px; height: 100px; 
-            border: 2px solid var(--neon-green); 
-            border-radius: 50%; background: #1a1a1a; 
-            margin-bottom: 15px; 
-            box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
-        }
-        
-        .mode-buttons {
-            position: absolute;
-            top: 15px;
-            left: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 100;
-        }
-        .btn { 
-            background: #111; color: var(--neon-green); border: 1px solid var(--neon-green); 
-            padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight: bold;
-            border-radius: 3px;
-        }
+        /* Buttons & UI */
+        .mode-buttons { position: absolute; top: 15px; left: 20px; display: flex; gap: 8px; z-index: 100; }
+        .btn { background: #111; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 8px 12px; cursor: pointer; border-radius: 4px; font-size: 11px; }
         .btn:hover { background: var(--neon-green); color: #000; }
+        .briefcase { font-size: 45px; filter: drop-shadow(0 0 5px var(--neon-green)); cursor: pointer; }
+        .toni-img { width: 80px; height: 80px; border: 2px solid var(--neon-green); border-radius: 50%; background: #111; margin-bottom: 10px; }
 
-        /* --- MOBILE ANPASSUNG (ROCK-SOLID) --- */
+        .bench-area { height: 100px; background: #050505; border-top: 1px solid #1a1a1a; display: flex; align-items: center; padding: 0 20px; }
+
+        /* Mobile */
         @media (max-width: 900px) {
             .main-content { flex-direction: column; overflow-y: auto; }
-            .column-left, .column-right { 
-                width: 100%; height: auto; padding: 15px; 
-                flex-direction: row; justify-content: space-around; 
-                border: none; border-bottom: 1px solid #1a1a1a;
-            }
-            .column-middle { min-height: 400px; padding: 40px 15px; order: 2; }
-            .column-left { order: 1; }
-            .column-right { order: 3; border-top: 1px solid #1a1a1a; }
-            .bench-area { height: 100px; position: sticky; bottom: 0; z-index: 100; }
+            .column-left, .column-right { width: 100%; height: auto; flex-direction: row; padding: 10px; }
+            .column-middle { min-height: 350px; }
         }
     </style>
 </head>
@@ -174,71 +71,74 @@
         <div class="main-content">
             <div class="column-left">
                 <div class="briefcase">💼</div>
-                <div style="font-size: 12px; color: #444; margin-top: 8px; font-weight: bold;">TOOLS</div>
+                <small style="color: #444; margin-top: 5px;">TOOLS</small>
             </div>
 
             <div class="column-middle">
                 <div class="mode-buttons">
-                    <button class="btn" onclick="updateField('senior')">Senioren</button>
-                    <button class="btn" onclick="updateField('funino')">Funino</button>
-                    <button class="btn" onclick="updateField('f-jugend')">F-Jugend</button>
+                    <button class="btn" onclick="setField('senior')">SENIOREN</button>
+                    <button class="btn" onclick="setField('funino')">FUNINO</button>
+                    <button class="btn" onclick="setField('f-jugend')">F-JUGEND</button>
                 </div>
 
                 <div id="soccer-field">
                     <div class="field-line center-line"></div>
-                    <div class="center-circle"></div>
-                    <div class="box-16 left-16"></div>
-                    <div class="box-16 right-16"></div>
-                    <div class="box-5 left-5"></div>
-                    <div class="box-5 right-5"></div>
                     
-                    <div id="gs-l" class="goal g-senior-l"></div>
-                    <div id="gs-r" class="goal g-senior-r"></div>
+                    <div class="standard-mark center-circle"></div>
+                    <div class="standard-mark box-16 left-16"></div>
+                    <div class="standard-mark box-16 right-16"></div>
                     
-                    <div class="goal g-funino f-l-1"></div>
-                    <div class="goal g-funino f-l-2"></div>
-                    <div class="goal g-funino f-r-1"></div>
-                    <div class="goal g-funino f-r-2"></div>
+                    <div class="funino-zone zone-left" id="zone-l"></div>
+                    <div class="funino-zone zone-right" id="zone-r"></div>
+
+                    <div id="gs-l" class="goal g-senior" style="left: -7px;"></div>
+                    <div id="gs-r" class="goal g-senior" style="right: -7px;"></div>
+                    
+                    <div class="goal g-funino" style="left: -7px; top: 15%;"></div>
+                    <div class="goal g-funino" style="left: -7px; bottom: 15%;"></div>
+                    <div class="goal g-funino" style="right: -7px; top: 15%;"></div>
+                    <div class="goal g-funino" style="right: -7px; bottom: 15%;"></div>
                 </div>
             </div>
 
             <div class="column-right">
                 <div class="toni-img"></div>
-                <span style="color: var(--neon-green); font-weight: bold; letter-spacing: 1px;">TONI</span>
-                <p style="font-size: 12px; color: #666; text-align: center; margin-top: 5px;">KI-Co-Trainer</p>
-                <div id="mic-status" style="margin-top: 10px; font-size: 10px; color: #333;">🎤 MIKROFON INAKTIV</div>
+                <span style="color: var(--neon-green); font-weight: bold;">TONI</span>
+                <p style="font-size: 11px; color: #555; text-align: center;">Taktik-Analyse aktiv</p>
             </div>
         </div>
-
         <div class="bench-area">
-            <span style="color: #222; font-weight: bold; font-size: 12px; border-right: 1px solid #222; padding-right: 15px;">BANK</span>
-            <div id="bench-content">
-                </div>
+            <div style="color: #222; font-size: 12px; font-weight: bold; margin-right: 20px;">BANK</div>
+            <div id="player-dock"></div>
         </div>
     </div>
 
     <script>
-        function updateField(mode) {
+        function setField(mode) {
             const field = document.getElementById('soccer-field');
-            const sGoals = [document.getElementById('gs-l'), document.getElementById('gs-r')];
+            const standards = document.querySelectorAll('.standard-mark');
+            const funinoZones = document.querySelectorAll('.funino-zone');
+            const sGoals = document.querySelectorAll('.g-senior');
             const fGoals = document.querySelectorAll('.g-funino');
 
-            // Reset
+            // Standardmäßig alles zurücksetzen
+            standards.forEach(el => el.style.opacity = "1");
+            funinoZones.forEach(el => el.style.display = "none");
+            sGoals.forEach(el => el.style.display = "block");
+            fGoals.forEach(el => el.style.display = "none");
             field.style.transform = "scale(1)";
-            sGoals.forEach(g => g.style.display = 'none');
-            fGoals.forEach(g => g.style.display = 'none');
 
-            if (mode === 'senior') {
-                sGoals.forEach(g => g.style.display = 'block');
-            } else if (mode === 'funino') {
-                fGoals.forEach(g => g.style.display = 'block');
+            if (mode === 'funino') {
+                // Funiño Spezial-Layout
+                standards.forEach(el => el.style.opacity = "0"); // Strafraum etc. ausblenden
+                funinoZones.forEach(el => el.style.display = "block"); // 6m Zonen einblenden
+                sGoals.forEach(el => el.style.display = "none");
+                fGoals.forEach(el => el.style.display = "block");
             } else if (mode === 'f-jugend') {
-                sGoals.forEach(g => g.style.display = 'block');
-                field.style.transform = "scale(0.85)"; // Verkleinert das Feld für Jugend
+                field.style.transform = "scale(0.85)";
             }
         }
-        // Initialer Start im Senioren-Modus
-        updateField('senior');
+        setField('senior'); // Startzustand
     </script>
 </body>
 </html>
