@@ -3,264 +3,213 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
-<title>TONI 2.0 | Pro Performance HQ v3.5</title>
+<title>TONI 2.0 | Squad Manager & Lab Pro</title>
 <style>
-  :root {
-    --bg: #010401;
-    --neon: #39FF14;
-    --neon-glow: rgba(57, 255, 20, 0.3);
-    --gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-    --glass: rgba(255, 255, 255, 0.05);
-  }
-  
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body, html { 
-    margin: 0; padding: 0; height: 100%; width: 100%;
-    background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif;
-    overflow: hidden; 
-  }
+  :root { --bg: #010401; --neon: #39FF14; --gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); --glass: rgba(255, 255, 255, 0.05); }
+  * { box-sizing: border-box; }
+  body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
 
-  /* --- APP STRUCTURE --- */
-  .app-container {
-    display: grid;
-    grid-template-columns: 80px 1fr 380px;
-    height: 100vh;
-    padding: 12px;
-    gap: 12px;
-  }
-
+  /* --- STRUCTURE --- */
+  .app-container { display: grid; grid-template-columns: 80px 1fr 380px; height: 100vh; padding: 12px; gap: 12px; }
   @media (max-width: 900px) {
     .app-container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr 350px; overflow-y: auto; height: auto; }
-    .left-nav { flex-direction: row !important; height: 60px; width: 100%; padding: 0 !important; justify-content: space-around; }
-    .overlay { inset: 5px !important; width: 98% !important; }
+    .left-nav { flex-direction: row !important; height: 60px; width: 100%; justify-content: space-around; padding: 0 !important; }
   }
-
-  .left-nav { background: var(--glass); border-radius: 15px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; backdrop-filter: blur(10px); }
-  .nav-item { width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--neon); color: var(--neon); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; transition: 0.3s; }
+  .left-nav { background: var(--glass); border-radius: 15px; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+  .nav-item { width: 45px; height: 45px; border-radius: 10px; border: 1px solid var(--neon); color: var(--neon); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
   /* --- ARENA --- */
   .center-arena { background: #000; border-radius: 15px; border: 1px solid var(--neon); display: flex; flex-direction: column; padding: 10px; position: relative; }
-  #board-wrap { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  canvas { background: #010a01; border-radius: 8px; box-shadow: 0 0 40px #000; max-width: 100%; height: auto; }
+  canvas { background: #010a01; border-radius: 8px; max-width: 100%; height: auto; }
 
-  /* --- TONI-BOX --- */
-  .right-toni { background: var(--glass); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 12px; border: 1px solid rgba(255,255,255,0.05); }
-  .chat-history { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
-  .msg { padding: 10px 14px; border-radius: 12px; font-size: 13px; max-width: 85%; line-height: 1.4; }
-  .msg.ai { background: rgba(57, 255, 20, 0.08); align-self: flex-start; border-left: 3px solid var(--neon); }
+  /* --- TONI CHAT --- */
+  .right-toni { background: var(--glass); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(255,255,255,0.05); }
+  .chat-box { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+  .msg { padding: 10px; border-radius: 10px; font-size: 13px; max-width: 85%; }
+  .msg.ai { background: rgba(57, 255, 20, 0.1); border-left: 3px solid var(--neon); align-self: flex-start; }
 
-  /* --- OVERLAYS & CARDS --- */
-  .overlay { position: fixed; inset: 20px 400px 20px 100px; background: rgba(0,0,0,0.98); border: 1px solid var(--neon); border-radius: 20px; z-index: 1000; display: none; flex-direction: column; padding: 25px; backdrop-filter: blur(25px); overflow: hidden; }
-  .scroll-box { flex: 1; overflow-y: auto; padding-top: 10px; }
-  .fifa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+  /* --- OVERLAYS --- */
+  .overlay { position: fixed; inset: 20px 400px 20px 100px; background: rgba(0,0,0,0.98); border: 1px solid var(--neon); border-radius: 20px; z-index: 1000; display: none; flex-direction: column; padding: 25px; backdrop-filter: blur(25px); }
+  .scroll-content { flex: 1; overflow-y: auto; }
   
-  .fifa-card { 
-    width: 150px; height: 215px; background: var(--gold); border-radius: 10px; color: #000; 
-    position: relative; padding: 10px; cursor: pointer; font-family: 'Arial Black', sans-serif;
-  }
-  .card-rating { font-size: 32px; position: absolute; top: 10px; left: 10px; }
-  .card-photo { width: 90px; height: 90px; background: rgba(0,0,0,0.1); margin: 5px auto; border-bottom: 2px solid #000; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
+  /* FIFA CARDS */
+  .fifa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
+  .fifa-card { width: 160px; height: 230px; background: var(--gold); border-radius: 10px; color: #000; position: relative; padding: 10px; cursor: pointer; font-family: 'Arial Black', sans-serif; }
+  .card-rating { font-size: 38px; position: absolute; top: 10px; left: 10px; }
+  .card-photo { width: 95px; height: 95px; background: rgba(0,0,0,0.1); margin: 5px auto; border-bottom: 2px solid #000; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
   .card-photo img { width: 100%; height: 100%; object-fit: cover; }
-  .attr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; font-size: 10px; padding: 0 10px; margin-top: 5px; }
+  .card-name { text-align: center; font-size: 16px; margin: 2px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
+  .attr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; font-size: 11px; padding: 0 10px; margin-top: 5px; }
 
-  /* --- MODULAR EDITOR --- */
+  /* EDITOR */
   .editor-pane { display: none; background: #000; border: 1px solid var(--neon); padding: 25px; border-radius: 20px; position: absolute; inset: 15px; z-index: 1100; overflow-y: auto; }
   .tab-header { display: flex; gap: 10px; margin-bottom: 15px; }
-  .tab-btn { flex: 1; background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px; border-radius: 8px; cursor: pointer; }
+  .tab-btn { flex: 1; background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px; border-radius: 8px; cursor: pointer; font-size: 10px; }
   .tab-btn.active { background: var(--neon); color: #000; font-weight: bold; }
   .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .input-group label { display: block; font-size: 9px; color: var(--neon); text-transform: uppercase; margin-bottom: 4px; }
+  .input-group label { display: block; font-size: 9px; color: var(--neon); text-transform: uppercase; margin-bottom: 3px; }
   .input-group input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; }
 
-  /* --- GATE --- */
+  /* LAB STYLE */
+  .lab-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(57,255,20,0.1); border-radius: 15px; padding: 15px; margin-bottom: 15px; }
+  .stat-bar { height: 4px; background: #111; border-radius: 2px; margin: 5px 0; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); }
+
+  /* GATES */
   .screen-gate { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; padding: 20px; }
 </style>
 </head>
 <body>
 
 <div id="gate" class="screen-gate">
-  <h1 style="color:var(--neon); letter-spacing: 5px;">TONI 2.0 ACCESS</h1>
+  <h1 style="color:var(--neon); letter-spacing: 5px;">TONI 2.0</h1>
   <input type="password" id="pw" style="background:#111; border:1px solid var(--neon); color:#fff; padding:15px; border-radius:10px; text-align:center;" placeholder="PASSWORT">
-  <button onclick="unlock()" style="background:var(--neon); padding:10px 40px; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">SYSTEM STARTEN</button>
-  <p style="font-size: 10px; color: #444;">Admin: 1234</p>
-</div>
-
-<div id="onboarding" class="screen-gate" style="display:none">
-  <h1 style="color:var(--neon); letter-spacing: 5px;">ONBOARDING</h1>
-  <div id="ob-content">
-    <p id="ob-text" style="color:#fff; text-align:center;">Wie heißt du, Coach?</p>
-    <input type="text" id="ob-input" style="background:#111; border:1px solid var(--neon); color:#fff; padding:15px; border-radius:10px; text-align:center; width: 300px;">
-    <br><br>
-    <button onclick="nextObStep()" style="background:var(--neon); padding:10px 40px; border:none; border-radius:10px; font-weight:bold; cursor:pointer; width: 100%;">WEITER</button>
-  </div>
+  <button onclick="unlock()" style="background:var(--neon); padding:10px 40px; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">STARTEN</button>
 </div>
 
 <div class="app-container" id="mainApp" style="display:none">
   <div class="left-nav">
     <div class="nav-item" onclick="openSektor('kabine')">💼</div>
     <div class="nav-item" onclick="openSektor('analyse')">🧪</div>
-    <div class="nav-item" onclick="toniSpeak('Gegenpressing aktivieren! Fokus!')">🎙️</div>
+    <div class="nav-item" onclick="toniSpeak('Fokus auf die Tiefe! Wir jagen den Sieg!')">🎙️</div>
     <div style="flex:1"></div>
     <div class="nav-item" onclick="resetMemory()">🔁</div>
   </div>
 
   <div class="center-arena">
-    <div style="display:flex; justify-content:space-between; padding:5px 15px; color:var(--neon); font-size:12px;">
-        <strong id="displayClub">ARENA</strong>
-        <span id="displayAge">[ LADE... ]</span>
+    <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--neon); padding:5px 10px;">
+      <strong id="displayClub">ARENA</strong>
+      <span id="displayAge">[ LADE... ]</span>
     </div>
-    <div id="board-wrap">
-      <canvas id="mainBoard" width="1000" height="700"></canvas>
+    <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+      <canvas id="board" width="1000" height="700"></canvas>
     </div>
   </div>
 
   <div class="right-toni">
-    <div style="font-weight:bold; color:var(--neon); display:flex; justify-content:space-between;">TONI AI <span>ONLINE</span></div>
-    <div class="chat-history" id="chat"></div>
-    <input type="text" id="cmd" placeholder="Befehl..." style="background:#111; border:1px solid #333; color:#fff; padding:12px; border-radius:10px;">
+    <div style="color:var(--neon); font-weight:bold;">TONI AI: BEREIT</div>
+    <div class="chat-box" id="chat"></div>
+    <input type="text" id="cmd" placeholder="Befehl an Toni..." style="background:#111; border:1px solid #333; color:#fff; padding:12px; border-radius:10px;">
   </div>
 </div>
 
 <div id="ov" class="overlay">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-    <h2 id="ov-title" style="margin:0; color:var(--neon); letter-spacing:2px;">HUB</h2>
-    <span onclick="closeOverlay()" style="cursor:pointer; font-size:30px;">✕</span>
+  <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+    <h2 id="ov-title" style="margin:0; color:var(--neon)">HUB</h2>
+    <div style="display:flex; gap:10px;">
+      <button id="addBtn" onclick="addNewPlayer()" style="background:var(--neon); color:#000; border:none; padding:5px 10px; border-radius:5px; font-weight:bold; font-size:10px; display:none;">+ SPIELER</button>
+      <span onclick="closeOv()" style="cursor:pointer; font-size:30px;">✕</span>
+    </div>
   </div>
-  <div class="scroll-box" id="ov-content"></div>
+  <div class="scroll-content" id="ov-content"></div>
 
   <div id="editor" class="editor-pane">
     <div class="tab-header">
-      <button class="tab-btn active" id="btn-squad" onclick="switchTab('squad')">SQUAD</button>
-      <button class="tab-btn" id="btn-lab" onclick="switchTab('lab')">LAB (WAAGE)</button>
-      <button class="tab-btn" id="btn-tracker" onclick="switchTab('tracker')">TRACKER (UHR)</button>
+      <button class="tab-btn active" id="tab-squad" onclick="setTab('squad')">SQUAD</button>
+      <button class="tab-btn" id="tab-lab" onclick="setTab('lab')">LAB (WAAGE)</button>
+      <button class="tab-btn" id="tab-tracker" onclick="setTab('tracker')">TRACKER (UHR)</button>
     </div>
-    <div class="input-grid" id="edit-fields"></div>
-    <button onclick="saveData()" style="width:100%; background:var(--neon); color:#000; border:none; padding:15px; border-radius:10px; font-weight:bold; margin-top:20px; cursor:pointer;">DATEN SYNCHRONISIEREN</button>
+    <div class="input-grid" id="editor-fields"></div>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button onclick="savePlayer()" style="flex:1; background:var(--neon); color:#000; font-weight:bold; border:none; padding:15px; border-radius:10px; cursor:pointer;">SPEICHERN</button>
+      <button onclick="deletePlayer()" style="background:red; color:#fff; border:none; padding:15px; border-radius:10px; cursor:pointer;">LÖSCHEN</button>
+    </div>
   </div>
 </div>
 
 <script>
-  const canvas = document.getElementById('mainBoard');
-  const ctx = canvas.getContext('2d');
-  
-  let userData = JSON.parse(localStorage.getItem('toni_user_v35')) || null;
-  let team = JSON.parse(localStorage.getItem('toni_team_v35')) || [
-    {id:0, name:'Müller', rating:91, pos:'ST', x:200, y:350, img:'', pac:88, sho:92, pas:85, dri:89, def:45, phy:82, weight:82, fat:10.2, muscle:38, water:60, bone:3.8, bpm:62, hrv:55, spo2:98, sleep:82}
+  const canvas = document.getElementById('board'); const ctx = canvas.getContext('2d');
+  let userData = JSON.parse(localStorage.getItem('toni_user_v36'));
+  let team = JSON.parse(localStorage.getItem('toni_team_v36')) || [
+    {id:Date.now(), name:'Müller', rating:91, pos:'ST', x:200, y:350, img:'', pac:88, sho:92, pas:85, dri:89, def:45, phy:82, weight:82, fat:10.2, muscle:38, water:62, bpm:60, hrv:55, spo2:98, sleep:82}
   ];
-
-  let obStep = 0; let curId = null; let curTab = 'squad';
+  let curId = null; let curTab = 'squad';
 
   function unlock() {
     if(document.getElementById('pw').value === '1234') {
-      document.getElementById('gate').style.display = 'none';
-      if(!userData) document.getElementById('onboarding').style.display = 'flex'; else startApp();
+      document.getElementById('gate').style.display='none'; document.getElementById('mainApp').style.display='grid';
+      if(!userData) startOnboarding(); else initApp();
     } else alert("Falsches Passwort.");
   }
 
-  function nextObStep() {
-    const val = document.getElementById('ob-input').value;
-    if(!val) return;
-    if(obStep === 0) { userData = { coach: val }; document.getElementById('ob-text').innerText = "Welchen Verein trainierst du?"; }
-    else if(obStep === 1) { userData.club = val; document.getElementById('ob-text').innerText = "Altersklasse (z.B. G-Jugend, F-Jugend, Erste Mannschaft)?"; }
-    else { userData.age = val; localStorage.setItem('toni_user_v35', JSON.stringify(userData)); startApp(); return; }
-    document.getElementById('ob-input').value = ""; obStep++;
+  function startOnboarding() {
+    const name = prompt("Wie heißt du?"); const club = prompt("Verein?"); const age = prompt("Altersklasse (G-Jugend oder Erste Mannschaft)?");
+    userData = { coach: name, club: club, age: age }; localStorage.setItem('toni_user_v36', JSON.stringify(userData)); initApp();
   }
 
-  function startApp() {
-    document.getElementById('onboarding').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'grid';
+  function initApp() {
     document.getElementById('displayClub').innerText = userData.club.toUpperCase();
     document.getElementById('displayAge').innerText = `[ ${userData.age.toUpperCase()} ]`;
-    renderArena();
-    toniSpeak(`Servus ${userData.coach}! Toni ist bereit. Klopp-Nagelsmann-Modus für ${userData.club} geladen.`);
+    renderArena(); toniSpeak(`Servus ${userData.coach}! Kader-Management geladen.`);
   }
 
-  // DER SPIELFELD-FIX (ALLE LINIE GESICHERT)
   function drawPitch() {
     ctx.fillStyle = '#021a02'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = 'rgba(57, 255, 20, 0.4)'; ctx.lineWidth = 3;
-    const age = userData.age.toLowerCase();
-
-    if(age.includes('g-')) { // FUNINO
+    ctx.strokeStyle = 'rgba(57, 255, 20, 0.5)'; ctx.lineWidth = 3;
+    const isG = userData.age.toLowerCase().includes('g-');
+    if(isG) {
       ctx.strokeRect(100, 100, canvas.width-200, canvas.height-200);
-      ctx.strokeRect(100, 200, 15, 60); ctx.strokeRect(100, 440, 15, 60);
-      ctx.strokeRect(canvas.width-115, 200, 15, 60); ctx.strokeRect(canvas.width-115, 440, 15, 60);
-      ctx.beginPath(); ctx.moveTo(canvas.width/2, 100); ctx.lineTo(canvas.width/2, canvas.height-100); ctx.stroke();
-    } else if(age.includes('f-')) { // F-JUGEND (Kleinfeld 2 Tore)
-      ctx.strokeRect(60, 60, canvas.width-120, canvas.height-120);
-      ctx.strokeRect(60, canvas.height/2-80, 60, 160); ctx.strokeRect(canvas.width-120, canvas.height/2-80, 60, 160);
-      ctx.beginPath(); ctx.moveTo(canvas.width/2, 60); ctx.lineTo(canvas.width/2, canvas.height-60); ctx.stroke();
-    } else { // PROFI / ERSTE MANNSCHAFT
+      ctx.strokeRect(100, 200, 15, 60); ctx.strokeRect(canvas.width-115, 200, 15, 60);
+    } else {
       ctx.strokeRect(40, 40, canvas.width-80, canvas.height-80);
       ctx.beginPath(); ctx.moveTo(canvas.width/2, 40); ctx.lineTo(canvas.width/2, canvas.height-40); ctx.stroke();
       ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, 80, 0, Math.PI*2); ctx.stroke();
       ctx.strokeRect(40, canvas.height/2-150, 120, 300); ctx.strokeRect(canvas.width-160, canvas.height/2-150, 120, 300); // 16er
       ctx.strokeRect(40, canvas.height/2-70, 50, 140); ctx.strokeRect(canvas.width-90, canvas.height/2-70, 50, 140); // 5er
-      ctx.beginPath(); ctx.arc(130, canvas.height/2, 4, 0, Math.PI*2); ctx.fill(); // Punkt
     }
   }
 
-  function renderArena() { drawPitch(); team.forEach(p => { ctx.fillStyle='#ff3333'; ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI*2); ctx.fill(); }); }
-
-  function toniSpeak(t) {
-    const chat = document.getElementById('chat'); chat.innerHTML += `<div class="msg ai">Toni: ${t}</div>`; chat.scrollTop = chat.scrollHeight;
-    const ut = new SpeechSynthesisUtterance(t); ut.lang = 'de-DE';
-    const voices = window.speechSynthesis.getVoices();
-    ut.voice = voices.find(v => v.name.includes('Deutsch') && v.name.includes('Google')) || voices[0];
-    window.speechSynthesis.speak(ut);
-  }
+  function renderArena() { drawPitch(); team.forEach(p => { ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI*2); ctx.fill(); }); }
 
   function openSektor(s) {
     document.getElementById('ov').style.display = 'flex'; const c = document.getElementById('ov-content'); c.innerHTML = '';
+    document.getElementById('addBtn').style.display = (s === 'kabine') ? 'block' : 'none';
     if(s === 'kabine') {
-      c.className = 'scroll-box fifa-grid';
+      c.className = 'scroll-content fifa-grid';
       team.forEach(p => {
-        c.innerHTML += `<div class="fifa-card" onclick="editPlayer(${p.id})"><div class="card-rating">${p.rating}</div><div class="card-photo">${p.img?`<img src="${p.img}">`:'👤'}</div><div class="card-name">${p.name}</div><div class="attr-grid"><span>PAC ${p.pac}</span><span>SHO ${p.sho}</span><span>PAS ${p.pas}</span><span>DRI ${p.dri}</span></div></div>`;
+        c.innerHTML += `<div class="fifa-card" onclick="openEdit(${p.id})"><div class="card-rating">${p.rating}</div><div class="card-photo">${p.img?`<img src="${p.img}">`:'👤'}</div><div class="card-name">${p.name}</div><div class="attr-grid"><span>PAC ${p.pac}</span><span>SHO ${p.sho}</span><span>PAS ${p.pas}</span><span>DRI ${p.dri}</span></div></div>`;
       });
     } else if(s === 'analyse') {
-      c.className = 'scroll-box';
-      team.forEach(p => { c.innerHTML += `<div style="background:var(--glass); padding:15px; border-radius:10px; margin-bottom:10px;"><strong>${p.name}:</strong> Puls ${p.bpm} | HRV ${p.hrv} | Schlaf ${p.sleep}%</div>`; });
+      c.className = 'scroll-content';
+      team.forEach(p => {
+        c.innerHTML += `<div class="lab-card"><strong>${p.name.toUpperCase()}</strong><div class="stat-bar"><div class="bar-fill" style="width:${p.bpm/2}%"></div></div><small>Puls: ${p.bpm} | Fett: ${p.fat}% | SpO2: ${p.spo2}%</small></div>`;
+      });
     }
   }
 
-  function editPlayer(id) { curId = id; document.getElementById('editor').style.display='block'; switchTab('squad'); }
+  function addNewPlayer() {
+    const newP = {id:Date.now(), name:'Neu', rating:50, x:500, y:350, img:'', pac:50, sho:50, pas:50, dri:50, weight:70, fat:15, muscle:30, bpm:60, spo2:98};
+    team.push(newP); openSektor('kabine');
+  }
 
-  function switchTab(t) {
-    curTab = t; const f = document.getElementById('edit-fields'); const p = team.find(x => x.id === curId);
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('btn-'+t).classList.add('active');
+  function openEdit(id) { curId = id; document.getElementById('editor').style.display='block'; setTab('squad'); }
+  
+  function setTab(t) {
+    curTab = t; const f = document.getElementById('editor-fields'); const p = team.find(x => x.id === curId);
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active');
     f.innerHTML = '';
     if(t === 'squad') {
-      f.innerHTML = `<div class="input-group" style="grid-column: span 2"><label>Foto Upload</label><input type="file" accept="image/*" onchange="procImg(this)"></div>
-      <div class="input-group"><label>Name</label><input type="text" id="e-name" value="${p.name}"></div>
-      <div class="input-group"><label>Rating</label><input type="number" id="e-rating" value="${p.rating}"></div>
-      <div class="input-group"><label>PAC</label><input type="number" id="e-pac" value="${p.pac}"></div>
-      <div class="input-group"><label>SHO</label><input type="number" id="e-sho" value="${p.sho}"></div>`;
+      f.innerHTML = `<div class="input-group" style="grid-column:span 2"><label>Foto</label><input type="file" accept="image/*" onchange="procImg(this)"></div><div class="input-group"><label>Name</label><input type="text" id="e-name" value="${p.name}"></div><div class="input-group"><label>PAC</label><input type="number" id="e-pac" value="${p.pac}"></div>`;
     } else if(t === 'lab') {
-      f.innerHTML = `<div class="input-group"><label>Gewicht (kg)</label><input type="number" step="0.1" id="e-weight" value="${p.weight}"></div>
-      <div class="input-group"><label>Fett %</label><input type="number" step="0.1" id="e-fat" value="${p.fat}"></div>
-      <div class="input-group"><label>Muskel kg</label><input type="number" step="0.1" id="e-muscle" value="${p.muscle}"></div>
-      <div class="input-group"><label>Wasser %</label><input type="number" step="0.1" id="e-water" value="${p.water}"></div>`;
+      f.innerHTML = `<div class="input-group"><label>Gewicht</label><input type="number" id="e-weight" value="${p.weight}"></div><div class="input-group"><label>Fett %</label><input type="number" id="e-fat" value="${p.fat}"></div>`;
     } else if(t === 'tracker') {
-      f.innerHTML = `<div class="input-group"><label>Puls BPM</label><input type="number" id="e-bpm" value="${p.bpm}"></div>
-      <div class="input-group"><label>HRV ms</label><input type="number" id="e-hrv" value="${p.hrv}"></div>
-      <div class="input-group"><label>SpO2 %</label><input type="number" id="e-spo2" value="${p.spo2}"></div>
-      <div class="input-group"><label>Schlaf</label><input type="number" id="e-sleep" value="${p.sleep}"></div>`;
+      f.innerHTML = `<div class="input-group"><label>Puls</label><input type="number" id="e-bpm" value="${p.bpm}"></div><div class="input-group"><label>SpO2 %</label><input type="number" id="e-spo2" value="${p.spo2}"></div>`;
     }
   }
 
-  function procImg(input) { if(input.files && input.files[0]) { const r = new FileReader(); r.onload = (e) => { team.find(x => x.id === curId).img = e.target.result; }; r.readAsDataURL(input.files[0]); } }
-
-  function saveData() {
+  function procImg(i) { if(i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { team.find(x => x.id === curId).img = e.target.result; }; r.readAsDataURL(i.files[0]); } }
+  
+  function savePlayer() {
     const p = team.find(x => x.id === curId);
     if(document.getElementById('e-name')) p.name = document.getElementById('e-name').value;
-    if(document.getElementById('e-weight')) p.weight = document.getElementById('e-weight').value;
     if(document.getElementById('e-bpm')) p.bpm = document.getElementById('e-bpm').value;
-    localStorage.setItem('toni_team_v35', JSON.stringify(team)); document.getElementById('editor').style.display='none'; openSektor('kabine');
+    localStorage.setItem('toni_team_v36', JSON.stringify(team)); document.getElementById('editor').style.display='none'; openSektor('kabine'); renderArena();
   }
 
+  function deletePlayer() { if(confirm("Spieler entlassen?")) { team = team.filter(x => x.id !== curId); saveData(); } }
+  function toniSpeak(t) { const c = document.getElementById('chat'); c.innerHTML += `<div class="msg ai">Toni: ${t}</div>`; c.scrollTop = c.scrollHeight; const ut = new SpeechSynthesisUtterance(t); ut.lang='de-DE'; window.speechSynthesis.speak(ut); }
   function resetMemory() { if(confirm("Reset?")) { localStorage.clear(); location.reload(); } }
-  function closeOverlay() { document.getElementById('ov').style.display='none'; document.getElementById('editor').style.display='none'; }
-  renderArena();
+  function closeOv() { document.getElementById('ov').style.display='none'; document.getElementById('editor').style.display='none'; }
 </script>
 </body>
 </html>
