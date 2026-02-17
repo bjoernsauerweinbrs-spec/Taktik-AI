@@ -1,320 +1,453 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 - KI Taktik-Zentrale</title>
-    <style>
-        :root {
-            --bg-dark: #0a0a0a;
-            --panel-bg: #161616;
-            --accent-green: #2ecc71;
-            --accent-blue: #3498db;
-            --accent-gold: #f1c40f;
-            --text: #ffffff;
-            --border: #2c2c2c;
-        }
-
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-dark); color: var(--text);
-            overflow: hidden;
-        }
-
-        /* --- Layout --- */
-        .cockpit {
-            display: grid;
-            grid-template-columns: 80px 1fr 380px;
-            height: 100vh;
-        }
-
-        /* --- Sidebar --- */
-        .nav-sidebar {
-            background: var(--panel-bg);
-            border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 25px;
-        }
-        .nav-btn {
-            width: 55px; height: 55px; background: #222; border-radius: 12px;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; transition: 0.3s; font-size: 24px; border: 1px solid #333;
-        }
-        .nav-btn:hover { background: var(--accent-green); color: black; transform: scale(1.1); }
-        .nav-btn.active { border-color: var(--accent-green); box-shadow: 0 0 15px rgba(46, 204, 113, 0.3); }
-
-        /* --- Arena (Spielfeld) --- */
-        .arena {
-            position: relative; background: #111; overflow: hidden;
-            display: flex; justify-content: center; align-items: center; padding: 20px;
-        }
-        #pitch-container {
-            position: relative; width: 100%; max-width: 800px; aspect-ratio: 2/3;
-            background: #27ae60; border: 4px solid white; border-radius: 5px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-        }
-        .pitch-line { position: absolute; border: 2px solid white; pointer-events: none; }
-        .center-circle { 
-            position: absolute; top: 50%; left: 50%; width: 120px; height: 120px; 
-            border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); 
-        }
-        .draw-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; cursor: crosshair; }
-
-        /* --- Toni-Box --- */
-        .toni-box {
-            background: var(--panel-bg); border-left: 1px solid var(--border);
-            display: flex; flex-direction: column;
-        }
-        .toni-header { padding: 20px; border-bottom: 1px solid var(--border); font-weight: bold; color: var(--accent-green); display: flex; align-items: center; gap: 10px; }
-        .chat-area { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .msg { padding: 12px; border-radius: 10px; font-size: 14px; max-width: 85%; line-height: 1.4; }
-        .msg.toni { background: #222; border-left: 4px solid var(--accent-green); align-self: flex-start; }
-        .msg.coach { background: var(--accent-green); color: black; align-self: flex-end; font-weight: bold; }
-        .input-bar { padding: 20px; background: #1a1a1a; display: flex; gap: 10px; }
-        .input-bar input { flex-grow: 1; background: #252525; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; }
-
-        /* --- Overlays & Sektoren --- */
-        .overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-            display: none; z-index: 100; padding: 40px; backdrop-filter: blur(10px);
-        }
-        .close-overlay { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; }
-
-        /* 3x3 Grid */
-        .grid-3x3 {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 600px; margin: auto;
-        }
-        .tile {
-            aspect-ratio: 1; background: #222; border-radius: 20px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.3s; border: 1px solid #333; gap: 10px;
-        }
-        .tile:hover { background: var(--accent-green); color: black; transform: scale(1.05); }
-        .tile span { font-size: 40px; }
-
-        /* Kabine / Karten */
-        .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 20px; }
-        .fifa-card {
-            width: 130px; height: 180px; background: linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%);
-            border-radius: 10px; position: relative; color: black; padding: 10px;
-            display: flex; flex-direction: column; align-items: center; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-        .fifa-card .rating { position: absolute; top: 10px; left: 10px; font-weight: bold; font-size: 20px; }
-        .fifa-card .pos { position: absolute; top: 30px; left: 10px; font-size: 12px; }
-        .fifa-card .name { margin-top: auto; font-weight: bold; text-transform: uppercase; border-top: 1px solid rgba(0,0,0,0.2); width: 100%; text-align: center; }
-
-        /* Video Analyse Split-Screen */
-        .analysis-split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 80vh; }
-        .video-box { background: black; border-radius: 15px; overflow: hidden; position: relative; border: 2px solid #333; }
-        .video-box video { width: 100%; height: 100%; object-fit: cover; }
-        .video-label { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 5px; font-size: 12px; }
-
-        /* Spieler auf Feld */
-        .on-pitch {
-            width: 45px; height: 45px; background: var(--accent-gold); border: 3px solid white;
-            border-radius: 50%; position: absolute; color: black; display: flex; 
-            justify-content: center; align-items: center; font-weight: bold; z-index: 10; cursor: move;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TONI 2.0 — Prototype</title>
+<style>
+  :root{
+    --bg:#000000;
+    --stadium-green:#051205;
+    --neon:#39FF14;
+    --gold:#FFD700;
+    --muted:#222;
+    --card-w:160px;
+    --card-h:230px;
+    --ui-gap:12px;
+    --font-sans: "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#050505);color:#ddd;font-family:var(--font-sans);}
+  .app{display:grid;grid-template-columns:72px 1fr 360px;gap:var(--ui-gap);height:100vh;padding:var(--ui-gap);box-sizing:border-box;}
+  /* Left column (icons) */
+  .left-col{background:rgba(255,255,255,0.02);border-radius:8px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .icon-btn{width:48px;height:48px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;color:var(--neon);cursor:pointer}
+  .icon-btn.active{background:rgba(57,255,20,0.06);box-shadow:0 0 8px rgba(57,255,20,0.06)}
+  /* Center column (arena) */
+  .center-col{background:linear-gradient(180deg, rgba(5,18,5,0.9), rgba(0,0,0,0.6));border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 0 40px rgba(0,0,0,0.6)}
+  .arena-toolbar{display:flex;gap:8px;align-items:center}
+  .tool-btn{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--neon);padding:6px 10px;border-radius:6px;cursor:pointer}
+  .arena-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative}
+  canvas#arenaCanvas{background:linear-gradient(180deg,#052205,#021202);border-radius:6px;box-shadow:0 6px 30px rgba(0,0,0,0.6);max-width:100%;max-height:100%}
+  /* Right column (Toni-Box) */
+  .right-col{background:rgba(255,255,255,0.02);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+  .tonibox-video{background:#000;border-radius:6px;height:180px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03)}
+  .chat{flex:1;display:flex;flex-direction:column;gap:8px;overflow:auto;padding:6px;background:linear-gradient(180deg, rgba(0,0,0,0.2), transparent);border-radius:6px}
+  .chat .msg{padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);max-width:85%}
+  .chat .msg.ai{background:linear-gradient(90deg, rgba(57,255,20,0.06), rgba(57,255,20,0.02));align-self:flex-start}
+  .chat .msg.user{background:rgba(255,255,255,0.04);align-self:flex-end}
+  .chat-input{display:flex;gap:8px}
+  input[type="text"]{flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff}
+  button.primary{background:var(--neon);color:#000;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+  /* Briefcase overlay (hidden by default) */
+  .briefcase-overlay{position:fixed;left:92px;top:12px;bottom:12px;width:520px;background:linear-gradient(180deg,#071207,#041004);border-radius:10px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,0.7);display:flex;flex-direction:column;gap:12px;z-index:60;overflow:hidden}
+  .briefcase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;overflow:auto;padding-right:6px}
+  .card{width:100%;height:220px;border-radius:10px;background:linear-gradient(180deg,#0b1b0b,#07110a);border:1px solid rgba(57,255,20,0.06);padding:10px;box-sizing:border-box;position:relative;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+  .card .photo{height:110px;background:linear-gradient(90deg,#0a0a0a,#111);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#888}
+  .card .meta{display:flex;justify-content:space-between;align-items:center}
+  .card .rating{font-size:22px;color:var(--gold);font-weight:700}
+  .card .name{font-size:14px}
+  .card .pos{font-size:12px;color:#9f9f9f}
+  .briefcase-actions{display:flex;gap:8px;align-items:center}
+  .sticky-header{position:sticky;top:0;background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.2));padding:6px;border-bottom:1px solid rgba(255,255,255,0.02);z-index:10}
+  /* small helpers */
+  .muted{color:#9a9a9a;font-size:13px}
+  .toast{position:fixed;right:20px;bottom:20px;background:rgba(0,0,0,0.7);padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);color:#fff}
+  @media (max-width:1100px){
+    .app{grid-template-columns:56px 1fr 300px}
+    .briefcase-overlay{left:72px}
+  }
+  @media (max-width:800px){
+    .app{grid-template-columns:56px 1fr;grid-template-rows:auto 360px}
+    .right-col{grid-column:1/-1;order:3}
+    .briefcase-overlay{left:8px;right:8px;width:auto}
+  }
+</style>
 </head>
 <body>
+<div class="app" id="app">
+  <!-- Left column -->
+  <div class="left-col" aria-label="Navigation">
+    <div class="icon-btn" id="btn-briefcase" title="Aktentasche">💼</div>
+    <div class="icon-btn" id="btn-mic" title="Live Talk Toni">🎙️</div>
+    <div class="icon-btn" id="btn-reset" title="System Reset">🔁</div>
+  </div>
 
-<div class="cockpit">
-    <nav class="nav-sidebar">
-        <div class="nav-btn" onclick="toggleOverlay('briefcase-overlay')" title="Aktentasche">💼</div>
-        <div class="nav-btn" onclick="toggleDrawMode()" id="draw-btn" title="Zeichnen">✏️</div>
-        <div class="nav-btn" onclick="toggleOverlay('video-overlay')" title="Video Analyse">📹</div>
-        <div class="nav-btn" onclick="location.reload()" title="Reset">🔄</div>
-    </nav>
-
-    <main class="arena" id="arena">
-        <div id="pitch-container">
-            <div class="pitch-line" style="width: 100%; top: 50%;"></div>
-            <div class="center-circle"></div>
-            <canvas id="tactic-canvas" class="draw-layer"></canvas>
-            </div>
-    </main>
-
-    <aside class="toni-box">
-        <div class="toni-header">🤖 TONI 2.0 <small style="color: #666; font-weight: normal;">Online</small></div>
-        <div class="chat-area" id="chat-win">
-            <div class="msg toni">Hallo Coach! Alle Systeme sind bereit. Öffne die Aktentasche, um den Kader zu laden oder starte die Video-Analyse.</div>
-        </div>
-        <div class="input-bar">
-            <input type="text" id="user-msg" placeholder="Befehl an Toni...">
-            <button onclick="askToni()" style="background: var(--accent-green); border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">➔</button>
-        </div>
-    </aside>
-</div>
-
-<div id="briefcase-overlay" class="overlay">
-    <span class="close-overlay" onclick="toggleOverlay('briefcase-overlay')">×</span>
-    <h2 style="text-align: center; margin-bottom: 40px;">ZENTRALE AKTENTASCHE</h2>
-    <div class="grid-3x3">
-        <div class="tile" onclick="openSector('kabine')"><span>🏟️</span>KABINE</div>
-        <div class="tile"><span>📊</span>ANALYSE</div>
-        <div class="tile" onclick="openSector('video')"><span>📹</span>VIDEO</div>
-        <div class="tile"><span>⚽</span>MATCH</div>
-        <div class="tile"><span>🚧</span>TRAINING</div>
-        <div class="tile"><span>💰</span>BUSINESS</div>
-        <div class="tile"><span>📰</span>ZEITUNG</div>
-        <div class="tile"><span>🔍</span>SCOUTING</div>
-        <div class="tile"><span>⚙️</span>SETTINGS</div>
+  <!-- Center column -->
+  <div class="center-col">
+    <div class="arena-toolbar">
+      <button class="tool-btn" id="tool-select">Select</button>
+      <button class="tool-btn" id="tool-line">Line</button>
+      <button class="tool-btn" id="tool-arrow">Arrow</button>
+      <button class="tool-btn" id="tool-delete">Delete</button>
+      <div style="flex:1"></div>
+      <button class="tool-btn" id="btn-undo">Undo</button>
+      <button class="tool-btn" id="btn-redo">Redo</button>
+      <button class="tool-btn" id="btn-export">Snapshot exportieren</button>
     </div>
-</div>
-
-<div id="kabine-overlay" class="overlay">
-    <span class="close-overlay" onclick="toggleOverlay('kabine-overlay')">×</span>
-    <h2>MANNSCHAFTS-KADER</h2>
-    <div class="player-grid" id="player-storage">
-        </div>
-</div>
-
-<div id="video-overlay" class="overlay">
-    <span class="close-overlay" onclick="toggleOverlay('video-overlay')">×</span>
-    <h2>VIDEO ANALYSEZENTRUM</h2>
-    <div class="analysis-split">
-        <div class="video-box">
-            <div class="video-label">REFERENZ (YOUTUBE)</div>
-            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/fSAtBv9_v6E" frameborder="0" allowfullscreen></iframe>
-        </div>
-        <div class="video-box">
-            <div class="video-label">LIVE-KAMERA (COACH)</div>
-            <video id="coach-cam" autoplay playsinline></video>
-            <button onclick="startCam()" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 10px; background: var(--accent-green); border: none; border-radius: 5px;">Kamera starten</button>
-        </div>
+    <div class="arena-wrap">
+      <canvas id="arenaCanvas" width="1200" height="700" aria-label="Taktikboard"></canvas>
     </div>
+  </div>
+
+  <!-- Right column -->
+  <div class="right-col">
+    <div class="sticky-header" style="display:flex;justify-content:space-between;align-items:center">
+      <div><strong>Toni‑Box</strong><div class="muted">KI • Video • Live</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="tool-btn" id="btn-video-toggle">Video</button>
+        <button class="tool-btn" id="btn-camera">Kamera</button>
+      </div>
+    </div>
+
+    <div class="tonibox-video" id="videoPane">Video / YouTube Platzhalter</div>
+
+    <div class="chat" id="chat">
+      <div class="msg ai">Hallo, ich bin Toni. Frag mich nach Taktik oder lade ein Video hoch.</div>
+    </div>
+
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Nachricht an Toni..." />
+      <button class="primary" id="chatSend">Senden</button>
+    </div>
+  </div>
 </div>
+
+<!-- Briefcase overlay (hidden) -->
+<div id="briefcaseOverlay" class="briefcase-overlay" style="display:none">
+  <div class="sticky-header" style="display:flex;justify-content:space-between;align-items:center">
+    <div><strong>Aktentasche</strong><div class="muted">Kader • Analyse • Management</div></div>
+    <div><button class="tool-btn" id="briefcaseClose">✕</button></div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center">
+    <input id="searchPlayer" type="text" placeholder="Suche Spieler..." style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff" />
+    <button class="tool-btn" id="btn-add-player">+ Spieler</button>
+  </div>
+
+  <div class="briefcase-grid" id="briefcaseGrid" role="list"></div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div class="muted">50+ Spieler unterstützt • Virtualized List</div>
+    <div class="briefcase-actions">
+      <button class="tool-btn" id="btn-export-players">Export CSV</button>
+      <button class="tool-btn" id="btn-import-players">Import</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" style="display:none"></div>
 
 <script>
-    // --- DATEN ---
-    const players = [
-        { id: 1, name: 'Müller', r: 88, pos: 'OM', nr: 25 },
-        { id: 2, name: 'Kane', r: 91, pos: 'ST', nr: 9 },
-        { id: 3, name: 'Musiala', r: 87, pos: 'ZM', nr: 42 },
-        { id: 4, name: 'Sané', r: 85, pos: 'RW', nr: 10 },
-        { id: 5, name: 'Kimmich', r: 88, pos: 'CDM', nr: 6 }
-    ];
+/* =========================
+   Tiny EventBus
+   ========================= */
+const events = (function(){
+  const map = {};
+  return {
+    on: (ev,fn)=>{(map[ev]||(map[ev]=[])).push(fn)},
+    off: (ev,fn)=>{if(!map[ev])return;map[ev]=map[ev].filter(f=>f!==fn)},
+    emit: (ev,p)=>{(map[ev]||[]).forEach(fn=>{try{fn(p)}catch(e){console.error(e)}})}
+  };
+})();
 
-    // --- UI LOGIK ---
-    function toggleOverlay(id) {
-        const el = document.getElementById(id);
-        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-        if(id === 'kabine-overlay') renderKabine();
+/* =========================
+   ToniDB (simple localStorage wrapper)
+   - players: array
+   - snapshots: array
+   ========================= */
+const toniDB = (function(){
+  const KEY = 'toni_db_v1';
+  let state = {players:[],snapshots:[]};
+  function load(){ try{ const raw=localStorage.getItem(KEY); if(raw) state=JSON.parse(raw);}catch(e){console.error(e)} }
+  function save(){ localStorage.setItem(KEY,JSON.stringify(state)); }
+  load();
+  return {
+    getPlayers: ()=>state.players.slice(),
+    savePlayer: (p)=>{ const idx=state.players.findIndex(x=>x.id===p.id); if(idx>=0) state.players[idx]=p; else state.players.push(p); save(); events.emit('playersChanged',toniDB.getPlayers()); },
+    deletePlayer: (id)=>{ state.players=state.players.filter(x=>x.id!==id); save(); events.emit('playersChanged',toniDB.getPlayers()); },
+    setPlayers: (arr)=>{ state.players=arr; save(); events.emit('playersChanged',toniDB.getPlayers()); },
+    saveSnapshot: (snap)=>{ state.snapshots.push(snap); save(); },
+    getSnapshots: ()=>state.snapshots.slice()
+  };
+})();
+
+/* =========================
+   Utilities
+   ========================= */
+function uid(prefix='id'){return prefix+Math.random().toString(36).slice(2,9)}
+function showToast(msg,timeout=2500){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',timeout); }
+
+/* =========================
+   Sample players (seed if empty)
+   ========================= */
+if(toniDB.getPlayers().length===0){
+  const sample = [
+    {id:'H1',name:'M. Müller',number:9,position:'ST',rating:92,attributes:{PAC:88,SHO:90,PAS:85,DRI:91,DEF:40,PHY:78},vital:{bpm:60,spO2:98,fatigue:12},meta:{injured:false,captain:false},x:100,y:300},
+    {id:'H2',name:'L. Silva',number:8,position:'CM',rating:89,attributes:{PAC:78,SHO:82,PAS:90,DRI:88,DEF:60,PHY:70},vital:{bpm:64,spO2:98,fatigue:18},meta:{injured:false,captain:false},x:200,y:300},
+    {id:'H3',name:'A. Becker',number:1,position:'GK',rating:90,attributes:{PAC:40,SHO:30,PAS:60,DRI:30,DEF:90,PHY:85},vital:{bpm:58,spO2:99,fatigue:8},meta:{injured:false,captain:false},x:60,y:350},
+    {id:'A1',name:'R. Smith',number:7,position:'RW',rating:86,attributes:{PAC:92,SHO:84,PAS:78,DRI:88,DEF:35,PHY:72},vital:{bpm:66,spO2:97,fatigue:20},meta:{injured:false,captain:false},x:900,y:300}
+  ];
+  toniDB.setPlayers(sample);
+}
+
+/* =========================
+   Briefcase UI
+   - virtualized simple: render first N, filter by search
+   ========================= */
+const briefcase = (function(){
+  const overlay = document.getElementById('briefcaseOverlay');
+  const grid = document.getElementById('briefcaseGrid');
+  const search = document.getElementById('searchPlayer');
+
+  function render(players){
+    grid.innerHTML='';
+    const list = players.slice(0,60); // simple cap for prototype
+    list.forEach(p=>{
+      const el = document.createElement('div'); el.className='card'; el.setAttribute('role','listitem');
+      el.innerHTML = `
+        <div class="photo">${p.position} • #${p.number}</div>
+        <div class="meta"><div><div class="name">${p.name}</div><div class="pos muted">${p.position}</div></div><div class="rating">${p.rating}</div></div>
+        <div style="display:flex;gap:6px;margin-top:auto">
+          <button class="tool-btn btn-place" data-id="${p.id}">Place</button>
+          <button class="tool-btn btn-edit" data-id="${p.id}">Edit</button>
+          <button class="tool-btn btn-del" data-id="${p.id}">Del</button>
+        </div>
+      `;
+      grid.appendChild(el);
+    });
+  }
+
+  function open(){ overlay.style.display='flex'; render(toniDB.getPlayers()); }
+  function close(){ overlay.style.display='none'; }
+
+  // events
+  document.getElementById('briefcaseClose').addEventListener('click',close);
+  document.getElementById('btn-briefcase').addEventListener('click',()=>{ overlay.style.display==='flex'?close():open() });
+  document.getElementById('btn-add-player').addEventListener('click',()=>{
+    const id=uid('P'); const p={id,name:'Neu Spieler',name:`Spieler ${id}`,number:99,position:'SUB',rating:80,attributes:{},vital:{bpm:60,spO2:98,fatigue:0},meta:{injured:false,captain:false},x:100,y:100};
+    toniDB.savePlayer(p); showToast('Spieler hinzugefügt');
+  });
+
+  grid.addEventListener('click', (ev)=>{
+    const btn = ev.target.closest('button');
+    if(!btn) return;
+    const id = btn.dataset.id;
+    if(btn.classList.contains('btn-place')){
+      const p = toniDB.getPlayers().find(x=>x.id===id);
+      events.emit('playerDropped',{player:p,x:400,y:300});
+      showToast('Spieler auf Feld platziert');
+    } else if(btn.classList.contains('btn-edit')){
+      const p = toniDB.getPlayers().find(x=>x.id===id);
+      const newName = prompt('Name',p.name); if(newName){ p.name=newName; toniDB.savePlayer(p); render(toniDB.getPlayers()); }
+    } else if(btn.classList.contains('btn-del')){
+      if(confirm('Spieler löschen?')){ toniDB.deletePlayer(id); render(toniDB.getPlayers()); }
     }
+  });
 
-    function openSector(sector) {
-        document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
-        if(sector === 'kabine') toggleOverlay('kabine-overlay');
-        if(sector === 'video') toggleOverlay('video-overlay');
+  search.addEventListener('input', ()=>{ const q=search.value.toLowerCase(); const filtered = toniDB.getPlayers().filter(p=>p.name.toLowerCase().includes(q)||p.position.toLowerCase().includes(q)); render(filtered); });
+
+  // export players
+  document.getElementById('btn-export-players').addEventListener('click',()=>{
+    const csv = toniDB.getPlayers().map(p=>`${p.id},${p.name},${p.number},${p.position},${p.rating}`).join('\n');
+    const blob = new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='players.csv'; a.click(); URL.revokeObjectURL(url);
+  });
+
+  return {open,close,render};
+})();
+
+/* =========================
+   Arena Engine (simplified)
+   - canvas rendering
+   - players array from DB
+   - drag & drop + long-press
+   - snapshot export
+   ========================= */
+const arena = (function(){
+  const canvas = document.getElementById('arenaCanvas');
+  const ctx = canvas.getContext('2d');
+  let players = [];
+  let selected = null;
+  let drag = null;
+  let longPressTimer = null;
+  let undoStack = [], redoStack = [];
+
+  function resizeCanvas(){
+    // keep fixed size for prototype; could be responsive
+  }
+
+  function loadPlayersFromDB(){
+    players = toniDB.getPlayers().map(p=>Object.assign({},p)); // copy
+    render();
+  }
+
+  function render(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    drawField();
+    // lines, overlays...
+    players.forEach(p=>drawPlayer(p));
+  }
+
+  function drawField(){
+    // grass
+    ctx.fillStyle = '#052205';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    // pitch lines neon
+    ctx.strokeStyle = 'rgba(57,255,20,0.18)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.rect(40,40,canvas.width-80,canvas.height-80);
+    ctx.stroke();
+    // center circle
+    ctx.beginPath();
+    ctx.arc(canvas.width/2, canvas.height/2, 60, 0, Math.PI*2);
+    ctx.stroke();
+    // 5m zones (goal area)
+    ctx.strokeStyle = 'rgba(57,255,20,0.08)';
+    ctx.beginPath();
+    ctx.rect(40, (canvas.height/2)-60, 40, 120);
+    ctx.rect(canvas.width-80, (canvas.height/2)-60, 40, 120);
+    ctx.stroke();
+  }
+
+  function drawPlayer(p){
+    const r = 20;
+    ctx.beginPath();
+    ctx.fillStyle = p.id.startsWith('H') ? 'rgba(255,60,60,0.95)' : 'rgba(80,140,255,0.95)';
+    ctx.arc(p.x,p.y,r,0,Math.PI*2);
+    ctx.fill();
+    // number
+    ctx.fillStyle='#fff'; ctx.font='14px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(p.number,p.x,p.y);
+    // name small
+    ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.font='11px sans-serif';
+    ctx.fillText(p.name.split(' ')[0], p.x, p.y + r + 12);
+    // highlight if selected
+    if(selected && selected.id===p.id){
+      ctx.strokeStyle='rgba(57,255,20,0.9)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(p.x,p.y,r+6,0,Math.PI*2); ctx.stroke();
     }
+  }
 
-    // --- KABINE & SPIELER ---
-    function renderKabine() {
-        const grid = document.getElementById('player-storage');
-        grid.innerHTML = '';
-        players.forEach(p => {
-            const card = document.createElement('div');
-            card.className = 'fifa-card';
-            card.innerHTML = `<div class="rating">${p.r}</div><div class="pos">${p.pos}</div><div class="name">${p.name}</div>`;
-            card.onclick = () => deployPlayer(p);
-            grid.appendChild(card);
-        });
+  function getPlayerAt(x,y){
+    return players.find(p=>Math.hypot(p.x-x,p.y-y) <= 26);
+  }
+
+  // mouse/touch handlers
+  canvas.addEventListener('pointerdown', (ev)=>{
+    const rect = canvas.getBoundingClientRect();
+    const x = ev.clientX - rect.left, y = ev.clientY - rect.top;
+    const p = getPlayerAt(x,y);
+    longPressTimer = setTimeout(()=>{
+      if(p){
+        // start drag
+        drag = {playerId:p.id,offsetX:x-p.x,offsetY:y-p.y};
+        selected = p;
+        render();
+      }
+    }, 600); // long-press threshold
+    // immediate select on click
+    if(p){ selected = p; render(); }
+    canvas.setPointerCapture(ev.pointerId);
+  });
+
+  canvas.addEventListener('pointermove', (ev)=>{
+    if(!drag) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = ev.clientX - rect.left, y = ev.clientY - rect.top;
+    const p = players.find(pp=>pp.id===drag.playerId);
+    if(p){ p.x = x - drag.offsetX; p.y = y - drag.offsetY; render(); }
+  });
+
+  canvas.addEventListener('pointerup', (ev)=>{
+    clearTimeout(longPressTimer);
+    if(drag){
+      // finalize
+      const p = players.find(pp=>pp.id===drag.playerId);
+      if(p){ pushUndo(); savePositionsToDB(); events.emit('playerMoved',p); }
+      drag=null;
+      render();
     }
+    canvas.releasePointerCapture(ev.pointerId);
+  });
 
-    function deployPlayer(pData) {
-        const pitch = document.getElementById('pitch-container');
-        const p = document.createElement('div');
-        p.className = 'on-pitch';
-        p.innerText = pData.nr;
-        p.style.left = '50%'; p.style.top = '50%';
-        
-        // Drag Logic
-        p.onmousedown = function(e) {
-            let shiftX = e.clientX - p.getBoundingClientRect().left;
-            let shiftY = e.clientY - p.getBoundingClientRect().top;
-            document.onmousemove = function(e) {
-                let rect = pitch.getBoundingClientRect();
-                let x = ((e.clientX - rect.left - shiftX) / rect.width) * 100;
-                let y = ((e.clientY - rect.top - shiftY) / rect.height) * 100;
-                p.style.left = x + '%'; p.style.top = y + '%';
-            };
-            document.onmouseup = () => document.onmousemove = null;
-        };
+  // allow placing from briefcase
+  events.on('playerDropped', ({player,x,y})=>{
+    // if player exists in players array, update pos; else add
+    let p = players.find(pp=>pp.id===player.id);
+    if(p){ p.x=x; p.y=y; } else { p = Object.assign({},player,{x,y}); players.push(p); }
+    pushUndo(); savePositionsToDB(); render();
+  });
 
-        pitch.appendChild(p);
-        toggleOverlay('kabine-overlay');
-        addMsg(`Toni: ${pData.name} steht jetzt auf dem Platz.`, 'toni');
-    }
+  function pushUndo(){ undoStack.push(JSON.stringify(players)); if(undoStack.length>50) undoStack.shift(); redoStack=[]; }
+  function undo(){ if(!undoStack.length) return; redoStack.push(JSON.stringify(players)); const raw=undoStack.pop(); players=JSON.parse(raw); savePositionsToDB(); render(); }
+  function redo(){ if(!redoStack.length) return; undoStack.push(JSON.stringify(players)); const raw=redoStack.pop(); players=JSON.parse(raw); savePositionsToDB(); render(); }
 
-    // --- ZEICHEN FUNKTION ---
-    const canvas = document.getElementById('tactic-canvas');
-    const ctx = canvas.getContext('2d');
-    let drawing = false;
-    let drawActive = false;
+  function savePositionsToDB(){
+    // persist positions back to toniDB
+    const dbPlayers = toniDB.getPlayers();
+    players.forEach(p=>{
+      const idx = dbPlayers.findIndex(d=>d.id===p.id);
+      if(idx>=0){ dbPlayers[idx].x=p.x; dbPlayers[idx].y=p.y; toniDB.savePlayer(dbPlayers[idx]); }
+    });
+  }
 
-    function toggleDrawMode() {
-        drawActive = !drawActive;
-        document.getElementById('draw-btn').classList.toggle('active');
-        canvas.style.pointerEvents = drawActive ? 'all' : 'none';
-        if(drawActive) {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-        }
-    }
+  function exportSnapshot(){
+    const snap = {id:uid('snap'),timestamp:Date.now(),players:players.map(p=>({id:p.id,x:p.x,y:p.y,name:p.name,number:p.number,position:p.position,rating:p.rating}))};
+    toniDB.saveSnapshot(snap);
+    const blob = new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});
+    const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='snapshot.json'; a.click(); URL.revokeObjectURL(url);
+    showToast('Snapshot exportiert');
+  }
 
-    canvas.onmousedown = () => drawing = true;
-    canvas.onmouseup = () => { drawing = false; ctx.beginPath(); };
-    canvas.onmousemove = (e) => {
-        if(!drawing || !drawActive) return;
-        ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = 'white';
-        ctx.lineTo(e.offsetX, e.offsetY);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(e.offsetX, e.offsetY);
-    };
+  // public API
+  return {
+    init: ()=>{ loadPlayersFromDB(); window.addEventListener('resize',resizeCanvas); document.getElementById('btn-export').addEventListener('click',exportSnapshot); document.getElementById('btn-undo').addEventListener('click',undo); document.getElementById('btn-redo').addEventListener('click',redo); },
+    render,
+    getPlayers: ()=>players
+  };
+})();
 
-    // --- VIDEO & KAMERA ---
-    async function startCam() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            document.getElementById('coach-cam').srcObject = stream;
-        } catch (err) { alert("Kamera-Zugriff verweigert."); }
-    }
+/* =========================
+   Toni-Box (chat skeleton)
+   - simple local responses for prototype
+   ========================= */
+const tonibox = (function(){
+  const chat = document.getElementById('chat');
+  const input = document.getElementById('chatInput');
+  const send = document.getElementById('chatSend');
 
-    // --- TONI CHAT ---
-    function askToni() {
-        const input = document.getElementById('user-msg');
-        if(!input.value) return;
-        addMsg(input.value, 'coach');
-        
-        const cmd = input.value.toLowerCase();
-        input.value = '';
+  function appendMsg(text,cls='ai'){ const el=document.createElement('div'); el.className='msg '+cls; el.textContent=text; chat.appendChild(el); chat.scrollTop=chat.scrollHeight; }
 
-        setTimeout(() => {
-            if(cmd.includes('kabine')) {
-                addMsg("Toni: Öffne Kabine...", 'toni');
-                openSector('kabine');
-            } else if(cmd.includes('video')) {
-                addMsg("Toni: Analyserhythmus wird synchronisiert. Videozentrum bereit.", 'toni');
-                openSector('video');
-            } else {
-                addMsg("Toni: Verstanden. Ich analysiere die Taktik und berechne die Verschiebung der Kette.", 'toni');
-            }
-        }, 800);
-    }
+  send.addEventListener('click', ()=>{
+    const v = input.value.trim(); if(!v) return;
+    appendMsg(v,'user'); input.value='';
+    // fake AI response for prototype
+    setTimeout(()=>{ appendMsg('Toni: Verstanden. Vorschlag: 4-3-3, Pressing höher.'); },600);
+  });
 
-    function addMsg(text, sender) {
-        const win = document.getElementById('chat-win');
-        const d = document.createElement('div');
-        d.className = `msg ${sender}`;
-        d.innerText = text;
-        win.appendChild(d);
-        win.scrollTop = win.scrollHeight;
-    }
+  return {appendMsg};
+})();
+
+/* =========================
+   Wire up UI controls
+   ========================= */
+document.getElementById('btn-reset').addEventListener('click', ()=>{
+  if(confirm('Reset: Alle Daten aus ToniDB löschen?')){ localStorage.clear(); location.reload(); }
+});
+document.getElementById('btn-mic').addEventListener('click', ()=>{ showToast('Voice: (Prototype) Mikrofon aktiviert'); });
+document.getElementById('btn-video-toggle').addEventListener('click', ()=>{ const v=document.getElementById('videoPane'); v.textContent = v.textContent.includes('YouTube') ? 'Video / YouTube Platzhalter' : 'YouTube: Zidane - Beispiel (timecode sync)'; });
+
+document.getElementById('btn-import-players').addEventListener('click', ()=>{
+  showToast('Import: Funktion in Prototype nicht aktiviert');
+});
+
+/* init */
+arena.init();
+briefcase.render(toniDB.getPlayers());
+showToast('TONI 2.0 Prototype geladen');
+
+/* expose for console debugging */
+window.toni = {arena,toniDB,events};
 </script>
-
 </body>
 </html>
