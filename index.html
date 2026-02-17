@@ -3,240 +3,295 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TONI 2.0 — High-Tech Tactical Board</title>
+<title>TONI 2.0 — Das ultimative Taktik-Betriebssystem</title>
 <style>
-  :root{
-    --bg:#000000;
-    --stadium-green:#051205;
-    --neon:#39FF14;
-    --gold:#FFD700;
-    --muted:#666;
-    --card-w:160px;
-    --card-h:230px;
-    --ui-gap:12px;
-    --font-sans: "Segoe UI", Roboto, Arial, sans-serif;
+  :root {
+    --bg: #000000;
+    --stadium-green: #051205;
+    --neon: #39FF14;
+    --gold: #FFD700;
+    --muted: #444;
+    --glass: rgba(255, 255, 255, 0.03);
+    --font-sans: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#050505);color:#ddd;font-family:var(--font-sans);overflow:hidden;}
-  .app{display:grid;grid-template-columns:72px 1fr 380px;gap:var(--ui-gap);height:100vh;padding:var(--ui-gap);box-sizing:border-box;}
-  
+  html, body { height: 100%; margin: 0; background: var(--bg); color: #fff; font-family: var(--font-sans); overflow: hidden; }
+  .app { display: grid; grid-template-columns: 80px 1fr 400px; gap: 15px; height: 100vh; padding: 15px; box-sizing: border-box; }
+
   /* Navigation */
-  .left-col{background:rgba(255,255,255,0.02);border-radius:8px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:12px;border:1px solid rgba(255,255,255,0.05);}
-  .icon-btn{width:48px;height:48px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,20,0.1);display:flex;align-items:center;justify-content:center;color:var(--neon);cursor:pointer;font-size:20px;transition:0.2s;}
-  .icon-btn:hover{background:rgba(57,255,20,0.1);box-shadow:0 0 10px var(--neon);}
+  .left-col { background: var(--glass); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; padding: 15px 0; gap: 20px; }
+  .icon-btn { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; border: 1px solid rgba(57, 255, 20, 0.1); transition: 0.3s; color: var(--neon); }
+  .icon-btn:hover { background: rgba(57, 255, 20, 0.1); box-shadow: 0 0 15px var(--neon); transform: scale(1.05); }
 
   /* Arena */
-  .center-col{background:rgba(5,18,5,0.5);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px;position:relative;}
-  .arena-toolbar{display:flex;gap:8px;align-items:center;background:rgba(0,0,0,0.4);padding:8px;border-radius:6px;}
-  .tool-btn{background:transparent;border:1px solid rgba(57,255,20,0.3);color:var(--neon);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;}
-  .tool-btn:hover{background:var(--neon);color:#000;}
-  .arena-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-  canvas#arenaCanvas{background:#021202;border-radius:4px;box-shadow:0 0 20px rgba(0,0,0,0.8);max-width:100%;max-height:100%;cursor:crosshair;}
+  .center-col { background: linear-gradient(180deg, #051205, #000); border-radius: 12px; display: flex; flex-direction: column; padding: 15px; position: relative; border: 1px solid rgba(57, 255, 20, 0.05); }
+  .arena-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; }
+  .arena-wrap { flex: 1; display: flex; align-items: center; justify-content: center; background: #010a01; border-radius: 8px; box-shadow: inset 0 0 50px #000; position: relative; overflow: hidden; }
+  canvas { cursor: crosshair; max-width: 100%; max-height: 100%; }
 
-  /* Toni-Box (Video & Chat) */
-  .right-col{background:rgba(255,255,255,0.02);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px;border-left:1px solid rgba(255,255,255,0.05);}
-  .video-analysis{display:grid;grid-template-columns:1fr;gap:8px;height:220px;}
-  .video-pane{background:#000;border:1px solid #222;border-radius:6px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:12px;color:#444;}
-  .chat{flex:1;display:flex;flex-direction:column;gap:8px;overflow-y:auto;padding:8px;border-top:1px solid #111;}
-  .msg{padding:10px;border-radius:8px;font-size:14px;line-height:1.4;max-width:90%;}
-  .msg.ai{background:rgba(57,255,20,0.08);color:var(--neon);align-self:flex-start;border-left:3px solid var(--neon);}
-  .msg.user{background:rgba(255,255,255,0.05);align-self:flex-end;}
-  .chat-input-wrap{display:flex;gap:8px;}
-  input#chatInput{flex:1;background:#111;border:1px solid #333;color:#fff;padding:10px;border-radius:6px;}
+  /* Toni-Box (Rechts) */
+  .right-col { background: var(--glass); border-radius: 12px; border-left: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; padding: 15px; gap: 15px; }
+  .video-zone { display: flex; flex-direction: column; gap: 10px; height: 250px; }
+  .video-frame { flex: 1; background: #000; border-radius: 8px; border: 1px solid #222; position: relative; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted); }
+  .chat-zone { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; overflow: hidden; }
+  #chat-history { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
+  .msg { padding: 10px; border-radius: 8px; font-size: 14px; max-width: 85%; line-height: 1.4; }
+  .msg.ai { background: rgba(57, 255, 20, 0.05); border-left: 3px solid var(--neon); align-self: flex-start; }
+  .msg.user { background: rgba(255, 255, 255, 0.05); align-self: flex-end; }
 
-  /* Overlays */
-  .overlay{position:fixed;left:92px;top:20px;bottom:20px;width:550px;background:#070f07;border:1px solid var(--neon);border-radius:12px;z-index:100;display:none;flex-direction:column;padding:20px;box-shadow:0 0 50px rgba(0,0,0,0.9);}
-  .grid-3x3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:20px;}
-  .kachel{background:rgba(57,255,20,0.05);border:1px solid rgba(57,255,20,0.2);border-radius:8px;padding:15px;text-align:center;cursor:pointer;transition:0.2s;}
-  .kachel:hover{background:var(--neon);color:#000;}
+  /* FIFA Cards / Briefcase Overlay */
+  .overlay { position: fixed; inset: 20px 420px 20px 100px; background: #070f07; border: 1px solid var(--neon); border-radius: 16px; z-index: 1000; display: none; flex-direction: column; padding: 25px; box-shadow: 0 0 100px rgba(0,0,0,0.9); }
+  .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; flex: 1; }
+  .kachel { background: rgba(57, 255, 20, 0.03); border: 1px solid rgba(57, 255, 20, 0.1); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: 0.2s; }
+  .kachel:hover { background: var(--neon); color: #000; transform: translateY(-5px); }
+  .kachel i { font-size: 32px; }
 
-  /* Manager Styles */
-  .sponsor-card{border:1px dashed #444;padding:10px;border-radius:6px;text-align:center;background:#111;}
+  /* FIFA Card Design */
+  .fifa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; overflow-y: auto; padding: 10px; }
+  .fifa-card { width: 140px; height: 200px; background: linear-gradient(135deg, #d4af37 0%, #f9f295 50%, #b8860b 100%); border-radius: 8px; position: relative; color: #000; padding: 10px; box-sizing: border-box; font-family: "Arial Black", sans-serif; cursor: grab; }
+  .fifa-card .rating { font-size: 24px; line-height: 1; }
+  .fifa-card .pos { font-size: 12px; }
+  .fifa-card .photo { width: 80px; height: 80px; background: rgba(0,0,0,0.1); margin: 0 auto; border-bottom: 2px solid #000; }
+  .fifa-card .name { text-align: center; font-size: 14px; margin-top: 5px; text-transform: uppercase; }
+  .fifa-card .stats { display: grid; grid-template-columns: 1fr 1fr; font-size: 9px; margin-top: 5px; border-top: 1px solid rgba(0,0,0,0.2); }
 
-  @media print {
-    body * { visibility: hidden; }
-    #printArea, #printArea * { visibility: visible; }
-    #printArea { position: absolute; left: 0; top: 0; width: 100%; }
-  }
+  .tool-btn { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .tool-btn:hover { background: var(--neon); color: #000; }
+
+  .close-btn { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; color: var(--neon); }
 </style>
 </head>
 <body>
 
 <div class="app">
   <div class="left-col">
-    <div class="icon-btn" onclick="toggleOverlay('briefcaseOverlay')">💼</div>
-    <div class="icon-btn" onclick="startVoice()">🎙️</div>
-    <div class="icon-btn" onclick="location.reload()">🔁</div>
+    <div class="icon-btn" onclick="openBriefcase()" title="Aktentasche">💼</div>
+    <div class="icon-btn" onclick="toggleMic()" id="mic-btn" title="Live Mikrofon">🎙️</div>
+    <div class="icon-btn" onclick="clearArena()" title="Feld zurücksetzen">🔁</div>
     <div style="flex:1"></div>
-    <div class="icon-btn" onclick="generatePrint()">📄</div>
+    <div class="icon-btn" onclick="generateMagazine()" title="Stadionzeitung drucken">📄</div>
+    <div class="icon-btn" onclick="openSettings()" title="Einstellungen">⚙️</div>
   </div>
 
   <div class="center-col">
-    <div class="arena-toolbar">
-      <button class="tool-btn" onclick="setMode('select')">Select</button>
-      <button class="tool-btn" onclick="setMode('arrow')">Laufweg</button>
-      <button class="tool-btn" onclick="clearBoard()">Clear Board</button>
-      <div style="flex:1"></div>
-      <span id="status" style="font-size:12px; color:var(--neon)">Live • Toni Active</span>
+    <div class="arena-header">
+      <div style="color: var(--neon); font-weight: bold;">ARENA: MATCH-MODUS</div>
+      <div style="display: flex; gap: 10px;">
+        <button class="tool-btn" onclick="setDrawMode('arrow')">Laufweg zeichnen</button>
+        <button class="tool-btn" onclick="setDrawMode('line')">Passweg</button>
+        <button class="tool-btn" onclick="clearDrawings()">Zeichnungen löschen</button>
+      </div>
     </div>
-    <div class="arena-wrap">
-      <canvas id="arenaCanvas" width="1000" height="650"></canvas>
+    <div class="arena-wrap" id="arena-container">
+      <canvas id="arenaCanvas" width="1000" height="700"></canvas>
     </div>
   </div>
 
   <div class="right-col">
-    <div style="font-weight:bold; color:var(--neon); display:flex; justify-content:space-between;">
-      TONI 2.0 <span>v2.4</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(57,255,20,0.2); padding-bottom: 10px;">
+      <strong style="color: var(--neon);">TONI 2.0</strong>
+      <span style="font-size: 10px; opacity: 0.5;">KI-COTRAINER AKTIV</span>
     </div>
-    <div class="video-analysis">
-      <div class="video-pane" id="ytPane">YouTube Profi-Stream</div>
-      <div class="video-pane" id="camPane" style="border-color:var(--neon)">Live Kamera (Tablet)</div>
+    <div class="video-zone">
+      <div class="video-frame" id="yt-stream">YouTube Profi-Analyse</div>
+      <div class="video-frame" id="tablet-cam" style="border-color: var(--neon);">Live Kamera (Tablet)</div>
     </div>
-    <div class="chat" id="chat">
-      <div class="msg ai">Hi Björn! Ich bin bereit. Sollen wir die 4-4-2 Formation prüfen oder ein Technik-Video analysieren?</div>
-    </div>
-    <div class="chat-input-wrap">
-      <input type="text" id="chatInput" placeholder="Befehl an Toni..." onkeypress="if(event.key==='Enter') sendMsg()">
-      <button class="tool-btn" onclick="sendMsg()">Senden</button>
+    <div class="chat-zone">
+      <div id="chat-history">
+        <div class="msg ai">Hallo Björn. Ich habe die Aufstellung geladen: Toni-Team im 4-4-2, Trainer-Team im 3-4-3. Das Mikrofon ist bereit für deine Befehle.</div>
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 10px;">
+        <input type="text" id="chat-input" placeholder="Befehl an Toni..." style="flex:1; background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px;">
+        <button class="tool-btn" onclick="sendToToni()">Senden</button>
+      </div>
     </div>
   </div>
 </div>
 
-<div id="briefcaseOverlay" class="overlay">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
-    <h2 style="color:var(--neon); margin:0;">AKTENTASCHE</h2>
-    <button class="tool-btn" onclick="toggleOverlay('briefcaseOverlay')">X</button>
+<div id="briefcase-overlay" class="overlay">
+  <span class="close-btn" onclick="closeOverlay()">✕</span>
+  <h2 style="color: var(--neon); margin-top: 0;">AKTENTASCHE</h2>
+  <div id="briefcase-main" class="grid-3x3">
+    <div class="kachel" onclick="showSector('kabine')"><i>👕</i><span>KABINE</span></div>
+    <div class="kachel" onclick="showSector('analyse')"><i>❤️</i><span>ANALYSE</span></div>
+    <div class="kachel" onclick="showSector('kids')"><i>👶</i><span>KIDS-CLUB</span></div>
+    <div class="kachel"><i>⚽</i><span>MATCH-DAY</span></div>
+    <div class="kachel"><i>🏃</i><span>TRAINING</span></div>
+    <div class="kachel" onclick="showSector('business')"><i>🤝</i><span>BUSINESS</span></div>
+    <div class="kachel" onclick="generateMagazine()"><i>📰</i><span>ZEITUNG</span></div>
+    <div class="kachel"><i>🔭</i><span>SCOUTING</span></div>
+    <div class="kachel" onclick="showSector('settings')"><i>⚙️</i><span>SETTINGS</span></div>
   </div>
-  <div class="grid-3x3">
-    <div class="kachel" onclick="alert('Kader geladen')">KABINE</div>
-    <div class="kachel" onclick="alert('Analyse gestartet')">ANALYSE</div>
-    <div class="kachel">KIDS-CLUB</div>
-    <div class="kachel">MATCH-DAY</div>
-    <div class="kachel">TRAINING</div>
-    <div class="kachel" onclick="showBusiness()">BUSINESS</div>
-    <div class="kachel" onclick="generatePrint()">ZEITUNG</div>
-    <div class="kachel">SCOUTING</div>
-    <div class="kachel">SETTINGS</div>
+  <div id="sector-content" style="display:none; flex:1; flex-direction:column;">
+    <button class="tool-btn" style="align-self: flex-start; margin-bottom: 15px;" onclick="backToMainBriefcase()">← Zurück</button>
+    <div id="sector-inner" style="flex:1; overflow-y: auto;"></div>
   </div>
-  <div id="subContent" style="margin-top:20px; border-top:1px solid #222; padding-top:10px;"></div>
 </div>
 
 <script>
   const canvas = document.getElementById('arenaCanvas');
   const ctx = canvas.getContext('2d');
-  let mode = 'select';
+  let drawMode = 'select';
   let shapes = [];
-  let players = [
-    {id:1, name:'Müller', x:200, y:300, team:'home', no:9},
-    {id:2, name:'Silva', x:400, y:200, team:'away', no:10}
-  ];
+  let players = [];
+  let isMicActive = false;
 
-  // ARENA LOGIC
-  function drawField() {
-    ctx.fillStyle = '#052205'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = 'rgba(57,255,20,0.2)'; ctx.lineWidth = 2;
-    ctx.strokeRect(20,20,canvas.width-40,canvas.height-40);
-    ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, 60, 0, Math.PI*2); ctx.stroke();
+  // Initialisiere Mannschaften basierend auf Sollzustand
+  function initTeams() {
+    players = [];
+    // Toni-Team (Rot): 4-4-2
+    addFormation(200, '#ff4444', [1, 4, 4, 2], 'Toni-Team');
+    // Trainer-Team (Blau): 3-4-3
+    addFormation(800, '#4444ff', [1, 3, 4, 3], 'Trainer-Team');
+    renderArena();
   }
 
-  function render() {
-    drawField();
-    // Draw Players
+  function addFormation(startX, color, lines, teamName) {
+    let idBase = teamName === 'Toni-Team' ? 'T' : 'C';
+    let xStep = teamName === 'Toni-Team' ? 120 : -120;
+    lines.forEach((count, lineIdx) => {
+      let x = startX + (lineIdx * xStep);
+      for(let i=0; i<count; i++) {
+        let y = (canvas.height / (count + 1)) * (i + 1);
+        players.push({ id: idBase + players.length, x, y, color, name: teamName === 'Toni-Team' ? 'Toni P' : 'Coach P', no: Math.floor(Math.random()*99) });
+      }
+    });
+  }
+
+  function drawPitch() {
+    ctx.fillStyle = '#021a02'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle = 'rgba(57, 255, 20, 0.2)'; ctx.lineWidth = 3;
+    // Outer
+    ctx.strokeRect(30, 30, canvas.width-60, canvas.height-60);
+    // Middle
+    ctx.beginPath(); ctx.moveTo(canvas.width/2, 30); ctx.lineTo(canvas.width/2, canvas.height-30); ctx.stroke();
+    ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, 80, 0, Math.PI*2); ctx.stroke();
+    // 5m Zone
+    ctx.strokeStyle = 'rgba(57, 255, 20, 0.1)';
+    ctx.strokeRect(30, canvas.height/2 - 70, 50, 140);
+    ctx.strokeRect(canvas.width-80, canvas.height/2 - 70, 50, 140);
+  }
+
+  function renderArena() {
+    drawPitch();
+    shapes.forEach(s => drawArrow(s.x1, s.y1, s.x2, s.y2, s.color));
     players.forEach(p => {
-      ctx.fillStyle = p.team === 'home' ? '#ff3333' : '#3366ff';
-      ctx.beginPath(); ctx.arc(p.x, p.y, 18, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#fff'; ctx.font = '12px Arial'; ctx.textAlign = 'center';
+      ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
       ctx.fillText(p.no, p.x, p.y+5);
-      ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillText(p.name, p.x, p.y+35);
-    });
-    // Draw Shapes (Toni's arrows)
-    shapes.forEach(s => {
-      drawArrow(s.fx, s.fy, s.tx, s.ty, s.color);
     });
   }
 
-  function drawArrow(fx, fy, tx, ty, color) {
-    const headlen = 10;
-    const angle = Math.atan2(ty-fy, tx-fx);
-    ctx.strokeStyle = color; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(tx, ty); ctx.stroke();
-    ctx.lineTo(tx-headlen*Math.cos(angle-Math.PI/6), ty-headlen*Math.sin(angle-Math.PI/6));
-    ctx.moveTo(tx, ty);
-    ctx.lineTo(tx-headlen*Math.cos(angle+Math.PI/6), ty-headlen*Math.sin(angle+Math.PI/6));
-    ctx.stroke();
+  function drawArrow(x1, y1, x2, y2, color) {
+    const head = 15; const angle = Math.atan2(y2-y1, x2-x1);
+    ctx.strokeStyle = color; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.lineTo(x2-head*Math.cos(angle-Math.PI/6), y2-head*Math.sin(angle-Math.PI/6));
+    ctx.moveTo(x2, y2); ctx.lineTo(x2-head*Math.cos(angle+Math.PI/6), y2-head*Math.sin(angle+Math.PI/6)); ctx.stroke();
   }
 
-  // INTERACTION
-  function setMode(m) { mode = m; }
-  function clearBoard() { shapes = []; render(); }
+  // UI Funktionen
+  function openBriefcase() { document.getElementById('briefcase-overlay').style.display = 'flex'; }
+  function closeOverlay() { document.getElementById('briefcase-overlay').style.display = 'none'; }
+  
+  function showSector(sector) {
+    document.getElementById('briefcase-main').style.display = 'none';
+    const sectorContent = document.getElementById('sector-content');
+    const inner = document.getElementById('sector-inner');
+    sectorContent.style.display = 'flex';
+    inner.innerHTML = '';
 
-  // TONI BRAIN
-  function sendMsg() {
-    const input = document.getElementById('chatInput');
-    const val = input.value.toLowerCase();
+    if(sector === 'kabine') {
+      inner.innerHTML = '<h3>Spielerkader (FIFA-Karten)</h3><div class="fifa-grid" id="fifa-list"></div>';
+      const list = document.getElementById('fifa-list');
+      for(let i=1; i<=15; i++) {
+        list.innerHTML += `
+          <div class="fifa-card">
+            <div class="rating">${85+i%10}</div><div class="pos">ST</div>
+            <div class="photo"></div>
+            <div class="name">Spieler ${i}</div>
+            <div class="stats">
+              <span>PAC ${80+i}</span><span>SHO ${75+i}</span>
+              <span>PAS ${70+i}</span><span>DRI ${82+i}</span>
+            </div>
+          </div>`;
+      }
+    } else if(sector === 'business') {
+      inner.innerHTML = `
+        <h3>Sponsoren & Finanzen</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+          <div class="kachel">Neon Energy (Hauptsponsor)</div>
+          <div class="kachel">Local Bank (Partner)</div>
+          <div class="kachel">Budget: 125.000 €</div>
+        </div>`;
+    } else if(sector === 'analyse') {
+      inner.innerHTML = '<h3>Analyse-Zentrum</h3><p style="color:var(--neon)">❤️ Puls-Monitoring aktiv...</p><div class="video-frame" style="height:200px">Live-Daten Graphen</div>';
+    } else if(sector === 'settings') {
+      inner.innerHTML = '<h3>System-Settings</h3><p>Ollama Schnittstelle: Verbunden</p><p>Mikrofon Pegel: Optimal</p><p>Sprachausgabe: Toni (Männlich)</p>';
+    }
+  }
+
+  function backToMainBriefcase() {
+    document.getElementById('briefcase-main').style.display = 'grid';
+    document.getElementById('sector-content').style.display = 'none';
+  }
+
+  function sendToToni() {
+    const input = document.getElementById('chat-input');
+    const val = input.value.trim();
     if(!val) return;
-    
-    appendChat(input.value, 'user');
+    addMsg(val, 'user');
     input.value = '';
-
+    
+    // Einfache KI-Logik
     setTimeout(() => {
-      if(val.includes('laufweg')) {
-        shapes.push({fx: 200, fy: 300, tx: 500, ty: 100, color: '#39FF14'});
-        appendChat("Toni: Ich habe den Laufweg für Müller eingezeichnet. Er sollte in den freien Raum stoßen.", "ai");
-        render();
-      } else if(val.includes('zeitung')) {
-        appendChat("Toni: Alles klar, ich erstelle das Layout für die Stadionzeitung.", "ai");
-        generatePrint();
+      if(val.toLowerCase().includes('laufweg')) {
+        shapes.push({x1: 200, y1: 300, x2: 600, y2: 100, color: '#39FF14'});
+        renderArena();
+        addMsg("Ich habe den Laufweg für den Flügelstürmer visualisiert. Er nutzt die Lücke in der blauen 3er-Kette.", 'ai');
       } else {
-        appendChat("Toni: Verstanden. Soll ich eine Videoanalyse starten oder die Taktik anpassen?", "ai");
+        addMsg("Verstanden. Ich analysiere die Situation und stehe für weitere Taktik-Anpassungen bereit.", 'ai');
       }
     }, 800);
   }
 
-  function appendChat(txt, side) {
-    const chat = document.getElementById('chat');
-    chat.innerHTML += `<div class="msg ${side}">${txt}</div>`;
-    chat.scrollTop = chat.scrollHeight;
+  function addMsg(text, type) {
+    const hist = document.getElementById('chat-history');
+    hist.innerHTML += `<div class="msg ${type}">${text}</div>`;
+    hist.scrollTop = hist.scrollHeight;
   }
 
-  // MANAGER & PRINT
-  function showBusiness() {
-    const content = document.getElementById('subContent');
-    content.innerHTML = `
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <div class="sponsor-card">⚡ Neon-Energy<br><small>Hauptsponsor</small></div>
-        <div class="sponsor-card">⚽ Sport-Shop<br><small>Ausrüster</small></div>
-      </div>
-    `;
+  function toggleMic() {
+    isMicActive = !isMicActive;
+    const btn = document.getElementById('mic-btn');
+    btn.style.boxShadow = isMicActive ? '0 0 20px #ff3333' : 'none';
+    btn.style.color = isMicActive ? '#ff3333' : 'var(--neon)';
+    addMsg(isMicActive ? "Mikrofon an. Ich höre zu..." : "Mikrofon aus.", 'ai');
   }
 
-  function generatePrint() {
-    const canvasData = canvas.toDataURL();
+  function generateMagazine() {
     const win = window.open('', '_blank');
+    const arenaImg = canvas.toDataURL();
     win.document.write(`
-      <html><body style="font-family:sans-serif; padding:50px;">
-        <h1 style="color:#052205">TONI 2.0 - MATCHDAY REPORT</h1>
-        <hr>
-        <h2>Aktuelle Taktik</h2>
-        <img src="${canvasData}" style="width:100%; border:2px solid #000;">
-        <h3>Kader-Status</h3>
-        <p>Alle Spieler einsatzbereit. Toni empfiehlt hohes Pressing.</p>
-        <h4>Sponsoren</h4>
-        <p>Neon-Energy | Sport-Shop | Lokal-Bank</p>
+      <html><body style="font-family:sans-serif; padding:40px;">
+        <h1 style="text-align:center;">STADIONZEITUNG - MATCHDAY</h1>
+        <hr><br>
+        <div style="text-align:center;"><img src="${arenaImg}" style="width:80%; border:2px solid #000;"></div>
+        <h3>Toni's Taktik-Analyse</h3>
+        <p>Gegen die 3-4-3 Formation des Gegners setzen wir heute auf schnelles Umschaltspiel über die Flügel. Unser 4-4-2 bietet die nötige Stabilität im Zentrum.</p>
+        <h3>Top-Sponsoren</h3>
+        <p>Neon Energy | Local Bank | Sport Gear Pro</p>
+        <script>window.print();<\/script>
       </body></html>
     `);
-    win.print();
   }
 
-  function toggleOverlay(id) {
-    const el = document.getElementById(id);
-    el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
-  }
+  function clearArena() { shapes = []; initTeams(); }
+  function clearDrawings() { shapes = []; renderArena(); }
+  function setDrawMode(m) { drawMode = m; }
 
-  function startVoice() {
-    appendChat("Toni: Mikrofon aktiviert. Ich höre zu...", "ai");
-  }
-
-  render();
+  // Init
+  initTeams();
 </script>
+
 </body>
 </html>
