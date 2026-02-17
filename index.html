@@ -3,140 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 - High-Tech Taktik Board</title>
+    <title>TONI 2.0 - KI Taktik-Zentrale</title>
     <style>
         :root {
-            --bg-dark: #0f0f0f;
-            --panel-bg: #1a1a1a;
+            --bg-dark: #0a0a0a;
+            --panel-bg: #161616;
             --accent-green: #2ecc71;
+            --accent-blue: #3498db;
             --accent-gold: #f1c40f;
-            --text-light: #e0e0e0;
-            --border-color: #333;
-            --pitch-green: #27ae60;
+            --text: #ffffff;
+            --border: #2c2c2c;
         }
 
         body, html {
             margin: 0; padding: 0; height: 100%;
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark); color: var(--text);
             overflow: hidden;
         }
 
-        /* 3-Spalten-Layout */
+        /* --- Layout --- */
         .cockpit {
             display: grid;
-            grid-template-columns: 80px 1fr 350px;
+            grid-template-columns: 80px 1fr 380px;
             height: 100vh;
         }
 
-        /* Sidebars */
-        .nav-sidebar, .toni-box {
-            background-color: var(--panel-bg);
-            border-color: var(--border-color);
-            border-style: solid;
-        }
-
+        /* --- Sidebar --- */
         .nav-sidebar {
-            border-right-width: 1px;
-            display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 20px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 25px;
         }
-
-        .nav-icon {
-            width: 55px; height: 55px; background: #252525; border-radius: 15px;
+        .nav-btn {
+            width: 55px; height: 55px; background: #222; border-radius: 12px;
             display: flex; justify-content: center; align-items: center;
-            cursor: pointer; transition: 0.2s; font-size: 24px;
+            cursor: pointer; transition: 0.3s; font-size: 24px; border: 1px solid #333;
         }
+        .nav-btn:hover { background: var(--accent-green); color: black; transform: scale(1.1); }
+        .nav-btn.active { border-color: var(--accent-green); box-shadow: 0 0 15px rgba(46, 204, 113, 0.3); }
 
-        .nav-icon:hover { background: var(--accent-green); color: black; transform: scale(1.05); }
-
-        /* Arena */
+        /* --- Arena (Spielfeld) --- */
         .arena {
-            position: relative; background: #111;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            padding: 20px;
+            position: relative; background: #111; overflow: hidden;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
         }
-
-        #pitch {
-            width: 100%; max-width: 900px; aspect-ratio: 2/3;
-            background: var(--pitch-green); border: 4px solid white;
-            position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.8);
-            border-radius: 5px;
+        #pitch-container {
+            position: relative; width: 100%; max-width: 800px; aspect-ratio: 2/3;
+            background: #27ae60; border: 4px solid white; border-radius: 5px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
-
-        /* Feld-Markierungen */
-        .pitch-line { position: absolute; border: 2px solid rgba(255,255,255,0.8); }
+        .pitch-line { position: absolute; border: 2px solid white; pointer-events: none; }
         .center-circle { 
             position: absolute; top: 50%; left: 50%; width: 120px; height: 120px; 
             border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); 
         }
-        .center-line { width: 100%; top: 50%; left: 0; border-top-width: 2px; }
+        .draw-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; cursor: crosshair; }
 
-        /* Spieler / Karten */
-        .player-card {
-            width: 50px; height: 70px; background: var(--accent-gold);
-            color: black; border-radius: 5px; position: absolute;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-weight: bold; cursor: grab; font-size: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 10;
-        }
-
-        .player-card .number { font-size: 18px; }
-
-        /* Toni Box */
+        /* --- Toni-Box --- */
         .toni-box {
-            border-left-width: 1px; display: flex; flex-direction: column;
+            background: var(--panel-bg); border-left: 1px solid var(--border);
+            display: flex; flex-direction: column;
         }
+        .toni-header { padding: 20px; border-bottom: 1px solid var(--border); font-weight: bold; color: var(--accent-green); display: flex; align-items: center; gap: 10px; }
+        .chat-area { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .msg { padding: 12px; border-radius: 10px; font-size: 14px; max-width: 85%; line-height: 1.4; }
+        .msg.toni { background: #222; border-left: 4px solid var(--accent-green); align-self: flex-start; }
+        .msg.coach { background: var(--accent-green); color: black; align-self: flex-end; font-weight: bold; }
+        .input-bar { padding: 20px; background: #1a1a1a; display: flex; gap: 10px; }
+        .input-bar input { flex-grow: 1; background: #252525; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; }
 
-        .video-container {
-            height: 220px; background: #000; margin: 15px; border-radius: 12px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            border: 1px solid #444; overflow: hidden;
-        }
-
-        #chat-window {
-            flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
-        }
-
-        .msg { padding: 10px; border-radius: 8px; max-width: 85%; font-size: 14px; line-height: 1.4; }
-        .msg.toni { background: #252525; color: var(--accent-green); align-self: flex-start; border-left: 3px solid var(--accent-green); }
-        .msg.coach { background: var(--accent-green); color: black; align-self: flex-end; font-weight: 500; }
-
-        .input-bar { padding: 15px; display: flex; gap: 8px; background: #151515; }
-        .input-bar input {
-            flex-grow: 1; background: #222; border: 1px solid #444; color: white;
-            padding: 12px; border-radius: 8px; outline: none;
-        }
-
-        /* Overlay & Modals */
+        /* --- Overlays & Sektoren --- */
         .overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-            display: none; justify-content: center; align-items: center; z-index: 100;
-            backdrop-filter: blur(10px);
+            display: none; z-index: 100; padding: 40px; backdrop-filter: blur(10px);
         }
+        .close-overlay { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; }
 
-        .briefcase-grid {
-            display: grid; grid-template-columns: repeat(3, 160px); gap: 25px;
+        /* 3x3 Grid */
+        .grid-3x3 {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 600px; margin: auto;
         }
-
         .tile {
-            height: 160px; background: #222; border-radius: 20px;
+            aspect-ratio: 1; background: #222; border-radius: 20px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.3s; border: 1px solid #333;
+            cursor: pointer; transition: 0.3s; border: 1px solid #333; gap: 10px;
         }
+        .tile:hover { background: var(--accent-green); color: black; transform: scale(1.05); }
+        .tile span { font-size: 40px; }
 
-        .tile:hover { background: var(--accent-green); color: black; transform: translateY(-5px); }
-        .tile i { font-size: 40px; margin-bottom: 10px; }
-
-        /* Kabine View */
-        .kabine-view {
-            width: 80%; max-width: 1000px; background: #1a1a1a; padding: 30px; border-radius: 20px;
-            display: none; flex-direction: column;
+        /* Kabine / Karten */
+        .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 20px; }
+        .fifa-card {
+            width: 130px; height: 180px; background: linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%);
+            border-radius: 10px; position: relative; color: black; padding: 10px;
+            display: flex; flex-direction: column; align-items: center; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
+        .fifa-card .rating { position: absolute; top: 10px; left: 10px; font-weight: bold; font-size: 20px; }
+        .fifa-card .pos { position: absolute; top: 30px; left: 10px; font-size: 12px; }
+        .fifa-card .name { margin-top: auto; font-weight: bold; text-transform: uppercase; border-top: 1px solid rgba(0,0,0,0.2); width: 100%; text-align: center; }
 
-        .player-list {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px;
-            margin-top: 20px;
+        /* Video Analyse Split-Screen */
+        .analysis-split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 80vh; }
+        .video-box { background: black; border-radius: 15px; overflow: hidden; position: relative; border: 2px solid #333; }
+        .video-box video { width: 100%; height: 100%; object-fit: cover; }
+        .video-label { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 5px; font-size: 12px; }
+
+        /* Spieler auf Feld */
+        .on-pitch {
+            width: 45px; height: 45px; background: var(--accent-gold); border: 3px solid white;
+            border-radius: 50%; position: absolute; color: black; display: flex; 
+            justify-content: center; align-items: center; font-weight: bold; z-index: 10; cursor: move;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -144,161 +123,191 @@
 
 <div class="cockpit">
     <nav class="nav-sidebar">
-        <div class="nav-icon" onclick="openOverlay('briefcase-overlay')" title="Aktentasche">💼</div>
-        <div class="nav-icon" title="Mikrofon">🎤</div>
-        <div class="nav-icon" onclick="location.reload()" title="Reset">🔄</div>
+        <div class="nav-btn" onclick="toggleOverlay('briefcase-overlay')" title="Aktentasche">💼</div>
+        <div class="nav-btn" onclick="toggleDrawMode()" id="draw-btn" title="Zeichnen">✏️</div>
+        <div class="nav-btn" onclick="toggleOverlay('video-overlay')" title="Video Analyse">📹</div>
+        <div class="nav-btn" onclick="location.reload()" title="Reset">🔄</div>
     </nav>
 
-    <main class="arena">
-        <div id="pitch">
-            <div class="pitch-line center-line"></div>
+    <main class="arena" id="arena">
+        <div id="pitch-container">
+            <div class="pitch-line" style="width: 100%; top: 50%;"></div>
             <div class="center-circle"></div>
+            <canvas id="tactic-canvas" class="draw-layer"></canvas>
             </div>
     </main>
 
     <aside class="toni-box">
-        <div class="video-container">
-            <span style="color: #666; font-size: 12px;">LIVE ANALYSE AKTIV</span>
-            <div id="mini-video-view"></div>
-        </div>
-        <div id="chat-window">
-            <div class="msg toni">Bereit, Björn. Das Taktik-Board ist geladen. Soll ich die 5m-Raum-Analyse starten?</div>
+        <div class="toni-header">🤖 TONI 2.0 <small style="color: #666; font-weight: normal;">Online</small></div>
+        <div class="chat-area" id="chat-win">
+            <div class="msg toni">Hallo Coach! Alle Systeme sind bereit. Öffne die Aktentasche, um den Kader zu laden oder starte die Video-Analyse.</div>
         </div>
         <div class="input-bar">
-            <input type="text" id="user-in" placeholder="Sprich mit Toni...">
-            <button onclick="sendToToni()" style="background: var(--accent-green); border:none; padding:10px 15px; border-radius:8px; cursor:pointer;">➔</button>
+            <input type="text" id="user-msg" placeholder="Befehl an Toni...">
+            <button onclick="askToni()" style="background: var(--accent-green); border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">➔</button>
         </div>
     </aside>
 </div>
 
 <div id="briefcase-overlay" class="overlay">
-    <div class="briefcase-grid">
-        <div class="tile" onclick="showSector('kabine')"><i>🏟️</i><span>KABINE</span></div>
-        <div class="tile"><i>📊</i><span>ANALYSE</span></div>
-        <div class="tile"><i>👶</i><span>KIDS</span></div>
-        <div class="tile"><i>⚽</i><span>MATCH</span></div>
-        <div class="tile"><i>🚧</i><span>TRAINING</span></div>
-        <div class="tile"><i>💰</i><span>BUSINESS</span></div>
-        <div class="tile" onclick="alert('PDF wird generiert...')"><i>📰</i><span>ZEITUNG</span></div>
-        <div class="tile"><i>🔍</i><span>SCOUTING</span></div>
-        <div class="tile"><i>⚙️</i><span>SYSTEM</span></div>
-        <button onclick="closeAllOverlays()" style="grid-column: span 3; background: none; border: 1px solid #444; color: white; padding: 10px; border-radius: 10px; margin-top: 10px;">Schließen</button>
+    <span class="close-overlay" onclick="toggleOverlay('briefcase-overlay')">×</span>
+    <h2 style="text-align: center; margin-bottom: 40px;">ZENTRALE AKTENTASCHE</h2>
+    <div class="grid-3x3">
+        <div class="tile" onclick="openSector('kabine')"><span>🏟️</span>KABINE</div>
+        <div class="tile"><span>📊</span>ANALYSE</div>
+        <div class="tile" onclick="openSector('video')"><span>📹</span>VIDEO</div>
+        <div class="tile"><span>⚽</span>MATCH</div>
+        <div class="tile"><span>🚧</span>TRAINING</div>
+        <div class="tile"><span>💰</span>BUSINESS</div>
+        <div class="tile"><span>📰</span>ZEITUNG</div>
+        <div class="tile"><span>🔍</span>SCOUTING</div>
+        <div class="tile"><span>⚙️</span>SETTINGS</div>
     </div>
 </div>
 
-<div id="kabine-sector" class="overlay">
-    <div class="kabine-view">
-        <h2>KABINE - SPIELERKADER</h2>
-        <div class="player-list" id="squad-list">
-            </div>
-        <button onclick="closeAllOverlays()" style="margin-top: 20px; padding: 15px; border-radius: 10px; background: #333; color: white; border: none; cursor: pointer;">Zurück zur Arena</button>
+<div id="kabine-overlay" class="overlay">
+    <span class="close-overlay" onclick="toggleOverlay('kabine-overlay')">×</span>
+    <h2>MANNSCHAFTS-KADER</h2>
+    <div class="player-grid" id="player-storage">
+        </div>
+</div>
+
+<div id="video-overlay" class="overlay">
+    <span class="close-overlay" onclick="toggleOverlay('video-overlay')">×</span>
+    <h2>VIDEO ANALYSEZENTRUM</h2>
+    <div class="analysis-split">
+        <div class="video-box">
+            <div class="video-label">REFERENZ (YOUTUBE)</div>
+            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/fSAtBv9_v6E" frameborder="0" allowfullscreen></iframe>
+        </div>
+        <div class="video-box">
+            <div class="video-label">LIVE-KAMERA (COACH)</div>
+            <video id="coach-cam" autoplay playsinline></video>
+            <button onclick="startCam()" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 10px; background: var(--accent-green); border: none; border-radius: 5px;">Kamera starten</button>
+        </div>
     </div>
 </div>
 
 <script>
     // --- DATEN ---
-    const squad = [
-        { id: 's1', name: 'Müller', nr: 25, rating: 87, pos: 'OM' },
-        { id: 's2', name: 'Sane', nr: 10, rating: 84, pos: 'LA' },
-        { id: 's3', name: 'Kane', nr: 9, rating: 90, pos: 'ST' },
-        { id: 's4', name: 'Kimmich', nr: 6, rating: 88, pos: 'ZM' }
+    const players = [
+        { id: 1, name: 'Müller', r: 88, pos: 'OM', nr: 25 },
+        { id: 2, name: 'Kane', r: 91, pos: 'ST', nr: 9 },
+        { id: 3, name: 'Musiala', r: 87, pos: 'ZM', nr: 42 },
+        { id: 4, name: 'Sané', r: 85, pos: 'RW', nr: 10 },
+        { id: 5, name: 'Kimmich', r: 88, pos: 'CDM', nr: 6 }
     ];
 
-    // --- NAVIGATION ---
-    function openOverlay(id) {
-        document.getElementById(id).style.display = 'flex';
+    // --- UI LOGIK ---
+    function toggleOverlay(id) {
+        const el = document.getElementById(id);
+        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        if(id === 'kabine-overlay') renderKabine();
     }
 
-    function closeAllOverlays() {
+    function openSector(sector) {
         document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
-        document.querySelector('.kabine-view').style.display = 'none';
+        if(sector === 'kabine') toggleOverlay('kabine-overlay');
+        if(sector === 'video') toggleOverlay('video-overlay');
     }
 
-    function showSector(sector) {
-        if(sector === 'kabine') {
-            document.getElementById('briefcase-overlay').style.display = 'none';
-            document.getElementById('kabine-sector').style.display = 'flex';
-            document.querySelector('.kabine-view').style.display = 'flex';
-            renderKabine();
-        }
-    }
-
-    // --- KABINE LOGIK ---
+    // --- KABINE & SPIELER ---
     function renderKabine() {
-        const list = document.getElementById('squad-list');
-        list.innerHTML = '';
-        squad.forEach(p => {
+        const grid = document.getElementById('player-storage');
+        grid.innerHTML = '';
+        players.forEach(p => {
             const card = document.createElement('div');
-            card.className = 'player-card';
-            card.style.position = 'relative';
-            card.innerHTML = `<span class="number">${p.nr}</span><span style="font-size:10px">${p.name}</span>`;
+            card.className = 'fifa-card';
+            card.innerHTML = `<div class="rating">${p.r}</div><div class="pos">${p.pos}</div><div class="name">${p.name}</div>`;
             card.onclick = () => deployPlayer(p);
-            list.appendChild(card);
+            grid.appendChild(card);
         });
     }
 
-    function deployPlayer(playerData) {
-        const pitch = document.getElementById('pitch');
+    function deployPlayer(pData) {
+        const pitch = document.getElementById('pitch-container');
         const p = document.createElement('div');
-        p.className = 'player-card';
-        p.id = 'active-' + playerData.id;
-        p.style.top = '50%';
-        p.style.left = '50%';
-        p.innerHTML = `<span class="number">${playerData.nr}</span><span style="font-size:10px">${playerData.name}</span>`;
+        p.className = 'on-pitch';
+        p.innerText = pData.nr;
+        p.style.left = '50%'; p.style.top = '50%';
         
-        // Einfaches Drag & Drop für deployed Spieler
-        makeDraggable(p);
-        
-        pitch.appendChild(p);
-        closeAllOverlays();
-        addChatMessage(`Toni: ${playerData.name} wurde auf das Feld beordert.`, 'toni');
-    }
-
-    function makeDraggable(el) {
-        let isDragging = false;
-        el.onmousedown = (e) => {
-            isDragging = true;
-            let shiftX = e.clientX - el.getBoundingClientRect().left;
-            let shiftY = e.clientY - el.getBoundingClientRect().top;
-
-            document.onmousemove = (e) => {
-                if(!isDragging) return;
-                let pitch = document.getElementById('pitch').getBoundingClientRect();
-                let x = e.clientX - pitch.left - shiftX;
-                let y = e.clientY - pitch.top - shiftY;
-                
-                el.style.left = (x / pitch.width * 100) + '%';
-                el.style.top = (y / pitch.height * 100) + '%';
+        // Drag Logic
+        p.onmousedown = function(e) {
+            let shiftX = e.clientX - p.getBoundingClientRect().left;
+            let shiftY = e.clientY - p.getBoundingClientRect().top;
+            document.onmousemove = function(e) {
+                let rect = pitch.getBoundingClientRect();
+                let x = ((e.clientX - rect.left - shiftX) / rect.width) * 100;
+                let y = ((e.clientY - rect.top - shiftY) / rect.height) * 100;
+                p.style.left = x + '%'; p.style.top = y + '%';
             };
-
-            document.onmouseup = () => {
-                isDragging = false;
-                document.onmousemove = null;
-            };
+            document.onmouseup = () => document.onmousemove = null;
         };
+
+        pitch.appendChild(p);
+        toggleOverlay('kabine-overlay');
+        addMsg(`Toni: ${pData.name} steht jetzt auf dem Platz.`, 'toni');
     }
 
-    // --- CHAT LOGIK ---
-    function sendToToni() {
-        const input = document.getElementById('user-in');
+    // --- ZEICHEN FUNKTION ---
+    const canvas = document.getElementById('tactic-canvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    let drawActive = false;
+
+    function toggleDrawMode() {
+        drawActive = !drawActive;
+        document.getElementById('draw-btn').classList.toggle('active');
+        canvas.style.pointerEvents = drawActive ? 'all' : 'none';
+        if(drawActive) {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+    }
+
+    canvas.onmousedown = () => drawing = true;
+    canvas.onmouseup = () => { drawing = false; ctx.beginPath(); };
+    canvas.onmousemove = (e) => {
+        if(!drawing || !drawActive) return;
+        ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = 'white';
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+    };
+
+    // --- VIDEO & KAMERA ---
+    async function startCam() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            document.getElementById('coach-cam').srcObject = stream;
+        } catch (err) { alert("Kamera-Zugriff verweigert."); }
+    }
+
+    // --- TONI CHAT ---
+    function askToni() {
+        const input = document.getElementById('user-msg');
         if(!input.value) return;
+        addMsg(input.value, 'coach');
         
-        addChatMessage(input.value, 'coach');
-        const val = input.value.toLowerCase();
+        const cmd = input.value.toLowerCase();
         input.value = '';
 
         setTimeout(() => {
-            if(val.includes('kabine')) {
-                addChatMessage("Toni: Öffne die Kabine für dich, Coach.", 'toni');
-                showSector('kabine');
+            if(cmd.includes('kabine')) {
+                addMsg("Toni: Öffne Kabine...", 'toni');
+                openSector('kabine');
+            } else if(cmd.includes('video')) {
+                addMsg("Toni: Analyserhythmus wird synchronisiert. Videozentrum bereit.", 'toni');
+                openSector('video');
             } else {
-                addChatMessage("Toni: Verstanden. Ich analysiere die Positionen...", 'toni');
+                addMsg("Toni: Verstanden. Ich analysiere die Taktik und berechne die Verschiebung der Kette.", 'toni');
             }
         }, 800);
     }
 
-    function addChatMessage(text, sender) {
-        const win = document.getElementById('chat-window');
+    function addMsg(text, sender) {
+        const win = document.getElementById('chat-win');
         const d = document.createElement('div');
         d.className = `msg ${sender}`;
         d.innerText = text;
