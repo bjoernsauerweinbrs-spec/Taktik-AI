@@ -3,287 +3,230 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
-<title>TONI 2.0 | G-Junior & Pro Intelligence</title>
+<title>TONI 2.0 | Klopp-Nagelsmann Edition</title>
 <style>
   :root {
-    --bg: #010501;
-    --neon: #39FF14;
-    --neon-glow: rgba(57, 255, 20, 0.3);
-    --gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+    --bg: #010501; --neon: #39FF14; --gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
     --glass: rgba(255, 255, 255, 0.05);
   }
-  
   * { box-sizing: border-box; }
-  body, html { 
-    margin: 0; padding: 0; height: 100%; width: 100%;
-    background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif;
-    overflow: hidden;
-  }
+  body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
 
-  /* --- APP WRAPPER --- */
-  .app-container {
-    display: grid;
-    grid-template-columns: 80px 1fr 380px;
-    height: 100vh; padding: 12px; gap: 12px;
-  }
-
+  /* UI STRUCTURE */
+  .app-container { display: grid; grid-template-columns: 80px 1fr 380px; height: 100vh; padding: 10px; gap: 10px; }
   @media (max-width: 900px) {
-    .app-container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr 350px; height: auto; }
-    .left-nav { flex-direction: row !important; height: 60px; width: 100%; justify-content: space-around; padding: 0 !important; }
-    .overlay { inset: 5px !important; width: 98% !important; }
+    .app-container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr 350px; overflow-y: auto; height: auto; }
+    .left-nav { flex-direction: row !important; width: 100%; height: 60px; padding: 0 !important; justify-content: space-around; }
   }
 
-  /* --- NAV --- */
-  .left-nav { background: var(--glass); border-radius: 15px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; backdrop-filter: blur(10px); }
-  .nav-item { width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--neon); color: var(--neon); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; transition: 0.3s; }
-  .nav-item:hover { background: var(--neon-glow); box-shadow: 0 0 15px var(--neon); }
+  .left-nav { background: var(--glass); border-radius: 15px; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+  .nav-item { width: 45px; height: 45px; border-radius: 10px; border: 1px solid var(--neon); color: var(--neon); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
 
-  /* --- ARENA --- */
-  .center-arena { background: #000; border-radius: 15px; border: 1px solid rgba(57,255,20,0.1); display: flex; flex-direction: column; padding: 10px; position: relative; }
-  canvas { background: #010a01; border-radius: 8px; box-shadow: 0 0 40px #000; max-width: 100%; height: auto; }
+  /* ARENA */
+  .center-arena { background: #000; border-radius: 15px; border: 1px solid var(--neon); display: flex; flex-direction: column; padding: 10px; position: relative; }
+  canvas { background: #010a01; border-radius: 8px; max-width: 100%; height: auto; }
 
-  /* --- TONI BOX --- */
-  .right-toni { background: var(--glass); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 12px; border: 1px solid rgba(255,255,255,0.05); }
-  .chat-history { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-  .msg { padding: 10px; border-radius: 12px; font-size: 13px; max-width: 85%; line-height: 1.4; }
-  .msg.ai { background: rgba(57, 255, 20, 0.08); align-self: flex-start; border-left: 3px solid var(--neon); }
+  /* TONI BOX */
+  .right-toni { background: var(--glass); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(255,255,255,0.05); }
+  .chat-box { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+  .msg { padding: 10px; border-radius: 10px; font-size: 13px; line-height: 1.4; max-width: 85%; }
+  .msg.ai { background: rgba(57, 255, 20, 0.1); align-self: flex-start; border-left: 3px solid var(--neon); }
 
-  /* --- OVERLAYS --- */
-  .overlay { position: fixed; inset: 20px 400px 20px 100px; background: rgba(3, 8, 3, 0.99); border: 1px solid var(--neon); border-radius: 20px; z-index: 1000; display: none; flex-direction: column; padding: 25px; backdrop-filter: blur(25px); overflow: hidden; }
-  .scroll-box { flex: 1; overflow-y: auto; padding-top: 10px; }
-
-  /* --- FIFA CARDS --- */
-  .fifa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
-  .fifa-card { width: 160px; height: 230px; background: var(--gold); border-radius: 10px; color: #000; position: relative; padding: 10px; cursor: pointer; font-family: 'Arial Black', sans-serif; }
-  .card-rating { font-size: 38px; position: absolute; top: 10px; left: 10px; }
-  .card-photo { width: 95px; height: 95px; background: rgba(0,0,0,0.1); margin: 5px auto 0 auto; border-bottom: 2px solid #000; overflow: hidden; display: flex; align-items: flex-end; }
+  /* OVERLAY & CARDS */
+  .overlay { position: fixed; inset: 20px 400px 20px 100px; background: rgba(0,0,0,0.98); border: 1px solid var(--neon); border-radius: 20px; z-index: 1000; display: none; flex-direction: column; padding: 25px; backdrop-filter: blur(20px); }
+  .scroll-content { flex: 1; overflow-y: auto; }
+  .fifa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+  
+  .fifa-card { width: 150px; height: 215px; background: var(--gold); border-radius: 10px; color: #000; position: relative; padding: 10px; cursor: pointer; font-family: 'Arial Black', sans-serif; transition: 0.2s; }
+  .card-rating { font-size: 32px; position: absolute; top: 10px; left: 10px; }
+  .card-photo { width: 90px; height: 90px; background: rgba(0,0,0,0.1); margin: 5px auto; border-bottom: 2px solid #000; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
   .card-photo img { width: 100%; height: 100%; object-fit: cover; }
-  .card-name { text-align: center; font-size: 16px; margin: 2px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
-  .attr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; font-size: 11px; padding: 5px 10px 0 10px; }
+  .attr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; font-size: 10px; padding: 0 10px; margin-top: 5px; }
 
-  /* --- EDITOR --- */
-  .editor-pane { display: none; background: #000; border: 1px solid var(--neon); padding: 30px; border-radius: 20px; position: absolute; inset: 15px; z-index: 1100; overflow-y: auto; }
-  .input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .input-group label { display: block; font-size: 9px; color: var(--neon); margin-bottom: 4px; text-transform: uppercase; }
-  .input-group input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; font-size: 13px; }
+  /* EDITOR TABS */
+  .tab-btn { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px; cursor: pointer; border-radius: 5px; }
+  .tab-btn.active { background: var(--neon); color: #000; }
+  .editor-pane { display: none; background: #000; border: 1px solid var(--neon); padding: 20px; border-radius: 15px; position: absolute; inset: 10px; z-index: 1100; overflow-y: auto; }
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+  .input-group label { display: block; font-size: 9px; color: var(--neon); text-transform: uppercase; margin-bottom: 3px; }
+  .input-group input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 5px; }
 
-  /* --- LOGIN & ONBOARDING --- */
-  .screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; padding: 20px; }
-  .input-field { background: #111; border: 1px solid var(--neon); color: #fff; padding: 15px; border-radius: 8px; width: 100%; max-width: 300px; text-align: center; font-size: 18px; }
-  .btn-primary { background: var(--neon); border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+  /* LOGIN */
+  .screen-gate { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
 </style>
 </head>
 <body>
 
-<div id="loginGate" class="screen">
-  <h1 style="color:var(--neon); letter-spacing: 5px;">TONI 2.0 ACCESS</h1>
-  <p>Bitte identifiziere dich.</p>
-  <input type="password" id="passInput" class="input-field" placeholder="PASSWORT">
-  <button class="btn-primary" onclick="verifyLogin()">EINLOGGEN</button>
-  <p style="font-size: 10px; color: #444;">Coach: 1234 | Junior: Junior2026</p>
+<div id="gate" class="screen-gate">
+  <h1 style="color:var(--neon); letter-spacing: 10px;">TONI 2.0</h1>
+  <input type="password" id="pw" style="background:#111; border:1px solid var(--neon); color:#fff; padding:15px; text-align:center; border-radius:10px;" placeholder="PASSWORT">
+  <button onclick="unlock()" style="background:var(--neon); border:none; padding:10px 40px; border-radius:10px; font-weight:bold; cursor:pointer;">SYSTEM AKTIVIEREN</button>
 </div>
 
-<div id="onboarding" class="screen" style="display:none">
-  <h1 style="color:var(--neon); letter-spacing: 5px;">WILLKOMMEN</h1>
-  <div id="ob-content">
-    <p id="ob-text">Hallo Coach! Ich bin Toni. Wie heißt du?</p>
-    <input type="text" id="ob-input" class="input-field">
-    <br><br>
-    <button class="btn-primary" onclick="nextObStep()">WEITER</button>
-  </div>
-</div>
-
-<div class="app-container" id="mainApp" style="display:none;">
+<div class="app-container" id="mainApp" style="display:none">
   <div class="left-nav">
     <div class="nav-item" onclick="openSektor('kabine')">💼</div>
     <div class="nav-item" onclick="openSektor('analyse')">🧪</div>
-    <div class="nav-item" onclick="openSektor('kids')">👶</div>
+    <div class="nav-item" onclick="toggleVoice()">🎙️</div>
     <div style="flex:1"></div>
-    <div class="nav-item" onclick="resetSystem()">🔁</div>
+    <div class="nav-item" onclick="resetAll()">🔁</div>
   </div>
 
   <div class="center-arena">
-    <div style="display:flex; justify-content:space-between; padding:5px 15px; color:var(--neon); font-size:12px;">
-        <strong id="displayClub">ARENA</strong>
-        <span id="displayAge">[ MODUS ]</span>
+    <div style="display:flex; justify-content:space-between; padding:5px 10px; font-size:11px; color:var(--neon)">
+      <strong id="clubDisplay">VFL MUSTERSTADT</strong>
+      <span id="ageDisplay">[ LADE... ]</span>
     </div>
     <div style="flex:1; display:flex; align-items:center; justify-content:center;">
-      <canvas id="mainBoard" width="1000" height="700"></canvas>
+      <canvas id="arenaBoard" width="1000" height="700"></canvas>
     </div>
   </div>
 
   <div class="right-toni">
-    <div style="font-weight:bold; color:var(--neon); display:flex; justify-content:space-between;">TONI AI <span>ONLINE</span></div>
-    <div class="chat-history" id="chat"></div>
-    <div style="display:flex; gap:10px;">
-      <input type="text" id="cmd" placeholder="Befehl..." style="flex:1; background:#111; border:1px solid #333; color:#fff; padding:12px; border-radius:10px;">
-      <button onclick="sendBefehl()" style="background:var(--neon); border:none; border-radius:10px; padding:0 15px; cursor:pointer;">➔</button>
-    </div>
+    <div style="color:var(--neon); font-weight:bold;">TONI AI: <span id="toniStatus">BEREIT</span></div>
+    <div class="chat-box" id="chat"></div>
+    <input type="text" id="cmd" placeholder="Befehl an Toni..." style="background:#111; border:1px solid #333; color:#fff; padding:12px; border-radius:10px;">
   </div>
 </div>
 
 <div id="ov" class="overlay">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-    <h2 id="ov-title" style="margin:0; color:var(--neon); letter-spacing:2px;">DATA CENTER</h2>
-    <span onclick="closeOverlay()" style="cursor:pointer; font-size:30px;">✕</span>
+  <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+    <h2 id="ov-title" style="margin:0; color:var(--neon)">PLAYER HUB</h2>
+    <span onclick="closeOv()" style="cursor:pointer; font-size:30px;">✕</span>
   </div>
-  <div class="scroll-box" id="ov-content"></div>
+  <div class="scroll-content" id="ov-content"></div>
 
   <div id="editor" class="editor-pane">
-    <h3 id="edit-title" style="margin-top:0; color:var(--neon)">PLAYER REFINEMENT</h3>
-    <div class="input-grid" id="edit-fields"></div>
-    <button onclick="saveData()" style="width:100%; background:var(--neon); color:#000; border:none; padding:15px; border-radius:10px; font-weight:bold; margin-top:20px; cursor:pointer;">DATEN SYNCHRONISIEREN</button>
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+      <button class="tab-btn active" onclick="switchTab('squad')">SQUAD</button>
+      <button class="tab-btn" onclick="switchTab('lab')">LAB (WAAGE)</button>
+      <button class="tab-btn" onclick="switchTab('tracker')">TRACKER (UHR)</button>
+    </div>
+    <div id="editor-fields" class="input-grid"></div>
+    <button onclick="savePlayer()" style="width:100%; padding:15px; background:var(--neon); color:#000; font-weight:bold; border:none; margin-top:20px; border-radius:10px; cursor:pointer;">DATEN SYNCHRONISIEREN</button>
   </div>
 </div>
 
 <script>
-  const canvas = document.getElementById('mainBoard');
+  const canvas = document.getElementById('arenaBoard');
   const ctx = canvas.getContext('2d');
   
-  let currentMode = 'admin'; 
-  let userData = JSON.parse(localStorage.getItem('toni_user_v32')) || null;
-  let obStep = 0;
-  
-  let team = JSON.parse(localStorage.getItem('toni_team_v32')) || [
-    {id:0, name:'Müller', rating:91, pos:'ST', x:200, y:350, bpm:62, spo2:98, weight:82, fat:10.5, img:'', pac:88, sho:92, pas:80, dri:85, def:40, phy:85}
+  let userData = JSON.parse(localStorage.getItem('toni_user_v33')) || null;
+  let team = JSON.parse(localStorage.getItem('toni_team_v33')) || [
+    {id:0, name:'Müller', rating:91, pos:'ST', x:200, y:350, img:'', pac:88, sho:92, weight:82, fat:10.2, muscle:38, bpm:60, hrv:55, sleep:85}
   ];
+  let curId = null; let curTab = 'squad';
 
-  // LOGIN
-  function verifyLogin() {
-    const pw = document.getElementById('passInput').value;
+  function unlock() {
+    const pw = document.getElementById('pw').value;
     if(pw === '1234') {
-        currentMode = 'admin';
-        initFlow();
-    } else if(pw === 'Junior2026') {
-        currentMode = 'junior';
-        initFlow();
-    } else { alert("Passwort inkorrekt."); }
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'grid';
+      if(!userData) startOnboarding(); else startApp();
+    } else { alert("Passwort falsch!"); }
   }
 
-  function initFlow() {
-    document.getElementById('loginGate').style.display = 'none';
-    if(!userData) {
-        document.getElementById('onboarding').style.display = 'flex';
-    } else {
-        startApp();
-    }
-  }
-
-  // ONBOARDING
-  function nextObStep() {
-    const val = document.getElementById('ob-input').value;
-    if(!val) return;
-    
-    if(obStep === 0) {
-        userData = { coach: val };
-        document.getElementById('ob-text').innerText = "Welchen Verein trainierst du?";
-        document.getElementById('ob-input').value = "";
-        obStep++;
-    } else if(obStep === 1) {
-        userData.club = val;
-        document.getElementById('ob-text').innerText = "Welche Altersklasse (z.B. G-Jugend)?";
-        document.getElementById('ob-input').value = "";
-        obStep++;
-    } else {
-        userData.age = val;
-        localStorage.setItem('toni_user_v32', JSON.stringify(userData));
-        startApp();
-    }
+  function startOnboarding() {
+    const name = prompt("Hallo Coach! Wie darf ich dich nennen?");
+    const club = prompt("Welchen Verein trainierst du?");
+    const age = prompt("Altersklasse (z.B. G-Jugend oder Erste Mannschaft)?");
+    userData = { coach: name, club: club, age: age };
+    localStorage.setItem('toni_user_v33', JSON.stringify(userData));
+    startApp();
   }
 
   function startApp() {
-    document.getElementById('onboarding').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'grid';
-    document.getElementById('displayClub').innerText = userData.club.toUpperCase();
-    document.getElementById('displayAge').innerText = `[ ${userData.age.toUpperCase()} ]`;
-    
-    // Branding Fix (Simuliert)
-    if(userData.club.toLowerCase().includes('bad hersfeld')) {
-        document.documentElement.style.setProperty('--neon', '#FF3333'); // Beispiel: Rot
-    }
-
+    document.getElementById('clubDisplay').innerText = userData.club.toUpperCase();
+    document.getElementById('ageDisplay').innerText = `[ ${userData.age.toUpperCase()} ]`;
     renderArena();
-    addChat(`Toni: Hallo ${userData.coach}! System für ${userData.age} kalibriert.`);
+    toniSpeak(`Servus ${userData.coach}! Hier ist Toni. Dein Matchplan für den ${userData.club} steht. Lass uns Vollgas geben!`);
   }
 
-  // ARENA: G-JUGEND FIX
+  function toniSpeak(txt) {
+    const chat = document.getElementById('chat');
+    chat.innerHTML += `<div class="msg ai">Toni: ${txt}</div>`;
+    chat.scrollTop = chat.scrollHeight;
+    
+    const ut = new SpeechSynthesisUtterance(txt);
+    ut.lang = 'de-DE';
+    const voices = window.speechSynthesis.getVoices();
+    const male = voices.find(v => v.name.includes('Google') && v.name.includes('Deutsch')) || voices[0];
+    ut.voice = male;
+    window.speechSynthesis.speak(ut);
+  }
+
   function drawPitch() {
     ctx.fillStyle = '#021a02'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = 'rgba(57, 255, 20, 0.4)'; ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(57, 255, 20, 0.5)'; ctx.lineWidth = 3;
+    const isG = userData.age.toLowerCase().includes('g-');
     
-    const isJunior = userData && (userData.age.toLowerCase().includes('g-') || userData.age.toLowerCase().includes('junior'));
-    
-    if(isJunior) {
-        // FUNINO / G-JUGEND FELD (Kürzer, 4 Tore markiert)
-        ctx.strokeRect(100, 100, canvas.width-200, canvas.height-200);
-        ctx.strokeStyle = 'rgba(57, 255, 20, 0.8)';
-        // 4 Mini-Tore (Zonen)
-        ctx.strokeRect(100, 150, 10, 80); ctx.strokeRect(100, 470, 10, 80);
-        ctx.strokeRect(canvas.width-110, 150, 10, 80); ctx.strokeRect(canvas.width-110, 470, 10, 80);
-        ctx.beginPath(); ctx.moveTo(canvas.width/2, 100); ctx.lineTo(canvas.width/2, canvas.height-100); ctx.stroke();
+    if(isG) {
+      ctx.strokeRect(100, 100, canvas.width-200, canvas.height-200); // Funino
+      ctx.strokeRect(100, 200, 15, 60); ctx.strokeRect(100, 440, 15, 60); // Tore Links
+      ctx.strokeRect(canvas.width-115, 200, 15, 60); ctx.strokeRect(canvas.width-115, 440, 15, 60); // Tore Rechts
     } else {
-        // PROFI FELD
-        ctx.strokeRect(40, 40, canvas.width-80, canvas.height-80);
-        ctx.beginPath(); ctx.moveTo(canvas.width/2, 40); ctx.lineTo(canvas.width/2, canvas.height-40); ctx.stroke();
-        ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, 80, 0, Math.PI*2); ctx.stroke();
-        ctx.strokeRect(40, canvas.height/2-70, 50, 140);
-        ctx.strokeRect(canvas.width-90, canvas.height/2-70, 50, 140);
+      ctx.strokeRect(40, 40, canvas.width-80, canvas.height-80); // Profi
+      ctx.beginPath(); ctx.moveTo(canvas.width/2, 40); ctx.lineTo(canvas.width/2, canvas.height-40); ctx.stroke();
+      ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, 80, 0, Math.PI*2); ctx.stroke();
     }
   }
 
-  function renderArena() { drawPitch(); team.forEach(p => { ctx.fillStyle = '#ff3333'; ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI*2); ctx.fill(); }); }
+  function renderArena() { drawPitch(); team.forEach(p => { ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI*2); ctx.fill(); }); }
 
-  // HUB & EDITOR
   function openSektor(s) {
     document.getElementById('ov').style.display = 'flex';
     const c = document.getElementById('ov-content');
     c.innerHTML = '';
-    
     if(s === 'kabine') {
+      c.className = 'fifa-grid';
       team.forEach(p => {
-        c.innerHTML += `
-          <div class="fifa-card" onclick="editPlayer(${p.id})">
-            <div class="card-rating">${p.rating}</div>
-            <div class="card-photo">👤</div>
-            <div class="card-name">${p.name}</div>
-            <div class="attr-grid"><span>PAC ${p.pac}</span><span>DRI ${p.dri}</span><span>SHO ${p.sho}</span><span>DEF ${p.def}</span></div>
-          </div>`;
+        c.innerHTML += `<div class="fifa-card" onclick="editP(${p.id})"><div class="card-rating">${p.rating}</div><div class="card-photo">${p.img?`<img src="${p.img}">`:'👤'}</div><div class="card-name">${p.name}</div></div>`;
       });
-    } else if(s === 'analyse') {
-        c.innerHTML = "<h3>LABOR-WERTE</h3>";
-        team.forEach(p => {
-            c.innerHTML += `<div style='background:var(--glass); padding:10px; margin:5px;'>${p.name}: Puls ${p.bpm} | Fett ${p.fat}%</div>`;
-        });
     }
   }
 
-  function editPlayer(id) {
-    const p = team.find(x => x.id === id);
-    const f = document.getElementById('edit-fields');
-    document.getElementById('editor').style.display = 'block';
-    f.innerHTML = `
-      <div class="input-group"><label>Name</label><input type="text" id="e-name" value="${p.name}"></div>
-      <div class="input-group"><label>Rating</label><input type="number" id="e-rating" value="${p.rating}"></div>
-      <div class="input-group"><label>Puls</label><input type="number" id="e-bpm" value="${p.bpm}"></div>
-      <div class="input-group"><label>Fett %</label><input type="number" id="e-fat" value="${p.fat}"></div>
-      <div class="input-group"><label>PAC</label><input type="number" id="e-pac" value="${p.pac}"></div>
-    `;
-    currentId = id;
+  function editP(id) {
+    curId = id; document.getElementById('editor').style.display = 'block'; switchTab('squad');
   }
 
-  function saveData() {
-    const p = team.find(x => x.id === currentId);
-    p.name = document.getElementById('e-name').value;
-    p.bpm = document.getElementById('e-bpm').value;
-    p.fat = document.getElementById('e-fat').value;
-    localStorage.setItem('toni_team_v32', JSON.stringify(team));
-    document.getElementById('editor').style.display = 'none';
-    openSektor('kabine');
+  function switchTab(t) {
+    curTab = t;
+    const f = document.getElementById('editor-fields');
+    const p = team.find(x => x.id === curId);
+    f.innerHTML = '';
+    if(t === 'squad') {
+      f.innerHTML = `
+        <div class="input-group" style="grid-column: span 2"><label>Foto Upload</label><input type="file" accept="image/*" onchange="procImg(this)"></div>
+        <div class="input-group"><label>Name</label><input type="text" id="e-name" value="${p.name}"></div>
+        <div class="input-group"><label>Rating</label><input type="number" id="e-rating" value="${p.rating}"></div>`;
+    } else if(t === 'lab') {
+      f.innerHTML = `<div class="input-group"><label>Gewicht</label><input type="number" id="e-weight" value="${p.weight}"></div><div class="input-group"><label>Fett %</label><input type="number" id="e-fat" value="${p.fat}"></div><div class="input-group"><label>Muskel kg</label><input type="number" id="e-muscle" value="${p.muscle}"></div>`;
+    } else if(t === 'tracker') {
+      f.innerHTML = `<div class="input-group"><label>Puls BPM</label><input type="number" id="e-bpm" value="${p.bpm}"></div><div class="input-group"><label>HRV ms</label><input type="number" id="e-hrv" value="${p.hrv}"></div><div class="input-group"><label>Schlaf</label><input type="number" id="e-sleep" value="${p.sleep}"></div>`;
+    }
   }
 
-  function addChat(t) { const ch = document.getElementById('chat'); ch.innerHTML += `<div class="msg ai">${t}</div>`; ch.scrollTop = ch.scrollHeight; }
-  function closeOverlay() { document.getElementById('ov').style.display = 'none'; document.getElementById('editor').style.display = 'none'; }
-  function resetSystem() { localStorage.clear(); location.reload(); }
+  function procImg(input) {
+    if(input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => { team.find(x => x.id === curId).img = e.target.result; };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function savePlayer() {
+    const p = team.find(x => x.id === curId);
+    if(document.getElementById('e-name')) p.name = document.getElementById('e-name').value;
+    if(document.getElementById('e-rating')) p.rating = document.getElementById('e-rating').value;
+    if(document.getElementById('e-weight')) p.weight = document.getElementById('e-weight').value;
+    if(document.getElementById('e-bpm')) p.bpm = document.getElementById('e-bpm').value;
+    localStorage.setItem('toni_team_v33', JSON.stringify(team));
+    document.getElementById('editor').style.display = 'none'; openSektor('kabine');
+  }
+
+  function resetAll() { if(confirm("ALLES LÖSCHEN?")) { localStorage.clear(); location.reload(); } }
+  function closeOv() { document.getElementById('ov').style.display = 'none'; }
+  function toggleVoice() { toniSpeak("Gegenpressing aktiviert! Wir jagen den Ball!"); }
 </script>
 </body>
 </html>
