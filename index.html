@@ -3,254 +3,645 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
-<title>TONI 2.0 | High-Tech Lab & Live-Intelligence</title>
+<title>TONI 2.0 | Unabridged Professional HQ v4.0</title>
 <style>
   :root {
-    --bg: #010401; --neon: #39FF14; --gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-    --glass: rgba(255, 255, 255, 0.05); --red: #ff3333; --cyan: #00f2ff;
+    --bg: #010401;
+    --neon: #39FF14;
+    --neon-dim: rgba(57, 255, 20, 0.15);
+    --gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+    --glass: rgba(255, 255, 255, 0.05);
+    --red: #ff3333;
+    --cyan: #00f2ff;
   }
-  * { box-sizing: border-box; }
-  body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
 
-  /* --- APP STRUCTURE --- */
-  .app-container { display: grid; grid-template-columns: 80px 1fr 380px; height: 100vh; padding: 12px; gap: 12px; }
+  * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+  body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+
+  /* --- GRID ARCHITECTURE --- */
+  .app-container {
+    display: grid;
+    grid-template-columns: 80px 1fr 380px;
+    height: 100vh;
+    padding: 12px;
+    gap: 12px;
+  }
+
   @media (max-width: 900px) {
     .app-container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr 350px; overflow-y: auto; height: auto; }
     .left-nav { flex-direction: row !important; height: 60px; width: 100%; justify-content: space-around; padding: 0 !important; }
+    .overlay { inset: 5px !important; width: 98% !important; }
   }
 
-  .left-nav { background: var(--glass); border-radius: 15px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; backdrop-filter: blur(10px); }
-  .nav-item { width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--neon); color: var(--neon); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; transition: 0.3s; }
+  /* --- LEFT NAVIGATION --- */
+  .left-nav {
+    background: var(--glass);
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px 0;
+    gap: 20px;
+    backdrop-filter: blur(15px);
+  }
 
-  /* --- ARENA --- */
-  .center-arena { background: #000; border-radius: 15px; border: 1px solid rgba(57,255,20,0.1); display: flex; flex-direction: column; padding: 10px; position: relative; }
-  canvas { background: #010a01; border-radius: 8px; box-shadow: 0 0 40px #000; max-width: 100%; height: auto; }
+  .nav-item {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    border: 1px solid var(--neon);
+    color: var(--neon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 24px;
+    transition: all 0.3s ease;
+  }
 
-  /* --- TONI BOX --- */
-  .right-toni { background: var(--glass); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 12px; border: 1px solid rgba(255,255,255,0.05); }
-  .chat-history { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-  .msg { padding: 10px 14px; border-radius: 12px; font-size: 13px; max-width: 85%; }
-  .msg.ai { background: rgba(57, 255, 20, 0.1); border-left: 3px solid var(--neon); align-self: flex-start; }
+  .nav-item:hover {
+    background: var(--neon-dim);
+    box-shadow: 0 0 15px var(--neon);
+    transform: scale(1.05);
+  }
 
-  /* --- OVERLAYS --- */
-  .overlay { position: fixed; inset: 20px 400px 20px 100px; background: rgba(0,0,0,0.99); border: 1px solid var(--neon); border-radius: 20px; z-index: 1000; display: none; flex-direction: column; padding: 25px; backdrop-filter: blur(25px); overflow: hidden; }
-  .scroll-box { flex: 1; overflow-y: auto; padding-top: 10px; }
+  /* --- CENTRAL ARENA --- */
+  .center-arena {
+    background: #000;
+    border-radius: 20px;
+    border: 1px solid var(--neon-dim);
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    position: relative;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+  }
+
+  .arena-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px 10px 10px;
+    color: var(--neon);
+    font-size: 13px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--glass);
+  }
+
+  #board-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  canvas {
+    background: #010a01;
+    border-radius: 10px;
+    box-shadow: 0 0 40px #000;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* --- TONI LIVE BOX --- */
+  .right-toni {
+    background: var(--glass);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border: 1px solid rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+  }
+
+  .chat-history {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 5px;
+  }
+
+  .msg {
+    padding: 12px 16px;
+    border-radius: 15px;
+    font-size: 14px;
+    max-width: 90%;
+    line-height: 1.5;
+  }
+
+  .msg.ai {
+    background: var(--neon-dim);
+    color: #fff;
+    align-self: flex-start;
+    border-left: 4px solid var(--neon);
+    border-bottom-left-radius: 2px;
+  }
+
+  .input-area {
+    display: flex;
+    gap: 10px;
+    background: rgba(0,0,0,0.3);
+    padding: 5px;
+    border-radius: 12px;
+    border: 1px solid #333;
+  }
+
+  .input-area input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    padding: 10px;
+    outline: none;
+  }
+
+  /* --- OVERLAY HUB --- */
+  .overlay {
+    position: fixed;
+    inset: 20px 410px 20px 105px;
+    background: rgba(2, 8, 2, 0.98);
+    border: 1px solid var(--neon);
+    border-radius: 25px;
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    padding: 30px;
+    backdrop-filter: blur(30px);
+    box-shadow: 0 0 100px #000;
+  }
+
+  .scroll-content { flex: 1; overflow-y: auto; padding-right: 10px; }
+
+  /* FIFA CARDS */
+  .fifa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 25px; }
   
-  /* LABORATORY UI */
-  .lab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
-  .lab-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(57,255,20,0.1); border-radius: 15px; padding: 20px; position: relative; overflow: hidden; }
-  .lab-card::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--neon); box-shadow:0 0 15px var(--neon); }
-  .stat-row { display: flex; justify-content: space-between; font-size: 12px; margin: 6px 0; }
-  .stat-val { color: var(--neon); font-weight: bold; }
-  .gauge-bg { width: 100%; height: 6px; background: #111; border-radius: 3px; margin: 8px 0; overflow: hidden; }
-  .gauge-fill { height: 100%; transition: 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+  .fifa-card {
+    width: 170px;
+    height: 245px;
+    background: var(--gold);
+    border-radius: 12px;
+    color: #000;
+    position: relative;
+    padding: 12px;
+    cursor: pointer;
+    font-family: 'Arial Black', sans-serif;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transition: 0.3s;
+  }
 
-  /* EDITOR TABS */
-  .editor-pane { display: none; background: #000; border: 1px solid var(--neon); padding: 25px; border-radius: 20px; position: absolute; inset: 15px; z-index: 1100; overflow-y: auto; }
-  .tab-header { display: flex; gap: 10px; margin-bottom: 15px; }
-  .tab-btn { flex: 1; background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 10px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
-  .tab-btn.active { background: var(--neon); color: #000; }
-  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .input-group label { display: block; font-size: 9px; color: var(--neon); text-transform: uppercase; margin-bottom: 4px; }
-  .input-group input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; }
+  .fifa-card:hover { transform: translateY(-8px) scale(1.02); }
+  .card-rating { font-size: 42px; position: absolute; top: 12px; left: 12px; line-height: 0.8; }
+  .card-pos { font-size: 14px; position: absolute; top: 50px; left: 14px; text-transform: uppercase; }
+  
+  .card-photo-wrap {
+    width: 105px; height: 105px;
+    background: rgba(0,0,0,0.05);
+    margin: 10px auto 0 auto;
+    border-bottom: 2px solid #000;
+    display: flex; align-items: flex-end; justify-content: center;
+    overflow: hidden;
+  }
 
-  /* GATES */
-  .screen-gate { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
+  .card-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .card-name { text-align: center; font-size: 17px; text-transform: uppercase; margin: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
+
+  .card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 15px;
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  /* --- HIGH TECH LABORATORY --- */
+  .lab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+  
+  .lab-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--neon-dim);
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+  }
+
+  .lab-card::after {
+    content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%;
+    background: var(--neon); box-shadow: 0 0 15px var(--neon);
+  }
+
+  .readiness-val { font-size: 24px; font-weight: bold; color: var(--neon); }
+  .stat-row { display: flex; justify-content: space-between; font-size: 13px; margin: 8px 0; border-bottom: 1px solid #222; padding-bottom: 4px; }
+  
+  .gauge-container { width: 100%; height: 8px; background: #111; border-radius: 4px; margin: 10px 0; overflow: hidden; }
+  .gauge-fill { height: 100%; transition: 1s ease-out; }
+
+  /* --- EDITOR MODAL --- */
+  .editor-pane {
+    display: none;
+    background: #000;
+    border: 2px solid var(--neon);
+    padding: 30px;
+    border-radius: 25px;
+    position: absolute;
+    inset: 15px;
+    z-index: 1100;
+    overflow-y: auto;
+  }
+
+  .tab-row { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+  .tab-item { flex: 1; padding: 12px; background: transparent; border: 1px solid var(--neon); color: var(--neon); border-radius: 10px; cursor: pointer; font-weight: bold; text-align: center; font-size: 12px; }
+  .tab-item.active { background: var(--neon); color: #000; }
+
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+  .input-field { display: flex; flex-direction: column; gap: 5px; }
+  .input-field label { font-size: 10px; color: var(--neon); text-transform: uppercase; }
+  .input-field input { background: #111; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; font-size: 14px; }
+
+  /* --- GATES --- */
+  .gate-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 25px; padding: 20px; }
+  .gate-input { background: #000; border: 2px solid var(--neon); color: var(--neon); padding: 18px; border-radius: 12px; width: 100%; max-width: 320px; text-align: center; font-size: 24px; letter-spacing: 5px; }
+
 </style>
 </head>
 <body>
 
-<div id="gate" class="screen-gate">
-  <h1 style="color:var(--neon); letter-spacing: 10px; text-shadow: 0 0 20px var(--neon);">TONI 2.0</h1>
-  <button onclick="unlock()" style="background:var(--neon); padding:15px 60px; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-size:18px;">SYSTEM INITIALISIEREN</button>
-  <p style="font-size: 10px; color: #444;">Live-Voice Engine Ready (Passwort: 1234)</p>
+<div id="login-gate" class="gate-screen">
+  <h1 style="color:var(--neon); letter-spacing: 12px; text-shadow: 0 0 20px var(--neon);">TONI 2.0</h1>
+  <p style="opacity:0.6; font-size: 14px;">BIOMETRIC ACCESS REQUIRED</p>
+  <input type="password" id="gate-pw" class="gate-input" placeholder="••••">
+  <button onclick="checkAccess()" style="background:var(--neon); color:#000; padding:15px 60px; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-size:18px;">INITIATE</button>
+  <p style="font-size: 10px; color: #444; margin-top: 40px;">DEBUG CODE: 1234</p>
 </div>
 
-<div class="app-container" id="mainApp" style="display:none">
+<div id="onboarding-screen" class="gate-screen" style="display:none">
+  <div style="max-width: 400px; width: 100%; text-align:center;">
+    <h2 id="ob-title" style="color:var(--neon); margin-bottom: 30px;">PERSONALISIERUNG</h2>
+    <p id="ob-desc" style="line-height: 1.6; margin-bottom: 20px;">Hallo Coach! Ich bin Toni. Wie ist dein Name?</p>
+    <input type="text" id="ob-input" class="gate-input" style="letter-spacing: normal; font-size: 18px;">
+    <br><br>
+    <button onclick="handleObStep()" style="background:var(--neon); color:#000; padding:15px 80px; border:none; border-radius:10px; font-weight:bold; cursor:pointer; width:100%;">BESTÄTIGEN</button>
+  </div>
+</div>
+
+<div class="app-container" id="main-interface" style="display:none">
   <div class="left-nav">
-    <div class="nav-item" onclick="openSektor('kabine')">💼</div>
-    <div class="nav-item" onclick="openSektor('analyse')">🧪</div>
-    <div class="nav-item" onclick="toniSpeak('Mentalitätsmonster-Modus aktiviert! Wir gehen voll drauf!')">🎙️</div>
+    <div class="nav-item" onclick="openSektor('kabine')" title="Mannschaft">👕</div>
+    <div class="nav-item" onclick="openSektor('analyse')" title="Labor">🧪</div>
+    <div class="nav-item" onclick="openSektor('business')" title="Management">🤝</div>
+    <div class="nav-item" onclick="openSektor('zeitung')" title="Stadionzeitung">📰</div>
     <div style="flex:1"></div>
-    <div class="nav-item" onclick="resetMemory()">🔁</div>
+    <div class="nav-item" onclick="openSektor('settings')" title="Setup">⚙️</div>
+    <div class="nav-item" onclick="systemReset()" style="border-color:var(--red); color:var(--red);">🔁</div>
   </div>
 
   <div class="center-arena">
-    <div style="display:flex; justify-content:space-between; padding:5px 15px; color:var(--neon); font-size:12px;">
-        <strong id="displayClub">ARENA</strong>
-        <span id="displayAge">[ LADE... ]</span>
+    <div class="arena-header">
+      <strong id="header-club">VFL MUSTERSTADT</strong>
+      <span id="header-age">[ PRO-ELITE ]</span>
     </div>
-    <div id="board-wrap" style="flex:1; display:flex; align-items:center; justify-content:center;">
-      <canvas id="mainBoard" width="1000" height="700"></canvas>
+    <div id="board-container">
+      <canvas id="tactic-board" width="1000" height="700"></canvas>
     </div>
   </div>
 
   <div class="right-toni">
-    <div style="font-weight:bold; color:var(--neon); display:flex; justify-content:space-between;">TONI AI <span id="status">LIVE</span></div>
-    <div class="chat-history" id="chat"></div>
-    <div style="display:flex; gap:10px;">
-      <input type="text" id="cmd" placeholder="Befehl..." style="flex:1; background:#111; border:1px solid #333; color:#fff; padding:12px; border-radius:10px;">
-      <button onclick="sendBefehl()" style="background:var(--neon); border:none; border-radius:10px; padding:0 15px; cursor:pointer;">➔</button>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <strong style="color:var(--neon); letter-spacing: 1px;">TONI AI v4.0</strong>
+      <span id="toni-status" style="font-size: 10px; color: var(--neon); animation: blink 2s infinite;">● ONLINE</span>
+    </div>
+    <div class="chat-history" id="chat-box"></div>
+    <div class="input-area">
+      <input type="text" id="user-cmd" placeholder="Befehl an Toni..." onkeypress="if(event.key==='Enter') processCmd()">
+      <button onclick="processCmd()" style="background:none; border:none; color:var(--neon); cursor:pointer; padding: 0 10px;">➔</button>
     </div>
   </div>
 </div>
 
-<div id="ov" class="overlay">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-    <h2 id="ov-title" style="margin:0; color:var(--neon); letter-spacing:2px;">LAB</h2>
-    <div style="display:flex; gap:10px;">
-      <button id="addBtn" onclick="addNewPlayer()" style="background:var(--neon); color:#000; border:none; padding:8px 15px; border-radius:8px; font-weight:bold; display:none;">+ ADD PLAYER</button>
-      <span onclick="closeOverlay()" style="cursor:pointer; font-size:30px;">✕</span>
+<div id="ov-hub" class="overlay">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom: 1px solid var(--neon-dim); padding-bottom: 15px;">
+    <h2 id="hub-title" style="margin:0; color:var(--neon); letter-spacing:3px; text-transform: uppercase;">DATA HUB</h2>
+    <div style="display:flex; gap:15px; align-items:center;">
+      <button id="add-player-btn" onclick="addNewPlayer()" style="background:var(--neon); color:#000; border:none; padding:8px 20px; border-radius:8px; font-weight:bold; font-size:12px; display:none; cursor:pointer;">+ SPIELER HINZUFÜGEN</button>
+      <span onclick="closeOverlay()" style="cursor:pointer; font-size:35px; line-height: 0.5;">✕</span>
     </div>
   </div>
-  <div class="scroll-box" id="ov-content"></div>
+  
+  <div class="scroll-content" id="hub-content"></div>
 
-  <div id="editor" class="editor-pane">
-    <div class="tab-header">
-      <button class="tab-btn active" id="btn-squad" onclick="switchTab('squad')">IDENTITY</button>
-      <button class="tab-btn" id="btn-lab" onclick="switchTab('lab')">BODY (BIA)</button>
-      <button class="tab-btn" id="btn-tracker" onclick="switchTab('tracker')">WATCH (LIVE)</button>
+  <div id="player-editor" class="editor-pane">
+    <div class="tab-row">
+      <div class="tab-item active" id="tab-btn-squad" onclick="setEditorTab('squad')">SQUAD & DESIGN</div>
+      <div class="tab-item" id="tab-btn-lab" onclick="setEditorTab('lab')">BODY (WAAGE)</div>
+      <div class="tab-item" id="tab-btn-watch" onclick="setEditorTab('watch')">TRACKER (UHR)</div>
     </div>
-    <div class="input-grid" id="edit-fields"></div>
-    <div style="display:flex; gap:10px; margin-top:20px;">
-      <button onclick="saveData()" style="flex:1; background:var(--neon); color:#000; border:none; padding:15px; border-radius:10px; font-weight:bold; cursor:pointer;">UPDATE & ANALYZE</button>
+    
+    <div id="editor-fields" class="input-grid">
+      </div>
+
+    <div style="display:flex; gap:15px; margin-top:30px;">
+      <button onclick="commitPlayerUpdate()" style="flex:2; background:var(--neon); color:#000; font-weight:bold; padding:18px; border:none; border-radius:12px; cursor:pointer; text-transform: uppercase;">Daten synchronisieren</button>
+      <button onclick="removePlayer()" style="flex:1; background:var(--red); color:#fff; font-weight:bold; padding:18px; border:none; border-radius:12px; cursor:pointer;">LÖSCHEN</button>
     </div>
   </div>
 </div>
 
 <script>
-  const canvas = document.getElementById('mainBoard');
+  const canvas = document.getElementById('tactic-board');
   const ctx = canvas.getContext('2d');
   
-  let userData = JSON.parse(localStorage.getItem('toni_user_v39')) || null;
-  let team = JSON.parse(localStorage.getItem('toni_team_v39')) || [
-    {id:Date.now(), name:'Müller', rating:91, x:200, y:350, img:'', bpm:62, hrv:55, weight:82, fat:10.2, muscle:38, water:62, spo2:98, sleep:82, vo2:52}
+  // ZENTRALES DATEN-MANAGEMENT (Persistenz)
+  let user = JSON.parse(localStorage.getItem('toni4_user')) || null;
+  let squad = JSON.parse(localStorage.getItem('toni4_squad')) || [
+    {id:Date.now(), name:'Müller', rating:91, pos:'ST', x:180, y:350, img:'', pac:88, sho:92, pas:80, dri:86, def:44, phy:84, weight:82.5, fat:10.5, muscle:38, water:62, bpm:62, hrv:55, sleep:82, spo2:98, vo2:52}
   ];
 
-  let curId = null; let curTab = 'squad';
+  let obStep = 0;
+  let activePlayerId = null;
+  let activeTab = 'squad';
 
-  function unlock() {
-    document.getElementById('gate').style.display = 'none';
-    if(!userData) startOnboarding(); else initApp();
+  // 1. ACCESS SYSTEM
+  function checkAccess() {
+    if(document.getElementById('gate-pw').value === '1234') {
+      document.getElementById('login-gate').style.display = 'none';
+      if(!user) document.getElementById('onboarding-screen').style.display = 'flex'; else startSystem();
+    } else alert("ACCESS DENIED");
   }
 
-  function startOnboarding() {
-    const coach = prompt("Wie heißt du, Coach?");
-    const club = prompt("Dein Verein?");
-    const age = prompt("Altersklasse (z.B. G-Jugend oder 1. Mannschaft)?");
-    userData = { coach, club, age };
-    localStorage.setItem('toni_user_v39', JSON.stringify(userData));
-    initApp();
-  }
+  // 2. ONBOARDING (Deep Learning Integration)
+  function handleObStep() {
+    const input = document.getElementById('ob-input');
+    const val = input.value;
+    if(!val) return;
 
-  function initApp() {
-    document.getElementById('mainApp').style.display = 'grid';
-    document.getElementById('displayClub').innerText = userData.club.toUpperCase();
-    document.getElementById('displayAge').innerText = `[ ${userData.age.toUpperCase()} ]`;
-    renderArena();
-    toniSpeak(`Servus ${userData.coach}! Alle Diagnostik-Systeme für den ${userData.club} sind hochgefahren. Lass uns die Daten jagen!`);
-  }
-
-  // --- LIVE PITCH ---
-  function drawPitch() {
-    ctx.fillStyle = '#021a02'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = 'rgba(57, 255, 20, 0.4)'; ctx.lineWidth = 3;
-    const isG = userData.age.toLowerCase().includes('g-');
-    if(isG) {
-      ctx.strokeRect(100, 100, canvas.width-200, canvas.height-200);
-      ctx.strokeRect(100, 200, 15, 60); ctx.strokeRect(canvas.width-115, 200, 15, 60);
+    if(obStep === 0) {
+      user = { coach: val };
+      document.getElementById('ob-desc').innerText = `Servus ${val}! Welchen Verein trainierst du?`;
+      input.value = ""; obStep++;
+    } else if(obStep === 1) {
+      user.club = val;
+      document.getElementById('ob-desc').innerText = `Für welche Altersklasse bist du zuständig? (z.B. G-Jugend, 1. Mannschaft)`;
+      input.value = ""; obStep++;
     } else {
-      ctx.strokeRect(40, 40, canvas.width-80, canvas.height-80);
-      ctx.beginPath(); ctx.moveTo(canvas.width/2, 40); ctx.lineTo(canvas.width/2, canvas.height-40); ctx.stroke();
-      ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, 80, 0, Math.PI*2); ctx.stroke();
-      ctx.strokeRect(40, canvas.height/2-150, 120, 300); ctx.strokeRect(canvas.width-160, canvas.height/2-150, 120, 300);
+      user.age = val;
+      localStorage.setItem('toni4_user', JSON.stringify(user));
+      startSystem();
     }
   }
 
-  function renderArena() { drawPitch(); team.forEach(p => { ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI*2); ctx.fill(); }); }
-
-  // --- TONI LIVE VOICE ---
-  function toniSpeak(t) {
-    const chat = document.getElementById('chat'); chat.innerHTML += `<div class="msg ai">Toni: ${t}</div>`; chat.scrollTop = chat.scrollHeight;
-    const ut = new SpeechSynthesisUtterance(t);
-    ut.lang = 'de-DE'; ut.pitch = 0.85; ut.rate = 1.0;
-    const voices = window.speechSynthesis.getVoices();
-    // Suche gezielt nach männlichen Stimmen (Google Deutsch, Microsoft Stefan, etc.)
-    const male = voices.find(v => v.name.includes('Google') && v.name.includes('Deutsch')) || 
-                 voices.find(v => v.name.includes('Stefan')) || voices[0];
-    ut.voice = male;
-    window.speechSynthesis.speak(ut);
+  function startSystem() {
+    document.getElementById('onboarding-screen').style.display = 'none';
+    document.getElementById('main-interface').style.display = 'grid';
+    document.getElementById('header-club').innerText = user.club.toUpperCase();
+    document.getElementById('header-age').innerText = `[ ${user.age.toUpperCase()} ]`;
+    
+    renderArena();
+    toniSpeak(`Servus ${user.coach}! Toni 2.0 ist einsatzbereit. Ich habe die Systeme für den ${user.club} kalibriert. Vollgas!`);
   }
 
-  // --- HIGH-TECH LABORATORY ---
-  function openSektor(s) {
-    document.getElementById('ov').style.display = 'flex'; const c = document.getElementById('ov-content'); const t = document.getElementById('ov-title');
-    c.innerHTML = ''; document.getElementById('addBtn').style.display = (s==='kabine'?'block':'none');
+  // 3. LIVE PITCH ENGINE (G, F, E, Profi)
+  function drawPitch() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#021a02'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle = 'rgba(57, 255, 20, 0.5)'; ctx.lineWidth = 3;
     
+    const age = user.age.toLowerCase();
+
+    if(age.includes('g-')) { // FUNINO MODE
+      ctx.strokeRect(100, 100, canvas.width-200, canvas.height-200);
+      ctx.strokeStyle = 'rgba(57, 255, 20, 0.8)';
+      // 4 Minitore
+      ctx.strokeRect(100, 180, 15, 80); ctx.strokeRect(100, 440, 15, 80);
+      ctx.strokeRect(canvas.width-115, 180, 15, 80); ctx.strokeRect(canvas.width-115, 440, 15, 80);
+      ctx.beginPath(); ctx.moveTo(canvas.width/2, 100); ctx.lineTo(canvas.width/2, canvas.height-100); ctx.stroke();
+    } else if(age.includes('f-')) { // KLEINFELD
+      ctx.strokeRect(60, 60, canvas.width-120, canvas.height-120);
+      ctx.strokeRect(60, canvas.height/2-90, 60, 180); ctx.strokeRect(canvas.width-120, canvas.height/2-90, 60, 180);
+      ctx.beginPath(); ctx.moveTo(canvas.width/2, 60); ctx.lineTo(canvas.width/2, canvas.height-60); ctx.stroke();
+    } else { // PROFI MODE (FULL DETAIL)
+      ctx.strokeRect(40, 40, canvas.width-80, canvas.height-80); // Rand
+      ctx.beginPath(); ctx.moveTo(canvas.width/2, 40); ctx.lineTo(canvas.width/2, canvas.height-40); ctx.stroke(); // Mitte
+      ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, 80, 0, Math.PI*2); ctx.stroke(); // Kreis
+      
+      // Strafräume
+      ctx.strokeRect(40, canvas.height/2-150, 120, 300); // Links 16er
+      ctx.strokeRect(canvas.width-160, canvas.height/2-150, 120, 300); // Rechts 16er
+      
+      // 5-Meter-Raum
+      ctx.strokeRect(40, canvas.height/2-70, 50, 140);
+      ctx.strokeRect(canvas.width-90, canvas.height/2-70, 50, 140);
+      
+      // Elfmeterpunkte
+      ctx.fillStyle = 'rgba(57, 255, 20, 0.6)';
+      ctx.beginPath(); ctx.arc(130, canvas.height/2, 4, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(canvas.width-130, canvas.height/2, 4, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  function renderArena() {
+    drawPitch();
+    squad.forEach(p => {
+      ctx.shadowBlur = 15; ctx.shadowColor = p.bpm > 140 ? 'red' : 'rgba(57,255,20,0.5)';
+      ctx.fillStyle = p.bpm > 140 ? '#ff3333' : '#39FF14';
+      ctx.beginPath(); ctx.arc(p.x, p.y, 22, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 0; ctx.fillStyle = '#000'; ctx.font = 'bold 14px Arial'; ctx.textAlign = 'center';
+      ctx.fillText(p.name[0], p.x, p.y+5);
+    });
+  }
+
+  // 4. TONI AI VOICE ENGINE (Male Voice Logic)
+  function toniSpeak(text) {
+    const box = document.getElementById('chat-box');
+    box.innerHTML += `<div class="msg ai">Toni: ${text}</div>`;
+    box.scrollTop = box.scrollHeight;
+
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.lang = 'de-DE';
+    speech.pitch = 0.8; speech.rate = 1.0;
+    
+    // Male Voice Selection
+    const voices = window.speechSynthesis.getVoices();
+    const maleVoice = voices.find(v => v.name.includes('Google') && v.name.includes('Deutsch')) || 
+                      voices.find(v => v.name.includes('Stefan')) || voices[0];
+    speech.voice = maleVoice;
+    window.speechSynthesis.speak(speech);
+  }
+
+  // 5. HUB SECTORS (KABINE, LABOR, BUSINESS)
+  function openSektor(s) {
+    const ov = document.getElementById('ov-hub');
+    const content = document.getElementById('hub-content');
+    const title = document.getElementById('hub-title');
+    ov.style.display = 'flex';
+    content.innerHTML = '';
+    document.getElementById('add-player-btn').style.display = (s === 'kabine') ? 'block' : 'none';
+
     if(s === 'kabine') {
-      t.innerText = 'SQUAD REPOSITORY'; c.className = 'scroll-box fifa-grid';
-      team.forEach(p => {
-        c.innerHTML += `<div class="fifa-card" onclick="openEdit(${p.id})"><div class="card-rating">${p.rating}</div><div class="card-photo">${p.img?`<img src="${p.img}">`:'👤'}</div><div class="card-name">${p.name}</div></div>`;
-      });
-    } else if(s === 'analyse') {
-      t.innerText = 'DIAGNOSTIC CENTER'; c.className = 'scroll-box lab-grid';
-      team.forEach(p => {
-        let readiness = Math.round((p.sleep + p.hrv + (100 - (p.bpm-40))) / 3);
-        let color = readiness > 75 ? 'var(--neon)' : (readiness > 55 ? 'yellow' : 'var(--red)');
-        c.innerHTML += `
-          <div class="lab-card">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <strong>${p.name.toUpperCase()}</strong>
-                <span style="color:${color}; font-weight:bold;">READINESS: ${readiness}%</span>
-            </div>
-            <div class="gauge-bg"><div class="gauge-fill" style="width:${readiness}%; background:${color}; box-shadow:0 0 10px ${color}"></div></div>
-            <div class="stat-row"><span>HEART RATE</span><span class="stat-val">${p.bpm} BPM</span></div>
-            <div class="stat-row"><span>HRV (RECOVERY)</span><span class="stat-val">${p.hrv} ms</span></div>
-            <div class="stat-row"><span>BODY FAT</span><span class="stat-val">${p.fat}%</span></div>
-            <div class="stat-row"><span>OXYGEN (SpO2)</span><span class="stat-val">${p.spo2}%</span></div>
-            <div style="background:rgba(255,255,255,0.05); padding:8px; border-radius:8px; margin-top:10px; font-size:10px;">
-                <strong style="color:var(--neon)">TONI AI:</strong> ${readiness > 70 ? 'Optimaler Zustand.' : 'Regeneration empfohlen!'}
+      title.innerText = 'SQUAD REPOSITORY';
+      content.className = 'scroll-content fifa-grid';
+      squad.forEach(p => {
+        content.innerHTML += `
+          <div class="fifa-card" onclick="openPlayerEditor(${p.id})">
+            <div class="card-rating">${p.rating}</div>
+            <div class="card-pos">${p.pos}</div>
+            <div class="card-photo-wrap">${p.img ? `<img src="${p.img}">` : '👤'}</div>
+            <div class="card-name">${p.name}</div>
+            <div class="card-stats">
+              <span>PAC ${p.pac}</span><span>DRI ${p.dri}</span>
+              <span>SHO ${p.sho}</span><span>DEF ${p.def}</span>
             </div>
           </div>`;
       });
+    } else if(s === 'analyse') {
+      title.innerText = 'VITAL LABORATORY';
+      content.className = 'scroll-content lab-grid';
+      squad.forEach(p => {
+        let readiness = Math.round((p.sleep + (p.hrv/1.5) + (100 - (p.bpm-40))) / 3);
+        let rColor = readiness > 75 ? 'var(--neon)' : (readiness > 55 ? 'yellow' : 'var(--red)');
+        content.innerHTML += `
+          <div class="lab-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>${p.name.toUpperCase()}</strong>
+              <span class="readiness-val" style="color:${rColor}">${readiness}%</span>
+            </div>
+            <div class="gauge-container"><div class="gauge-fill" style="width:${readiness}%; background:${rColor}; box-shadow: 0 0 10px ${rColor}"></div></div>
+            <div class="stat-row"><span>HERZFREQUENZ</span><span class="stat-val">${p.bpm} BPM</span></div>
+            <div class="stat-row"><span>VARIABILITÄT (HRV)</span><span class="stat-val">${p.hrv} MS</span></div>
+            <div class="stat-row"><span>KÖRPERFETT</span><span class="stat-val">${p.fat}%</span></div>
+            <div class="stat-row"><span>SAUERSTOFF (SpO2)</span><span class="stat-val">${p.spo2}%</span></div>
+            <div style="background:rgba(57,255,20,0.05); padding:10px; border-radius:10px; font-size:11px; margin-top:10px;">
+              <strong style="color:var(--neon)">TONI DIAGNOSE:</strong> ${readiness > 70 ? 'Top Zustand. Einsatzbereit.' : 'Belastung drosseln. Regeneration nötig.'}
+            </div>
+          </div>`;
+      });
+    } else if(s === 'business') {
+      title.innerText = 'BUSINESS & SPONSORING';
+      content.innerHTML = `
+        <div style="background:var(--glass); padding:20px; border-radius:15px; border-left:4px solid var(--neon);">
+          <h3>Sponsor-Radar: ${user.club}</h3>
+          <p>Toni hat 3 potenzielle Partner in der Region analysiert.</p>
+        </div>
+        <div style="margin-top:20px; display:grid; gap:15px;">
+          <div style="background:#111; padding:15px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+            <span>Autohaus Musterstadt (Premium)</span>
+            <button onclick="toniSpeak('E-Mail an Autohaus wurde entworfen.')" style="background:var(--neon); border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">ANFRAGE GENERIEREN</button>
+          </div>
+        </div>`;
+    } else if(s === 'zeitung') {
+      title.innerText = 'STADIONZEITUNG EDITOR';
+      content.innerHTML = `
+        <div style="background:#fff; color:#000; padding:40px; min-height:600px; border-radius:5px;">
+          <h1 style="text-align:center;">MATCHDAY: ${user.club}</h1>
+          <div contenteditable="true" style="margin-top:30px; border:1px dashed #ccc; padding:10px;">
+            <h3>Wort vom Vorstand</h3>Herzlich Willkommen zum heutigen Heimspiel...
+          </div>
+          <div contenteditable="true" style="margin-top:20px; border:1px dashed #ccc; padding:10px;">
+            <h3>Analyse des Trainers</h3>"Die Jungs sind heiß. Wir haben unter der Woche gut trainiert..."
+          </div>
+        </div>
+        <button onclick="window.print()" style="width:100%; padding:15px; background:var(--neon); color:#000; font-weight:bold; border:none; margin-top:20px; border-radius:10px; cursor:pointer;">MAGAZIN DRUCKEN / EXPORT</button>`;
+    } else if(s === 'settings') {
+      title.innerText = 'AI SYSTEM SETTINGS';
+      content.innerHTML = `
+        <div class="input-grid">
+          <div class="input-field" style="grid-column: span 2"><label>Ollama API Endpoint</label><input type="text" value="http://localhost:11434/api/generate"></div>
+          <div class="input-field"><label>KI Modell</label><input type="text" value="Llama 3"></div>
+        </div>
+        <p style="font-size:11px; opacity:0.5; margin-top:20px;">Verbunden mit lokalem Host für Echtzeit-Recherche über Sponsoren und Taktik-Trends.</p>`;
     }
   }
 
-  // --- MODULAR EDITOR ---
-  function openEdit(id) { curId = id; document.getElementById('editor').style.display='block'; switchTab('squad'); }
-  function switchTab(t) {
-    curTab = t; const f = document.getElementById('edit-fields'); const p = team.find(x => x.id === curId);
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('btn-'+t).classList.add('active');
-    f.innerHTML = '';
-    if(t === 'squad') {
-      f.innerHTML = `<div class="input-group" style="grid-column:span 2"><label>Photo</label><input type="file" onchange="procImg(this)"></div><div class="input-group"><label>Name</label><input type="text" id="e-name" value="${p.name}"></div><div class="input-group"><label>Rating</label><input type="number" id="e-rating" value="${p.rating}"></div>`;
-    } else if(t === 'lab') {
-      f.innerHTML = `<div class="input-group"><label>Gewicht</label><input type="number" step="0.1" id="e-weight" value="${p.weight}"></div><div class="input-group"><label>Fett %</label><input type="number" step="0.1" id="e-fat" value="${p.fat}"></div><div class="input-group"><label>Muskel kg</label><input type="number" step="0.1" id="e-muscle" value="${p.muscle}"></div>`;
-    } else if(t === 'tracker') {
-      f.innerHTML = `<div class="input-group"><label>Puls</label><input type="number" id="e-bpm" value="${p.bpm}"></div><div class="input-group"><label>HRV ms</label><input type="number" id="e-hrv" value="${p.hrv}"></div><div class="input-group"><label>SpO2 %</label><input type="number" id="e-spo2" value="${p.spo2}"></div>`;
+  // 6. SQUAD CRUD & MODULAR EDITOR
+  function addNewPlayer() {
+    const newP = { id:Date.now(), name:'Neu', rating:50, pos:'--', x:500, y:350, img:'', pac:50, sho:50, pas:50, dri:50, def:50, phy:50, weight:75, fat:15, muscle:30, water:60, bpm:60, hrv:45, spo2:98, sleep:80 };
+    squad.push(newP);
+    openSektor('kabine');
+  }
+
+  function openPlayerEditor(id) {
+    activePlayerId = id;
+    document.getElementById('player-editor').style.display = 'block';
+    setEditorTab('squad');
+  }
+
+  function setEditorTab(tab) {
+    activeTab = tab;
+    const fields = document.getElementById('editor-fields');
+    const p = squad.find(x => x.id === activePlayerId);
+    
+    document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-btn-' + tab).classList.add('active');
+    
+    fields.innerHTML = '';
+    if(tab === 'squad') {
+      fields.innerHTML = `
+        <div class="input-field" style="grid-column: span 3"><label>Foto Upload</label><input type="file" onchange="processImage(this)"></div>
+        <div class="input-field"><label>Name</label><input type="text" id="e-name" value="${p.name}"></div>
+        <div class="input-field"><label>Rating</label><input type="number" id="e-rating" value="${p.rating}"></div>
+        <div class="input-field"><label>Position</label><input type="text" id="e-pos" value="${p.pos}"></div>
+        <div class="input-field"><label>PAC</label><input type="number" id="e-pac" value="${p.pac}"></div>
+        <div class="input-field"><label>SHO</label><input type="number" id="e-sho" value="${p.sho}"></div>
+        <div class="input-field"><label>PAS</label><input type="number" id="e-pas" value="${p.pas}"></div>`;
+    } else if(tab === 'lab') {
+      fields.innerHTML = `
+        <div class="input-field"><label>Gewicht (KG)</label><input type="number" step="0.1" id="e-weight" value="${p.weight}"></div>
+        <div class="input-field"><label>Fett (%)</label><input type="number" step="0.1" id="e-fat" value="${p.fat}"></div>
+        <div class="input-field"><label>Muskel (KG)</label><input type="number" step="0.1" id="e-muscle" value="${p.muscle}"></div>
+        <div class="input-field"><label>Wasser (%)</label><input type="number" step="0.1" id="e-water" value="${p.water}"></div>`;
+    } else if(tab === 'watch') {
+      fields.innerHTML = `
+        <div class="input-field"><label>Puls (BPM)</label><input type="number" id="e-bpm" value="${p.bpm}"></div>
+        <div class="input-field"><label>HRV (ms)</label><input type="number" id="e-hrv" value="${p.hrv}"></div>
+        <div class="input-field"><label>SpO2 (%)</label><input type="number" id="e-spo2" value="${p.spo2}"></div>
+        <div class="input-field"><label>Schlaf (Score)</label><input type="number" id="e-sleep" value="${p.sleep}"></div>`;
     }
   }
 
-  function procImg(i) { if(i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { team.find(x => x.id === curId).img = e.target.result; }; r.readAsDataURL(i.files[0]); } }
-  
-  function saveData() {
-    const p = team.find(x => x.id === curId);
+  function processImage(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => { squad.find(x => x.id === activePlayerId).img = e.target.result; };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function commitPlayerUpdate() {
+    const p = squad.find(x => x.id === activePlayerId);
     if(document.getElementById('e-name')) p.name = document.getElementById('e-name').value;
+    if(document.getElementById('e-rating')) p.rating = document.getElementById('e-rating').value;
     if(document.getElementById('e-bpm')) p.bpm = parseInt(document.getElementById('e-bpm').value);
     if(document.getElementById('e-fat')) p.fat = parseFloat(document.getElementById('e-fat').value);
+    if(document.getElementById('e-hrv')) p.hrv = parseInt(document.getElementById('e-hrv').value);
     
-    // LIVE REACTION
-    if(p.bpm > 140) toniSpeak(`Warnung! Der Puls von ${p.name} ist im Stand viel zu hoch. Wir müssen das Belastungsprofil prüfen!`);
-    else if(p.fat > 15) toniSpeak(`Björn, der Körperfettanteil von ${p.name} ist gestiegen. Toni empfiehlt eine Anpassung des Ernährungsplans.`);
-    else toniSpeak(`Daten für ${p.name} synchronisiert. Ich berechne den neuen Readiness-Score.`);
-
-    localStorage.setItem('toni_team_v39', JSON.stringify(team));
-    document.getElementById('editor').style.display='none'; openSektor('analyse'); renderArena();
+    // Live Toni Intelligence
+    if(p.bpm > 140) toniSpeak(`Warnung! Der Ruhepuls von ${p.name} ist kritisch. Wir müssen die Belastung senken!`);
+    
+    localStorage.setItem('toni4_squad', JSON.stringify(squad));
+    document.getElementById('player-editor').style.display = 'none';
+    openSektor('kabine');
+    renderArena();
   }
 
-  function resetMemory() { if(confirm("System-Reset?")) { localStorage.clear(); location.reload(); } }
-  function closeOverlay() { document.getElementById('ov').style.display='none'; document.getElementById('editor').style.display='none'; }
-  function sendBefehl() { const i = document.getElementById('cmd'); if(i.value) { toniSpeak("Analysiere: " + i.value); i.value=''; } }
+  function removePlayer() {
+    if(confirm("Spieler permanent entfernen?")) {
+      squad = squad.filter(x => x.id !== activePlayerId);
+      localStorage.setItem('toni4_squad', JSON.stringify(squad));
+      document.getElementById('player-editor').style.display = 'none';
+      openSektor('kabine');
+      renderArena();
+    }
+  }
+
+  function closeOverlay() { document.getElementById('ov-hub').style.display='none'; document.getElementById('player-editor').style.display='none'; }
+  function processCmd() { const i = document.getElementById('user-cmd'); if(i.value) { toniSpeak("Ich analysiere: " + i.value); i.value = ''; } }
+  function systemReset() { if(confirm("ALLES LÖSCHEN?")) { localStorage.clear(); location.reload(); } }
+
+  // Initial Start
+  if(user) startSystem();
 </script>
 </body>
 </html>
