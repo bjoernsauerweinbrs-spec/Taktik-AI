@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
-<title>TONI 2.0 | Intelligence & Club HQ</title>
+<title>TONI 2.0 | G-Junior & Pro Intelligence</title>
 <style>
   :root {
-    --bg: #010401;
+    --bg: #010501;
     --neon: #39FF14;
     --neon-glow: rgba(57, 255, 20, 0.3);
     --gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
@@ -58,52 +58,54 @@
   .card-rating { font-size: 38px; position: absolute; top: 10px; left: 10px; }
   .card-photo { width: 95px; height: 95px; background: rgba(0,0,0,0.1); margin: 5px auto 0 auto; border-bottom: 2px solid #000; overflow: hidden; display: flex; align-items: flex-end; }
   .card-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .card-name { text-align: center; font-size: 16px; margin: 2px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
   .attr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; font-size: 11px; padding: 5px 10px 0 10px; }
 
-  /* --- ONBOARDING & SCREENS --- */
-  .screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; padding: 20px; text-align: center; }
-  .input-field { background: #111; border: 1px solid var(--neon); color: #fff; padding: 15px; border-radius: 8px; width: 100%; max-width: 300px; text-align: center; }
+  /* --- EDITOR --- */
+  .editor-pane { display: none; background: #000; border: 1px solid var(--neon); padding: 30px; border-radius: 20px; position: absolute; inset: 15px; z-index: 1100; overflow-y: auto; }
+  .input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .input-group label { display: block; font-size: 9px; color: var(--neon); margin-bottom: 4px; text-transform: uppercase; }
+  .input-group input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; font-size: 13px; }
+
+  /* --- LOGIN & ONBOARDING --- */
+  .screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; padding: 20px; }
+  .input-field { background: #111; border: 1px solid var(--neon); color: #fff; padding: 15px; border-radius: 8px; width: 100%; max-width: 300px; text-align: center; font-size: 18px; }
   .btn-primary { background: var(--neon); border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 </style>
 </head>
 <body>
 
-<div id="onboarding" class="screen">
-  <h1 style="color:var(--neon); letter-spacing: 5px;">TONI 2.0</h1>
-  <div id="ob-step1">
-    <p>Hallo Coach! Ich bin Toni, dein KI-Co-Trainer.<br>Wie darf ich dich nennen?</p>
-    <input type="text" id="coachName" class="input-field" placeholder="Dein Name">
+<div id="loginGate" class="screen">
+  <h1 style="color:var(--neon); letter-spacing: 5px;">TONI 2.0 ACCESS</h1>
+  <p>Bitte identifiziere dich.</p>
+  <input type="password" id="passInput" class="input-field" placeholder="PASSWORT">
+  <button class="btn-primary" onclick="verifyLogin()">EINLOGGEN</button>
+  <p style="font-size: 10px; color: #444;">Coach: 1234 | Junior: Junior2026</p>
+</div>
+
+<div id="onboarding" class="screen" style="display:none">
+  <h1 style="color:var(--neon); letter-spacing: 5px;">WILLKOMMEN</h1>
+  <div id="ob-content">
+    <p id="ob-text">Hallo Coach! Ich bin Toni. Wie heißt du?</p>
+    <input type="text" id="ob-input" class="input-field">
     <br><br>
-    <button class="btn-primary" onclick="obStep(2)">WEITER</button>
-  </div>
-  <div id="ob-step2" style="display:none">
-    <p>Sehr schön. Welchen Verein führen wir zum Erfolg?</p>
-    <input type="text" id="clubName" class="input-field" placeholder="z.B. FC Bad Hersfeld">
-    <br><br>
-    <button class="btn-primary" onclick="obStep(3)">WEITER</button>
-  </div>
-  <div id="ob-step3" style="display:none">
-    <p>Und für welche Altersklasse bist du zuständig?</p>
-    <input type="text" id="ageGroup" class="input-field" placeholder="z.B. U19 oder 1. Herren">
-    <br><br>
-    <button class="btn-primary" onclick="completeOnboarding()">SYSTEM STARTEN</button>
+    <button class="btn-primary" onclick="nextObStep()">WEITER</button>
   </div>
 </div>
 
 <div class="app-container" id="mainApp" style="display:none;">
   <div class="left-nav">
     <div class="nav-item" onclick="openSektor('kabine')">💼</div>
-    <div class="nav-item" onclick="openSektor('business')">🤝</div>
-    <div class="nav-item" onclick="openSektor('kids')">👶</div>
     <div class="nav-item" onclick="openSektor('analyse')">🧪</div>
+    <div class="nav-item" onclick="openSektor('kids')">👶</div>
     <div style="flex:1"></div>
-    <div class="nav-item" onclick="openSektor('zeitung')">📰</div>
+    <div class="nav-item" onclick="resetSystem()">🔁</div>
   </div>
 
   <div class="center-arena">
     <div style="display:flex; justify-content:space-between; padding:5px 15px; color:var(--neon); font-size:12px;">
-        <strong id="displayClub">CLUB HQ</strong>
-        <span id="displayAge">[ LADE... ]</span>
+        <strong id="displayClub">ARENA</strong>
+        <span id="displayAge">[ MODUS ]</span>
     </div>
     <div style="flex:1; display:flex; align-items:center; justify-content:center;">
       <canvas id="mainBoard" width="1000" height="700"></canvas>
@@ -122,126 +124,166 @@
 
 <div id="ov" class="overlay">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-    <h2 id="ov-title" style="margin:0; color:var(--neon); letter-spacing:2px;">HUB</h2>
+    <h2 id="ov-title" style="margin:0; color:var(--neon); letter-spacing:2px;">DATA CENTER</h2>
     <span onclick="closeOverlay()" style="cursor:pointer; font-size:30px;">✕</span>
   </div>
   <div class="scroll-box" id="ov-content"></div>
+
+  <div id="editor" class="editor-pane">
+    <h3 id="edit-title" style="margin-top:0; color:var(--neon)">PLAYER REFINEMENT</h3>
+    <div class="input-grid" id="edit-fields"></div>
+    <button onclick="saveData()" style="width:100%; background:var(--neon); color:#000; border:none; padding:15px; border-radius:10px; font-weight:bold; margin-top:20px; cursor:pointer;">DATEN SYNCHRONISIEREN</button>
+  </div>
 </div>
 
 <script>
   const canvas = document.getElementById('mainBoard');
   const ctx = canvas.getContext('2d');
   
-  let userData = JSON.parse(localStorage.getItem('toni_user')) || null;
-  let team = JSON.parse(localStorage.getItem('toni_team_v31')) || [
-    {id:0, name:'Müller', rating:91, pos:'ST', x:200, y:350, img:'', pac:88, sho:92, pas:80, dri:85, def:40, phy:85}
+  let currentMode = 'admin'; 
+  let userData = JSON.parse(localStorage.getItem('toni_user_v32')) || null;
+  let obStep = 0;
+  
+  let team = JSON.parse(localStorage.getItem('toni_team_v32')) || [
+    {id:0, name:'Müller', rating:91, pos:'ST', x:200, y:350, bpm:62, spo2:98, weight:82, fat:10.5, img:'', pac:88, sho:92, pas:80, dri:85, def:40, phy:85}
   ];
 
-  // ONBOARDING LOGIC
-  function obStep(step) {
-    document.getElementById('ob-step1').style.display = 'none';
-    document.getElementById('ob-step2').style.display = 'none';
-    document.getElementById('ob-step3').style.display = 'none';
-    document.getElementById('ob-step'+step).style.display = 'block';
+  // LOGIN
+  function verifyLogin() {
+    const pw = document.getElementById('passInput').value;
+    if(pw === '1234') {
+        currentMode = 'admin';
+        initFlow();
+    } else if(pw === 'Junior2026') {
+        currentMode = 'junior';
+        initFlow();
+    } else { alert("Passwort inkorrekt."); }
   }
 
-  function completeOnboarding() {
-    userData = {
-      coach: document.getElementById('coachName').value || 'Coach',
-      club: document.getElementById('clubName').value || 'Mein Verein',
-      age: document.getElementById('ageGroup').value || 'Senioren'
-    };
-    localStorage.setItem('toni_user', JSON.stringify(userData));
-    startApp();
+  function initFlow() {
+    document.getElementById('loginGate').style.display = 'none';
+    if(!userData) {
+        document.getElementById('onboarding').style.display = 'flex';
+    } else {
+        startApp();
+    }
+  }
+
+  // ONBOARDING
+  function nextObStep() {
+    const val = document.getElementById('ob-input').value;
+    if(!val) return;
+    
+    if(obStep === 0) {
+        userData = { coach: val };
+        document.getElementById('ob-text').innerText = "Welchen Verein trainierst du?";
+        document.getElementById('ob-input').value = "";
+        obStep++;
+    } else if(obStep === 1) {
+        userData.club = val;
+        document.getElementById('ob-text').innerText = "Welche Altersklasse (z.B. G-Jugend)?";
+        document.getElementById('ob-input').value = "";
+        obStep++;
+    } else {
+        userData.age = val;
+        localStorage.setItem('toni_user_v32', JSON.stringify(userData));
+        startApp();
+    }
   }
 
   function startApp() {
-    if(!userData) return;
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('mainApp').style.display = 'grid';
     document.getElementById('displayClub').innerText = userData.club.toUpperCase();
     document.getElementById('displayAge').innerText = `[ ${userData.age.toUpperCase()} ]`;
     
+    // Branding Fix (Simuliert)
+    if(userData.club.toLowerCase().includes('bad hersfeld')) {
+        document.documentElement.style.setProperty('--neon', '#FF3333'); // Beispiel: Rot
+    }
+
     renderArena();
-    greetCoach();
+    addChat(`Toni: Hallo ${userData.coach}! System für ${userData.age} kalibriert.`);
   }
 
-  function greetCoach() {
-    const text = `Hallo ${userData.coach}! Ich bin bereit. Wir starten für den ${userData.club} in der Altersklasse ${userData.age}. Wie kann ich heute helfen?`;
-    addChat(text);
-    // Voice output (optional)
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = 'de-DE';
-    window.speechSynthesis.speak(msg);
-  }
-
-  // BUSINESS LOGIC
-  function openSektor(s) {
-    document.getElementById('ov').style.display = 'flex';
-    const c = document.getElementById('ov-content');
-    const t = document.getElementById('ov-title');
-    c.innerHTML = '';
-
-    if(s === 'business') {
-      t.innerText = 'MANAGEMENT & SPONSORING';
-      c.innerHTML = `
-        <div style="background:var(--glass); padding:15px; border-radius:10px; border-left:4px solid var(--neon); margin-bottom:20px;">
-            <strong>Toni Sponsor-Radar:</strong> Ich habe lokale Partner im Umkreis von ${userData.club} analysiert.
-        </div>
-        <div style="display:grid; gap:10px;">
-            <div style="padding:15px; background:rgba(255,255,255,0.02); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                <span>Autohaus Region Süd</span>
-                <button onclick="generateMail('Autohaus Region Süd')" class="btn-primary" style="padding:5px 10px; font-size:10px;">MAIL ENTWERFEN</button>
-            </div>
-            <div style="padding:15px; background:rgba(255,255,255,0.02); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                <span>Bauunternehmen Müller</span>
-                <button onclick="generateMail('Bauunternehmen Müller')" class="btn-primary" style="padding:5px 10px; font-size:10px;">MAIL ENTWERFEN</button>
-            </div>
-        </div>
-        <div id="mailPreview" style="margin-top:20px; font-size:12px; white-space:pre-wrap; background:#000; padding:15px; border-radius:5px; display:none; border:1px solid #333;"></div>
-      `;
-    } else if(s === 'kabine') {
-      t.innerText = 'SQUAD REPOSITORY';
-      c.className = 'scroll-box fifa-grid';
-      team.forEach(p => {
-        c.innerHTML += `<div class="fifa-card"><div class="card-rating">${p.rating}</div><div class="card-photo">${p.img?`<img src="${p.img}">`:'👤'}</div><div class="card-name">${p.name}</div><div class="attr-grid"><span>PAC ${p.pac}</span><span>DRI ${p.dri}</span><span>SHO ${p.sho}</span><span>DEF ${p.def}</span></div></div>`;
-      });
+  // ARENA: G-JUGEND FIX
+  function drawPitch() {
+    ctx.fillStyle = '#021a02'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle = 'rgba(57, 255, 20, 0.4)'; ctx.lineWidth = 3;
+    
+    const isJunior = userData && (userData.age.toLowerCase().includes('g-') || userData.age.toLowerCase().includes('junior'));
+    
+    if(isJunior) {
+        // FUNINO / G-JUGEND FELD (Kürzer, 4 Tore markiert)
+        ctx.strokeRect(100, 100, canvas.width-200, canvas.height-200);
+        ctx.strokeStyle = 'rgba(57, 255, 20, 0.8)';
+        // 4 Mini-Tore (Zonen)
+        ctx.strokeRect(100, 150, 10, 80); ctx.strokeRect(100, 470, 10, 80);
+        ctx.strokeRect(canvas.width-110, 150, 10, 80); ctx.strokeRect(canvas.width-110, 470, 10, 80);
+        ctx.beginPath(); ctx.moveTo(canvas.width/2, 100); ctx.lineTo(canvas.width/2, canvas.height-100); ctx.stroke();
+    } else {
+        // PROFI FELD
+        ctx.strokeRect(40, 40, canvas.width-80, canvas.height-80);
+        ctx.beginPath(); ctx.moveTo(canvas.width/2, 40); ctx.lineTo(canvas.width/2, canvas.height-40); ctx.stroke();
+        ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, 80, 0, Math.PI*2); ctx.stroke();
+        ctx.strokeRect(40, canvas.height/2-70, 50, 140);
+        ctx.strokeRect(canvas.width-90, canvas.height/2-70, 50, 140);
     }
   }
 
-  function generateMail(firma) {
-    const preview = document.getElementById('mailPreview');
-    const text = `Betreff: Sponsoring-Anfrage - ${userData.club}
-
-Sehr geehrte Damen und Herren des ${firma},
-
-mein Name ist ${userData.coach} vom ${userData.club}. Wir suchen starke regionale Partner für unsere ${userData.age}. 
-
-Wir bieten Ihnen attraktive Logoplatzierungen in unserer neuen Stadionzeitung und auf unseren Social Media Kanälen. Hätten Sie Zeit für ein kurzes Gespräch?
-
-Beste Grüße,
-${userData.coach}
-${userData.club}`;
-    preview.innerText = text;
-    preview.style.display = 'block';
-    addChat(`Toni: Ich habe den Entwurf für ${firma} erstellt. Du kannst ihn oben kopieren.`);
-  }
-
-  // ARENA LOGIC (Restored Build 2.7+)
-  function drawPitch() {
-    ctx.fillStyle = '#021202'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = 'rgba(57, 255, 20, 0.4)'; ctx.lineWidth = 3;
-    ctx.strokeRect(40, 40, canvas.width-80, canvas.height-80);
-    ctx.beginPath(); ctx.moveTo(canvas.width/2, 40); ctx.lineTo(canvas.width/2, canvas.height-40); ctx.stroke();
-    ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, 80, 0, Math.PI*2); ctx.stroke();
-  }
-
   function renderArena() { drawPitch(); team.forEach(p => { ctx.fillStyle = '#ff3333'; ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI*2); ctx.fill(); }); }
-  function addChat(t) { const c = document.getElementById('chat'); c.innerHTML += `<div class="msg ai">${t}</div>`; c.scrollTop = c.scrollHeight; }
-  function closeOverlay() { document.getElementById('ov').style.display = 'none'; }
 
-  // START CHECK
-  if(userData) startApp(); else document.getElementById('onboarding').style.display = 'flex';
+  // HUB & EDITOR
+  function openSektor(s) {
+    document.getElementById('ov').style.display = 'flex';
+    const c = document.getElementById('ov-content');
+    c.innerHTML = '';
+    
+    if(s === 'kabine') {
+      team.forEach(p => {
+        c.innerHTML += `
+          <div class="fifa-card" onclick="editPlayer(${p.id})">
+            <div class="card-rating">${p.rating}</div>
+            <div class="card-photo">👤</div>
+            <div class="card-name">${p.name}</div>
+            <div class="attr-grid"><span>PAC ${p.pac}</span><span>DRI ${p.dri}</span><span>SHO ${p.sho}</span><span>DEF ${p.def}</span></div>
+          </div>`;
+      });
+    } else if(s === 'analyse') {
+        c.innerHTML = "<h3>LABOR-WERTE</h3>";
+        team.forEach(p => {
+            c.innerHTML += `<div style='background:var(--glass); padding:10px; margin:5px;'>${p.name}: Puls ${p.bpm} | Fett ${p.fat}%</div>`;
+        });
+    }
+  }
+
+  function editPlayer(id) {
+    const p = team.find(x => x.id === id);
+    const f = document.getElementById('edit-fields');
+    document.getElementById('editor').style.display = 'block';
+    f.innerHTML = `
+      <div class="input-group"><label>Name</label><input type="text" id="e-name" value="${p.name}"></div>
+      <div class="input-group"><label>Rating</label><input type="number" id="e-rating" value="${p.rating}"></div>
+      <div class="input-group"><label>Puls</label><input type="number" id="e-bpm" value="${p.bpm}"></div>
+      <div class="input-group"><label>Fett %</label><input type="number" id="e-fat" value="${p.fat}"></div>
+      <div class="input-group"><label>PAC</label><input type="number" id="e-pac" value="${p.pac}"></div>
+    `;
+    currentId = id;
+  }
+
+  function saveData() {
+    const p = team.find(x => x.id === currentId);
+    p.name = document.getElementById('e-name').value;
+    p.bpm = document.getElementById('e-bpm').value;
+    p.fat = document.getElementById('e-fat').value;
+    localStorage.setItem('toni_team_v32', JSON.stringify(team));
+    document.getElementById('editor').style.display = 'none';
+    openSektor('kabine');
+  }
+
+  function addChat(t) { const ch = document.getElementById('chat'); ch.innerHTML += `<div class="msg ai">${t}</div>`; ch.scrollTop = ch.scrollHeight; }
+  function closeOverlay() { document.getElementById('ov').style.display = 'none'; document.getElementById('editor').style.display = 'none'; }
+  function resetSystem() { localStorage.clear(); location.reload(); }
 </script>
 </body>
 </html>
