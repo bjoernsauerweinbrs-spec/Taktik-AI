@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
-<title>TONI 2.0 | High-Performance Tactical HQ</title>
+<title>TONI 2.0 | Pro Mobile Sync HQ</title>
 <style>
   :root {
     --bg: #020502;
@@ -30,8 +30,12 @@
   }
 
   @media (max-width: 900px) {
-    .app-container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr 350px; overflow-y: auto; height: auto; }
-    .left-nav { flex-direction: row !important; height: 60px; width: 100%; justify-content: space-around; padding: 0 !important; }
+    .app-container {
+      grid-template-columns: 1fr;
+      grid-template-rows: 60px 1fr 350px;
+      overflow-y: auto; height: auto;
+    }
+    .left-nav { flex-direction: row !important; height: 60px; width: 100%; padding: 0 !important; justify-content: space-around; }
     .overlay { inset: 5px !important; width: 98% !important; }
   }
 
@@ -50,14 +54,12 @@
   .msg { padding: 10px 14px; border-radius: 12px; font-size: 13px; max-width: 85%; line-height: 1.4; }
   .msg.ai { background: rgba(57, 255, 20, 0.08); align-self: flex-start; border-left: 3px solid var(--neon); }
 
-  /* --- OVERLAY & LAB --- */
+  /* --- OVERLAY & HUB --- */
   .overlay { position: fixed; inset: 20px 400px 20px 100px; background: rgba(4, 10, 4, 0.99); border: 1px solid var(--neon); border-radius: 20px; z-index: 1000; display: none; flex-direction: column; padding: 25px; backdrop-filter: blur(25px); overflow: hidden; }
   .content-scroll { flex: 1; overflow-y: auto; padding-top: 10px; }
   
-  /* GRID FOR FIFA CARDS */
   .fifa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
   
-  /* HIGH-TECH FIFA CARD DESIGN (RESTORED) */
   .fifa-card { 
     width: 150px; height: 210px; background: var(--gold); border-radius: 10px; color: #000; 
     position: relative; padding: 12px; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(0,0,0,0.5);
@@ -66,26 +68,27 @@
   .fifa-card:hover { transform: translateY(-8px) scale(1.03); }
   .card-rating { font-size: 35px; position: absolute; top: 10px; left: 10px; }
   .card-pos { font-size: 12px; position: absolute; top: 38px; left: 10px; text-transform: uppercase; }
-  .card-photo { width: 85px; height: 85px; background: rgba(0,0,0,0.1); margin: 10px auto; border-bottom: 2px solid #000; }
+  .card-photo { width: 85px; height: 85px; background: rgba(0,0,0,0.1); margin: 10px auto; border-bottom: 2px solid #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .card-photo img { width: 100%; height: 100%; object-fit: cover; }
   .card-name { text-align: center; font-size: 15px; border-bottom: 1px solid rgba(0,0,0,0.2); text-transform: uppercase; }
 
-  /* LABORATORY LAB CARDS */
-  .lab-card { 
-    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); 
-    border-radius: 15px; padding: 20px; margin-bottom: 15px;
-  }
+  /* --- LABORATORY --- */
+  .lab-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-bottom: 15px; }
   .stat-row { display: flex; justify-content: space-between; font-size: 11px; margin: 4px 0; }
   .stat-val { color: var(--neon); font-weight: bold; }
   .bar-bg { width: 100%; height: 5px; background: #111; border-radius: 3px; margin: 8px 0; overflow: hidden; }
   .bar-fill { height: 100%; transition: 0.5s; box-shadow: 0 0 10px var(--neon); }
 
-  /* EDITOR */
+  /* --- EDITOR --- */
   .editor-pane { display: none; background: #000; border: 1px solid var(--neon); padding: 30px; border-radius: 20px; position: absolute; inset: 15px; z-index: 1100; overflow-y: auto; }
   .input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
   .input-group label { display: block; font-size: 9px; color: var(--neon); margin-bottom: 4px; text-transform: uppercase; }
   .input-group input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; font-size: 13px; }
   .section-title { grid-column: 1 / -1; font-size: 10px; color: #666; border-bottom: 1px solid #222; margin: 15px 0 5px 0; }
-
+  
+  /* Upload Button */
+  .upload-area { grid-column: 1 / -1; display: flex; align-items: center; gap: 15px; margin-top: 10px; }
+  .cam-btn { background: var(--glass); border: 1px dashed var(--neon); color: var(--neon); padding: 15px; border-radius: 10px; cursor: pointer; flex: 1; text-align: center; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -101,8 +104,8 @@
 
   <div class="center-arena">
     <div style="display:flex; justify-content:space-between; padding:5px 15px; color:var(--neon); font-size:12px;">
-        <strong>PERFORMANCE CORE v2.7</strong>
-        <span>[ 4-4-2 ACTIVE ]</span>
+        <strong>PERFORMANCE CORE v2.8</strong>
+        <span onclick="resetMemory()" style="cursor:pointer; opacity:0.5;">[ Speicher leeren ]</span>
     </div>
     <div id="board-wrap">
       <canvas id="mainBoard" width="1000" height="700"></canvas>
@@ -110,9 +113,11 @@
   </div>
 
   <div class="right-toni">
-    <div style="font-weight:bold; color:var(--neon); display:flex; justify-content:space-between;">TONI AI <span>READY</span></div>
+    <div style="font-weight:bold; color:var(--neon); letter-spacing:1px; display:flex; justify-content:space-between;">
+      TONI 2.0 <span>AI</span>
+    </div>
     <div class="chat-history" id="chat">
-      <div class="msg ai">Toni: System v2.7 bereit. Alle hochauflösenden Platzmarkierungen und Spielerdaten sind synchronisiert.</div>
+      <div class="msg ai">Toni: System v2.8 online. Du kannst jetzt Fotos direkt vom Smartphone hochladen.</div>
     </div>
     <input type="text" id="cmd" placeholder="Befehl..." style="background:#111; border:1px solid #333; color:#fff; padding:12px; border-radius:10px;">
   </div>
@@ -123,11 +128,19 @@
     <h2 id="ov-title" style="margin:0; color:var(--neon); letter-spacing:2px;">DATA CENTER</h2>
     <span onclick="closeOverlay()" style="cursor:pointer; font-size:30px;">✕</span>
   </div>
-  
   <div class="content-scroll" id="ov-content"></div>
 
   <div id="editor" class="editor-pane">
-    <h3 style="margin-top:0; color:var(--neon)">DATA ENCRYPTION & SYNC</h3>
+    <h3 style="margin-top:0; color:var(--neon)">PLAYER PROFILE & CAMERA SYNC</h3>
+    
+    <div class="upload-area">
+        <div id="edit-img-preview" style="width: 80px; height: 80px; background: #222; border-radius: 8px; overflow: hidden; display: flex; align-items:center; justify-content:center;">👤</div>
+        <label class="cam-btn">
+            📷 FOTO VOM SMARTPHONE LADEN
+            <input type="file" id="cam-input" accept="image/*" style="display:none" onchange="processImage(this)">
+        </label>
+    </div>
+
     <div class="input-grid" id="edit-fields"></div>
     <button onclick="saveData()" style="width:100%; background:var(--neon); color:#000; border:none; padding:15px; border-radius:10px; font-weight:bold; margin-top:20px; cursor:pointer;">UPDATE GLOBAL STATE</button>
   </div>
@@ -137,46 +150,32 @@
   const canvas = document.getElementById('mainBoard');
   const ctx = canvas.getContext('2d');
   
-  let team = [
+  // INITIALER DATENSATZ ODER AUS LOCALSTORAGE LADEN
+  let team = JSON.parse(localStorage.getItem('toni_team_v28')) || [
     { 
       id:0, name:'Müller', rating:91, pos:'ST', x:200, y:350, 
-      weight:82.4, muscle:38.5, fat:10.2, water:62.1, bone:3.8, visceral:4, 
-      bpm:62, hrV:55, spo2:98, sleep:82, vo2:52, stress:22, recovery:12, img:''
+      weight:82.4, muscle:38.5, fat:10.2, hrV:55, bpm:62, spo2:98, sleep:82, vo2:52, stress:22, recovery:12, img:''
     },
     { 
       id:1, name:'Silva', rating:89, pos:'ZM', x:450, y:350, 
-      weight:76.2, muscle:35.1, fat:11.5, water:60.5, bone:3.4, visceral:5, 
-      bpm:68, hrV:42, spo2:99, sleep:65, vo2:48, stress:45, recovery:24, img:''
-    },
-    { 
-      id:2, name:'Neuer', rating:92, pos:'TW', x:80, y:350, 
-      weight:93.1, muscle:42.3, fat:12.4, water:58.2, bone:4.1, visceral:6, 
-      bpm:58, hrV:65, spo2:98, sleep:88, vo2:45, stress:15, recovery:6, img:''
+      weight:76.2, muscle:35.1, fat:11.5, hrV:42, bpm:68, spo2:99, sleep:65, vo2:48, stress:45, recovery:24, img:''
     }
   ];
 
   let currentId = null;
+  let tempImgData = '';
 
-  // HIGH-RES PITCH RENDERING (RESTORED)
   function drawPitch() {
     ctx.fillStyle = '#021202'; ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.strokeStyle = 'rgba(57, 255, 20, 0.4)'; ctx.lineWidth = 3;
-    
-    // Bounds & Halfway
     ctx.strokeRect(40, 40, canvas.width-80, canvas.height-80);
     ctx.beginPath(); ctx.moveTo(canvas.width/2, 40); ctx.lineTo(canvas.width/2, canvas.height-40); ctx.stroke();
     ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, 80, 0, Math.PI*2); ctx.stroke();
-    
-    // Penalty Areas (Large)
     ctx.strokeRect(40, canvas.height/2-150, 120, 300);
     ctx.strokeRect(canvas.width-160, canvas.height/2-150, 120, 300);
-    
-    // Goal Areas (5m Boxes - RESTORED)
     ctx.strokeStyle = 'rgba(57, 255, 20, 0.2)';
     ctx.strokeRect(40, canvas.height/2-70, 50, 140);
     ctx.strokeRect(canvas.width-90, canvas.height/2-70, 50, 140);
-    
-    // Penalty Spots
     ctx.fillStyle = 'rgba(57, 255, 20, 0.5)';
     ctx.beginPath(); ctx.arc(130, canvas.height/2, 4, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(canvas.width-130, canvas.height/2, 4, 0, Math.PI*2); ctx.fill();
@@ -206,7 +205,7 @@
           <div class="fifa-card" onclick="editPlayer(${p.id})">
             <div class="card-rating">${p.rating}</div>
             <div class="card-pos">${p.pos}</div>
-            <div class="card-photo">${p.img ? `<img src="${p.img}" style="width:100%">` : '👤'}</div>
+            <div class="card-photo">${p.img ? `<img src="${p.img}">` : '👤'}</div>
             <div class="card-name">${p.name}</div>
             <div style="font-size:10px; margin-top:8px; opacity:0.8; display:flex; justify-content:space-between;">
               <span>PULS: ${p.bpm}</span><span>FAT: ${p.fat}%</span>
@@ -221,15 +220,11 @@
         content.innerHTML += `
           <div class="lab-card">
             <div class="stat-row"><strong style="color:var(--neon)">${p.name.toUpperCase()}</strong><span>READINESS: ${readiness}%</span></div>
-            <div class="section-title">BIO-ELECTRICAL IMPEDANCE (BIA)</div>
+            <div class="section-title">BIO-DATA ANALYTICS</div>
             <div class="stat-row"><span>Weight / Body Fat</span><span class="stat-val">${p.weight}kg / ${p.fat}%</span></div>
-            <div class="stat-row"><span>Muscle / Water</span><span class="stat-val">${p.muscle}kg / ${p.water}%</span></div>
-            <div class="section-title">TRACKER METRICS (HRV/VO2)</div>
-            <div class="stat-row"><span>HRV / Puls</span><span class="stat-val">${p.hrV}ms / ${p.bpm}bpm</span></div>
-            <div class="stat-row"><span>VO2 Max Score</span><span class="stat-val">${p.vo2}</span></div>
-            <div class="bar-bg"><div class="bar-fill" style="width:${(p.vo2/60)*100}%; background:cyan;"></div></div>
-            <div style="background:rgba(57,255,20,0.06); padding:8px; border-radius:8px; margin-top:10px; font-size:10px; border-left:2px solid var(--neon);">
-              <strong>TONI AI:</strong> ${readiness > 70 ? 'Optimal readiness detected.' : 'Warning: High fatigue levels.'}
+            <div class="bar-bg"><div class="bar-fill" style="width:${(p.hrV/100)*100}%; background:cyan;"></div></div>
+            <div style="font-size:10px; margin-top:10px; border-left:2px solid var(--neon); padding-left:8px;">
+                <strong>TONI AI:</strong> ${readiness > 70 ? 'Startelf bereit.' : 'Regeneration empfohlen.'}
             </div>
           </div>`;
       });
@@ -239,6 +234,9 @@
   function editPlayer(id) {
     currentId = id;
     const p = team.find(x => x.id === id);
+    tempImgData = p.img;
+    document.getElementById('edit-img-preview').innerHTML = p.img ? `<img src="${p.img}" style="width:100%; height:100%; object-fit:cover;">` : '👤';
+    
     const fields = document.getElementById('edit-fields');
     document.getElementById('editor').style.display = 'block';
     fields.innerHTML = `
@@ -246,18 +244,25 @@
       <div class="input-group"><label>Name</label><input type="text" id="e-name" value="${p.name}"></div>
       <div class="input-group"><label>Pos</label><input type="text" id="e-pos" value="${p.pos}"></div>
       <div class="input-group"><label>Rating</label><input type="number" id="e-rating" value="${p.rating}"></div>
-      <div class="section-title">BIA ANALYTICS</div>
-      <div class="input-group"><label>Weight</label><input type="number" step="0.1" id="e-weight" value="${p.weight}"></div>
-      <div class="input-group"><label>Fat %</label><input type="number" step="0.1" id="e-fat" value="${p.fat}"></div>
-      <div class="input-group"><label>Muscle kg</label><input type="number" step="0.1" id="e-muscle" value="${p.muscle}"></div>
-      <div class="section-title">TRACKER SYNC</div>
-      <div class="input-group"><label>BPM</label><input type="number" id="e-bpm" value="${p.bpm}"></div>
-      <div class="input-group"><label>HRV ms</label><input type="number" id="e-hrv" value="${p.hrV}"></div>
+      <div class="section-title">VITAL DATA</div>
+      <div class="input-group"><label>Puls</label><input type="number" id="e-bpm" value="${p.bpm}"></div>
+      <div class="input-group"><label>HRV</label><input type="number" id="e-hrv" value="${p.hrV}"></div>
+      <div class="input-group"><label>Gewicht</label><input type="number" step="0.1" id="e-weight" value="${p.weight}"></div>
+      <div class="input-group"><label>Fett %</label><input type="number" step="0.1" id="e-fat" value="${p.fat}"></div>
+      <div class="input-group"><label>Schlaf</label><input type="number" id="e-sleep" value="${p.sleep}"></div>
       <div class="input-group"><label>Stress %</label><input type="number" id="e-stress" value="${p.stress}"></div>
-      <div class="input-group"><label>Sleep Score</label><input type="number" id="e-sleep" value="${p.sleep}"></div>
-      <div class="input-group"><label>VO2 Max</label><input type="number" id="e-vo2" value="${p.vo2}"></div>
-      <div class="input-group"><label>Recovery h</label><input type="number" id="e-recovery" value="${p.recovery}"></div>
     `;
+  }
+
+  function processImage(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        tempImgData = e.target.result;
+        document.getElementById('edit-img-preview').innerHTML = `<img src="${tempImgData}" style="width:100%; height:100%; object-fit:cover;">`;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
   }
 
   function saveData() {
@@ -266,20 +271,20 @@
     p.pos = document.getElementById('e-pos').value;
     p.rating = document.getElementById('e-rating').value;
     p.bpm = parseInt(document.getElementById('e-bpm').value);
-    p.fat = parseFloat(document.getElementById('e-fat').value);
-    p.weight = parseFloat(document.getElementById('e-weight').value);
-    p.muscle = parseFloat(document.getElementById('e-muscle').value);
     p.hrV = parseInt(document.getElementById('e-hrv').value);
-    p.stress = parseInt(document.getElementById('e-stress').value);
+    p.weight = parseFloat(document.getElementById('e-weight').value);
+    p.fat = parseFloat(document.getElementById('e-fat').value);
     p.sleep = parseInt(document.getElementById('e-sleep').value);
-    p.vo2 = parseInt(document.getElementById('e-vo2').value);
-    p.recovery = parseInt(document.getElementById('e-recovery').value);
+    p.stress = parseInt(document.getElementById('e-stress').value);
+    p.img = tempImgData;
 
+    localStorage.setItem('toni_team_v28', JSON.stringify(team));
     document.getElementById('editor').style.display = 'none';
     openSektor('kabine');
     renderArena();
   }
 
+  function resetMemory() { if(confirm("Alle Daten löschen?")) { localStorage.removeItem('toni_team_v28'); location.reload(); } }
   function closeOverlay() { document.getElementById('ov').style.display = 'none'; document.getElementById('editor').style.display = 'none'; }
   renderArena();
 </script>
