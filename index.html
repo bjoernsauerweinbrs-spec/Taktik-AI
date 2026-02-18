@@ -3,65 +3,70 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
-<title>TONI 2.0 | Senior Pro v6.0</title>
+<title>TONI 2.0 | Titan Pro v7.0</title>
 <style>
   :root {
-    --bg: #010401; --neon: #39FF14; --neon-dim: rgba(57, 255, 20, 0.12);
-    --glass: rgba(255, 255, 255, 0.07); --red: #ff3333; --yellow: #ffff00;
-    --gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-    --font: 'Segoe UI', Roboto, Helvetica, sans-serif;
+    --bg: #010601; --neon: #39FF14; --neon-dim: rgba(57, 255, 20, 0.15);
+    --gold: linear-gradient(135deg, #d4af37 0%, #fcf6ba 45%, #b38728 70%, #fbf5b7 100%);
+    --card-text: #2c2401; --red: #ff3333;
   }
   
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-  body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: var(--bg); color: #fff; font-family: var(--font); overflow: hidden; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: var(--bg); color: #fff; font-family: 'Arial Condensed', sans-serif; overflow: hidden; }
 
-  /* --- GRID LAYOUT --- */
-  .app-container { display: grid; grid-template-columns: 80px 1fr 380px; height: 100vh; padding: 10px; gap: 10px; transition: 0.3s; }
+  /* --- FIFA KARTEN DESIGN --- */
+  .fifa-card {
+    width: 160px; height: 230px; background: var(--gold); border-radius: 10px 10px 50px 10px;
+    position: relative; padding: 10px; color: var(--card-text); box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+    cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.3);
+  }
+  .fifa-card:active { transform: scale(0.95); }
   
+  .card-rating { font-size: 32px; font-weight: 900; line-height: 1; margin-bottom: 2px; }
+  .card-pos { font-size: 14px; font-weight: bold; text-transform: uppercase; }
+  .card-name { text-align: center; font-weight: 900; font-size: 15px; text-transform: uppercase; margin: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
+  
+  .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 11px; padding: 0 5px; }
+  .stat-row { display: flex; gap: 4px; font-weight: bold; }
+  .stat-val { font-weight: 900; width: 18px; }
+
+  /* --- LABOR ANIMATIONEN --- */
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+  }
+  .heart-icon { color: var(--red); font-size: 24px; animation: pulse 0.8s infinite; display: inline-block; }
+  
+  .lab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+  .lab-entry { background: rgba(255,255,255,0.03); border: 1px solid var(--neon-dim); border-radius: 15px; padding: 15px; position: relative; overflow: hidden; }
+
+  /* --- APP LAYOUT --- */
+  .app-container { display: grid; grid-template-columns: 80px 1fr 380px; height: 100vh; padding: 10px; gap: 10px; }
   @media (max-width: 950px) {
     .app-container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr 280px; height: auto; min-height: 100vh; }
-    .left-nav { flex-direction: row !important; height: 60px; width: 100%; padding: 0 10px !important; justify-content: space-around !important; order: 1; border-radius: 12px !important; }
-    .center-arena { order: 2; min-height: 480px !important; }
-    .right-toni { order: 3; min-height: 320px; border-radius: 20px 20px 0 0 !important; }
+    .left-nav { flex-direction: row !important; height: 60px; width: 100%; padding: 0 10px !important; justify-content: space-around !important; }
+    .overlay { inset: 5px !important; width: auto !important; padding: 10px !important; }
   }
 
-  /* --- UI ELEMENTS --- */
-  .left-nav { background: var(--glass); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; backdrop-filter: blur(20px); }
-  .nav-item { width: 50px; height: 50px; border-radius: 14px; border: 1.5px solid var(--neon); color: var(--neon); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; transition: 0.2s; }
-  .nav-item:active { transform: scale(0.9); background: var(--neon-dim); }
+  .left-nav { background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 20px; border: 1px solid rgba(255,255,255,0.1); }
+  .nav-item { width: 50px; height: 50px; border-radius: 15px; border: 2px solid var(--neon); color: var(--neon); display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
 
-  .center-arena { background: #000; border-radius: 25px; border: 1px solid var(--neon-dim); display: flex; flex-direction: column; padding: 12px; position: relative; overflow: hidden; box-shadow: inset 0 0 50px rgba(0,0,0,0.9); }
-  .arena-header { display: flex; justify-content: space-between; align-items: center; color: var(--neon); font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-
-  /* --- HUB & OVERLAY --- */
-  .overlay { position: fixed; inset: 20px 410px 20px 100px; background: rgba(0, 0, 0, 0.98); border: 2px solid var(--neon); border-radius: 25px; z-index: 2000; display: none; flex-direction: column; padding: 25px; backdrop-filter: blur(40px); box-shadow: 0 0 100px rgba(0,0,0,1); }
-  .scroll-content { flex: 1; overflow-y: auto; padding-right: 5px; }
-  
-  /* --- KARTEN & ORDNER --- */
-  .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
-  .folder-item { cursor: pointer; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); text-align: center; font-size: 13px; font-weight: bold; }
-  .fifa-card { width: 145px; height: 195px; background: var(--gold); border-radius: 12px; color: #000; position: relative; padding: 10px; font-family: 'Arial Black', sans-serif; box-shadow: 0 10px 20px rgba(0,0,0,0.5); cursor: pointer; }
-  .status-light { position: absolute; top: 10px; right: 10px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #000; }
-  
-  .status-match { background: var(--neon); box-shadow: 0 0 10px var(--neon); }
-  .status-training { background: var(--yellow); box-shadow: 0 0 10px var(--yellow); }
-  .status-absent { background: var(--red); box-shadow: 0 0 10px var(--red); }
-
-  /* --- LOGIN --- */
-  .gate-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
-  .gate-input { background: #000; border: 2px solid var(--neon); color: var(--neon); padding: 15px; border-radius: 12px; text-align: center; font-size: 26px; width: 300px; letter-spacing: 4px; }
+  .center-arena { background: #000; border-radius: 25px; border: 1px solid var(--neon-dim); position: relative; overflow: hidden; padding: 15px; }
+  .overlay { position: fixed; inset: 20px 410px 20px 100px; background: rgba(0,0,0,0.98); border: 2px solid var(--neon); border-radius: 25px; z-index: 2000; display: none; flex-direction: column; padding: 30px; backdrop-filter: blur(20px); }
+  .scroll-content { flex: 1; overflow-y: auto; }
 </style>
 </head>
 <body>
 
 <div id="gate" class="gate-screen">
-  <div style="text-align: center; margin-bottom: 20px;">
-    <h1 style="color:var(--neon); letter-spacing: 12px; margin:0; text-shadow: 0 0 20px var(--neon-dim);">TONI 2.0</h1>
-    <p style="font-size: 10px; opacity: 0.5; letter-spacing: 3px;">SENIOREN PRO EDITION v6.0</p>
+  <div style="text-align: center; margin-bottom: 25px;">
+    <h1 style="color:var(--neon); letter-spacing: 15px; margin:0; text-shadow: 0 0 30px var(--neon-dim);">TITAN PRO</h1>
+    <p style="font-size: 11px; opacity: 0.6; letter-spacing: 5px;">SENIOREN PERFORMANCE v7.0</p>
   </div>
-  <input type="password" id="pw" class="gate-input" placeholder="CODE">
-  <button id="gate-trigger" style="background:var(--neon); color:#000; padding:18px 70px; border:none; border-radius:12px; font-weight:bold; cursor:pointer; font-size:16px; box-shadow: 0 0 20px var(--neon-dim);">INITIALISIEREN</button>
-  <div style="margin-top: 30px; display: flex; gap: 20px; font-size: 10px; opacity: 0.4;">
+  <input type="password" id="pw" class="gate-input" placeholder="ACCESS CODE">
+  <button id="gate-trigger" style="background:var(--neon); color:#000; padding:20px 80px; border:none; border-radius:15px; font-weight:bold; cursor:pointer; font-size:18px; box-shadow: 0 0 25px var(--neon-dim); transition: 0.3s;">SYSTEM INITIALISIEREN</button>
+  <div style="margin-top: 40px; display: flex; gap: 30px; font-size: 11px; opacity: 0.3;">
     <span>ADMIN: 1234</span>
     <span>SPIELER: 0000</span>
   </div>
@@ -71,7 +76,7 @@
   
   <div class="left-nav">
     <div class="nav-item" id="btn-hub" title="Aktentasche">💼</div>
-    <div class="nav-item" id="btn-mic" title="Live-Talk">🎙️</div>
+    <div class="nav-item" id="btn-mic" title="Voice AI">🎙️</div>
     <div style="flex:1"></div>
     <div class="nav-item" id="btn-reset" style="color:var(--red); border-color:var(--red);" title="Reset">🔁</div>
   </div>
@@ -79,106 +84,93 @@
   <div class="center-arena">
     <div class="arena-header">
       <div style="display:flex; flex-direction:column;">
-        <strong id="display-club">ARENA</strong> 
-        <span id="display-role" style="opacity: 0.4; font-size: 9px;">[ STATUS: INITIALISIERUNG ]</span>
+        <strong id="display-club" style="font-size: 18px; letter-spacing: 2px;">VFL BAD HERSFELD</strong> 
+        <span id="display-role" style="opacity: 0.5; font-size: 10px;">[ AUTHENTICATED: COACH ]</span>
       </div>
       <div class="mode-switch">
         <button id="mode-match" class="mode-btn active">MATCH</button>
         <button id="mode-training" class="mode-btn">TRAINING</button>
       </div>
     </div>
-    
     <div id="board-wrap">
       <canvas id="main-canvas" width="1000" height="700"></canvas>
     </div>
   </div>
 
-  <div class="right-toni">
-    <div style="font-weight:bold; color:var(--neon); display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--glass); padding-bottom: 8px;">
-      <span style="font-size: 12px; letter-spacing: 1px;">TONI AI COMMAND</span>
-      <span id="ai-status" style="font-size: 9px; color: var(--neon);">● LIVE</span>
-    </div>
-    
-    <div class="chat-history" id="chat-box"></div>
-    
-    <div style="display:flex; gap:8px; background:rgba(0,0,0,0.3); padding:8px; border-radius:15px; border: 1px solid #333;">
-      <input type="text" id="user-cmd" placeholder="Problem beschreiben..." style="flex:1; background:transparent; border:none; color:#fff; outline:none; font-size: 14px;">
-      <button id="btn-send" style="background:none; border:none; color:var(--neon); cursor:pointer; font-size:18px;">➔</button>
+  <div class="right-toni" style="background:var(--glass); border-radius: 25px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column;">
+    <div style="font-weight:bold; color:var(--neon); border-bottom: 1px solid var(--neon-dim); padding-bottom: 10px; margin-bottom: 15px; font-size: 14px;">TONI AI MONITOR</div>
+    <div class="chat-history" id="chat-box" style="flex:1; overflow-y:auto; font-size:13px; margin-bottom:15px;"></div>
+    <div style="display:flex; gap:10px; background:rgba(0,0,0,0.5); padding:10px; border-radius:15px; border: 1px solid #333;">
+      <input type="text" id="user-cmd" placeholder="Taktische Analyse..." style="flex:1; background:transparent; border:none; color:#fff; outline:none;">
+      <button id="btn-send" style="background:none; border:none; color:var(--neon); font-size:20px;">➔</button>
     </div>
   </div>
 </div>
 
 <div id="hub-ov" class="overlay">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--neon-dim); padding-bottom:12px;">
-    <h2 id="hub-title" style="margin:0; color:var(--neon); letter-spacing:3px; font-size: 18px; text-transform:uppercase;">MANAGEMENT HUB</h2>
-    <span id="btn-close-hub" style="cursor:pointer; font-size: 35px; line-height: 0.5;">✕</span>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; border-bottom:1px solid var(--neon-dim); padding-bottom:15px;">
+    <h2 id="hub-title" style="margin:0; color:var(--neon); letter-spacing:5px; font-size: 20px;">MANAGEMENT HUB</h2>
+    <span id="btn-close-hub" style="cursor:pointer; font-size: 40px; line-height: 0.5;">✕</span>
   </div>
   
   <div class="scroll-content" id="hub-content">
     </div>
 
-  <div id="p-editor" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.98); z-index:2100; padding:25px; border-radius:25px;">
-    <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom: 1px solid #222; padding-bottom: 12px;">
-        <button class="edit-tab active" id="tab-id" style="background:transparent; border:none; color:var(--neon); cursor:pointer; font-weight:bold;">IDENTITÄT</button>
-        <button class="edit-tab" id="tab-lab" style="background:transparent; border:none; color:#555; cursor:pointer; font-weight:bold;">DIAGNOSTIK</button>
-    </div>
-    <div id="editor-fields" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+  <div id="p-editor" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.98); z-index:2100; padding:30px; border-radius:25px; overflow-y:auto;">
+    <h2 style="color:var(--neon); border-bottom:1px solid #333; padding-bottom:10px;">PRO-SPEILER EDITOR</h2>
+    <div id="editor-fields" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">
       </div>
-    <div style="display:flex; gap:12px; margin-top:30px;">
-      <button id="btn-save-data" style="flex:2; background:var(--neon); color:#000; font-weight:bold; padding:18px; border:none; border-radius:15px; cursor:pointer; text-transform: uppercase;">Daten synchronisieren</button>
-      <button id="btn-cancel-edit" style="flex:1; background:#222; color:#fff; padding:18px; border:none; border-radius:15px; cursor:pointer;">Abbrechen</button>
+    <div style="margin-top:40px; display:flex; gap:15px;">
+      <button id="btn-save-data" style="flex:2; background:var(--neon); color:#000; font-weight:bold; padding:20px; border:none; border-radius:15px; cursor:pointer; text-transform:uppercase;">Daten synchronisieren</button>
+      <button id="btn-cancel-edit" style="flex:1; background:#222; color:#fff; padding:20px; border:none; border-radius:15px; cursor:pointer;">Abbrechen</button>
     </div>
   </div>
 </div>
 <script>
 (function() {
-  // --- TITAN DATA CORE v6.0 ---
+  // --- TITAN DATA CORE v7.0 ---
   const canvas = document.getElementById('main-canvas');
   const ctx = canvas.getContext('2d');
   
-  let db = JSON.parse(localStorage.getItem('toni60_db')) || {
-    user: null,
-    role: null, // 'admin' oder 'player'
+  let db = JSON.parse(localStorage.getItem('titan70_db')) || {
     squad: [],
-    budget: 250000, // Fiktives Startbudget [Surprise Feature]
-    partners: [
-      { id: 1, name: "ToniTech Labs", type: "Performance", budget: "+50k", status: "Aktiv", logo: "🤖" },
-      { id: 2, name: "Zweipunktnull Physio", type: "Health", budget: "+30k", status: "Verhandlung", logo: "🏥" },
-      { id: 3, name: "Bad Hersfeld AI Arena", type: "Stadion", budget: "Exklusiv", status: "Aktiv", logo: "🏟️" }
-    ],
-    homework: [
-      { id: 1, title: "Adduktoren-Mobilität", type: "Video", link: "https://youtube.com/watch?v=Muster", target: "Alle" },
-      { id: 2, title: "Taktik-Laufweg 3-4-3", type: "Board", link: "board_anim_01", target: "Müller" }
-    ]
+    role: 'admin',
+    activeMode: 'match'
   };
 
-  // --- KADER-GENERIERUNG (PROFI-DIAGNOSTIK) ---
+  // --- KADER-INITIALISIERUNG MIT FIFA-ATTRIBUTEN ---
   if (db.squad.length === 0) {
     const names = ['Müller','Silva','Schmidt','Schneider','Fischer','Weber','Meyer','Wagner','Becker','Schulz','Hoffmann','Schäfer','Koch','Bauer','Richter','Wolf'];
-    const pos = ['ST','ST','IV','IV','RV','LV','ZM','ZM','LM','RM','IV','ZM','RV','LV','LM','ST'];
+    const positions = ['ST','ST','IV','IV','RV','LV','ZM','ZM','LM','RM','IV','ZM','RV','LV','LM','ST'];
     
     for (let i = 0; i < 16; i++) {
       db.squad.push({
         id: Date.now() + i,
         name: names[i],
-        rating: 84 + Math.floor(Math.random() * 8),
-        pos: pos[i],
+        num: 1 + i,
+        pos: positions[i],
+        rating: 82 + Math.floor(Math.random() * 12),
         status: i < 11 ? 'match' : (i < 14 ? 'training' : 'absent'),
         x: 75 + (i * 60), y: 635,
-        // INDIVIDUELLE BIA-WERTE [cite: 2026-02-07]
-        weight: names[i] === 'Müller' ? 81.2 : (names[i] === 'Silva' ? 76.5 : 79.0),
-        fat: names[i] === 'Müller' ? 10.1 : (names[i] === 'Silva' ? 11.2 : 12.5),
-        muscle: names[i] === 'Müller' ? 39.8 : (names[i] === 'Silva' ? 37.5 : 38.2),
-        hrv: names[i] === 'Müller' ? 52 : (names[i] === 'Silva' ? 68 : 58),
-        readiness: 85 + Math.floor(Math.random() * 15),
-        feedback: "Fit", // Schmerz-Meldung Platzhalter
-        homeworkDone: false
+        // FIFA-Attribute
+        pac: 70 + Math.floor(Math.random() * 25), 
+        sho: 65 + Math.floor(Math.random() * 30),
+        pas: 72 + Math.floor(Math.random() * 20),
+        dri: 75 + Math.floor(Math.random() * 20),
+        def: 50 + Math.floor(Math.random() * 40),
+        phy: 70 + Math.floor(Math.random() * 25),
+        // Bio-Labor Daten
+        hr: 60 + Math.floor(Math.random() * 15),
+        hrv: 50 + Math.floor(Math.random() * 25),
+        fat: 10 + (Math.random() * 5).toFixed(1),
+        muscle: 35 + (Math.random() * 10).toFixed(1),
+        readiness: 75 + Math.floor(Math.random() * 25)
       });
     }
     save();
   }
 
-  // --- EVENT-LISTENER INITIALISIERUNG ---
+  // --- EVENT BINDING (Sicherstellung der Funktion) ---
   window.onload = () => {
     document.getElementById('gate-trigger').onclick = unlock;
     document.getElementById('btn-hub').onclick = openHub;
@@ -187,210 +179,219 @@
     document.getElementById('mode-match').onclick = () => setMode('match');
     document.getElementById('mode-training').onclick = () => setMode('training');
     document.getElementById('btn-reset').onclick = systemReset;
-    document.getElementById('btn-cancel-edit').onclick = () => { document.getElementById('p-editor').style.display='none'; };
+    document.getElementById('btn-cancel-edit').onclick = () => { 
+        document.getElementById('p-editor').style.display='none'; 
+    };
   };
 
-  // --- LOGIN LOGIK (ADMIN VS SPIELER) ---
   function unlock() {
-    const code = document.getElementById('pw').value;
-    if (code === '1234') {
-      db.role = 'admin';
-      db.user = { name: "Chef-Coach" };
-    } else if (code === '0000') {
-      db.role = 'player';
-      db.user = { name: "Gast-Spieler", playerId: db.squad[0].id }; // Beispiel: Müller-Login
+    if (document.getElementById('pw').value === '1234') {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('main-app').style.display = 'grid';
+      renderArena();
+      toniSpeak("Titan Pro v7.0 online. Alle Systeme für Bad Hersfeld einsatzbereit.");
     } else {
-      alert("Ungültiger Code. Zugriff verweigert.");
-      return;
-    }
-    
-    document.getElementById('gate').style.display = 'none';
-    initApp();
-  }
-
-  function initApp() {
-    document.getElementById('main-app').style.display = 'grid';
-    document.getElementById('display-role').innerText = `[ RANG: ${db.role.toUpperCase()} | USER: ${db.user.name} ]`;
-    renderArena();
-    toniSpeak(`System v6.0 initialisiert. Zugriff als ${db.role} gewährt.`);
-  }
-
-  // --- UTILS ---
-  function save() { localStorage.setItem('toni60_db', JSON.stringify(db)); }
-  function systemReset() { if(confirm("Gesamtes System löschen?")) { localStorage.clear(); location.reload(); } }
-
-  function toniSpeak(t) {
-    const b = document.getElementById('chat-box');
-    b.innerHTML += `<div class="msg ai"><b>Toni:</b> ${t}</div>`;
-    b.scrollTop = b.scrollHeight;
-    if ('speechSynthesis' in window) {
-      const u = new SpeechSynthesisUtterance(t); u.lang = 'de-DE';
-      window.speechSynthesis.speak(u);
+      alert("ZUGRIFF VERWEIGERT.");
     }
   }
 
-  function sendCmd() {
-    const i = document.getElementById('user-cmd');
-    if (!i.value) return;
-    toniSpeak(`Verstanden. Befehl "${i.value}" wird verarbeitet.`);
-    i.value = "";
-  }
-  // --- HUB-STEUERUNG (AKTENTASCHE) ---
+  // --- HUB ROUTING ---
   function openHub() {
-    const content = document.getElementById('hub-content');
+    const c = document.getElementById('hub-content');
     document.getElementById('hub-ov').style.display = 'flex';
     document.getElementById('hub-title').innerText = "MANAGEMENT HUB";
-    content.className = "scroll-content folder-grid";
-    
-    // Die 5 Haupt-Ordner [cite: 2026-02-07]
-    content.innerHTML = `
-      <div class="folder-item" onclick="openSektor('kabine')">👕 <div>KABINE</div><small>Kader-Status</small></div>
-      <div class="folder-item" onclick="openSektor('analyse')">🧪 <div>ANALYSE</div><small>BIA-Zentrum</small></div>
-      <div class="folder-item" onclick="openSektor('leistungszentrum')">📝 <div>PERFORMANCE</div><small>Hausaufgaben</small></div>
-      <div class="folder-item" onclick="openSektor('zeitung')">📰 <div>ZEITUNG</div><small>Match-Magazin</small></div>
-      <div class="folder-item" onclick="openSektor('business')">🤝 <div>BUSINESS</div><small>Partner-Radar</small></div>
+    c.className = "scroll-content folder-grid";
+    c.innerHTML = `
+      <div class="folder-item" onclick="openSektor('kabine')">👕 <div>KABINE</div><small>FIFA Kader</small></div>
+      <div class="folder-item" onclick="openSektor('analyse')">🧪 <div>LABOR</div><small>Bio-Monitoring</small></div>
+      <div class="folder-item" onclick="openSektor('business')">🤝 <div>BUSINESS</div><small>Sponsoring</small></div>
+      <div class="folder-item" onclick="openSektor('zeitung')">📰 <div>MAGAZIN</div><small>Stadion-News</small></div>
     `;
   }
 
   window.openSektor = function(s) {
     const c = document.getElementById('hub-content');
-    c.className = "scroll-content";
     c.innerHTML = "";
-
     if (s === 'kabine') {
       c.className = "scroll-content fifa-grid";
       db.squad.forEach(p => {
         const light = p.status === 'match' ? 'status-match' : (p.status === 'training' ? 'status-training' : 'status-absent');
         c.innerHTML += `
           <div class="fifa-card" onclick="openEditor(${p.id})">
-            <div class="status-light ${light}" onclick="event.stopPropagation(); toggleStatus(${p.id})"></div>
-            <div style="font-size:32px; font-weight:bold;">${p.rating}</div>
-            <div style="text-align:center; font-size:45px; margin-top:15px;">👤</div>
-            <div style="text-align:center; font-weight:bold; margin-top:10px; font-size:13px; color:#000;">${p.name.toUpperCase()}</div>
-            <div style="font-size:9px; text-align:center; opacity:0.6; color:#000;">POS: ${p.pos}</div>
+            <div class="status-light ${light}"></div>
+            <div class="card-rating">${p.rating}</div>
+            <div class="card-pos">${p.pos}</div>
+            <div style="text-align:center; font-size:40px; margin:5px 0;">👤</div>
+            <div class="card-name">${p.name}</div>
+            <div class="card-stats">
+              <div class="stat-row"><span class="stat-val">${p.pac}</span><span>PAC</span></div>
+              <div class="stat-row"><span class="stat-val">${p.dri}</span><span>DRI</span></div>
+              <div class="stat-row"><span class="stat-val">${p.sho}</span><span>SHO</span></div>
+              <div class="stat-row"><span class="stat-val">${p.def}</span><span>DEF</span></div>
+              <div class="stat-row"><span class="stat-val">${p.pas}</span><span>PAS</span></div>
+              <div class="stat-row"><span class="stat-val">${p.phy}</span><span>PHY</span></div>
+            </div>
           </div>`;
       });
-    } 
+    } else if (s === 'analyse') {
+      c.className = "scroll-content lab-grid";
+      db.squad.forEach(p => {
+        c.innerHTML += `
+          <div class="lab-entry">
+            <div style="float:right; text-align:right;">
+              <span class="heart-icon">❤️</span><br>
+              <b style="font-size:20px; color:var(--neon);">${p.hr}</b> <small>BPM</small>
+            </div>
+            <strong style="font-size:16px; color:var(--neon);">${p.name} (#${p.num})</strong><br>
+            <small>${p.pos} | READINESS: ${p.readiness}%</small>
+            <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:12px; opacity:0.8;">
+              <div>HRV: <b>${p.hrv}ms</b></div><div>FAT: <b>${p.fat}%</b></div>
+              <div>MUSCLE: <b>${p.muscle}kg</b></div><div>STATUS: <b>STABIL</b></div>
+            </div>
+          </div>`;
+      });
+    }
+  };
+
+  function save() { localStorage.setItem('titan70_db', JSON.stringify(db)); }
+  function closeHub() { document.getElementById('hub-ov').style.display = 'none'; }
+  function systemReset() { if(confirm("System-Reset durchführen?")) { localStorage.clear(); location.reload(); } }
+  // --- PRO-EDITOR LOGIK (DATEN-INPUT) ---
+  let activePId = null;
+
+  window.openEditor = function(id) {
+    activePId = id;
+    const p = db.squad.find(x => x.id === id);
+    const fields = document.getElementById('editor-fields');
+    document.getElementById('p-editor').style.display = 'block';
     
-    else if (s === 'analyse') {
-      c.innerHTML = `<h3>ANALYSEZENTRUM: BIA-DIAGNOSTIK</h3>`;
-      // GASTZUGANG-FILTER: Spieler sehen nur sich selbst [cite: 2026-02-07]
-      const visiblePlayers = db.role === 'admin' ? db.squad : db.squad.filter(p => p.id === db.user.playerId);
+    // Generiere Input-Felder für alle Attribute [cite: 2026-02-09]
+    fields.innerHTML = `
+      <div style="grid-column: span 2; background:var(--neon-dim); padding:10px; border-radius:10px;">
+        <label>SPIELERNAME</label><br>
+        <input id="edit-name" value="${p.name}" style="width:100%; background:transparent; border:none; border-bottom:1px solid var(--neon); color:#fff; font-size:18px; font-weight:bold;">
+      </div>
+      <div><label>RATING</label><input type="number" id="edit-rat" value="${p.rating}"></div>
+      <div><label>POSITION</label><input type="text" id="edit-pos" value="${p.pos}"></div>
       
-      visiblePlayers.forEach(p => {
-        c.innerHTML += `
-          <div style="background:var(--neon-dim); padding:15px; border-radius:12px; border-left:4px solid var(--neon); margin-bottom:12px;">
-            <div style="float:right; text-align:right;"><span style="color:var(--neon); font-size:22px; font-weight:bold;">${p.readiness}%</span><br><small>READINESS</small></div>
-            <h4 style="margin:0;">${p.name}</h4>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:12px; margin-top:10px; opacity:0.8;">
-              <span>Fett: <b>${p.fat}%</b></span><span>Muskel: <b>${p.muscle}kg</b></span>
-              <span>HRV: <b>${p.hrv}ms</b></span><span>Puls: <b>${p.bpm}bpm</b></span>
-            </div>
-          </div>`;
-      });
-    }
+      <div style="grid-column: span 2; color:var(--neon); font-size:10px; margin-top:10px;">FIFA ATTRIBUTE</div>
+      <div><label>PAC (Tempo)</label><input type="number" id="edit-pac" value="${p.pac}"></div>
+      <div><label>DRI (Dribbling)</label><input type="number" id="edit-dri" value="${p.dri}"></div>
+      <div><label>SHO (Schuss)</label><input type="number" id="edit-sho" value="${p.sho}"></div>
+      <div><label>DEF (Defensive)</label><input type="number" id="edit-def" value="${p.def}"></div>
+      <div><label>PAS (Passen)</label><input type="number" id="edit-pas" value="${p.pas}"></div>
+      <div><label>PHY (Physis)</label><input type="number" id="edit-phy" value="${p.phy}"></div>
+      
+      <div style="grid-column: span 2; color:var(--neon); font-size:10px; margin-top:10px;">LABOR-WERTE (BIA)</div>
+      <div><label>HERZ (BPM)</label><input type="number" id="edit-hr" value="${p.hr}"></div>
+      <div><label>HRV (ms)</label><input type="number" id="edit-hrv" value="${p.hrv}"></div>
+    `;
+    
+    // Style Korrektur für alle Editor-Inputs
+    fields.querySelectorAll('input').forEach(i => {
+      i.style.cssText = "width:100%; background:#111; border:1px solid #333; color:#fff; padding:8px; border-radius:5px;";
+    });
+  };
 
-    else if (s === 'leistungszentrum') {
-      c.innerHTML = `<h3>TRAININGS-HAUSAUFGABEN [cite: 2026-02-07]</h3>`;
-      db.homework.forEach(h => {
-        const isForMe = h.target === 'Alle' || (db.role === 'player' && db.squad.find(x => x.id === db.user.playerId)?.name === h.target);
-        if (db.role === 'admin' || isForMe) {
-          c.innerHTML += `
-            <div style="background:#111; padding:20px; border-radius:15px; border: 1px solid #333; margin-bottom:15px;">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div>
-                  <strong style="color:var(--neon);">${h.title}</strong><br>
-                  <small>Typ: ${h.type} | Ziel: ${h.target}</small>
-                </div>
-                <button onclick="playExercise('${h.link}')" style="background:var(--neon); border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">START</button>
-              </div>
-              ${db.role === 'player' ? `
-                <div style="margin-top:15px; border-top:1px solid #222; padding-top:10px; display:flex; gap:10px;">
-                  <button onclick="sendFeedback('Fit')" style="font-size:10px; background:#222; border:1px solid var(--neon); color:#fff; padding:5px; border-radius:5px;">Fit 👍</button>
-                  <button onclick="sendFeedback('Schmerz')" style="font-size:10px; background:#222; border:1px solid var(--red); color:#fff; padding:5px; border-radius:5px;">Schmerz ⚠️</button>
-                </div>` : ''}
-            </div>`;
-        }
-      });
-    }
+  document.getElementById('btn-save-data').onclick = function() {
+    const p = db.squad.find(x => x.id === activePId);
+    // Daten aus Inputs in DB übertragen
+    p.name = document.getElementById('edit-name').value;
+    p.rating = parseInt(document.getElementById('edit-rat').value);
+    p.pos = document.getElementById('edit-pos').value.toUpperCase();
+    p.pac = parseInt(document.getElementById('edit-pac').value);
+    p.sho = parseInt(document.getElementById('edit-sho').value);
+    p.pas = parseInt(document.getElementById('edit-pas').value);
+    p.dri = parseInt(document.getElementById('edit-dri').value);
+    p.def = parseInt(document.getElementById('edit-def').value);
+    p.phy = parseInt(document.getElementById('edit-phy').value);
+    p.hr = parseInt(document.getElementById('edit-hr').value);
+    p.hrv = parseInt(document.getElementById('edit-hrv').value);
+    
+    save();
+    document.getElementById('p-editor').style.display = 'none';
+    openSektor('kabine'); // Refresh Kabine
+    renderArena(); // Refresh Spielfeld
+    toniSpeak(`Daten für ${p.name} erfolgreich synchronisiert.`);
+  };
 
-    else if (s === 'zeitung') {
+  // --- WEITERE SEKTOREN ---
+  let magPage = 1;
+  window.openSektor = function(s) {
+    const c = document.getElementById('hub-content');
+    c.innerHTML = "";
+    if (s === 'kabine') {
+      // (Bisherige Kabinen-Logik aus Block 3 wird hier fortgesetzt)
+      renderKabine(); 
+    } else if (s === 'analyse') {
+      renderLabor();
+    } else if (s === 'business') {
+      c.className = "scroll-content";
+      c.innerHTML = `<h3>SPONSORING RADAR: BAD HERSFELD</h3>
+        <div style="background:var(--neon-dim); padding:15px; border-radius:15px; margin-bottom:20px; border:1px solid var(--neon);">
+          <small>VEREINS-BUDGET (FIKTIV):</small><br><strong style="font-size:24px;">250.000 €</strong>
+        </div>
+        <div style="display:grid; gap:10px;">
+          <div class="lab-entry" style="display:flex; align-items:center; gap:15px;">
+            <div style="font-size:30px;">🤖</div>
+            <div><b>ToniTech Labs</b><br><small>Status: Hauptsponsor | +50k</small></div>
+          </div>
+          <div class="lab-entry" style="display:flex; align-items:center; gap:15px;">
+            <div style="font-size:30px;">🏥</div>
+            <div><b>Zweipunktnull Physio</b><br><small>Status: Gesundheitspartner</small></div>
+          </div>
+        </div>`;
+    } else if (s === 'zeitung') {
       renderMag();
-    }
-
-    else if (s === 'business') {
-      c.innerHTML = `<h3>BUSINESS-RADAR & PARTNER [cite: 2026-02-07]</h3>
-                     <div style="background:var(--neon-dim); padding:10px; border-radius:10px; margin-bottom:20px;">
-                       <small>VEREINSBUDGET:</small><br><strong style="font-size:20px;">${db.budget.toLocaleString()} €</strong>
-                     </div>`;
-      db.partners.forEach(p => {
-        c.innerHTML += `
-          <div style="display:flex; align-items:center; gap:15px; background:#111; padding:15px; border-radius:12px; margin-bottom:10px; border: 1px solid #222;">
-            <div style="font-size:30px; background:#000; width:60px; height:60px; display:flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid var(--neon);">${p.logo}</div>
-            <div style="flex:1;">
-              <div style="font-weight:bold;">${p.name}</div>
-              <small style="opacity:0.5;">${p.type} | Status: ${p.status}</small>
-            </div>
-            <div style="color:var(--neon); font-weight:bold;">${p.budget}</div>
-          </div>`;
-      });
-      c.innerHTML += `<p style="font-size:10px; opacity:0.4; text-align:center;">Musterlogos powered by TONI 2.0 AI. Austauschbar via Manager-Upload.</p>`;
     }
   };
 
   function renderMag() {
     const c = document.getElementById('hub-content');
     const pgs = [
-      `<h1>MATCHDAY NEWS</h1><p>Willkommen zur Senioren Pro v6.0 Edition. Heute im Fokus: Die neue BIA-gestützte Taktikanalyse von Coach ${db.user.name}.</p><div style="text-align:center; font-size:60px;">⚽</div>`,
-      `<h1>TAKTIK-BOARD</h1><p>Warum das 3-4-3 gegen das 4-4-2 von Toni heute den Ausschlag geben wird. Die Analyse im Leistungszentrum zeigt klare Vorteile im Umschaltspiel.</p>`,
-      `<h1>BIO-REPORT</h1><p>Die Mannschaft ist bereit. Müller und Silva führen die Fitness-Werte an. Durchschnittliche Team-Readiness: 92%.</p>`,
-      `<h1>UNSERE PARTNER</h1><p>Ein großes Dankeschön an ToniTech Labs und alle lokalen Sponsoren aus Bad Hersfeld für die Unterstützung der neuen AI-Arena.</p>`
+      "<h1>STADIONZEITUNG</h1><p>Willkommen zur Titan Pro v7.0 Edition. Heute im Fokus: Die neue BIA-gestützte Taktikanalyse.</p>",
+      "<h1>TAKTIK-ECKE</h1><p>Warum das 3-4-3 heute den Ausschlag gibt. Analyse powered by TONI 2.0.</p>",
+      "<h1>BIO-REPORT</h1><p>Team-Fitness auf Rekordniveau. Durchschnittlicher Puls: 62 BPM.</p>",
+      "<h1>PARTNER</h1><p>Dank an unsere Sponsoren für die Unterstützung der neuen AI-Arena.</p>"
     ];
     c.innerHTML = `
-      <div style="background:#fff; color:#000; padding:30px; border-radius:15px; min-height:450px; position:relative; font-family:serif;">
-        <div style="border:2px solid #000; padding:15px; height:100%;">
-          ${pgs[magPage-1]}
-        </div>
-        <div style="margin-top:30px; display:flex; justify-content:space-between; align-items:center;">
-          <button class="mode-btn active" style="background:#000; color:#fff;" onclick="if(magPage>1){magPage--; renderMag();}">ZURÜCK</button>
-          <span style="font-weight:bold; color:#000;">SEITE ${magPage} / 4</span>
-          <button class="mode-btn active" style="background:#000; color:#fff;" onclick="if(magPage<4){magPage++; renderMag();}">WEITER</button>
+      <div style="background:#fff; color:#000; padding:25px; border-radius:15px; min-height:400px; font-family:serif;">
+        ${pgs[magPage-1]}
+        <div style="margin-top:40px; display:flex; justify-content:space-between;">
+          <button onclick="if(magPage>1){magPage--; renderMag();}">ZURÜCK</button>
+          <b>${magPage} / 4</b>
+          <button onclick="if(magPage<4){magPage++; renderMag();}">WEITER</button>
         </div>
       </div>`;
   }
 
-  function playExercise(link) {
-    if (link === 'board_anim_01') {
-      closeHub();
-      setMode('training');
-      toniSpeak("Visualisiere Taktik-Laufweg auf dem Board. Bitte achte auf die markierten Zonen.");
-    } else {
-      window.open(link, '_blank');
-    }
-  }
+  // Hilfsfunktionen für Render-Refresh
+  function renderKabine() { openSektor('kabine'); } 
+  function renderLabor() { openSektor('analyse'); }
 
-  window.sendFeedback = function(f) {
-    toniSpeak(`Feedback empfangen: Der Spieler meldet "${f}". Daten wurden im Coach-Dashboard synchronisiert.`);
+  // Status-Ampel Logik [cite: 2026-02-09]
+  window.toggleStatus = function(id) {
+    const p = db.squad.find(x => x.id === id);
+    p.status = p.status === 'match' ? 'training' : (p.status === 'training' ? 'absent' : 'match');
+    save(); openSektor('kabine'); renderArena();
   };
-
-  function closeHub() { document.getElementById('hub-ov').style.display = 'none'; }
-  // --- ARENA ENGINE: PITCH & TACTICS [cite: 2026-02-09] ---
+  // --- ARENA ENGINE: GRAFIK & ANIMATION [cite: 2026-02-09] ---
   function drawPitch() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#011801'; 
+    ctx.fillStyle = '#011a01'; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     ctx.strokeStyle = 'rgba(57, 255, 20, 0.4)';
     ctx.lineWidth = 3;
 
-    // Spielfeld-Markierungen
+    // Spielfeld-Linien
     ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 180);
     ctx.beginPath(); 
     ctx.moveTo(canvas.width / 2, 40); 
     ctx.lineTo(canvas.width / 2, canvas.height - 140); 
     ctx.stroke();
     
-    // Mittelkreis
+    // Mittelkreis & Anstoßpunkt
     ctx.beginPath(); 
     ctx.arc(canvas.width / 2, (canvas.height - 100) / 2, 85, 0, Math.PI * 2); 
     ctx.stroke();
@@ -399,43 +400,17 @@
     ctx.strokeRect(40, canvas.height / 2 - 160, 130, 320); 
     ctx.strokeRect(canvas.width - 170, canvas.height / 2 - 160, 130, 320);
     
-    // Ersatzbank-Bereich [cite: 2026-02-09]
-    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+    // ERSATZBANK BEREICH [cite: 2026-02-09]
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
     ctx.fillRect(0, canvas.height - 135, canvas.width, 135);
     ctx.strokeStyle = 'var(--neon)';
     ctx.setLineDash([10, 5]);
-    ctx.strokeRect(15, canvas.height - 125, canvas.width - 30, 115);
+    ctx.strokeRect(15, canvas.height - 128, canvas.width - 30, 120);
     ctx.setLineDash([]);
-  }
-
-  // Visualisierung von Laufwegen (Pfeile) [cite: 2026-02-07]
-  function drawArrow(fromX, fromY, toX, toY, color) {
-    const headlen = 15;
-    const angle = Math.atan2(toY - fromY, toX - fromX);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(fromX, fromY);
-    ctx.lineTo(toX, toY);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(toX, toY);
-    ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
-    ctx.moveTo(toX, toY);
-    ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
-    ctx.stroke();
   }
 
   function renderArena() {
     drawPitch();
-    
-    // Im Trainings-Modus: Beispielhafte Laufweg-Pfeile zeichnen
-    const mode = document.getElementById('mode-training').classList.contains('active');
-    if (mode) {
-      drawArrow(700, 350, 850, 200, 'rgba(255, 255, 0, 0.5)'); // Stürmer-Lauf
-      drawArrow(500, 350, 680, 350, 'rgba(57, 255, 20, 0.5)'); // Pass-Weg
-    }
-
     db.squad.forEach(p => {
       if (p.status === 'absent') return;
       if (p.y < canvas.height - 135) {
@@ -446,100 +421,85 @@
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#000'; ctx.font = 'bold 14px Arial'; ctx.textAlign = 'center';
         ctx.fillText(p.name[0], p.x, p.y + 6);
-        ctx.fillStyle = '#fff'; ctx.font = '11px Arial';
-        ctx.fillText(p.name, p.x, p.y + 45);
-        
-        // Anzeige bei Schmerz-Feedback [cite: 2026-02-07]
-        if (p.feedback === 'Schmerz') {
-            ctx.fillStyle = 'red'; ctx.font = 'bold 16px Arial';
-            ctx.fillText('⚠️', p.x + 25, p.y - 15);
-        }
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px Arial';
+        ctx.fillText(p.name.toUpperCase(), p.x, p.y + 45);
       } else {
-        // FIFA-Karten auf der Bank
-        ctx.fillStyle = '#bf953f'; ctx.fillRect(p.x - 24, p.y - 32, 48, 64);
-        ctx.fillStyle = '#000'; ctx.font = 'bold 9px Arial'; ctx.textAlign = 'center';
-        ctx.fillText(p.name, p.x, p.y + 24);
-        ctx.font = 'bold 13px Arial'; ctx.fillText(p.rating, p.x - 12, p.y - 16);
+        // FIFA-Miniatur auf der Bank
+        ctx.fillStyle = '#bf953f'; ctx.fillRect(p.x - 22, p.y - 30, 44, 60);
+        ctx.fillStyle = '#000'; ctx.font = 'bold 8px Arial'; ctx.textAlign = 'center';
+        ctx.fillText(p.name, p.x, p.y + 22);
+        ctx.font = 'bold 12px Arial'; ctx.fillText(p.rating, p.x - 12, p.y - 15);
       }
     });
   }
 
-  // --- TAKTIK-LOGIK: 4-4-2 VS 3-4-3 [cite: 2026-02-07] ---
+  // --- TAKTIK-LOGIK: 3-4-3 (TRAINER) VS 4-4-2 (TONI) [cite: 2026-02-07] ---
   function setMode(m) {
+    db.activeMode = m;
     document.getElementById('mode-match').classList.toggle('active', m === 'match');
     document.getElementById('mode-training').classList.toggle('active', m === 'training');
     
-    const activeOnes = db.squad.filter(p => p.status === 'match');
+    const activePlayers = db.squad.filter(p => p.status === 'match');
     
     if (m === 'match') {
-      toniSpeak("Match-Analyse: Toni 4-4-2 vs. Coach 3-4-3 aktiv.");
-      const formation = [
+      toniSpeak("Taktik-Check: Trainer-Mannschaft rückt ins 3-4-3 vor.");
+      const formation343 = [
         {x:120, y:350}, // TW
         {x:280, y:150}, {x:280, y:350}, {x:280, y:550}, // 3er Abwehr
         {x:500, y:80}, {x:500, y:260}, {x:500, y:440}, {x:500, y:620}, // 4er Mittelfeld
         {x:780, y:150}, {x:780, y:350}, {x:780, y:550} // 3er Sturm
       ];
-      activeOnes.forEach((p, i) => { if (formation[i]) { p.x = formation[i].x; p.y = formation[i].y; } });
+      activePlayers.forEach((p, i) => { if (formation343[i]) { p.x = formation343[i].x; p.y = formation343[i].y; } });
     } else {
-      toniSpeak("Trainings-Modus: Laufwege im Leistungszentrum visualisiert.");
+      toniSpeak("Trainings-Modus: Alle Spieler rücken auf die Bank aus.");
       db.squad.forEach((p, i) => { p.x = 75 + (i * 60); p.y = 635; });
     }
     renderArena();
   }
 
-  // --- EDITOR-LOGIK ---
-  window.openEditor = function(id) {
-    if (db.role !== 'admin') return; // GASTZUGANG-SCHUTZ
-    activePId = id;
+  // --- BIO-LABOR: LIVE MESSUNG SIMULATION [Surprise Feature] ---
+  window.startBiaScan = function(id) {
     const p = db.squad.find(x => x.id === id);
-    document.getElementById('p-editor').style.display = 'block';
-    setEditTab('id');
-  };
-
-  document.getElementById('btn-save-data').onclick = function() {
-    const p = db.squad.find(x => x.id === activePId);
-    const n = document.getElementById('edit-name');
-    if (n) p.name = n.value;
-    save();
-    document.getElementById('p-editor').style.display = 'none';
-    openSektor('kabine'); renderArena();
-    toniSpeak("Daten erfolgreich in der Cloud synchronisiert.");
-  };
-
-  window.toggleStatus = function(id) {
-    if (db.role !== 'admin') return;
-    const p = db.squad.find(x => x.id === id);
-    p.status = p.status === 'match' ? 'training' : (p.status === 'training' ? 'absent' : 'match');
-    save(); openSektor('kabine'); renderArena();
+    toniSpeak(`Starte Live-BIA-Messung für ${p.name}... Bitte stillhalten.`);
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 20;
+      if (progress > 100) {
+        clearInterval(interval);
+        p.readiness = 80 + Math.floor(Math.random() * 20);
+        save(); openSektor('analyse');
+        toniSpeak(`Messung abgeschlossen. Readiness bei ${p.readiness}%.`);
+      }
+    }, 400);
   };
 
   // --- TOUCH & DRAG ENGINE (IPHONE OPTIMIZED) [cite: 2026-02-09] ---
-  let dragMode = false; let target = null;
-  const getXY = (e) => {
-    const r = canvas.getBoundingClientRect();
-    const cx = e.touches ? e.touches[0].clientX : e.clientX;
-    const cy = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: (cx - r.left) * (canvas.width / r.width), y: (cy - r.top) * (canvas.height / r.height) };
+  let dragMode = false; let dragTarget = null;
+  const getMousePos = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
   };
 
   canvas.onmousedown = canvas.ontouchstart = (e) => {
-    const p = getXY(e);
-    target = db.squad.find(s => Math.hypot(s.x - p.x, s.y - p.y) < 35);
-    if (target) dragMode = true;
+    const p = getMousePos(e);
+    dragTarget = db.squad.find(s => Math.hypot(s.x - p.x, s.y - p.y) < 35);
+    if (dragTarget) dragMode = true;
   };
 
   canvas.onmousemove = canvas.ontouchmove = (e) => {
-    if (dragMode && target) {
-      const p = getXY(e);
-      target.x = p.x; target.y = p.y;
+    if (dragMode && dragTarget) {
+      const p = getMousePos(e);
+      dragTarget.x = p.x; dragTarget.y = p.y;
       renderArena();
       e.preventDefault();
     }
   };
 
-  window.onmouseup = window.ontouchend = () => { dragMode = false; target = null; save(); };
+  window.onmouseup = window.ontouchend = () => { dragMode = false; dragTarget = null; save(); };
 
-  // --- INITIAL RENDERING ---
+  // --- INITIAL START ---
   setTimeout(renderArena, 500);
 
 })();
