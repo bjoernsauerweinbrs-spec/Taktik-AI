@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
-<title>TONI 2.0 | Master Build v5.5</title>
+<title>TONI 2.0 | Senior Pro v5.6</title>
 <style>
   :root {
     --bg: #010401; --neon: #39FF14; --neon-dim: rgba(57, 255, 20, 0.15);
@@ -11,135 +11,152 @@
     --gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: var(--bg); color: #fff; font-family: sans-serif; overflow-x: hidden; }
+  body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: var(--bg); color: #fff; font-family: sans-serif; overflow: hidden; }
 
-  /* RESPONSIVE GRID */
+  /* RESPONSIVE LAYOUT */
   .app-container { display: grid; grid-template-columns: 80px 1fr 380px; height: 100vh; padding: 10px; gap: 10px; }
   @media (max-width: 950px) {
-    .app-container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr 300px; height: auto; min-height: 100vh; }
-    .left-nav { flex-direction: row !important; height: 60px; width: 100%; padding: 0 15px !important; justify-content: space-around !important; order: 1; }
+    .app-container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr 280px; height: auto; min-height: 100vh; }
+    .left-nav { flex-direction: row !important; height: 60px; width: 100%; padding: 0 10px !important; justify-content: space-around !important; order: 1; border-radius: 12px !important; }
     .center-arena { order: 2; min-height: 480px !important; }
-    .right-toni { order: 3; min-height: 350px; }
-    .overlay { inset: 5px !important; width: auto !important; padding: 15px !important; }
+    .right-toni { order: 3; min-height: 320px; }
+    .overlay { inset: 8px !important; width: auto !important; padding: 15px !important; border-radius: 15px !important; }
   }
 
-  .left-nav { background: var(--glass); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; padding: 25px 0; gap: 20px; }
-  .nav-item { width: 50px; height: 50px; border-radius: 14px; border: 1px solid var(--neon); color: var(--neon); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; }
+  .left-nav { background: var(--glass); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 15px; }
+  .nav-item { width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid var(--neon); color: var(--neon); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; }
 
-  .center-arena { background: #000; border-radius: 25px; border: 1px solid var(--neon-dim); display: flex; flex-direction: column; padding: 12px; position: relative; overflow: hidden; }
-  .arena-header { display: flex; justify-content: space-between; align-items: center; color: var(--neon); font-size: 11px; margin-bottom: 8px; }
-  .mode-switch { display: flex; background: #111; border-radius: 8px; padding: 2px; border: 1px solid #333; }
-  .mode-btn { background: transparent; border: none; color: #555; padding: 6px 14px; cursor: pointer; border-radius: 6px; font-size: 10px; font-weight: bold; }
+  .center-arena { background: #000; border-radius: 20px; border: 1px solid var(--neon-dim); display: flex; flex-direction: column; padding: 10px; position: relative; overflow: hidden; }
+  .arena-header { display: flex; justify-content: space-between; align-items: center; color: var(--neon); font-size: 10px; margin-bottom: 5px; }
+  .mode-switch { display: flex; background: #111; border-radius: 8px; padding: 2px; }
+  .mode-btn { background: transparent; border: none; color: #555; padding: 5px 12px; cursor: pointer; border-radius: 6px; font-size: 9px; font-weight: bold; }
   .mode-btn.active { background: var(--neon); color: #000; }
-  #board-wrap { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
-  canvas { background: #011201; border-radius: 12px; max-width: 100%; height: auto; display: block; }
-
-  .right-toni { background: var(--glass); border-radius: 25px; padding: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(255,255,255,0.05); }
-  .chat-history { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-  .msg { padding: 12px; border-radius: 15px; font-size: 13px; line-height: 1.4; max-width: 90%; background: var(--neon-dim); border-left: 3px solid var(--neon); }
-
-  .overlay { position: fixed; top: 25px; left: 100px; right: 410px; bottom: 25px; background: rgba(0, 5, 0, 0.99); border: 2px solid var(--neon); border-radius: 25px; z-index: 1000; display: none; flex-direction: column; padding: 25px; backdrop-filter: blur(40px); }
-  .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-  .folder-item { cursor: pointer; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.03); border: 1px solid #333; text-align: center; }
-  .fifa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-  .fifa-card { width: 150px; height: 210px; background: var(--gold); border-radius: 12px; color: #000; position: relative; padding: 10px; font-family: 'Arial Black', sans-serif; box-shadow: 0 8px 15px rgba(0,0,0,0.5); cursor: pointer; }
-  .status-light { position: absolute; top: 10px; right: 10px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #000; z-index: 100; }
   
-  .gate-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
-  .gate-input { background: #000; border: 2px solid var(--neon); color: var(--neon); padding: 15px; border-radius: 12px; text-align: center; font-size: 26px; width: 300px; }
+  #board-wrap { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
+  canvas { background: #011201; border-radius: 10px; max-width: 100%; height: auto; display: block; box-shadow: 0 0 20px #000; }
+
+  .right-toni { background: var(--glass); border-radius: 20px; padding: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(255,255,255,0.05); }
+  .chat-history { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+  .msg { padding: 10px; border-radius: 12px; background: var(--neon-dim); border-left: 3px solid var(--neon); }
+
+  /* HUB & CONTENT */
+  .overlay { position: fixed; top: 20px; left: 100px; right: 410px; bottom: 20px; background: rgba(0, 0, 0, 0.98); border: 2px solid var(--neon); border-radius: 20px; z-index: 2000; display: none; flex-direction: column; padding: 20px; backdrop-filter: blur(30px); }
+  .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+  .folder-item { cursor: pointer; padding: 15px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid #333; text-align: center; transition: 0.2s; }
+  .folder-item:hover { border-color: var(--neon); background: var(--neon-dim); }
+  
+  .fifa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .fifa-card { width: 140px; height: 200px; background: var(--gold); border-radius: 10px; color: #000; position: relative; padding: 8px; font-family: sans-serif; cursor: pointer; }
+  .status-light { position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #000; }
+
+  .gate-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 15px; }
+  .gate-input { background: #000; border: 2px solid var(--neon); color: var(--neon); padding: 15px; border-radius: 10px; text-align: center; font-size: 24px; width: 280px; }
+  
+  .lab-card { background: #111; padding: 15px; border-radius: 12px; border-left: 4px solid var(--neon); margin-bottom: 10px; }
 </style>
 </head>
 <body>
 
 <div id="gate" class="gate-screen">
-  <h1 style="color:var(--neon); letter-spacing: 10px; margin:0;">TONI 2.0</h1>
-  <p style="font-size: 10px; opacity: 0.5;">MASTER BUILD v5.5 | SENIOREN PRO</p>
-  <input type="password" id="pw" class="gate-input" placeholder="••••">
-  <button onclick="unlock()" style="background:var(--neon); color:#000; padding:18px 70px; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">SYSTEM STARTEN</button>
+  <h1 style="color:var(--neon); letter-spacing: 8px; margin:0;">TONI 2.0</h1>
+  <p style="font-size: 10px; opacity: 0.6;">SENIOR PRO v5.6 | MASTER BUILD</p>
+  <input type="password" id="pw" class="gate-input" placeholder="PASSWORT">
+  <button id="login-btn" style="background:var(--neon); color:#000; padding:15px 60px; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-size:16px;">ZUGRIFF BESTÄTIGEN</button>
 </div>
 
 <div class="app-container" id="main-app" style="display:none">
   <div class="left-nav">
-    <div class="nav-item" onclick="openBriefcase()">💼</div>
-    <div class="nav-item" onclick="toniSpeak('System bereit. Ich höre zu.')">🎙️</div>
+    <div class="nav-item" id="nav-briefcase">💼</div>
+    <div class="nav-item" onclick="toniSpeak('Live-Analyse aktiv. Was gibt es zu tun?')">🎙️</div>
     <div style="flex:1"></div>
     <div class="nav-item" onclick="systemReset()" style="color:var(--red); border-color:var(--red);">🔁</div>
   </div>
 
   <div class="center-arena">
     <div class="arena-header">
-      <strong id="club-display">ARENA</strong>
+      <strong id="club-display">SENIOREN ARENA</strong>
       <div class="mode-switch">
-        <button id="mode-match" class="mode-btn active" onclick="setMode('match')">MATCH</button>
-        <button id="mode-training" class="mode-btn" onclick="setMode('training')">TRAINING</button>
+        <button id="mode-match" class="mode-btn active">MATCH</button>
+        <button id="mode-training" class="mode-btn">TRAINING</button>
       </div>
     </div>
     <div id="board-wrap"><canvas id="main-canvas" width="1000" height="700"></canvas></div>
   </div>
 
   <div class="right-toni">
-    <div style="font-weight:bold; color:var(--neon); border-bottom: 1px solid var(--glass); padding-bottom: 8px;">TONI AI COMMAND</div>
+    <div style="font-weight:bold; color:var(--neon); border-bottom: 1px solid var(--glass); padding-bottom: 5px; font-size: 12px;">COMMAND CENTER</div>
     <div class="chat-history" id="chat-box"></div>
-    <div style="display:flex; gap:8px; background:rgba(0,0,0,0.3); padding:6px; border-radius:15px; border: 1px solid #333;">
-      <input type="text" id="user-cmd" placeholder="Taktik..." style="flex:1; background:transparent; border:none; color:#fff; outline:none;" onkeypress="if(event.key==='Enter') sendCmd()">
-      <button onclick="sendCmd()" style="background:none; border:none; color:var(--neon); font-size:18px;">➔</button>
+    <div style="display:flex; gap:5px; background:rgba(0,0,0,0.3); padding:5px; border-radius:12px; border: 1px solid #444;">
+      <input type="text" id="user-cmd" placeholder="Befehl..." style="flex:1; background:transparent; border:none; color:#fff; outline:none; font-size: 13px;">
+      <button id="send-btn" style="background:none; border:none; color:var(--neon); font-size:18px; cursor:pointer;">➔</button>
     </div>
   </div>
 </div>
 
 <div id="hub-ov" class="overlay">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--neon-dim); padding-bottom:12px;">
-    <h2 id="hub-title" style="margin:0; color:var(--neon); font-size: 18px;">MANAGEMENT HUB</h2>
-    <span onclick="closeHub()" style="cursor:pointer; font-size: 30px;">✕</span>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid var(--neon-dim); padding-bottom:10px;">
+    <h2 id="hub-title" style="margin:0; color:var(--neon); font-size: 16px;">MANAGEMENT HUB</h2>
+    <span id="close-hub" style="cursor:pointer; font-size: 28px;">✕</span>
   </div>
   <div class="scroll-content" id="hub-content"></div>
 </div>
 <script>
-  // --- MASTER DATA CORE v5.5 ---
+(function() {
+  // --- TITAN CORE v5.6: SENIOR PRO ENGINE ---
   const canvas = document.getElementById('main-canvas');
   const ctx = canvas.getContext('2d');
   
-  let user = JSON.parse(localStorage.getItem('toni55_master_user')) || null;
-  let squad = JSON.parse(localStorage.getItem('toni55_master_squad')) || [];
-  let currentMode = 'match'; 
+  let user = JSON.parse(localStorage.getItem('toni56_pro_user')) || null;
+  let squad = JSON.parse(localStorage.getItem('toni56_pro_squad')) || [];
   let magPage = 1;
   let activePId = null;
 
-  // --- 16 PROFI-SPIELER (BIA & RECOGNIZABILITY) [cite: 2026-02-07, 2026-02-09] ---
+  // --- INITIALISIERUNG DES 16er KADERS ---
   if (squad.length === 0) {
     const names = ['Müller','Silva','Schmidt','Schneider','Fischer','Weber','Meyer','Wagner','Becker','Schulz','Hoffmann','Schäfer','Koch','Bauer','Richter','Wolf'];
-    const pos = ['ST','ST','IV','IV','RV','LV','ZM','ZM','LM','RM','IV','ZM','RV','LV','LM','ST'];
+    const positions = ['ST','ST','IV','IV','RV','LV','ZM','ZM','LM','RM','IV','ZM','RV','LV','LM','ST'];
+    
     for (let i = 0; i < 16; i++) {
       squad.push({
         id: Date.now() + i,
         name: names[i],
-        rating: 83 + Math.floor(Math.random() * 7),
-        pos: pos[i],
+        rating: 84 + Math.floor(Math.random() * 6),
+        pos: positions[i],
         status: i < 11 ? 'match' : (i < 14 ? 'training' : 'absent'),
         x: 75 + (i * 60), y: 635,
-        // ANALYSEZENTRUM (BIA DATEN) [cite: 2026-02-07]
-        weight: 78.5, fat: 11.2, muscle: 39.0, bone: 3.8, water: 62.0, visceral: 4,
-        bpm: 62, hrv: 58, sleep: 85
+        // ANALYSEZENTRUM: TIEFE BIA-WERTE
+        weight: 79.2, fat: 10.8, muscle: 39.5, bone: 3.8, water: 62.5,
+        bpm: 60, hrv: 62, sleep: 86
       });
     }
     saveSquad();
   }
 
-  // --- AUTH & SETUP ---
+  // --- EVENT BINDING (VERHINDERT DAS FESTSTECKEN) ---
+  document.getElementById('login-btn').onclick = unlock;
+  document.getElementById('nav-briefcase').onclick = openBriefcase;
+  document.getElementById('close-hub').onclick = closeHub;
+  document.getElementById('send-btn').onclick = sendCmd;
+  document.getElementById('mode-match').onclick = () => setMode('match');
+  document.getElementById('mode-training').onclick = () => setMode('training');
+
   function unlock() {
-    if (document.getElementById('pw').value === '1234') {
+    const pw = document.getElementById('pw').value;
+    if (pw === '1234') {
       document.getElementById('gate').style.display = 'none';
       if (!user) startOnboarding(); else initApp();
-    } else alert("Zugriff verweigert.");
+    } else {
+      alert("ZUGRIFF VERWEIGERT.");
+    }
   }
 
   function startOnboarding() {
     user = { 
-      coach: prompt("Coach Name?") || "Coach", 
-      club: prompt("Vereinsname?") || "Elite FC", 
-      color: prompt("Farbe (z.B. #39FF14)?") || "#39FF14" 
+      coach: prompt("Name des Coaches?") || "Coach", 
+      club: prompt("Vereinsname?") || "Elite Senioren", 
+      color: prompt("Vereinsfarbe (z.B. #39FF14)?") || "#39FF14" 
     };
-    localStorage.setItem('toni55_master_user', JSON.stringify(user));
+    localStorage.setItem('toni56_pro_user', JSON.stringify(user));
     initApp();
   }
 
@@ -148,10 +165,10 @@
     document.getElementById('club-display').innerText = user.club.toUpperCase();
     document.documentElement.style.setProperty('--club-color', user.color);
     renderArena();
-    toniSpeak(`System v5.5 online. Willkommen, Coach ${user.coach}.`);
+    toniSpeak(`System v5.6 aktiv. Willkommen zurück, Coach ${user.coach}.`);
   }
 
-  // --- ARENA LOGIK (4-4-2 VS 3-4-3) [cite: 2026-02-07] ---
+  // --- ARENA ENGINE & TAKTIK (4-4-2 VS 3-4-3) ---
   function drawPitch() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#011501'; ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -159,7 +176,7 @@
     ctx.strokeRect(40,40,canvas.width-80,canvas.height-180);
     ctx.beginPath(); ctx.moveTo(canvas.width/2, 40); ctx.lineTo(canvas.width/2, canvas.height-140); ctx.stroke();
     ctx.beginPath(); ctx.arc(canvas.width/2, (canvas.height-100)/2, 85, 0, Math.PI*2); ctx.stroke();
-    // Bank Bereich [cite: 2026-02-09]
+    // Bank
     ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0, canvas.height-135, canvas.width, 135);
   }
 
@@ -168,11 +185,10 @@
     squad.forEach(p => {
       if (p.status === 'absent') return;
       if (p.y < canvas.height - 135) {
-        ctx.fillStyle = user.color; ctx.beginPath(); ctx.arc(p.x, p.y, 22, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#000'; ctx.font = 'bold 12px Arial'; ctx.textAlign='center'; ctx.fillText(p.name[0], p.x, p.y+5);
-        ctx.fillStyle = '#fff'; ctx.font = '10px Arial'; ctx.fillText(p.name, p.x, p.y+38);
+        ctx.fillStyle = user.color; ctx.beginPath(); ctx.arc(p.x, p.y, 23, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#000'; ctx.font = 'bold 13px Arial'; ctx.textAlign='center'; ctx.fillText(p.name[0], p.x, p.y+5);
+        ctx.fillStyle = '#fff'; ctx.font = '10px Arial'; ctx.fillText(p.name, p.x, p.y+40);
       } else {
-        // FIFA CARD (RECOGNIZABLE MOD) [cite: 2026-02-09]
         ctx.fillStyle = '#bf953f'; ctx.fillRect(p.x-22, p.y-30, 44, 60);
         ctx.fillStyle = '#000'; ctx.font = 'bold 8px Arial'; ctx.textAlign='center'; ctx.fillText(p.name, p.x, p.y+20);
       }
@@ -180,13 +196,12 @@
   }
 
   function setMode(m) {
-    currentMode = m;
     document.getElementById('mode-match').classList.toggle('active', m==='match');
     document.getElementById('mode-training').classList.toggle('active', m==='training');
     if (m === 'match') {
-      toniSpeak("Matchmodus: Toni stellt 4-4-2, Trainer stellt 3-4-3."); [cite: 2026-02-07]
+      toniSpeak("Taktik: Toni stellt 4-4-2, Trainer stellt 3-4-3.");
       squad.filter(p=>p.status==='match').forEach((p,i) => {
-        p.x = 200 + (Math.floor(i/3)*150); p.y = 100 + (i%3 * 150);
+        p.x = 200 + (Math.floor(i/3)*170); p.y = 100 + (i%3 * 160);
       });
     } else {
       squad.forEach((p,i) => { p.x = 75+(i*60); p.y = 635; });
@@ -194,11 +209,10 @@
     renderArena();
   }
 
-  // --- BRIEFCASE (MANAGEMENT HUB) [cite: 2026-02-07] ---
+  // --- MANAGEMENT HUB ---
   function openBriefcase() {
     const c = document.getElementById('hub-content');
     document.getElementById('hub-ov').style.display = 'flex';
-    document.getElementById('hub-title').innerText = "MANAGEMENT HQ";
     c.className = "scroll-content folder-grid";
     c.innerHTML = `
       <div class="folder-item" onclick="openSektor('kabine')">👕 KABINE</div>
@@ -208,7 +222,7 @@
     `;
   }
 
-  function openSektor(s) {
+  window.openSektor = function(s) {
     const c = document.getElementById('hub-content');
     c.innerHTML = "";
     if (s === 'kabine') {
@@ -217,53 +231,39 @@
         const cl = p.status==='match'?'#0f0':(p.status==='training'?'#ff0':'#f00');
         c.innerHTML += `<div class="fifa-card" onclick="openEditor(${p.id})">
           <div class="status-light" style="background:${cl}"></div>
-          <div style="font-size:25px">${p.rating}</div>
-          <div style="text-align:center; font-size:40px">👤</div>
+          <div style="font-size:28px">${p.rating}</div>
+          <div style="text-align:center; font-size:45px">👤</div>
           <div style="text-align:center; font-weight:bold">${p.name}</div>
-          <div style="font-size:10px; text-align:center">${p.pos}</div>
         </div>`;
       });
     } else if (s === 'analyse') {
-      c.innerHTML = "<h3>Analysezentrum (BIA-Erweiterung)</h3>"; [cite: 2026-02-07]
+      c.innerHTML = "<h3>BIA-Diagnostik Zentrum</h3>";
       squad.forEach(p => {
-        c.innerHTML += `<div style="background:#111; padding:12px; margin:5px; border-radius:10px; border-left:4px solid var(--neon);">
-          <b>${p.name}</b>: Fett ${p.fat}% | Muskel ${p.muscle}kg | Wasser ${p.water}% | Viszeral ${p.visceral}
+        c.innerHTML += `<div class="lab-card">
+          <b>${p.name}</b><br><small>Fett: ${p.fat}% | Muskel: ${p.muscle}kg | HRV: ${p.hrv}</small>
         </div>`;
       });
     } else if (s === 'zeitung') {
-      renderMag(); [cite: 2026-02-07]
+      renderMag();
     } else if (s === 'business') {
-      c.innerHTML = "<h3>Sponsoring Radar</h3><p>Verhandlungen mit Partnern für das Stadionumfeld laufen.</p>"; [cite: 2026-02-07]
+      c.innerHTML = "<h3>Sponsoring Radar</h3><p>Aktuelle Partner-Akquise läuft für Senioren Pro.</p>";
     }
-  }
+  };
 
   function renderMag() {
     const c = document.getElementById('hub-content');
-    const pgs = ["Titelseite: Senioren Pro Elite","Trainer-Analyse: 3-4-3 Vorteile","BIA-Lab: Fitness Report","Sponsoring & Partner"];
-    c.innerHTML = `<div style="background:#fff; color:#000; padding:40px; border-radius:10px; min-height:450px;">
-      <h2>Stadionzeitung</h2><hr><p style="font-size:18px;">${pgs[magPage-1]}</p>
-      <div style="margin-top:100px; display:flex; justify-content:space-between;">
-        <button class="mode-btn active" style="background:#000; color:#fff;" onclick="if(magPage>1){magPage--; renderMag();}">Zurück</button>
-        <span style="font-weight:bold;">Seite ${magPage} / 4</span>
-        <button class="mode-btn active" style="background:#000; color:#fff;" onclick="if(magPage<4){magPage++; renderMag();}">Weiter</button>
+    const pgs = ["Senior Pro News","Taktik: 3-4-3 Fokus","Analyse-Zentrum Report","Sponsoren Wand"];
+    c.innerHTML = `<div style="background:#fff; color:#000; padding:30px; border-radius:10px; min-height:400px;">
+      <h2>MAGAZIN</h2><hr><p>${pgs[magPage-1]}</p>
+      <div style="margin-top:80px; display:flex; justify-content:space-between;">
+        <button onclick="if(magPage>1){magPage--; renderMag();}">ZURÜCK</button>
+        <span>${magPage} / 4</span>
+        <button onclick="if(magPage<4){magPage++; renderMag();}">WEITER</button>
       </div>
     </div>`;
   }
 
-  // --- EDITOR & DRAG PHYSIK ---
-  function openEditor(id) {
-    activePId = id; const p = squad.find(x=>x.id===id);
-    document.getElementById('hub-content').innerHTML = `<h3>Editor: ${p.name}</h3>
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        <label>Name:</label><input id="en" value="${p.name}" style="padding:10px;">
-        <button onclick="saveP()" style="padding:15px; background:var(--neon); border:none; font-weight:bold;">SPEICHERN</button>
-      </div>`;
-  }
-  function saveP() {
-    const p = squad.find(x=>x.id===activePId); p.name = document.getElementById('en').value;
-    saveSquad(); openSektor('kabine'); renderArena();
-  }
-
+  // --- TOUCH & DRAG ---
   let dr = null;
   const getXY = (e) => {
     const r = canvas.getBoundingClientRect();
@@ -279,18 +279,21 @@
   };
   window.onmouseup = window.ontouchend = () => { dr=null; saveSquad(); };
 
-  function toniSpeak(t) {
+  window.toniSpeak = function(t) {
     const b = document.getElementById('chat-box');
     b.innerHTML += `<div class="msg">Toni: ${t}</div>`; b.scrollTop = b.scrollHeight;
-    const ut = new SpeechSynthesisUtterance(t); ut.lang = 'de-DE';
-    window.speechSynthesis.speak(ut);
-  }
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(t));
+  };
+
   function sendCmd() {
-    const i = document.getElementById('user-cmd'); toniSpeak(`Analysiere für ${user.club}: ${i.value}`); i.value="";
+    const i = document.getElementById('user-cmd'); toniSpeak(`Analysiere: ${i.value}`); i.value="";
   }
+
   function closeHub() { document.getElementById('hub-ov').style.display='none'; }
-  function saveSquad() { localStorage.setItem('toni55_master_squad', JSON.stringify(squad)); }
-  function systemReset() { localStorage.clear(); location.reload(); }
+  function saveSquad() { localStorage.setItem('toni56_pro_squad', JSON.stringify(squad)); }
+  window.systemReset = function() { localStorage.clear(); location.reload(); };
+
+})();
 </script>
 </body>
 </html>
