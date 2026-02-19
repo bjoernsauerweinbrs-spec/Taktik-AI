@@ -515,25 +515,12 @@
 
     /* ======================================================================= */
     /* I. MOCK DATABASE & API SERVICE */
-    /* (Simuliert das Backend und die persistenten Daten des Vereins) */
     /* ======================================================================= */
 
     const MockData = {
         profiles: {
-            "coach_meier": {
-                id: "coach_meier",
-                name: "Björn Meier",
-                role: "Cheftrainer",
-                club: "FC Visionary 2024",
-                avatar: "BM"
-            },
-            "manager_schmidt": {
-                id: "manager_schmidt",
-                name: "Jens Schmidt",
-                role: "Manager",
-                club: "FC Visionary 2024",
-                avatar: "JS"
-            }
+            "coach_meier": { id: "coach_meier", name: "Björn Meier", role: "Cheftrainer", club: "FC Visionary 2024", avatar: "BM" },
+            "manager_schmidt": { id: "manager_schmidt", name: "Jens Schmidt", role: "Manager", club: "FC Visionary 2024", avatar: "JS" }
         },
         squad: {
             "p1": { id: "p1", name: "Müller", num: 13, pos: "ST", canvas: {x: 650, y: 250}, att: { pac: 90, sho: 88, pas: 80, dri: 85, def: 40, phy: 78 }, ovr: 88, bio: { hrv: 92, fatPct: 11.2, readiness: 95 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 } },
@@ -543,28 +530,20 @@
             "p5": { id: "p5", name: "Neuer", num: 1, pos: "TW", canvas: {x: 100, y: 250}, att: { pac: 60, sho: 30, pas: 65, dri: 40, def: 88, phy: 82 }, ovr: 85, bio: { hrv: 91, fatPct: 12.8, readiness: 94 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 } }
         },
         finances: {
-            budget: 50000000,
-            salaries: 35000000,
-            infrastructure: 8000000,
+            budget: 50000000, salaries: 35000000, infrastructure: 8000000,
         },
         contracts: [
-            { id: "p3", type: "player", name: "Hummels", endDate: new Date(new Date().setMonth(new Date().getMonth() + 5)) },
-            { id: "p1", type: "player", name: "Müller", endDate: new Date(new Date().setMonth(new Date().getMonth() + 14)) },
-            { id: "sponsor1", type: "sponsor", name: "ToniTech Labs", endDate: new Date(new Date().setMonth(new Date().getMonth() + 8)) },
+            { id: "p3", type: "player", name: "Hummels", endDate: new Date(new Date().setMonth(new Date().getMonth() + 5)).toISOString() },
+            { id: "p1", type: "player", name: "Müller", endDate: new Date(new Date().setMonth(new Date().getMonth() + 14)).toISOString() },
+            { id: "sponsor1", type: "sponsor", name: "ToniTech Labs", endDate: new Date(new Date().setMonth(new Date().getMonth() + 8)).toISOString() },
         ]
     };
 
     const ApiService = {
-        _simulateDelay(ms = 300) {
-            return new Promise(res => setTimeout(res, ms));
-        },
-        async getProfiles() {
-            await this._simulateDelay();
-            return Object.values(MockData.profiles);
-        },
+        _simulateDelay(ms = 300) { return new Promise(res => setTimeout(res, ms)); },
+        async getProfiles() { await this._simulateDelay(); return Object.values(MockData.profiles); },
         async loadProfileData(profileId) {
             await this._simulateDelay(800);
-            // Deep copy to prevent mutations of mock data
             return {
                 user: MockData.profiles[profileId],
                 squad: JSON.parse(JSON.stringify(MockData.squad)),
@@ -576,15 +555,9 @@
 
     /* ======================================================================= */
     /* II. APPLICATION STATE & UI MANAGER */
-    /* (Zentrales Management von Daten und DOM-Elementen) */
     /* ======================================================================= */
 
-    const AppState = {
-        user: null,
-        squad: null,
-        finances: null,
-        contracts: null
-    };
+    const AppState = { user: null, squad: null, finances: null, contracts: null };
 
     const UIManager = {
         init() {
@@ -601,392 +574,178 @@
             elementIds.forEach(id => this.elements[id] = document.getElementById(id));
             this.bindEvents();
         },
-
         bindEvents() {
-            // Login
-            this.elements['login-form'].addEventListener('submit', (e) => {
-                e.preventDefault();
-                App.login(this.elements['profile-selector'].value);
-            });
-
-            // Panel Toggles
+            this.elements['login-form'].addEventListener('submit', (e) => { e.preventDefault(); App.login(this.elements['profile-selector'].value); });
             this.elements['toggle-left-panel-btn'].addEventListener('click', () => this.togglePanel('left-panel'));
             this.elements['toggle-right-panel-btn'].addEventListener('click', () => this.togglePanel('right-panel'));
             this.elements['close-right-panel-btn'].addEventListener('click', () => this.togglePanel('right-panel', false));
-            this.elements['mobile-backdrop'].addEventListener('click', () => {
-                this.togglePanel('left-panel', false);
-                this.togglePanel('right-panel', false);
-            });
+            this.elements['mobile-backdrop'].addEventListener('click', () => { this.togglePanel('left-panel', false); this.togglePanel('right-panel', false); });
             
-            // Globaler Click-Handler für data-actions
             document.addEventListener('click', (e) => {
                 const action = e.target.closest('[data-action]')?.dataset.action;
                 if (!action) return;
 
                 switch (action) {
-                    case 'close-dialog':
-                        e.target.closest('.dialog-overlay').classList.remove('is-active');
-                        break;
-                    case 'open-manager-cockpit':
-                        this.renderManagerCockpit();
-                        this.openDialog('manager-cockpit-dialog');
-                        break;
-                    case 'open-clipboard':
-                        this.renderClipboard();
-                        this.openDialog('clipboard-dialog');
-                        break;
-                    case 'logout':
-                        App.logout();
-                        break;
+                    case 'close-dialog': e.target.closest('.dialog-overlay').classList.remove('is-active'); break;
+                    case 'open-manager-cockpit': this.renderManagerCockpit(); this.openDialog('manager-cockpit-dialog'); break;
+                    case 'open-clipboard': this.renderClipboard(); this.openDialog('clipboard-dialog'); break;
+                    case 'logout': App.logout(); break;
                 }
             });
         },
-
         togglePanel(panelId, forceState) {
-            const panel = this.elements[panelId];
-            if (!panel) return;
-
+            const panel = this.elements[panelId]; if (!panel) return;
             const isVisible = forceState!== undefined? forceState :!panel.classList.contains('is-visible');
             panel.classList.toggle('is-visible', isVisible);
-            
-            const anyVisible = document.querySelector('#left-panel.is-visible, #right-panel.is-visible');
-            this.elements['mobile-backdrop'].hidden =!anyVisible;
+            this.elements['mobile-backdrop'].hidden =!document.querySelector('#left-panel.is-visible, #right-panel.is-visible');
         },
-        
-        openDialog(dialogId) {
-            this.elements[dialogId].classList.add('is-active');
-        },
-
+        openDialog(dialogId) { this.elements[dialogId].classList.add('is-active'); },
         renderAppLayout() {
-            // User-Profil im Header
             this.elements['user-name'].textContent = AppState.user.name;
             this.elements['user-role'].textContent = AppState.user.club;
             this.elements['user-avatar'].textContent = AppState.user.avatar;
-            // Kaderliste rendern
             this.renderSquadList();
         },
-        
         renderSquadList() {
-            const listEl = this.elements['squad-list'];
-            listEl.innerHTML = '';
+            const listEl = this.elements['squad-list']; listEl.innerHTML = '';
             Object.values(AppState.squad).forEach(p => {
-                const playerEl = document.createElement('button');
-                playerEl.className = 'btn';
-                playerEl.innerHTML = `
-                    <span>${p.num}</span>
-                    <div>${p.name} <br><small>${p.pos}</small></div>
-                    <strong>${p.ovr}</strong>
-                `;
+                const playerEl = document.createElement('button'); playerEl.className = 'btn';
+                playerEl.innerHTML = `<span>${p.num}</span><div>${p.name} <br><small>${p.pos}</small></div><strong>${p.ovr}</strong>`;
                 playerEl.onclick = () => this.renderPlayerDashboard(p.id);
                 listEl.appendChild(playerEl);
             });
         },
-        
         renderPlayerDashboard(playerId) {
-            const p = AppState.squad[playerId];
-            if (!p) return;
-            
+            const p = AppState.squad[playerId]; if (!p) return;
             this.elements['player-dialog-title'].textContent = `Digitale Akte: ${p.name}`;
-            this.elements['player-dialog-content'].innerHTML = `
-                <div class="gold-card">
-                    <div class="card-header">
-                        <span>${p.ovr}</span>
-                        <span>${p.pos}</span>
-                    </div>
-                    <div class="card-player-name">${p.name} #${p.num}</div>
-                    <div class="card-attributes">
-                        ${Object.entries(p.att).map(([key, val]) => `<div>${val} ${key.toUpperCase()}</div>`).join('')}
-                    </div>
-                    <div class="card-bio-data">
-                        <strong>BIA:</strong> HRV: ${p.bio.hrv}ms | Fett: ${p.bio.fatPct}% | Readiness: ${p.bio.readiness}%<br>
-                        <strong>Mental:</strong> Schlaf: ${p.mental.sleep}/10 | Stress: ${p.mental.stress}/10 | Motivation: ${p.mental.motiv}/10
-                    </div>
-                </div>
-            `;
+            this.elements['player-dialog-content'].innerHTML = `<div class="gold-card"><div class="card-header"><span>${p.ovr}</span><span>${p.pos}</span></div><div class="card-player-name">${p.name} #${p.num}</div><div class="card-attributes">${Object.entries(p.att).map(([key, val]) => `<div>${val} ${key.toUpperCase()}</div>`).join('')}</div><div class="card-bio-data"><strong>BIA:</strong> HRV: ${p.bio.hrv}ms | Fett: ${p.bio.fatPct}% | Readiness: ${p.bio.readiness}%<br><strong>Mental:</strong> Schlaf: ${p.mental.sleep}/10 | Stress: ${p.mental.stress}/10 | Motivation: ${p.mental.motiv}/10</div></div>`;
             this.openDialog('player-dashboard-dialog');
         },
-
         renderManagerCockpit() {
-            const f = AppState.finances;
-            const c = AppState.contracts;
-            const costs = f.salaries + f.infrastructure;
-            const liquidity = f.budget - costs;
-
-            const expiringContracts = c
-               .filter(con => con.type === 'player' && (new Date(con.endDate) - new Date()) / (1000 * 60 * 60 * 24) < 180)
-               .map(con => `<p style="color:var(--accent-red);">⚠️ ${con.name} - läuft aus in ${Math.round((new Date(con.endDate) - new Date()) / (1000 * 60 * 60 * 24))} Tagen</p>`)
-               .join('');
-
-            this.elements['manager-dialog-content'].innerHTML = `
-                <h3>Finanz-Cockpit</h3>
-                <p>Budget: ${f.budget.toLocaleString('de-DE')} € | Kosten: ${costs.toLocaleString('de-DE')} € | <strong>Liquidität: ${liquidity.toLocaleString('de-DE')} €</strong></p>
-                <br>
-                <h3>Contract-Lifecycle-Radar (Auslaufende Verträge < 6 Monate)</h3>
-                ${expiringContracts.length > 0? expiringContracts : '<p>Keine kritischen Verträge.</p>'}
-            `;
+            const f = AppState.finances, c = AppState.contracts, costs = f.salaries + f.infrastructure, liquidity = f.budget - costs;
+            const expiringContracts = c.filter(con => con.type === 'player' && (new Date(con.endDate) - new Date()) / 864e5 < 180).map(con => `<p style="color:var(--accent-red);">⚠️ ${con.name} - läuft aus in ${Math.round((new Date(con.endDate) - new Date()) / 864e5)} Tagen</p>`).join('');
+            this.elements['manager-dialog-content'].innerHTML = `<h3>Finanz-Cockpit</h3><p>Budget: ${f.budget.toLocaleString('de-DE')} € | Kosten: ${costs.toLocaleString('de-DE')} € | <strong>Liquidität: ${liquidity.toLocaleString('de-DE')} €</strong></p><br><h3>Contract-Lifecycle-Radar (&lt; 6 Monate)</h3>${expiringContracts.length > 0? expiringContracts : '<p>Keine kritischen Verträge.</p>'}`;
         },
-
-        renderClipboard() {
-             this.elements['clipboard-dialog-content'].innerHTML = `
-                <h3>Matchday Countdown (vs. FC Musterstadt)</h3>
-                <p>14:30: Ankunft Stadion</p>
-                <p>15:15: Aufwärmen</p>
-                <p>15:50: Letzte Ansprache</p>
-                <br>
-                <h3>Logistik-Checkliste</h3>
-                <p><input type="checkbox" checked> Trikots (Heim)</p>
-                <p><input type="checkbox" checked> Spielerpässe</p>
-                <p><input type="checkbox"> Sanitätskoffer</p>
-             `;
-        }
+        renderClipboard() { this.elements['clipboard-dialog-content'].innerHTML = `<h3>Matchday Countdown</h3><p>14:30: Ankunft</p><p>15:15: Aufwärmen</p><br><h3>Logistik</h3><p><input type="checkbox" checked> Trikots</p><p><input type="checkbox" checked> Pässe</p>`; }
     };
 
     /* ======================================================================= */
     /* III. TONI AI - DAS KOGNITIVE GEHIRN */
     /* ======================================================================= */
-
     const ToniAI = {
         init() {
             this.elements = UIManager.elements;
-            this.elements['chat-form'].addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.processCommand();
-            });
+            this.elements['chat-form'].addEventListener('submit', (e) => { e.preventDefault(); this.processCommand(); });
             this.elements['ai-status-indicator'].style.color = 'var(--accent-green)';
             this.speak(`TITAN v10 für ${AppState.user.name} online. System bereit.`);
             this.performMorningCheck();
         },
-
         speak(message, isUser = false) {
-            const msgContainer = document.createElement('div');
-            msgContainer.style.marginBottom = '12px';
-
-            if (isUser) {
-                msgContainer.innerHTML = `<div style="display:flex; justify-content:flex-end;"><div style="padding:8px 12px; background:var(--accent-blue); color:#fff; border-radius:12px 12px 0 12px; max-width:80%;">${message}</div></div>`;
-            } else {
-                msgContainer.innerHTML = `<div style="font-weight:bold; color:var(--text-secondary); font-size:0.9em; margin-bottom:4px;">Toni AI</div><div>${message.replace(/\n/g, "<br>")}</div>`;
-            }
-            this.elements['chat-box'].appendChild(msgContainer);
-            this.elements['chat-box'].scrollTop = this.elements['chat-box'].scrollHeight;
+            const msg = document.createElement('div'); msg.style.marginBottom = '12px';
+            if (isUser) { msg.innerHTML = `<div style="display:flex;justify-content:flex-end;"><div style="padding:8px 12px;background:var(--accent-blue);color:#fff;border-radius:12px 12px 0 12px;max-width:80%;">${message}</div></div>`; }
+            else { msg.innerHTML = `<div style="font-weight:bold;color:var(--text-secondary);font-size:0.9em;margin-bottom:4px;">Toni AI</div><div>${message.replace(/\n/g, "<br>")}</div>`; }
+            this.elements['chat-box'].appendChild(msg); this.elements['chat-box'].scrollTop = this.elements['chat-box'].scrollHeight;
         },
-
         processCommand() {
-            const input = this.elements['chat-input'].value.trim();
-            if (!input) return;
-
-            this.speak(input, true);
-            this.elements['chat-input'].value = '';
-
-            // Einfache Befehlserkennung
-            if (input.toLowerCase().includes('status')) {
-                this.performMorningCheck();
-            } else if (input.toLowerCase().match(/wer ist müde|zeig erschöpfung/)) {
-                const tiredPlayers = Object.values(AppState.squad).filter(p => p.stats.performance < 85);
-                if(tiredPlayers.length > 0) {
-                    this.speak(`Folgende Spieler zeigen erhöhte Ermüdung:\n${tiredPlayers.map(p => `- ${p.name} (Leistung: ${p.stats.performance.toFixed(0)}%)`).join('\n')}`);
-                } else {
-                    this.speak('Aktuell sind alle Spieler im grünen Bereich.');
-                }
-            }
-            else {
-                this.speak("Befehl nicht erkannt. Versuche 'status' oder 'wer ist müde'.");
-            }
+            const input = this.elements['chat-input'].value.trim(); if (!input) return;
+            this.speak(input, true); this.elements['chat-input'].value = '';
+            if (input.toLowerCase().includes('status')) { this.performMorningCheck(); }
+            else if (input.toLowerCase().match(/wer ist müde|zeig erschöpfung/)) {
+                const tired = Object.values(AppState.squad).filter(p => p.stats.performance < 85);
+                if (tired.length > 0) this.speak(`Ermüdung erkannt:\n${tired.map(p => `- ${p.name} (${p.stats.performance.toFixed(0)}%)`).join('\n')}`);
+                else this.speak('Alle Spieler sind im grünen Bereich.');
+            } else this.speak("Befehl nicht erkannt. Versuche 'status' oder 'wer ist müde'.");
         },
-
         performMorningCheck() {
-            const warnings = Object.values(AppState.squad)
-               .filter(p => p.bio.readiness < 90)
-               .map(p => `${p.name} (Readiness: ${p.bio.readiness}%)`);
-
-            if (warnings.length > 0) {
-                this.speak(`⚠️ **Morgenreport:** ${warnings.length} Spieler im roten Bereich.\n- ${warnings.join('\n- ')}`);
-            } else {
-                this.speak(`✅ **Morgenreport:** Alle Spieler sind fit und einsatzbereit.`);
-            }
+            const warnings = Object.values(AppState.squad).filter(p => p.bio.readiness < 90).map(p => `${p.name} (Readiness: ${p.bio.readiness}%)`);
+            if (warnings.length > 0) this.speak(`⚠️ **Morgenreport:** ${warnings.length} Spieler im roten Bereich.\n- ${warnings.join('\n- ')}`);
+            else this.speak(`✅ **Morgenreport:** Alle Spieler sind fit.`);
         }
     };
 
     /* ======================================================================= */
     /* IV. ARENA ENGINE - DAS TAKTIKBOARD */
     /* ======================================================================= */
-
     const ArenaEngine = {
         init() {
-            this.canvas = UIManager.elements['main-canvas'];
-            this.ctx = this.canvas.getContext('2d');
-            this.dpr = window.devicePixelRatio || 1;
-            
-            this.isDragging = false;
-            this.dragTarget = null;
-            
-            this.setupCanvas();
-            this.bindEvents();
-            this.renderLoop();
-
-            // Starte die Substitutions-KI
-            setInterval(() => this.SubstitutionAI.updateAllPlayers(), 5000); // Alle 5 Sekunden
+            this.canvas = UIManager.elements['main-canvas']; this.ctx = this.canvas.getContext('2d');
+            this.dpr = window.devicePixelRatio || 1; this.isDragging = false; this.dragTarget = null;
+            this.setupCanvas(); this.bindEvents(); this.renderLoop();
+            setInterval(() => this.SubstitutionAI.updateAllPlayers(), 5000);
         },
-        
         setupCanvas() {
             const rect = this.canvas.parentElement.getBoundingClientRect();
-            this.canvas.width = rect.width * this.dpr;
-            this.canvas.height = rect.height * this.dpr;
-            this.canvas.style.width = `${rect.width}px`;
-            this.canvas.style.height = `${rect.height}px`;
+            this.canvas.width = rect.width * this.dpr; this.canvas.height = rect.height * this.dpr;
+            this.canvas.style.width = `${rect.width}px`; this.canvas.style.height = `${rect.height}px`;
             this.ctx.scale(this.dpr, this.dpr);
         },
-
         bindEvents() {
-            const getPos = (e) => {
-                const rect = this.canvas.getBoundingClientRect();
-                const t = e.touches? e.touches[0] : e;
-                return { x: t.clientX - rect.left, y: t.clientY - rect.top };
-            };
-            
-            this.canvas.onpointerdown = (e) => {
-                const pos = getPos(e);
-                const player = this.getPlayerAt(pos);
-                if (player) {
-                    this.isDragging = true;
-                    this.dragTarget = player;
-                }
-            };
-            this.canvas.onpointermove = (e) => {
-                if (this.isDragging && this.dragTarget) {
-                    const pos = getPos(e);
-                    this.dragTarget.canvas.x = pos.x;
-                    this.dragTarget.canvas.y = pos.y;
-                }
-            };
-            this.canvas.onpointerup = () => {
-                this.isDragging = false;
-                this.dragTarget = null;
-            };
-            window.onresize = () => this.setupCanvas();
+            const getPos = (e) => { const r = this.canvas.getBoundingClientRect(); const t = e.touches? e.touches[0] : e; return { x: t.clientX - r.left, y: t.clientY - r.top }; };
+            this.canvas.onpointerdown = (e) => { const p = this.getPlayerAt(getPos(e)); if (p) { this.isDragging = true; this.dragTarget = p; } };
+            this.canvas.onpointermove = (e) => { if (this.isDragging && this.dragTarget) { const pos = getPos(e); this.dragTarget.canvas.x = pos.x; this.dragTarget.canvas.y = pos.y; } };
+            this.canvas.onpointerup = () => { this.isDragging = false; this.dragTarget = null; };
+            window.addEventListener('resize', () => this.setupCanvas());
         },
-
-        getPlayerAt(pos) {
-            return Object.values(AppState.squad).find(p => 
-                Math.hypot(p.canvas.x - pos.x, p.canvas.y - pos.y) < 22 // 22px Klick-Radius
-            );
-        },
-        
-        renderLoop() {
-            this.draw();
-            requestAnimationFrame(() => this.renderLoop());
-        },
-
+        getPlayerAt(pos) { return Object.values(AppState.squad).find(p => Math.hypot(p.canvas.x - pos.x, p.canvas.y - pos.y) < 22); },
+        renderLoop() { this.draw(); requestAnimationFrame(() => this.renderLoop()); },
         draw() {
-            const w = this.canvas.clientWidth;
-            const h = this.canvas.clientHeight;
-            this.ctx.clearRect(0, 0, w, h);
-            this.drawPitch(w, h);
-            Object.values(AppState.squad).forEach(p => this.drawPlayer(p));
+            const w = this.canvas.clientWidth, h = this.canvas.clientHeight; this.ctx.clearRect(0, 0, w, h);
+            this.drawPitch(w, h); Object.values(AppState.squad).forEach(p => this.drawPlayer(p));
         },
-
         drawPitch(w, h) {
-            this.ctx.fillStyle = '#011a01';
-            this.ctx.fillRect(0,0,w,h);
-            this.ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-            this.ctx.lineWidth = 2;
-            // Linien
-            this.ctx.strokeRect(25, 25, w - 50, h - 50); // Außen
-            this.ctx.beginPath(); this.ctx.moveTo(w/2, 25); this.ctx.lineTo(w/2, h - 25); this.ctx.stroke(); // Mitte
-            this.ctx.beginPath(); this.ctx.arc(w/2, h/2, Math.min(w,h) / 8, 0, 2 * Math.PI); this.ctx.stroke(); // Mittelkreis
+            this.ctx.fillStyle = '#011a01'; this.ctx.fillRect(0, 0, w, h);
+            this.ctx.strokeStyle = 'rgba(255,255,255,0.2)'; this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(25, 25, w - 50, h - 50); this.ctx.beginPath(); this.ctx.moveTo(w / 2, 25); this.ctx.lineTo(w / 2, h - 25); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.arc(w / 2, h / 2, Math.min(w, h) / 8, 0, 2 * Math.PI); this.ctx.stroke();
         },
-
         drawPlayer(p) {
-            const { x, y } = p.canvas;
-            
-            this.ctx.save();
-            const performance = p.stats.performance;
-            if (performance < 70) {
-                this.ctx.shadowBlur = 15;
-                this.ctx.shadowColor = `rgba(248, 81, 73, ${Math.abs(Math.sin(Date.now() / 200))})`; // Schnelles Blinken
-            } else if (performance < 85) {
-                this.ctx.shadowBlur = 10;
-                this.ctx.shadowColor = `rgba(227, 179, 65, ${Math.abs(Math.sin(Date.now() / 400))})`; // Langsames Blinken
-            }
-            
-            // Spieler-Kreis
-            this.ctx.beginPath();
-            this.ctx.arc(x, y, 20, 0, 2 * Math.PI);
-            this.ctx.fillStyle = p.pos === 'TW'? 'var(--accent-yellow)' : 'var(--accent-blue)';
-            this.ctx.fill();
+            const { x, y } = p.canvas; this.ctx.save();
+            const perf = p.stats.performance;
+            if (perf < 70) { this.ctx.shadowBlur = 15; this.ctx.shadowColor = `rgba(248, 81, 73, ${Math.abs(Math.sin(Date.now() / 200))})`; }
+            else if (perf < 85) { this.ctx.shadowBlur = 10; this.ctx.shadowColor = `rgba(227, 179, 65, ${Math.abs(Math.sin(Date.now() / 400))})`; }
+            this.ctx.beginPath(); this.ctx.arc(x, y, 20, 0, 2 * Math.PI);
+            this.ctx.fillStyle = p.pos === 'TW'? 'var(--accent-yellow)' : 'var(--accent-blue)'; this.ctx.fill();
             this.ctx.restore();
-
-            // Nummer
-            this.ctx.fillStyle = p.pos === 'TW'? '#000' : '#fff';
-            this.ctx.font = 'bold 18px var(--font-sans)';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.fillText(p.num, x, y);
+            this.ctx.fillStyle = p.pos === 'TW'? '#000' : '#fff'; this.ctx.font = 'bold 18px var(--font-sans)';
+            this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle'; this.ctx.fillText(p.num, x, y);
         },
-
         SubstitutionAI: {
-            updateAllPlayers() {
-                Object.values(AppState.squad).forEach(p => {
-                    // Simuliere 1 Minute Spielzeit pro Update
-                    if(p.stats.minutes < 90) p.stats.minutes += 1;
-                    p.stats.performance = this.calculatePerformance(p);
-                });
-            },
-            calculatePerformance(player) {
-                // P(t) = P0 * e^(-kt)
-                const P0 = player.bio.readiness; // Startfitness
-                const t = player.stats.minutes; // Zeit in Minuten
-                const k = 0.0035; // Zerfallsrate (k-Faktor)
-                
-                const performance = P0 * Math.exp(-k * t);
-                return Math.max(0, performance); // Performance kann nicht unter 0 fallen
-            }
+            updateAllPlayers() { Object.values(AppState.squad).forEach(p => { if (p.stats.minutes < 90) p.stats.minutes += 1; p.stats.performance = this.calculatePerformance(p); }); },
+            calculatePerformance(player) { const P0 = player.bio.readiness, t = player.stats.minutes, k = 0.0035; return Math.max(0, P0 * Math.exp(-k * t)); }
         }
     };
 
     /* ======================================================================= */
     /* V. APPLICATION ENTRY POINT */
     /* ======================================================================= */
-
     const App = {
         async init() {
             UIManager.init();
-            
             const storedProfileId = sessionStorage.getItem('titan_profile_id');
-            if (storedProfileId) {
-                await this.login(storedProfileId);
-            } else {
+            if (storedProfileId) { await this.login(storedProfileId); }
+            else {
                 UIManager.elements['system-loader'].hidden = true;
                 const profiles = await ApiService.getProfiles();
-                // KORREKTUR hier angewendet: UIManager.elements statt this.elements
                 UIManager.elements['profile-selector'].innerHTML = profiles.map(p => `<option value="${p.id}">${p.name} (${p.role})</option>`).join('');
                 UIManager.elements['login-screen'].style.display = 'flex';
             }
         },
-
         async login(profileId) {
             UIManager.elements['login-screen'].style.display = 'none';
             UIManager.elements['system-loader'].hidden = false;
-
             const data = await ApiService.loadProfileData(profileId);
             Object.assign(AppState, data);
-            
             sessionStorage.setItem('titan_profile_id', profileId);
-            
             UIManager.elements['system-loader'].hidden = true;
             UIManager.elements['main-app'].hidden = false;
-
             UIManager.renderAppLayout();
             ToniAI.init();
             ArenaEngine.init();
         },
-
-        logout() {
-            sessionStorage.removeItem('titan_profile_id');
-            window.location.reload();
-        }
+        logout() { sessionStorage.removeItem('titan_profile_id'); window.location.reload(); }
     };
     
-    // Startet die Anwendung, sobald das Fenster vollständig geladen ist.
-    window.onload = () => App.init();
-
+    // ** DIE FINALE KORREKTUR **
+    // Startet die App, sobald das HTML-Dokument bereit ist.
+    document.addEventListener('DOMContentLoaded', App.init);
 </script>
