@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TONI 2.0 | Professional Coaching & Management Suite</title>
-<meta name="description" content="TONI 2.0 - Eine KI-gestützte, hybride Coaching-Plattform für professionelle Taktikanalyse, Spieler-Management und Vereinsstrategie.">
+<title>TONI 2.0 | Ultimate Titan Edition</title>
+<meta name="description" content="TONI 2.0 - Hybrides Hochleistungstool für professionelle Taktikanalyse, Spieler-Management und Vereinsstrategie.">
 
 <!-- Professionelles CSS Design System -->
 <style>
@@ -12,8 +12,9 @@
     --bg-dark: #0d1117; --bg-medium: #161b22; --bg-light: #21262d;
     --border-color: #30363d; --text-primary: #e6edf3; --text-secondary: #848d97;
     --accent-blue: #58a6ff; --accent-green: #3fb950; --accent-red: #f85149; --accent-yellow: #e3b341;
+    --gold-gradient: linear-gradient(145deg, #d4af37, #b48c2c);
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px;
+    --radius-md: 10px; --radius-lg: 16px;
   }
     * { box-sizing: border-box; }
   html, body {
@@ -24,101 +25,87 @@
 .scroll-content { overflow-y: auto; padding-right: 8px; }
 .scroll-content::-webkit-scrollbar { width: 6px; }
 .scroll-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
-.text-muted { color: var(--text-secondary); font-size: 0.9em; }
 .btn {
     padding: 10px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);
     background-color: var(--bg-medium); color: var(--text-primary);
     font-weight: 600; cursor: pointer; transition: background-color.2s, border-color.2s;
   }
-.btn:hover { background-color: var(--bg-light); border-color: var(--text-secondary); }
+.btn:hover { background-color: var(--bg-light); }
 .btn-primary { background-color: var(--accent-green); border-color: var(--accent-green); color: #fff; }
-.input-field { width: 100%; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary); padding: 12px; border-radius: var(--radius-md); font-size: 1em; }
 .system-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10000; background: rgba(13, 17, 23, 0.85); backdrop-filter: blur(10px); }
 .system-overlay[hidden] { display: none; }
 .spinner { width: 50px; height: 50px; border: 5px solid var(--border-color); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 #login-screen { flex-direction: column; gap: 20px; }
 .login-box { width: 90%; max-width: 380px; padding: 40px; background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
-.login-title { text-align: center; margin-bottom: 24px; font-size: 24px; font-weight: 300; letter-spacing: 2px; }
 .app-container { display: grid; grid-template-rows: 60px 1fr; grid-template-columns: 280px 1fr 350px; height: 100vh; padding: 12px; gap: 12px; }
 .app-header { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; }
 .panel { background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 16px; display:flex; flex-direction:column; overflow: hidden; }
-.user-profile { display: flex; align-items: center; gap: 12px; }
-.user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-light); display:flex; align-items:center; justify-content:center; font-weight:bold; }
 #board-wrap { flex: 1; position: relative; border-radius: var(--radius-md); overflow: hidden; background-color: #011a01; }
-#main-canvas { position: absolute; top: 0; left: 0; }
-#arena-controls { position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: var(--radius-md); }
+#main-canvas { position: absolute; top: 0; left: 0; touch-action: none; }
+#arena-controls { position: absolute; top: 12px; left: 12px; display: flex; flex-wrap: wrap; gap: 8px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: var(--radius-md); }
 .tool-btn.active { background-color: var(--accent-blue); border-color: var(--accent-blue); }
 .dialog-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 5000; background: rgba(13, 17, 23, 0.7); backdrop-filter: blur(8px); }
 .dialog-overlay.is-active { display: flex; }
-.dialog-box { width: 90vw; max-width: 1400px; height: 90vh; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: var(--radius-lg); display: flex; flex-direction: column; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+.dialog-box { width: 90vw; max-width: 1400px; height: 90vh; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: var(--radius-lg); display: flex; flex-direction: column; }
 .dialog-header { padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
 .dialog-title { font-size: 18px; font-weight: 600; }
 .dialog-content { flex: 1; padding: 24px; overflow: auto; }
-.magazine-editor { display: grid; grid-template-columns: 300px 1fr; gap: 24px; height: 100%; }
-.page-thumbnail.active { border-color: var(--accent-blue); }
-.data-table { width: 100%; border-collapse: collapse; }
-.data-table th,.data-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+.fifa-card { background: var(--gold-gradient); color: #1a1a1a; border-radius: var(--radius-md); padding: 12px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+.live-session-btn { border: 2px solid var(--accent-red); color: var(--accent-red); }
+.live-session-btn.active { background-color: var(--accent-red); color: #fff; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); } 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); } }
 .mobile-nav-btn { display: none; }
 
-/* ------------------- RESPONSIVE DESIGN ------------------- */
-@media (max-width: 1200px) {
-  .app-container { grid-template-columns: 280px 1fr 300px; }
-}
+/* --- RESPONSIVE DESIGN --- */
 @media (max-width: 992px) {
-   .app-container { grid-template-columns: 1fr 300px; }
+  .app-container { grid-template-columns: 1fr 300px; }
     #left-panel { position: fixed; top: 0; left: 0; height: 100%; width: 280px; z-index: 8000; transition: transform.3s ease; transform: translateX(-100%); border-radius: 0; }
     #left-panel.is-visible { transform: translateX(0); }
-    #main-arena { grid-column: 1 / 2; }
-    #right-panel { grid-column: 2 / 3; }
-   .mobile-nav-btn.menu { display: block; }
+  .mobile-nav-btn.menu { display: block; }
 }
 @media (max-width: 768px) {
-  .app-container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr; padding: 8px; gap: 8px; }
-  .panel { border-radius: var(--radius-md); }
-  .mobile-nav-btn { display: block; }
-  .user-details { display: none; }
-  .desktop-controls { display: none; }
-    #left-panel, #right-panel { position: fixed; top: 0; height: 100%; width: 85%; max-width: 320px; z-index: 8000; transition: transform.3s ease; border-radius: 0; }
+ .app-container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr; padding: 8px; gap: 8px; }
+ .user-details { display: none; }
+ .desktop-controls { display: none; }
+    #left-panel, #right-panel { position: fixed; top: 0; height: 100%; width: 85%; max-width: 320px; z-index: 8000; transition: transform.3s ease; border-radius: 0; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
     #left-panel { left: 0; transform: translateX(-100%); }
-    #left-panel.is-visible { transform: translateX(0); }
     #right-panel { right: 0; transform: translateX(100%); }
-    #right-panel.is-visible { transform: translateX(0); }
-    #main-arena { grid-row: 2; grid-column: 1; }
-  .dialog-box { width: 100vw; height: 100vh; border-radius: 0; border: none; }
-  .dialog-content { padding: 16px; }
-  .magazine-editor { display: flex; flex-direction: column; }
+    #left-panel.is-visible, #right-panel.is-visible { transform: translateX(0); }
+ .dialog-box { width: 100vw; height: 100vh; border-radius: 0; border: none; }
 }
 </style>
 </head>
 <body>
 
 <div id="system-loader" class="system-overlay"><div class="spinner"></div></div>
-<div id="login-screen" class="system-overlay" hidden>
+<div id="login-screen" class="system-overlay">
   <div class="login-box">
-    <h1 class="login-title">TONI 2.0</h1>
+    <h1 style="text-align: center; font-weight: 300; letter-spacing: 2px;">TONI 2.0</h1>
     <form id="login-form">
       <div style="margin-bottom: 16px;">
-        <label for="username" class="text-muted" style="display:block; margin-bottom:6px;">Benutzerprofil</label>
+        <label for="username" style="display:block; margin-bottom:6px; color:var(--text-secondary);">Benutzerprofil</label>
         <select id="username" class="input-field"></select>
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%; padding:12px;">SYSTEM LADEN</button>
     </form>
   </div>
 </div>
+
 <div id="main-app" class="app-container" style="display:none;">
   <header class="app-header panel">
     <div style="display: flex; align-items: center; gap: 16px;">
         <button id="toggle-left-panel-btn" class="btn mobile-nav-btn menu">☰</button>
-        <div class="user-profile">
-            <div id="user-avatar" class="user-avatar"></div>
+        <div class="user-profile" style="display: flex; align-items: center; gap: 12px;">
+            <div id="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-light); display:flex; align-items:center; justify-content:center; font-weight:bold;"></div>
             <div class="user-details">
                 <div id="user-name" style="font-weight: 600;"></div>
-                <div id="user-role" class="text-muted"></div>
+                <div id="user-role" style="color:var(--text-secondary); font-size:0.9em;"></div>
             </div>
         </div>
     </div>
     <div class="desktop-controls" style="display:flex; align-items:center; gap: 20px;">
+        <button id="live-session-btn" class="btn live-session-btn" title="Live-Session starten/stoppen">🎙️</button>
         <button id="admin-panel-btn" class="btn" style="display:none;">👑 Admin Panel</button>
     </div>
     <button id="toggle-right-panel-btn" class="btn mobile-nav-btn">💬</button>
@@ -128,107 +115,243 @@
     <div id="board-wrap"><canvas id="main-canvas"></canvas><div id="arena-controls"></div></div>
   </main>
   <aside id="right-panel" class="right-panel panel">
-    <div id="toni-chat-header" style="border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:12px;">
       <h3 style="margin:0; font-size:16px;">TONI <span id="ai-status">●</span></h3>
-      <button id="close-chat-btn" class="btn mobile-nav-btn" style="padding: 4px 8px;">✕</button>
+      <button id="close-panel-btn" class="btn mobile-nav-btn" style="padding: 4px 8px;">✕</button>
     </div>
     <div id="chat-box" class="scroll-content" style="flex:1;"></div>
-    <form id="chat-form" onsubmit="return false;" style="display:flex; gap:8px; margin-top:12px;">
+    <form id="chat-form" style="display:flex; gap:8px; margin-top:12px;">
       <input type="text" id="user-cmd" class="input-field" placeholder="Befehl..."><button type="submit" class="btn">➤</button>
     </form>
   </aside>
 </div>
-<div id="management-hub" class="dialog-overlay"><div class="dialog-box"><header class="dialog-header"><h2 class="dialog-title">🏢 Management</h2><button class="btn" onclick="UIManager.closeDialog('management-hub')">✕</button></header><div id="management-content" class="dialog-content"></div></div></div>
-<div id="magazine-studio" class="dialog-overlay"><div class="dialog-box"><header class="dialog-header"><h2 class="dialog-title">📰 Studio</h2><button class="btn" onclick="UIManager.closeDialog('magazine-studio')">✕</button></header><div id="magazine-content" class="dialog-content"></div></div></div>
+
 <div id="player-dashboard" class="dialog-overlay"></div>
+<!-- Other dialog overlays would go here -->
+<div id="management-hub" class="dialog-overlay"><div class="dialog-box"><header class="dialog-header"><h2 class="dialog-title">🏢 Management Cockpit</h2><button class="btn" onclick="UIManager.closeDialog('management-hub')">✕</button></header><div id="management-content" class="dialog-content"></div></div></div>
 <div id="admin-panel-dialog" class="dialog-overlay"><div class="dialog-box" style="max-width: 900px;"><header class="dialog-header"><h2 class="dialog-title">👑 Admin Panel</h2><button class="btn" onclick="UIManager.closeDialog('admin-panel-dialog')">✕</button></header><div id="admin-content" class="dialog-content"></div></div></div>
 <div id="mobile-backdrop" class="system-overlay" style="z-index: 7999; background: rgba(0,0,0,0.5); backdrop-filter: none;" hidden></div>
 
 <script>
 'use strict';
-// --- MOCK DATA (UNCHANGED from v2) ---
-const MockData = { users: { "ralf-meier": { id: "ralf-meier", name: "Ralf Meier", role: "Cheftrainer", avatar: "RM", permissions: ["view_team", "edit_tactic", "view_analytics", "edit_magazine"] }, "sabine-keller": { id: "sabine-keller", name: "Sabine Keller", role: "Daten-Analystin", avatar: "SK", permissions: ["view_team", "view_analytics", "view_magazine"] }, "jens-schmidt": { id: "jens-schmidt", name: "Jens Schmidt", role: "Manager", avatar: "JS", permissions: ["view_team", "view_finances", "edit_contracts", "view_magazine"] }, "admin": { id: "admin", name: "Admin", role: "System-Administrator", avatar: "👑", permissions: ["*"] } }, team: { id: "fc-hersfeld", name: "FC Hersfeld", league: "Regionalliga", squad: { "p-1": { id: "p-1", personal: { name: "Müller", num: 13, position: "ST" }, attributes: { pac: 90, sho: 88, pas: 80, dri: 85, def: 40, phy: 78, overall: 88 }, canvas: { x: 800, y: 250 }, medical: { status: "fit", readiness: 95, history: [{date: "2025-10-15", injury: "Muskelfaserriss", duration_days: 21}] }, contract: { salary_monthly: 15000, valid_until: "2028-06-30", clause: "Keine" }, performance: { history: [88, 87, 89, 90, 88] }, interview: `Frage: Zwei Tore heute, wie fühlt es sich an?\nAntwort: Unglaublich. Die harte Arbeit im Training zahlt sich aus. Ein Sieg für das ganze Team!` }, "p-2": { id: "p-2", personal: { name: "Kimmich", num: 6, position: "ZDM" }, attributes: { pac: 75, sho: 78, pas: 91, dri: 84, def: 82, phy: 79, overall: 89 }, canvas: { x: 500, y: 350 }, medical: { status: "aufbautraining", readiness: 60, history: [{date: "2026-01-20", injury: "Bänderdehnung", duration_days: 14}] }, contract: { salary_monthly: 18000, valid_until: "2029-06-30", clause: "Ausstiegsklausel 25 Mio €" }, performance: { history: [89, 89, 88, 87, 88] }, interview: `Frage: Wie läuft die Reha?\nAntwort: Gut, ich bin auf einem guten Weg und hoffe, bald wieder auf dem Platz zu stehen.` }, "p-3": { id: "p-3", personal: { name: "Hummels", num: 5, position: "IV" }, attributes: { pac: 65, sho: 60, pas: 78, dri: 72, def: 90, phy: 84, overall: 86 }, canvas: { x: 250, y: 350 }, medical: { status: "fit", readiness: 92, history: [] }, contract: { salary_monthly: 12000, valid_until: "2027-06-30", clause: "Keine" }, performance: { history: [86, 87, 86, 86, 85] }, interview: `Frage: Die Abwehr stand heute bombensicher.\nAntwort: Kommunikation ist alles. Wir haben als Einheit verteidigt.` } } }, finances: { budget_total: 2500000, costs: { salaries_players: 1250000, salaries_staff: 450000, infrastructure: 300000, travel: 150000, nlz: 200000 }, sponsors: [{ name: "ToniTech Labs", contribution: 500000, status: "aktiv" }, { name: "Zweipunktnull Med", contribution: 350000, status: "aktiv" }] } };
-const AppState = { user: null, team: null, finances: null, ui: { activeTool: 'select', activeOverlay: null } };
-const ApiService = { _simulateLatency(ms = 200) { return new Promise(resolve => setTimeout(resolve, ms)); }, async getAvailableProfiles() { await this._simulateLatency(100); return Object.values(MockData.users).map(u => ({ id: u.id, name: `${u.name} (${u.role})` })); }, async login(userId) { await this._simulateLatency(); const user = MockData.users[userId]; if (user) return user; else throw new Error("Benutzerprofil nicht gefunden."); }, async getTeamData() { await this._simulateLatency(); return JSON.parse(JSON.stringify(MockData.team)); }, async getFinanceData() { await this._simulateLatency(); return JSON.parse(JSON.stringify(MockData.finances)); }, async searchWeb(query) { await this._simulateLatency(1000); console.log(`WEB SEARCH (SIMULATED) FOR: "${query}"`); return `Simuliertes Ergebnis für "${query}":\nDie Rondo-Übung '6 gegen 2' verbessert das Passspiel.`; } };
-
-const UIManager = {
-  elements: {},
-  init() { const ids = [ 'system-loader', 'login-screen', 'login-form', 'username', 'main-app', 'user-avatar', 'user-name', 'user-role', 'admin-panel-btn', 'left-panel', 'right-panel', 'main-arena', 'board-wrap', 'main-canvas', 'arena-controls', 'ai-status', 'chat-box', 'chat-form', 'user-cmd', 'management-hub', 'management-content', 'magazine-studio', 'magazine-content', 'player-dashboard', 'admin-panel-dialog', 'admin-content', 'toggle-left-panel-btn', 'toggle-right-panel-btn', 'close-chat-btn', 'mobile-backdrop' ]; ids.forEach(id => this.elements[id] = document.getElementById(id)); },
-  bindEvents() {
-    this.elements['left-panel'].addEventListener('click', (e) => {
-        const target = e.target.closest('button[data-action]'); if (!target) return;
-        this.togglePanel('left-panel', false); // Close panel on action
-        switch(target.dataset.action) {
-            case 'open-management-hub': this.openDialog('management-hub'); this.renderManagementHub(); break;
-            case 'open-magazine-studio': this.openDialog('magazine-studio'); this.renderMagazineStudio(); break;
-            case 'open-player-dashboard': this.renderPlayerDashboard(target.dataset.playerId); break;
-            case 'logout': App.logout(); break;
+// --- MOCK DATA ---
+const MockData = {
+    users: {
+        "ralf-meier": { id: "ralf-meier", name: "Ralf Meier", role: "Cheftrainer (3-4-3)", avatar: "RM", permissions: ["view_team", "edit_tactic", "view_analytics", "edit_magazine"] },
+        "jens-schmidt": { id: "jens-schmidt", name: "Jens Schmidt", role: "Manager", avatar: "JS", permissions: ["view_team", "view_finances", "edit_contracts"] },
+        "admin": { id: "admin", name: "Admin", role: "System-Administrator", avatar: "👑", permissions: ["*"] }
+    },
+    team: {
+        squad: {
+            "p1":{id:"p1",pos:"ST",name:"Müller",num:13,att:{pac:90,sho:88,pas:80,dri:85,def:40,phy:78},ovr:88,bio:{hr:75,readiness:95,muscle:42.5,fat:11.2,water:60.1}},
+            "p2":{id:"p2",pos:"ZDM",name:"Kimmich",num:6,att:{pac:75,sho:78,pas:91,dri:84,def:82,phy:79},ovr:89,bio:{hr:68,readiness:92,muscle:41.8,fat:12.1,water:59.5}},
+            "p3":{id:"p3",pos:"IV",name:"Hummels",num:5,att:{pac:65,sho:60,pas:78,dri:72,def:90,phy:84},ovr:86,bio:{hr:71,readiness:88,muscle:44.1,fat:13.5,water:58.2}}
         }
-    });
-    this.elements['admin-panel-btn'].addEventListener('click', () => { this.openDialog('admin-panel-dialog'); this.renderAdminPanel(); });
-    this.elements['chat-form'].addEventListener('submit', () => ToniAI.processCommand());
-    this.elements['toggle-left-panel-btn'].addEventListener('click', () => this.togglePanel('left-panel'));
-    this.elements['toggle-right-panel-btn'].addEventListener('click', () => this.togglePanel('right-panel'));
-    this.elements['close-chat-btn'].addEventListener('click', () => this.togglePanel('right-panel', false));
-    this.elements['mobile-backdrop'].addEventListener('click', () => { this.togglePanel('left-panel', false); this.togglePanel('right-panel', false); });
-  },
-  togglePanel(panelId, forceState) {
-      const panel = this.elements[panelId]; const backdrop = this.elements['mobile-backdrop'];
-      const shouldBeVisible = forceState === undefined?!panel.classList.contains('is-visible') : forceState;
-      panel.classList.toggle('is-visible', shouldBeVisible);
-      const anyPanelVisible = this.elements['left-panel'].classList.contains('is-visible') || this.elements['right-panel'].classList.contains('is-visible');
-      backdrop.hidden =!anyPanelVisible;
-  },
-  showApp() { this.elements['main-app'].style.display = 'grid'; this.updateHeader(); this.renderLeftPanel(); },
-  updateHeader() { this.elements['user-name'].textContent = AppState.user.name; this.elements['user-role'].textContent = AppState.user.role; this.elements['user-avatar'].textContent = AppState.user.avatar; this.elements['admin-panel-btn'].style.display = AppState.user.permissions.includes('*')? 'block' : 'none'; },
-  openDialog(id) { this.closeAllDialogs(); const dialog = this.elements[id]; if (dialog) { dialog.classList.add('is-active'); AppState.ui.activeOverlay = id; } },
-  closeDialog(id) { const dialog = this.elements[id]; if (dialog) { dialog.classList.remove('is-active'); if(AppState.ui.activeOverlay === id) AppState.ui.activeOverlay = null; } },
-  closeAllDialogs() { document.querySelectorAll('.dialog-overlay').forEach(d => d.classList.remove('is-active')); AppState.ui.activeOverlay = null; },
-  renderLeftPanel() { let c = `<h2 style="font-size: 16px; margin: 0 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Hauptmenü</h2>`; if (AppState.user.permissions.includes('view_finances') || AppState.user.permissions.includes('*')) c += `<button class="btn" data-action="open-management-hub" style="width:100%; margin-bottom:10px;">🏢 Management</button>`; if (AppState.user.permissions.includes('edit_magazine') || AppState.user.permissions.includes('*')) c += `<button class="btn" data-action="open-magazine-studio" style="width:100%; margin-bottom:10px;">📰 Studio</button>`; c += `<button class="btn" data-action="logout" style="width:100%; margin-top:20px; border-color:var(--accent-red); color:var(--accent-red);">Logout</button>`; c += `<h2 style="font-size: 16px; margin: 24px 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Kader</h2>`; c += '<div class="scroll-content" style="flex:1;">'; for (const p of Object.values(AppState.team.squad)) { c += `<button data-action="open-player-dashboard" data-player-id="${p.id}" class="btn" style="width:100%; display:flex; align-items:center; gap:12px; margin-bottom:8px; text-align:left;"><span style="background:var(--bg-dark); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-weight:bold;">${p.personal.num}</span><div><div>${p.personal.name}</div><small class="text-muted">${p.personal.position}</small></div><span style="margin-left:auto; font-size:16px; font-weight:bold;">${p.attributes.overall}</span></button>`; } c += '</div>'; this.elements['left-panel'].innerHTML = c; },
-  renderManagementHub() { /* CONTENT FROM V2 */ const f = AppState.finances; let c; if (f) { const t = Object.values(f.costs).reduce((a, b) => a + b, 0), r = f.budget_total - t; c = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;"><div><h3>Finanzstatus (p.a.)</h3><div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);"><p>Gesamtbudget: <strong class="text-green">${f.budget_total.toLocaleString('de-DE')} €</strong></p><p>Gesamtkosten: <strong class="text-red">${t.toLocaleString('de-DE')} €</strong></p><hr style="border-color: var(--border-color);"><p>Liquidität: <strong class="${r > 0? 'text-green' : 'text-red'}">${r.toLocaleString('de-DE')} €</strong></p></div><h3 style="margin-top:24px;">Sponsoren</h3><div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);">${f.sponsors.map(s => `<p>${s.name}: <strong>${s.contribution.toLocaleString('de-DE')} €</strong> <span class="text-green">(${s.status})</span></p>`).join('')}</div></div><div><h3>Kostenstellen</h3><div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);"><p>Gehälter (Profis): <strong>${f.costs.salaries_players.toLocaleString('de-DE')} €</strong></p><p>Gehälter (Stab): <strong>${f.costs.salaries_staff.toLocaleString('de-DE')} €</strong></p><p>Infrastruktur: <strong>${f.costs.infrastructure.toLocaleString('de-DE')} €</strong></p><p>Nachwuchs (NLZ): <strong>${f.costs.nlz.toLocaleString('de-DE')} €</strong></p><p>Reisekosten: <strong>${f.costs.travel.toLocaleString('de-DE')} €</strong></p></div></div></div>`; } else { c = `<p class="text-muted">Keine Zugriffsberechtigung auf Finanzdaten.</p>`; } this.elements['management-content'].innerHTML = c; },
-  renderMagazineStudio() { /* CONTENT FROM V2 */ let html = `<div class="magazine-editor"><div id="magazine-sidebar"><h3>Seitenübersicht</h3><div class="magazine-pages-overview" id="magazine-pages-overview" style="display:flex; flex-direction:column; gap:12px;"></div><div style="margin-top: 20px;"><h3>Toni-Assistent</h3><button id="generate-interview-btn" class="btn" style="width:100%; margin-bottom:8px;">Interview generieren</button><button id="generate-match-report-btn" class="btn" style="width:100%;">Spielbericht generieren</button></div></div><div id="magazine-page-view" style="background: #fff; color: #000; aspect-ratio: 210/297; max-height:100%; padding:20px;"></div></div>`; this.elements['magazine-content'].innerHTML = html; const pagesContainer = document.getElementById('magazine-pages-overview'); const pageView = document.getElementById('magazine-page-view'); const pages = [{ title: 'Cover', template: `<h1>FC Hersfeld Aktuell</h1>` }, { title: 'Spieler im Fokus', template: `<h2>Spieler im Fokus</h2><div id="interview-content" contenteditable="true" style="min-height:400px; border:1px dashed #ccc; padding:10px;"></div>` }, { title: 'Letztes Spiel', template: `<h2>Analyse: Letztes Spiel</h2><div id="report-content" contenteditable="true" style="min-height:400px; border:1px dashed #ccc; padding:10px;"></div>` } ]; const renderPage = (index) => { pagesContainer.innerHTML = pages.map((p, i) => `<div class="page-thumbnail btn ${i === index? 'active' : ''}" data-page-index="${i}">${p.title}</div>`).join(''); pageView.innerHTML = pages[index].template; document.querySelectorAll('.page-thumbnail').forEach(thumb => thumb.addEventListener('click', (e) => renderPage(parseInt(e.currentTarget.dataset.pageIndex)))); }; renderPage(0); document.getElementById('generate-interview-btn').addEventListener('click', () => { const player = MockData.team.squad['p-1']; if (player.interview) { renderPage(1); document.getElementById('interview-content').innerText = `Interview mit ${player.personal.name}:\n\n${player.interview}`; ToniAI.speak(`Interview mit ${player.personal.name} generiert.`); } }); document.getElementById('generate-match-report-btn').addEventListener('click', () => { renderPage(2); document.getElementById('report-content').innerText = `Spielbericht (simuliert):\n\nEin 2:1 Sieg. Die Mannschaft zeigte Moral. Müller war Mann des Spiels.`; ToniAI.speak(`Spielbericht generiert.`); }); },
-  renderPlayerDashboard(playerId) { /* CONTENT FROM V2 */ const p = AppState.team.squad[playerId]; if (!p) return; const history = p.performance.history; const maxRating = Math.max(...history, 95); const graphHTML = history.map((rating, i) => `<div style="flex:1; background-color:var(--accent-blue); height: ${(rating / maxRating) * 100}%" title="Spiel ${i+1}: Rating ${rating}"></div>`).join(''); this.elements['player-dashboard'].innerHTML = `<div class="dialog-box" style="max-width: 900px;"><header class="dialog-header"><h2 class="dialog-title">Spieler-Akte: ${p.personal.name} (#${p.personal.num})</h2><button class="btn" onclick="UIManager.closeDialog('player-dashboard')">✕</button></header><div class="dialog-content"><div style="display:grid; grid-template-columns: 250px 1fr; gap: 32px;"><div><div style="background:var(--bg-dark); padding:16px; border-radius:var(--radius-md);"><h4>Attribute</h4><p><strong>Gesamt: ${p.attributes.overall}</strong></p><p>PAC: ${p.attributes.pac} | SHO: ${p.attributes.sho}</p><p>PAS: ${p.attributes.pas} | DRI: ${p.attributes.dri}</p><p>DEF: ${p.attributes.def} | PHY: ${p.attributes.phy}</p></div></div><div><h3>Leistungsentwicklung</h3><div style="display:flex; align-items:flex-end; gap:4px; height:120px; border-bottom:1px solid var(--border-color);">${graphHTML}</div><h3 style="margin-top:24px;">Medizinische Akte</h3><p>Status: <span class="${p.medical.status === 'fit'? 'text-green' : 'text-red'}">${p.medical.status.toUpperCase()}</span> | Readiness: <strong>${p.medical.readiness}%</strong></p></div></div></div></div>`; this.openDialog('player-dashboard'); },
-  renderAdminPanel() { /* CONTENT FROM V2 */ let userTable = Object.values(MockData.users).map(u => `<tr><td>${u.name}</td><td>${u.role}</td></tr>`).join(''); this.elements['admin-content'].innerHTML = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;"><div><h3>Benutzer</h3><table class="data-table"><thead><tr><th>Name</th><th>Rolle</th></tr></thead><tbody>${userTable}</tbody></table></div><div><h3>Simulation</h3><button id="trigger-transfer-btn" class="btn" style="width:100%;">Transferangebot für Müller auslösen</button></div></div>`; document.getElementById('trigger-transfer-btn').addEventListener('click', () => { ToniAI.speak(`ADMIN-EREIGNIS: Transferangebot über 20 Mio. € für Müller ist eingegangen.`); this.closeDialog('admin-panel-dialog'); }); }
+    },
+    finances: { budget: 2500000, salaries: 1700000, infrastructure: 450000, sponsors: [{name:"ToniTech Labs", val:500000}, {name:"Zweipunktnull Med", val:350000}] }
 };
 
-const ToniAI = { /* LOGIC FROM V2, UNCHANGED */ /*... same as v2... */ init() { this.elements = UIManager.elements; this.updateStatus('online', 'var(--accent-green)'); this.speak(`System für ${AppState.user.name} geladen.`); }, updateStatus(text, color) { this.elements['ai-status'].textContent = `● ${text.toUpperCase()}`; this.elements['ai-status'].style.color = color; }, speak(message, isUser = false) { const chatBox = this.elements['chat-box']; const msgDiv = document.createElement('div'); msgDiv.style.marginBottom = '12px'; if (isUser) { msgDiv.style.textAlign = 'right'; msgDiv.innerHTML = `<div style="display:inline-block; background:var(--accent-blue); color: #fff; padding:8px 12px; border-radius:12px 12px 0 12px;">${message}</div>`; } else { msgDiv.innerHTML = `<small style="color:var(--text-secondary); font-weight:bold;">TONI:</small><div style="padding: 4px 0;">${message.replace(/\n/g, "<br>")}</div>`; } chatBox.appendChild(msgDiv); chatBox.scrollTop = chatBox.scrollHeight; }, async processCommand() { const input = this.elements['user-cmd']; const commandText = input.value.trim(); if (!commandText) return; this.speak(commandText, true); input.value = ''; const result = await ApiService.searchWeb(commandText); this.speak(result); if(commandText.includes("rondo")) ArenaEngine.Tactic.visualizeExercise(commandText); } };
-const ArenaEngine = { /* LOGIC FROM V2, UNCHANGED */ /*... same as v2... */ canvas: null, ctx: null, dpr: 1, isDragging: false, dragTarget: null, init() { this.canvas = UIManager.elements['main-canvas']; this.ctx = this.canvas.getContext('2d'); this.dpr = window.devicePixelRatio || 1; this.setupCanvas(); this.renderControls(); this.bindCanvasEvents(); this.History.saveState(); window.addEventListener('resize', () => { this.setupCanvas(); this.render(); }); this.render(); }, setupCanvas() { const rect = this.canvas.parentElement.getBoundingClientRect(); this.canvas.width = rect.width * this.dpr; this.canvas.height = rect.height * this.dpr; this.canvas.style.width = `${rect.width}px`; this.canvas.style.height = `${rect.height}px`; this.ctx.scale(this.dpr, this.dpr); }, renderControls() { const tools = [{ id: 'select', icon: '🖐️', title: 'Auswählen' }, { id: 'arrow', icon: '→', title: 'Pfeil' }, { id: 'line', icon: '—', title: 'Linie' }, { id: 'zone', icon: '■', title: 'Zone' }, { id: 'clear', icon: '🗑️', title: 'Löschen' }]; let html = tools.map(t => `<button class="btn tool-btn" data-tool="${t.id}" title="${t.title}">${t.icon}</button>`).join(''); html += `<button class="btn tool-btn" id="btn-undo" title="Rückgängig">↩️</button><button class="btn tool-btn" id="btn-redo" title="Wiederholen">↪️</button>`; UIManager.elements['arena-controls'].innerHTML = html; UIManager.elements['arena-controls'].addEventListener('click', (e) => { const toolBtn = e.target.closest('[data-tool]'); if (toolBtn) this.setTool(toolBtn.dataset.tool); if (e.target.closest('#btn-undo')) this.History.undo(); if (e.target.closest('#btn-redo')) this.History.redo(); }); this.setTool('select'); }, bindCanvasEvents() { const getPos = (e) => { const rect = this.canvas.getBoundingClientRect(); const touch = e.touches? e.touches[0] : e; return { x: touch.clientX - rect.left, y: touch.clientY - rect.top }; }; this.canvas.addEventListener('pointerdown', (e) => { const pos = getPos(e); const player = this.getPlayerAtPos(pos); if (AppState.ui.activeTool === 'select' && player) { this.isDragging = true; this.dragTarget = player; this.canvas.style.cursor = 'grabbing'; } else { this.Drawing.start(pos); } }); this.canvas.addEventListener('pointermove', (e) => { e.preventDefault(); const pos = getPos(e); if (this.isDragging && this.dragTarget) { this.dragTarget.canvas.x = pos.x; this.dragTarget.canvas.y = pos.y; this.render(); } else { if (this.Drawing.update(pos)) this.render(); } }, {passive: false}); this.canvas.addEventListener('pointerup', () => { if (this.isDragging) { this.isDragging = false; this.dragTarget = null; this.canvas.style.cursor = 'grab'; this.History.saveState(); } else { this.Drawing.finish(); } }); this.canvas.addEventListener('touchstart', (e) => this.canvas.dispatchEvent(new PointerEvent('pointerdown', e.touches[0])), {passive: false}); this.canvas.addEventListener('touchmove', (e) => this.canvas.dispatchEvent(new PointerEvent('pointermove', e.touches[0])), {passive: false}); this.canvas.addEventListener('touchend', (e) => this.canvas.dispatchEvent(new PointerEvent('pointerup', e.changedTouches[0])), {passive: false}); }, getPlayerAtPos(pos) { return Object.values(AppState.team.squad).reverse().find(p => Math.hypot(p.canvas.x - pos.x, p.canvas.y - pos.y) < 25); }, render() { requestAnimationFrame(() => { const w = this.canvas.clientWidth, h = this.canvas.clientHeight; this.ctx.clearRect(0, 0, w, h); this.drawPitch(w, h); this.Drawing.renderAll(); Object.values(AppState.team.squad).forEach(p => this.drawPlayer(p)); }); }, drawPitch(w, h) { this.ctx.fillStyle = '#011a01'; this.ctx.fillRect(0, 0, w, h); this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'; this.ctx.lineWidth = 2; this.ctx.strokeRect(25, 25, w - 50, h - 50); this.ctx.beginPath(); this.ctx.moveTo(w / 2, 25); this.ctx.lineTo(w / 2, h - 25); this.ctx.stroke(); this.ctx.beginPath(); this.ctx.arc(w / 2, h / 2, Math.min(w,h) / 10, 0, 2 * Math.PI); this.ctx.stroke(); this.ctx.strokeRect(25, h/2 - Math.min(w,h)/4, Math.min(w,h)/6, Math.min(w,h)/2); this.ctx.strokeRect(w-25-Math.min(w,h)/6, h/2 - Math.min(w,h)/4, Math.min(w,h)/6, Math.min(w,h)/2);}, drawPlayer(p) { const { x, y } = p.canvas; this.ctx.beginPath(); this.ctx.arc(x, y, 20, 0, 2 * Math.PI); this.ctx.fillStyle = p.personal.position === 'GK'? 'var(--accent-yellow)' : 'var(--accent-blue)'; this.ctx.fill(); this.ctx.fillStyle = '#fff'; this.ctx.font = 'bold 18px var(--font-sans)'; this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle'; this.ctx.fillText(p.personal.num, x, y); }, setTool(toolId) { if (toolId === 'clear') { AppState.drawings = []; this.History.saveState(); this.render(); ToniAI.speak('Zeichnungen entfernt.'); return; } AppState.ui.activeTool = toolId; document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tool === toolId)); this.canvas.style.cursor = toolId === 'select'? 'grab' : 'crosshair'; }};
-ArenaEngine.Drawing = { /* LOGIC FROM V2, UNCHANGED */ /*... same as v2... */ current: null, start(pos) { if (AppState.ui.activeTool === 'select') return; this.current = { id: `draw_${Date.now()}`, type: AppState.ui.activeTool, color: AppState.ui.activeTool === 'zone'? 'rgba(51, 153, 255, 0.2)' : 'rgba(255, 51, 51, 0.9)', startX: pos.x, startY: pos.y, endX: pos.x, endY: pos.y }; }, update(pos) { if (!this.current) return false; this.current.endX = pos.x; this.current.endY = pos.y; return true; }, finish() { if (!this.current) return; if (Math.hypot(this.current.endX - this.current.startX, this.current.endY - this.current.startY) > 10) { if (!AppState.drawings) AppState.drawings = []; AppState.drawings.push(this.current); this.History.saveState(); } this.current = null; ArenaEngine.render(); }, renderAll() { const drawings = AppState.drawings || []; drawings.forEach(d => this.drawHelper(d)); if (this.current) this.drawHelper(this.current); }, drawHelper(drawing) { const { ctx } = ArenaEngine; const { type, color, startX, startY, endX, endY } = drawing; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 4; if (type === 'zone') { ctx.fillRect(startX, startY, endX - startX, endY - startY); } else { ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke(); if (type === 'arrow') { const angle = Math.atan2(endY - startY, endX - startX); ctx.beginPath(); ctx.moveTo(endX, endY); ctx.lineTo(endX - 15 * Math.cos(angle - Math.PI / 6), endY - 15 * Math.sin(angle - Math.PI / 6)); ctx.moveTo(endX, endY); ctx.lineTo(endX - 15 * Math.cos(angle + Math.PI / 6), endY - 15 * Math.sin(angle + Math.PI / 6)); ctx.stroke(); } } }};
-ArenaEngine.History = { /* LOGIC FROM V2, UNCHANGED */ /*... same as v2... */ past: [], future: [], saveState() { const state = JSON.stringify({ positions: Object.values(AppState.team.squad).map(p => ({ id: p.id, x: p.canvas.x, y: p.canvas.y })), drawings: AppState.drawings || [] }); if (this.past.length > 0 && this.past[this.past.length - 1] === state) return; this.past.push(state); this.future = []; }, loadState(stateString) { const state = JSON.parse(stateString); state.positions.forEach(pos => { if (AppState.team.squad[pos.id]) { AppState.team.squad[pos.id].canvas.x = pos.x; AppState.team.squad[pos.id].canvas.y = pos.y; } }); AppState.drawings = state.drawings; ArenaEngine.render(); }, undo() { if (this.past.length <= 1) return; this.future.unshift(this.past.pop()); this.loadState(this.past[this.past.length - 1]); }, redo() { if (this.future.length === 0) return; const nextState = this.future.shift(); this.past.push(nextState); this.loadState(nextState); }};
-ArenaEngine.Tactic = { /* LOGIC FROM V2, UNCHANGED */ /*... same as v2... */ visualizeExercise(commandText) { if (commandText.toLowerCase().includes("rondo")) { ToniAI.speak("Okay, ich baue die Rondo-Übung auf."); AppState.drawings = [{ id: 'zone_rondo', type: 'zone', color: 'rgba(255, 174, 0, 0.3)', startX: 400, startY: 200, endX: 800, endY: 500 }]; ArenaEngine.History.saveState(); ArenaEngine.render(); } } };
+// --- APPLICATION STATE & API ---
+const AppState = { user: null, team: null, drawings: [], ui: { activeTool: 'select' } };
+const ApiService = {
+    _s(ms=200){return new Promise(r=>setTimeout(r,ms));},
+    async getProfiles(){await this._s(100);return Object.values(MockData.users).map(u=>({id:u.id,name:u.name,role:u.role}));},
+    async login(id){await this._s();const u=MockData.users[id];if(u)return u;throw new Error("User not found");},
+    async getData(type){await this._s();return JSON.parse(JSON.stringify(MockData[type]));},
+    async searchWeb(q){await this._s(1000);console.log(`WEB SEARCH: ${q}`);return `Die Rondo-Übung '4 gegen 2' ist ideal. Feld: 10x10 Meter. Material: 6 Hütchen, Bälle. Ablauf: 4 Angreifer an den Seiten, 2 Verteidiger jagen den Ball. Ziel: 10 Pässe schaffen.`;}
+};
 
+// --- UI MANAGER ---
+const UIManager = {
+    init() {
+        this.el = {};
+        ['system-loader','login-screen','login-form','username','main-app','user-avatar','user-name','user-role','live-session-btn','admin-panel-btn','toggle-left-panel-btn','toggle-right-panel-btn','left-panel','right-panel','close-panel-btn','main-arena','board-wrap','main-canvas','arena-controls','ai-status','chat-box','chat-form','user-cmd','player-dashboard','management-hub','management-content','admin-panel-dialog','admin-content','mobile-backdrop']
+       .forEach(id => this.el[id] = document.getElementById(id));
+        this.bindEvents();
+    },
+    bindEvents() {
+        this.el['login-form'].onsubmit = e => {e.preventDefault(); App.login(this.el['username'].value);};
+        this.el['left-panel'].onclick = e => {
+            const t=e.target.closest('[data-action]'); if(!t)return; this.togglePanel('left-panel',false);
+            switch(t.dataset.action){
+                case 'squad': this.renderSquadList(); break;
+                case 'management': this.openDialog('management-hub'); this.renderManagementHub(); break;
+                case 'admin': this.openDialog('admin-panel-dialog'); this.renderAdminPanel(); break;
+                case 'logout': App.logout(); break;
+            }
+        };
+        this.el['toggle-left-panel-btn'].onclick=()=>this.togglePanel('left-panel');
+        this.el['toggle-right-panel-btn'].onclick=()=>this.togglePanel('right-panel');
+        this.el['close-panel-btn'].onclick=()=>this.togglePanel('right-panel',false);
+        this.el['mobile-backdrop'].onclick=()=>{this.togglePanel('left-panel',false);this.togglePanel('right-panel',false);};
+        this.el['chat-form'].onsubmit=e=>{e.preventDefault();ToniAI.processCommand();};
+        this.el['live-session-btn'].onclick=()=>ToniAI.toggleLiveSession();
+    },
+    togglePanel(id,force){const p=this.el[id],v=force===undefined?!p.classList.contains('is-visible'):force;p.classList.toggle('is-visible',v);const a=this.el['left-panel'].classList.contains('is-visible')||this.el['right-panel'].classList.contains('is-visible');this.el['mobile-backdrop'].hidden=!a;},
+    openDialog(id){document.querySelectorAll('.dialog-overlay').forEach(d=>d.classList.remove('is-active'));this.el[id].classList.add('is-active');},
+    closeDialog(id){this.el[id].classList.remove('is-active');},
+    showApp(){this.el['main-app'].style.display='grid';this.updateHeader();this.renderLeftPanel();this.renderSquadList();},
+    updateHeader(){this.el['user-name'].textContent=AppState.user.name;this.el['user-role'].textContent=AppState.user.role;this.el['user-avatar'].textContent=AppState.user.avatar;this.el['admin-panel-btn'].style.display=AppState.user.permissions.includes('*')?'block':'none';},
+    renderLeftPanel() {
+        let c=`<div id="squad-list" class="scroll-content" style="flex:1;"></div><div style="border-top:1px solid var(--border-color); padding-top:12px; margin-top:12px;">`;
+        if(AppState.user.permissions.includes('view_finances') || AppState.user.permissions.includes('*')) c+=`<button class="btn" data-action="management" style="width:100%; margin-bottom:8px;">🏢 Management</button>`;
+        if(AppState.user.permissions.includes('*')) c+=`<button class="btn" data-action="admin" style="width:100%; margin-bottom:8px;">👑 Admin Panel</button>`;
+        c+=`<button class="btn" data-action="logout" style="width:100%; border-color:var(--accent-red); color:var(--accent-red);">Logout</button></div>`;
+        this.el['left-panel'].innerHTML=c;
+    },
+    renderSquadList() {
+        const listEl=document.getElementById('squad-list');
+        listEl.innerHTML = `<h2>Kader</h2>` + Object.values(AppState.team.squad).map(p =>
+            `<button class="btn" onclick="UIManager.renderPlayerDashboard('${p.id}')" style="width:100%;display:flex;align-items:center;gap:12px;margin-bottom:8px;text-align:left;">
+                <span style="background:var(--bg-dark);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:bold;">${p.num}</span>
+                <div><div>${p.name}</div><small style="color:var(--text-secondary);">${p.pos}</small></div>
+                <span style="margin-left:auto;font-size:16px;font-weight:bold;">${p.ovr}</span>
+            </button>`
+        ).join('');
+    },
+    renderPlayerDashboard(id){
+        const p=AppState.team.squad[id]; if(!p)return;
+        this.el['player-dashboard'].innerHTML =
+        `<div class="dialog-box"><header class="dialog-header"><h2 class="dialog-title">Akte: ${p.name}</h2><button class="btn" onclick="UIManager.closeDialog('player-dashboard')">✕</button></header>
+        <div class="dialog-content scroll-content" style="display:grid; grid-template-columns: 300px 1fr; gap:24px;">
+            <div class="fifa-card">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <strong style="font-size:24px;">${p.ovr}</strong>
+                    <span style="font-size:20px;font-weight:bold;">${p.pos}</span>
+                </div>
+                <div style="text-align:center; margin:12px 0; font-size:20px; font-weight:bold;">${p.name} #${p.num}</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-weight:600;">
+                    <span>${p.att.pac} PAC</span><span>${p.att.dri} DRI</span>
+                    <span>${p.att.sho} SHO</span><span>${p.att.def} DEF</span>
+                    <span>${p.att.pas} PAS</span><span>${p.att.phy} PHY</span>
+                </div>
+            </div>
+            <div>
+                <h3>Bio-Monitoring</h3>
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;">
+                    <div id="hr-display" style="font-size:24px;color:var(--accent-red);">❤️ ${p.bio.hr}</div>
+                    <div>Readiness: <strong style="font-size:18px;">${p.bio.readiness}%</strong></div>
+                </div>
+                <h3>BIA-Diagnostik</h3>
+                <p>Muskelmasse: ${p.bio.muscle}kg | Körperfett: ${p.bio.fat}% | Wasser: ${p.bio.water}%</p>
+            </div>
+        </div></div>`;
+        this.openDialog('player-dashboard');
+    },
+    renderManagementHub(){
+        const f=AppState.finances;const c=f.salaries+f.infrastructure;const l=f.budget-c;
+        this.el['management-content'].innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+            <div><h3>Finanzstatus (p.a.)</h3>
+                <p>Budget: <strong style="color:var(--accent-green);">${f.budget.toLocaleString('de-DE')} €</strong></p>
+                <p>Kosten: <strong style="color:var(--accent-red);">${c.toLocaleString('de-DE')} €</strong></p>
+                <p>Liquidität: <strong style="color:${l>0?'var(--accent-green)':'var(--accent-red)'};">${l.toLocaleString('de-DE')} €</strong></p>
+            </div>
+            <div><h3>Sponsoring</h3>${f.sponsors.map(s=>`<p>${s.name}: <strong>${s.val.toLocaleString('de-DE')} €</strong></p>`).join('')}</div>
+        </div>
+        <h3>Analysezentrum Ausbau</h3><div style="background:var(--bg-dark);border-radius:var(--radius-md);padding:4px;"><div style="width:45%; background:var(--accent-blue);height:20px;border-radius:var(--radius-md);"></div></div>`;
+    }
+};
+
+// --- TONI AI CORE ---
+const ToniAI = {
+    init(){this.el=UIManager.el;this.updateStatus('online','var(--accent-green)');this.speak(`System für ${AppState.user.name} online. Liga: Regionalliga. Formation: ${AppState.user.role.match(/\((.*?)\)/)?.[1]||'Standard'}`);this.setupSpeech();},
+    updateStatus(t,c){this.el['ai-status'].style.color=c;},
+    speak(m,u=false){const d=document.createElement('div');d.style.marginBottom='12px';if(u){d.style.textAlign='right';d.innerHTML=`<div style="display:inline-block;background:var(--accent-blue);color:#fff;padding:8px 12px;border-radius:12px 12px 0 12px;">${m}</div>`;}else{d.innerHTML=`<small style="color:var(--text-secondary);font-weight:bold;">TONI:</small><div style="padding:4px 0;">${m.replace(/\n/g,"<br>")}</div>`;}this.el['chat-box'].append(d);this.el['chat-box'].scrollTop=this.el['chat-box'].scrollHeight;},
+    async processCommand(cmd){
+        const txt=cmd||this.el['user-cmd'].value.trim();if(!txt)return;this.speak(txt,true);if(!cmd)this.el['user-cmd'].value='';
+        if(txt.match(/suche|finde/i) && txt.match(/übung|rondo/i)){
+            this.speak("Suche Übung im Web und visualisiere sie...");
+            const res = await ApiService.searchWeb(txt);
+            this.speak(res);
+            ArenaEngine.Tactic.visualizeFromText(res);
+        } else if (txt.match(/system-duell|formationen/i)) {
+            this.speak("Stelle System-Duell auf: Dein 3-4-3 gegen ein 4-4-2.");
+            ArenaEngine.Tactic.setupSystemDuel();
+        } else {
+            this.speak("Verstanden. Führe Websuche durch...");
+            const res = await ApiService.searchWeb(txt); this.speak(res);
+        }
+    },
+    setupSpeech(){const S=window.SpeechRecognition||window.webkitSpeechRecognition;if(!S)return;this.rec=new S();this.rec.continuous=false;this.rec.lang='de-DE';this.rec.onresult=e=>{const t=e.results[e.results.length-1][0].transcript.trim();this.processCommand(t);};this.rec.onend=()=>{if(this.el['live-session-btn'].classList.contains('active'))this.rec.start();};},
+    toggleLiveSession(){if(!this.rec)return this.speak("Spracherkennung nicht unterstützt.");const btn=this.el['live-session-btn'];btn.classList.toggle('active');if(btn.classList.contains('active')){this.rec.start();this.speak("Live-Session gestartet. Ich höre zu.");}else{this.rec.stop();this.speak("Live-Session beendet.");}}
+};
+
+// --- ARENA ENGINE ---
+const ArenaEngine = {
+    init(){this.c=UIManager.el['main-canvas'];this.ctx=this.c.getContext('2d');this.dpr=window.devicePixelRatio||1;this.setupCanvas();this.bindEvents();this.render();},
+    setupCanvas(){const r=this.c.parentElement.getBoundingClientRect();this.c.width=r.width*this.dpr;this.c.height=r.height*this.dpr;this.c.style.width=`${r.width}px`;this.c.style.height=`${r.height}px`;this.ctx.scale(this.dpr,this.dpr);},
+    bindEvents(){const getPos=e=>{const r=this.c.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};};const pDown=e=>{const pos=getPos(e);const p=this.getPlayerAt(pos);if(AppState.ui.activeTool==='select'&&p){this.isDragging=true;this.dragTarget=p;this.c.style.cursor='grabbing';}else{this.Drawing.start(pos);}};const pMove=e=>{e.preventDefault();const pos=getPos(e);if(this.isDragging&&this.dragTarget){this.dragTarget.canvas.x=pos.x;this.dragTarget.canvas.y=pos.y;this.render();}else{if(this.Drawing.update(pos))this.render();}};const pUp=()=>{if(this.isDragging){this.isDragging=false;this.dragTarget=null;this.c.style.cursor='grab';}else{this.Drawing.finish();}};this.c.onpointerdown=pDown;this.c.onpointermove=pMove;this.c.onpointerup=pUp;this.c.onpointercancel=pUp;window.onresize=()=>{this.setupCanvas();this.render();};UIManager.el['arena-controls'].onclick=e=>{const t=e.target.closest('[data-tool]');if(t)this.setTool(t.dataset.tool);};},
+    render(){requestAnimationFrame(()=>{const w=this.c.clientWidth,h=this.c.clientHeight;this.ctx.clearRect(0,0,w,h);this.drawPitch(w,h);this.Drawing.renderAll();Object.values(AppState.team.squad).forEach(p=>this.drawPlayer(p));if(AppState.opponents)Object.values(AppState.opponents).forEach(p=>this.drawPlayer(p,true));});},
+    drawPitch(w,h){this.ctx.fillStyle='#011a01';this.ctx.fillRect(0,0,w,h);this.ctx.strokeStyle='rgba(255,255,255,0.2)';this.ctx.lineWidth=2;this.ctx.strokeRect(25,25,w-50,h-50);this.ctx.beginPath();this.ctx.moveTo(w/2,25);this.ctx.lineTo(w/2,h-50);this.ctx.stroke();this.ctx.beginPath();this.ctx.arc(w/2,h/2,Math.min(w,h)/10,0,2*Math.PI);this.ctx.stroke();this.ctx.strokeRect(25,h/2-Math.min(w,h)/4,Math.min(w,h)/6,Math.min(w,h)/2);this.ctx.strokeRect(w-25-Math.min(w,h)/6,h/2-Math.min(w,h)/4,Math.min(w,h)/6,Math.min(w,h)/2);},
+    drawPlayer(p,isOpp=false){const{x,y}=p.canvas;this.ctx.beginPath();this.ctx.arc(x,y,20,0,2*Math.PI);this.ctx.fillStyle=isOpp?'#c00':'var(--accent-blue)';this.ctx.fill();this.ctx.fillStyle='#fff';this.ctx.font='bold 18px var(--font-sans)';this.ctx.textAlign='center';this.ctx.textBaseline='middle';this.ctx.fillText(p.num,x,y);},
+    getPlayerAt(pos){return Object.values(AppState.team.squad).reverse().find(p=>Math.hypot(p.canvas.x-pos.x,p.canvas.y-pos.y)<25);},
+    setTool(id){if(id==='clear'){AppState.drawings=[];this.render();return;}AppState.ui.activeTool=id;document.querySelectorAll('.tool-btn').forEach(b=>b.classList.toggle('active',b.dataset.tool===id));this.c.style.cursor=id==='select'?'grab':'crosshair';},
+    Tactic:{
+        visualizeFromText(txt){
+            AppState.drawings=[];
+            const fieldMatch=txt.match(/(\d+)x(\d+)\s*Meter/);
+            if(fieldMatch){
+                const w=parseInt(fieldMatch[1])*20,h=parseInt(fieldMatch[2])*20;
+                AppState.drawings.push({type:'zone',color:'rgba(255,174,0,0.3)',sx:ArenaEngine.c.clientWidth/2-w/2,sy:ArenaEngine.c.clientHeight/2-h/2,ex:ArenaEngine.c.clientWidth/2+w/2,ey:ArenaEngine.c.clientHeight/2+h/2});
+            }
+            const players=Object.values(AppState.team.squad);
+            const numAttackers=txt.match(/(\d+)\s*Angreifer/)?.[1]||4;
+            const numDefenders=txt.match(/(\d+)\s*Verteidiger/)?.[1]||2;
+            // Simple placement logic for demo
+            for(let i=0;i<numAttackers&&i<players.length;i++){
+                const angle=i*(2*Math.PI/numAttackers);
+                players[i].canvas.x = ArenaEngine.c.clientWidth/2 + 150 * Math.cos(angle);
+                players[i].canvas.y = ArenaEngine.c.clientHeight/2 + 150 * Math.sin(angle);
+            }
+            ArenaEngine.render();
+        },
+        setupSystemDuel(){
+            const {clientWidth:w,clientHeight:h}=ArenaEngine.c;
+            const P=Object.values(AppState.team.squad);
+            // 3-4-3
+            if(P[0])P[0].canvas={x:w*0.15,y:h*0.5};if(P[1])P[1].canvas={x:w*0.15,y:h*0.25};if(P[2])P[2].canvas={x:w*0.15,y:h*0.75};
+            // Opponents 4-4-2
+            AppState.opponents = {};
+            for(let i=1;i<=11;i++) AppState.opponents[`o${i}`]={id:`o${i}`,num:i,canvas:{}};
+            const O=Object.values(AppState.opponents);
+            O[0].canvas={x:w*0.85,y:h*0.5}; O[1].canvas={x:w*0.8,y:h*0.2}; O[2].canvas={x:w*0.8,y:h*0.8};
+            ArenaEngine.render();
+        }
+    },
+    Drawing:{
+        start(p){if(AppState.ui.activeTool==='select')return;this.curr={type:AppState.ui.activeTool,color:'rgba(255,51,51,0.9)',sx:p.x,sy:p.y,ex:p.x,ey:p.y};},
+        update(p){if(!this.curr)return false;this.curr.ex=p.x;this.curr.ey=p.y;return true;},
+        finish(){if(!this.curr)return;if(Math.hypot(this.curr.ex-this.curr.sx,this.curr.ey-this.curr.sy)>10)AppState.drawings.push(this.curr);this.curr=null;ArenaEngine.render();},
+        renderAll(){AppState.drawings.forEach(d=>this.draw(d));if(this.curr)this.draw(this.curr);},
+        draw(d){const{ctx}=ArenaEngine;ctx.strokeStyle=d.color;ctx.fillStyle=d.color;ctx.lineWidth=4;if(d.type==='zone'){ctx.globalAlpha=0.3;ctx.fillRect(d.sx,d.sy,d.ex-d.sx,d.ey-d.sy);ctx.globalAlpha=1;}else{ctx.beginPath();ctx.moveTo(d.sx,d.sy);ctx.lineTo(d.ex,d.ey);ctx.stroke();if(d.type==='arrow'){const a=Math.atan2(d.ey-d.sy,d.ex-d.sx);ctx.beginPath();ctx.moveTo(d.ex,d.ey);ctx.lineTo(d.ex-15*Math.cos(a-Math.PI/6),d.ey-15*Math.sin(a-Math.PI/6));ctx.moveTo(d.ex,d.ey);ctx.lineTo(d.ex-15*Math.cos(a+Math.PI/6),d.ey-15*Math.sin(a+Math.PI/6));ctx.stroke();}}}
+    }
+};
+
+// --- APP LIFECYCLE ---
 const App = {
-  async init() {
-    UIManager.init();
-    const sessionUserId = sessionStorage.getItem('toni2_userid');
-    if (sessionUserId) { await this.login(sessionUserId); } else { await this.showLoginScreen(); }
-  },
-  async showLoginScreen() {
-    const profiles = await ApiService.getAvailableProfiles();
-    UIManager.elements['username'].innerHTML = profiles.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-    UIManager.elements['login-form'].onsubmit = async (e) => { e.preventDefault(); await this.login(UIManager.elements['username'].value); };
-    UIManager.elements['system-loader'].hidden = true;
-    UIManager.elements['login-screen'].hidden = false;
-  },
-  async login(userId) {
-    UIManager.elements['system-loader'].hidden = false;
-    UIManager.elements['login-screen'].hidden = true;
-    try {
-      const user = await ApiService.login(userId); AppState.user = user;
-      sessionStorage.setItem('toni2_userid', userId);
-      await this.bootstrap();
-    } catch (error) { console.error(error); UIManager.elements['system-loader'].hidden = true; UIManager.elements['login-screen'].hidden = false; }
-  },
-  async bootstrap() {
-    const [teamData, financeData] = await Promise.all([
-      ApiService.getTeamData(),
-      (AppState.user.permissions.includes("view_finances") || AppState.user.permissions.includes("*"))? ApiService.getFinanceData() : Promise.resolve(null)
-    ]);
-    AppState.team = teamData; AppState.finances = financeData;
-    UIManager.elements['system-loader'].hidden = true;
-    UIManager.showApp(); UIManager.bindEvents(); ToniAI.init(); ArenaEngine.init();
-  },
-  logout() { sessionStorage.removeItem('toni2_userid'); window.location.reload(); }
+    async init() {
+        UIManager.init();
+        const uid = sessionStorage.getItem('toni2_uid');
+        if(uid) await this.login(uid);
+        else {
+            const profiles = await ApiService.getProfiles();
+            UIManager.el['username'].innerHTML=profiles.map(p=>`<option value="${p.id}">${p.name} - ${p.role}</option>`).join('');
+            UIManager.el['login-screen'].style.opacity=1;
+        }
+    },
+    async login(id) {
+        UIManager.el['system-loader'].hidden=false;
+        UIManager.el['login-screen'].hidden=true;
+        try {
+            const [user, team, finances] = await Promise.all([ApiService.login(id), ApiService.getData('team'), ApiService.getData('finances')]);
+            AppState.user=user; AppState.team=team; AppState.finances=finances;
+            sessionStorage.setItem('toni2_uid',id);
+            UIManager.el['system-loader'].hidden=true;
+            UIManager.showApp(); ToniAI.init(); ArenaEngine.init();
+        } catch(e){ console.error(e); UIManager.el['system-loader'].hidden=true; UIManager.el['login-screen'].hidden=false; }
+    },
+    logout() { sessionStorage.removeItem('toni2_uid'); window.location.reload(); }
 };
 
 document.addEventListener('DOMContentLoaded', () => App.init());
