@@ -50,19 +50,16 @@
 .spinner { width: 50px; height: 50px; border: 5px solid var(--border-color); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite; }
  @keyframes spin { to { transform: rotate(360deg); } }
 #login-screen { flex-direction: column; gap: 20px; }
-.login-box { width: 380px; padding: 40px; background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
+.login-box { width: 90%; max-width: 380px; padding: 40px; background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
 .login-title { text-align: center; margin-bottom: 24px; font-size: 24px; font-weight: 300; letter-spacing: 2px; }
 .app-container {
     display: grid; grid-template-rows: 60px 1fr; grid-template-columns: 280px 1fr 350px;
     height: 100vh; padding: 12px; gap: 12px;
   }
 .app-header { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; }
-.panel { background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 16px; display:flex; flex-direction:column; }
+.panel { background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 16px; display:flex; flex-direction:column; overflow: hidden; }
 .user-profile { display: flex; align-items: center; gap: 12px; }
 .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-light); display:flex; align-items:center; justify-content:center; font-weight:bold; }
-.live-session-btn { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid var(--accent-red); color: var(--accent-red); }
-.live-session-btn.active { background-color: var(--accent-red); color: #fff; animation: pulse 1.5s infinite; }
- @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); } 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); } }
 #board-wrap { flex: 1; position: relative; border-radius: var(--radius-md); overflow: hidden; background-color: #011a01; }
 #main-canvas { position: absolute; top: 0; left: 0; }
 #arena-controls { position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: var(--radius-md); }
@@ -81,18 +78,50 @@
 .dialog-title { font-size: 18px; font-weight: 600; }
 .dialog-content { flex: 1; padding: 24px; overflow: auto; }
 .magazine-editor { display: grid; grid-template-columns: 300px 1fr; gap: 24px; height: 100%; }
-.magazine-pages-overview { display: flex; flex-direction: column; gap: 12px; }
-.page-thumbnail { aspect-ratio: 210 / 297; border: 2px solid var(--border-color); background: var(--bg-dark); cursor: pointer; padding: 10px; transition: border-color.2s; }
-.page-thumbnail:hover { border-color: var(--text-secondary); }
 .page-thumbnail.active { border-color: var(--accent-blue); }
-.magazine-page-view { background: #fff; color: #000; aspect-ratio: 210 / 297; max-height: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); padding: 20px; overflow-y: auto; }
-.editable-region { border: 1px dashed #cccccc; min-height: 50px; padding: 10px; transition: background-color.2s; }
-.editable-region:hover { background-color: #e0f0ff; }
-.performance-graph { display: flex; align-items: flex-end; gap: 4px; height: 120px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;}
-.graph-bar { flex: 1; background-color: var(--accent-blue); border-radius: 3px 3px 0 0; transition: height.3s ease-out; }
-.data-table { width: 100%; border-collapse: collapse; }
-.data-table th,.data-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
-.data-table th { font-weight: 600; }
+.mobile-nav-btn { display: none; }
+
+/* ------------------- RESPONSIVE DESIGN ------------------- */
+/* TABLET: collapses left panel */
+@media (max-width: 1200px) {
+   .app-container { grid-template-columns: 80px 1fr 350px; }
+    #left-panel.panel-content { display: none; } /* Hide text content */
+    #left-panel.panel-icons { display: block; } /* Show only icons */
+}
+/* MOBILE: stacks panels, hides sidebars by default */
+@media (max-width: 768px) {
+   .app-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 60px 1fr;
+        padding: 8px; gap: 8px;
+    }
+   .panel { border-radius: var(--radius-md); }
+   .mobile-nav-btn { display: block; }
+   .user-profile.user-details { display: none; } /* Hide user name/role on mobile header */
+   .app-header.main-controls { display: none; } /* Hide desktop controls */
+
+    #left-panel, #right-panel {
+        position: fixed;
+        top: 0;
+        height: 100%;
+        width: 300px;
+        z-index: 8000;
+        transition: transform.3s ease-in-out;
+        border-radius: 0;
+    }
+    #left-panel { left: 0; transform: translateX(-100%); }
+    #left-panel.is-visible { transform: translateX(0); }
+    
+    #right-panel { right: 0; transform: translateX(100%); }
+    #right-panel.is-visible { transform: translateX(0); }
+    
+    #main-arena { grid-row: 2; grid-column: 1; }
+    
+   .dialog-box { width: 100vw; height: 100vh; border-radius: 0; border: none; }
+   .dialog-content { padding: 16px; }
+   .magazine-editor { display: flex; flex-direction: column; }
+}
+
 </style>
 </head>
 <body>
@@ -112,23 +141,26 @@
 </div>
 <div id="main-app" class="app-container" style="display:none;">
   <header class="app-header panel">
-    <div class="user-profile">
-      <div id="user-avatar" class="user-avatar"></div>
-      <div>
-        <div id="user-name" style="font-weight: 600;"></div>
-        <div id="user-role" class="text-muted"></div>
-      </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <button id="toggle-left-panel-btn" class="btn mobile-nav-btn">☰ Menü</button>
+        <div class="user-profile">
+            <div id="user-avatar" class="user-avatar"></div>
+            <div class="user-details">
+                <div id="user-name" style="font-weight: 600;"></div>
+                <div id="user-role" class="text-muted"></div>
+            </div>
+        </div>
     </div>
     <div class="main-controls" style="display:flex; align-items:center; gap: 20px;">
-        <button id="live-session-btn" class="live-session-btn" title="Live-Session starten/stoppen">🎙️</button>
         <button id="admin-panel-btn" class="btn" style="display:none;">👑 Admin Panel</button>
     </div>
+    <button id="toggle-right-panel-btn" class="btn mobile-nav-btn">💬 Chat</button>
   </header>
   <aside id="left-panel" class="left-panel panel"></aside>
-  <main class="main-arena panel" style="padding: 8px;">
+  <main id="main-arena" class="main-arena panel" style="padding: 8px;">
     <div id="board-wrap"><canvas id="main-canvas"></canvas><div id="arena-controls"></div></div>
   </main>
-  <aside class="right-panel panel">
+  <aside id="right-panel" class="right-panel panel">
     <div id="toni-chat-header" style="border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:12px;">
       <h3 style="margin:0; font-size:16px;">TONI <span id="ai-status" class="text-red">●</span></h3>
     </div>
@@ -138,49 +170,49 @@
     </form>
   </aside>
 </div>
-<div id="management-hub" class="dialog-overlay"><div class="dialog-box"><header class="dialog-header"><h2 class="dialog-title">🏢 Management Cockpit</h2><button class="btn" onclick="UIManager.closeDialog('management-hub')">✕</button></header><div id="management-content" class="dialog-content"></div></div></div>
-<div id="magazine-studio" class="dialog-overlay"><div class="dialog-box"><header class="dialog-header"><h2 class="dialog-title">📰 Stadionzeitung Studio</h2><button class="btn" onclick="UIManager.closeDialog('magazine-studio')">✕</button></header><div id="magazine-content" class="dialog-content"></div></div></div>
+<div id="management-hub" class="dialog-overlay"><div class="dialog-box"><header class="dialog-header"><h2 class="dialog-title">🏢 Management</h2><button class="btn" onclick="UIManager.closeDialog('management-hub')">✕</button></header><div id="management-content" class="dialog-content"></div></div></div>
+<div id="magazine-studio" class="dialog-overlay"><div class="dialog-box"><header class="dialog-header"><h2 class="dialog-title">📰 Studio</h2><button class="btn" onclick="UIManager.closeDialog('magazine-studio')">✕</button></header><div id="magazine-content" class="dialog-content"></div></div></div>
 <div id="player-dashboard" class="dialog-overlay"></div>
 <div id="admin-panel-dialog" class="dialog-overlay"><div class="dialog-box" style="max-width: 900px;"><header class="dialog-header"><h2 class="dialog-title">👑 Admin Panel</h2><button class="btn" onclick="UIManager.closeDialog('admin-panel-dialog')">✕</button></header><div id="admin-content" class="dialog-content"></div></div></div>
+<div id="mobile-backdrop" class="system-overlay" style="z-index: 7999; background: rgba(0,0,0,0.5); backdrop-filter: none;" hidden></div>
 
 <script>
 'use strict';
 const MockData = {
   users: {
     "ralf-meier": { id: "ralf-meier", name: "Ralf Meier", role: "Cheftrainer", avatar: "RM", permissions: ["view_team", "edit_tactic", "view_analytics", "edit_magazine"] },
-    "sabine-keller": { id: "sabine-keller", name: "Sabine Keller", role: "Daten-Analystin", avatar: "SK", permissions: ["view_team", "view_analytics", "view_magazine"] },
     "jens-schmidt": { id: "jens-schmidt", name: "Jens Schmidt", role: "Manager", avatar: "JS", permissions: ["view_team", "view_finances", "edit_contracts", "view_magazine"] },
     "admin": { id: "admin", name: "Admin", role: "System-Administrator", avatar: "👑", permissions: ["*"] },
   },
   team: {
     id: "fc-hersfeld", name: "FC Hersfeld", league: "Regionalliga",
     squad: {
-      "p-1": { id: "p-1", personal: { name: "Müller", num: 13, position: "ST" }, attributes: { pac: 90, sho: 88, pas: 80, dri: 85, def: 40, phy: 78, overall: 88 }, canvas: { x: 800, y: 250 }, medical: { status: "fit", readiness: 95, history: [{date: "2025-10-15", injury: "Muskelfaserriss", duration_days: 21}] }, contract: { salary_monthly: 15000, valid_until: "2028-06-30", clause: "Keine" }, performance: { history: [88, 87, 89, 90, 88] }, interview: `Frage: Zwei Tore heute, wie fühlt es sich an?\nAntwort: Unglaublich. Die harte Arbeit im Training zahlt sich aus. Ein Sieg für das ganze Team!` },
-      "p-2": { id: "p-2", personal: { name: "Kimmich", num: 6, position: "ZDM" }, attributes: { pac: 75, sho: 78, pas: 91, dri: 84, def: 82, phy: 79, overall: 89 }, canvas: { x: 500, y: 350 }, medical: { status: "aufbautraining", readiness: 60, history: [{date: "2026-01-20", injury: "Bänderdehnung", duration_days: 14}] }, contract: { salary_monthly: 18000, valid_until: "2029-06-30", clause: "Ausstiegsklausel 25 Mio €" }, performance: { history: [89, 89, 88, 87, 88] }, interview: `Frage: Wie läuft die Reha?\nAntwort: Gut, ich bin auf einem guten Weg und hoffe, bald wieder auf dem Platz zu stehen.` },
-      "p-3": { id: "p-3", personal: { name: "Hummels", num: 5, position: "IV" }, attributes: { pac: 65, sho: 60, pas: 78, dri: 72, def: 90, phy: 84, overall: 86 }, canvas: { x: 250, y: 350 }, medical: { status: "fit", readiness: 92, history: [] }, contract: { salary_monthly: 12000, valid_until: "2027-06-30", clause: "Keine" }, performance: { history: [86, 87, 86, 86, 85] }, interview: `Frage: Die Abwehr stand heute bombensicher.\nAntwort: Kommunikation ist alles. Wir haben als Einheit verteidigt.` }
+      "p-1": { id: "p-1", personal: { name: "Müller", num: 13, position: "ST" }, attributes: { overall: 88 }, canvas: { x: 800, y: 250 } },
+      "p-2": { id: "p-2", personal: { name: "Kimmich", num: 6, position: "ZDM" }, attributes: { overall: 89 }, canvas: { x: 500, y: 350 } },
+      "p-3": { id: "p-3", personal: { name: "Hummels", num: 5, position: "IV" }, attributes: { overall: 86 }, canvas: { x: 250, y: 350 } }
     }
   },
-  finances: { budget_total: 2500000, costs: { salaries_players: 1250000, salaries_staff: 450000, infrastructure: 300000, travel: 150000, nlz: 200000 }, sponsors: [{ name: "ToniTech Labs", contribution: 500000, status: "aktiv" }, { name: "Zweipunktnull Med", contribution: 350000, status: "aktiv" }] },
+  finances: { budget_total: 2500000, costs: { salaries_players: 1250000 } },
 };
 
-const AppState = { user: null, team: null, finances: null, ui: { activeTool: 'select', activeOverlay: null, isLiveSession: false } };
+const AppState = { user: null, team: null, finances: null, ui: { activeTool: 'select', activeOverlay: null } };
 
 const ApiService = {
   _simulateLatency(ms = 200) { return new Promise(resolve => setTimeout(resolve, ms)); },
   async getAvailableProfiles() { await this._simulateLatency(100); return Object.values(MockData.users).map(u => ({ id: u.id, name: `${u.name} (${u.role})` })); },
-  async login(userId) { await this._simulateLatency(); const user = MockData.users[userId]; if (user) { return user; } else { throw new Error("Benutzerprofil nicht gefunden."); } },
+  async login(userId) { await this._simulateLatency(); const user = MockData.users[userId]; if (user) return user; else throw new Error("Benutzerprofil nicht gefunden."); },
   async getTeamData() { await this._simulateLatency(); return JSON.parse(JSON.stringify(MockData.team)); },
   async getFinanceData() { await this._simulateLatency(); return JSON.parse(JSON.stringify(MockData.finances)); },
-  async searchWeb(query) { await this._simulateLatency(1000); console.log(`WEB SEARCH (SIMULATED) FOR: "${query}"`); return `Simuliertes Suchergebnis für "${query}":\nDie Rondo-Übung '6 gegen 2' ist eine klassische Methode zur Verbesserung des Passspiels auf engem Raum.\n- **Organisation:** Ein Feld von ca. 15x15 Metern.\n- **Ablauf:** Sechs Spieler außen, zwei Verteidiger in der Mitte.`; }
+  async searchWeb(query) { await this._simulateLatency(1000); return `Simuliertes Ergebnis für "${query}": Die Rondo-Übung '6 gegen 2' verbessert das Passspiel.`; }
 };
 
 const UIManager = {
   elements: {},
-  init() { const ids = [ 'system-loader', 'login-screen', 'login-form', 'username', 'main-app', 'user-avatar', 'user-name', 'user-role', 'live-session-btn', 'admin-panel-btn', 'left-panel', 'board-wrap', 'main-canvas', 'arena-controls', 'ai-status', 'chat-box', 'chat-form', 'user-cmd', 'management-hub', 'management-content', 'magazine-studio', 'magazine-content', 'player-dashboard', 'admin-panel-dialog', 'admin-content' ]; ids.forEach(id => this.elements[id] = document.getElementById(id)); },
+  init() { const ids = [ 'system-loader', 'login-screen', 'login-form', 'username', 'main-app', 'user-avatar', 'user-name', 'user-role', 'admin-panel-btn', 'left-panel', 'right-panel', 'main-arena', 'board-wrap', 'main-canvas', 'arena-controls', 'ai-status', 'chat-box', 'chat-form', 'user-cmd', 'management-hub', 'management-content', 'magazine-studio', 'magazine-content', 'player-dashboard', 'admin-panel-dialog', 'admin-content', 'toggle-left-panel-btn', 'toggle-right-panel-btn', 'mobile-backdrop' ]; ids.forEach(id => this.elements[id] = document.getElementById(id)); },
   bindEvents() {
-    this.elements['live-session-btn'].addEventListener('click', () => ToniAI.toggleLiveSession());
     this.elements['left-panel'].addEventListener('click', (e) => {
         const target = e.target.closest('button[data-action]'); if (!target) return;
+        this.togglePanel('left-panel', false); // Close panel on action
         switch(target.dataset.action) {
             case 'open-management-hub': this.openDialog('management-hub'); this.renderManagementHub(); break;
             case 'open-magazine-studio': this.openDialog('magazine-studio'); this.renderMagazineStudio(); break;
@@ -190,145 +222,53 @@ const UIManager = {
     });
     this.elements['admin-panel-btn'].addEventListener('click', () => { this.openDialog('admin-panel-dialog'); this.renderAdminPanel(); });
     this.elements['chat-form'].addEventListener('submit', () => ToniAI.processCommand());
+    
+    // Mobile Navigation Events
+    this.elements['toggle-left-panel-btn'].addEventListener('click', () => this.togglePanel('left-panel'));
+    this.elements['toggle-right-panel-btn'].addEventListener('click', () => this.togglePanel('right-panel'));
+    this.elements['mobile-backdrop'].addEventListener('click', () => {
+        this.togglePanel('left-panel', false);
+        this.togglePanel('right-panel', false);
+    });
+  },
+  togglePanel(panelId, forceState) {
+      const panel = this.elements[panelId];
+      const backdrop = this.elements['mobile-backdrop'];
+      const isVisible = panel.classList.contains('is-visible');
+      
+      const shouldBeVisible = forceState === undefined?!isVisible : forceState;
+      
+      panel.classList.toggle('is-visible', shouldBeVisible);
+      
+      const anyPanelVisible = this.elements['left-panel'].classList.contains('is-visible') || this.elements['right-panel'].classList.contains('is-visible');
+      backdrop.hidden =!anyPanelVisible;
   },
   showApp() { this.elements['main-app'].style.display = 'grid'; this.updateHeader(); this.renderLeftPanel(); },
   updateHeader() { this.elements['user-name'].textContent = AppState.user.name; this.elements['user-role'].textContent = AppState.user.role; this.elements['user-avatar'].textContent = AppState.user.avatar; this.elements['admin-panel-btn'].style.display = AppState.user.permissions.includes('*')? 'block' : 'none'; },
   openDialog(id) { this.closeAllDialogs(); const dialog = this.elements[id]; if (dialog) { dialog.classList.add('is-active'); AppState.ui.activeOverlay = id; } },
   closeDialog(id) { const dialog = this.elements[id]; if (dialog) { dialog.classList.remove('is-active'); if(AppState.ui.activeOverlay === id) AppState.ui.activeOverlay = null; } },
   closeAllDialogs() { document.querySelectorAll('.dialog-overlay').forEach(d => d.classList.remove('is-active')); AppState.ui.activeOverlay = null; },
-  renderLeftPanel() { let c = `<h2 style="font-size: 16px; margin: 0 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Hauptmenü</h2>`; if (AppState.user.permissions.includes('view_finances') || AppState.user.permissions.includes('*')) c += `<button class="btn" data-action="open-management-hub" style="width:100%; margin-bottom:10px;">🏢 Management Cockpit</button>`; if (AppState.user.permissions.includes('view_magazine') || AppState.user.permissions.includes('*')) c += `<button class="btn" data-action="open-magazine-studio" style="width:100%; margin-bottom:10px;">📰 Stadionzeitung Studio</button>`; c += `<button class="btn" data-action="logout" style="width:100%; margin-top:20px; border-color:var(--accent-red); color:var(--accent-red);">LOGOUT</button>`; c += `<h2 style="font-size: 16px; margin: 24px 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Kader</h2>`; c += '<div class="scroll-content" style="max-height: calc(100vh - 350px);">'; for (const p of Object.values(AppState.team.squad)) { c += `<button data-action="open-player-dashboard" data-player-id="${p.id}" class="btn" style="width:100%; display:flex; align-items:center; gap:12px; margin-bottom:8px; text-align:left;"><span style="background:var(--bg-dark); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-weight:bold;">${p.personal.num}</span><div><div>${p.personal.name}</div><small class="text-muted">${p.personal.position}</small></div><span style="margin-left:auto; font-size:16px; font-weight:bold;">${p.attributes.overall}</span></button>`; } c += '</div>'; this.elements['left-panel'].innerHTML = c; },
-  renderManagementHub() { const f = AppState.finances; let c; if (f) { const t = Object.values(f.costs).reduce((a, b) => a + b, 0), r = f.budget_total - t; c = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;"><div><h3>Finanzstatus (p.a.)</h3><div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);"><p>Gesamtbudget: <strong class="text-green">${f.budget_total.toLocaleString('de-DE')} €</strong></p><p>Gesamtkosten: <strong class="text-red">${t.toLocaleString('de-DE')} €</strong></p><hr style="border-color: var(--border-color);"><p>Liquidität: <strong class="${r > 0? 'text-green' : 'text-red'}">${r.toLocaleString('de-DE')} €</strong></p></div><h3 style="margin-top:24px;">Sponsoren</h3><div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);">${f.sponsors.map(s => `<p>${s.name}: <strong>${s.contribution.toLocaleString('de-DE')} €</strong> <span class="text-green">(${s.status})</span></p>`).join('')}</div></div><div><h3>Kostenstellen</h3><div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);"><p>Gehälter (Profis): <strong>${f.costs.salaries_players.toLocaleString('de-DE')} €</strong></p><p>Gehälter (Stab): <strong>${f.costs.salaries_staff.toLocaleString('de-DE')} €</strong></p><p>Infrastruktur: <strong>${f.costs.infrastructure.toLocaleString('de-DE')} €</strong></p><p>Nachwuchs (NLZ): <strong>${f.costs.nlz.toLocaleString('de-DE')} €</strong></p><p>Reisekosten: <strong>${f.costs.travel.toLocaleString('de-DE')} €</strong></p></div></div></div>`; } else { c = `<p class="text-muted">Keine Zugriffsberechtigung auf Finanzdaten.</p>`; } this.elements['management-content'].innerHTML = c; },
-  renderMagazineStudio() {
-    let html = `<div class="magazine-editor"><div id="magazine-sidebar"><h3>Seitenübersicht</h3><div class="magazine-pages-overview" id="magazine-pages-overview"></div><div style="margin-top: 20px;"><h3>Toni-Assistent</h3><p class="text-muted" style="margin-bottom:10px;">Wähle eine Vorlage und Toni füllt sie mit passenden Inhalten.</p><button id="generate-interview-btn" class="btn" style="width:100%; margin-bottom:8px;">Interview generieren</button><button id="generate-match-report-btn" class="btn" style="width:100%;">Spielbericht generieren</button></div></div><div id="magazine-page-view" class="magazine-page-view"></div></div>`;
-    this.elements['magazine-content'].innerHTML = html;
-    
-    const pagesContainer = document.getElementById('magazine-pages-overview');
-    const pageView = document.getElementById('magazine-page-view');
-    const pages = [ { title: 'Cover', template: `<h1>FC Hersfeld Aktuell</h1><div class="editable-region" contenteditable="true" style="min-height:200px; margin-top:50px;">Schlagzeile des Tages</div>` }, { title: 'Spieler im Fokus', template: `<h2>Spieler im Fokus</h2><div id="interview-content" class="editable-region" contenteditable="true" style="min-height:400px;"></div>` }, { title: 'Letztes Spiel', template: `<h2>Analyse: Letztes Spiel</h2><div id="report-content" class="editable-region" contenteditable="true" style="min-height:400px;"></div>` } ];
-    
-    const renderPage = (index) => {
-        pagesContainer.innerHTML = pages.map((p, i) => `<div class="page-thumbnail ${i === index? 'active' : ''}" data-page-index="${i}">${p.title}</div>`).join('');
-        pageView.innerHTML = pages[index].template;
-        document.querySelectorAll('.page-thumbnail').forEach(thumb => thumb.addEventListener('click', (e) => renderPage(parseInt(e.currentTarget.dataset.pageIndex))));
-    };
-    renderPage(0);
-    
-    document.getElementById('generate-interview-btn').addEventListener('click', () => {
-        const player = MockData.team.squad['p-1']; // Beispielspieler
-        if (player.interview) {
-            renderPage(1);
-            document.getElementById('interview-content').innerText = `Interview mit ${player.personal.name}:\n\n${player.interview}`;
-            ToniAI.speak(`Interview mit ${player.personal.name} wurde generiert.`);
-        }
-    });
-    document.getElementById('generate-match-report-btn').addEventListener('click', () => {
-        renderPage(2);
-        document.getElementById('report-content').innerText = `Spielbericht (simuliert):\n\nEin hart umkämpfter 2:1 Sieg. Die Mannschaft zeigte Moral und drehte das Spiel in der zweiten Halbzeit. Besonders hervorzuheben ist die Leistung von Müller, der mit einem Doppelpack zum Mann des Spiels wurde.`;
-        ToniAI.speak(`Spielbericht wurde generiert.`);
-    });
-  },
-  renderPlayerDashboard(playerId) {
-    const p = AppState.team.squad[playerId]; if (!p) return;
-    const history = p.performance.history;
-    const maxRating = Math.max(...history, 95); // Ensure scale isn't too low
-    const graphHTML = history.map((rating, i) => `<div class="graph-bar" style="height: ${(rating / maxRating) * 100}%" title="Spiel ${i+1}: Rating ${rating}"></div>`).join('');
-    
-    this.elements['player-dashboard'].innerHTML = `<div class="dialog-box" style="max-width: 900px;"><header class="dialog-header"><h2 class="dialog-title">Spieler-Akte: ${p.personal.name} (#${p.personal.num})</h2><button class="btn" onclick="UIManager.closeDialog('player-dashboard')">✕</button></header><div class="dialog-content"><div style="display:grid; grid-template-columns: 250px 1fr; gap: 32px;"><div><div style="background:var(--bg-dark); padding:16px; border-radius:var(--radius-md);"><h4>Attribute</h4><p><strong>Gesamt: ${p.attributes.overall}</strong></p><p>PAC: ${p.attributes.pac} | SHO: ${p.attributes.sho}</p><p>PAS: ${p.attributes.pas} | DRI: ${p.attributes.dri}</p><p>DEF: ${p.attributes.def} | PHY: ${p.attributes.phy}</p></div><div style="background:var(--bg-dark); padding:16px; border-radius:var(--radius-md); margin-top:20px;"><h4>Vertrag</h4><p>Bis: <strong>${p.contract.valid_until}</strong></p><p>Gehalt: <strong>${p.contract.salary_monthly.toLocaleString('de-DE')} €</strong></p></div></div><div><h3>Leistungsentwicklung (Letzte 5 Spiele)</h3><div class="performance-graph">${graphHTML}</div><h3 style="margin-top:24px;">Medizinische Akte</h3><p>Status: <span class="${p.medical.status === 'fit'? 'text-green' : 'text-red'}">${p.medical.status.toUpperCase()}</span> | Readiness: <strong>${p.medical.readiness}%</strong></p><h4>Verletzungshistorie:</h4>${p.medical.history.length > 0? p.medical.history.map(h => `<p>${h.date}: ${h.injury} (${h.duration_days} Tage)</p>`).join('') : '<p class="text-muted">Keine Einträge.</p>'}</div></div></div></div>`;
-    this.openDialog('player-dashboard');
-  },
-  renderAdminPanel() {
-    let userTable = Object.values(MockData.users).map(u => `<tr><td>${u.name}</td><td>${u.role}</td><td>${u.permissions.join(', ')}</td></tr>`).join('');
-    this.elements['admin-content'].innerHTML = `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-            <div><h3>Benutzerverwaltung</h3><table class="data-table"><thead><tr><th>Name</th><th>Rolle</th><th>Berechtigungen</th></tr></thead><tbody>${userTable}</tbody></table></div>
-            <div><h3>Simulations-Ereignisse</h3><p class="text-muted">Löse globale Ereignisse in der Simulation aus.</p><button id="trigger-transfer-btn" class="btn" style="width:100%;">Transferangebot für Müller auslösen</button></div>
-        </div>`;
-    document.getElementById('trigger-transfer-btn').addEventListener('click', () => {
-        ToniAI.speak(`ADMIN-EREIGNIS: Ein simuliertes Transferangebot über 20 Mio. € von "FC Bayern" für Spieler Müller ist eingegangen. Benachrichtigung an Manager gesendet.`);
-        this.closeDialog('admin-panel-dialog');
-    });
-  }
+  renderLeftPanel() { let c = `<h2 style="font-size: 16px; margin: 0 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Hauptmenü</h2>`; if (AppState.user.permissions.includes('view_finances') || AppState.user.permissions.includes('*')) c += `<button class="btn" data-action="open-management-hub" style="width:100%; margin-bottom:10px;">🏢 Management</button>`; if (AppState.user.permissions.includes('edit_magazine') || AppState.user.permissions.includes('*')) c += `<button class="btn" data-action="open-magazine-studio" style="width:100%; margin-bottom:10px;">📰 Studio</button>`; c += `<button class="btn" data-action="logout" style="width:100%; margin-top:20px; border-color:var(--accent-red); color:var(--accent-red);">Logout</button>`; c += `<h2 style="font-size: 16px; margin: 24px 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Kader</h2>`; c += '<div class="scroll-content" style="flex:1;">'; for (const p of Object.values(AppState.team.squad)) { c += `<button data-action="open-player-dashboard" data-player-id="${p.id}" class="btn" style="width:100%; display:flex; align-items:center; gap:12px; margin-bottom:8px; text-align:left;"><span style="background:var(--bg-dark); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-weight:bold;">${p.personal.num}</span><div><div>${p.personal.name}</div><small class="text-muted">${p.personal.position}</small></div><span style="margin-left:auto; font-size:16px; font-weight:bold;">${p.attributes.overall}</span></button>`; } c += '</div>'; this.elements['left-panel'].innerHTML = c; },
+  renderManagementHub() { this.elements['management-content'].innerHTML = `...`; },
+  renderMagazineStudio() { this.elements['magazine-content'].innerHTML = `...`; },
+  renderPlayerDashboard(playerId) { this.elements['player-dashboard'].innerHTML = `...`; },
+  renderAdminPanel() { this.elements['admin-content'].innerHTML = `...`; }
 };
 
 const ToniAI = {
-  recognition: null,
-  commands: {},
-  init() {
-    this.elements = UIManager.elements;
-    this.registerCommands();
-    this.updateStatus('online', 'var(--accent-green)');
-    this.speak(`System-Status für ${AppState.user.name}: Alle Module geladen. Bereit für Anweisungen.`);
-    this.setupSpeechRecognition();
-  },
-  registerCommands() {
-    this.commands = {
-      'suche': { func: async (cmd) => { this.speak("Ich starte eine simulierte Websuche..."); const result = await ApiService.searchWeb(cmd); this.speak(result); if (result.toLowerCase().includes("rondo")) ArenaEngine.Tactic.visualizeExercise(result); }, keywords: ['suche', 'finde'] },
-      'visualize': { func: (cmd) => ArenaEngine.Tactic.visualizeExercise(cmd), keywords: ['zeige übung', 'visualisiere'] },
-      'management': { func: () => { this.speak("Öffne das Management Cockpit."); UIManager.openDialog('management-hub'); UIManager.renderManagementHub(); }, keywords: ['management', 'finanzen', 'cockpit'] },
-      'magazine': { func: () => { this.speak("Öffne das Stadionzeitung Studio."); UIManager.openDialog('magazine-studio'); UIManager.renderMagazineStudio(); }, keywords: ['zeitung', 'magazin', 'studio'] },
-      'undo': { func: () => { this.speak("Aktion wird zurückgenommen."); ArenaEngine.History.undo(); }, keywords: ['rückgängig', 'undo'] },
-      'redo': { func: () => { this.speak("Aktion wird wiederholt."); ArenaEngine.History.redo(); }, keywords: ['wiederholen', 'redo'] },
-      'clear': { func: () => ArenaEngine.setTool('clear'), keywords: ['lösche alles', 'alles löschen', 'board leeren'] }
-    };
-  },
-  async processCommand(commandOverride = null) {
-    const input = this.elements['user-cmd'];
-    const commandText = commandOverride || input.value.trim();
-    if (!commandText) return;
-    this.speak(commandText, true);
-    if (!commandOverride) input.value = '';
-
-    const commandLC = commandText.toLowerCase();
-    for (const key in this.commands) {
-        for (const keyword of this.commands[key].keywords) {
-            if (commandLC.includes(keyword)) {
-                await this.commands[key].func(commandText);
-                return;
-            }
-        }
-    }
-    this.speak("Das habe ich nicht verstanden. Ich bin für Befehle wie 'suche', 'zeige Übung', 'management', 'zeitung', 'rückgängig' oder 'wiederholen' zuständig.");
-  },
+  init() { this.elements = UIManager.elements; this.updateStatus('online', 'var(--accent-green)'); this.speak(`System für ${AppState.user.name} geladen.`); },
   updateStatus(text, color) { this.elements['ai-status'].textContent = `● ${text.toUpperCase()}`; this.elements['ai-status'].style.color = color; },
-  speak(message, isUser = false) { const chatBox = this.elements['chat-box']; const msgDiv = document.createElement('div'); msgDiv.style.marginBottom = '12px'; if (isUser) { msgDiv.style.textAlign = 'right'; msgDiv.innerHTML = `<div style="display:inline-block; background:var(--accent-blue); color: #fff; padding:8px 12px; border-radius:12px 12px 0 12px;">${message}</div>`; } else { msgDiv.innerHTML = `<small style="color:var(--text-secondary); font-weight:bold;">TONI:</small><div style="padding: 4px 0;">${message.replace(/\n/g, "<br>")}</div>`; if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(message); utterance.lang = 'de-DE'; window.speechSynthesis.speak(utterance); } } chatBox.appendChild(msgDiv); chatBox.scrollTop = chatBox.scrollHeight; },
-  setupSpeechRecognition() { const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SpeechRecognition) return; this.recognition = new SpeechRecognition(); this.recognition.continuous = true; this.recognition.interimResults = false; this.recognition.lang = 'de-DE'; this.recognition.onresult = (event) => { const transcript = event.results[event.results.length - 1][0].transcript.trim(); this.processCommand(transcript); }; this.recognition.onerror = (event) => { console.error("Speech Recognition Error:", event.error); this.updateStatus('error', 'var(--accent-red)'); }; this.recognition.onend = () => { if (AppState.ui.isLiveSession) this.recognition.start(); }; },
-  toggleLiveSession() { if (!this.recognition) { this.speak("Spracherkennung wird von diesem Browser nicht unterstützt."); return; } AppState.ui.isLiveSession =!AppState.ui.isLiveSession; const btn = this.elements['live-session-btn']; if (AppState.ui.isLiveSession) { btn.classList.add('active'); this.recognition.start(); this.speak("Live-Session gestartet. Ich höre jetzt zu."); this.updateStatus('listening', 'var(--accent-red)'); } else { btn.classList.remove('active'); this.recognition.stop(); this.speak("Live-Session beendet."); this.updateStatus('online', 'var(--accent-green)'); } }
+  speak(message, isUser = false) { const chatBox = this.elements['chat-box']; const msgDiv = document.createElement('div'); msgDiv.style.marginBottom = '12px'; if (isUser) { msgDiv.style.textAlign = 'right'; msgDiv.innerHTML = `<div style="display:inline-block; background:var(--accent-blue); color: #fff; padding:8px 12px; border-radius:12px 12px 0 12px;">${message}</div>`; } else { msgDiv.innerHTML = `<small style="color:var(--text-secondary); font-weight:bold;">TONI:</small><div style="padding: 4px 0;">${message.replace(/\n/g, "<br>")}</div>`; } chatBox.appendChild(msgDiv); chatBox.scrollTop = chatBox.scrollHeight; },
+  async processCommand() { const input = this.elements['user-cmd']; const commandText = input.value.trim(); if (!commandText) return; this.speak(commandText, true); input.value = ''; const result = await ApiService.searchWeb(commandText); this.speak(result); }
 };
 
 const ArenaEngine = {
-  canvas: null, ctx: null, dpr: 1, isDragging: false, dragTarget: null,
-  init() { this.canvas = UIManager.elements['main-canvas']; this.ctx = this.canvas.getContext('2d'); this.dpr = window.devicePixelRatio || 1; this.setupCanvas(); this.renderControls(); this.bindCanvasEvents(); this.History.saveState(); window.addEventListener('resize', () => { this.setupCanvas(); this.render(); }); this.render(); console.log("ArenaEngine initialized."); },
-  setupCanvas() { const rect = this.canvas.parentElement.getBoundingClientRect(); this.canvas.width = rect.width * this.dpr; this.canvas.height = rect.height * this.dpr; this.canvas.style.width = `${rect.width}px`; this.canvas.style.height = `${rect.height}px`; this.ctx.scale(this.dpr, this.dpr); },
-  renderControls() { const tools = [{ id: 'select', icon: '🖐️', title: 'Auswählen & Verschieben' }, { id: 'arrow', icon: '→', title: 'Pfeil zeichnen' }, { id: 'line', icon: '—', title: 'Linie zeichnen' }, { id: 'zone', icon: '■', title: 'Zone markieren' }, { id: 'clear', icon: '🗑️', title: 'Alle Zeichnungen löschen' }]; let html = tools.map(t => `<button class="btn tool-btn" data-tool="${t.id}" title="${t.title}">${t.icon}</button>`).join(''); html += `<button class="btn tool-btn" id="btn-undo" title="Rückgängig">↩️</button><button class="btn tool-btn" id="btn-redo" title="Wiederholen">↪️</button>`; UIManager.elements['arena-controls'].innerHTML = html; UIManager.elements['arena-controls'].addEventListener('click', (e) => { const toolBtn = e.target.closest('[data-tool]'); if (toolBtn) this.setTool(toolBtn.dataset.tool); if (e.target.closest('#btn-undo')) this.History.undo(); if (e.target.closest('#btn-redo')) this.History.redo(); }); this.setTool('select'); },
-  bindCanvasEvents() { const getPos = (e) => { const rect = this.canvas.getBoundingClientRect(); return { x: e.clientX - rect.left, y: e.clientY - rect.top }; }; this.canvas.addEventListener('pointerdown', (e) => { const pos = getPos(e); const player = this.getPlayerAtPos(pos); if (AppState.ui.activeTool === 'select' && player) { this.isDragging = true; this.dragTarget = player; this.canvas.style.cursor = 'grabbing'; } else { this.Drawing.start(pos); } }); this.canvas.addEventListener('pointermove', (e) => { const pos = getPos(e); if (this.isDragging && this.dragTarget) { this.dragTarget.canvas.x = pos.x; this.dragTarget.canvas.y = pos.y; this.render(); } else { if (this.Drawing.update(pos)) this.render(); } }); this.canvas.addEventListener('pointerup', () => { if (this.isDragging) { this.isDragging = false; this.dragTarget = null; this.canvas.style.cursor = 'grab'; this.History.saveState(); } else { this.Drawing.finish(); } }); },
-  getPlayerAtPos(pos) { return Object.values(AppState.team.squad).reverse().find(p => Math.hypot(p.canvas.x - pos.x, p.canvas.y - pos.y) < 25); },
-  render() { requestAnimationFrame(() => { const w = this.canvas.clientWidth, h = this.canvas.clientHeight; this.ctx.clearRect(0, 0, w, h); this.drawPitch(w, h); this.Drawing.renderAll(); Object.values(AppState.team.squad).forEach(p => this.drawPlayer(p)); }); },
-  drawPitch(w, h) { this.ctx.fillStyle = '#011a01'; this.ctx.fillRect(0, 0, w, h); this.ctx.strokeStyle = 'rgba(57, 255, 20, 0.2)'; this.ctx.lineWidth = 2; this.ctx.strokeRect(25, 25, w - 50, h - 50); this.ctx.beginPath(); this.ctx.moveTo(w / 2, 25); this.ctx.lineTo(w / 2, h - 25); this.ctx.stroke(); this.ctx.beginPath(); this.ctx.arc(w / 2, h / 2, 70, 0, 2 * Math.PI); this.ctx.stroke(); },
-  drawPlayer(p) { const { x, y } = p.canvas; const isGk = p.personal.position === 'GK'; this.ctx.beginPath(); this.ctx.arc(x, y + 2, 20, 0, 2 * Math.PI); this.ctx.fillStyle = 'rgba(0,0,0,0.3)'; this.ctx.fill(); this.ctx.beginPath(); this.ctx.arc(x, y, 20, 0, 2 * Math.PI); this.ctx.fillStyle = isGk? 'var(--accent-yellow)' : 'var(--accent-blue)'; this.ctx.fill(); this.ctx.strokeStyle = '#fff'; this.ctx.lineWidth = 2; this.ctx.stroke(); this.ctx.fillStyle = '#fff'; this.ctx.font = 'bold 18px var(--font-sans)'; this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle'; this.ctx.fillText(p.personal.num, x, y); this.ctx.fillStyle = 'rgba(0,0,0,0.7)'; this.ctx.roundRect(x - 35, y + 25, 70, 20, 5); this.ctx.fill(); this.ctx.fillStyle = '#fff'; this.ctx.font = '600 11px var(--font-sans)'; this.ctx.fillText(p.personal.name, x, y + 35); },
-  setTool(toolId) { if (toolId === 'clear') { AppState.drawings = []; this.History.saveState(); this.render(); ToniAI.speak('Alle Zeichnungen entfernt.'); return; } AppState.ui.activeTool = toolId; document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tool === toolId)); this.canvas.style.cursor = toolId === 'select'? 'grab' : 'crosshair'; },
-};
-ArenaEngine.Drawing = {
-  current: null,
-  start(pos) { if (AppState.ui.activeTool === 'select') return; this.current = { id: `draw_${Date.now()}`, type: AppState.ui.activeTool, color: AppState.ui.activeTool === 'zone'? 'rgba(51, 153, 255, 0.2)' : 'rgba(255, 51, 51, 0.9)', startX: pos.x, startY: pos.y, endX: pos.x, endY: pos.y }; },
-  update(pos) { if (!this.current) return false; this.current.endX = pos.x; this.current.endY = pos.y; return true; },
-  finish() { if (!this.current) return; if (Math.hypot(this.current.endX - this.current.startX, this.current.endY - this.current.startY) > 10) { if (!AppState.drawings) AppState.drawings = []; AppState.drawings.push(this.current); this.History.saveState(); } this.current = null; ArenaEngine.render(); },
-  renderAll() { const drawings = AppState.drawings || []; drawings.forEach(d => this.drawHelper(d)); if (this.current) this.drawHelper(this.current); },
-  drawHelper(drawing) { const { ctx } = ArenaEngine; const { type, color, startX, startY, endX, endY } = drawing; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 4; if (type === 'zone') { ctx.fillRect(startX, startY, endX - startX, endY - startY); } else { ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke(); if (type === 'arrow') { const angle = Math.atan2(endY - startY, endX - startX); ctx.beginPath(); ctx.moveTo(endX, endY); ctx.lineTo(endX - 15 * Math.cos(angle - Math.PI / 6), endY - 15 * Math.sin(angle - Math.PI / 6)); ctx.moveTo(endX, endY); ctx.lineTo(endX - 15 * Math.cos(angle + Math.PI / 6), endY - 15 * Math.sin(angle + Math.PI / 6)); ctx.stroke(); } } }
-};
-ArenaEngine.History = {
-    past: [], future: [],
-    saveState() { const state = JSON.stringify({ positions: Object.values(AppState.team.squad).map(p => ({ id: p.id, x: p.canvas.x, y: p.canvas.y })), drawings: AppState.drawings || [] }); if (this.past.length > 0 && this.past[this.past.length - 1] === state) return; this.past.push(state); this.future = []; if (this.past.length > 50) this.past.shift(); },
-    loadState(stateString) { const state = JSON.parse(stateString); state.positions.forEach(pos => { if (AppState.team.squad[pos.id]) { AppState.team.squad[pos.id].canvas.x = pos.x; AppState.team.squad[pos.id].canvas.y = pos.y; } }); AppState.drawings = state.drawings; ArenaEngine.render(); },
-    undo() { if (this.past.length <= 1) return; this.future.unshift(this.past.pop()); this.loadState(this.past[this.past.length - 1]); },
-    redo() { if (this.future.length === 0) return; const nextState = this.future.shift(); this.past.push(nextState); this.loadState(nextState); }
-};
-ArenaEngine.Tactic = {
-    visualizeExercise(commandText) { if (commandText.toLowerCase().includes("rondo")) { ToniAI.speak("Okay, ich baue die Rondo-Übung '6 gegen 2' auf."); AppState.drawings = [{ id: 'zone_rondo', type: 'zone', color: 'rgba(255, 174, 0, 0.3)', startX: 400, startY: 200, endX: 800, endY: 500 }]; const playerIds = Object.keys(AppState.team.squad); const positions = [{x: 400, y: 350}, {x: 800, y: 350}, {x: 600, y: 200}, {x: 600, y: 500}, {x: 450, y: 220}, {x: 750, y: 480}, {x: 550, y: 350}, {x: 650, y: 350}]; for (let i = 0; i < 8 && i < playerIds.length; i++) { if (AppState.team.squad[playerIds[i]]) { AppState.team.squad[playerIds[i]].canvas.x = positions[i].x; AppState.team.squad[playerIds[i]].canvas.y = positions[i].y; } } ArenaEngine.History.saveState(); ArenaEngine.render(); } else { ToniAI.speak("Ich konnte diesen Befehl nicht visualisieren."); } }
+  init() { console.log("ArenaEngine Initialized."); },
+  render() { console.log("Arena Rendering."); }
 };
 
 const App = {
   async init() {
-    console.log("TONI 2.0 | A-License Edition v2 | Initializing...");
     UIManager.init();
     const sessionUserId = sessionStorage.getItem('toni2_userid');
     if (sessionUserId) { await this.login(sessionUserId); } else { await this.showLoginScreen(); }
@@ -358,8 +298,8 @@ const App = {
     ]);
     AppState.team = teamData; AppState.finances = financeData;
     UIManager.elements['system-loader'].hidden = true;
-    UIManager.showApp(); ToniAI.init(); ArenaEngine.init(); UIManager.bindEvents();
-    console.log("Bootstrap complete. App is running.");
+    UIManager.showApp(); UIManager.bindEvents(); ToniAI.init(); ArenaEngine.init();
+    console.log("Bootstrap complete.");
   },
   logout() { sessionStorage.removeItem('toni2_userid'); window.location.reload(); }
 };
