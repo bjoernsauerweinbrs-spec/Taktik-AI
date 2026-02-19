@@ -4,214 +4,71 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>TONI 2.0 | Ultimate Titan v8.0</title>
+<meta name="description" content="TONI 2.0 — High‑Tech Profi Taktikboard mit Videoanalyse, KI‑Coaching und Vereinsmanagement.">
 
-<!-- Design Tokens -->
+<!-- Design Tokens & Core Styles -->
 <style>
   :root{
-    --bg: #010601;
-    --stadium-green: #051205;
-    --neon: #39FF14;
-    --neon-dim: rgba(57,255,20,0.12);
-    --gold-start: #bf953f;
-    --gold-mid: #fcf6ba;
-    --gold-end: #b38728;
-    --glass: rgba(255,255,255,0.05);
-    --red: #ff3333;
-    --card-text: #2c2401;
-    --ui-gap: 12px;
-    --radius-lg: 16px;
-    --font-sans: "Segoe UI", Roboto, Arial, sans-serif;
+    --bg:#010601; --neon:#39FF14; --neon-dim:rgba(57,255,20,0.12);
+    --gold-start:#bf953f; --gold-mid:#fcf6ba; --gold-end:#b38728;
+    --glass:rgba(255,255,255,0.04); --red:#ff3333; --card-text:#2c2401;
+    --ui-gap:12px; --radius-lg:14px; --font-sans:"Segoe UI", Roboto, Arial, sans-serif;
     --focus-ring: rgba(57,255,20,0.18);
   }
 
   /* Reset & base */
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{
-    height:100%;
-    width:100%;
-    margin:0;
-    padding:0;
-    background:var(--bg);
-    color:#fff;
-    font-family:var(--font-sans);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    /* allow scrolling when needed */
-    overflow:auto;
-  }
+  html,body{height:100%;width:100%;margin:0;padding:0;background:var(--bg);color:#fff;font-family:var(--font-sans);overflow:auto}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-  /* Accessibility: reduced motion */
-  @media (prefers-reduced-motion: reduce){
-    *{animation:none!important;transition:none!important}
-  }
+  /* Gate screen */
+  .gate-screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;background-image:radial-gradient(circle at center,#0a200a 0%,#010601 100%);padding:24px}
+  .gate-brand{color:var(--neon);letter-spacing:12px;font-size:28px;margin:0 0 6px 0;text-shadow:0 0 20px var(--neon-dim)}
+  .gate-sub{font-size:11px;opacity:0.6;letter-spacing:4px;margin:0 0 18px 0}
+  .gate-input{background:#000;border:2px solid var(--neon);color:var(--neon);padding:16px;border-radius:14px;text-align:center;font-size:20px;width:320px;letter-spacing:6px;box-shadow:0 0 20px var(--neon-dim);margin-bottom:18px}
+  .gate-btn{background:var(--neon);color:#000;padding:16px 64px;border:none;border-radius:14px;font-weight:700;cursor:pointer;font-size:16px;box-shadow:0 0 30px var(--neon-dim)}
+  .gate-note{font-size:11px;opacity:0.35;margin-top:14px}
 
-  /* Headline / Gate screen */
-  .gate-screen{
-    position:fixed;
-    inset:0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    z-index:9999;
-    background-image: radial-gradient(circle at center, #0a200a 0%, #010601 100%);
-    padding:24px;
-  }
-  .gate-brand{ color:var(--neon); letter-spacing:12px; font-size:28px; margin:0 0 6px 0; text-shadow:0 0 20px var(--neon-dim); }
-  .gate-sub{ font-size:11px; opacity:0.6; letter-spacing:4px; margin:0 0 18px 0; }
+  /* App grid */
+  .app-container{display:grid;grid-template-columns:85px 1fr 400px;gap:var(--ui-gap);height:100vh;padding:10px}
+  @media (max-width:1000px){.app-container{grid-template-columns:1fr;grid-template-rows:65px 1fr 320px;height:auto;min-height:100vh}}
 
-  .gate-input{
-    background:#000;
-    border:2px solid var(--neon);
-    color:var(--neon);
-    padding:16px;
-    border-radius:14px;
-    text-align:center;
-    font-size:20px;
-    width:320px;
-    letter-spacing:6px;
-    box-shadow:0 0 20px var(--neon-dim);
-    margin-bottom:18px;
-  }
-  .gate-btn{
-    background:var(--neon);
-    color:#000;
-    padding:16px 64px;
-    border:none;
-    border-radius:14px;
-    font-weight:700;
-    cursor:pointer;
-    font-size:16px;
-    box-shadow:0 0 30px var(--neon-dim);
-  }
-  .gate-note{ font-size:11px; opacity:0.35; margin-top:14px; }
+  /* Left nav */
+  .left-nav{background:var(--glass);border-radius:20px;border:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;align-items:center;padding:20px 8px;gap:14px;backdrop-filter:blur(8px)}
+  .nav-item{width:56px;height:56px;border-radius:12px;border:2px solid var(--neon);color:var(--neon);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;transition:transform .18s,box-shadow .18s}
+  .nav-item:hover{transform:translateY(-4px);box-shadow:0 6px 24px rgba(57,255,20,0.06);background:var(--neon);color:#000}
+  .nav-item:focus{outline:3px solid var(--focus-ring);box-shadow:0 8px 30px rgba(57,255,20,0.06)}
 
-  /* App core layout (grid) */
-  .app-container{
-    display:grid;
-    grid-template-columns:85px 1fr 400px;
-    gap:var(--ui-gap);
-    height:100vh;
-    padding:10px;
-  }
+  /* Center arena */
+  .center-arena{background:linear-gradient(180deg,rgba(0,0,0,0.6),rgba(0,0,0,0.4));border-radius:22px;border:1px solid rgba(57,255,20,0.06);padding:14px;display:flex;flex-direction:column;position:relative;overflow:hidden}
 
-  @media (max-width:1000px){
-    .app-container{
-      grid-template-columns:1fr;
-      grid-template-rows:65px 1fr 320px;
-      height:auto;
-      min-height:100vh;
-    }
-  }
+  /* Overlays (responsive) */
+  .overlay{position:fixed;left:6.5rem;right:24px;top:24px;bottom:24px;background:rgba(0,0,0,0.98);border:2px solid rgba(57,255,20,0.12);border-radius:22px;z-index:2000;display:none;flex-direction:column;padding:28px;backdrop-filter:blur(30px);box-shadow:0 30px 80px rgba(0,0,0,0.8);overflow:hidden}
+  @media (max-width:1000px){.overlay{left:12px;right:12px;top:12px;bottom:12px;padding:18px;border-radius:14px}}
+  .scroll-content{flex:1;overflow:auto;padding-right:8px}
+  .folder-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  @media (min-width:1200px){.folder-grid{grid-template-columns:repeat(4,1fr)}}
 
-  /* Left navigation */
-  .left-nav{
-    background:var(--glass);
-    border-radius:20px;
-    border:1px solid rgba(255,255,255,0.06);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:20px 8px;
-    gap:14px;
-    backdrop-filter: blur(8px);
-  }
-  .nav-item{
-    width:56px;
-    height:56px;
-    border-radius:12px;
-    border:2px solid var(--neon);
-    color:var(--neon);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:24px;
-    cursor:pointer;
-    transition:transform .18s ease, box-shadow .18s ease;
-  }
-  .nav-item:hover{ transform:translateY(-4px); box-shadow:0 6px 24px rgba(57,255,20,0.06); background:var(--neon); color:#000; }
-  .nav-item:focus{ outline:3px solid var(--focus-ring); box-shadow:0 8px 30px rgba(57,255,20,0.06); }
+  /* FIFA card */
+  .fifa-card{width:155px;height:220px;background:linear-gradient(135deg,var(--gold-start) 0%,var(--gold-mid) 45%,var(--gold-end) 100%);border-radius:10px 10px 45px 10px;padding:12px;color:var(--card-text);box-shadow:0 12px 25px rgba(0,0,0,0.7);cursor:pointer;transition:transform .16s,box-shadow .16s;border:1px solid rgba(255,255,255,0.18);display:flex;flex-direction:column;justify-content:space-between}
+  .fifa-card:focus{outline:3px solid var(--focus-ring);transform:translateY(-6px)}
+  .card-rating{font-size:34px;font-weight:900;line-height:0.9;color:#2c2401}
+  .card-pos{font-size:13px;font-weight:800;text-transform:uppercase;color:#2c2401}
+  .card-name{text-align:center;font-weight:900;font-size:14px;text-transform:uppercase;margin:8px 0;border-bottom:1.5px solid rgba(0,0,0,0.12);padding-bottom:6px}
+  .card-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;font-weight:800;color:#2c2401}
+  .stat-row{display:flex;gap:6px;align-items:center}
+  .stat-val{font-weight:900;width:26px;text-align:center}
 
-  /* Center arena container */
-  .center-arena{
-    background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.4));
-    border-radius:22px;
-    border:1px solid rgba(57,255,20,0.06);
-    padding:14px;
-    display:flex;
-    flex-direction:column;
-    position:relative;
-    overflow:hidden;
-  }
-
-  /* Overlay (responsive) - progressive enhancement */
-  .overlay{
-    position:fixed;
-    left:6.5rem; /* aligns with left-nav width */
-    right:24px;
-    top:24px;
-    bottom:24px;
-    background:rgba(0,0,0,0.98);
-    border:2px solid rgba(57,255,20,0.12);
-    border-radius:22px;
-    z-index:2000;
-    display:none;
-    flex-direction:column;
-    padding:28px;
-    backdrop-filter: blur(30px);
-    box-shadow:0 30px 80px rgba(0,0,0,0.8);
-    overflow:hidden;
-  }
-  @media (max-width:1000px){
-    .overlay{ left:12px; right:12px; top:12px; bottom:12px; padding:18px; border-radius:14px; }
-  }
-
-  .scroll-content{ flex:1; overflow:auto; padding-right:8px; }
-  .folder-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
-  @media (min-width:1200px){ .folder-grid{ grid-template-columns:repeat(4,1fr); } }
-
-  /* FIFA card (visual) */
-  .fifa-card{
-    width:155px;
-    height:220px;
-    background: linear-gradient(135deg, var(--gold-start) 0%, var(--gold-mid) 45%, var(--gold-end) 100%);
-    border-radius:10px 10px 45px 10px;
-    padding:12px;
-    color:var(--card-text);
-    box-shadow:0 12px 25px rgba(0,0,0,0.7);
-    cursor:pointer;
-    transition:transform .16s ease, box-shadow .16s ease;
-    border:1px solid rgba(255,255,255,0.18);
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-  }
-  .fifa-card:focus{ outline:3px solid var(--focus-ring); transform:translateY(-6px); }
-  .card-rating{ font-size:34px; font-weight:900; line-height:0.9; color:#2c2401; }
-  .card-pos{ font-size:13px; font-weight:800; text-transform:uppercase; color:#2c2401; }
-  .card-name{ text-align:center; font-weight:900; font-size:14px; text-transform:uppercase; margin:8px 0; border-bottom:1.5px solid rgba(0,0,0,0.12); padding-bottom:6px; }
-  .card-stats{ display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:11px; font-weight:800; color:#2c2401; }
-  .stat-row{ display:flex; gap:6px; align-items:center; }
-  .stat-val{ font-weight:900; width:26px; text-align:center; }
-
-  /* small helpers */
-  .muted{ color:#9a9a9a; font-size:13px; }
-  .heart-beat{ color:var(--red); animation:pulse .9s infinite; display:inline-block; }
-  @keyframes pulse{ 0%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}100%{opacity:.6;transform:scale(1)} }
-
-  /* focus ring for inputs/buttons */
-  input:focus, button:focus, .nav-item:focus{ outline:3px solid var(--focus-ring); outline-offset:2px; }
-
-  /* responsive adjustments for gate input on small screens */
-  @media (max-width:420px){
-    .gate-input{ width:86%; font-size:18px; letter-spacing:4px; }
-    .gate-btn{ padding:12px 36px; font-size:15px; }
-  }
+  /* helpers */
+  .muted{color:#9a9a9a;font-size:13px}
+  .heart-beat{color:var(--red);animation:pulse .9s infinite;display:inline-block}
+  @keyframes pulse{0%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}100%{opacity:.6;transform:scale(1)}}
+  input:focus,button:focus,.nav-item:focus{outline:3px solid var(--focus-ring);outline-offset:2px}
 </style>
 </head>
 <body>
 
-<!-- GATE SCREEN (DEV: remove bypass in production) -->
+<!-- GATE SCREEN -->
 <div id="gate" class="gate-screen" role="dialog" aria-modal="true" aria-labelledby="gate-title">
   <h1 id="gate-title" class="gate-brand">TITAN v8.0</h1>
   <p class="gate-sub">ULTIMATE PERFORMANCE ENGINE</p>
@@ -220,7 +77,7 @@
 
   <button id="gate-trigger" class="gate-btn" aria-label="System starten">SYSTEM STARTEN</button>
 
-  <p class="gate-note" aria-hidden="true">Entwicklungsmodus: Passwort wird lokal geprüft.</p>
+  <p class="gate-note" aria-hidden="true">Hinweis: Beim ersten Start bitte ein sicheres Passwort setzen. Keine Passwörter im Quellcode.</p>
 </div>
 <!-- === Teil 2/5 — App Container, Navigation, Arena, Toni-Box, Overlays (Hub, Editor, Video, AI Config) === -->
 <div class="app-container" id="main-app" style="display:none" role="application" aria-label="TONI 2.0 Hauptanwendung">
@@ -354,7 +211,6 @@ function openHub() {
   document.getElementById('hub-ov').style.display = 'flex';
   document.getElementById('hub-ov').setAttribute('aria-hidden','false');
   document.getElementById('hub-title').innerText = "TITAN MANAGEMENT HUB";
-  // folder grid (use data-action attributes, no inline onclick)
   content.className = "scroll-content folder-grid";
   content.innerHTML = ''; // clear
 
@@ -377,7 +233,6 @@ function openHub() {
   });
 
   content.appendChild(frag);
-  // focus first element
   const first = content.querySelector('.folder-item');
   if(first) first.focus();
 }
@@ -434,14 +289,12 @@ function renderKabineSafe() {
   c.innerHTML = '';
 
   const frag = document.createDocumentFragment();
-  // ensure db.squad exists
   const squad = Array.isArray(db.squad) ? db.squad : [];
   squad.forEach(p => {
     const card = document.createElement('div');
     card.className = 'fifa-card';
     card.tabIndex = 0;
     card.dataset.playerId = String(p.id);
-    // build innerHTML with escaped values for readability
     card.innerHTML = `
       <div class="card-rating">${Number(p.rating)}</div>
       <div class="card-pos">${escapeHtml(p.pos)}</div>
@@ -587,7 +440,6 @@ document.getElementById('btn-save-data').addEventListener('click', function(){
   if(!activePId) return;
   const p = db.squad.find(x => String(x.id) === String(activePId));
   if(!p) return;
-  // read and validate
   const name = document.getElementById('en').value.trim();
   if(!name){ alert('Name darf nicht leer sein'); return; }
   p.name = name;
@@ -600,11 +452,10 @@ document.getElementById('btn-save-data').addEventListener('click', function(){
   p.fat = parseFloat(document.getElementById('efat').value) || p.fat;
   p.muscle = parseFloat(document.getElementById('emus').value) || p.muscle;
 
-  save(); // persist
+  saveDB();
   document.getElementById('p-editor').style.display = 'none';
   document.getElementById('p-editor').setAttribute('aria-hidden','true');
   openSektor('kabine');
-  // re-render arena if available
   if(typeof renderArena === 'function') renderArena();
   if(typeof toniSpeak === 'function') toniSpeak("Daten für " + p.name + " wurden synchronisiert.");
 });
@@ -975,21 +826,37 @@ document.addEventListener('DOMContentLoaded', function(){
 /* Compatibility alias (some earlier parts used save/saveDB) */
 window.save = saveDB;
 
-/* Focus trap utility for overlays (basic) */
+/* Focus trap utility for overlays (robust) */
 function trapFocus(modal) {
   if(!modal) return;
-  const focusable = modal.querySelectorAll('a,button,input,textarea,select,[tabindex]:not([tabindex="-1"])');
+  const focusableSelector = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, [tabindex]:not([tabindex="-1"])';
+  const focusable = Array.from(modal.querySelectorAll(focusableSelector)).filter(el => el.offsetParent !== null);
   if(!focusable.length) return;
   const first = focusable[0], last = focusable[focusable.length - 1];
-  modal.addEventListener('keydown', function onKey(e){
+  function onKey(e){
     if(e.key === 'Tab'){
       if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
       else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
     }
     if(e.key === 'Escape'){ modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); modal.removeEventListener('keydown', onKey); }
-  });
-  // focus first element
+  }
+  modal.addEventListener('keydown', onKey);
   setTimeout(()=> first.focus(), 50);
+}
+
+/* Overlay open/close helpers with focus trap */
+function openOverlay(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.display = 'flex';
+  el.setAttribute('aria-hidden','false');
+  trapFocus(el);
+}
+function closeOverlay(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.display = 'none';
+  el.setAttribute('aria-hidden','true');
 }
 
 /* Import Snapshot (JSON) */
@@ -999,7 +866,6 @@ function importSnapshotFile(file) {
     try {
       const snap = JSON.parse(e.target.result);
       if(!snap || !Array.isArray(snap.squad)) throw new Error('Ungültiges Snapshot Format');
-      // map positions back to db.squad by id
       snap.squad.forEach(sp => {
         const p = db.squad.find(x => String(x.id) === String(sp.id));
         if(p){ p.x = sp.x; p.y = sp.y; }
@@ -1014,9 +880,8 @@ function importSnapshotFile(file) {
   reader.readAsText(file);
 }
 
-/* UI: Import button (drag & drop support on snapshot) */
+/* UI: Import button (hidden file input) */
 (function setupImportHandlers(){
-  // create a hidden file input for snapshot import
   const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.style.display = 'none';
   document.body.appendChild(input);
   input.addEventListener('change', (e)=> {
@@ -1024,12 +889,10 @@ function importSnapshotFile(file) {
     if(f) importSnapshotFile(f);
     input.value = '';
   });
-  // bind to snapshot button with modifier (Shift+Click to import)
   const snapBtn = document.getElementById('btn-snapshot');
   if(snapBtn){
     snapBtn.addEventListener('click', (ev)=>{
       if(ev.shiftKey){
-        // trigger import
         input.click();
       } else {
         exportSnapshot();
@@ -1050,7 +913,6 @@ function exportPlayersCSV(){
   toniSpeak('Spielerliste exportiert.');
 }
 (function bindExportPlayers(){
-  // add a small export control in hub if not present
   const hub = document.getElementById('hub-ov');
   if(hub){
     const ctrl = document.createElement('div');
@@ -1061,35 +923,65 @@ function exportPlayersCSV(){
   }
 })();
 
+/* Undo/Redo (simple snapshot stack) */
+const historyStack = { past: [], future: [] };
+function pushSnapshot() {
+  const snap = JSON.stringify(db.squad.map(p => ({id:p.id,x:p.x,y:p.y})));
+  historyStack.past.push(snap);
+  if(historyStack.past.length > 50) historyStack.past.shift();
+  historyStack.future = [];
+}
+function undo() {
+  if(!historyStack.past.length) return;
+  const current = JSON.stringify(db.squad.map(p => ({id:p.id,x:p.x,y:p.y})));
+  historyStack.future.push(current);
+  const prev = historyStack.past.pop();
+  const arr = JSON.parse(prev);
+  arr.forEach(a => {
+    const p = db.squad.find(x => x.id === a.id);
+    if(p){ p.x = a.x; p.y = a.y; }
+  });
+  saveDB(); renderArena(); toniSpeak('Rückgängig ausgeführt.');
+}
+function redo() {
+  if(!historyStack.future.length) return;
+  const next = historyStack.future.pop();
+  const arr = JSON.parse(next);
+  arr.forEach(a => {
+    const p = db.squad.find(x => x.id === a.id);
+    if(p){ p.x = a.x; p.y = a.y; }
+  });
+  saveDB(); renderArena(); toniSpeak('Wiederhergestellt.');
+}
+
+/* Bind undo/redo buttons */
+document.addEventListener('DOMContentLoaded', ()=>{
+  const undoBtn = document.getElementById('btn-undo');
+  const redoBtn = document.getElementById('btn-redo');
+  if(undoBtn) undoBtn.addEventListener('click', undo);
+  if(redoBtn) redoBtn.addEventListener('click', redo);
+});
+
 /* Keyboard shortcuts (global) */
 document.addEventListener('keydown', (e)=>{
-  // Ctrl+S -> save DB
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); saveDB(); toniSpeak('Daten gespeichert.'); }
-  // Esc -> close overlays
   if(e.key === 'Escape'){
     ['hub-ov','video-ov','ai-config-ov','p-editor'].forEach(id=>{
       const el = document.getElementById(id);
-      if(el && el.style.display === 'flex' || el && el.style.display === 'block'){ el.style.display = 'none'; el.setAttribute('aria-hidden','true'); }
+      if(el && (el.style.display === 'flex' || el.style.display === 'block')){ el.style.display = 'none'; el.setAttribute('aria-hidden','true'); }
     });
   }
 });
 
-/* Small accessibility improvements: ensure buttons have aria-labels (already set in markup) */
-
-/* Clean up: ensure overlays hidden on load */
+/* Accessibility: ensure overlays hidden on load */
 document.addEventListener('DOMContentLoaded', ()=>{
   ['hub-ov','video-ov','ai-config-ov','p-editor'].forEach(id=>{
     const el = document.getElementById(id);
     if(el){ el.style.display = 'none'; el.setAttribute('aria-hidden','true'); }
   });
-  // Setup canvas and start loop only if gate already unlocked (for dev convenience)
-  if(document.getElementById('main-app').style.display !== 'none'){
-    setupCanvas();
-    startRenderLoop();
-  }
 });
 
-/* Final note: expose small API for console debugging */
+/* Small API for debugging */
 window.TONI = {
   db,
   saveDB,
@@ -1099,8 +991,14 @@ window.TONI = {
   startCamera,
   stopCamera,
   renderArena,
-  setFormation
+  setFormation,
+  pushSnapshot,
+  undo,
+  redo
 };
+
+/* Ensure we push initial snapshot for undo */
+pushSnapshot();
 </script>
 
 </body>
