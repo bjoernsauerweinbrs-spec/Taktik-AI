@@ -5,8 +5,187 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="TITAN v11 ELITE - Das ultimative Fußball-Betriebssystem">
     <title>TITAN v11 ELITE</title>
-    
-    </head>
+
+    <style>
+        /* ======================================================================= */
+        /* I. DESIGN SYSTEM & ROOT-VARIABLEN                                       */
+        /* ======================================================================= */
+        :root {
+            --bg-dark: #090c10;
+            --bg-medium: #161b22;
+            --bg-light: #21262d;
+            --border-color: #30363d;
+            
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-yellow: #d4af37;
+            
+            --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            --pitch-bg: repeating-linear-gradient(0deg, #012a01, #012a01 10%, #013201 10%, #013201 20%);
+            
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        [hidden] { display: none !important; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%; width: 100%;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            overflow: hidden;
+        }
+
+        /* ======================================================================= */
+        /* II. APP-ARCHITEKTUR & GRID (Pro-Desktop Layout)                         */
+        /* ======================================================================= */
+        .app-container {
+            display: grid;
+            height: 100vh; width: 100vw;
+            grid-template-areas:
+                "header header header"
+                "nav    main   aside"
+                "nav    main   aside";
+            grid-template-columns: 260px 1fr 320px;
+            grid-template-rows: 60px 1fr;
+            gap: 12px; padding: 12px;
+        }
+
+        .app-header { grid-area: header; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+        #left-panel { grid-area: nav; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; overflow: hidden; }
+        #main-arena { grid-area: main; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 8px; position: relative; display: flex; flex-direction: column; }
+        #right-panel { grid-area: aside; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* ======================================================================= */
+        /* III. UI-KOMPONENTEN (Buttons, Inputs, Avatar)                           */
+        /* ======================================================================= */
+        input, select, button { font-family: inherit; }
+        
+        .btn-primary, .menu-btn {
+            width: 100%; padding: 12px;
+            border-radius: var(--radius-md); border: 1px solid var(--border-color);
+            font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-primary { background: var(--accent-green); color: #fff; border: none; font-size: 16px; margin-top: 15px; }
+        .btn-primary:hover { filter: brightness(1.1); }
+        
+        .menu-btn { background: var(--bg-light); color: var(--text-primary); text-align: left; display: flex; align-items: center; gap: 10px; }
+        .menu-btn:hover { background: var(--border-color); }
+        
+        .btn-live { background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red); padding: 6px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        .btn-live.active { background: var(--accent-red); color: #fff; animation: pulse 1.5s infinite; }
+        
+        .btn-send { background: var(--accent-blue); color: #fff; border: none; padding: 0 16px; border-radius: var(--radius-sm); cursor: pointer; font-weight: bold; }
+
+        .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-light); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; border: 2px solid var(--accent-blue); }
+
+        /* ======================================================================= */
+        /* IV. ARENA & TAKTIKBOARD (Echtes Spielfeld-Design)                       */
+        /* ======================================================================= */
+        #board-wrap {
+            flex-grow: 1; position: relative; border-radius: var(--radius-md); 
+            background: var(--pitch-bg); border: 2px solid #005000;
+            overflow: hidden; box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+        }
+        #main-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+
+        #arena-controls {
+            position: absolute; top: 12px; left: 12px; display: flex; gap: 8px;
+            background: rgba(13, 17, 23, 0.85); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); z-index: 100;
+        }
+        .tool-btn { background: transparent; border: none; font-size: 18px; padding: 4px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
+        .tool-btn:hover, .tool-btn.active { opacity: 1; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
+
+        /* ======================================================================= */
+        /* V. MANNSCHAFTSKABINE & FIFA-CARDS (Optimierte Lesbarkeit)               */
+        /* ======================================================================= */
+        .fifa-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px; padding: 10px;
+        }
+        
+        .fifa-card {
+            background: var(--gold-gradient); color: #111;
+            border-radius: var(--radius-md); padding: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 8px;
+            position: relative; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+        
+        .fifa-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(0,0,0,0.2); padding-bottom: 5px; margin-bottom: 5px; }
+        .fifa-ovr { font-size: 28px; font-weight: 900; line-height: 1; }
+        .fifa-pos { font-size: 18px; font-weight: 700; opacity: 0.9; }
+        
+        .fifa-name { text-align: center; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0; }
+        
+        .fifa-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 15px; }
+        .fifa-stat-row { display: flex; justify-content: space-between; align-items: center; font-size: 15px; }
+        .fifa-val { font-weight: 900; }
+        .fifa-lbl { font-weight: 600; opacity: 0.85; }
+        
+        .fifa-bio { border-top: 2px solid rgba(0,0,0,0.2); padding-top: 8px; margin-top: 5px; font-size: 12px; font-weight: 700; display: flex; justify-content: space-between; }
+
+        /* ======================================================================= */
+        /* VI. AKTENTASCHE (Das Manager-Dashboard)                                 */
+        /* ======================================================================= */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .dash-widget { background: var(--bg-light); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; }
+        .dash-widget h3 { border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; color: var(--accent-blue); }
+        
+        .progress-track { width: 100%; height: 12px; background: var(--bg-dark); border-radius: 6px; overflow: hidden; margin-top: 10px; border: 1px solid var(--border-color); }
+        .progress-fill { height: 100%; background: var(--accent-green); width: 65%; }
+
+        /* ======================================================================= */
+        /* VII. OVERLAYS, MODALS & ANIMATIONEN                                     */
+        /* ======================================================================= */
+        .system-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); }
+        .login-box { width: 90%; max-width: 400px; padding: 40px; background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        
+        .dialog-overlay { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .dialog-overlay.is-active { display: flex; }
+        .dialog-box { width: 95vw; max-width: 600px; max-height: 90vh; background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
+        .dialog-box.large { max-width: 1400px; height: 85vh; }
+        .dialog-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); background: var(--bg-light); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+        .dialog-content { padding: 24px; overflow-y: auto; flex-grow: 1; }
+        .close-btn { font-size: 20px; color: var(--text-secondary); cursor: pointer; background: none; border: none; transition: color 0.2s; }
+        .close-btn:hover { color: var(--accent-red); }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); }
+        }
+
+        /* ======================================================================= */
+        /* VIII. MOBILE RESPONSIVENESS (Temporäres Grid, Feinschliff folgt)        */
+        /* ======================================================================= */
+        .mobile-nav-btn { display: none; font-size: 24px; padding: 4px 8px; background: transparent; border: none; color: var(--text-primary); cursor: pointer; }
+
+        @media (max-width: 1200px) {
+            .app-container { grid-template-columns: 1fr; grid-template-areas: "header" "main"; padding: 8px; }
+            #left-panel, #right-panel {
+                position: fixed; top: 0; height: 100%; width: 320px; z-index: 8000;
+                transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); border-radius: 0;
+            }
+            #left-panel { left: 0; transform: translateX(-100%); }
+            #right-panel { right: 0; transform: translateX(100%); }
+            #left-panel.is-visible, #right-panel.is-visible { transform: translateX(0); }
+            .mobile-nav-btn { display: block; }
+        }
+    </style>
+</head>
 <body>
 
     <div id="system-loader" class="system-overlay">
@@ -15,7 +194,7 @@
 
     <div id="login-screen" class="system-overlay" hidden>
         <div class="login-box">
-            <h1 style="color: var(--neon); letter-spacing: 3px;">TITAN v11</h1>
+            <h1 style="color: var(--accent-blue); letter-spacing: 3px;">TITAN v11</h1>
             <p style="color: var(--text-secondary); margin-bottom: 20px;">SYSTEM INITIALISIEREN</p>
             <form id="login-form">
                 <select id="profile-selector"></select>
@@ -72,7 +251,7 @@
 
         <aside id="right-panel">
             <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
-                <h3 style="margin: 0;">TONI AI <span id="ai-status">●</span></h3>
+                <h3 style="margin: 0;">TONI AI <span id="ai-status" style="color: var(--accent-green)">●</span></h3>
                 <button id="close-right-panel-btn" class="mobile-nav-btn" style="font-size: 16px;">✕</button>
             </header>
             <div id="chat-box" style="flex-grow: 1; overflow-y: auto; font-size: 13px; margin-bottom: 15px;"></div>
@@ -128,230 +307,33 @@
         </div>
     </div>
 
-</body>
-</html>
-<style>
-    /* ======================================================================= */
-    /* I. DESIGN SYSTEM & ROOT-VARIABLEN                                       */
-    /* ======================================================================= */
-    :root {
-        --bg-dark: #090c10;
-        --bg-medium: #161b22;
-        --bg-light: #21262d;
-        --border-color: #30363d;
-        
-        --text-primary: #e6edf3;
-        --text-secondary: #8b949e;
-        
-        --accent-blue: #58a6ff;
-        --accent-green: #3fb950;
-        --accent-red: #f85149;
-        --accent-yellow: #d4af37;
-        
-        --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-        --pitch-bg: repeating-linear-gradient(0deg, #012a01, #012a01 10%, #013201 10%, #013201 20%);
-        
-        --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        --radius-sm: 6px;
-        --radius-md: 10px;
-        --radius-lg: 16px;
-    }
-
-    [hidden] { display: none !important; }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-        height: 100%; width: 100%;
-        background-color: var(--bg-dark);
-        color: var(--text-primary);
-        font-family: var(--font-sans);
-        font-size: 14px;
-        overflow: hidden;
-    }
-
-    /* ======================================================================= */
-    /* II. APP-ARCHITEKTUR & GRID (Pro-Desktop Layout)                         */
-    /* ======================================================================= */
-    .app-container {
-        display: grid;
-        height: 100vh; width: 100vw;
-        grid-template-areas:
-            "header header header"
-            "nav    main   aside"
-            "nav    main   aside";
-        grid-template-columns: 260px 1fr 320px;
-        grid-template-rows: 60px 1fr;
-        gap: 12px; padding: 12px;
-    }
-
-    .app-header { grid-area: header; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-    #left-panel { grid-area: nav; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; overflow: hidden; }
-    #main-arena { grid-area: main; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 8px; position: relative; display: flex; flex-direction: column; }
-    #right-panel { grid-area: aside; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; overflow: hidden; }
-
-    /* ======================================================================= */
-    /* III. UI-KOMPONENTEN (Buttons, Inputs, Avatar)                           */
-    /* ======================================================================= */
-    input, select, button { font-family: inherit; }
-    
-    .btn-primary, .menu-btn {
-        width: 100%; padding: 12px;
-        border-radius: var(--radius-md); border: 1px solid var(--border-color);
-        font-weight: 600; cursor: pointer; transition: all 0.2s;
-    }
-    .btn-primary { background: var(--accent-green); color: #fff; border: none; font-size: 16px; margin-top: 15px; }
-    .btn-primary:hover { filter: brightness(1.1); }
-    
-    .menu-btn { background: var(--bg-light); color: var(--text-primary); text-align: left; display: flex; align-items: center; gap: 10px; }
-    .menu-btn:hover { background: var(--border-color); }
-    
-    .btn-live { background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red); padding: 6px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; }
-    .btn-live.active { background: var(--accent-red); color: #fff; animation: pulse 1.5s infinite; }
-    
-    .btn-send { background: var(--accent-blue); color: #fff; border: none; padding: 0 16px; border-radius: var(--radius-sm); cursor: pointer; font-weight: bold; }
-
-    .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-light); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; border: 2px solid var(--accent-blue); }
-
-    /* ======================================================================= */
-    /* IV. ARENA & TAKTIKBOARD (Echtes Spielfeld-Design)                       */
-    /* ======================================================================= */
-    #board-wrap {
-        flex-grow: 1; position: relative; border-radius: var(--radius-md); 
-        background: var(--pitch-bg); border: 2px solid #005000;
-        overflow: hidden; box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
-    }
-    #main-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
-
-    #arena-controls {
-        position: absolute; top: 12px; left: 12px; display: flex; gap: 8px;
-        background: rgba(13, 17, 23, 0.85); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); z-index: 100;
-    }
-    .tool-btn { background: transparent; border: none; font-size: 18px; padding: 4px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
-    .tool-btn:hover, .tool-btn.active { opacity: 1; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
-
-    /* ======================================================================= */
-    /* V. MANNSCHAFTSKABINE & FIFA-CARDS (Optimierte Lesbarkeit)               */
-    /* ======================================================================= */
-    .fifa-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 20px; padding: 10px;
-    }
-    
-    .fifa-card {
-        background: var(--gold-gradient); color: #111;
-        border-radius: var(--radius-md); padding: 15px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        display: flex; flex-direction: column; gap: 8px;
-        position: relative; overflow: hidden;
-        border: 1px solid rgba(255,255,255,0.4);
-    }
-    
-    /* Erhöhter Kontrast und klarere Typografie für bessere Erkennbarkeit */
-    .fifa-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(0,0,0,0.2); padding-bottom: 5px; margin-bottom: 5px; }
-    .fifa-ovr { font-size: 28px; font-weight: 900; line-height: 1; }
-    .fifa-pos { font-size: 18px; font-weight: 700; opacity: 0.9; }
-    
-    .fifa-name { text-align: center; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0; }
-    
-    .fifa-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 15px; }
-    .fifa-stat-row { display: flex; justify-content: space-between; align-items: center; font-size: 15px; }
-    .fifa-val { font-weight: 900; }
-    .fifa-lbl { font-weight: 600; opacity: 0.85; }
-    
-    .fifa-bio { border-top: 2px solid rgba(0,0,0,0.2); padding-top: 8px; margin-top: 5px; font-size: 12px; font-weight: 700; display: flex; justify-content: space-between; }
-
-    /* ======================================================================= */
-    /* VI. AKTENTASCHE (Das Manager-Dashboard)                                 */
-    /* ======================================================================= */
-    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-    .dash-widget { background: var(--bg-light); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; }
-    .dash-widget h3 { border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; color: var(--accent-blue); }
-    
-    /* Fortschrittsbalken Analysezentrum */
-    .progress-track { width: 100%; height: 12px; background: var(--bg-dark); border-radius: 6px; overflow: hidden; margin-top: 10px; border: 1px solid var(--border-color); }
-    .progress-fill { height: 100%; background: var(--accent-green); width: 65%; }
-
-    /* ======================================================================= */
-    /* VII. OVERLAYS, MODALS & ANIMATIONEN                                     */
-    /* ======================================================================= */
-    .system-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); }
-    .login-box { width: 90%; max-width: 400px; padding: 40px; background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-    
-    .dialog-overlay { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
-    .dialog-overlay.is-active { display: flex; }
-    .dialog-box { width: 95vw; max-width: 600px; max-height: 90vh; background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
-    .dialog-box.large { max-width: 1400px; height: 85vh; }
-    .dialog-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); background: var(--bg-light); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-    .dialog-content { padding: 24px; overflow-y: auto; flex-grow: 1; }
-    .close-btn { font-size: 20px; color: var(--text-secondary); cursor: pointer; background: none; border: none; transition: color 0.2s; }
-    .close-btn:hover { color: var(--accent-red); }
-
-    @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.4); }
-        70% { box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); }
-    }
-
-    /* ======================================================================= */
-    /* VIII. MOBILE RESPONSIVENESS (Temporäres Grid, Feinschliff folgt)        */
-    /* ======================================================================= */
-    .mobile-nav-btn { display: none; font-size: 24px; padding: 4px 8px; background: transparent; border: none; color: var(--text-primary); cursor: pointer; }
-
-    @media (max-width: 1200px) {
-        .app-container { grid-template-columns: 1fr; grid-template-areas: "header" "main"; padding: 8px; }
-        #left-panel, #right-panel {
-            position: fixed; top: 0; height: 100%; width: 320px; z-index: 8000;
-            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); border-radius: 0;
-        }
-        #left-panel { left: 0; transform: translateX(-100%); }
-        #right-panel { right: 0; transform: translateX(100%); }
-        #left-panel.is-visible, #right-panel.is-visible { transform: translateX(0); }
-        .mobile-nav-btn { display: block; }
-    }
-</style>
 <script>
     'use strict';
 
     /* ======================================================================= */
     /* I. MOCK DATABASE & API SERVICE (Der Elite-Datensatz)                    */
     /* ======================================================================= */
-    
     const MockData = {
         profiles: {
             "coach_meier": { id: "coach_meier", name: "Björn Meier", role: "Cheftrainer", club: "FC TITAN ELITE", avatar: "BM" },
             "manager_schmidt": { id: "manager_schmidt", name: "Jens Schmidt", role: "Manager", club: "FC TITAN ELITE", avatar: "JS" }
         },
-        
-        // Vollständiger Kader für die Kabine und die Arena
         squad: {
-            // Torhüter
-            "p1": { id: "p1", name: "Neuer", num: 1, pos: "TW", att: { pac: 85, sho: 89, pas: 91, dri: 90, def: 60, phy: 86 }, ovr: 89, bio: { hrv: 94, fatPct: 10.5, readiness: 98 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 } },
-            // Abwehr (Trainer 3-4-3 Fokus)
-            "p2": { id: "p2", name: "Rüdiger", num: 2, pos: "IV", att: { pac: 82, sho: 40, pas: 71, dri: 65, def: 89, phy: 90 }, ovr: 87, bio: { hrv: 88, fatPct: 8.5, readiness: 92 }, mental: { sleep: 7, stress: 3, motiv: 8 }, stats: { minutes: 0, performance: 100 } },
-            "p3": { id: "p3", name: "Hummels", num: 5, pos: "IV", att: { pac: 55, sho: 58, pas: 81, dri: 73, def: 89, phy: 80 }, ovr: 85, bio: { hrv: 82, fatPct: 12.0, readiness: 85 }, mental: { sleep: 6, stress: 5, motiv: 7 }, stats: { minutes: 0, performance: 100 } },
-            "p4": { id: "p4", name: "Tah", num: 4, pos: "IV", att: { pac: 78, sho: 35, pas: 68, dri: 60, def: 85, phy: 88 }, ovr: 84, bio: { hrv: 91, fatPct: 9.2, readiness: 95 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 } },
-            // Außenverteidiger (Für Toni 4-4-2)
-            "p5": { id: "p5", name: "Davies", num: 19, pos: "LV", att: { pac: 95, sho: 68, pas: 77, dri: 84, def: 76, phy: 77 }, ovr: 84, bio: { hrv: 96, fatPct: 8.1, readiness: 99 }, mental: { sleep: 9, stress: 1, motiv: 10 }, stats: { minutes: 0, performance: 100 } },
-            "p6": { id: "p6", name: "Frimpong", num: 30, pos: "RV", att: { pac: 94, sho: 72, pas: 78, dri: 85, def: 74, phy: 70 }, ovr: 84, bio: { hrv: 93, fatPct: 8.8, readiness: 96 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 } },
-            // Mittelfeld
-            "p7": { id: "p7", name: "Kimmich", num: 6, pos: "ZDM", att: { pac: 70, sho: 78, pas: 90, dri: 83, def: 82, phy: 78 }, ovr: 88, bio: { hrv: 90, fatPct: 10.1, readiness: 94 }, mental: { sleep: 7, stress: 4, motiv: 10 }, stats: { minutes: 0, performance: 100 } },
-            "p8": { id: "p8", name: "Kroos", num: 8, pos: "ZM", att: { pac: 53, sho: 81, pas: 93, dri: 81, def: 71, phy: 68 }, ovr: 86, bio: { hrv: 85, fatPct: 11.5, readiness: 88 }, mental: { sleep: 8, stress: 2, motiv: 8 }, stats: { minutes: 0, performance: 100 } },
-            "p9": { id: "p9", name: "Musiala", num: 10, pos: "ZOM", att: { pac: 85, sho: 80, pas: 84, dri: 92, def: 55, phy: 65 }, ovr: 88, bio: { hrv: 95, fatPct: 8.9, readiness: 97 }, mental: { sleep: 9, stress: 1, motiv: 9 }, stats: { minutes: 0, performance: 100 } },
-            "p10": { id: "p10", name: "Wirtz", num: 17, pos: "ZOM", att: { pac: 83, sho: 82, pas: 86, dri: 89, def: 54, phy: 68 }, ovr: 87, bio: { hrv: 92, fatPct: 9.5, readiness: 95 }, mental: { sleep: 8, stress: 3, motiv: 9 }, stats: { minutes: 0, performance: 100 } },
-            // Sturm
-            "p11": { id: "p11", name: "Müller", num: 13, pos: "ST", att: { pac: 75, sho: 84, pas: 83, dri: 80, def: 54, phy: 75 }, ovr: 85, bio: { hrv: 89, fatPct: 11.0, readiness: 92 }, mental: { sleep: 7, stress: 2, motiv: 10 }, stats: { minutes: 0, performance: 100 } },
-            "p12": { id: "p12", name: "Sané", num: 11, pos: "RF", att: { pac: 91, sho: 83, pas: 81, dri: 86, def: 38, phy: 70 }, ovr: 85, bio: { hrv: 86, fatPct: 9.8, readiness: 89 }, mental: { sleep: 6, stress: 4, motiv: 8 }, stats: { minutes: 0, performance: 100 } }
+            "p1": { id: "p1", name: "Neuer", num: 1, pos: "TW", att: { pac: 85, sho: 89, pas: 91, dri: 90, def: 60, phy: 86 }, ovr: 89, bio: { hrv: 94, fatPct: 10.5, readiness: 98 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 100, y: 100} },
+            "p2": { id: "p2", name: "Rüdiger", num: 2, pos: "IV", att: { pac: 82, sho: 40, pas: 71, dri: 65, def: 89, phy: 90 }, ovr: 87, bio: { hrv: 88, fatPct: 8.5, readiness: 92 }, mental: { sleep: 7, stress: 3, motiv: 8 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 150, y: 150} },
+            "p3": { id: "p3", name: "Hummels", num: 5, pos: "IV", att: { pac: 55, sho: 58, pas: 81, dri: 73, def: 89, phy: 80 }, ovr: 85, bio: { hrv: 82, fatPct: 12.0, readiness: 85 }, mental: { sleep: 6, stress: 5, motiv: 7 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 200, y: 150} },
+            "p4": { id: "p4", name: "Tah", num: 4, pos: "IV", att: { pac: 78, sho: 35, pas: 68, dri: 60, def: 85, phy: 88 }, ovr: 84, bio: { hrv: 91, fatPct: 9.2, readiness: 95 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 250, y: 150} },
+            "p5": { id: "p5", name: "Davies", num: 19, pos: "LV", att: { pac: 95, sho: 68, pas: 77, dri: 84, def: 76, phy: 77 }, ovr: 84, bio: { hrv: 96, fatPct: 8.1, readiness: 99 }, mental: { sleep: 9, stress: 1, motiv: 10 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 80, y: 250} },
+            "p6": { id: "p6", name: "Frimpong", num: 30, pos: "RV", att: { pac: 94, sho: 72, pas: 78, dri: 85, def: 74, phy: 70 }, ovr: 84, bio: { hrv: 93, fatPct: 8.8, readiness: 96 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 320, y: 250} },
+            "p7": { id: "p7", name: "Kimmich", num: 6, pos: "ZDM", att: { pac: 70, sho: 78, pas: 90, dri: 83, def: 82, phy: 78 }, ovr: 88, bio: { hrv: 90, fatPct: 10.1, readiness: 94 }, mental: { sleep: 7, stress: 4, motiv: 10 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 180, y: 300} },
+            "p8": { id: "p8", name: "Kroos", num: 8, pos: "ZM", att: { pac: 53, sho: 81, pas: 93, dri: 81, def: 71, phy: 68 }, ovr: 86, bio: { hrv: 85, fatPct: 11.5, readiness: 88 }, mental: { sleep: 8, stress: 2, motiv: 8 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 220, y: 300} },
+            "p9": { id: "p9", name: "Musiala", num: 10, pos: "ZOM", att: { pac: 85, sho: 80, pas: 84, dri: 92, def: 55, phy: 65 }, ovr: 88, bio: { hrv: 95, fatPct: 8.9, readiness: 97 }, mental: { sleep: 9, stress: 1, motiv: 9 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 150, y: 350} },
+            "p10": { id: "p10", name: "Wirtz", num: 17, pos: "ZOM", att: { pac: 83, sho: 82, pas: 86, dri: 89, def: 54, phy: 68 }, ovr: 87, bio: { hrv: 92, fatPct: 9.5, readiness: 95 }, mental: { sleep: 8, stress: 3, motiv: 9 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 250, y: 350} },
+            "p11": { id: "p11", name: "Müller", num: 13, pos: "ST", att: { pac: 75, sho: 84, pas: 83, dri: 80, def: 54, phy: 75 }, ovr: 85, bio: { hrv: 89, fatPct: 11.0, readiness: 92 }, mental: { sleep: 7, stress: 2, motiv: 10 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 200, y: 400} },
+            "p12": { id: "p12", name: "Sané", num: 11, pos: "RF", att: { pac: 91, sho: 83, pas: 81, dri: 86, def: 38, phy: 70 }, ovr: 85, bio: { hrv: 86, fatPct: 9.8, readiness: 89 }, mental: { sleep: 6, stress: 4, motiv: 8 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 300, y: 400} }
         },
-        
-        // Die Inhalte der Aktentasche (Briefcase)
         briefcase: {
-            finances: {
-                budget: 15500000,
-                salaries: 8200000,
-                infrastructure: 1400000,
-            },
+            finances: { budget: 15500000, salaries: 8200000, infrastructure: 1400000 },
             sponsors: [
                 { name: "ToniTech Labs", type: "Hauptsponsor", value: 2500000, status: "Aktiv", endDate: "2027-06-30" },
                 { name: "Global Sports Net", type: "Ärmel", value: 800000, status: "Aktiv", endDate: "2026-12-31" },
@@ -361,27 +343,15 @@
                 { name: "Erweiterung Analysezentrum", progress: 65, cost: 450000, deadline: "2026-08-01" },
                 { name: "Rasensanierung Arena", progress: 100, cost: 120000, deadline: "Abgeschlossen" }
             ],
-            stadionzeitung: {
-                ausgabe: "Vol. 42 - Heimspiel Spezial",
-                status: "Im Druck",
-                auflage: 15000,
-                werbeeinnahmen: 25000
-            }
+            stadionzeitung: { ausgabe: "Vol. 42 - Heimspiel Spezial", status: "Im Druck", auflage: 15000, werbeeinnahmen: 25000 }
         }
     };
 
-    /* API Simulation */
     const ApiService = {
         _delay(ms) { return new Promise(res => setTimeout(res, ms)); },
-        
-        async getProfiles() {
-            await this._delay(400); // Ladezeit simulieren
-            return Object.values(MockData.profiles);
-        },
-        
+        async getProfiles() { await this._delay(400); return Object.values(MockData.profiles); },
         async loadProfileData(profileId) {
-            await this._delay(1000); // Datenbank-Abruf simulieren
-            // Deep Copy, damit wir das Original nicht überschreiben
+            await this._delay(1000);
             return {
                 user: MockData.profiles[profileId],
                 squad: JSON.parse(JSON.stringify(MockData.squad)),
@@ -391,40 +361,18 @@
     };
 
     /* ======================================================================= */
-    /* II. APPLICATION STATE (Der zentrale Datenspeicher)                      */
+    /* II. APPLICATION STATE & UI MANAGER                                      */
     /* ======================================================================= */
-    const AppState = {
-        user: null,
-        squad: null,
-        briefcase: null,
-        currentFormation: '4-4-2' // Standard-Startformation
-    };
+    const AppState = { user: null, squad: null, briefcase: null };
     
-    // Platzhalter für den UIManager (wird in Teil 4 definiert)
-    const UIManager = {}; 
-
-    // Platzhalter für die Arena Engine (wird in Teil 5 definiert)
-    const ArenaEngine = {};
-
-    // Platzhalter für Toni AI (wird in Teil 5 definiert)
-    const ToniAI = {};
-
-</script>
-    /* ======================================================================= */
-    /* III. UI MANAGER (Die Schnittstelle zwischen Daten und Design)           */
-    /* ======================================================================= */
-
-    // Definiere den UIManager (überschreibt den Platzhalter aus Teil 3)
-    Object.assign(UIManager, {
+    const UIManager = {
         init() {
             this.elements = {};
             const elementIds = [
                 'system-loader', 'login-screen', 'profile-selector', 'login-form', 'main-app',
                 'user-avatar', 'user-name', 'user-role', 'squad-list-mini',
-                'kabine-dialog', 'kabine-content',
-                'aktentasche-dialog', 'aktentasche-content',
-                'video-dialog', 'video-content',
-                'player-dashboard-dialog', 'player-dialog-title', 'player-dialog-content',
+                'kabine-dialog', 'kabine-content', 'aktentasche-dialog', 'aktentasche-content',
+                'video-dialog', 'video-content', 'player-dashboard-dialog', 'player-dialog-title', 'player-dialog-content',
                 'chat-box', 'chat-form', 'chat-input', 'ai-status', 'main-canvas', 'left-panel', 'right-panel', 'mobile-backdrop'
             ];
             
@@ -437,7 +385,6 @@
         },
 
         bindEvents() {
-            // 1. Login-Handler
             if(this.elements['login-form']) {
                 this.elements['login-form'].onsubmit = (e) => {
                     e.preventDefault();
@@ -445,42 +392,22 @@
                 };
             }
 
-            // 2. Mobile Panel-Toggles
             document.getElementById('toggle-left-panel-btn')?.addEventListener('click', () => this.togglePanel('left-panel'));
             document.getElementById('toggle-right-panel-btn')?.addEventListener('click', () => this.togglePanel('right-panel'));
             document.getElementById('close-right-panel-btn')?.addEventListener('click', () => this.togglePanel('right-panel', false));
 
-            // 3. Globale Navigation & Dialog-Steuerung (Event Delegation)
             document.addEventListener('click', (e) => {
                 const btn = e.target.closest('[data-action]');
                 if (!btn) return;
-
                 const action = btn.dataset.action;
 
                 switch (action) {
-                    case 'close-dialog':
-                        btn.closest('.dialog-overlay').classList.remove('is-active');
-                        break;
-                    case 'open-kabine':
-                        this.renderKabine();
-                        this.openDialog('kabine-dialog');
-                        break;
-                    case 'open-aktentasche':
-                        this.renderAktentasche();
-                        this.openDialog('aktentasche-dialog');
-                        break;
-                    case 'open-video':
-                        this.renderVideoWorkspace();
-                        this.openDialog('video-dialog');
-                        break;
-                    case 'open-clipboard':
-                        // Fallback, falls das Clipboard-Modal in Teil 1 vergessen wurde
-                        alert("Tactical Clipboard wird in der Arena-Engine aufgerufen.");
-                        break;
-                    case 'reset-tactics':
-                        // Wird von der Arena Engine verarbeitet (Teil 5)
-                        if(window.ArenaEngine) window.ArenaEngine.resetTactics();
-                        break;
+                    case 'close-dialog': btn.closest('.dialog-overlay').classList.remove('is-active'); break;
+                    case 'open-kabine': this.renderKabine(); this.openDialog('kabine-dialog'); break;
+                    case 'open-aktentasche': this.renderAktentasche(); this.openDialog('aktentasche-dialog'); break;
+                    case 'open-video': this.renderVideoWorkspace(); this.openDialog('video-dialog'); break;
+                    case 'open-clipboard': alert("Tactical Clipboard wird hier geladen..."); break;
+                    case 'reset-tactics': if(window.ArenaEngine) window.ArenaEngine.resetTactics(); break;
                 }
             });
         },
@@ -495,13 +422,7 @@
             if(this.elements['mobile-backdrop']) this.elements['mobile-backdrop'].hidden = !anyVisible;
         },
 
-        openDialog(dialogId) {
-            if(this.elements[dialogId]) {
-                this.elements[dialogId].classList.add('is-active');
-            }
-        },
-
-        // --- RENDER FUNKTIONEN ---
+        openDialog(dialogId) { if(this.elements[dialogId]) this.elements[dialogId].classList.add('is-active'); },
 
         renderAppLayout() {
             const { user } = AppState;
@@ -527,38 +448,29 @@
         renderPlayerDashboard(playerId) {
             const p = AppState.squad[playerId];
             if (!p) return;
-            
             this.elements['player-dialog-title'].textContent = `MEDIZINISCHE AKTE: ${p.name}`;
             this.elements['player-dialog-content'].innerHTML = `
                 <div style="display:grid; grid-template-columns: 1fr; gap: 20px;">
                     <div class="dash-widget" style="border-left: 4px solid ${p.bio.readiness > 90 ? 'var(--accent-green)' : 'var(--accent-red)'};">
-                        <h3>Readiness-Score</h3>
-                        <div style="font-size: 36px; font-weight: bold;">${p.bio.readiness}%</div>
+                        <h3>Readiness-Score</h3><div style="font-size: 36px; font-weight: bold;">${p.bio.readiness}%</div>
                         <p style="color: var(--text-secondary);">HRV: ${p.bio.hrv}ms | Körperfett: ${p.bio.fatPct}%</p>
                     </div>
                     <div class="dash-widget">
                         <h3>Mentale Belastung</h3>
-                        <p>Schlafqualität: ${p.mental.sleep}/10</p>
-                        <p>Stresslevel: ${p.mental.stress}/10</p>
-                        <p>Motivation: ${p.mental.motiv}/10</p>
+                        <p>Schlaf: ${p.mental.sleep}/10 | Stress: ${p.mental.stress}/10 | Motivation: ${p.mental.motiv}/10</p>
                     </div>
-                </div>
-            `;
+                </div>`;
             this.openDialog('player-dashboard-dialog');
         },
 
         renderKabine() {
             const container = this.elements['kabine-content'];
             container.innerHTML = '';
-            
             Object.values(AppState.squad).forEach(p => {
                 const card = document.createElement('div');
                 card.className = 'fifa-card';
                 card.innerHTML = `
-                    <div class="fifa-header">
-                        <span class="fifa-ovr">${p.ovr}</span>
-                        <span class="fifa-pos">${p.pos}</span>
-                    </div>
+                    <div class="fifa-header"><span class="fifa-ovr">${p.ovr}</span><span class="fifa-pos">${p.pos}</span></div>
                     <div class="fifa-name">${p.name}</div>
                     <div class="fifa-stats">
                         <div class="fifa-stat-row"><span class="fifa-val">${p.att.pac}</span> <span class="fifa-lbl">PAC</span></div>
@@ -568,11 +480,7 @@
                         <div class="fifa-stat-row"><span class="fifa-val">${p.att.pas}</span> <span class="fifa-lbl">PAS</span></div>
                         <div class="fifa-stat-row"><span class="fifa-val">${p.att.phy}</span> <span class="fifa-lbl">PHY</span></div>
                     </div>
-                    <div class="fifa-bio">
-                        <span>HRV: ${p.bio.hrv}</span>
-                        <span>FAT: ${p.bio.fatPct}%</span>
-                        <span style="color: ${p.bio.readiness > 90 ? '#000' : 'var(--accent-red)'}">RDY: ${p.bio.readiness}%</span>
-                    </div>
+                    <div class="fifa-bio"><span>HRV: ${p.bio.hrv}</span><span>FAT: ${p.bio.fatPct}%</span><span style="color: ${p.bio.readiness > 90 ? '#000' : 'var(--accent-red)'}">RDY: ${p.bio.readiness}%</span></div>
                 `;
                 container.appendChild(card);
             });
@@ -581,91 +489,51 @@
         renderAktentasche() {
             const bc = AppState.briefcase;
             const container = this.elements['aktentasche-content'];
-            
-            // Finanzen berechnen
             const liquidity = bc.finances.budget - bc.finances.salaries - bc.finances.infrastructure;
             
-            // Sponsoren HTML
             const sponsorsHtml = bc.sponsors.map(s => {
                 const color = s.status === 'Kritisch' ? 'var(--accent-red)' : 'var(--accent-green)';
-                return `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
+                return `<div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
                         <div><strong>${s.name}</strong> <br><small style="color:var(--text-secondary);">${s.type} | Endet: ${s.endDate}</small></div>
-                        <div style="text-align:right;">
-                            <div style="font-weight:bold;">${s.value.toLocaleString()} €</div>
-                            <span style="font-size:11px; padding:2px 6px; border-radius:4px; background:${color}; color:#fff;">${s.status.toUpperCase()}</span>
-                        </div>
-                    </div>
-                `;
+                        <div style="text-align:right;"><div style="font-weight:bold;">${s.value.toLocaleString()} €</div><span style="font-size:11px; padding:2px 6px; border-radius:4px; background:${color}; color:#fff;">${s.status.toUpperCase()}</span></div></div>`;
             }).join('');
 
-            // Projekte HTML
             const projectsHtml = bc.projects.map(p => `
-                <div style="margin-bottom: 15px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <strong>${p.name}</strong> <small>${p.cost.toLocaleString()} €</small>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill" style="width: ${p.progress}%;"></div>
-                    </div>
-                    <small style="color:var(--text-secondary);">Status: ${p.progress}% | Deadline: ${p.deadline}</small>
-                </div>
-            `).join('');
+                <div style="margin-bottom: 15px;"><div style="display:flex; justify-content:space-between;"><strong>${p.name}</strong> <small>${p.cost.toLocaleString()} €</small></div>
+                <div class="progress-track"><div class="progress-fill" style="width: ${p.progress}%;"></div></div>
+                <small style="color:var(--text-secondary);">Status: ${p.progress}% | Deadline: ${p.deadline}</small></div>`).join('');
 
             container.innerHTML = `
                 <div class="dashboard-grid">
-                    <div class="dash-widget">
-                        <h3>💰 BUDGET & FINANZEN</h3>
-                        <p style="display:flex; justify-content:space-between;"><span>Vereinsbudget:</span> <strong>${bc.finances.budget.toLocaleString()} €</strong></p>
+                    <div class="dash-widget"><h3>💰 BUDGET & FINANZEN</h3>
+                        <p style="display:flex; justify-content:space-between;"><span>Budget:</span> <strong>${bc.finances.budget.toLocaleString()} €</strong></p>
                         <p style="display:flex; justify-content:space-between;"><span>Gehälter:</span> <strong style="color:var(--accent-red);">- ${bc.finances.salaries.toLocaleString()} €</strong></p>
-                        <p style="display:flex; justify-content:space-between;"><span>Infrastruktur:</span> <strong style="color:var(--accent-red);">- ${bc.finances.infrastructure.toLocaleString()} €</strong></p>
-                        <hr style="margin:10px 0; border:0; border-top:1px solid var(--border-color);">
+                        <hr style="margin:10px 0; border-top:1px solid var(--border-color);">
                         <p style="display:flex; justify-content:space-between; font-size:18px;"><span>Liquidität:</span> <strong style="color:var(--accent-green);">${liquidity.toLocaleString()} €</strong></p>
                     </div>
-                    
-                    <div class="dash-widget">
-                        <h3>📰 STADIONZEITUNG</h3>
+                    <div class="dash-widget"><h3>📰 STADIONZEITUNG</h3>
                         <div style="background: var(--bg-dark); padding: 15px; border-radius: var(--radius-sm); text-align:center;">
-                            <h4 style="margin-bottom:5px;">${bc.stadionzeitung.ausgabe}</h4>
-                            <p style="color:var(--accent-yellow); font-weight:bold; margin-bottom:15px;">STATUS: ${bc.stadionzeitung.status.toUpperCase()}</p>
-                            <div style="display:flex; justify-content:space-around;">
-                                <div><small>Auflage</small><br><strong>${bc.stadionzeitung.auflage.toLocaleString()}</strong></div>
-                                <div><small>Werbewert</small><br><strong style="color:var(--accent-green);">${bc.stadionzeitung.werbeeinnahmen.toLocaleString()} €</strong></div>
-                            </div>
+                            <h4>${bc.stadionzeitung.ausgabe}</h4><p style="color:var(--accent-yellow); font-weight:bold;">STATUS: ${bc.stadionzeitung.status.toUpperCase()}</p>
                         </div>
                     </div>
-
-                    <div class="dash-widget">
-                        <h3>🤝 SPONSORING-RADAR</h3>
-                        ${sponsorsHtml}
-                    </div>
-
-                    <div class="dash-widget">
-                        <h3>🏗️ INFRASTRUKTUR-PROJEKTE</h3>
-                        ${projectsHtml}
-                    </div>
-                </div>
-            `;
+                    <div class="dash-widget"><h3>🤝 SPONSORING</h3>${sponsorsHtml}</div>
+                    <div class="dash-widget"><h3>🏗️ INFRASTRUKTUR</h3>${projectsHtml}</div>
+                </div>`;
         },
 
         renderVideoWorkspace() {
             this.elements['video-content'].innerHTML = `
                 <div style="width:100%; height:400px; background:#000; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; flex-direction:column; border: 1px solid var(--border-color);">
-                    <div style="font-size:40px; color:var(--text-secondary); margin-bottom:10px;">📹</div>
-                    <p style="color:var(--text-secondary);">Kein lokales MP4-Video geladen.</p>
-                    <button class="btn-primary" style="width:auto; padding:8px 20px; margin-top:10px;">Video hochladen (Lokal)</button>
-                </div>
-                <div style="margin-top:15px; display:flex; gap:10px;">
-                    <button class="menu-btn" style="width:auto; text-align:center;">✏️ Telestrator aktivieren</button>
-                    <button class="menu-btn" style="width:auto; text-align:center;">💾 Analyse speichern</button>
-                </div>
-            `;
+                    <div style="font-size:40px; margin-bottom:10px;">📹</div>
+                    <p style="color:var(--text-secondary);">Kein Video geladen.</p>
+                </div>`;
         }
     };
+
     /* ======================================================================= */
-    /* IV. ARENA ENGINE (Das echte Profi-Spielfeld & KI)                       */
+    /* IV. ARENA ENGINE                                                        */
     /* ======================================================================= */
-    Object.assign(ArenaEngine, {
+    window.ArenaEngine = {
         init() {
             this.canvas = UIManager.elements['main-canvas'];
             this.ctx = this.canvas.getContext('2d');
@@ -676,9 +544,7 @@
             this.setupCanvas();
             this.bindEvents();
             this.renderLoop();
-
-            // Substitution AI: Berechnet den Leistungsabfall in Echtzeit
-            setInterval(() => this.updateFatigue(), 5000); // 5 Sek = 1 simulierte Spielminute
+            setInterval(() => this.updateFatigue(), 5000); 
         },
         
         setupCanvas() {
@@ -697,7 +563,6 @@
             
             this.canvas.onpointerdown = (e) => {
                 const pos = getPos(e);
-                // Erhöhter Touch-Radius für perfekte Bedienung auf dem iPhone
                 const p = Object.values(AppState.squad).find(s => Math.hypot(s.canvas.x - pos.x, s.canvas.y - pos.y) < 30);
                 if (p) { this.isDragging = true; this.dragTarget = p; }
             };
@@ -718,267 +583,156 @@
             this.ctx.clearRect(0, 0, w, h);
             
             this.drawPitch(w, h);
-            
-            // Spieler sortieren, damit der gezogene Spieler immer oben liegt
             const players = Object.values(AppState.squad).sort((a, b) => (a === this.dragTarget ? 1 : b === this.dragTarget ? -1 : 0));
             players.forEach(p => this.drawPlayer(p));
-            
             requestAnimationFrame(() => this.renderLoop());
         },
 
         drawPitch(w, h) {
             this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
             this.ctx.lineWidth = 2;
-
-            const margin = 20;
-            const pitchW = w - margin * 2;
-            const pitchH = h - margin * 2;
-
-            // Außenlinien
+            const margin = 20, pitchW = w - margin * 2, pitchH = h - margin * 2;
             this.ctx.strokeRect(margin, margin, pitchW, pitchH);
+            this.ctx.beginPath(); this.ctx.moveTo(margin, h / 2); this.ctx.lineTo(w - margin, h / 2); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.arc(w / 2, h / 2, pitchW * 0.15, 0, 2 * Math.PI); this.ctx.stroke();
             
-            // Mittellinie
-            this.ctx.beginPath();
-            this.ctx.moveTo(margin, h / 2);
-            this.ctx.lineTo(w - margin, h / 2);
-            this.ctx.stroke();
-
-            // Mittelkreis
-            this.ctx.beginPath();
-            this.ctx.arc(w / 2, h / 2, pitchW * 0.15, 0, 2 * Math.PI);
-            this.ctx.stroke();
-
-            // Strafraum (Oben & Unten)
-            const penW = pitchW * 0.5;
-            const penH = pitchH * 0.15;
-            this.ctx.strokeRect(w / 2 - penW / 2, margin, penW, penH); // Oben
-            this.ctx.strokeRect(w / 2 - penW / 2, h - margin - penH, penW, penH); // Unten
-
-            // Torraum (Oben & Unten)
-            const goalAreaW = pitchW * 0.25;
-            const goalAreaH = pitchH * 0.05;
-            this.ctx.strokeRect(w / 2 - goalAreaW / 2, margin, goalAreaW, goalAreaH); // Oben
-            this.ctx.strokeRect(w / 2 - goalAreaW / 2, h - margin - goalAreaH, goalAreaW, goalAreaH); // Unten
-
-            // Tore (Netz)
-            this.ctx.lineWidth = 3;
-            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-            const goalW = pitchW * 0.15;
-            this.ctx.strokeRect(w / 2 - goalW / 2, margin - 5, goalW, 5); // Oben
-            this.ctx.strokeRect(w / 2 - goalW / 2, h - margin, goalW, 5); // Unten
+            const penW = pitchW * 0.5, penH = pitchH * 0.15;
+            this.ctx.strokeRect(w / 2 - penW / 2, margin, penW, penH); 
+            this.ctx.strokeRect(w / 2 - penW / 2, h - margin - penH, penW, penH); 
         },
 
         drawPlayer(p) {
             const { x, y } = p.canvas;
             this.ctx.save();
-            
-            // ELITE Fatigue Blinking (Substitution AI)
             if (p.stats.performance < 75) {
                 this.ctx.shadowBlur = 20;
-                this.ctx.shadowColor = `rgba(248, 81, 73, ${Math.abs(Math.sin(Date.now() / 300))})`; // Rotes Pulsieren
+                this.ctx.shadowColor = `rgba(248, 81, 73, ${Math.abs(Math.sin(Date.now() / 300))})`; 
             }
-
-            // Spieler-Kreis
             this.ctx.beginPath();
             this.ctx.arc(x, y, 18, 0, 2 * Math.PI);
-            
-            // Farbcodierung: Gegner (Toni) vs Eigenes Team (Trainer)
-            // Wir simulieren das durch die Rückennummern (Beispielhaft)
             const isTrainerTeam = p.num <= 17; 
             this.ctx.fillStyle = p.pos === 'TW' ? 'var(--accent-yellow)' : (isTrainerTeam ? 'var(--accent-blue)' : 'var(--accent-red)');
             this.ctx.fill();
-            
-            // Rand
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-            this.ctx.stroke();
+            this.ctx.lineWidth = 2; this.ctx.strokeStyle = 'rgba(255,255,255,0.8)'; this.ctx.stroke();
             this.ctx.restore();
 
-            // Rückennummer & Name
             this.ctx.fillStyle = p.pos === 'TW' ? '#000' : '#fff';
             this.ctx.font = 'bold 14px var(--font-sans)';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
+            this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle';
             this.ctx.fillText(p.num, x, y);
-            
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = '10px var(--font-sans)';
-            // Text-Schatten für Lesbarkeit auf dem Rasen
-            this.ctx.shadowColor = "black";
-            this.ctx.shadowBlur = 4;
+            this.ctx.fillStyle = '#fff'; this.ctx.font = '10px var(--font-sans)';
             this.ctx.fillText(p.name.toUpperCase(), x, y + 28);
-            this.ctx.shadowBlur = 0;
         },
 
         updateFatigue() {
             Object.values(AppState.squad).forEach(p => {
                 p.stats.minutes += 1;
-                const k = 0.0035; // Profi-Zerfallsrate
-                p.stats.performance = p.bio.readiness * Math.exp(-k * p.stats.minutes);
+                p.stats.performance = p.bio.readiness * Math.exp(-0.0035 * p.stats.minutes);
             });
         },
 
-        // DAS TAKTIK-DUDELL: 4-4-2 vs 3-4-3
         resetTactics() {
-            const w = this.canvas.width / this.dpr;
-            const h = this.canvas.height / this.dpr;
-            
-            // Geometrische Zonen definieren
-            const trainerY = { def: h * 0.8, mid: h * 0.6, att: h * 0.5 }; // Unten: 3-4-3
-            const toniY = { def: h * 0.2, mid: h * 0.4, att: h * 0.5 };    // Oben: 4-4-2
-
-            // Wir ordnen die Spieler hart kodiert an, um das Duell visuell zu zeigen
+            const w = this.canvas.width / this.dpr, h = this.canvas.height / this.dpr;
+            const trainerY = { def: h * 0.8, mid: h * 0.6, att: h * 0.5 };
+            const toniY = { def: h * 0.2, mid: h * 0.4, att: h * 0.5 };
             const squad = AppState.squad;
             
-            // Trainer Team (3-4-3) - Blau
-            if(squad.p1) squad.p1.canvas = { x: w/2, y: h * 0.95 }; // TW Neuer
-            if(squad.p2) squad.p2.canvas = { x: w*0.3, y: trainerY.def }; // IV Rüdiger
-            if(squad.p3) squad.p3.canvas = { x: w/2, y: trainerY.def }; // IV Hummels
-            if(squad.p4) squad.p4.canvas = { x: w*0.7, y: trainerY.def }; // IV Tah
+            if(squad.p1) squad.p1.canvas = { x: w/2, y: h * 0.95 }; 
+            if(squad.p2) squad.p2.canvas = { x: w*0.3, y: trainerY.def }; 
+            if(squad.p3) squad.p3.canvas = { x: w/2, y: trainerY.def }; 
+            if(squad.p4) squad.p4.canvas = { x: w*0.7, y: trainerY.def }; 
+            if(squad.p7) squad.p7.canvas = { x: w*0.4, y: trainerY.mid }; 
+            if(squad.p8) squad.p8.canvas = { x: w*0.6, y: trainerY.mid }; 
+            if(squad.p11) squad.p11.canvas = { x: w/2, y: trainerY.att }; 
+            if(squad.p12) squad.p12.canvas = { x: w*0.75, y: trainerY.att }; 
             
-            if(squad.p7) squad.p7.canvas = { x: w*0.4, y: trainerY.mid }; // ZDM Kimmich
-            if(squad.p8) squad.p8.canvas = { x: w*0.6, y: trainerY.mid }; // ZM Kroos
-            
-            if(squad.p11) squad.p11.canvas = { x: w/2, y: trainerY.att }; // ST Müller
-            if(squad.p12) squad.p12.canvas = { x: w*0.75, y: trainerY.att }; // RF Sané
-            
-            // Toni Team (4-4-2 Simulation mit den restlichen Spielern) - Rot
-            if(squad.p5) squad.p5.canvas = { x: w*0.2, y: toniY.def }; // LV Davies
-            if(squad.p6) squad.p6.canvas = { x: w*0.8, y: toniY.def }; // RV Frimpong
-            if(squad.p9) squad.p9.canvas = { x: w*0.3, y: toniY.mid }; // ZOM Musiala
-            if(squad.p10) squad.p10.canvas = { x: w*0.7, y: toniY.mid }; // ZOM Wirtz
-
-            // Kleines haptisches Feedback, falls auf Mobile unterstützt
-            if (navigator.vibrate) navigator.vibrate(50);
+            if(squad.p5) squad.p5.canvas = { x: w*0.2, y: toniY.def }; 
+            if(squad.p6) squad.p6.canvas = { x: w*0.8, y: toniY.def }; 
+            if(squad.p9) squad.p9.canvas = { x: w*0.3, y: toniY.mid }; 
+            if(squad.p10) squad.p10.canvas = { x: w*0.7, y: toniY.mid }; 
         }
-    });
+    };
 
     /* ======================================================================= */
-    /* V. TONI AI (Kognitive Engine & Chat)                                    */
+    /* V. TONI AI & BOOT SEQUENCE                                              */
     /* ======================================================================= */
-    Object.assign(ToniAI, {
+    const ToniAI = {
         init() {
             this.elements = UIManager.elements;
-            
             if(this.elements['chat-form']) {
-                this.elements['chat-form'].onsubmit = (e) => { 
-                    e.preventDefault(); 
-                    this.handleInput(); 
-                };
+                this.elements['chat-form'].onsubmit = (e) => { e.preventDefault(); this.handleInput(); };
             }
-            
-            this.speak("Toni AI v11 Elite online. Audio-Interface gekoppelt.");
+            this.speak("Toni AI v11 Elite online.");
             this.morningReport();
         },
-
         speak(msg, isUser = false) {
             const chatBox = this.elements['chat-box'];
             if(!chatBox) return;
-
             const div = document.createElement('div');
             div.style.marginBottom = '12px';
-            
             if (isUser) {
                 div.innerHTML = `<div style="text-align:right;"><span style="background:var(--accent-blue); padding:8px 12px; border-radius:12px 12px 0 12px; font-size:13px; color:#fff; display:inline-block; max-width:90%;">${msg}</span></div>`;
             } else {
                 div.innerHTML = `<div style="color:var(--accent-green); font-weight:bold; font-size:11px; margin-bottom:4px;">TONI AI:</div>
                                  <div style="background:var(--bg-light); border:1px solid var(--border-color); padding:8px 12px; border-radius:0 12px 12px 12px; font-size:13px;">${msg}</div>`;
             }
-            
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         },
-
         morningReport() {
             const critical = Object.values(AppState.squad).filter(p => p.bio.readiness < 90);
-            if (critical.length > 0) {
-                this.speak(`⚠️ **MORGENREPORT:** ${critical.length} Spieler (u.a. ${critical[0].name}) sind heute unter 90% Readiness. Das Verletzungsrisiko für Sprints ist erhöht.`);
-            } else {
-                this.speak("✅ **MORGENREPORT:** Gesamter Kader ist bei 100% Einsatzbereitschaft.");
-            }
+            if (critical.length > 0) this.speak(`⚠️ **MORGENREPORT:** ${critical.length} Spieler unter 90% Readiness.`);
+            else this.speak("✅ **MORGENREPORT:** Gesamter Kader bei 100% Einsatzbereitschaft.");
         },
-
         handleInput() {
             const inputEl = this.elements['chat-input'];
             const cmd = inputEl.value.trim();
             if (!cmd) return;
-            
             this.speak(cmd, true);
             inputEl.value = '';
-            
             const lowerCmd = cmd.toLowerCase();
-            if (lowerCmd.includes('status') || lowerCmd.includes('report')) {
-                this.morningReport();
-            } else if (lowerCmd.includes('taktik') || lowerCmd.includes('aufstellung')) {
-                this.speak("Ich habe die 4-4-2 Formation geladen. Analysiere Lücken im gegnerischen 3-4-3...");
+            if (lowerCmd.includes('status')) this.morningReport();
+            else if (lowerCmd.includes('taktik')) {
+                this.speak("Stelle Formation um...");
                 if(window.ArenaEngine) window.ArenaEngine.resetTactics();
-            } else {
-                this.speak("Ich synchronisiere die Daten. Bitte gib einen spezifischen Befehl wie 'Status' oder 'Taktik' ein.");
-            }
-        }
-    });
-
-    /* ======================================================================= */
-    /* VI. SYSTEM BOOT (Die fehlerfreie Start-Routine)                         */
-    /* ======================================================================= */
-    const App = {
-        async init() {
-            UIManager.init();
-            
-            try {
-                const profiles = await ApiService.getProfiles();
-                const selector = UIManager.elements['profile-selector'];
-                if(selector) {
-                    selector.innerHTML = profiles.map(p => `<option value="${p.id}">${p.name} (${p.role})</option>`).join('');
-                }
-                
-                // Loader ausblenden, Login einblenden (mit Fallbacks)
-                setTimeout(() => {
-                    const loader = UIManager.elements['system-loader'];
-                    const login = UIManager.elements['login-screen'];
-                    
-                    if(loader) { loader.style.display = 'none'; loader.hidden = true; }
-                    if(login) { login.style.display = 'flex'; login.hidden = false; }
-                }, 800);
-            } catch(e) {
-                console.error("Boot-Fehler:", e);
-            }
-        },
-
-        async login(profileId) {
-            const login = UIManager.elements['login-screen'];
-            const loader = UIManager.elements['system-loader'];
-            const app = UIManager.elements['main-app'];
-
-            if(login) { login.style.display = 'none'; login.hidden = true; }
-            if(loader) { loader.style.display = 'flex'; loader.hidden = false; }
-            
-            try {
-                // Daten laden und globalen State füllen
-                const data = await ApiService.loadProfileData(profileId);
-                Object.assign(AppState, data);
-                
-                setTimeout(() => {
-                    if(loader) { loader.style.display = 'none'; loader.hidden = true; }
-                    if(app) { app.style.display = 'grid'; app.hidden = false; }
-                    
-                    // Module hochfahren
-                    UIManager.renderAppLayout();
-                    ArenaEngine.init();
-                    ToniAI.init();
-                }, 1000);
-            } catch(e) {
-                console.error("Login-Fehler:", e);
-                alert("Fehler beim Laden des Profils.");
-            }
-        },
-        
-        logout() {
-            window.location.reload();
+            } else this.speak("Bitte gib 'Status' oder 'Taktik' ein.");
         }
     };
 
-    // Ultimativer Startbefehl, sobald das Dokument geladen ist
+    const App = {
+        async init() {
+            UIManager.init();
+            try {
+                const profiles = await ApiService.getProfiles();
+                const selector = UIManager.elements['profile-selector'];
+                if(selector) selector.innerHTML = profiles.map(p => `<option value="${p.id}">${p.name} (${p.role})</option>`).join('');
+                setTimeout(() => {
+                    const loader = UIManager.elements['system-loader'], login = UIManager.elements['login-screen'];
+                    if(loader) { loader.style.display = 'none'; loader.hidden = true; }
+                    if(login) { login.style.display = 'flex'; login.hidden = false; }
+                }, 800);
+            } catch(e) { console.error(e); }
+        },
+        async login(profileId) {
+            const login = UIManager.elements['login-screen'], loader = UIManager.elements['system-loader'], app = UIManager.elements['main-app'];
+            if(login) { login.style.display = 'none'; login.hidden = true; }
+            if(loader) { loader.style.display = 'flex'; loader.hidden = false; }
+            try {
+                const data = await ApiService.loadProfileData(profileId);
+                Object.assign(AppState, data);
+                setTimeout(() => {
+                    if(loader) { loader.style.display = 'none'; loader.hidden = true; }
+                    if(app) { app.style.display = 'grid'; app.hidden = false; }
+                    UIManager.renderAppLayout();
+                    window.ArenaEngine.init();
+                    ToniAI.init();
+                }, 1000);
+            } catch(e) { console.error(e); }
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', () => App.init());
 
 </script>
+</body>
+</html>
