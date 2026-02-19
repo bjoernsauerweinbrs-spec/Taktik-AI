@@ -6,9 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="TITAN v10 ELITE - Das kostenlose All-in-One Betriebssystem für den modernen Fußball.">
     <title>TITAN v10 ELITE</title>
-
-    <!-- HINWEIS: CSS (Teil 2) und JavaScript (Teil 3) werden später hier eingebunden -->
-
 </head>
 <body>
 
@@ -16,24 +13,21 @@
     <!-- II. System-Overlays (Initialisierung, Login, Ladebildschirme)          -->
     <!-- ======================================================================= -->
 
-    <!-- Lade-Spinner für den App-Start -->
     <div id="system-loader" class="system-overlay">
         <!-- Spinner-Grafik wird via CSS hinzugefügt -->
     </div>
 
-    <!-- Login-Maske zur Profilauswahl -->
     <div id="login-screen" class="system-overlay">
         <div class="login-box">
             <h1>TITAN v10 ELITE</h1>
             <p>Wähle dein Vereinsprofil zum Laden.</p>
             <form id="login-form">
                 <select id="profile-selector" name="profile"></select>
-                <button type="submit">System Starten</button>
+                <button type="submit" class="btn">System Starten</button>
             </form>
         </div>
     </div>
 
-    <!-- Ein universeller Backdrop für mobile Overlays -->
     <div id="mobile-backdrop" class="system-overlay" hidden></div>
 
     <!-- ======================================================================= -->
@@ -42,9 +36,7 @@
 
     <div id="main-app" class="app-container" hidden>
 
-        <!-- ------------------------------------------------------------------- -->
-        <!-- A. Der App-Header: Globale Steuerung & Nutzerprofil                 -->
-        <!-- ------------------------------------------------------------------- -->
+        <!-- A. Der App-Header: Globale Steuerung & Nutzerprofil -->
         <header class="app-header">
             <div class="header-left">
                 <button id="toggle-left-panel-btn" class="mobile-nav-btn">☰</button>
@@ -64,95 +56,70 @@
             </div>
         </header>
 
-        <!-- ------------------------------------------------------------------- -->
-        <!-- B. Linke Seitenleiste: Hauptnavigation für den Trainer             -->
-        <!-- ------------------------------------------------------------------- -->
+        <!-- B. Linke Seitenleiste: Hauptnavigation -->
         <aside id="left-panel">
             <div class="panel-content">
-                <!-- Squad List (wird dynamisch geladen) -->
                 <div id="squad-list-container">
                     <h2>Mannschaft</h2>
                     <div id="squad-list"></div>
                 </div>
-                <!-- Haupt-Module -->
                 <nav class="main-navigation">
                     <h2>Module</h2>
-                    <button data-action="open-clipboard">📋 Tactical Clipboard</button>
-                    <button data-action="open-manager-cockpit">💼 Manager Cockpit</button>
-                    <button data-action="open-player-portal">👤 Player Portal</button>
+                    <button class="btn" data-action="open-clipboard">📋 Tactical Clipboard</button>
+                    <button class="btn" data-action="open-manager-cockpit">💼 Manager Cockpit</button>
                 </nav>
             </div>
             <footer class="panel-footer">
-                <button data-action="logout">Logout</button>
+                <button class="btn" data-action="logout">Logout</button>
             </footer>
         </aside>
 
-        <!-- ------------------------------------------------------------------- -->
-        <!-- C. Der Hauptbereich: Das Taktikboard & die Arena                   -->
-        <!-- ------------------------------------------------------------------- -->
+        <!-- C. Der Hauptbereich: Das Taktikboard -->
         <main id="main-arena">
             <div id="board-wrap">
                 <canvas id="main-canvas"></canvas>
             </div>
-            <div id="arena-controls">
-                <button data-tool="select" class="tool-btn active">🖐️</button>
-                <button data-tool="arrow" class="tool-btn">➔</button>
-                <button data-tool="line" class="tool-btn">―</button>
-                <button data-tool="zone" class="tool-btn">▭</button>
-                <button data-tool="clear" class="tool-btn">🗑️</button>
-            </div>
         </main>
 
-        <!-- ------------------------------------------------------------------- -->
-        <!-- D. Rechte Seitenleiste: Die Toni AI Chat-Konsole                   -->
-        <!-- ------------------------------------------------------------------- -->
+        <!-- D. Rechte Seitenleiste: Die Toni AI Chat-Konsole -->
         <aside id="right-panel">
             <header class="panel-header">
                 <h3>Toni AI <span id="ai-status-indicator">●</span></h3>
                 <button id="close-right-panel-btn" class="mobile-nav-btn">✕</button>
             </header>
-            <div id="chat-box" class="panel-content">
-                <!-- Chat-Nachrichten werden dynamisch eingefügt -->
-            </div>
+            <div id="chat-box" class="panel-content"></div>
             <form id="chat-form" class="panel-footer">
                 <input id="chat-input" type="text" placeholder="Befehl für Toni...">
                 <button type="submit">➤</button>
             </form>
         </aside>
 
-    </div> <!-- Ende #main-app -->
+    </div>
 
     <!-- ======================================================================= -->
     <!-- IV. Modale Dialoge (Pop-ups für Detailansichten)                        -->
     <!-- ======================================================================= -->
 
-    <!-- 1. Spieler-Akte ("Digitale DNA") -->
     <div id="player-dashboard-dialog" class="dialog-overlay">
         <div class="dialog-box">
             <header class="dialog-header">
                 <h2 id="player-dialog-title"></h2>
                 <button data-action="close-dialog">✕</button>
             </header>
-            <div id="player-dialog-content" class="dialog-content">
-                <!-- Hier wird die "Gold Card" und weitere Spieler-Daten eingefügt -->
-            </div>
+            <div id="player-dialog-content" class="dialog-content"></div>
         </div>
     </div>
 
-    <!-- 2. Manager Cockpit -->
     <div id="manager-cockpit-dialog" class="dialog-overlay">
         <div class="dialog-box large">
             <header class="dialog-header">
                 <h2>💼 Manager Cockpit</h2>
                 <button data-action="close-dialog">✕</button>
             </header>
-            <div id="manager-dialog-content" class="dialog-content">
-                <!-- Hier kommen die Module: Contract-Radar, Scouting-Feed, Asset-Value -->
-            </div>
+            <div id="manager-dialog-content" class="dialog-content"></div>
         </div>
     </div>
 
-    <!-- 3. Tactical Clipboard -->
     <div id="clipboard-dialog" class="dialog-overlay">
         <div class="dialog-box large">
             <header class="dialog-header">
@@ -160,13 +127,9 @@
                 <button data-action="print-clipboard">🖨️</button>
                 <button data-action="close-dialog">✕</button>
             </header>
-            <div id="clipboard-dialog-content" class="dialog-content">
-                <!-- Hier kommen die Module: Countdown, Checkliste, War-Room -->
-            </div>
+            <div id="clipboard-dialog-content" class="dialog-content"></div>
         </div>
     </div>
-
-    <!-- Weitere Dialoge für Player-Portal, Video-Telestrator etc. würden hier folgen -->
 
 </body>
 </html>
@@ -289,22 +252,60 @@
 
     /* ----- Buttons ----- */
     .btn {
+        width: 100%;
         padding: 10px 16px;
+        margin-bottom: 8px;
         border-radius: var(--radius-md);
         border: 1px solid var(--border-color);
         background-color: var(--bg-light);
         color: var(--text-primary);
         font-weight: 600;
+        text-align: left;
         transition: background-color 0.2s;
     }
     .btn:hover { background-color: #30363d; }
+    .btn:last-child { margin-bottom: 0; }
     
     .mobile-nav-btn { display: none; font-size: 24px; padding: 5px 10px; }
+
+    /* ----- Login Screen ----- */
+    #login-screen {
+        display: none; /* Wird per JS auf 'flex' gesetzt */
+    }
+    .login-box {
+        text-align: center;
+        width: 90%;
+        max-width: 350px;
+    }
+    .login-box select, .login-box button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 12px;
+        font-size: 1em;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-light);
+        color: var(--text-primary);
+    }
+    .login-box button {
+        font-weight: 600;
+        cursor: pointer;
+    }
 
     /* ----- Header & Profil ----- */
     .header-left, .header-right { display: flex; align-items: center; gap: 16px; }
     #user-profile { display: flex; align-items: center; gap: 12px; }
-    #user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-dark); }
+    #user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--bg-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
     .user-details { display: flex; flex-direction: column; }
     #user-name { font-weight: 600; }
     #user-role { font-size: 0.8em; color: var(--text-secondary); }
@@ -312,7 +313,7 @@
     /* ----- Chat-Konsole (Rechte Leiste) ----- */
     #chat-form { display: flex; gap: 8px; margin-top: 12px; }
     #chat-input {
-        width: 100%;
+        flex-grow: 1;
         background: var(--bg-dark);
         border: 1px solid var(--border-color);
         color: var(--text-primary);
@@ -321,6 +322,13 @@
         font-size: 1em;
     }
     #chat-input:focus { outline: none; border-color: var(--accent-blue); }
+    #chat-form button {
+        flex-shrink: 0;
+        padding: 0 16px;
+        font-size: 1.5em;
+        border-radius: var(--radius-md);
+        background-color: var(--bg-light);
+    }
 
     /* ----- Taktikboard ----- */
     #board-wrap { flex-grow: 1; position: relative; border-radius: var(--radius-md); background-color: #011a01; }
@@ -336,13 +344,21 @@
         justify-content: center;
         background: rgba(13, 17, 23, 0.8);
         backdrop-filter: blur(10px);
+        transition: opacity 0.3s;
     }
-    .dialog-overlay { display: none; }
-    .dialog-overlay.is-active { display: flex; }
-
+    #mobile-backdrop {
+        background: rgba(13, 17, 23, 0.6);
+        z-index: 7000;
+    }
+    .dialog-overlay {
+        display: none; /* Wird per JS gesteuert */
+    }
+    .dialog-overlay.is-active {
+        display: flex;
+    }
     .dialog-box {
         width: 90vw;
-        max-width: 600px; /* Standard-Breite für Dialoge */
+        max-width: 600px;
         max-height: 90vh;
         background: var(--bg-medium);
         border: 1px solid var(--border-color);
@@ -358,8 +374,10 @@
         align-items: center;
         padding: 20px;
         border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
     }
     .dialog-content { padding: 20px; overflow-y: auto; }
+    .dialog-header button { font-size: 20px; }
 
     /* ======================================================================= */
     /* V. Feature-spezifisches Styling (Gold Card etc.)                        */
@@ -389,39 +407,60 @@
         border-top: 1px solid rgba(0,0,0,0.2);
         padding-top: 16px;
         font-size: 14px;
+        line-height: 1.5;
     }
 
-    /* ----- Live Session & Warnungen ----- */
-    .live-session-btn.active {
-        color: var(--accent-red);
-        animation: pulse 1.5s infinite;
+    /* ----- Kaderliste ----- */
+    #squad-list .btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
-    .fatigue-warning {
-        animation: fatigue-pulse 2s infinite;
+    #squad-list .btn span {
+        background:var(--bg-dark);
+        border-radius:50%;
+        width:32px;
+        height:32px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:bold;
+        flex-shrink: 0;
     }
-    
+    #squad-list .btn div {
+        flex-grow: 1;
+    }
+    #squad-list .btn small {
+        color: var(--text-secondary);
+    }
+    #squad-list .btn strong {
+        margin-left: auto;
+        font-size: 16px;
+    }
+
+    /* ----- Hauptnavigation ----- */
+    .main-navigation {
+        margin-top: 20px;
+        border-top: 1px solid var(--border-color);
+        padding-top: 20px;
+    }
 
     /* ======================================================================= */
-    /* VI. Animationen                                                         */
+    /* VI. Animationen & Responsive Design                                     */
     /* ======================================================================= */
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
+
+    /* ----- Pulsierende Animationen ----- */
     @keyframes pulse {
         0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.4); }
         70% { box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); }
         100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); }
     }
-    @keyframes fatigue-pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7); }
-        50% { box-shadow: 0 0 10px 4px rgba(248, 81, 73, 0.7); }
+    .live-session-btn.active {
+        color: var(--accent-red);
+        animation: pulse 1.5s infinite;
     }
 
-    /* ======================================================================= */
-    /* VII. Responsive Design (Media Queries)                                  */
-    /* ======================================================================= */
-
-    /* Tablet & kleinere Desktops */
+    /* ----- Media Queries für Tablets & Mobile ----- */
     @media (max-width: 1200px) {
         .app-container {
             grid-template-areas:
@@ -445,7 +484,6 @@
         #desktop-controls { display: none; }
     }
 
-    /* Mobile Geräte */
     @media (max-width: 768px) {
         .app-container {
             grid-template-areas:
@@ -458,6 +496,12 @@
         #left-panel, #right-panel {
             width: 85%;
             max-width: 320px;
+            position: fixed;
+            top: 0;
+            height: 100%;
+            z-index: 8000;
+            transition: transform 0.3s ease-in-out;
+            border-radius: 0;
         }
         #left-panel {
             left: 0;
@@ -465,14 +509,13 @@
         }
         #left-panel.is-visible { transform: translateX(0); }
     }
-
 </style>
 <script>
     'use strict';
 
     /* ======================================================================= */
     /* I. MOCK DATABASE & API SERVICE */
-    /* (Simuliert das Backend und die Daten des Vereins) */
+    /* (Simuliert das Backend und die persistenten Daten des Vereins) */
     /* ======================================================================= */
 
     const MockData = {
@@ -493,10 +536,11 @@
             }
         },
         squad: {
-            "p1": { id: "p1", name: "Müller", num: 13, pos: "ST", canvas: {x: 450, y: 200}, att: { pac: 90, sho: 88, pas: 80, dri: 85, def: 40, phy: 78 }, ovr: 88, bio: { hrv: 92, fatPct: 11.2, readiness: 95 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 } },
-            "p2": { id: "p2", name: "Kimmich", num: 6, pos: "ZDM", canvas: {x: 300, y: 250}, att: { pac: 75, sho: 78, pas: 91, dri: 84, def: 82, phy: 79 }, ovr: 89, bio: { hrv: 95, fatPct: 12.1, readiness: 98 }, mental: { sleep: 9, stress: 1, motiv: 10 }, stats: { minutes: 0, performance: 100 } },
-            "p3": { id: "p3", name: "Hummels", num: 5, pos: "IV", canvas: {x: 150, y: 250}, att: { pac: 65, sho: 60, pas: 78, dri: 72, def: 90, phy: 84 }, ovr: 86, bio: { hrv: 85, fatPct: 13.5, readiness: 88 }, mental: { sleep: 6, stress: 4, motiv: 8 }, stats: { minutes: 0, performance: 100 } },
-            "p4": { id: "p4", name: "Neuer", num: 1, pos: "TW", canvas: {x: 50, y: 250}, att: { pac: 60, sho: 30, pas: 65, dri: 40, def: 88, phy: 82 }, ovr: 85, bio: { hrv: 91, fatPct: 12.8, readiness: 94 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 } }
+            "p1": { id: "p1", name: "Müller", num: 13, pos: "ST", canvas: {x: 650, y: 250}, att: { pac: 90, sho: 88, pas: 80, dri: 85, def: 40, phy: 78 }, ovr: 88, bio: { hrv: 92, fatPct: 11.2, readiness: 95 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 } },
+            "p2": { id: "p2", name: "Kimmich", num: 6, pos: "ZDM", canvas: {x: 450, y: 250}, att: { pac: 75, sho: 78, pas: 91, dri: 84, def: 82, phy: 79 }, ovr: 89, bio: { hrv: 95, fatPct: 12.1, readiness: 98 }, mental: { sleep: 9, stress: 1, motiv: 10 }, stats: { minutes: 0, performance: 100 } },
+            "p3": { id: "p3", name: "Hummels", num: 5, pos: "IV", canvas: {x: 250, y: 180}, att: { pac: 65, sho: 60, pas: 78, dri: 72, def: 90, phy: 84 }, ovr: 86, bio: { hrv: 85, fatPct: 13.5, readiness: 88 }, mental: { sleep: 6, stress: 4, motiv: 8 }, stats: { minutes: 0, performance: 100 } },
+            "p4": { id: "p4", name: "Rüdiger", num: 2, pos: "IV", canvas: {x: 250, y: 320}, att: { pac: 85, sho: 55, pas: 70, dri: 70, def: 87, phy: 88 }, ovr: 87, bio: { hrv: 94, fatPct: 11.8, readiness: 96 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 } },
+            "p5": { id: "p5", name: "Neuer", num: 1, pos: "TW", canvas: {x: 100, y: 250}, att: { pac: 60, sho: 30, pas: 65, dri: 40, def: 88, phy: 82 }, ovr: 85, bio: { hrv: 91, fatPct: 12.8, readiness: 94 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 } }
         },
         finances: {
             budget: 50000000,
@@ -520,6 +564,7 @@
         },
         async loadProfileData(profileId) {
             await this._simulateDelay(800);
+            // Deep copy to prevent mutations of mock data
             return {
                 user: MockData.profiles[profileId],
                 squad: JSON.parse(JSON.stringify(MockData.squad)),
@@ -573,24 +618,34 @@
                 this.togglePanel('right-panel', false);
             });
             
-            // Dialog Closers & Openers
+            // Globaler Click-Handler für data-actions
             document.addEventListener('click', (e) => {
-                if (e.target.dataset.action === 'close-dialog') {
-                    e.target.closest('.dialog-overlay').classList.remove('is-active');
-                }
-                if (e.target.dataset.action === 'open-manager-cockpit'){
-                    this.renderManagerCockpit();
-                    this.openDialog('manager-cockpit-dialog');
-                }
-                 if (e.target.dataset.action === 'open-clipboard'){
-                    this.renderClipboard();
-                    this.openDialog('clipboard-dialog');
+                const action = e.target.closest('[data-action]')?.dataset.action;
+                if (!action) return;
+
+                switch (action) {
+                    case 'close-dialog':
+                        e.target.closest('.dialog-overlay').classList.remove('is-active');
+                        break;
+                    case 'open-manager-cockpit':
+                        this.renderManagerCockpit();
+                        this.openDialog('manager-cockpit-dialog');
+                        break;
+                    case 'open-clipboard':
+                        this.renderClipboard();
+                        this.openDialog('clipboard-dialog');
+                        break;
+                    case 'logout':
+                        App.logout();
+                        break;
                 }
             });
         },
 
         togglePanel(panelId, forceState) {
             const panel = this.elements[panelId];
+            if (!panel) return;
+
             const isVisible = forceState!== undefined? forceState :!panel.classList.contains('is-visible');
             panel.classList.toggle('is-visible', isVisible);
             
@@ -607,7 +662,7 @@
             this.elements['user-name'].textContent = AppState.user.name;
             this.elements['user-role'].textContent = AppState.user.club;
             this.elements['user-avatar'].textContent = AppState.user.avatar;
-            // Kaderliste
+            // Kaderliste rendern
             this.renderSquadList();
         },
         
@@ -617,11 +672,10 @@
             Object.values(AppState.squad).forEach(p => {
                 const playerEl = document.createElement('button');
                 playerEl.className = 'btn';
-                playerEl.style.cssText = 'width:100%; display:flex; align-items:center; gap:12px; margin-bottom:8px; text-align:left;';
                 playerEl.innerHTML = `
-                    <span style="background:var(--bg-dark); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-weight:bold;">${p.num}</span>
-                    <div>${p.name} <small style="color:var(--text-secondary);">${p.pos}</small></div>
-                    <strong style="margin-left:auto; font-size:16px;">${p.ovr}</strong>
+                    <span>${p.num}</span>
+                    <div>${p.name} <br><small>${p.pos}</small></div>
+                    <strong>${p.ovr}</strong>
                 `;
                 playerEl.onclick = () => this.renderPlayerDashboard(p.id);
                 listEl.appendChild(playerEl);
@@ -648,7 +702,6 @@
                         <strong>Mental:</strong> Schlaf: ${p.mental.sleep}/10 | Stress: ${p.mental.stress}/10 | Motivation: ${p.mental.motiv}/10
                     </div>
                 </div>
-                <!-- Weitere Graphen und Analysen hier -->
             `;
             this.openDialog('player-dashboard-dialog');
         },
@@ -659,14 +712,17 @@
             const costs = f.salaries + f.infrastructure;
             const liquidity = f.budget - costs;
 
-            const expiringContracts = c.filter(con => con.type === 'player' && (con.endDate - new Date()) / (1000 * 60 * 60 * 24) < 180);
+            const expiringContracts = c
+               .filter(con => con.type === 'player' && (new Date(con.endDate) - new Date()) / (1000 * 60 * 60 * 24) < 180)
+               .map(con => `<p style="color:var(--accent-red);">⚠️ ${con.name} - läuft aus in ${Math.round((new Date(con.endDate) - new Date()) / (1000 * 60 * 60 * 24))} Tagen</p>`)
+               .join('');
 
             this.elements['manager-dialog-content'].innerHTML = `
                 <h3>Finanz-Cockpit</h3>
-                <p>Budget: ${f.budget.toLocaleString()} € | Kosten: ${costs.toLocaleString()} € | <strong>Liquidität: ${liquidity.toLocaleString()} €</strong></p>
+                <p>Budget: ${f.budget.toLocaleString('de-DE')} € | Kosten: ${costs.toLocaleString('de-DE')} € | <strong>Liquidität: ${liquidity.toLocaleString('de-DE')} €</strong></p>
+                <br>
                 <h3>Contract-Lifecycle-Radar (Auslaufende Verträge < 6 Monate)</h3>
-                ${expiringContracts.length > 0? expiringContracts.map(con => `<p style="color:var(--accent-red);">⚠️ ${con.name} - läuft aus in ${Math.round((con.endDate - new Date()) / (1000 * 60 * 60 * 24))} Tagen</p>`).join('') : '<p>Keine kritischen Verträge.</p>'}
-                <!-- Hier würden weitere Manager-Module folgen -->
+                ${expiringContracts.length > 0? expiringContracts : '<p>Keine kritischen Verträge.</p>'}
             `;
         },
 
@@ -676,6 +732,7 @@
                 <p>14:30: Ankunft Stadion</p>
                 <p>15:15: Aufwärmen</p>
                 <p>15:50: Letzte Ansprache</p>
+                <br>
                 <h3>Logistik-Checkliste</h3>
                 <p><input type="checkbox" checked> Trikots (Heim)</p>
                 <p><input type="checkbox" checked> Spielerpässe</p>
@@ -737,10 +794,10 @@
         },
 
         performMorningCheck() {
-            const warnings = [];
-            Object.values(AppState.squad).forEach(p => {
-                if (p.bio.readiness < 90) warnings.push(`${p.name} (Readiness: ${p.bio.readiness}%)`);
-            });
+            const warnings = Object.values(AppState.squad)
+               .filter(p => p.bio.readiness < 90)
+               .map(p => `${p.name} (Readiness: ${p.bio.readiness}%)`);
+
             if (warnings.length > 0) {
                 this.speak(`⚠️ **Morgenreport:** ${warnings.length} Spieler im roten Bereich.\n- ${warnings.join('\n- ')}`);
             } else {
@@ -805,12 +862,12 @@
                 this.isDragging = false;
                 this.dragTarget = null;
             };
-             window.onresize = () => this.setupCanvas();
+            window.onresize = () => this.setupCanvas();
         },
 
         getPlayerAt(pos) {
             return Object.values(AppState.squad).find(p => 
-                Math.hypot(p.canvas.x - pos.x, p.canvas.y - pos.y) < 20 // 20px Radius
+                Math.hypot(p.canvas.x - pos.x, p.canvas.y - pos.y) < 22 // 22px Klick-Radius
             );
         },
         
@@ -834,21 +891,21 @@
             this.ctx.lineWidth = 2;
             // Linien
             this.ctx.strokeRect(25, 25, w - 50, h - 50); // Außen
-            this.ctx.beginPath(); this.ctx.moveTo(w/2, 25); this.ctx.lineTo(w/2, h - 50); this.ctx.stroke(); // Mitte
-            this.ctx.beginPath(); this.ctx.arc(w/2, h/2, 60, 0, 2 * Math.PI); this.ctx.stroke(); // Mittelkreis
+            this.ctx.beginPath(); this.ctx.moveTo(w/2, 25); this.ctx.lineTo(w/2, h - 25); this.ctx.stroke(); // Mitte
+            this.ctx.beginPath(); this.ctx.arc(w/2, h/2, Math.min(w,h) / 8, 0, 2 * Math.PI); this.ctx.stroke(); // Mittelkreis
         },
 
         drawPlayer(p) {
             const { x, y } = p.canvas;
             
-            // Ermüdungs-Warnung
             this.ctx.save();
-            if (p.stats.performance < 70) {
+            const performance = p.stats.performance;
+            if (performance < 70) {
                 this.ctx.shadowBlur = 15;
-                this.ctx.shadowColor = 'rgba(248, 81, 73, 0.9)'; // HIGH BLINK
-            } else if (p.stats.performance < 85) {
+                this.ctx.shadowColor = `rgba(248, 81, 73, ${Math.abs(Math.sin(Date.now() / 200))})`; // Schnelles Blinken
+            } else if (performance < 85) {
                 this.ctx.shadowBlur = 10;
-                this.ctx.shadowColor = 'rgba(227, 179, 65, 0.7)'; // LOW BLINK
+                this.ctx.shadowColor = `rgba(227, 179, 65, ${Math.abs(Math.sin(Date.now() / 400))})`; // Langsames Blinken
             }
             
             // Spieler-Kreis
@@ -859,7 +916,7 @@
             this.ctx.restore();
 
             // Nummer
-            this.ctx.fillStyle = '#fff';
+            this.ctx.fillStyle = p.pos === 'TW'? '#000' : '#fff';
             this.ctx.font = 'bold 18px var(--font-sans)';
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
@@ -869,16 +926,16 @@
         SubstitutionAI: {
             updateAllPlayers() {
                 Object.values(AppState.squad).forEach(p => {
-                    // Simuliere 5 Minuten Spielzeit pro Update
-                    if(p.stats.minutes < 90) p.stats.minutes += 5;
+                    // Simuliere 1 Minute Spielzeit pro Update
+                    if(p.stats.minutes < 90) p.stats.minutes += 1;
                     p.stats.performance = this.calculatePerformance(p);
                 });
             },
             calculatePerformance(player) {
                 // P(t) = P0 * e^(-kt)
                 const P0 = player.bio.readiness; // Startfitness
-                const t = player.stats.minutes; // Zeit
-                const k = 0.0035; // Zerfallsrate (k-Faktor), angepasst für stärkere Wirkung
+                const t = player.stats.minutes; // Zeit in Minuten
+                const k = 0.0035; // Zerfallsrate (k-Faktor)
                 
                 const performance = P0 * Math.exp(-k * t);
                 return Math.max(0, performance); // Performance kann nicht unter 0 fallen
@@ -900,7 +957,8 @@
             } else {
                 UIManager.elements['system-loader'].hidden = true;
                 const profiles = await ApiService.getProfiles();
-                this.elements['profile-selector'].innerHTML = profiles.map(p => `<option value="${p.id}">${p.name} (${p.role})</option>`).join('');
+                // KORREKTUR hier angewendet: UIManager.elements statt this.elements
+                UIManager.elements['profile-selector'].innerHTML = profiles.map(p => `<option value="${p.id}">${p.name} (${p.role})</option>`).join('');
                 UIManager.elements['login-screen'].style.display = 'flex';
             }
         },
@@ -928,7 +986,7 @@
         }
     };
     
-    // Start the application
-    App.init();
+    // Startet die Anwendung, sobald das Fenster vollständig geladen ist.
+    window.onload = () => App.init();
 
 </script>
