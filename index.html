@@ -11,49 +11,39 @@
         /* I. DESIGN SYSTEM & ROOT-VARIABLEN                                       */
         /* ======================================================================= */
         :root {
-            /* Grundfarben */
-            --bg-dark: #090c10;
+            var(--bg-dark): #090c10;
             --bg-medium: #161b22;
             --bg-light: #21262d;
             --border-color: #30363d;
             
-            /* Textfarben */
             --text-primary: #e6edf3;
             --text-secondary: #8b949e;
             
-            /* Akzentfarben für UI & Status */
             --accent-blue: #58a6ff;
             --accent-green: #3fb950;
             --accent-red: #f85149;
             --accent-yellow: #d4af37;
             
-            /* Komplexe Verläufe für Pro-Elemente */
             --gold-gradient: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
-            /* Echtes Rasenmuster für die Arena */
             --pitch-bg: repeating-linear-gradient(0deg, #012a01, #012a01 10%, #013201 10%, #013201 20%);
             
-            /* Typografie & Metriken */
             --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --radius-sm: 6px;
             --radius-md: 10px;
             --radius-lg: 16px;
         }
 
-        /* Ultimativer Fix gegen flackernde Ladebildschirme */
         [hidden] { display: none !important; }
 
-        /* ======================================================================= */
-        /* II. GLOBALE STILE & RESETS                                              */
-        /* ======================================================================= */
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         html, body {
             height: 100%; width: 100%;
-            background-color: var(--bg-dark);
+            background-color: #090c10;
             color: var(--text-primary);
             font-family: var(--font-sans);
             font-size: 14px;
-            overflow: hidden; /* Verhindert Scrollen der gesamten Seite */
+            overflow: hidden;
         }
 
         button, input, select { font-family: inherit; }
@@ -61,7 +51,7 @@
         h1, h2, h3, h4 { font-weight: 600; margin-bottom: 0.8em; }
 
         /* ======================================================================= */
-        /* III. APP-ARCHITEKTUR & GRID (Pro-Desktop Layout)                        */
+        /* III. APP-ARCHITEKTUR & GRID                                             */
         /* ======================================================================= */
         .app-container {
             display: grid;
@@ -70,22 +60,20 @@
                 "header header header"
                 "nav    main   aside"
                 "nav    main   aside";
-            grid-template-columns: 280px 1fr 340px; /* Perfekte Proportionen */
+            grid-template-columns: 280px 1fr 340px;
             grid-template-rows: 70px 1fr;
             gap: 15px; padding: 15px;
         }
 
-        /* Die 4 Hauptbereiche */
         .app-header { grid-area: header; }
         #left-panel { grid-area: nav; }
         #main-arena { grid-area: main; }
         #right-panel { grid-area: aside; }
 
-        /* Gemeinsames Styling für alle Panel-Boxen */
         .app-header, #left-panel, #main-arena, #right-panel {
             background: var(--bg-medium);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg); /* Etwas weichere Ecken */
+            border-radius: var(--radius-lg);
             display: flex; flex-direction: column; overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
@@ -95,10 +83,8 @@
         #main-arena { padding: 10px; position: relative; }
 
         /* ======================================================================= */
-        /* IV. UI-KOMPONENTEN (Buttons, Listen, Avatare)                           */
+        /* IV. UI-KOMPONENTEN                                                      */
         /* ======================================================================= */
-        
-        /* Primäre Aktions-Buttons (Login, Speichern) */
         .btn-primary {
             width: 100%; padding: 14px;
             background: var(--accent-green); color: #fff;
@@ -108,7 +94,6 @@
         }
         .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
         
-        /* Navigation & Listen-Elemente */
         .menu-btn {
             width: 100%; padding: 12px 15px; margin-bottom: 8px;
             background: var(--bg-light); color: var(--text-primary);
@@ -118,7 +103,6 @@
         }
         .menu-btn:hover { background: var(--border-color); }
         
-        /* Spezieller Live-Button */
         .btn-live {
             background: transparent; border: 2px solid var(--accent-red);
             color: var(--accent-red); padding: 8px 20px;
@@ -128,7 +112,6 @@
         .btn-live:hover { background: rgba(248, 81, 73, 0.1); }
         .btn-live.active { background: var(--accent-red); color: #fff; animation: pulse 1.5s infinite; }
         
-        /* Der Toni AI Senden-Button */
         .btn-send {
             background: var(--accent-blue); color: #fff;
             padding: 0 20px; border-radius: var(--radius-md);
@@ -143,7 +126,7 @@
         }
 
         /* ======================================================================= */
-        /* V. ARENA & TAKTIKBOARD (Proportionen & Rasen)                           */
+        /* V. ARENA & TAKTIKBOARD                                                  */
         /* ======================================================================= */
         #board-wrap {
             flex-grow: 1; position: relative; 
@@ -155,7 +138,6 @@
         }
         #main-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
 
-        /* Schwebende Werkzeugleiste in der Arena */
         #arena-controls {
             position: absolute; top: 15px; left: 15px; 
             display: flex; gap: 10px;
@@ -167,60 +149,27 @@
         .tool-btn:hover, .tool-btn.active { opacity: 1; transform: scale(1.1); text-shadow: 0 0 10px rgba(255,255,255,0.5); }
 
         /* ======================================================================= */
-        /* VI. MANNSCHAFTSKABINE & FIFA-CARDS (Verbesserte Lesbarkeit)             */
+        /* VI. MANNSCHAFTSKABINE & FIFA-CARDS                                      */
         /* ======================================================================= */
-        .fifa-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* Breiter für bessere Lesbarkeit */
-            gap: 25px; padding: 15px;
-        }
-        
-        .fifa-card {
-            background: var(--gold-gradient); color: #111;
-            border-radius: var(--radius-lg); padding: 20px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.6);
-            display: flex; flex-direction: column; gap: 10px;
-            position: relative; overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.6);
-        }
-        
-        /* Glanz-Effekt über der Karte */
-        .fifa-card::after {
-            content: ''; position: absolute; top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: linear-gradient(to bottom right, rgba(255,255,255,0.8), rgba(255,255,255,0) 40%, rgba(255,255,255,0));
-            transform: rotate(30deg); pointer-events: none; opacity: 0.4;
-        }
-
+        .fifa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; padding: 15px; }
+        .fifa-card { background: var(--gold-gradient); color: #111; border-radius: var(--radius-lg); padding: 20px; box-shadow: 0 12px 30px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 10px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.6); }
+        .fifa-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(to bottom right, rgba(255,255,255,0.8), rgba(255,255,255,0) 40%, rgba(255,255,255,0)); transform: rotate(30deg); pointer-events: none; opacity: 0.4; }
         .fifa-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid rgba(0,0,0,0.25); padding-bottom: 8px; margin-bottom: 5px; }
         .fifa-ovr { font-size: 34px; font-weight: 900; line-height: 1; }
         .fifa-pos { font-size: 20px; font-weight: 800; opacity: 0.9; }
-        
         .fifa-name { text-align: center; font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; margin: 8px 0; }
-        
-        /* Die Werte (PAC, SHO etc.) besser getrennt */
         .fifa-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
         .fifa-stat-row { display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
         .fifa-val { font-weight: 900; font-size: 18px; }
         .fifa-lbl { font-weight: 700; opacity: 0.8; }
-        
-        /* Medizinische Daten in der Karte */
-        .fifa-bio { 
-            border-top: 2px dashed rgba(0,0,0,0.3); padding-top: 12px; margin-top: 8px; 
-            font-size: 13px; font-weight: 800; display: flex; justify-content: space-between; 
-        }
+        .fifa-bio { border-top: 2px dashed rgba(0,0,0,0.3); padding-top: 12px; margin-top: 8px; font-size: 13px; font-weight: 800; display: flex; justify-content: space-between; }
 
         /* ======================================================================= */
-        /* VII. AKTENTASCHE (Manager-Dashboard Module)                             */
+        /* VII. AKTENTASCHE (Manager-Dashboard)                                    */
         /* ======================================================================= */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; }
-        .dash-widget { 
-            background: var(--bg-light); border: 1px solid var(--border-color); 
-            border-radius: var(--radius-lg); padding: 25px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
+        .dash-widget { background: var(--bg-light); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
         .dash-widget h3 { border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; color: var(--accent-blue); display: flex; align-items: center; gap: 10px; }
-        
         .progress-track { width: 100%; height: 16px; background: var(--bg-dark); border-radius: 8px; overflow: hidden; margin: 15px 0 5px 0; border: 1px solid var(--border-color); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
         .progress-fill { height: 100%; background: var(--accent-green); transition: width 1s ease-in-out; }
 
@@ -228,14 +177,11 @@
         /* VIII. OVERLAYS, MODALS & ANIMATIONEN                                    */
         /* ======================================================================= */
         .system-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: rgba(9, 12, 16, 0.98); backdrop-filter: blur(15px); }
-        
         .login-box { width: 90%; max-width: 450px; padding: 50px; background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.7); }
         .login-box select { width: 100%; padding: 15px; margin-top: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-light); color: white; font-size: 16px; }
-
         .spinner { width: 60px; height: 60px; border: 6px solid var(--border-color); border-top: 6px solid var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Dialog-Fenster (Modals) */
         .dialog-overlay { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
         .dialog-overlay.is-active { display: flex; }
         .dialog-box { width: 95vw; max-width: 650px; max-height: 90vh; background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
@@ -245,7 +191,6 @@
         .close-btn { font-size: 24px; color: var(--text-secondary); cursor: pointer; background: none; border: none; transition: color 0.2s; padding: 5px; }
         .close-btn:hover { color: var(--accent-red); transform: scale(1.1); }
 
-        /* Animations */
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.5); }
             70% { box-shadow: 0 0 0 15px rgba(248, 81, 73, 0); }
@@ -253,18 +198,23 @@
         }
 
         /* ======================================================================= */
-        /* IX. MOBILE RESPONSIVENESS (Sauberes Grid für Tablets & Handys)          */
+        /* IX. MOBILE RESPONSIVENESS (Der Fix für die unsichtbaren Menüs)          */
         /* ======================================================================= */
         .mobile-nav-btn { display: none; font-size: 26px; padding: 5px 10px; background: transparent; border: none; color: var(--text-primary); cursor: pointer; }
+
+        /* FIX 1: Der Schleier muss z-index technisch unter die Menüs rutschen! */
+        #mobile-backdrop { z-index: 7999 !important; }
 
         @media (max-width: 1200px) {
             .app-container { grid-template-columns: 1fr; grid-template-areas: "header" "main"; padding: 10px; gap: 10px; }
             #left-panel, #right-panel {
-                position: fixed; top: 0; height: 100%; width: 340px; z-index: 8000;
+                position: fixed; top: 0; height: 100%; width: 340px; 
+                z-index: 8000 !important; /* FIX 1: Hebt das Menü über den Schleier */
+                background: var(--bg-dark) !important; /* FIX 1: Erzwingt Solid Color */
                 transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); border-radius: 0;
             }
-            #left-panel { left: 0; transform: translateX(-100%); }
-            #right-panel { right: 0; transform: translateX(100%); }
+            #left-panel { left: 0; transform: translateX(-100%); border-right: 1px solid var(--border-color); }
+            #right-panel { right: 0; transform: translateX(100%); border-left: 1px solid var(--border-color); }
             #left-panel.is-visible, #right-panel.is-visible { transform: translateX(0); }
             .mobile-nav-btn { display: block; }
         }
@@ -419,30 +369,20 @@
         
         // Vollständiger Kader für das Duell: Trainer (3-4-3) vs Toni (4-4-2)
         squad: {
-            // Torhüter
             "p1": { id: "p1", name: "Neuer", num: 1, pos: "TW", att: { pac: 85, sho: 89, pas: 91, dri: 90, def: 60, phy: 86 }, ovr: 89, bio: { hrv: 94, fatPct: 10.5, readiness: 98 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 150, y: 150} },
-            
-            // Abwehr (Trainer 3-4-3 Fokus)
             "p2": { id: "p2", name: "Rüdiger", num: 2, pos: "IV", att: { pac: 82, sho: 40, pas: 71, dri: 65, def: 89, phy: 90 }, ovr: 87, bio: { hrv: 88, fatPct: 8.5, readiness: 92 }, mental: { sleep: 7, stress: 3, motiv: 8 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 200, y: 150} },
             "p3": { id: "p3", name: "Hummels", num: 5, pos: "IV", att: { pac: 55, sho: 58, pas: 81, dri: 73, def: 89, phy: 80 }, ovr: 85, bio: { hrv: 82, fatPct: 12.0, readiness: 85 }, mental: { sleep: 6, stress: 5, motiv: 7 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 250, y: 150} },
             "p4": { id: "p4", name: "Tah", num: 4, pos: "IV", att: { pac: 78, sho: 35, pas: 68, dri: 60, def: 85, phy: 88 }, ovr: 84, bio: { hrv: 91, fatPct: 9.2, readiness: 95 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 300, y: 150} },
-            
-            // Außenverteidiger (Für Toni 4-4-2)
             "p5": { id: "p5", name: "Davies", num: 19, pos: "LV", att: { pac: 95, sho: 68, pas: 77, dri: 84, def: 76, phy: 77 }, ovr: 84, bio: { hrv: 96, fatPct: 8.1, readiness: 99 }, mental: { sleep: 9, stress: 1, motiv: 10 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 100, y: 250} },
             "p6": { id: "p6", name: "Frimpong", num: 30, pos: "RV", att: { pac: 94, sho: 72, pas: 78, dri: 85, def: 74, phy: 70 }, ovr: 84, bio: { hrv: 93, fatPct: 8.8, readiness: 96 }, mental: { sleep: 8, stress: 2, motiv: 9 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 350, y: 250} },
-            
-            // Mittelfeld
             "p7": { id: "p7", name: "Kimmich", num: 6, pos: "ZDM", att: { pac: 70, sho: 78, pas: 90, dri: 83, def: 82, phy: 78 }, ovr: 88, bio: { hrv: 90, fatPct: 10.1, readiness: 94 }, mental: { sleep: 7, stress: 4, motiv: 10 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 200, y: 300} },
             "p8": { id: "p8", name: "Kroos", num: 8, pos: "ZM", att: { pac: 53, sho: 81, pas: 93, dri: 81, def: 71, phy: 68 }, ovr: 86, bio: { hrv: 85, fatPct: 11.5, readiness: 88 }, mental: { sleep: 8, stress: 2, motiv: 8 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 250, y: 300} },
             "p9": { id: "p9", name: "Musiala", num: 10, pos: "ZOM", att: { pac: 85, sho: 80, pas: 84, dri: 92, def: 55, phy: 65 }, ovr: 88, bio: { hrv: 95, fatPct: 8.9, readiness: 97 }, mental: { sleep: 9, stress: 1, motiv: 9 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 150, y: 350} },
             "p10": { id: "p10", name: "Wirtz", num: 17, pos: "ZOM", att: { pac: 83, sho: 82, pas: 86, dri: 89, def: 54, phy: 68 }, ovr: 87, bio: { hrv: 92, fatPct: 9.5, readiness: 95 }, mental: { sleep: 8, stress: 3, motiv: 9 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 300, y: 350} },
-            
-            // Sturm
             "p11": { id: "p11", name: "Müller", num: 13, pos: "ST", att: { pac: 75, sho: 84, pas: 83, dri: 80, def: 54, phy: 75 }, ovr: 85, bio: { hrv: 89, fatPct: 11.0, readiness: 92 }, mental: { sleep: 7, stress: 2, motiv: 10 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 200, y: 450} },
             "p12": { id: "p12", name: "Sané", num: 11, pos: "RF", att: { pac: 91, sho: 83, pas: 81, dri: 86, def: 38, phy: 70 }, ovr: 85, bio: { hrv: 86, fatPct: 9.8, readiness: 89 }, mental: { sleep: 6, stress: 4, motiv: 8 }, stats: { minutes: 0, performance: 100 }, canvas: {x: 300, y: 450} }
         },
         
-        // Die Inhalte der Aktentasche (Briefcase)
         briefcase: {
             finances: {
                 budget: 15500000,
@@ -467,7 +407,6 @@
         }
     };
 
-    /* API Simulation für realistische Ladezeiten */
     const ApiService = {
         _delay(ms) { return new Promise(res => setTimeout(res, ms)); },
         
@@ -478,7 +417,6 @@
         
         async loadProfileData(profileId) {
             await this._delay(800); 
-            // Deep Copy, damit wir das Original nicht überschreiben
             return {
                 user: MockData.profiles[profileId],
                 squad: JSON.parse(JSON.stringify(MockData.squad)),
@@ -488,7 +426,7 @@
     };
 
     /* ======================================================================= */
-    /* II. APPLICATION STATE (Der zentrale Datenspeicher)                      */
+    /* II. APPLICATION STATE                                                   */
     /* ======================================================================= */
     const AppState = {
         user: null,
@@ -497,7 +435,7 @@
     };
 
     /* ======================================================================= */
-    /* III. UI MANAGER (Die Schnittstelle zwischen Daten und Design)           */
+    /* III. UI MANAGER                                                         */
     /* ======================================================================= */
     const UIManager = {
         init() {
@@ -509,7 +447,8 @@
                 'aktentasche-dialog', 'aktentasche-content',
                 'video-dialog', 'video-content',
                 'player-dashboard-dialog', 'player-dialog-title', 'player-dialog-content',
-                'chat-box', 'chat-form', 'chat-input', 'ai-status', 'main-canvas', 'left-panel', 'right-panel', 'mobile-backdrop'
+                'chat-box', 'chat-form', 'chat-input', 'ai-status', 'main-canvas', 'left-panel', 'right-panel', 'mobile-backdrop',
+                'live-session-btn'
             ];
             
             elementIds.forEach(id => {
@@ -521,7 +460,6 @@
         },
 
         bindEvents() {
-            // 1. Login-Handler
             if(this.elements['login-form']) {
                 this.elements['login-form'].onsubmit = (e) => {
                     e.preventDefault();
@@ -529,12 +467,25 @@
                 };
             }
 
-            // 2. Mobile Panel-Toggles
+            // Mobile Navigation Toggles
             document.getElementById('toggle-left-panel-btn')?.addEventListener('click', () => this.togglePanel('left-panel'));
             document.getElementById('toggle-right-panel-btn')?.addEventListener('click', () => this.togglePanel('right-panel'));
             document.getElementById('close-right-panel-btn')?.addEventListener('click', () => this.togglePanel('right-panel', false));
 
-            // 3. Globale Navigation & Dialog-Steuerung (Event Delegation)
+            // FIX 2: Live-Audio Button Logik
+            if(this.elements['live-session-btn']) {
+                this.elements['live-session-btn'].addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    if(this.classList.contains('active')) {
+                        UIManager.togglePanel('right-panel', true); // Öffnet Toni AI Menü
+                        if(window.ToniAI) window.ToniAI.speak("🎙️ Live-Audio-Kanal geöffnet. Ich höre zu, Coach.");
+                    } else {
+                        if(window.ToniAI) window.ToniAI.speak("🔇 Live-Audio-Kanal geschlossen.");
+                    }
+                });
+            }
+
+            // Event Delegation für alle Module
             document.addEventListener('click', (e) => {
                 const btn = e.target.closest('[data-action]');
                 if (!btn) return;
@@ -573,6 +524,7 @@
             const isVisible = forceState !== undefined ? forceState : !panel.classList.contains('is-visible');
             panel.classList.toggle('is-visible', isVisible);
             
+            // Schleier aktivieren, wenn mindestens ein Panel offen ist
             const anyVisible = document.querySelector('#left-panel.is-visible, #right-panel.is-visible');
             if(this.elements['mobile-backdrop']) this.elements['mobile-backdrop'].hidden = !anyVisible;
         },
@@ -582,8 +534,6 @@
                 this.elements[dialogId].classList.add('is-active');
             }
         },
-
-        // --- RENDER FUNKTIONEN ---
 
         renderAppLayout() {
             const { user } = AppState;
@@ -601,7 +551,11 @@
                 btn.className = 'menu-btn';
                 btn.style.cssText = "display: flex; justify-content: space-between; padding: 10px 15px; font-size: 14px; border: 1px solid var(--border-color); border-radius: 8px;";
                 btn.innerHTML = `<span><strong style="color:var(--text-secondary); width:25px; display:inline-block;">${p.num}</strong> ${p.name}</span> <span style="color:var(--accent-green); font-weight:bold;">${p.ovr}</span>`;
-                btn.onclick = () => this.renderPlayerDashboard(p.id);
+                btn.onclick = () => {
+                    this.renderPlayerDashboard(p.id);
+                    // Menü auf Mobile einklappen bei Klick
+                    if(window.innerWidth <= 1200) this.togglePanel('left-panel', false);
+                };
                 list.appendChild(btn);
             });
         },
@@ -666,10 +620,8 @@
             const bc = AppState.briefcase;
             const container = this.elements['aktentasche-content'];
             
-            // Finanzen berechnen
             const liquidity = bc.finances.budget - bc.finances.salaries - bc.finances.infrastructure;
             
-            // Sponsoren HTML
             const sponsorsHtml = bc.sponsors.map(s => {
                 const color = s.status === 'Kritisch' ? 'var(--accent-red)' : 'var(--accent-green)';
                 return `
@@ -686,7 +638,6 @@
                 `;
             }).join('');
 
-            // Projekte HTML
             const projectsHtml = bc.projects.map(p => `
                 <div style="margin-bottom: 25px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
@@ -729,16 +680,12 @@
 
                     <div class="dash-widget">
                         <h3>🤝 SPONSORING-RADAR</h3>
-                        <div style="margin-top: 15px;">
-                            ${sponsorsHtml}
-                        </div>
+                        <div style="margin-top: 15px;">${sponsorsHtml}</div>
                     </div>
 
                     <div class="dash-widget">
                         <h3>🏗️ INFRASTRUKTUR-PROJEKTE</h3>
-                        <div style="margin-top: 25px;">
-                            ${projectsHtml}
-                        </div>
+                        <div style="margin-top: 25px;">${projectsHtml}</div>
                     </div>
                 </div>
             `;
@@ -758,7 +705,6 @@
             `;
         }
     };
-
     /* ======================================================================= */
     /* IV. ARENA ENGINE (Das echte Profi-Spielfeld & KI)                       */
     /* ======================================================================= */
@@ -777,6 +723,9 @@
 
             // Substitution AI: Berechnet den Leistungsabfall in Echtzeit
             setInterval(() => this.updateFatigue(), 5000); 
+
+            // FIX 3: Spieler sofort beim Booten ordentlich aufstellen!
+            this.resetTactics();
         },
         
         setupCanvas() {
@@ -795,7 +744,7 @@
             
             this.canvas.onpointerdown = (e) => {
                 const pos = getPos(e);
-                // Touch-Radius großzügig bemessen (30px)
+                // Touch-Radius großzügig bemessen (30px) für Handys
                 const p = Object.values(AppState.squad).find(s => Math.hypot(s.canvas.x - pos.x, s.canvas.y - pos.y) < 30);
                 if (p) { 
                     this.isDragging = true; 
@@ -892,12 +841,11 @@
             this.ctx.beginPath();
             this.ctx.arc(x, y, 18, 0, 2 * Math.PI);
             
-            // Farbcodierung: Gegner (Toni, oben) vs Eigenes Team (Trainer, unten)
-            // p1 bis p4 = Trainer (Blau), p5 bis p10 = Toni (Rot) etc.
-            // Zur Vereinfachung ordnen wir Blau den Nummern < 15 zu, Rot den Nummern > 15
             const isTrainerTeam = p.num <= 13; 
             
-            this.ctx.fillStyle = p.pos === 'TW' ? 'var(--accent-yellow)' : (isTrainerTeam ? 'var(--accent-blue)' : 'var(--accent-red)');
+            // FIX 3: Harte Hex-Farben statt var() für iOS Kompatibilität
+            // Gelb = TW, Blau = Trainer Team, Rot = Toni Team
+            this.ctx.fillStyle = p.pos === 'TW' ? '#d4af37' : (isTrainerTeam ? '#58a6ff' : '#f85149');
             this.ctx.fill();
             
             // Rand
@@ -972,7 +920,7 @@
     /* ======================================================================= */
     /* V. TONI AI (Kognitive Engine & Chat)                                    */
     /* ======================================================================= */
-    const ToniAI = {
+    window.ToniAI = {
         init() {
             this.elements = UIManager.elements;
             
@@ -1089,7 +1037,7 @@
                     // Module hochfahren
                     UIManager.renderAppLayout();
                     window.ArenaEngine.init();
-                    ToniAI.init();
+                    window.ToniAI.init();
                 }, 1500);
 
             } catch(e) {
