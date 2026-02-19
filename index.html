@@ -3,906 +3,846 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TONI 2.0 Pro | Ultimate Titan v9.0</title>
-<meta name="description" content="TONI 2.0 Pro — Professionelles Taktikboard mit Videoanalyse, KI‑Coaching, Live-Kollaboration und Vereinsmanagement. Anbindung an die zentrale Titan-Datenbank.">
+<title>TONI 2.0 | Professional Coaching & Management Suite</title>
+<meta name="description" content="TONI 2.0 - Eine KI-gestützte, hybride Coaching-Plattform für professionelle Taktikanalyse, Spieler-Management und Vereinsstrategie.">
 
-<!-- Design Tokens & Core Styles -->
+<!-- Professionelles CSS Design System -->
 <style>
   :root {
-    --bg: #010601;
-    --neon: #39FF14;
-    --neon-dim: rgba(57, 255, 20, 0.12);
-    --gold-start: #bf953f;
-    --gold-mid: #fcf6ba;
-    --gold-end: #b38728;
-    --glass: rgba(255, 255, 255, 0.04);
-    --red: #ff3333;
-    --blue: #3399ff;
-    --card-text: #2c2401;
-    --ui-gap: 12px;
-    --radius-lg: 14px;
-    --font-sans: "Segoe UI", Roboto, Arial, sans-serif;
-    --focus-ring: rgba(57, 255, 20, 0.25);
+    --bg-dark: #0d1117;
+    --bg-medium: #161b22;
+    --bg-light: #21262d;
+    --border-color: #30363d;
+    --text-primary: #e6edf3;
+    --text-secondary: #848d97;
+    --accent-blue: #58a6ff;
+    --accent-green: #3fb950;
+    --accent-red: #f85149;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
   }
 
-  /* Reset & base */
-    * {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
-  html,
-  body {
+  /* Globale Resets & Basis-Stile */
+    * { box-sizing: border-box; }
+  html, body {
     height: 100%;
     width: 100%;
     margin: 0;
     padding: 0;
-    background: var(--bg);
-    color: #fff;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
     font-family: var(--font-sans);
-    overflow: hidden; /* Verhindert Scrollen auf Body-Ebene */
-  }
-  @media (prefers-reduced-motion: reduce) {
-        * {
-      animation: none!important;
-      transition: none!important;
-    }
+    font-size: 14px;
+    overflow: hidden;
   }
 
-  /* NEU: Lade-Overlay & System-Meldungen */
+  /* Utility-Klassen */
+ .scroll-content { overflow-y: auto; padding-right: 8px; }
+ .scroll-content::-webkit-scrollbar { width: 6px; }
+ .scroll-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+ .text-muted { color: var(--text-secondary); font-size: 0.9em; }
+ .text-accent { color: var(--accent-blue); }
+ .text-green { color: var(--accent-green); }
+ .text-red { color: var(--accent-red); }
+
+  /* Buttons & Inputs */
+ .btn {
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-medium);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color.2s, border-color.2s;
+  }
+ .btn:hover { background-color: var(--bg-light); border-color: var(--text-secondary); }
+ .btn-primary { background-color: var(--accent-green); border-color: var(--accent-green); color: #fff; }
+ .btn-primary:hover { background-color: #4acb5f; }
+ .input-field {
+    width: 100%;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    font-size: 1em;
+  }
+
+  /* System-Overlays (Loader, Login) */
  .system-overlay {
     position: fixed;
     inset: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 10000;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(13, 17, 23, 0.85);
     backdrop-filter: blur(10px);
     transition: opacity.3s ease;
   }
- .system-overlay[hidden] {
-      display: none;
-  }
- .spinner {
-    width: 56px;
-    height: 56px;
-    border: 4px solid var(--neon-dim);
-    border-top-color: var(--neon);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
- .system-overlay.message {
-      margin-top: 18px;
-      color: var(--neon);
-      font-size: 14px;
-      letter-spacing: 2px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+ .system-overlay[hidden] { display: none; }
+ .spinner { /*... (wie gehabt)... */ }
+  #login-screen { flex-direction: column; gap: 20px; }
+ .login-box { width: 380px; padding: 40px; background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
+ .login-title { text-align: center; margin-bottom: 24px; font-size: 24px; font-weight: 300; letter-spacing: 2px; }
 
-  /* Gate screen (Login) */
- .gate-screen {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    background-image: radial-gradient(circle at center, #0a200a 0%, #010601 100%);
-    padding: 24px;
-  }
- .gate-brand {
-    color: var(--neon);
-    letter-spacing: 12px;
-    font-size: 28px;
-    margin: 0 0 6px 0;
-    text-shadow: 0 0 20px var(--neon-dim);
-  }
- .gate-sub {
-    font-size: 11px;
-    opacity: 0.6;
-    letter-spacing: 4px;
-    margin: 0 0 18px 0;
-  }
- .gate-input {
-    background: #000;
-    border: 2px solid var(--neon);
-    color: var(--neon);
-    padding: 16px;
-    border-radius: 14px;
-    text-align: center;
-    font-size: 20px;
-    width: 320px;
-    letter-spacing: 6px;
-    box-shadow: 0 0 20px var(--neon-dim);
-    margin-bottom: 18px;
-  }
- .gate-btn {
-    background: var(--neon);
-    color: #000;
-    padding: 16px 64px;
-    border: none;
-    border-radius: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    font-size: 16px;
-    box-shadow: 0 0 30px var(--neon-dim);
-    transition: background-color.2s;
-  }
- .gate-btn:hover { background-color: #fff; }
- .gate-note {
-    font-size: 11px;
-    opacity: 0.35;
-    margin-top: 14px;
-  }
- .gate-error {
-      color: var(--red);
-      margin-top: 12px;
-      font-size: 13px;
-      display: none;
-  }
-
-  /* App grid */
+  /* Haupt-App-Layout */
  .app-container {
     display: grid;
-    grid-template-columns: 85px 1fr 400px;
-    gap: var(--ui-gap);
+    grid-template-rows: 60px 1fr;
+    grid-template-columns: 280px 1fr 350px;
     height: 100vh;
-    padding: 10px;
+    padding: 12px;
+    gap: 12px;
   }
-  @media (max-width: 1200px) {
-   .app-container {
-      grid-template-columns: 85px 1fr;
-      grid-template-rows: 1fr auto;
-    }
-   .right-toni { display: none; } /* Toni-Box wird bei kleineren Screens ausgeblendet */
-  }
-  @media (max-width: 800px) {
-   .app-container {
-      grid-template-columns: 1fr;
-      grid-template-rows: 65px 1fr;
-      height: auto;
-      min-height: 100vh;
-    }
-    .left-nav {
-        flex-direction: row;
-        padding: 8px 12px;
-     }
-  }
+ .app-header { grid-column: 1 / -1; }
+ .left-panel { /* Spielerliste / Taktik-Varianten */ }
+ .main-arena { /* Taktikboard */ }
+ .right-panel { /* Toni AI Chat */ }
+ .panel { background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 16px; display:flex; flex-direction:column; }
 
-  /* Left nav */
- .left-nav {
-    background: var(--glass);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 8px;
-    gap: 14px;
-    backdrop-filter: blur(8px);
-  }
- .nav-item {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    border: 2px solid var(--neon);
-    color: var(--neon);
-    display: flex;
+  /* Header */
+ .app-header { display: flex; align-items: center; justify-content: space-between; }
+ .user-profile { display: flex; align-items: center; gap: 12px; }
+ .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-light); display:flex; align-items:center; justify-content:center; font-weight:bold; }
+ .live-session-btn { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid var(--accent-red); color: var(--accent-red); }
+ .live-session-btn.active { background-color: var(--accent-red); color: #fff; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); } 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); } }
+  
+  /* Arena */
+  #board-wrap { flex: 1; position: relative; border-radius: var(--radius-md); overflow: hidden; background-color: #011a01; }
+  #main-canvas { position: absolute; top: 0; left: 0; }
+  #arena-controls { position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: var(--radius-md); }
+
+  /* Dialog / Modal Overlays */
+ .dialog-overlay {
+    position: fixed;
+    inset: 0;
+    display: none; /* wird zu 'flex' bei Aktivierung */
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    cursor: pointer;
-    transition: transform.18s, box-shadow.18s, background-color.18s, color.18s;
-    background-color: transparent;
+    z-index: 5000;
+    background: rgba(13, 17, 23, 0.7);
+    backdrop-filter: blur(8px);
   }
- .nav-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 24px rgba(57, 255, 20, 0.08);
-    background: var(--neon);
-    color: #000;
-  }
- .nav-item:focus-visible {
-    outline: 3px solid var(--focus-ring);
-    box-shadow: 0 8px 30px rgba(57, 255, 20, 0.08);
-  }
- .nav-item.active {
-      background: var(--neon);
-      color: #000;
-      border-color: #fff;
-  }
- .nav-item.danger {
-      color: var(--red);
-      border-color: var(--red);
-  }
- .nav-item.danger:hover {
-      background: var(--red);
-      color: #fff;
-  }
-
-  /* Center arena */
- .center-arena {
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4));
-    border-radius: 22px;
-    border: 1px solid rgba(57, 255, 20, 0.06);
-    padding: 14px;
+ .dialog-overlay.is-active { display: flex; }
+ .dialog-box {
+    width: 90vw;
+    max-width: 1400px;
+    height: 90vh;
+    background: var(--bg-medium);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
-    position: relative;
-    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
   }
+ .dialog-header { padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+ .dialog-title { font-size: 18px; font-weight: 600; }
+ .dialog-content { flex: 1; padding: 24px; overflow: auto; }
 
-  /* Arena-Steuerung (NEUE Zeichenwerkzeuge) */
-  #arena-controls {
-    position: absolute;
-    left: 14px;
-    top: 14px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    z-index: 10;
-    background: rgba(0,0,0,0.4);
-    padding: 8px;
-    border-radius: 12px;
-  }
- .tool-btn {
-    width: 42px;
-    height: 42px;
-    font-size: 20px;
-    border-width: 1.5px;
-  }
-
-  /* Overlays (responsive) */
- .overlay {
-    position: fixed;
-    left: 6.5rem;
-    right: 24px;
-    top: 24px;
-    bottom: 24px;
-    background: rgba(0, 0, 0, 0.98);
-    border: 2px solid rgba(57, 255, 20, 0.12);
-    border-radius: 22px;
-    z-index: 2000;
-    display: none;
-    flex-direction: column;
-    padding: 28px;
-    backdrop-filter: blur(30px);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
-    overflow: hidden;
-  }
- .overlay[aria-hidden="false"] {
-      display: flex;
-  }
-  @media (max-width: 1000px) {
-   .overlay {
-      left: 12px;
-      right: 12px;
-      top: 12px;
-      bottom: 12px;
-      padding: 18px;
-      border-radius: 14px;
-    }
-  }
- .scroll-content {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 8px;
-  }
-  /* Custom scrollbar for webkit browsers */
- .scroll-content::-webkit-scrollbar {
-    width: 6px;
-  }
- .scroll-content::-webkit-scrollbar-track {
-    background: transparent;
-  }
- .scroll-content::-webkit-scrollbar-thumb {
-    background: var(--neon);
-    border-radius: 3px;
-  }
-
- .folder-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 14px;
-  }
-
-  /* FIFA card */
- .fifa-card {
-    width: 100%;
-    min-width: 155px;
-    aspect-ratio: 155 / 220;
-    background: linear-gradient(135deg, var(--gold-start) 0%, var(--gold-mid) 45%, var(--gold-end) 100%);
-    border-radius: 10px 10px 45px 10px;
-    padding: 12px;
-    color: var(--card-text);
-    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.7);
-    cursor: pointer;
-    transition: transform.16s, box-shadow.16s;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
- .fifa-card:focus-visible,.folder-item:focus-visible {
-    outline: 3px solid var(--focus-ring);
-    transform: translateY(-6px);
-  }
- .card-rating {
-    font-size: 34px;
-    font-weight: 900;
-    line-height: 0.9;
-  }
- .card-pos {
-    font-size: 13px;
-    font-weight: 800;
-    text-transform: uppercase;
-  }
- .card-name {
-    text-align: center;
-    font-weight: 900;
-    font-size: 14px;
-    text-transform: uppercase;
-    margin: 8px 0;
-    border-bottom: 1.5px solid rgba(0, 0, 0, 0.12);
-    padding-bottom: 6px;
-  }
- .card-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 800;
-  }
- .stat-row {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
- .stat-val {
-    font-weight: 900;
-    width: 26px;
-    text-align: center;
-  }
-
-  /* helpers */
- .muted {
-    color: #9a9a9a;
-    font-size: 13px;
-  }
- .heart-beat {
-    color: var(--red);
-    animation: pulse.9s infinite;
-    display: inline-block;
-  }
-  @keyframes pulse {
-    0% { opacity:.6; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.08); }
-    100% { opacity:.6; transform: scale(1); }
-  }
-  input:focus-visible, button:focus-visible,.nav-item:focus-visible {
-    outline: 3px solid var(--focus-ring);
-    outline-offset: 2px;
-  }
-  canvas {
-      touch-action: none; /* Wichtig für Pointer Events auf Touch-Geräten */
-  }
+  /* Stadionzeitung Editor Stile */
+ .magazine-editor { display: grid; grid-template-columns: 300px 1fr; gap: 24px; height: 100%; }
+ .magazine-pages-overview { display: flex; flex-direction: column; gap: 12px; }
+ .page-thumbnail { aspect-ratio: 210 / 297; border: 2px dashed var(--border-color); background: var(--bg-dark); cursor: pointer; }
+ .page-thumbnail.active { border-color: var(--accent-blue); }
+ .magazine-page-view { background: #fff; color: #000; aspect-ratio: 210 / 297; max-height: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+ .editable-region { border: 1px dashed #cccccc; min-height: 50px; padding: 10px; transition: background-color.2s; }
+ .editable-region:hover { background-color: #e0f0ff; }
 </style>
 </head>
 <body>
 
-<!-- NEU: System-Overlay für Ladezustände -->
+<!-- System-Overlay für Ladezustände -->
 <div id="system-loader" class="system-overlay">
-    <div class="spinner"></div>
-    <div id="system-message" class="message">SYSTEM WIRD GESTARTET...</div>
-</div>
-<!-- === Teil 2/5 — App-Struktur: Login, Container, Navigation, Arena und Toni-Box === -->
-
-<!-- GATE SCREEN (Login) -->
-<div id="gate" class="gate-screen" role="dialog" aria-modal="true" aria-labelledby="gate-title">
-  <h1 id="gate-title" class="gate-brand">TITAN v9.0</h1>
-  <p class="gate-sub">ULTIMATE PERFORMANCE ENGINE</p>
-
-  <form id="login-form" onsubmit="return false;">
-    <input aria-label="Benutzername" type="text" id="username" class="gate-input" placeholder="BENUTZERNAME" style="margin-bottom: 12px; font-size: 16px; letter-spacing: 4px;" autocomplete="username">
-    <input aria-label="System Passwort" type="password" id="password" class="gate-input" placeholder="••••" autocomplete="current-password">
-    <div id="login-error" class="gate-error">Ungültige Anmeldedaten.</div>
-    <button id="gate-trigger" class="gate-btn" style="margin-top: 18px;" aria-label="System starten">SYSTEM STARTEN</button>
-  </form>
-
-  <p class="gate-note" aria-hidden="true">Bitte mit den vom Verein bereitgestellten Zugangsdaten anmelden.</p>
+  <div class="spinner"></div>
+  <div id="system-message" class="message" style="margin-top:20px; color:var(--text-secondary);">SYSTEM WIRD GESTARTET...</div>
 </div>
 
-<!-- App-Hauptcontainer -->
-<div class="app-container" id="main-app" style="display:none" role="application" aria-label="TONI 2.0 Hauptanwendung">
-
-  <!-- LINKE NAVIGATION -->
-  <nav class="left-nav" aria-label="Hauptnavigation">
-    <button class="nav-item" id="btn-hub" data-action="open-hub" title="Management Hub" aria-label="Management Hub">💼</button>
-    <button class="nav-item" id="btn-video" data-action="open-video" title="Videoanalyse" aria-label="Videoanalyse">📹</button>
-    <button class="nav-item" id="btn-ai-setup" data-action="open-ai" title="Einstellungen" aria-label="Einstellungen">⚙️</button>
-    <div style="flex:1"></div>
-    <button class="nav-item danger" id="btn-logout" data-action="system-logout" title="Abmelden & Sperren" aria-label="Abmelden">🚪</button>
-  </nav>
-
-  <!-- MITTLERE ARENA (TAKTIKBOARD) -->
-  <main class="center-arena" role="main" aria-label="Arena">
-    <header class="arena-header" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px;">
-      <div style="display:flex; flex-direction:column;">
-        <strong id="display-club">Lade Verein...</strong>
-        <span id="display-role" class="muted" style="font-size:11px;">[ Rolle wird geladen... ]</span>
+<!-- Login-Screen -->
+<div id="login-screen" class="system-overlay">
+  <div class="login-box">
+    <h1 class="login-title">TONI 2.0</h1>
+    <form id="login-form">
+      <div style="margin-bottom: 16px;">
+        <label for="username" class="text-muted" style="display:block; margin-bottom:6px;">Benutzerprofil</label>
+        <select id="username" class="input-field">
+          <!-- Profile werden dynamisch geladen -->
+        </select>
       </div>
+      <button type="submit" class="btn btn-primary" style="width:100%; padding:12px;">SYSTEM LADEN</button>
+      <div id="login-error" class="text-red" style="margin-top:12px; text-align:center;"></div>
+    </form>
+  </div>
+</div>
 
-      <div class="mode-switch" role="tablist" aria-label="Modus wechseln" style="display:flex; gap:8px;">
-        <button id="mode-match" class="mode-btn nav-item active" role="tab" aria-selected="true" data-mode="match">MATCH</button>
-        <button id="mode-training" class="mode-btn nav-item" role="tab" aria-selected="false" data-mode="training">TRAINING</button>
+<!-- Haupt-App-Container (anfangs versteckt) -->
+<div id="main-app" class="app-container" style="display:none;">
+  
+  <!-- 1. Header-Leiste -->
+  <header class="app-header panel">
+    <div class="user-profile">
+      <div id="user-avatar" class="user-avatar"></div>
+      <div>
+        <div id="user-name" style="font-weight: 600;"></div>
+        <div id="user-role" class="text-muted"></div>
       </div>
-    </header>
+    </div>
+    <div class="main-controls" style="display:flex; align-items:center; gap: 20px;">
+        <button id="live-session-btn" class="live-session-btn" title="Live-Session starten/stoppen">🎙️</button>
+        <button id="admin-panel-btn" class="btn" style="display:none;">👑 Admin Panel</button>
+    </div>
+  </header>
 
-    <div id="board-wrap" style="flex:1; position:relative; min-height:420px; border-radius: 12px; overflow: hidden;">
-      <!-- Canvas für das Taktikboard -->
-      <canvas id="main-canvas" role="img" aria-label="Interaktives Taktikfeld"></canvas>
+  <!-- 2. Linkes Panel -->
+  <aside class="left-panel panel">
+    <!-- Wird dynamisch mit Spielerliste oder Taktik-Optionen gefüllt -->
+  </aside>
 
-      <!-- NEU: Arena-Steuerung (Zeichenwerkzeuge etc.) -->
+  <!-- 3. Haupt-Arena -->
+  <main class="main-arena panel" style="padding: 8px;">
+    <div id="board-wrap">
+      <canvas id="main-canvas"></canvas>
       <div id="arena-controls">
-        <button class="nav-item tool-btn active" id="tool-select" title="Auswählen & Verschieben (V)" data-tool="select" aria-label="Auswahlwerkzeug">🖐️</button>
-        <button class="nav-item tool-btn" id="tool-arrow" title="Pfeil zeichnen (A)" data-tool="arrow" aria-label="Pfeilwerkzeug">↗️</button>
-        <button class="nav-item tool-btn" id="tool-line" title="Linie zeichnen (L)" data-tool="line" aria-label="Linienwerkzeug">/️</button>
-        <button class="nav-item tool-btn" id="tool-zone" title="Zone zeichnen (Z)" data-tool="zone" aria-label="Zonenwerkzeug" style="font-size: 16px;">⬣</button>
-        <button class="nav-item tool-btn danger" id="tool-clear" title="Alle Zeichnungen löschen (Entf)" data-tool="clear" aria-label="Zeichnungen löschen">🗑️</button>
-        <div style="width: 100%; height: 1px; background: var(--neon-dim); margin: 4px 0;"></div>
-        <button class="nav-item tool-btn" id="btn-undo" title="Rückgängig (Cmd/Strg+Z)" aria-label="Rückgängig">↶</button>
-        <button class="nav-item tool-btn" id="btn-redo" title="Wiederholen (Cmd/Strg+Y)" aria-label="Wiederherstellen">↷</button>
-        <button class="nav-item tool-btn" id="btn-snapshot" title="Snapshot exportieren/importieren" aria-label="Snapshot exportieren">📤</button>
+        <!-- Werkzeuge werden hier dynamisch eingefügt -->
       </div>
     </div>
   </main>
 
-  <!-- RECHTE TONI-BOX (KI-ASSISTENT) -->
-  <aside class="right-toni" role="complementary" aria-label="Toni AI Monitor" style="background:var(--glass); border-radius: 22px; padding: 18px; border: 1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column;">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
-      <div>
-        <div style="font-weight:700; color:var(--neon);">TONI‑AI MONITOR</div>
-        <div class="muted" style="font-size:11px;">Multimodaler Co‑Trainer</div>
-      </div>
-      <div style="text-align:right;">
-        <div id="ai-status" style="font-size:11px; color:var(--red);">● OLLAMA: OFFLINE</div>
-        <button id="btn-ai-test" class="nav-item" style="width:40px;height:28px;font-size:14px;margin-top:6px;" aria-label="KI Test">✓</button>
-      </div>
+  <!-- 4. Rechtes Panel -->
+  <aside class="right-panel panel">
+    <div id="toni-chat-header" style="border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:12px;">
+      <h3 style="margin:0; font-size:16px;">TONI <span id="ai-status" class="text-red">●</span></h3>
     </div>
-
-    <div id="chat-box" class="chat-history scroll-content" style="flex:1; margin-bottom:12px; font-size:13px;" aria-live="polite" aria-atomic="false">
-      <div class="muted" style="padding:8px;">Toni ist im Standby. System wird initialisiert...</div>
-    </div>
-
-    <form id="chat-form" style="display:flex; gap:8px; background:rgba(0,0,0,0.35); padding:10px; border-radius:12px; border:1px solid #222;" onsubmit="return false;">
-      <input type="text" id="user-cmd" placeholder="Befehl an Toni..." aria-label="Befehl an Toni" style="flex:1; background:transparent; border:none; color:#fff; outline:none; padding:8px;" disabled>
-      <button id="btn-send" class="nav-item" aria-label="Senden" disabled>➔</button>
+    <div id="chat-box" class="scroll-content" style="flex:1;"></div>
+    <form id="chat-form" onsubmit="return false;" style="display:flex; gap:8px; margin-top:12px;">
+      <input type="text" id="user-cmd" class="input-field" placeholder="Befehl eingeben...">
+      <button type="submit" class="btn">➤</button>
     </form>
   </aside>
-
 </div>
-<!-- === Teil 3/5 — Overlays: Hub, Spieler-Editor, Video und Einstellungen === -->
 
-<!-- MANAGEMENT HUB OVERLAY -->
-<div id="hub-ov" class="overlay" role="dialog" aria-modal="true" aria-labelledby="hub-title" aria-hidden="true">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; gap:12px;">
-    <h2 id="hub-title" style="margin:0; color:var(--neon); letter-spacing:4px; font-size:20px;">TITAN MANAGEMENT HUB</h2>
-    <button id="btn-close-hub" class="nav-item" aria-label="Hub schließen">✕</button>
-  </div>
-
-  <div id="hub-content" class="scroll-content folder-grid" tabindex="0" aria-label="Hub Inhalte">
-    <!-- Hub-Inhalte (Sektoren / Karten) werden hier dynamisch per JavaScript eingefügt -->
-  </div>
-
-  <!-- CSV-Export Button, fest im Hub verankert -->
-  <div style="position:absolute; right:88px; bottom:28px;">
-     <button id="export-players-btn" class="nav-item tool-btn" title="Kader als CSV exportieren" aria-label="Kader als CSV exportieren" style="font-size: 16px; background: rgba(0,0,0,0.5);">CSV</button>
+<!-- Dialog Overlays (anfangs versteckt) -->
+<div id="management-hub" class="dialog-overlay">
+  <div class="dialog-box">
+    <header class="dialog-header">
+      <h2 class="dialog-title">🏢 Management Cockpit</h2>
+      <button class="btn" onclick="UIManager.closeDialog('management-hub')">✕</button>
+    </header>
+    <div id="management-content" class="dialog-content">
+      <!-- Inhalt des Management-Bereichs wird hier geladen -->
+    </div>
   </div>
 </div>
 
-<!-- SPIELER-EDITOR MODAL (standardmäßig unsichtbar) -->
-<div id="p-editor" class="overlay" role="dialog" aria-modal="true" aria-labelledby="editor-title" aria-hidden="true" style="backdrop-filter: blur(50px); background: rgba(0,0,0,0.9);">
-    <h2 id="editor-title" style="color:var(--neon); margin-top:0;">SPIELER-SPEZIFIKATION</h2>
-    
-    <div id="editor-content" class="scroll-content">
-        <div id="editor-fields" style="display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:12px; max-width: 600px;">
-            <!-- Editor-Felder werden hier dynamisch per JavaScript eingefügt -->
+<div id="magazine-studio" class="dialog-overlay">
+  <div class="dialog-box">
+    <header class="dialog-header">
+      <h2 class="dialog-title">📰 Stadionzeitung Studio</h2>
+      <button class="btn" onclick="UIManager.closeDialog('magazine-studio')">✕</button>
+    </header>
+    <div class="dialog-content">
+        <div id="magazine-editor" class="magazine-editor">
+            <!-- Layout für den Editor wird hier dynamisch erstellt -->
         </div>
     </div>
-
-    <div style="margin-top:22px; display:flex; gap:12px; padding-top: 12px; border-top: 1px solid #222;">
-      <button id="btn-save-data" class="gate-btn" style="flex:2;">DATEN SYNC</button>
-      <button id="btn-cancel-edit" class="nav-item" style="flex:1;">ABBRECHEN</button>
-    </div>
-</div>
-
-<!-- VIDEO-ANALYSE OVERLAY -->
-<div id="video-ov" class="overlay" role="dialog" aria-modal="true" aria-labelledby="video-title" aria-hidden="true">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-    <h2 id="video-title" style="color:var(--neon); margin:0;">VIDEO‑ANALYSE</h2>
-    <button id="btn-close-video" class="nav-item" aria-label="Videoanalyse schließen">✕</button>
-  </div>
-  
-  <div style="display:flex; flex-direction: column; flex: 1; gap: 12px;">
-    <div class="video-container" style="position:relative; flex:1; background:#000; border-radius: 12px; overflow:hidden;">
-        <video id="cam-feed" playsinline style="width:100%; height:100%; object-fit:contain;"></video>
-        <div id="rec-badge" style="position:absolute; top:10px; left:10px; background:rgba(255,0,0,0.75); padding:6px 10px; border-radius:6px; font-size:11px; font-weight:700; display:none;">REC ●</div>
-    </div>
-
-    <div class="video-controls" style="display:flex; gap:10px; padding: 10px; background: var(--glass); border-radius: 12px;">
-        <button id="btn-live-cam" class="gate-btn" style="flex:1;">LIVE-KAMERA STARTEN</button>
-        <button id="btn-upload-video" class="nav-item" style="flex:1;">VIDEO LADEN</button>
-    </div>
-    <input type="file" id="video-upload-input" accept="video/*" style="display:none;">
-
-    <p class="muted" style="margin-top:12px; font-size:12px;">Starte die Live-Kamera zur Beobachtung oder lade eine Videodatei zur Analyse hoch.</p>
   </div>
 </div>
 
-<!-- EINSTELLUNGEN OVERLAY -->
-<div id="ai-config-ov" class="overlay" role="dialog" aria-modal="true" aria-labelledby="ai-config-title" aria-hidden="true">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-    <h2 id="ai-config-title" style="color:var(--neon); margin:0;">EINSTELLUNGEN & KONFIGURATION</h2>
-    <button id="btn-close-ai" class="nav-item" aria-label="Einstellungen schließen">✕</button>
-  </div>
-
-  <div class="scroll-content" style="display:grid; gap: 24px; max-width:720px;">
-    <div>
-        <h3 style="color:var(--neon); margin-bottom:12px; border-bottom: 1px solid var(--neon-dim); padding-bottom: 8px;">KI-KONFIGURATION (OLLAMA)</h3>
-        <label for="ollama-url" class="muted">OLLAMA URL</label>
-        <input type="text" id="ollama-url" style="width: 100%; background:#111; border:1px solid #333; color:#fff; padding:12px; border-radius:10px; margin-top: 6px;" aria-label="Ollama URL">
-
-        <label for="ollama-model" class="muted" style="display:block; margin-top:12px;">MODEL NAME</label>
-        <input type="text" id="ollama-model" style="width: 100%; background:#111; border:1px solid #333; color:#fff; padding:12px; border-radius:10px; margin-top: 6px;" aria-label="Ollama Modell">
-    </div>
-    
-    <div>
-        <h3 style="color:var(--neon); margin-bottom:12px; border-bottom: 1px solid var(--neon-dim); padding-bottom: 8px;">API & SERVER</h3>
-        <label for="api-url" class="muted">SERVER API ENDPOINT</label>
-        <input type="text" id="api-url" style="width: 100%; background:#111; border:1px solid #333; color:#fff; padding:12px; border-radius:10px; margin-top: 6px;" aria-label="Server API URL">
-    </div>
-
-    <div style="display:flex; gap:12px; margin-top: 12px;">
-      <button id="btn-save-settings" class="gate-btn" style="flex:1;">EINSTELLUNGEN SPEICHERN</button>
-    </div>
-  </div>
+<div id="player-dashboard" class="dialog-overlay">
+    <!-- Vollbild-Dashboard für den einzelnen Spieler -->
 </div>
+
+<div id="admin-panel-dialog" class="dialog-overlay">
+    <!-- Das geheime Admin-Panel -->
+</div>
+
+</body>
+</html>
 <script>
 /*
 
-TONI 2.0 Pro | Ultimate Titan v9.0 | Core Application Logic
+TONI 2.0 | A-License Edition | Core Logic Part 1
 
-Struktur:
-- MODULE: AppState - Zentraler Speicher für Daten, UI-Status und Einstellungen
-- MODULE: ApiService - Kapselt alle Server-Anfragen (fetch)
-- MODULE: UIManager - Steuert alle DOM-Manipulationen und UI-Events
-- MODULE: ArenaEngine - Verwaltet das Canvas, Spieler, Zeichnungen und Interaktionen
-- MODULE: ToniAI - Steuert den KI-Assistenten und die Ollama-Anbindung
-- App - Haupt-Controller, der die Module initialisiert und verbindet
+Modul-Struktur:
+- MockData: Die "Datenbank" für die Simulation mit tiefen, realistischen Daten.
+- AppState: Der zentrale State-Manager (Single Source of Truth).
+- ApiService: Simulierte Backend-Kommunikation.
+- App: Der Haupt-Controller, der alles initialisiert und steuert.
 
 */
 
 // -----------------------------------------------------------------------------
-// MODULE: AppState - Zentraler Zustand der Anwendung
+// MODULE: MockData - Die simulierte Datenbank der App
 // -----------------------------------------------------------------------------
-const AppState = {
-  data: {
-    team: null, // { id, name, squad: [] }
-    user: null, // { name, role }
-    drawings: [], // Alle Zeichnungen auf dem Canvas
-  },
-  ui: {
-    activeTool: 'select',
-    currentMode: 'match', // 'match' or 'training'
-    isDragging: false,
-    dragTarget: null,
-    activeOverlay: null,
-  },
-  settings: {
-    apiUrl: 'http://localhost:3000/api', // Standard-API-URL
-    ollamaUrl: 'http://localhost:11434',
-    ollamaModel: 'llama3',
-    authToken: null,
-  },
-
-  // Lade Einstellungen aus dem localStorage
-  loadSettings() {
-    const saved = localStorage.getItem('titan9_settings');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Nur die Einstellungen überschreiben, nicht den Token
-      this.settings.apiUrl = parsed.apiUrl || this.settings.apiUrl;
-      this.settings.ollamaUrl = parsed.ollamaUrl || this.settings.ollamaUrl;
-      this.settings.ollamaModel = parsed.ollamaModel || this.settings.ollamaModel;
-    }
-    this.settings.authToken = sessionStorage.getItem('titan9_token');
-  },
-
-  // Speichere Einstellungen im localStorage
-  saveSettings() {
-    const toSave = {
-      apiUrl: this.settings.apiUrl,
-      ollamaUrl: this.settings.ollamaUrl,
-      ollamaModel: this.settings.ollamaModel,
-    };
-    localStorage.setItem('titan9_settings', JSON.stringify(toSave));
-    if (this.settings.authToken) {
-      sessionStorage.setItem('titan9_token', this.settings.authToken);
-    } else {
-      sessionStorage.removeItem('titan9_token');
-    }
-  }
-};
-
-// -----------------------------------------------------------------------------
-// MODULE: ApiService - Kapselt alle Server-Anfragen
-// -----------------------------------------------------------------------------
-const ApiService = {
-  async _fetch(endpoint, options = {}) {
-    const url = `${AppState.settings.apiUrl}${endpoint}`;
-    const headers = {
-      'Content-Type': 'application/json',
-     ...options.headers,
-    };
-    if (AppState.settings.authToken) {
-      headers['Authorization'] = `Bearer ${AppState.settings.authToken}`;
-    }
-
-    const response = await fetch(url, {...options, headers });
-
-    if (!response.ok) {
-      if (response.status === 401) { // Unauthorized
-        App.logout();
-        throw new Error('Sitzung abgelaufen. Bitte neu anmelden.');
-      }
-      const errorData = await response.json().catch(() => ({ message: 'Unbekannter Serverfehler' }));
-      throw new Error(errorData.message || `Fehler ${response.status}`);
-    }
-    return response.json();
-  },
-
-  login(username, password) {
-    return this._fetch('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
-    });
-  },
-
-  getTeamData() {
-    return this._fetch('/team');
-  },
-
-  updatePlayer(playerData) {
-    return this._fetch(`/players/${playerData.id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(playerData),
-    });
+const MockData = {
+  // Benutzerprofile für den Login
+  users: {
+    "ralf-meier": {
+      id: "ralf-meier",
+      name: "Ralf Meier",
+      role: "Cheftrainer",
+      avatar: "RM",
+      permissions: ["view_team", "edit_tactic", "view_analytics", "view_magazine"],
+    },
+    "sabine-keller": {
+      id: "sabine-keller",
+      name: "Sabine Keller",
+      role: "Daten-Analystin",
+      avatar: "SK",
+      permissions: ["view_team", "view_analytics", "edit_magazine"],
+    },
+    "jens-schmidt": {
+      id: "jens-schmidt",
+      name: "Jens Schmidt",
+      role: "Manager",
+      avatar: "JS",
+      permissions: ["view_team", "view_finances", "edit_contracts", "view_magazine"],
+    },
+    "admin": {
+      id: "admin",
+      name: "Admin",
+      role: "System-Administrator",
+      avatar: "👑",
+      permissions: ["*"], // Wildcard für alle Berechtigungen
+    },
   },
   
-  updatePlayerPositions(positions) { // [{id, x, y}]
-    return this._fetch('/team/positions', {
-        method: 'PATCH',
-        body: JSON.stringify({ positions }),
-    });
+  // Detaillierte Vereins- und Spielerdaten
+  team: {
+    id: "fc-hersfeld",
+    name: "FC Hersfeld",
+    league: "Regionalliga",
+    squad: {
+      "p-1": {
+        id: "p-1",
+        personal: { name: "Müller", num: 13, position: "ST" },
+        attributes: { pac: 90, sho: 88, pas: 80, dri: 85, def: 40, phy: 78, overall: 88 },
+        canvas: { x: 800, y: 250 },
+        medical: { status: "fit", readiness: 95, history: [{date: "2025-10-15", injury: "Muskelfaserriss", duration_days: 21}] },
+        contract: { salary_monthly: 15000, valid_until: "2028-06-30", clause: "Keine" }
+      },
+      "p-2": {
+        id: "p-2",
+        personal: { name: "Kimmich", num: 6, position: "ZDM" },
+        attributes: { pac: 75, sho: 78, pas: 91, dri: 84, def: 82, phy: 79, overall: 89 },
+        canvas: { x: 500, y: 350 },
+        medical: { status: "aufbautraining", readiness: 60, history: [{date: "2026-01-20", injury: "Bänderdehnung", duration_days: 14}] },
+        contract: { salary_monthly: 18000, valid_until: "2029-06-30", clause: "Ausstiegsklausel 25 Mio €" }
+      },
+      "p-3": {
+        id: "p-3",
+        personal: { name: "Hummels", num: 5, position: "IV" },
+        attributes: { pac: 65, sho: 60, pas: 78, dri: 72, def: 90, phy: 84, overall: 86 },
+        canvas: { x: 250, y: 350 },
+        medical: { status: "fit", readiness: 92, history: [] },
+        contract: { salary_monthly: 12000, valid_until: "2027-06-30", clause: "Keine" }
+      }
+      //... weitere Spieler hier
+    }
   },
 
-  getDrawings() {
-    return this._fetch('/drawings');
+  // Management- und Finanzdaten
+  finances: {
+    budget_total: 2500000,
+    costs: {
+      salaries_players: 1250000,
+      salaries_staff: 450000,
+      infrastructure: 300000,
+      travel: 150000,
+      nlz: 200000,
+    },
+    sponsors: [
+      { name: "ToniTech Labs", contribution: 500000, status: "aktiv" },
+      { name: "Zweipunktnull Med", contribution: 350000, status: "aktiv" }
+    ]
+  },
+};
+
+// -----------------------------------------------------------------------------
+// MODULE: AppState - Der zentrale Zustand der Anwendung
+// -----------------------------------------------------------------------------
+const AppState = {
+  user: null, // Das eingeloggte Benutzerprofil
+  team: null, // Die geladenen Team-Daten
+  finances: null, // Die geladenen Finanz-Daten
+  ui: {
+    activeTool: 'select',
+    activeOverlay: null,
+    isLiveSession: false,
+  },
+  settings: {
+    // Hier können Benutzereinstellungen gespeichert werden
+  },
+};
+
+// -----------------------------------------------------------------------------
+// MODULE: ApiService - Simuliert die Server-Kommunikation
+// -----------------------------------------------------------------------------
+const ApiService = {
+  // Simuliert eine Netzwerklatenz
+  _simulateLatency(ms = 300) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   },
 
-  saveDrawings(drawings) {
-    return this._fetch('/drawings', {
-        method: 'POST',
-        body: JSON.stringify({ drawings })
-    });
+  async getAvailableProfiles() {
+    await this._simulateLatency(100);
+    // Gibt eine Liste von Profilen für den Login-Screen zurück
+    return Object.values(MockData.users).map(u => ({ id: u.id, name: `${u.name} (${u.role})` }));
+  },
+
+  async login(userId) {
+    await this._simulateLatency();
+    const user = MockData.users[userId];
+    if (user) {
+      return user;
+    } else {
+      throw new Error("Benutzerprofil nicht gefunden.");
+    }
+  },
+
+  async getTeamData() {
+    await this._simulateLatency();
+    return MockData.team;
+  },
+
+  async getFinanceData() {
+    await this._simulateLatency();
+    return MockData.finances;
+  },
+  
+  async searchWeb(query) {
+    await this._simulateLatency(1500); // Websuche dauert länger
+    console.log(`WEB SEARCH (SIMULATED) FOR: "${query}"`);
+    // Gibt einen Dummy-Text zurück, als hätte man eine Webseite gescannt
+    return `
+      Simuliertes Suchergebnis für "${query}":
+      Die Rondo-Übung '6 gegen 2' ist eine klassische und hocheffektive Methode zur Verbesserung des Passspiels auf engem Raum.
+      - **Organisation:** Ein Feld von ca. 15x15 Metern wird mit Hütchen markiert.
+      - **Ablauf:** Sechs Spieler positionieren sich an den Außenseiten, zwei Verteidiger versuchen in der Mitte, den Ball zu erobern. Ziel der Außenspieler ist es, mindestens 10 Pässe am Stück zu schaffen.
+      - **Coaching-Punkte:** Schnelle Ballverarbeitung, Blickkontakt, 'offener Stand' zum Spielfeld.
+    `;
   }
 };
 
 // -----------------------------------------------------------------------------
-// MODULE: UIManager - Steuert alle DOM-Manipulationen und UI-Events
+// App - Haupt-Controller
+// -----------------------------------------------------------------------------
+const App = {
+  init() {
+    console.log("TONI 2.0 | A-License Edition | Initializing...");
+    // Später: UIManager.init(), ArenaEngine.init(), etc.
+    
+    // Versuchen, eine bestehende Session zu laden
+    const sessionUserId = sessionStorage.getItem('toni2_userid');
+    if (sessionUserId) {
+      this.login(sessionUserId);
+    } else {
+      this.showLoginScreen();
+    }
+  },
+
+  async showLoginScreen() {
+    const profiles = await ApiService.getAvailableProfiles();
+    const select = document.getElementById('username');
+    select.innerHTML = profiles.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const selectedUserId = document.getElementById('username').value;
+        this.login(selectedUserId);
+    });
+
+    document.getElementById('system-loader').hidden = true;
+    document.getElementById('login-screen').hidden = false;
+  },
+
+  async login(userId) {
+    const loader = document.getElementById('system-loader');
+    const loginScreen = document.getElementById('login-screen');
+    const loginError = document.getElementById('login-error');
+
+    loader.hidden = false;
+    loginScreen.hidden = true;
+    loginError.textContent = '';
+
+    try {
+      const user = await ApiService.login(userId);
+      AppState.user = user;
+      sessionStorage.setItem('toni2_userid', userId); // Session für Reloads speichern
+      
+      console.log(`User logged in: ${user.name} (${user.role})`);
+      this.bootstrap();
+
+    } catch (error) {
+      loginError.textContent = error.message;
+      loader.hidden = true;
+      loginScreen.hidden = false;
+    }
+  },
+
+  async bootstrap() {
+    console.log("Bootstrapping application...");
+    // Lade alle notwendigen Daten parallel
+    const [teamData, financeData] = await Promise.all([
+      ApiService.getTeamData(),
+      // Lade Finanzen nur, wenn der Benutzer die Berechtigung hat
+      AppState.user.permissions.includes("view_finances") || AppState.user.permissions.includes("*")
+       ? ApiService.getFinanceData()
+        : Promise.resolve(null)
+    ]);
+
+    AppState.team = teamData;
+    AppState.finances = financeData;
+    
+    console.log("Data loaded. Starting UI...");
+
+    // Platzhalter für die nächsten Schritte:
+    // UIManager.init();
+    // UIManager.showApp();
+    // ArenaEngine.init();
+    
+    // Vorerst zeigen wir nur die geladenen Daten in der Konsole an
+    // und verstecken den Loader
+    console.log("AppState after bootstrap:", AppState);
+    document.getElementById('system-loader').hidden = true;
+    document.getElementById('main-app').style.display = 'grid'; // Zeige die App-Struktur
+    
+    // UI mit Benutzerdaten füllen (Beispiel)
+    document.getElementById('user-name').textContent = AppState.user.name;
+    document.getElementById('user-role').textContent = AppState.user.role;
+    document.getElementById('user-avatar').textContent = AppState.user.avatar;
+    if (AppState.user.permissions.includes('*')) {
+      document.getElementById('admin-panel-btn').style.display = 'block';
+    }
+  }
+};
+
+// Startet die App, sobald das DOM vollständig geladen ist.
+document.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>
+<script>
+// Fortsetzung von Teil 2
+
+// -----------------------------------------------------------------------------
+// MODULE: UIManager - Verwaltet alle DOM-Manipulationen und UI-Events
 // -----------------------------------------------------------------------------
 const UIManager = {
-  // DOM-Elemente cachen
-  elements: {},
+  elements: {}, // Cache für DOM-Elemente
+
   init() {
     const ids = [
-      'system-loader', 'system-message', 'gate', 'login-form', 'login-error', 'username', 'password', 'main-app',
-      'display-club', 'display-role', 'arena-controls', 'p-editor', 'editor-fields', 'editor-title',
-      'hub-ov', 'hub-content', 'hub-title', 'video-ov', 'ai-config-ov', 'chat-box', 'user-cmd', 'btn-send',
-      'ollama-url', 'ollama-model', 'api-url', 'ai-status', 'cam-feed', 'rec-badge'
+      'system-loader', 'system-message', 'login-screen', 'login-form', 'login-error', 'username',
+      'main-app', 'app-header', 'left-panel', 'main-arena', 'right-panel',
+      'user-avatar', 'user-name', 'user-role', 'live-session-btn', 'admin-panel-btn',
+      'board-wrap', 'main-canvas', 'arena-controls',
+      'toni-chat-header', 'ai-status', 'chat-box', 'chat-form', 'user-cmd',
+      'management-hub', 'management-content',
+      'magazine-studio', 'magazine-editor',
+      'player-dashboard', 'admin-panel-dialog'
     ];
     ids.forEach(id => this.elements[id] = document.getElementById(id));
+    
     this.bindEvents();
+    console.log("UIManager initialized.");
   },
 
   bindEvents() {
-    // Gate/Login
-    this.elements['login-form'].addEventListener('submit', (e) => {
-        e.preventDefault();
-        App.login();
-    });
-    document.getElementById('btn-logout').addEventListener('click', () => App.logout());
+    // Header-Buttons
+    this.elements['live-session-btn'].addEventListener('click', () => ToniAI.toggleLiveSession());
+    // Wichtige Navigations-Buttons (werden im linken Panel gerendert)
+    // Wir verwenden Event-Delegation auf dem Parent-Panel
+    this.elements['left-panel'].addEventListener('click', (e) => {
+        const target = e.target.closest('button[data-action]');
+        if (!target) return;
 
-    // Navigation & Overlays
-    document.getElementById('btn-hub').addEventListener('click', () => this.openOverlay('hub-ov'));
-    document.getElementById('btn-video').addEventListener('click', () => this.openOverlay('video-ov'));
-    document.getElementById('btn-ai-setup').addEventListener('click', () => this.openOverlay('ai-config-ov'));
-    document.querySelectorAll('[id^="btn-close-"]').forEach(btn => {
-        btn.addEventListener('click', () => this.closeActiveOverlay());
-    });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') this.closeActiveOverlay();
-    });
-
-    // Arena Controls
-    this.elements['arena-controls'].addEventListener('click', (e) => {
-        const toolBtn = e.target.closest('[data-tool]');
-        if (toolBtn) ArenaEngine.setTool(toolBtn.dataset.tool);
-    });
-    document.getElementById('mode-match').addEventListener('click', () => ArenaEngine.setFormation('match'));
-    document.getElementById('mode-training').addEventListener('click', () => ArenaEngine.setFormation('training'));
-    document.getElementById('btn-undo').addEventListener('click', () => ArenaEngine.History.undo());
-    document.getElementById('btn-redo').addEventListener('click', () => ArenaEngine.History.redo());
-    
-    // Editor
-    document.getElementById('btn-save-data').addEventListener('click', () => this.saveEditorData());
-    document.getElementById('btn-cancel-edit').addEventListener('click', () => this.closeOverlay('p-editor'));
-
-    // Einstellungen
-    document.getElementById('btn-save-settings').addEventListener('click', () => {
-        AppState.settings.apiUrl = this.elements['api-url'].value.trim();
-        AppState.settings.ollamaUrl = this.elements['ollama-url'].value.trim();
-        AppState.settings.ollamaModel = this.elements['ollama-model'].value.trim();
-        AppState.saveSettings();
-        ToniAI.speak('Einstellungen wurden lokal gespeichert.');
-        this.closeActiveOverlay();
-    });
-
-    // ToniAI Chat
-    document.getElementById('chat-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        ToniAI.sendCommand();
-    });
-    document.getElementById('btn-ai-test').addEventListener('click', () => ToniAI.testConnection());
-
-    // Globale Tastatur-Shortcuts
-    document.addEventListener('keydown', (e) => {
-        if (document.activeElement.tagName === 'INPUT') return; // Nicht in Eingabefeldern
-        const key = e.key.toLowerCase();
-        if(!e.ctrlKey &&!e.metaKey) {
-          if (key === 'v') ArenaEngine.setTool('select');
-          if (key === 'a') ArenaEngine.setTool('arrow');
-          if (key === 'l') ArenaEngine.setTool('line');
-          if (key === 'z') ArenaEngine.setTool('zone');
+        const action = target.dataset.action;
+        switch(action) {
+            case 'open-management-hub':
+                this.openDialog('management-hub');
+                this.renderManagementHub();
+                break;
+            case 'open-magazine-studio':
+                this.openDialog('magazine-studio');
+                this.renderMagazineStudio();
+                break;
+            case 'open-player-dashboard':
+                const playerId = target.dataset.playerId;
+                this.renderPlayerDashboard(playerId);
+                break;
         }
-        if (e.key === 'Delete' || e.key === 'Backspace') ArenaEngine.setTool('clear');
-        if ((e.ctrlKey || e.metaKey) && key === 'z') { e.preventDefault(); ArenaEngine.History.undo(); }
-        if ((e.ctrlKey || e.metaKey) && key === 'y') { e.preventDefault(); ArenaEngine.History.redo(); }
     });
-  },
 
-  showLoader(message) {
-    this.elements['system-message'].textContent = message;
-    this.elements['system-loader'].hidden = false;
+    // Admin Panel
+    this.elements['admin-panel-btn'].addEventListener('click', () => this.openDialog('admin-panel-dialog'));
+    
+    // AI Chat
+    this.elements['chat-form'].addEventListener('submit', () => ToniAI.processCommand());
   },
-
-  hideLoader() {
-    this.elements['system-loader'].style.opacity = '0';
-    setTimeout(() => { this.elements['system-loader'].hidden = true; this.elements['system-loader'].style.opacity = '1'; }, 300);
-  },
-
-  showLoginScreen() {
-    this.hideLoader();
-    this.elements.gate.style.display = 'flex';
-    this.elements['main-app'].style.display = 'none';
-  },
-
+  
+  // ----- Generelle UI-Updates -----
   showApp() {
-    this.elements.gate.style.display = 'none';
     this.elements['main-app'].style.display = 'grid';
     this.updateHeader();
-    ArenaEngine.setupCanvas();
-    ArenaEngine.render();
-    ToniAI.enableChat();
+    this.renderLeftPanel();
+    // ArenaEngine.setupCanvas(); // wird später hinzugefügt
+    // ArenaEngine.render(); // wird später hinzugefügt
+    ToniAI.init();
   },
 
   updateHeader() {
-    this.elements['display-club'].textContent = AppState.data.team?.name || 'Kein Team';
-    this.elements['display-role'].textContent = `[ AUTHENTICATED: ${AppState.data.user?.role.toUpperCase()} ]`;
+    this.elements['user-name'].textContent = AppState.user.name;
+    this.elements['user-role'].textContent = AppState.user.role;
+    this.elements['user-avatar'].textContent = AppState.user.avatar;
+    if (AppState.user.permissions.includes('*')) {
+      this.elements['admin-panel-btn'].style.display = 'block';
+    }
   },
-  
-  openOverlay(id) {
-    this.closeActiveOverlay(); // Schließe vorherige Overlays
-    const overlay = this.elements[id];
-    if (overlay) {
-      overlay.setAttribute('aria-hidden', 'false');
+
+  // ----- Dialog / Overlay Management -----
+  openDialog(id) {
+    this.closeAllDialogs(); // Sicherstellen, dass nur ein Dialog offen ist
+    const dialog = this.elements[id];
+    if (dialog) {
+      dialog.classList.add('is-active');
       AppState.ui.activeOverlay = id;
-      // Spezifische Logik beim Öffnen
-      if (id === 'hub-ov') this.renderHub();
-      if (id === 'ai-config-ov') this.renderSettings();
+    }
+  },
+  
+  closeDialog(id) {
+    const dialog = this.elements[id];
+    if (dialog) {
+      dialog.classList.remove('is-active');
+      if(AppState.ui.activeOverlay === id) {
+          AppState.ui.activeOverlay = null;
+      }
     }
   },
 
-  closeActiveOverlay() {
-    if (AppState.ui.activeOverlay) {
-      const overlay = this.elements[AppState.ui.activeOverlay];
-      if(overlay) overlay.setAttribute('aria-hidden', 'true');
-      AppState.ui.activeOverlay = null;
+  closeAllDialogs() {
+    document.querySelectorAll('.dialog-overlay').forEach(d => d.classList.remove('is-active'));
+    AppState.ui.activeOverlay = null;
+  },
+
+  // ----- Dynamisches Rendering der Inhalte -----
+  renderLeftPanel() {
+    let content = `<h2 style="font-size: 16px; margin: 0 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Hauptmenü</h2>`;
+
+    // Zeige Navigations-Buttons basierend auf Benutzer-Berechtigungen
+    if (AppState.user.permissions.includes('view_finances') || AppState.user.permissions.includes('*')) {
+        content += `<button class="btn" data-action="open-management-hub" style="width:100%; margin-bottom:10px;">🏢 Management Cockpit</button>`;
     }
-  },
-
-  renderHub() {
-    const content = this.elements['hub-content'];
-    content.innerHTML = ''; // Sicher, da wir DocumentFragments verwenden
-    const sectors = [
-        { key: 'kabine', emoji: '👕', title: 'KABINE', sub: 'FIFA Pro Kader' },
-        { key: 'analyse', emoji: '🧪', title: 'BIO-LABOR', sub: 'BIA Diagnostik' },
-        { key: 'business', emoji: '🤝', title: 'BUSINESS', sub: 'Sponsoring' }
-    ];
-    //... Logik zum Erstellen der Sektor-Kacheln (siehe alter Code)
-    // Hier gekürzt für Übersichtlichkeit
-  },
-  
-  openEditor(playerId) {
-      const player = AppState.data.team.squad.find(p => p.id === playerId);
-      if (!player) return;
-      
-      AppState.ui.activePlayerId = playerId;
-      this.elements['editor-title'].textContent = `SPEZIFIKATION: ${player.name.toUpperCase()}`;
-      const fieldsContainer = this.elements['editor-fields'];
-      fieldsContainer.innerHTML = ''; // Container leeren
-      
-      const createField = (label, key, value, type='text') => {
-        //... Logik zum sicheren Erstellen von Input-Feldern (siehe alter Code)
-        // WICHTIG: Inputs bekommen data-key Attribut, z.B. data-key="name"
-      };
-
-      createField('Name', 'name', player.name);
-      //... weitere Felder erstellen
-      this.openOverlay('p-editor');
+    if (AppState.user.permissions.includes('view_magazine') || AppState.user.permissions.includes('*')) {
+        content += `<button class="btn" data-action="open-magazine-studio" style="width:100%; margin-bottom:10px;">📰 Stadionzeitung Studio</button>`;
+    }
+    
+    content += `<h2 style="font-size: 16px; margin: 24px 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Kader</h2>`;
+    content += '<div class="scroll-content">';
+    // Spielerliste
+    for (const player of Object.values(AppState.team.squad)) {
+      content += `
+        <button data-action="open-player-dashboard" data-player-id="${player.id}" style="width:100%; display:flex; align-items:center; gap:12px; margin-bottom:8px; text-align:left;" class="btn">
+          <span style="background:var(--bg-dark); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-weight:bold;">${player.personal.num}</span>
+          <div>
+            <div>${player.personal.name}</div>
+            <small class="text-muted">${player.personal.position}</small>
+          </div>
+          <span style="margin-left:auto; font-size:16px; font-weight:bold;">${player.attributes.overall}</span>
+        </button>
+      `;
+    }
+    content += '</div>';
+    this.elements['left-panel'].innerHTML = content;
   },
   
-  async saveEditorData() {
-      if (!AppState.ui.activePlayerId) return;
+  renderManagementHub() {
+    // Hier wird das Management-Cockpit dynamisch basierend auf den Daten und Berechtigungen aufgebaut.
+    // DIES IST EINE VEREINFACHTE DARSTELLUNG FÜR DEN TEST
+    let content = `<h2>Finanzübersicht (Simuliert)</h2>`;
+    if (AppState.finances) {
+        const totalCosts = Object.values(AppState.finances.costs).reduce((a, b) => a + b, 0);
+        content += `
+            <p><strong>Gesamtbudget:</strong> ${AppState.finances.budget_total.toLocaleString('de-DE')} €</p>
+            <p class="text-red"><strong>Aktuelle Kosten (p.a.):</strong> ${totalCosts.toLocaleString('de-DE')} €</p>
+            <p class="text-green"><strong>Verbleibend:</strong> ${(AppState.finances.budget_total - totalCosts).toLocaleString('de-DE')} €</p>
+        `;
+    } else {
+        content += `<p class="text-muted">Keine Zugriffsberechtigung auf Finanzdaten.</p>`;
+    }
+    this.elements['management-content'].innerHTML = content;
+  },
+  
+  renderMagazineStudio() {
+    // Hier wird der Editor für die Stadionzeitung initialisiert
+    this.elements['magazine-editor'].innerHTML = `
+        <div>
+            <h3>Seitenübersicht</h3>
+            <div class="magazine-pages-overview">
+                <div class="page-thumbnail active">Seite 1 (Cover)</div>
+                <div class="page-thumbnail">Seite 2</div>
+                <button class="btn" style="width:100%; margin-top:12px;">+ Seite hinzufügen</button>
+            </div>
+        </div>
+        <div class="magazine-page-view">
+            <div class="editable-region" contenteditable="true">
+                <h1>Schlagzeile hier klicken zum Bearbeiten</h1>
+            </div>
+            <div class="editable-region" contenteditable="true" style="margin-top:20px;">
+                Dies ist ein Textblock. Toni kann hier automatisch Inhalte einfügen, die du dann verfeinern kannst.
+            </div>
+        </div>
+    `;
+  },
+  
+  renderPlayerDashboard(playerId) {
+    // Dies würde einen detaillierten Dialog für den Spieler öffnen.
+    // Vorerst als Platzhalter eine einfache Benachrichtigung:
+    ToniAI.speak(`Öffne Spieler-Dashboard für ${AppState.team.squad[playerId].personal.name}... (Feature in Entwicklung)`);
+    console.log("Angeforderte Spielerdaten:", AppState.team.squad[playerId]);
+  }
+};
+
+// -----------------------------------------------------------------------------
+// MODULE: ToniAI - Steuert den KI-Assistenten und die Live-Session
+// -----------------------------------------------------------------------------
+const ToniAI = {
+  isInitialized: false,
+  recognition: null, // Für die Web Speech API
+
+  init() {
+    this.elements = UIManager.elements; // Shortcut
+    this.updateStatus('online', 'var(--accent-green)');
+    this.speak(`System-Status für ${AppState.user.name}: Alle Module geladen. Bereit für Anweisungen.`);
+    this.setupSpeechRecognition();
+  },
+
+  updateStatus(text, color) {
+    this.elements['ai-status'].textContent = `● ${text.toUpperCase()}`;
+    this.elements['ai-status'].style.color = color;
+  },
+
+  speak(message, isUser = false) {
+    const chatBox = this.elements['chat-box'];
+    const msgDiv = document.createElement('div');
+    msgDiv.style.marginBottom = '12px';
+    
+    if (isUser) {
+        msgDiv.style.textAlign = 'right';
+        msgDiv.innerHTML = `<div style="display:inline-block; background:var(--accent-blue); color: #fff; padding:8px 12px; border-radius:12px 12px 0 12px;">${message}</div>`;
+    } else {
+        msgDiv.innerHTML = `<small style="color:var(--text-secondary); font-weight:bold;">TONI:</small><div style="padding: 4px 0;">${message}</div>`;
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.lang = 'de-DE';
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  },
+
+  async processCommand(commandOverride = null) {
+      const input = this.elements['user-cmd'];
+      const command = commandOverride || input.value.trim();
+      if (!command) return;
       
-      const updatedData = { id: AppState.ui.activePlayerId };
-      const fields = this.elements['editor-fields'].querySelectorAll('input');
-      fields.forEach(input => {
-          const key = input.dataset.key;
-          const value = input.type === 'number'? parseFloat(input.value) : input.value;
-          if (key && value) {
-              updatedData[key] = value;
-          }
-      });
-      
-      this.showLoader('Speichere Daten...');
-      try {
-          const updatedPlayer = await ApiService.updatePlayer(updatedData);
-          // Update local state
-          const playerIndex = AppState.data.team.squad.findIndex(p => p.id === updatedPlayer.id);
-          if (playerIndex > -1) {
-              AppState.data.team.squad[playerIndex] = {...AppState.data.team.squad[playerIndex],...updatedPlayer };
-          }
-          ToniAI.speak(`Daten für ${updatedPlayer.name} wurden synchronisiert.`);
-          this.closeActiveOverlay();
-          // Optional: Kabine neu rendern, falls sie offen ist
-      } catch (error) {
-          ToniAI.speak(`Fehler: ${error.message}`);
-      } finally {
-          this.hideLoader();
+      this.speak(command, true);
+      if(!commandOverride) input.value = '';
+
+      // *** HIER IST DIE ZENTRALE BEFEHLS-LOGIK ***
+      if (command.toLowerCase().includes("suche") || command.toLowerCase().includes("finde")) {
+          this.speak("Ich starte eine simulierte Websuche...");
+          const result = await ApiService.searchWeb(command);
+          this.speak(result);
+      } else if (command.toLowerCase().includes("zeichne") || command.toLowerCase().includes("zeige übung")) {
+          this.speak("Okay, ich analysiere die Übung und visualisiere sie auf dem Board. (Funktion in ArenaEngine)");
+          // ArenaEngine.visualizeExercise(command); // Platzhalter
+      } else {
+          this.speak("Das habe ich noch nicht gelernt, aber ich leite es an Ollama weiter. (Funktion in Entwicklung)");
       }
   },
 
-  renderSettings() {
-    this.elements['api-url'].value = AppState.settings.apiUrl;
-    this.elements['ollama-url'].value = AppState.settings.ollamaUrl;
-    this.elements['ollama-model'].value = AppState.settings.ollamaModel;
+  // ----- Live-Session Management -----
+  setupSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.warn("Web Speech API wird von diesem Browser nicht unterstützt.");
+      this.elements['live-session-btn'].disabled = true;
+      return;
+    }
+    this.recognition = new SpeechRecognition();
+    this.recognition.continuous = true;
+    this.recognition.interimResults = false;
+    this.recognition.lang = 'de-DE';
+
+    this.recognition.onresult = (event) => {
+      const transcript = event.results[event.results.length - 1][0].transcript.trim();
+      this.speak(`Befehl erkannt: "${transcript}"`, true);
+      this.processCommand(transcript);
+    };
+    this.recognition.onerror = (event) => {
+        console.error("Speech Recognition Error:", event.error);
+        this.updateStatus('error', 'var(--accent-red)');
+    };
+    this.recognition.onend = () => {
+        // Starte die Erkennung neu, wenn sie aktiv sein soll (z.B. bei kurzen Pausen)
+        if (AppState.ui.isLiveSession) {
+            this.recognition.start();
+        }
+    };
+  },
+
+  toggleLiveSession() {
+    if (!this.recognition) return;
+    AppState.ui.isLiveSession =!AppState.ui.isLiveSession;
+    const btn = this.elements['live-session-btn'];
+
+    if (AppState.ui.isLiveSession) {
+      btn.classList.add('active');
+      this.recognition.start();
+      this.speak("Live-Session gestartet. Ich höre jetzt zu.");
+      this.updateStatus('listening', 'var(--accent-red)');
+    } else {
+      btn.classList.remove('active');
+      this.recognition.stop();
+      this.speak("Live-Session beendet.");
+      this.updateStatus('online', 'var(--accent-green)');
+    }
   }
 };
+
+// App-Controller anpassen, um den UIManager zu initialisieren
+App.bootstrap = async function() { // überschreibt die alte Funktion
+    console.log("Bootstrapping application...");
+    const [teamData, financeData] = await Promise.all([
+        ApiService.getTeamData(),
+        AppState.user.permissions.includes("view_finances") || AppState.user.permissions.includes("*")
+        ? ApiService.getFinanceData()
+          : Promise.resolve(null)
+    ]);
+    AppState.team = teamData;
+    AppState.finances = financeData;
+    
+    console.log("Data loaded. Initializing UI...");
+    document.getElementById('system-loader').hidden = true;
+    
+    // Initialisiere den UIManager und zeige die App an
+    UIManager.init();
+    UIManager.showApp();
+    
+    console.log("AppState after bootstrap:", AppState);
+};
+
 </script>
+</body>
+</html>
 <script>
-// Fortsetzung von Teil 4
+// Fortsetzung von Teil 3
 
 // -----------------------------------------------------------------------------
 // MODULE: ArenaEngine - Verwaltet Canvas, Spieler, Zeichnungen, Interaktionen
@@ -910,128 +850,26 @@ const UIManager = {
 const ArenaEngine = {
   canvas: null,
   ctx: null,
-  rafId: null,
-  dpr: 1,
-
-  // Sub-Module
-  History: {
-    past: [],
-    future: [],
-    
-    saveState() {
-        // Speichert nur Positionen und Zeichnungen
-        const state = JSON.stringify({
-            positions: AppState.data.team.squad.map(p => ({ id: p.id, x: p.x, y: p.y })),
-            drawings: AppState.data.drawings,
-        });
-        
-        // Vermeide Duplikate
-        if(this.past.length > 0 && this.past[this.past.length - 1] === state) return;
-
-        this.past.push(state);
-        this.future = []; // Lösche die "redo"-Historie bei neuer Aktion
-        if (this.past.length > 50) this.past.shift();
-    },
-    
-    loadState(stateString) {
-        const state = JSON.parse(stateString);
-        state.positions.forEach(pos => {
-            const player = AppState.data.team.squad.find(p => p.id === pos.id);
-            if (player) {
-                player.x = pos.x;
-                player.y = pos.y;
-            }
-        });
-        AppState.data.drawings = state.drawings;
-        ArenaEngine.render();
-    },
-
-    undo() {
-        if (this.past.length <= 1) return; // Das erste Element ist der Initialzustand
-        const currentState = this.past.pop();
-        this.future.unshift(currentState);
-        this.loadState(this.past[this.past.length - 1]);
-        ToniAI.speak('Rückgängig.');
-    },
-
-    redo() {
-        if (this.future.length === 0) return;
-        const nextState = this.future.shift();
-        this.past.push(nextState);
-        this.loadState(nextState);
-        ToniAI.speak('Wiederholt.');
-    }
-  },
-
-  Drawing: {
-    current: null, // Das aktuell gezeichnete Objekt
-    
-    start(pos) {
-        if(AppState.ui.activeTool === 'select') return;
-        this.current = {
-            id: `draw_${Date.now()}`,
-            type: AppState.ui.activeTool,
-            color: AppState.ui.activeTool === 'zone' ? 'rgba(51, 153, 255, 0.2)' : 'rgba(255, 51, 51, 0.9)',
-            startX: pos.x,
-            startY: pos.y,
-            endX: pos.x,
-            endY: pos.y
-        };
-    },
-
-    update(pos) {
-        if (!this.current) return;
-        this.current.endX = pos.x;
-        this.current.endY = pos.y;
-    },
-
-    finish() {
-        if (!this.current) return;
-        // Kleine Zeichnungen ignorieren
-        if (Math.hypot(this.current.endX - this.current.startX, this.current.endY - this.current.startY) > 10) {
-            AppState.data.drawings.push(this.current);
-            ArenaEngine.History.saveState();
-        }
-        this.current = null;
-    },
-
-    drawHelper(drawing) {
-        const { type, color, startX, startY, endX, endY } = drawing;
-        this.ctx.strokeStyle = color;
-        this.ctx.fillStyle = color;
-        this.ctx.lineWidth = 4;
-
-        if (type === 'zone') {
-            this.ctx.globalAlpha = 0.5;
-            this.ctx.fillRect(startX, startY, endX - startX, endY - startY);
-            this.ctx.strokeRect(startX, startY, endX - startX, endY - startY);
-            this.ctx.globalAlpha = 1.0;
-        } else {
-             this.ctx.beginPath();
-             this.ctx.moveTo(startX, startY);
-             this.ctx.lineTo(endX, endY);
-             this.ctx.stroke();
-
-            if (type === 'arrow') {
-                const headlen = 15;
-                const angle = Math.atan2(endY - startY, endX - startX);
-                this.ctx.beginPath();
-                this.ctx.moveTo(endX, endY);
-                this.ctx.lineTo(endX - headlen * Math.cos(angle - Math.PI / 6), endY - headlen * Math.sin(angle - Math.PI / 6));
-                this.ctx.moveTo(endX, endY);
-                this.ctx.lineTo(endX - headlen * Math.cos(angle + Math.PI / 6), endY - headlen * Math.sin(angle + Math.PI / 6));
-                this.ctx.stroke();
-            }
-        }
-    }
-  },
+  dpr: 1, // Device Pixel Ratio für scharfe Darstellung
   
+  isDragging: false,
+  dragTarget: null,
+  
+  // ----- Initialisierung -----
   init() {
-    this.canvas = document.getElementById('main-canvas');
+    this.canvas = UIManager.elements['main-canvas'];
     this.ctx = this.canvas.getContext('2d');
     this.dpr = window.devicePixelRatio || 1;
+    
+    this.setupCanvas();
     this.bindCanvasEvents();
+    this.renderControls();
+
+    this.Tactic.setFormation('trainer_343'); // Standard-Formation laden
+    this.History.saveState(); // Initialen Zustand speichern
+
     window.addEventListener('resize', () => { this.setupCanvas(); this.render(); });
+    console.log("ArenaEngine initialized.");
   },
 
   setupCanvas() {
@@ -1043,234 +881,536 @@ const ArenaEngine = {
     this.ctx.scale(this.dpr, this.dpr);
   },
 
+  renderControls() {
+    const tools = [
+        { id: 'select', icon: '🖐️', title: 'Auswählen & Verschieben' },
+        { id: 'arrow', icon: '→', title: 'Pfeil zeichnen' },
+        { id: 'line', icon: '—', title: 'Linie zeichnen' },
+        { id: 'zone', icon: '■', title: 'Zone markieren' },
+        { id: 'clear', icon: '🗑️', title: 'Alle Zeichnungen löschen' },
+    ];
+    let html = tools.map(t => `<button class="btn tool-btn" data-tool="${t.id}" title="${t.title}">${t.icon}</button>`).join('');
+    html += `<button class="btn tool-btn" id="btn-undo" title="Rückgängig">↩️</button>`;
+    html += `<button class="btn tool-btn" id="btn-redo" title="Wiederholen">↪️</button>`;
+    UIManager.elements['arena-controls'].innerHTML = html;
+    
+    // Event Listeners für die neuen Buttons
+    UIManager.elements['arena-controls'].addEventListener('click', (e) => {
+        const toolBtn = e.target.closest('[data-tool]');
+        if (toolBtn) this.setTool(toolBtn.dataset.tool);
+        if (e.target.closest('#btn-undo')) this.History.undo();
+        if (e.target.closest('#btn-redo')) this.History.redo();
+    });
+    this.setTool('select'); // Standardwerkzeug
+  },
+
+  // ----- Event Handling -----
   bindCanvasEvents() {
     this.canvas.addEventListener('pointerdown', (e) => {
         const pos = this.getCanvasPos(e);
-        const player = AppState.data.team.squad.find(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 25);
+        const player = this.getPlayerAtPos(pos);
         
         if (AppState.ui.activeTool === 'select' && player) {
-            AppState.ui.isDragging = true;
-            AppState.ui.dragTarget = player;
+            this.isDragging = true;
+            this.dragTarget = player;
+            this.canvas.style.cursor = 'grabbing';
         } else {
             this.Drawing.start(pos);
         }
-        this.canvas.setPointerCapture(e.pointerId);
     });
 
     this.canvas.addEventListener('pointermove', (e) => {
-        if (!e.buttons) return; // Nur bei gedrückter Taste
         const pos = this.getCanvasPos(e);
-        if (AppState.ui.isDragging && AppState.ui.dragTarget) {
-            AppState.ui.dragTarget.x = pos.x;
-            AppState.ui.dragTarget.y = pos.y;
+        if (this.isDragging && this.dragTarget) {
+            this.dragTarget.canvas.x = pos.x;
+            this.dragTarget.canvas.y = pos.y;
+            this.render();
         } else {
             this.Drawing.update(pos);
+            if (this.Drawing.current) this.render();
         }
-        this.render();
     });
 
-    this.canvas.addEventListener('pointerup', async (e) => {
-        this.canvas.releasePointerCapture(e.pointerId);
-        if (AppState.ui.isDragging) {
-            AppState.ui.isDragging = false;
+    this.canvas.addEventListener('pointerup', () => {
+        if (this.isDragging) {
+            this.isDragging = false;
+            this.dragTarget = null;
+            this.canvas.style.cursor = 'grab';
             this.History.saveState();
-            // Debounced Speichern der Positionen
-            clearTimeout(this.saveTimeout);
-            this.saveTimeout = setTimeout(() => {
-                const positions = AppState.data.team.squad.map(p => ({id: p.id, x: p.x, y: p.y}));
-                ApiService.updatePlayerPositions(positions).catch(err => ToniAI.speak(`Positions-Sync fehlgeschlagen: ${err.message}`));
-            }, 1000);
         } else {
             this.Drawing.finish();
-            await ApiService.saveDrawings(AppState.data.drawings);
         }
     });
   },
 
   getCanvasPos(e) {
     const rect = this.canvas.getBoundingClientRect();
-    return {
-      x: (e.clientX - rect.left),
-      y: (e.clientY - rect.top)
-    };
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   },
 
-  setTool(tool) {
-    if (tool === 'clear') {
-        AppState.data.drawings = [];
-        this.History.saveState();
-        this.render();
-        ToniAI.speak('Alle Zeichnungen entfernt.');
-        ApiService.saveDrawings([]);
-        return;
-    }
-    AppState.ui.activeTool = tool;
-    document.querySelectorAll('#arena-controls .tool-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tool === tool);
-    });
-    this.canvas.style.cursor = tool === 'select' ? 'grab' : 'crosshair';
+  getPlayerAtPos(pos) {
+    // Finde den obersten Spieler an der Klick-Position
+    return Object.values(AppState.team.squad)
+     .reverse() // Um von oben nach unten im DOM zu prüfen
+     .find(p => Math.hypot(p.canvas.x - pos.x, p.canvas.y - pos.y) < 25);
   },
 
-  setFormation(mode) {
-    // ... Implementierung wie im alten Code, aber mit besserer State-Anpassung
-    ToniAI.speak(`Modus ${mode} aktiviert.`);
-    AppState.ui.currentMode = mode;
-    this.History.saveState();
-    this.render();
-  },
-
+  // ----- Haupt-Render-Loop -----
   render() {
     requestAnimationFrame(() => {
-        this.drawPitch();
-        AppState.data.drawings.forEach(d => this.Drawing.drawHelper(d));
-        if (this.Drawing.current) this.Drawing.drawHelper(this.Drawing.current);
-        
-        if(AppState.data.team) {
-          AppState.data.team.squad.forEach(p => this.drawPlayer(p));
-        }
+      const w = this.canvas.clientWidth;
+      const h = this.canvas.clientHeight;
+      this.ctx.clearRect(0, 0, w, h);
+      
+      this.drawPitch(w, h);
+      this.Drawing.renderAll();
+      Object.values(AppState.team.squad).forEach(p => this.drawPlayer(p));
     });
   },
 
-  drawPitch() {
-    const w = this.canvas.clientWidth;
-    const h = this.canvas.clientHeight;
-    this.ctx.clearRect(0, 0, w, h);
+  drawPitch(w, h) {
+    //... (komplette Spielfeld-Zeichnungslogik, hier gekürzt)
     this.ctx.fillStyle = '#011a01';
     this.ctx.fillRect(0, 0, w, h);
-    this.ctx.strokeStyle = 'rgba(57, 255, 20, 0.36)';
+    this.ctx.strokeStyle = 'rgba(57, 255, 20, 0.2)';
     this.ctx.lineWidth = 2;
-    // ... restliche Pitch-Zeichnungslogik (siehe alter Code)
+    this.ctx.strokeRect(25, 25, w - 50, h - 50); // Außenlinie
+    this.ctx.beginPath(); this.ctx.moveTo(w / 2, 25); this.ctx.lineTo(w / 2, h - 25); this.ctx.stroke(); // Mittellinie
+    this.ctx.beginPath(); this.ctx.arc(w / 2, h / 2, 70, 0, 2 * Math.PI); this.ctx.stroke(); // Mittelkreis
   },
 
   drawPlayer(p) {
-    // ... Spieler-Zeichnungslogik (siehe alter Code)
+    const { x, y } = p.canvas;
+    const isGk = p.personal.position === 'GK';
+
+    // Puck-Schatten
+    this.ctx.beginPath();
+    this.ctx.arc(x, y + 2, 20, 0, 2 * Math.PI);
+    this.ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    this.ctx.fill();
+
+    // Puck
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, 20, 0, 2 * Math.PI);
+    this.ctx.fillStyle = isGk? '#ffae00' : '#006eff';
+    this.ctx.fill();
+    this.ctx.strokeStyle = '#fff';
+    this.ctx.lineWidth = 2;
+    this.ctx.stroke();
+
+    // Nummer
+    this.ctx.fillStyle = '#fff';
+    this.ctx.font = 'bold 18px var(--font-sans)';
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.fillText(p.personal.num, x, y);
+
+    // Name
+    this.ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    this.ctx.roundRect(x - 35, y + 25, 70, 20, 5);
+    this.ctx.fill();
+    this.ctx.fillStyle = '#fff';
+    this.ctx.font = '600 11px var(--font-sans)';
+    this.ctx.fillText(p.personal.name, x, y + 35);
+  },
+
+  setTool(toolId) {
+    if (toolId === 'clear') {
+        AppState.drawings = [];
+        this.History.saveState();
+        this.render();
+        ToniAI.speak('Alle Zeichnungen entfernt.');
+        return;
+    }
+    AppState.ui.activeTool = toolId;
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tool === toolId);
+    });
+    this.canvas.style.cursor = toolId === 'select'? 'grab' : 'crosshair';
+  },
+
+  //... weitere Sub-Module folgen
+};
+
+// -----------------------------------------------------------------------------
+// SUB-MODULE: ArenaEngine.Drawing - Management der Zeichen-Werkzeuge
+// -----------------------------------------------------------------------------
+ArenaEngine.Drawing = {
+  current: null, // Das Objekt, das gerade gezeichnet wird
+
+  start(pos) {
+    if (AppState.ui.activeTool === 'select') return;
+    this.current = {
+      id: `draw_${Date.now()}`,
+      type: AppState.ui.activeTool,
+      color: AppState.ui.activeTool === 'zone'? 'rgba(51, 153, 255, 0.2)' : 'rgba(255, 51, 51, 0.9)',
+      startX: pos.x, startY: pos.y, endX: pos.x, endY: pos.y
+    };
+  },
+  
+  update(pos) {
+    if (!this.current) return;
+    this.current.endX = pos.x; this.current.endY = pos.y;
+  },
+
+  finish() {
+    if (!this.current) return;
+    if (Math.hypot(this.current.endX - this.current.startX, this.current.endY - this.current.startY) > 10) {
+      if (!AppState.drawings) AppState.drawings = [];
+      AppState.drawings.push(this.current);
+      ArenaEngine.History.saveState();
+    }
+    this.current = null;
+    ArenaEngine.render();
+  },
+
+  renderAll() {
+    const drawings = AppState.drawings || [];
+    drawings.forEach(d => this.drawHelper(d));
+    if (this.current) this.drawHelper(this.current); // Zeichne das aktuelle Objekt live
+  },
+
+  drawHelper(drawing) {
+    const { ctx } = ArenaEngine;
+    const { type, color, startX, startY, endX, endY } = drawing;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 4;
+
+    if (type === 'zone') {
+        ctx.fillRect(startX, startY, endX - startX, endY - startY);
+    } else { // 'arrow' oder 'line'
+         ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
+        if (type === 'arrow') {
+            const angle = Math.atan2(endY - startY, endX - startX);
+            ctx.beginPath(); ctx.moveTo(endX, endY);
+            ctx.lineTo(endX - 15 * Math.cos(angle - Math.PI / 6), endY - 15 * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(endX - 15 * Math.cos(angle + Math.PI / 6), endY - 15 * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+        }
+    }
   }
 };
 
 // -----------------------------------------------------------------------------
-// MODULE: ToniAI - Steuert den KI-Assistenten
+// SUB-MODULE: ArenaEngine.History - Undo/Redo Funktionalität
 // -----------------------------------------------------------------------------
-const ToniAI = {
-    speak(message, isUser = false) {
-        const chatBox = UIManager.elements['chat-box'];
-        const msgDiv = document.createElement('div');
-        msgDiv.style.marginBottom = '10px';
-        if (isUser) {
-            msgDiv.style.textAlign = 'right';
-            msgDiv.innerHTML = `<div style="display:inline-block;background:rgba(51,153,255,0.1);padding:8px 12px;border-radius:12px 12px 0 12px;">${message}</div>`;
+ArenaEngine.History = {
+    past: [], future: [],
+    
+    saveState() {
+        const state = JSON.stringify({
+            positions: Object.values(AppState.team.squad).map(p => ({ id: p.id, x: p.canvas.x, y: p.canvas.y })),
+            drawings: AppState.drawings || [],
+        });
+        if (this.past.length > 0 && this.past[this.past.length - 1] === state) return;
+        this.past.push(state);
+        this.future = [];
+        if (this.past.length > 50) this.past.shift();
+    },
+    
+    loadState(stateString) {
+        const state = JSON.parse(stateString);
+        state.positions.forEach(pos => {
+            if (AppState.team.squad[pos.id]) {
+                AppState.team.squad[pos.id].canvas.x = pos.x;
+                AppState.team.squad[pos.id].canvas.y = pos.y;
+            }
+        });
+        AppState.drawings = state.drawings;
+        ArenaEngine.render();
+    },
+
+    undo() {
+        if (this.past.length <= 1) return;
+        this.future.unshift(this.past.pop());
+        this.loadState(this.past[this.past.length - 1]);
+    },
+    redo() {
+        if (this.future.length === 0) return;
+        const nextState = this.future.shift();
+        this.past.push(nextState);
+        this.loadState(nextState);
+    }
+};
+
+// -----------------------------------------------------------------------------
+// SUB-MODULE: ArenaEngine.Tactic - Formations- und KI-Visualisierung
+// -----------------------------------------------------------------------------
+ArenaEngine.Tactic = {
+    formations: {
+        'trainer_343': { /* Positionen für 3-4-3 */ },
+        'opponent_442': { /* Positionen für 4-4-2 */ },
+    },
+    setFormation(formationId) {
+        // Logik zum Setzen der Spielerpositionen basierend auf der Formation
+        //... (vereinfacht für dieses Snippet)
+        ToniAI.speak(`Formation ${formationId} wird geladen...`);
+        this.visualizeExercise("Setze Spieler auf Standardpositionen."); // Beispiel
+    },
+    visualizeExercise(commandText) {
+        // *** DIES IST DAS SIMULIERTE GEHIRN FÜR DIE VISUALISIERUNG ***
+        console.log("Visualizing command:", commandText);
+        // Beispiel: Wenn der Befehl "Rondo" enthält
+        if (commandText.toLowerCase().includes("rondo")) {
+            ToniAI.speak("Okay, ich baue die Rondo-Übung '6 gegen 2' auf.");
+            
+            // 1. Lösche alte Zeichnungen
+            AppState.drawings = [];
+            
+            // 2. Erstelle Hütchen-Zone als 'zone' Zeichnung
+            AppState.drawings.push({
+                id: 'zone_rondo', type: 'zone', color: 'rgba(255, 174, 0, 0.3)',
+                startX: 400, startY: 200, endX: 800, endY: 500
+            });
+
+            // 3. Positioniere 8 Spieler (6 außen, 2 innen)
+            const playerIds = Object.keys(AppState.team.squad);
+            const positions = [
+                {x: 400, y: 350}, {x: 800, y: 350}, {x: 600, y: 200}, {x: 600, y: 500},
+                {x: 450, y: 220}, {x: 750, y: 480}, // Außen
+                {x: 550, y: 350}, {x: 650, y: 350} // Innen
+            ];
+            for (let i = 0; i < 8; i++) {
+                if(AppState.team.squad[playerIds[i]]) {
+                    AppState.team.squad[playerIds[i]].canvas.x = positions[i].x;
+                    AppState.team.squad[playerIds[i]].canvas.y = positions[i].y;
+                }
+            }
+            
+            this.History.saveState();
+            ArenaEngine.render();
         } else {
-            msgDiv.innerHTML = `<small style="color:var(--neon)">TONI:</small><div>${message}</div>`;
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(message);
-                utterance.lang = 'de-DE';
-                window.speechSynthesis.speak(utterance);
-            }
+             ToniAI.speak("Ich konnte diesen Befehl nicht visualisieren.");
         }
-        chatBox.appendChild(msgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    },
-    
-    sendCommand() {
-        const input = UIManager.elements['user-cmd'];
-        const command = input.value.trim();
-        if (!command) return;
-        this.speak(command, true);
-        input.value = '';
-        // Hier käme die Ollama-API-Anfrage
-        this.speak(`Analysiere: "${command}"... (Ollama-Integration erforderlich)`);
-    },
-    
-    async testConnection() {
-        this.speak("Prüfe Verbindung zu Ollama-Server...");
-        try {
-            const response = await fetch(AppState.settings.ollamaUrl);
-            if(response.ok) {
-                 UIManager.elements['ai-status'].textContent = '● OLLAMA: ONLINE';
-                 UIManager.elements['ai-status'].style.color = 'var(--neon)';
-                 this.speak("Verbindung zum Ollama-Server erfolgreich.");
-            } else {
-                throw new Error(`Server antwortete mit Status ${response.status}`);
-            }
-        } catch(error) {
-            UIManager.elements['ai-status'].textContent = '● OLLAMA: OFFLINE';
-            UIManager.elements['ai-status'].style.color = 'var(--red)';
-            this.speak(`Verbindung fehlgeschlagen: ${error.message}`);
-        }
-    },
-    
-    enableChat() {
-        UIManager.elements['user-cmd'].disabled = false;
-        UIManager.elements['btn-send'].disabled = false;
     }
 };
 
-// -----------------------------------------------------------------------------
-// App - Haupt-Controller
-// -----------------------------------------------------------------------------
-const App = {
-  init() {
+// App-Controller anpassen, um die ArenaEngine zu initialisieren
+App.bootstrap = async function() { // überschreibt die vorherige Funktion
+    console.log("Bootstrapping application...");
+    const [teamData, financeData] = await Promise.all([
+        ApiService.getTeamData(),
+        AppState.user.permissions.includes("view_finances") || AppState.user.permissions.includes("*")
+       ? ApiService.getFinanceData()
+          : Promise.resolve(null)
+    ]);
+    AppState.team = teamData;
+    AppState.finances = financeData;
+    
+    console.log("Data loaded. Initializing UI and Arena...");
+    document.getElementById('system-loader').hidden = true;
+    
     UIManager.init();
-    ArenaEngine.init();
-    AppState.loadSettings();
-
-    if (AppState.settings.authToken) {
-      this.bootstrap();
-    } else {
-      UIManager.showLoginScreen();
-    }
-  },
-
-  async login() {
-    const username = UIManager.elements.username.value;
-    const password = UIManager.elements.password.value;
-    UIManager.showLoader('AUTHENTIFIZIERE...');
+    UIManager.showApp();
     
-    try {
-        const { token, user } = await ApiService.login(username, password);
-        AppState.settings.authToken = token;
-        AppState.data.user = user;
-        AppState.saveSettings();
-        this.bootstrap();
-    } catch (error) {
-        UIManager.elements['login-error'].style.display = 'block';
-        UIManager.elements['login-error'].textContent = error.message;
-        UIManager.showLoginScreen();
+    // Initialisiere die ArenaEngine NACHDEM die UI sichtbar ist
+    ArenaEngine.init();
+    
+    console.log("AppState after bootstrap:", AppState);
+};
+</script>
+</body>
+</html>
+<script>
+// Fortsetzung von Teil 4
+
+// =============================================================================
+// FINALE IMPLEMENTIERUNG: Ersetzt die Platzhalter aus den vorherigen Teilen.
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// ERWEITERUNG: UIManager - Vollständige Render-Funktionen für Dialoge
+// -----------------------------------------------------------------------------
+UIManager.renderLeftPanel = function() { // Überschreibt die alte Funktion
+    let content = `<h2 style="font-size: 16px; margin: 0 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Hauptmenü</h2>`;
+
+    if (AppState.user.permissions.includes('view_finances') || AppState.user.permissions.includes('*')) {
+        content += `<button class="btn" data-action="open-management-hub" style="width:100%; margin-bottom:10px;">🏢 Management Cockpit</button>`;
     }
-  },
-
-  async bootstrap() {
-    UIManager.showLoader('LADE DATEN...');
-    try {
-        const [teamData, drawingsData] = await Promise.all([
-            ApiService.getTeamData(),
-            ApiService.getDrawings()
-        ]);
-        AppState.data.team = teamData;
-        AppState.data.drawings = drawingsData.drawings || [];
-        
-        UIManager.hideLoader();
-        UIManager.showApp();
-        ToniAI.speak(`System online. Willkommen zurück, ${AppState.data.user.name}.`);
-        ArenaEngine.History.saveState(); // Initialen Zustand speichern
-        ToniAI.testConnection();
-
-    } catch (error) {
-        ToniAI.speak(`Kritischer Fehler beim Laden der Daten: ${error.message}`);
-        this.logout();
+    if (AppState.user.permissions.includes('view_magazine') || AppState.user.permissions.includes('*')) {
+        content += `<button class="btn" data-action="open-magazine-studio" style="width:100%; margin-bottom:10px;">📰 Stadionzeitung Studio</button>`;
     }
-  },
+    
+    // Logout Button
+    content += `<button class="btn" data-action="logout" style="width:100%; margin-top:20px; border-color:var(--accent-red); color:var(--accent-red);">LOGOUT</button>`;
 
-  logout() {
-    AppState.settings.authToken = null;
-    AppState.data.user = null;
-    sessionStorage.removeItem('titan9_token');
-    UIManager.showLoginScreen();
-  }
+    content += `<h2 style="font-size: 16px; margin: 24px 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Kader</h2>`;
+    content += '<div class="scroll-content" style="max-height: calc(100vh - 350px);">'; // Begrenze Höhe für Scroll
+    for (const player of Object.values(AppState.team.squad)) {
+        content += `
+        <button data-action="open-player-dashboard" data-player-id="${player.id}" style="width:100%; display:flex; align-items:center; gap:12px; margin-bottom:8px; text-align:left;" class="btn">
+          <span style="background:var(--bg-dark); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-weight:bold;">${player.personal.num}</span>
+          <div>
+            <div>${player.personal.name}</div>
+            <small class="text-muted">${player.personal.position}</small>
+          </div>
+          <span style="margin-left:auto; font-size:16px; font-weight:bold;">${player.attributes.overall}</span>
+        </button>
+      `;
+    }
+    content += '</div>';
+    this.elements['left-panel'].innerHTML = content;
 };
 
-// App starten, sobald das DOM geladen ist
-document.addEventListener('DOMContentLoaded', () => App.init());
+UIManager.renderManagementHub = function() { // Überschreibt die alte Funktion
+    const { finances } = AppState;
+    if (!finances) {
+        this.elements['management-content'].innerHTML = `<p class="text-muted">Keine Zugriffsberechtigung auf Finanzdaten.</p>`;
+        return;
+    }
+    const totalCosts = Object.values(finances.costs).reduce((a, b) => a + b, 0);
+    const remaining = finances.budget_total - totalCosts;
 
+    this.elements['management-content'].innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div>
+                <h3>Finanzstatus (p.a.)</h3>
+                <div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);">
+                    <p>Gesamtbudget: <strong class="text-green">${finances.budget_total.toLocaleString('de-DE')} €</strong></p>
+                    <p>Gesamtkosten: <strong class="text-red">${totalCosts.toLocaleString('de-DE')} €</strong></p>
+                    <hr style="border-color: var(--border-color);">
+                    <p>Liquidität: <strong class="${remaining > 0? 'text-green' : 'text-red'}">${remaining.toLocaleString('de-DE')} €</strong></p>
+                </div>
+                <h3 style="margin-top:24px;">Sponsoren</h3>
+                <div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);">
+                    ${finances.sponsors.map(s => `<p>${s.name}: <strong>${s.contribution.toLocaleString('de-DE')} €</strong> <span class="text-green">(${s.status})</span></p>`).join('')}
+                </div>
+            </div>
+            <div>
+                <h3>Kostenstellen</h3>
+                <div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);">
+                    <p>Gehälter (Profis): <strong>${finances.costs.salaries_players.toLocaleString('de-DE')} €</strong></p>
+                    <p>Gehälter (Stab): <strong>${finances.costs.salaries_staff.toLocaleString('de-DE')} €</strong></p>
+                    <p>Infrastruktur: <strong>${finances.costs.infrastructure.toLocaleString('de-DE')} €</strong></p>
+                    <p>Nachwuchs (NLZ): <strong>${finances.costs.nlz.toLocaleString('de-DE')} €</strong></p>
+                    <p>Reisekosten: <strong>${finances.costs.travel.toLocaleString('de-DE')} €</strong></p>
+                </div>
+            </div>
+        </div>
+    `;
+};
+
+UIManager.renderPlayerDashboard = function(playerId) { // Überschreibt die alte Funktion
+    const player = AppState.team.squad[playerId];
+    if (!player) return;
+
+    const dialog = this.elements['player-dashboard'];
+    dialog.innerHTML = `
+     <div class="dialog-box" style="max-width: 800px;">
+        <header class="dialog-header">
+            <h2 class="dialog-title">Spieler-Akte: ${player.personal.name} (#${player.personal.num})</h2>
+            <button class="btn" onclick="UIManager.closeDialog('player-dashboard')">✕</button>
+        </header>
+        <div class="dialog-content">
+            <div style="display:grid; grid-template-columns: 250px 1fr; gap: 24px;">
+                <div>
+                    <!-- Hier käme die FIFA-Karte hin -->
+                    <div style="background:var(--bg-dark); padding:16px; border-radius:var(--radius-md);">
+                        <p><strong>Gesamt: ${player.attributes.overall}</strong></p>
+                        <p>PAC: ${player.attributes.pac} | SHO: ${player.attributes.sho}</p>
+                        <p>PAS: ${player.attributes.pas} | DRI: ${player.attributes.dri}</p>
+                        <p>DEF: ${player.attributes.def} | PHY: ${player.attributes.phy}</p>
+                    </div>
+                </div>
+                <div>
+                    <h3>Medizinische Akte</h3>
+                    <p>Status: <span class="${player.medical.status === 'fit'? 'text-green' : 'text-red'}">${player.medical.status.toUpperCase()}</span> | Readiness: <strong>${player.medical.readiness}%</strong></p>
+                    <h4>Verletzungshistorie:</h4>
+                    ${player.medical.history.length > 0? player.medical.history.map(h => `<p>${h.date}: ${h.injury} (${h.duration_days} Tage)</p>`).join('') : '<p class="text-muted">Keine Einträge.</p>'}
+
+                    <h3 style="margin-top:24px;">Vertragsdetails</h3>
+                    <p>Gehalt: <strong>${player.contract.salary_monthly.toLocaleString('de-DE')} €</strong> / Monat</p>
+                    <p>Gültig bis: <strong>${player.contract.valid_until}</strong></p>
+                    <p>Klausel: <span class="text-muted">${player.contract.clause}</span></p>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    this.openDialog('player-dashboard');
+};
+
+UIManager.bindEvents = function() { // Überschreibt die alte Funktion
+    this.elements['live-session-btn'].addEventListener('click', () => ToniAI.toggleLiveSession());
+    this.elements['left-panel'].addEventListener('click', (e) => {
+        const target = e.target.closest('button[data-action]');
+        if (!target) return;
+        const action = target.dataset.action;
+        switch(action) {
+            case 'open-management-hub': this.openDialog('management-hub'); this.renderManagementHub(); break;
+            case 'open-magazine-studio': this.openDialog('magazine-studio'); this.renderMagazineStudio(); break;
+            case 'open-player-dashboard': this.renderPlayerDashboard(target.dataset.playerId); break;
+            case 'logout': App.logout(); break;
+        }
+    });
+    this.elements['admin-panel-btn'].addEventListener('click', () => this.openDialog('admin-panel-dialog'));
+    this.elements['chat-form'].addEventListener('submit', () => ToniAI.processCommand());
+};
+
+// -----------------------------------------------------------------------------
+// ERWEITERUNG: ToniAI - Vollständiger Befehls-Dispatcher
+// -----------------------------------------------------------------------------
+ToniAI.processCommand = async function(commandOverride = null) { // Überschreibt die alte Funktion
+    const input = this.elements['user-cmd'];
+    const command = (commandOverride || input.value.trim()).toLowerCase();
+    if (!command) return;
+    
+    this.speak(commandOverride || input.value.trim(), true);
+    if (!commandOverride) input.value = '';
+
+    // *** ZENTRALER BEFEHLS-DISPATCHER ***
+    if (command.includes("suche") || command.includes("finde")) {
+        this.speak("Ich starte eine simulierte Websuche...");
+        const result = await ApiService.searchWeb(command);
+        this.speak(result);
+        if (result.toLowerCase().includes("rondo")) {
+            ArenaEngine.Tactic.visualizeExercise(result);
+        }
+    } else if (command.includes("zeige übung") || command.includes("visualisiere")) {
+        ArenaEngine.Tactic.visualizeExercise(command);
+    } else if (command.includes("management") || command.includes("finanzen")) {
+        this.speak("Öffne das Management Cockpit.");
+        UIManager.openDialog('management-hub');
+        UIManager.renderManagementHub();
+    } else if (command.includes("zeitung") || command.includes("magazin")) {
+        this.speak("Öffne das Stadionzeitung Studio.");
+        UIManager.openDialog('magazine-studio');
+        UIManager.renderMagazineStudio();
+    } else if (command.includes("rückgängig")) {
+        this.speak("Aktion wird zurückgenommen.");
+        ArenaEngine.History.undo();
+    } else if (command.includes("wiederholen")) {
+        this.speak("Aktion wird wiederholt.");
+        ArenaEngine.History.redo();
+    } else if (command.includes("lösche alles") || command.includes("alles löschen")) {
+        this.setTool('clear');
+    } else {
+        this.speak("Das habe ich nicht verstanden. Mögliche Befehle: 'suche', 'zeige Übung', 'management', 'zeitung', 'rückgängig', 'wiederholen'.");
+    }
+};
+
+// -----------------------------------------------------------------------------
+// ERWEITERUNG: App - Finale Implementierung mit Logout
+// -----------------------------------------------------------------------------
+App.logout = function() {
+    console.log("User logging out...");
+    sessionStorage.removeItem('toni2_userid');
+    AppState.user = null;
+    AppState.team = null;
+    AppState.finances = null;
+    
+    // Verstecke die App, zeige den Login-Screen
+    document.getElementById('main-app').style.display = 'none';
+    this.showLoginScreen();
+
+    // Stoppe eventuelle Live-Sessions
+    if (AppState.ui.isLiveSession) {
+        ToniAI.toggleLiveSession();
+    }
+    UIManager.closeAllDialogs();
+};
+
+// Start der App (bleibt unverändert)
+document.addEventListener('DOMContentLoaded', () => App.init());
 </script>
 </body>
 </html>
