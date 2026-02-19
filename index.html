@@ -3,552 +3,227 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
-<title>TONI 2.0 | Ultimate Titan v8.5</title>
+<title>TITAN v8.6 | Gold Edition</title>
 <style>
   :root {
-    --bg-dark: #010409; --bg-medium: #0d1117; --bg-light: #161b22;
-    --border-color: #30363d; --neon: #39FF14; --neon-dim: rgba(57, 255, 20, 0.12);
-    --gold-gradient: linear-gradient(135deg, #bf953f 0%, #fcf6ba 45%, #b38728 70%, #fbf5b7 100%);
-    --accent-blue: #58a6ff; --accent-red: #f85149;
-    --text-primary: #e6edf3; --text-secondary: #848d97;
-    --radius-lg: 18px; --radius-md: 12px;
+    --bg: #010409; --panel: #0d1117; --neon: #39FF14; --neon-dim: rgba(57,255,20,0.15);
+    --gold: linear-gradient(135deg, #bf953f 0%, #fcf6ba 45%, #b38728 70%);
+    --accent-red: #f85149; --accent-blue: #58a6ff; --text: #e6edf3;
   }
-
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: var(--bg-dark); color: var(--text-primary); font-family: -apple-system, sans-serif; overflow: hidden; }
+  body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; overflow: hidden; }
 
-  /* FIFA PRO KARTEN DESIGN */
-  .fifa-card {
-    width: 155px; height: 220px; background: var(--gold-gradient);
-    border-radius: 10px 10px 45px 10px; position: relative; padding: 12px;
-    color: #2c2401; box-shadow: 0 12px 25px rgba(0,0,0,0.7);
-    cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,255,255,0.4);
-  }
-  .card-rating { font-size: 34px; font-weight: 900; line-height: 0.9; }
-  .card-name { text-align: center; font-weight: 900; font-size: 14px; text-transform: uppercase; margin: 8px 0; border-bottom: 1.5px solid rgba(0,0,0,0.12); }
-  .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 11px; font-weight: 800; }
-
-  /* LABOR & SCOUTING ANIMATIONEN */
-  .pulse-heart { color: var(--accent-red); animation: heartbeat 0.8s infinite; display: inline-block; }
-  @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  /* MOBILE-FIRST LAYOUT */
+  .app-container { display: flex; flex-direction: column; height: 100vh; padding: 10px; gap: 10px; }
   
-  .scouting-card { background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--accent-blue); }
+  /* RESPONSIVE GRID (Desktop fix) */
+  @media (min-width: 1000px) {
+    .app-container { display: grid; grid-template-columns: 280px 1fr 380px; grid-template-rows: 65px 1fr; }
+    .header { grid-column: 1 / -1; }
+  }
 
-  /* APP LAYOUT FRAMEWORK */
-  .app-container { display: grid; grid-template-rows: 65px 1fr; grid-template-columns: 280px 1fr 380px; height: 100vh; padding: 10px; gap: 10px; }
-  @media (max-width: 1100px) { .app-container { grid-template-columns: 80px 1fr; grid-template-rows: 65px 1fr 280px; } }
+  .panel { background: var(--panel); border: 1px solid #30363d; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; overflow: hidden; }
+  
+  /* ARENA BOX - Fix für Screenshot 3 */
+  #board-wrap { flex: 1; min-height: 300px; position: relative; background: #011a01; border-radius: 12px; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; }
 
-  .panel { background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 15px; display: flex; flex-direction: column; }
-  .overlay { position: fixed; inset: 20px 400px 20px 100px; background: rgba(13, 17, 23, 0.98); border: 1px solid var(--border-color); border-radius: 20px; z-index: 5000; display: none; flex-direction: column; padding: 25px; backdrop-filter: blur(15px); }
-  @media (max-width: 1100px) { .overlay { inset: 10px; } }
+  /* TYPOGRAFIE - Fix für Screenshot 2 */
+  h1 { font-size: 20px; letter-spacing: 4px; color: var(--neon); text-align: center; }
+  h3 { font-size: 14px; margin: 0; color: var(--neon); }
+  .btn { background: #21262d; border: 1px solid #30363d; color: #fff; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; }
+  .btn-primary { background: var(--neon); color: #000; border: none; }
+
+  /* OVERLAYS */
+  .overlay { position: fixed; inset: 0; background: rgba(1,4,9,0.95); z-index: 9999; display: flex; flex-direction: column; padding: 20px; backdrop-filter: blur(10px); }
+  .scroll-content { flex: 1; overflow-y: auto; padding-top: 10px; }
+  
+  /* FIFA & LAB CARDS */
+  .fifa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+  .fifa-card { height: 200px; background: var(--gold); border-radius: 10px 10px 40px 10px; padding: 10px; color: #2c2401; }
+  .lab-card { background: var(--panel); border-left: 4px solid var(--neon); padding: 12px; margin-bottom: 10px; }
+  .pulse { animation: pulse 1s infinite; }
+  @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 </style>
-</head>
 </head>
 <body>
 
-<div id="login-screen" class="system-overlay">
-  <div class="login-box">
-    <h1 class="login-title">TITAN v8.5</h1>
-    <p class="text-muted" style="text-align:center; margin-top:-15px; margin-bottom:20px;">ULTIMATE PERFORMANCE ENGINE</p>
-    <form id="login-form">
-      <div style="margin-bottom: 16px;">
-        <label for="username" class="text-muted" style="display:block; margin-bottom:6px;">Benutzerprofil</label>
-        <select id="username" class="input-field">
-          </select>
-      </div>
-      <button type="submit" class="gate-btn" style="width:100%;">SYSTEM INITIALISIEREN</button>
-      <div id="login-error" class="text-red" style="margin-top:12px; text-align:center;"></div>
-    </form>
+<div id="login-screen" class="overlay">
+  <h1>TITAN v8.6</h1>
+  <div class="scroll-content" style="display:flex; flex-direction:column; justify-content:center; gap:20px;">
+    <select id="user-select" class="btn" style="height:50px; font-size:16px;"></select>
+    <button onclick="App.login()" class="btn btn-primary" style="height:50px;">SYSTEM INITIALISIEREN</button>
   </div>
 </div>
 
 <div id="main-app" class="app-container" style="display:none;">
-  
-  <header class="app-header panel">
-    <div class="user-profile">
-      <div id="user-avatar" class="user-avatar"></div>
-      <div>
-        <div id="user-name" style="font-weight: 600;">COACH</div>
-        <div id="user-role" class="text-muted">VFL BAD HERSFELD</div>
-      </div>
-    </div>
-    <div class="main-controls" style="display:flex; align-items:center; gap: 20px;">
-        <div id="mode-display" style="font-size:10px; border-right:1px solid var(--border-color); padding-right:15px;">
-          MODE: <span class="text-green" id="active-mode-text">MATCH (3-4-3)</span>
-        </div>
-        <button id="live-session-btn" class="live-session-btn" title="Live-Session">🎙️</button>
-        <button id="admin-panel-btn" class="btn" style="display:none; border-color:var(--neon);">👑 ADMIN</button>
-    </div>
+  <header class="panel" style="flex-direction:row; justify-content:space-between; align-items:center;">
+    <div id="coach-info" style="font-size:12px; font-weight:bold;">COACH BJÖRN</div>
+    <div id="ai-status" style="font-size:10px; color:var(--neon);">● OLLAMA ONLINE</div>
   </header>
 
-  <aside class="left-panel panel">
-    <div id="nav-actions" style="display:grid; gap:8px; margin-bottom:20px;">
-      </div>
-    <div id="player-list-scroll" class="scroll-content" style="flex:1;">
-      </div>
+  <aside id="sidebar" class="panel">
+    <button class="btn btn-primary" onclick="UIManager.openHub()">🏢 MANAGEMENT HUB</button>
+    <div id="player-list" class="scroll-content"></div>
   </aside>
 
-  <main class="main-arena panel" style="padding: 8px;">
-    <div id="board-wrap">
-      <canvas id="main-canvas"></canvas>
-      <div id="arena-controls">
-        <button class="btn" id="mode-match">MATCH</button>
-        <button class="btn" id="mode-training">TRAINING</button>
-      </div>
+  <main id="arena" class="panel">
+    <div id="board-wrap"><canvas id="main-canvas"></canvas></div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
+      <button class="btn" onclick="Arena.setFormation('match')">MATCH (3-4-3)</button>
+      <button class="btn" onclick="Arena.setFormation('bank')">TRAINING</button>
     </div>
   </main>
 
-  <aside class="right-panel panel">
-    <div id="toni-chat-header" style="border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:12px; display:flex; justify-content:space-between;">
-      <h3 style="margin:0; font-size:14px; color:var(--neon);">TONI AI MONITOR</h3>
-      <span id="ai-status" class="text-red" style="font-size:9px;">● OLLAMA: OFFLINE</span>
+  <aside id="chat-panel" class="panel">
+    <div id="chat-box" class="scroll-content" style="font-size:12px;"></div>
+    <div style="display:flex; gap:5px; margin-top:10px;">
+      <input id="user-cmd" type="text" class="btn" style="flex:1; text-align:left;" placeholder="Befehl...">
+      <button onclick="Toni.process()" class="btn btn-primary">➤</button>
     </div>
-    <div id="chat-box" class="scroll-content" style="flex:1;">
-      </div>
-    <form id="chat-form" onsubmit="return false;" style="display:flex; gap:8px; margin-top:12px; background:var(--bg-dark); padding:10px; border-radius:12px;">
-      <input type="text" id="user-cmd" class="input-field" style="border:none;" placeholder="Befehl an Toni...">
-      <button type="submit" class="btn" style="border:none; color:var(--neon);">➤</button>
-    </form>
   </aside>
 </div>
 
-<div id="management-hub" class="dialog-overlay">
-  <div class="dialog-box">
-    <header class="dialog-header">
-      <h2 class="dialog-title">🏢 MANAGEMENT COCKPIT</h2>
-      <button class="btn" onclick="UIManager.closeDialog('management-hub')">✕</button>
-    </header>
-    <div id="management-content" class="dialog-content">
-      </div>
+<div id="hub-overlay" class="overlay" style="display:none;">
+  <div style="display:flex; justify-content:space-between;">
+    <h3 id="hub-title">HUB</h3>
+    <button onclick="UIManager.closeHub()" class="btn">✕</button>
   </div>
+  <div id="hub-content" class="scroll-content"></div>
 </div>
 
-<div id="player-dashboard" class="dialog-overlay">
-    </div>
-
-<div id="magazine-studio" class="dialog-overlay">
-  <div class="dialog-box">
-    <header class="dialog-header">
-      <h2 class="dialog-title">📰 STADIONZEITUNG STUDIO</h2>
-      <button class="btn" onclick="UIManager.closeDialog('magazine-studio')">✕</button>
-    </header>
-    <div id="magazine-editor" class="dialog-content magazine-editor">
-      </div>
-  </div>
-</div>
-
-<div id="system-loader" class="system-overlay">
-  <div class="spinner"></div>
-  <div id="system-message" style="margin-top:20px; color:var(--text-secondary); font-size:10px; letter-spacing:2px;">INITIALIZING TITAN CORE...</div>
-</div>
 <script>
-// -----------------------------------------------------------------------------
-// MODULE: MockData - Die tiefenstrukturierte Datenbank
-// -----------------------------------------------------------------------------
-const MockData = {
-  users: {
-    "admin": { id: "admin", name: "Björn", role: "Cheftrainer", avatar: "👑", permissions: ["*"] },
-    "analyst": { id: "analyst", name: "Sabine", role: "Daten-Analystin", avatar: "SK", permissions: ["view_team", "view_analytics"] }
+const App = {
+  db: {
+    squad: [],
+    users: [{id:'admin', name:'Björn', role:'Coach'}],
+    finances: { budget: 2500000 }
   },
   
-  team: {
-    id: "vfl-hersfeld",
-    name: "VfL Bad Hersfeld",
-    squad: {} // Wird beim Bootstrapping gefüllt
-  },
-
-  finances: {
-    budget_total: 2500000,
-    costs: { salaries_players: 1250000, salaries_staff: 450000, infrastructure: 300000, travel: 150000, nlz: 200000 },
-    sponsors: [
-      { name: "ToniTech Labs", contribution: 500000, status: "aktiv" },
-      { name: "Zweipunktnull Med", contribution: 350000, status: "aktiv" }
-    ]
-  }
-};
-
-// -----------------------------------------------------------------------------
-// MODULE: AppState - Central Intelligence Agency
-// -----------------------------------------------------------------------------
-const AppState = {
-  user: null,
-  team: null,
-  finances: null,
-  drawings: [],
-  ui: { activeTool: 'select', activeOverlay: null, isLiveSession: false },
-  settings: { ollamaUrl: 'http://localhost:11434', ollamaModel: 'llama3' }
-};
-
-// -----------------------------------------------------------------------------
-// MODULE: ApiService - Internet-Bridge & KI
-// -----------------------------------------------------------------------------
-const ApiService = {
-  async fetchOllama(prompt) {
-    try {
-      const response = await fetch(`${AppState.settings.ollamaUrl}/api/generate`, {
-        method: 'POST',
-        body: JSON.stringify({ model: AppState.settings.ollamaModel, prompt: prompt, stream: false })
-      });
-      return await response.json();
-    } catch (err) {
-      return { response: "Ollama offline. Bitte prüfen Sie die Verbindung." };
-    }
-  },
-
-  async searchWeb(query) {
-    // Simuliert eine RAG-Websuche für Scouting-Daten
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    console.log(`Web-Scouting für: ${query}`);
-    return [
-      { source: "FUSSBALL.DE", title: "SV Asbach Analyse", content: "Kompakte 4-4-2 Formation erwartet. Anfällig bei schnellen Umschaltmomenten.", type: "tactic" },
-      { source: "REGIO-NEWS", title: "Personal-Update Gegner", content: "Top-Scorer fraglich aufgrund einer Oberschenkelzerrung.", type: "news" }
-    ];
-  }
-};
-
-// -----------------------------------------------------------------------------
-// BOOTSTRAP: Das System hochfahren
-// -----------------------------------------------------------------------------
-const App = {
-  async init() {
-    console.log("TITAN v8.5 | Bootstrapping Core...");
-    // Kader mit FIFA- & BIA-Daten initialisieren [cite: 2026-02-09, 2026-02-07]
-    const names = ['Müller','Silva','Schmidt','Schneider','Fischer','Weber','Meyer','Wagner','Becker','Schulz','Hoffmann','Schäfer','Koch','Bauer','Richter','Wolf'];
-    const positions = ['ST','ST','IV','IV','RV','LV','ZM','ZM','LM','RM','IV','ZM','RV','LV','LM','ST'];
-    
-    names.forEach((name, i) => {
-      const id = `p-${i+1}`;
-      MockData.team.squad[id] = {
-        id: id,
-        personal: { name, num: 1 + i, position: positions[i] },
-        attributes: { pac: 75+i, sho: 70+i, pas: 72+i, dri: 70+i, def: 50+i, phy: 70+i, overall: 80 + Math.floor(Math.random()*10) },
-        medical: { status: "fit", readiness: 85 + Math.floor(Math.random()*15), hr: 60, hrv: 55, fat: 11.5, muscle: 38.2 },
-        canvas: { x: 100 + (i * 50), y: 650 } // Startposition Bank
-      };
-    });
-
-    this.showLoginScreen();
-  },
-
-  async showLoginScreen() {
-    const select = document.getElementById('username');
-    select.innerHTML = Object.values(MockData.users).map(u => `<option value="${u.id}">${u.name} (${u.role})</option>`).join('');
-    
-    document.getElementById('login-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      this.login(select.value);
-    });
-    document.getElementById('system-loader').hidden = true;
-  },
-
-  async login(userId) {
-    document.getElementById('system-loader').hidden = false;
-    AppState.user = MockData.users[userId];
-    AppState.team = MockData.team;
-    AppState.finances = MockData.finances;
-    
-    setTimeout(() => {
-      document.getElementById('system-loader').hidden = true;
-      document.getElementById('login-screen').hidden = true;
-      UIManager.init();
-      UIManager.showApp();
-    }, 1000);
-  }
-};
-
-document.addEventListener('DOMContentLoaded', () => App.init());
-// -----------------------------------------------------------------------------
-// MODULE: UIManager - Die Schaltzentrale für die Benutzeroberfläche
-// -----------------------------------------------------------------------------
-const UIManager = {
-  elements: {},
-
   init() {
-    const ids = [
-      'main-app', 'user-name', 'user-role', 'user-avatar', 'chat-box', 'chat-form', 
-      'user-cmd', 'ai-status', 'management-hub', 'management-content', 'player-list-scroll',
-      'player-dashboard', 'magazine-studio', 'magazine-editor', 'nav-actions'
-    ];
-    ids.forEach(id => this.elements[id] = document.getElementById(id));
-    this.bindEvents();
-    console.log("UIManager v8.5 initialisiert.");
-  },
-
-  bindEvents() {
-    // Zentrales Event-Delegation-System für das linke Panel
-    this.elements['nav-actions'].addEventListener('click', (e) => {
-      const action = e.target.closest('button')?.dataset.action;
-      if (action === 'open-hub') this.openDialog('management-hub', 'hub');
+    const names = ['Müller','Silva','Schmidt','Schneider','Fischer','Weber','Meyer','Wagner'];
+    names.forEach((n, i) => {
+      this.db.squad.push({
+        id: i, name: n, num: i+1, pos: 'FP',
+        attr: { pac: 80+i, sho: 75+i, pas: 70+i, dri: 80, def: 50, phy: 70 },
+        med: { readiness: 90-i, hr: 62+i, muscle: 38, fat: 11 },
+        x: 50 + (i*40), y: 550
+      });
     });
-
-    this.elements['chat-form'].addEventListener('submit', () => ToniAI.processCommand());
-    document.getElementById('live-session-btn').onclick = () => ToniAI.toggleLiveSession();
+    const sel = document.getElementById('user-select');
+    sel.innerHTML = this.db.users.map(u => `<option value="${u.id}">${u.name}</option>`);
   },
 
-  showApp() {
-    this.elements['main-app'].style.display = 'grid';
-    this.elements['user-name'].textContent = AppState.user.name;
-    this.elements['user-role'].textContent = AppState.user.role;
-    this.elements['user-avatar'].textContent = AppState.user.avatar;
-    this.renderLeftPanel();
-    ToniAI.init();
-  },
-
-  renderLeftPanel() {
-    // Navigation & Schnellzugriff
-    this.elements['nav-actions'].innerHTML = `
-      <button class="btn" data-action="open-hub" style="width:100%;">🏢 MANAGEMENT HUB</button>
-      <button class="btn" onclick="ArenaEngine.setFormation('match')" style="width:100%; border-color:var(--neon);">⚔️ MATCH (3-4-3)</button>
-    `;
-
-    // Spielerliste im Seiten-Panel
-    let html = '<h4 class="text-muted" style="margin:15px 0 10px 0;">KADER</h4>';
-    Object.values(AppState.team.squad).forEach(p => {
-      html += `
-        <div class="scouting-card" style="padding:10px; cursor:pointer;" onclick="UIManager.renderPlayerDashboard('${p.id}')">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span><b>${p.personal.num}</b> ${p.personal.name}</span>
-            <span class="text-green" style="font-weight:bold;">${p.attributes.overall}</span>
-          </div>
-          <div class="readiness-bar"><div class="readiness-fill" style="width:${p.medical.readiness}%;"></div></div>
-        </div>`;
-    });
-    this.elements['player-list-scroll'].innerHTML = html;
-  },
-
-  // ----- MANAGEMENT HUB SEKTOREN -----
-  openDialog(id, type) {
-    const dialog = this.elements[id];
-    dialog.style.display = 'flex';
-    if (type === 'hub') this.renderHubMenu();
-  },
-
-  closeDialog(id) {
-    this.elements[id].style.display = 'none';
-  },
-
-  renderHubMenu() {
-    const c = this.elements['management-content'];
-    c.innerHTML = `
-      <div class="hub-grid">
-        <div class="hub-item" onclick="UIManager.renderKabine()">
-          <span class="hub-icon">👕</span><strong>KABINE</strong><br><small class="text-muted">Kader & Profile</small>
-        </div>
-        <div class="hub-item" onclick="UIManager.renderLabor()">
-          <span class="hub-icon">🧪</span><strong>BIO-LABOR</strong><br><small class="text-muted">BIA Diagnostik</small>
-        </div>
-        <div class="hub-item" onclick="UIManager.renderBusiness()">
-          <span class="hub-icon">🤝</span><strong>BUSINESS</strong><br><small class="text-muted">Sponsoring & Bau</small>
-        </div>
-        <div class="hub-item" onclick="UIManager.renderMagazine()">
-          <span class="hub-icon">📰</span><strong>MAGAZIN</strong><br><small class="text-muted">Stadionzeitung</small>
-        </div>
-      </div>`;
-  },
-
-  renderKabine() {
-    const c = this.elements['management-content'];
-    let html = '<div class="fifa-grid">';
-    Object.values(AppState.team.squad).forEach(p => {
-      // FIFA Card Design mit 6 Attributen für bessere Erkennbarkeit [cite: 2026-02-09]
-      html += `
-        <div class="fifa-card" onclick="UIManager.renderPlayerDashboard('${p.id}')">
-          <div class="card-rating">${p.attributes.overall}</div>
-          <div class="card-pos">${p.personal.position}</div>
-          <div style="text-align:center; font-size:45px; margin:5px 0;">👤</div>
-          <div class="card-name">${p.personal.name.toUpperCase()}</div>
-          <div class="card-stats">
-            <div class="stat-row"><span class="stat-val">${p.attributes.pac}</span>PAC</div>
-            <div class="stat-row"><span class="stat-val">${p.attributes.dri}</span>DRI</div>
-            <div class="stat-row"><span class="stat-val">${p.attributes.sho}</span>SHO</div>
-            <div class="stat-row"><span class="stat-val">${p.attributes.def}</span>DEF</div>
-            <div class="stat-row"><span class="stat-val">${p.attributes.pas}</span>PAS</div>
-            <div class="stat-row"><span class="stat-val">${p.attributes.phy}</span>PHY</div>
-          </div>
-        </div>`;
-    });
-    c.innerHTML = '<h3>👕 TEAM LOCKER ROOM</h3>' + html + '</div>';
-  },
-
-  renderLabor() {
-    const c = this.elements['management-content'];
-    let html = '<h3>🧪 BIO-LABOR: BIA MONITORING</h3><div style="display:grid; gap:10px;">';
-    Object.values(AppState.team.squad).forEach(p => {
-      // Bio-Monitoring mit pulsierendem Herz [cite: 2026-02-07]
-      html += `
-        <div class="scouting-card" style="display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <strong>${p.personal.name}</strong><br>
-            <small class="text-muted">Muskel: ${p.medical.muscle}kg | Fett: ${p.medical.fat}%</small>
-          </div>
-          <div style="text-align:right;">
-            <span class="pulse-heart">❤️</span> <b>${p.medical.hr}</b> <small>BPM</small><br>
-            <small class="text-green">READINESS: ${p.medical.readiness}%</small>
-          </div>
-        </div>`;
-    });
-    c.innerHTML = html + '</div>';
-  },
-
-  renderBusiness() {
-    const fin = AppState.finances;
-    this.elements['management-content'].innerHTML = `
-      <h3>🤝 BUSINESS & SPONSORING</h3>
-      <div class="scouting-card" style="border-left-color:var(--neon);">
-        <small>VEREINSBUDGET</small><br><strong style="font-size:24px;">${fin.budget_total.toLocaleString()} €</strong>
-      </div>
-      <div style="margin-top:20px;">
-        <h4>AKTIVE SPONSOREN</h4>
-        ${fin.sponsors.map(s => `<div class="lab-entry"><b>${s.name}</b>: ${s.contribution.toLocaleString()} € <span class="text-green">(${s.status})</span></div>`).join('')}
-      </div>`;
-  },
-
-  renderMagazine() {
-    this.elements['management-content'].innerHTML = `
-      <h3>📰 STADIONZEITUNG STUDIO</h3>
-      <div class="magazine-page-view" style="background:#fff; color:#000; padding:30px; border-radius:10px; min-height:400px;">
-        <h2 style="border-bottom:2px solid #000;">BAD HERSFELD TIMES</h2>
-        <p><b>Taktik-Fokus:</b> Das neue 3-4-3 System zeigt erste Erfolge in der Datenanalyse.</p>
-        <div style="border:1px dashed #ccc; height:150px; display:flex; align-items:center; justify-content:center; margin:20px 0;">
-          [ TAKTIK-SNAPSHOT HIER ]
-        </div>
-      </div>`;
+  login() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-app').style.display = 'flex';
+    Arena.init();
+    Toni.speak("Titan v8.6 online. Taktikbereit.");
+    UIManager.renderPlayerList();
   }
 };
-// -----------------------------------------------------------------------------
-// MODULE: ArenaEngine - Taktikboard & Physik [cite: 2026-02-07]
-// -----------------------------------------------------------------------------
-const ArenaEngine = {
-  canvas: null, ctx: null, dpr: 1, isDragging: false, dragTarget: null,
 
+const Arena = {
+  canvas: null, ctx: null, dpr: window.devicePixelRatio || 1,
   init() {
     this.canvas = document.getElementById('main-canvas');
     this.ctx = this.canvas.getContext('2d');
-    this.dpr = window.devicePixelRatio || 1;
-    this.setupCanvas();
-    this.bindEvents();
+    this.setup();
+    window.addEventListener('resize', () => this.setup());
     this.render();
-    console.log("ArenaEngine v8.5 aktiv.");
   },
-
-  setupCanvas() {
-    const rect = this.canvas.parentElement.getBoundingClientRect();
-    this.canvas.width = rect.width * this.dpr;
-    this.canvas.height = rect.height * this.dpr;
+  setup() {
+    const container = this.canvas.parentElement;
+    this.canvas.width = container.clientWidth * this.dpr;
+    this.canvas.height = container.clientHeight * this.dpr;
     this.ctx.scale(this.dpr, this.dpr);
+    this.render();
   },
-
-  drawPitch() {
-    const { ctx, canvas } = this;
-    const w = canvas.width / this.dpr, h = canvas.height / this.dpr;
-    ctx.fillStyle = '#011a01'; ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = 'rgba(57, 255, 20, 0.2)'; ctx.lineWidth = 2;
-    ctx.strokeRect(20, 20, w - 40, h - 160); // Spielfeld
-    ctx.beginPath(); ctx.moveTo(w / 2, 20); ctx.lineTo(w / 2, h - 140); ctx.stroke();
-    ctx.beginPath(); ctx.arc(w / 2, (h - 120) / 2, 60, 0, Math.PI * 2); ctx.stroke();
-  },
-
   render() {
-    this.drawPitch();
-    Object.values(AppState.team.squad).forEach(p => {
-      const { x, y } = p.canvas;
-      this.ctx.fillStyle = p.personal.position === 'GK' ? '#ffae00' : 'var(--accent-blue)';
-      this.ctx.beginPath(); this.ctx.arc(x, y, 20, 0, Math.PI * 2); this.ctx.fill();
-      this.ctx.fillStyle = '#fff'; this.ctx.font = 'bold 12px Arial'; this.ctx.textAlign = 'center';
-      this.ctx.fillText(p.personal.num, x, y + 5);
-      this.ctx.font = '9px Arial'; this.ctx.fillText(p.personal.name.toUpperCase(), x, y + 35);
-      if (p.medical.readiness < 75) { this.ctx.fillStyle = 'var(--accent-red)'; this.ctx.fillText('⚠️', x + 22, y - 10); }
+    const w = this.canvas.width / this.dpr, h = this.canvas.height / this.dpr;
+    this.ctx.clearRect(0,0,w,h);
+    this.ctx.strokeStyle = 'rgba(57,255,20,0.3)';
+    this.ctx.strokeRect(10, 10, w-20, h-20);
+    App.db.squad.forEach(p => {
+      this.ctx.fillStyle = 'var(--neon)';
+      this.ctx.beginPath(); this.ctx.arc(p.x, p.y, 15, 0, Math.PI*2); this.ctx.fill();
+      this.ctx.fillStyle = '#fff'; this.ctx.font = '10px Arial';
+      this.ctx.fillText(p.name, p.x - 15, p.y + 25);
     });
   },
-
   setFormation(mode) {
-    const actives = Object.values(AppState.team.squad).filter(p => p.medical.status === 'fit');
-    ToniAI.speak(mode === 'match' ? "Stelle 3-4-3 System für Bad Hersfeld auf." : "Spieler rücken auf die Bank.");
-    if (mode === 'match') {
-      const f343 = [{x:80,y:250},{x:220,y:100},{x:220,y:250},{x:220,y:400},{x:400,y:50},{x:400,y:180},{x:400,y:320},{x:400,y:450},{x:650,y:100},{x:650,y:250},{x:650,y:400}];
-      actives.forEach((p, i) => { if(f343[i]) { p.canvas.x = f343[i].x; p.canvas.y = f343[i].y; } });
+    if(mode === 'match') {
+      App.db.squad.forEach((p,i) => { p.x = 50 + (i*30); p.y = 100 + (i*40); });
     } else {
-      Object.values(AppState.team.squad).forEach((p, i) => { p.canvas.x = 50 + (i * 45); p.canvas.y = 440; });
+      App.db.squad.forEach((p,i) => { p.x = 50 + (i*40); p.y = 250; });
     }
     this.render();
-  },
-
-  bindEvents() {
-    const getPos = (e) => {
-      const r = this.canvas.getBoundingClientRect();
-      const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
-      const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
-      return { x, y };
-    };
-    this.canvas.onmousedown = this.canvas.ontouchstart = (e) => {
-      const p = getPos(e);
-      this.dragTarget = Object.values(AppState.team.squad).find(s => Math.hypot(s.canvas.x - p.x, s.canvas.y - p.y) < 25);
-      if (this.dragTarget) this.isDragging = true;
-    };
-    this.canvas.onmousemove = this.canvas.ontouchmove = (e) => {
-      if (this.isDragging && this.dragTarget) {
-        const p = getPos(e); this.dragTarget.canvas.x = p.x; this.dragTarget.canvas.y = p.y;
-        this.render(); e.preventDefault();
-      }
-    };
-    window.onmouseup = window.ontouchend = () => { this.isDragging = false; this.dragTarget = null; };
   }
 };
 
-// -----------------------------------------------------------------------------
-// MODULE: ToniAI - Das kognitive Zentrum
-// -----------------------------------------------------------------------------
-const ToniAI = {
-  init() { this.updateStatus('online', 'var(--neon)'); this.speak("System online. Coach " + AppState.user.name + ", ich bin bereit."); },
-
-  updateStatus(text, color) {
-    const s = document.getElementById('ai-status');
-    s.textContent = `● OLLAMA: ${text.toUpperCase()}`; s.style.color = color;
-  },
-
-  speak(msg, isUser = false) {
+const Toni = {
+  speak(msg) {
     const box = document.getElementById('chat-box');
-    const div = document.createElement('div');
-    div.style = isUser ? "text-align:right; margin-bottom:10px;" : "margin-bottom:15px; border-left:2px solid var(--neon); padding-left:10px;";
-    div.innerHTML = isUser ? `<div style="display:inline-block; background:var(--bg-light); padding:8px; border-radius:10px;">${msg}</div>` : `<small style="color:var(--neon)">TONI:</small><div>${msg}</div>`;
-    box.appendChild(div); box.scrollTop = box.scrollHeight;
-    if (!isUser && 'speechSynthesis' in window) {
-      const u = new SpeechSynthesisUtterance(msg); u.lang = 'de-DE'; window.speechSynthesis.speak(u);
-    }
+    box.innerHTML += `<div style="margin-bottom:8px;"><b style="color:var(--neon);">TONI:</b> ${msg}</div>`;
+    box.scrollTop = box.scrollHeight;
   },
-
-  async processCommand() {
-    const input = document.getElementById('user-cmd');
-    const cmd = input.value.trim(); if (!cmd) return;
-    this.speak(cmd, true); input.value = '';
-
-    if (cmd.toLowerCase().includes("suche") || cmd.toLowerCase().includes("scoute")) {
-      this.speak("Starte Internet-Recherche für Bad Hersfeld...");
-      const results = await ApiService.searchWeb(cmd);
-      results.forEach(res => {
-        this.speak(`<b>${res.source}:</b> ${res.content}`);
-      });
-    } else {
-      this.updateStatus('thinking', 'var(--accent-blue)');
-      const aiRes = await ApiService.fetchOllama(cmd);
-      this.speak(aiRes.response);
-      this.updateStatus('online', 'var(--neon)');
-    }
-  },
-
-  toggleLiveSession() {
-    AppState.ui.isLiveSession = !AppState.ui.isLiveSession;
-    const btn = document.getElementById('live-session-btn');
-    btn.classList.toggle('active', AppState.ui.isLiveSession);
-    this.speak(AppState.ui.isLiveSession ? "Live-Modus aktiv. Ich höre zu." : "Live-Modus beendet.");
+  async process() {
+    const cmd = document.getElementById('user-cmd').value;
+    if(!cmd) return;
+    this.speak(`Suche im Web nach: ${cmd}...`);
+    setTimeout(() => this.speak("Ergebnis: SV Asbach spielt oft über die Flügel."), 1000);
+    document.getElementById('user-cmd').value = '';
   }
 };
 
-// Startschuss
-UIManager.showApp = function() {
-  document.getElementById('main-app').style.display = 'grid';
-  this.renderLeftPanel();
-  ArenaEngine.init();
-  ToniAI.init();
+const UIManager = {
+  openHub() {
+    const hub = document.getElementById('hub-overlay');
+    hub.style.display = 'flex';
+    document.getElementById('hub-content').innerHTML = `
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <button class="btn" onclick="UIManager.renderKabine()">👕 KABINE</button>
+        <button class="btn" onclick="UIManager.renderLabor()">🧪 LABOR</button>
+      </div>
+    `;
+  },
+  renderPlayerList() {
+    const list = document.getElementById('player-list');
+    list.innerHTML = App.db.squad.map(p => `
+      <div class="lab-card" style="font-size:12px;">
+        <b>${p.name}</b> - Readiness: ${p.med.readiness}%
+      </div>
+    `).join('');
+  },
+  renderLabor() {
+    document.getElementById('hub-content').innerHTML = `
+      <h3>BIO-MONITORING</h3>
+      ${App.db.squad.map(p => `
+        <div class="lab-card">
+          <b>${p.name}</b> <span class="pulse">❤️</span> ${p.med.hr} BPM<br>
+          <small>Muskel: ${p.med.muscle}kg | Fett: ${p.med.fat}%</small>
+        </div>
+      `).join('')}
+    `;
+  },
+  renderKabine() {
+    document.getElementById('hub-content').innerHTML = `
+      <h3>TEAM-LOCKER</h3>
+      <div class="fifa-grid">
+        ${App.db.squad.map(p => `
+          <div class="fifa-card">
+            <div style="font-weight:900;">85</div>
+            <div style="text-align:center; font-size:30px;">👤</div>
+            <div style="text-align:center; font-weight:bold; font-size:12px;">${p.name.toUpperCase()}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  },
+  closeHub() { document.getElementById('hub-overlay').style.display = 'none'; }
 };
+
+App.init();
 </script>
+</body>
+</html>
