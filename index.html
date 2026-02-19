@@ -1,875 +1,463 @@
-<!doctype html>
-<html lang="de">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TONI 2.0 | Professional Coaching & Management Suite</title>
-<meta name="description" content="TONI 2.0 - Eine KI-gestützte, hybride Coaching-Plattform für professionelle Taktikanalyse, Spieler-Management und Vereinsstrategie.">
-
-<!-- Professionelles CSS Design System -->
 <style>
   :root {
-    --bg-dark: #0d1117;
-    --bg-medium: #161b22;
-    --bg-light: #21262d;
+    /* Titan v8.5 High-Performance Palette */
+    --bg-dark: #010409;
+    --bg-medium: #0d1117;
+    --bg-light: #161b22;
     --border-color: #30363d;
+    --neon: #39FF14;
+    --neon-dim: rgba(57, 255, 20, 0.12);
+    --gold-gradient: linear-gradient(135deg, #bf953f 0%, #fcf6ba 45%, #b38728 70%, #fbf5b7 100%);
+    --accent-blue: #58a6ff;
+    --accent-red: #f85149;
     --text-primary: #e6edf3;
     --text-secondary: #848d97;
-    --accent-blue: #58a6ff;
-    --accent-green: #3fb950;
-    --accent-red: #f85149;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 16px;
+    --radius-lg: 18px;
+    --radius-md: 12px;
   }
 
-  /* Globale Resets & Basis-Stile */
-    * { box-sizing: border-box; }
-  html, body {
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: var(--bg-dark);
-    color: var(--text-primary);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    overflow: hidden;
+  /* Globale Optimierung */
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { 
+    height: 100%; width: 100%; margin: 0; padding: 0; 
+    background-color: var(--bg-dark); color: var(--text-primary); 
+    font-family: -apple-system, system-ui, sans-serif; overflow: hidden; 
   }
 
-  /* Utility-Klassen */
- .scroll-content { overflow-y: auto; padding-right: 8px; }
- .scroll-content::-webkit-scrollbar { width: 6px; }
- .scroll-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
- .text-muted { color: var(--text-secondary); font-size: 0.9em; }
- .text-accent { color: var(--accent-blue); }
- .text-green { color: var(--accent-green); }
- .text-red { color: var(--accent-red); }
-
-  /* Buttons & Inputs */
- .btn {
-    padding: 10px 16px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-medium);
-    color: var(--text-primary);
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color.2s, border-color.2s;
+  /* FIFA PRO CARDS (Gold-Standard) */
+  .fifa-card {
+    width: 160px; height: 230px; background: var(--gold-gradient);
+    border-radius: 12px 12px 50px 12px; position: relative; padding: 12px;
+    color: #2c2401; box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255,255,255,0.4); display: flex; flex-direction: column;
   }
- .btn:hover { background-color: var(--bg-light); border-color: var(--text-secondary); }
- .btn-primary { background-color: var(--accent-green); border-color: var(--accent-green); color: #fff; }
- .btn-primary:hover { background-color: #4acb5f; }
- .input-field {
-    width: 100%;
-    background: var(--bg-dark);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 12px;
-    border-radius: var(--radius-md);
-    font-size: 1em;
-  }
+  .fifa-card:active { transform: scale(0.94); }
+  .card-rating { font-size: 36px; font-weight: 900; line-height: 0.8; letter-spacing: -2px; }
+  .card-pos { font-size: 14px; font-weight: bold; text-transform: uppercase; }
+  .card-name { text-align: center; font-weight: 900; font-size: 15px; text-transform: uppercase; margin: 10px 0; border-bottom: 1.5px solid rgba(0,0,0,0.1); padding-bottom: 4px; }
+  .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px; font-weight: 800; }
+  .stat-row { display: flex; gap: 6px; }
+  .stat-val { font-weight: 900; width: 22px; text-align: center; }
 
-  /* System-Overlays (Loader, Login) */
- .system-overlay {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    background: rgba(13, 17, 23, 0.85);
-    backdrop-filter: blur(10px);
-    transition: opacity.3s ease;
+  /* SCOUTING-FEED & INTERNET-CARDS */
+  .scouting-card {
+    background: var(--bg-medium); border: 1px solid var(--border-color);
+    border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px;
+    border-left: 4px solid var(--accent-blue); transition: 0.3s;
   }
- .system-overlay[hidden] { display: none; }
- .spinner { /*... (wie gehabt)... */ }
-  #login-screen { flex-direction: column; gap: 20px; }
- .login-box { width: 380px; padding: 40px; background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
- .login-title { text-align: center; margin-bottom: 24px; font-size: 24px; font-weight: 300; letter-spacing: 2px; }
+  .scouting-card:hover { background: var(--bg-light); border-color: var(--accent-blue); }
+  .scouting-source { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-blue); margin-bottom: 4px; }
 
-  /* Haupt-App-Layout */
- .app-container {
-    display: grid;
-    grid-template-rows: 60px 1fr;
-    grid-template-columns: 280px 1fr 350px;
-    height: 100vh;
-    padding: 12px;
-    gap: 12px;
-  }
- .app-header { grid-column: 1 / -1; }
- .left-panel { /* Spielerliste / Taktik-Varianten */ }
- .main-arena { /* Taktikboard */ }
- .right-panel { /* Toni AI Chat */ }
- .panel { background: var(--bg-medium); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 16px; display:flex; flex-direction:column; }
-
-  /* Header */
- .app-header { display: flex; align-items: center; justify-content: space-between; }
- .user-profile { display: flex; align-items: center; gap: 12px; }
- .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-light); display:flex; align-items:center; justify-content:center; font-weight:bold; }
- .live-session-btn { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid var(--accent-red); color: var(--accent-red); }
- .live-session-btn.active { background-color: var(--accent-red); color: #fff; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); } 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); } }
+  /* BIO-LABOR ANIMATIONEN */
+  .pulse-heart { color: var(--accent-red); animation: heartbeat 0.8s infinite; display: inline-block; }
+  @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
   
-  /* Arena */
-  #board-wrap { flex: 1; position: relative; border-radius: var(--radius-md); overflow: hidden; background-color: #011a01; }
-  #main-canvas { position: absolute; top: 0; left: 0; }
-  #arena-controls { position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: var(--radius-md); }
+  .readiness-bar { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 8px; overflow: hidden; }
+  .readiness-fill { height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); }
 
-  /* Dialog / Modal Overlays */
- .dialog-overlay {
-    position: fixed;
-    inset: 0;
-    display: none; /* wird zu 'flex' bei Aktivierung */
-    align-items: center;
-    justify-content: center;
-    z-index: 5000;
-    background: rgba(13, 17, 23, 0.7);
-    backdrop-filter: blur(8px);
+  /* APP LAYOUT FIX (1500 Zeilen Framework) */
+  .app-container {
+    display: grid; grid-template-rows: 65px 1fr;
+    grid-template-columns: 280px 1fr 380px;
+    height: 100vh; padding: 12px; gap: 12px;
   }
- .dialog-overlay.is-active { display: flex; }
- .dialog-box {
-    width: 90vw;
-    max-width: 1400px;
-    height: 90vh;
-    background: var(--bg-medium);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
-  }
- .dialog-header { padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
- .dialog-title { font-size: 18px; font-weight: 600; }
- .dialog-content { flex: 1; padding: 24px; overflow: auto; }
 
-  /* Stadionzeitung Editor Stile */
- .magazine-editor { display: grid; grid-template-columns: 300px 1fr; gap: 24px; height: 100%; }
- .magazine-pages-overview { display: flex; flex-direction: column; gap: 12px; }
- .page-thumbnail { aspect-ratio: 210 / 297; border: 2px dashed var(--border-color); background: var(--bg-dark); cursor: pointer; }
- .page-thumbnail.active { border-color: var(--accent-blue); }
- .magazine-page-view { background: #fff; color: #000; aspect-ratio: 210 / 297; max-height: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
- .editable-region { border: 1px dashed #cccccc; min-height: 50px; padding: 10px; transition: background-color.2s; }
- .editable-region:hover { background-color: #e0f0ff; }
+  @media (max-width: 1100px) {
+    .app-container { grid-template-columns: 80px 1fr; grid-template-rows: 65px 1fr 250px; }
+    .right-panel { grid-column: 1 / -1; }
+  }
+
+  /* HUB NAVIGATION GRID */
+  .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .hub-item {
+    background: var(--bg-medium); border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg); padding: 20px; text-align: center;
+    cursor: pointer; transition: 0.3s;
+  }
+  .hub-item:hover { border-color: var(--neon); background: var(--neon-dim); transform: translateY(-5px); }
+  .hub-icon { font-size: 32px; margin-bottom: 12px; display: block; }
+
+  /* EDITOR OPTIMIERUNG */
+  .input-field { background: var(--bg-dark); border: 1px solid var(--border-color); color: #fff; font-size: 16px; padding: 12px; border-radius: 8px; }
+  .input-field:focus { border-color: var(--neon); outline: none; box-shadow: 0 0 15px var(--neon-dim); }
 </style>
-</head>
-<body>
-
-<!-- System-Overlay für Ladezustände -->
-<div id="system-loader" class="system-overlay">
-  <div class="spinner"></div>
-  <div id="system-message" class="message" style="margin-top:20px; color:var(--text-secondary);">SYSTEM WIRD GESTARTET...</div>
-</div>
-
-<!-- Login-Screen -->
-<div id="login-screen" class="system-overlay">
-  <div class="login-box">
-    <h1 class="login-title">TONI 2.0</h1>
-    <form id="login-form">
-      <div style="margin-bottom: 16px;">
-        <label for="username" class="text-muted" style="display:block; margin-bottom:6px;">Benutzerprofil</label>
-        <select id="username" class="input-field">
-          <!-- Profile werden dynamisch geladen -->
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary" style="width:100%; padding:12px;">SYSTEM LADEN</button>
-      <div id="login-error" class="text-red" style="margin-top:12px; text-align:center;"></div>
-    </form>
-  </div>
-</div>
-
-<!-- Haupt-App-Container (anfangs versteckt) -->
-<div id="main-app" class="app-container" style="display:none;">
-  
-  <!-- 1. Header-Leiste -->
-  <header class="app-header panel">
-    <div class="user-profile">
-      <div id="user-avatar" class="user-avatar"></div>
-      <div>
-        <div id="user-name" style="font-weight: 600;"></div>
-        <div id="user-role" class="text-muted"></div>
-      </div>
-    </div>
-    <div class="main-controls" style="display:flex; align-items:center; gap: 20px;">
-        <button id="live-session-btn" class="live-session-btn" title="Live-Session starten/stoppen">🎙️</button>
-        <button id="admin-panel-btn" class="btn" style="display:none;">👑 Admin Panel</button>
-    </div>
-  </header>
-
-  <!-- 2. Linkes Panel -->
-  <aside class="left-panel panel">
-    <!-- Wird dynamisch mit Spielerliste oder Taktik-Optionen gefüllt -->
-  </aside>
-
-  <!-- 3. Haupt-Arena -->
-  <main class="main-arena panel" style="padding: 8px;">
-    <div id="board-wrap">
-      <canvas id="main-canvas"></canvas>
-      <div id="arena-controls">
-        <!-- Werkzeuge werden hier dynamisch eingefügt -->
-      </div>
-    </div>
-  </main>
-
-  <!-- 4. Rechtes Panel -->
-  <aside class="right-panel panel">
-    <div id="toni-chat-header" style="border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:12px;">
-      <h3 style="margin:0; font-size:16px;">TONI <span id="ai-status" class="text-red">●</span></h3>
-    </div>
-    <div id="chat-box" class="scroll-content" style="flex:1;"></div>
-    <form id="chat-form" onsubmit="return false;" style="display:flex; gap:8px; margin-top:12px;">
-      <input type="text" id="user-cmd" class="input-field" placeholder="Befehl eingeben...">
-      <button type="submit" class="btn">➤</button>
-    </form>
-  </aside>
-</div>
-
-<!-- Dialog Overlays (anfangs versteckt) -->
-<div id="management-hub" class="dialog-overlay">
-  <div class="dialog-box">
-    <header class="dialog-header">
-      <h2 class="dialog-title">🏢 Management Cockpit</h2>
-      <button class="btn" onclick="UIManager.closeDialog('management-hub')">✕</button>
-    </header>
-    <div id="management-content" class="dialog-content">
-      <!-- Inhalt des Management-Bereichs wird hier geladen -->
-    </div>
-  </div>
-</div>
-
-<div id="magazine-studio" class="dialog-overlay">
-  <div class="dialog-box">
-    <header class="dialog-header">
-      <h2 class="dialog-title">📰 Stadionzeitung Studio</h2>
-      <button class="btn" onclick="UIManager.closeDialog('magazine-studio')">✕</button>
-    </header>
-    <div class="dialog-content">
-        <div id="magazine-editor" class="magazine-editor">
-            <!-- Layout für den Editor wird hier dynamisch erstellt -->
-        </div>
-    </div>
-  </div>
-</div>
-
-<div id="player-dashboard" class="dialog-overlay">
-    <!-- Vollbild-Dashboard für den einzelnen Spieler -->
-</div>
-
-<div id="admin-panel-dialog" class="dialog-overlay">
-    <!-- Das geheime Admin-Panel -->
-</div>
-
-</body>
-</html>
-<script>
-/*
-
-TONI 2.0 | A-License Edition | Core Logic Part 1
-
-Modul-Struktur:
-- MockData: Die "Datenbank" für die Simulation mit tiefen, realistischen Daten.
-- AppState: Der zentrale State-Manager (Single Source of Truth).
-- ApiService: Simulierte Backend-Kommunikation.
-- App: Der Haupt-Controller, der alles initialisiert und steuert.
-
-*/
-
 // -----------------------------------------------------------------------------
-// MODULE: MockData - Die simulierte Datenbank der App
-// -----------------------------------------------------------------------------
-const MockData = {
-  // Benutzerprofile für den Login
-  users: {
-    "ralf-meier": {
-      id: "ralf-meier",
-      name: "Ralf Meier",
-      role: "Cheftrainer",
-      avatar: "RM",
-      permissions: ["view_team", "edit_tactic", "view_analytics", "view_magazine"],
-    },
-    "sabine-keller": {
-      id: "sabine-keller",
-      name: "Sabine Keller",
-      role: "Daten-Analystin",
-      avatar: "SK",
-      permissions: ["view_team", "view_analytics", "edit_magazine"],
-    },
-    "jens-schmidt": {
-      id: "jens-schmidt",
-      name: "Jens Schmidt",
-      role: "Manager",
-      avatar: "JS",
-      permissions: ["view_team", "view_finances", "edit_contracts", "view_magazine"],
-    },
-    "admin": {
-      id: "admin",
-      name: "Admin",
-      role: "System-Administrator",
-      avatar: "👑",
-      permissions: ["*"], // Wildcard für alle Berechtigungen
-    },
-  },
-  
-  // Detaillierte Vereins- und Spielerdaten
-  team: {
-    id: "fc-hersfeld",
-    name: "FC Hersfeld",
-    league: "Regionalliga",
-    squad: {
-      "p-1": {
-        id: "p-1",
-        personal: { name: "Müller", num: 13, position: "ST" },
-        attributes: { pac: 90, sho: 88, pas: 80, dri: 85, def: 40, phy: 78, overall: 88 },
-        canvas: { x: 800, y: 250 },
-        medical: { status: "fit", readiness: 95, history: [{date: "2025-10-15", injury: "Muskelfaserriss", duration_days: 21}] },
-        contract: { salary_monthly: 15000, valid_until: "2028-06-30", clause: "Keine" }
-      },
-      "p-2": {
-        id: "p-2",
-        personal: { name: "Kimmich", num: 6, position: "ZDM" },
-        attributes: { pac: 75, sho: 78, pas: 91, dri: 84, def: 82, phy: 79, overall: 89 },
-        canvas: { x: 500, y: 350 },
-        medical: { status: "aufbautraining", readiness: 60, history: [{date: "2026-01-20", injury: "Bänderdehnung", duration_days: 14}] },
-        contract: { salary_monthly: 18000, valid_until: "2029-06-30", clause: "Ausstiegsklausel 25 Mio €" }
-      },
-      "p-3": {
-        id: "p-3",
-        personal: { name: "Hummels", num: 5, position: "IV" },
-        attributes: { pac: 65, sho: 60, pas: 78, dri: 72, def: 90, phy: 84, overall: 86 },
-        canvas: { x: 250, y: 350 },
-        medical: { status: "fit", readiness: 92, history: [] },
-        contract: { salary_monthly: 12000, valid_until: "2027-06-30", clause: "Keine" }
-      }
-      //... weitere Spieler hier
-    }
-  },
-
-  // Management- und Finanzdaten
-  finances: {
-    budget_total: 2500000,
-    costs: {
-      salaries_players: 1250000,
-      salaries_staff: 450000,
-      infrastructure: 300000,
-      travel: 150000,
-      nlz: 200000,
-    },
-    sponsors: [
-      { name: "ToniTech Labs", contribution: 500000, status: "aktiv" },
-      { name: "Zweipunktnull Med", contribution: 350000, status: "aktiv" }
-    ]
-  },
-};
-
-// -----------------------------------------------------------------------------
-// MODULE: AppState - Der zentrale Zustand der Anwendung
-// -----------------------------------------------------------------------------
-const AppState = {
-  user: null, // Das eingeloggte Benutzerprofil
-  team: null, // Die geladenen Team-Daten
-  finances: null, // Die geladenen Finanz-Daten
-  ui: {
-    activeTool: 'select',
-    activeOverlay: null,
-    isLiveSession: false,
-  },
-  settings: {
-    // Hier können Benutzereinstellungen gespeichert werden
-  },
-};
-
-// -----------------------------------------------------------------------------
-// MODULE: ApiService - Simuliert die Server-Kommunikation
+// ERWEITERTES MODULE: ApiService - Internet-Suche & KI-Schnittstelle
 // -----------------------------------------------------------------------------
 const ApiService = {
-  // Simuliert eine Netzwerklatenz
-  _simulateLatency(ms = 300) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  },
-
-  async getAvailableProfiles() {
-    await this._simulateLatency(100);
-    // Gibt eine Liste von Profilen für den Login-Screen zurück
-    return Object.values(MockData.users).map(u => ({ id: u.id, name: `${u.name} (${u.role})` }));
-  },
-
-  async login(userId) {
-    await this._simulateLatency();
-    const user = MockData.users[userId];
-    if (user) {
-      return user;
-    } else {
-      throw new Error("Benutzerprofil nicht gefunden.");
-    }
-  },
-
-  async getTeamData() {
-    await this._simulateLatency();
-    return MockData.team;
-  },
-
-  async getFinanceData() {
-    await this._simulateLatency();
-    return MockData.finances;
-  },
-  
-  async searchWeb(query) {
-    await this._simulateLatency(1500); // Websuche dauert länger
-    console.log(`WEB SEARCH (SIMULATED) FOR: "${query}"`);
-    // Gibt einen Dummy-Text zurück, als hätte man eine Webseite gescannt
-    return `
-      Simuliertes Suchergebnis für "${query}":
-      Die Rondo-Übung '6 gegen 2' ist eine klassische und hocheffektive Methode zur Verbesserung des Passspiels auf engem Raum.
-      - **Organisation:** Ein Feld von ca. 15x15 Metern wird mit Hütchen markiert.
-      - **Ablauf:** Sechs Spieler positionieren sich an den Außenseiten, zwei Verteidiger versuchen in der Mitte, den Ball zu erobern. Ziel der Außenspieler ist es, mindestens 10 Pässe am Stück zu schaffen.
-      - **Coaching-Punkte:** Schnelle Ballverarbeitung, Blickkontakt, 'offener Stand' zum Spielfeld.
-    `;
-  }
-};
-
-// -----------------------------------------------------------------------------
-// App - Haupt-Controller
-// -----------------------------------------------------------------------------
-const App = {
-  init() {
-    console.log("TONI 2.0 | A-License Edition | Initializing...");
-    // Später: UIManager.init(), ArenaEngine.init(), etc.
-    
-    // Versuchen, eine bestehende Session zu laden
-    const sessionUserId = sessionStorage.getItem('toni2_userid');
-    if (sessionUserId) {
-      this.login(sessionUserId);
-    } else {
-      this.showLoginScreen();
-    }
-  },
-
-  async showLoginScreen() {
-    const profiles = await ApiService.getAvailableProfiles();
-    const select = document.getElementById('username');
-    select.innerHTML = profiles.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-    
-    document.getElementById('login-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const selectedUserId = document.getElementById('username').value;
-        this.login(selectedUserId);
-    });
-
-    document.getElementById('system-loader').hidden = true;
-    document.getElementById('login-screen').hidden = false;
-  },
-
-  async login(userId) {
-    const loader = document.getElementById('system-loader');
-    const loginScreen = document.getElementById('login-screen');
-    const loginError = document.getElementById('login-error');
-
-    loader.hidden = false;
-    loginScreen.hidden = true;
-    loginError.textContent = '';
-
+  async fetchOllama(prompt) {
+    console.log("Connecting to local Ollama instance...");
     try {
-      const user = await ApiService.login(userId);
-      AppState.user = user;
-      sessionStorage.setItem('toni2_userid', userId); // Session für Reloads speichern
-      
-      console.log(`User logged in: ${user.name} (${user.role})`);
-      this.bootstrap();
-
-    } catch (error) {
-      loginError.textContent = error.message;
-      loader.hidden = true;
-      loginScreen.hidden = false;
+      const response = await fetch(`${AppState.settings.ollamaUrl || 'http://localhost:11434'}/api/generate`, {
+        method: 'POST',
+        body: JSON.stringify({
+          model: AppState.settings.ollamaModel || 'llama3',
+          prompt: prompt,
+          stream: false
+        })
+      });
+      return await response.json();
+    } catch (err) {
+      console.error("Ollama connection failed.", err);
+      return { response: "Fehler: Lokale KI (Ollama) nicht erreichbar. Bitte Server prüfen." };
     }
   },
 
-  async bootstrap() {
-    console.log("Bootstrapping application...");
-    // Lade alle notwendigen Daten parallel
-    const [teamData, financeData] = await Promise.all([
-      ApiService.getTeamData(),
-      // Lade Finanzen nur, wenn der Benutzer die Berechtigung hat
-      AppState.user.permissions.includes("view_finances") || AppState.user.permissions.includes("*")
-       ? ApiService.getFinanceData()
-        : Promise.resolve(null)
-    ]);
+  async searchWeb(query) {
+    // Simuliert eine RAG-Suche (Retrieval-Augmented Generation) [cite: 2026-02-19]
+    await new Promise(r => setTimeout(r, 1200)); 
+    
+    // Logik für Scouting-Anfragen
+    if (query.includes("gegner") || query.includes("asbach")) {
+      return [
+        { source: "FUSSBALL.DE", title: "SV Asbach: Analyse", content: "Letztes Spiel 2:1 Sieg. Fokus auf Flanken über Rechts.", type: "tactic" },
+        { source: "REGIO-NEWS", title: "Verletzungs-Update", content: "Top-Stürmer fällt am Wochenende mit Muskelfaserriss aus.", type: "news" }
+      ];
+    }
+    
+    // Standard-Recherche
+    return [{ 
+      source: "TRAINER-WIKI", 
+      title: "6 gegen 2 Rondo", 
+      content: "Feldgröße 15x15m. Fokus auf schnelles Umschalten nach Ballverlust.",
+      type: "exercise" 
+    }];
+  },
 
-    AppState.team = teamData;
-    AppState.finances = financeData;
-    
-    console.log("Data loaded. Starting UI...");
-
-    // Platzhalter für die nächsten Schritte:
-    // UIManager.init();
-    // UIManager.showApp();
-    // ArenaEngine.init();
-    
-    // Vorerst zeigen wir nur die geladenen Daten in der Konsole an
-    // und verstecken den Loader
-    console.log("AppState after bootstrap:", AppState);
-    document.getElementById('system-loader').hidden = true;
-    document.getElementById('main-app').style.display = 'grid'; // Zeige die App-Struktur
-    
-    // UI mit Benutzerdaten füllen (Beispiel)
-    document.getElementById('user-name').textContent = AppState.user.name;
-    document.getElementById('user-role').textContent = AppState.user.role;
-    document.getElementById('user-avatar').textContent = AppState.user.avatar;
-    if (AppState.user.permissions.includes('*')) {
-      document.getElementById('admin-panel-btn').style.display = 'block';
+  async importScoutingData(data) {
+    console.log("Importing to AppState:", data);
+    ToniAI.speak("Daten werden in die Strategie-Matrix übernommen...");
+    // Integration in die Taktik-Logik
+    if (data.type === "tactic") {
+      ArenaEngine.Tactic.currentOpponentIntel = data.content;
     }
   }
 };
 
-// Startet die App, sobald das DOM vollständig geladen ist.
-document.addEventListener('DOMContentLoaded', () => App.init());
-</script>
-</body>
-</html>
-<script>
-// Fortsetzung von Teil 2
-
 // -----------------------------------------------------------------------------
-// MODULE: UIManager - Verwaltet alle DOM-Manipulationen und UI-Events
-// -----------------------------------------------------------------------------
-const UIManager = {
-  elements: {}, // Cache für DOM-Elemente
-
-  init() {
-    const ids = [
-      'system-loader', 'system-message', 'login-screen', 'login-form', 'login-error', 'username',
-      'main-app', 'app-header', 'left-panel', 'main-arena', 'right-panel',
-      'user-avatar', 'user-name', 'user-role', 'live-session-btn', 'admin-panel-btn',
-      'board-wrap', 'main-canvas', 'arena-controls',
-      'toni-chat-header', 'ai-status', 'chat-box', 'chat-form', 'user-cmd',
-      'management-hub', 'management-content',
-      'magazine-studio', 'magazine-editor',
-      'player-dashboard', 'admin-panel-dialog'
-    ];
-    ids.forEach(id => this.elements[id] = document.getElementById(id));
-    
-    this.bindEvents();
-    console.log("UIManager initialized.");
-  },
-
-  bindEvents() {
-    // Header-Buttons
-    this.elements['live-session-btn'].addEventListener('click', () => ToniAI.toggleLiveSession());
-    // Wichtige Navigations-Buttons (werden im linken Panel gerendert)
-    // Wir verwenden Event-Delegation auf dem Parent-Panel
-    this.elements['left-panel'].addEventListener('click', (e) => {
-        const target = e.target.closest('button[data-action]');
-        if (!target) return;
-
-        const action = target.dataset.action;
-        switch(action) {
-            case 'open-management-hub':
-                this.openDialog('management-hub');
-                this.renderManagementHub();
-                break;
-            case 'open-magazine-studio':
-                this.openDialog('magazine-studio');
-                this.renderMagazineStudio();
-                break;
-            case 'open-player-dashboard':
-                const playerId = target.dataset.playerId;
-                this.renderPlayerDashboard(playerId);
-                break;
-        }
-    });
-
-    // Admin Panel
-    this.elements['admin-panel-btn'].addEventListener('click', () => this.openDialog('admin-panel-dialog'));
-    
-    // AI Chat
-    this.elements['chat-form'].addEventListener('submit', () => ToniAI.processCommand());
-  },
-  
-  // ----- Generelle UI-Updates -----
-  showApp() {
-    this.elements['main-app'].style.display = 'grid';
-    this.updateHeader();
-    this.renderLeftPanel();
-    // ArenaEngine.setupCanvas(); // wird später hinzugefügt
-    // ArenaEngine.render(); // wird später hinzugefügt
-    ToniAI.init();
-  },
-
-  updateHeader() {
-    this.elements['user-name'].textContent = AppState.user.name;
-    this.elements['user-role'].textContent = AppState.user.role;
-    this.elements['user-avatar'].textContent = AppState.user.avatar;
-    if (AppState.user.permissions.includes('*')) {
-      this.elements['admin-panel-btn'].style.display = 'block';
-    }
-  },
-
-  // ----- Dialog / Overlay Management -----
-  openDialog(id) {
-    this.closeAllDialogs(); // Sicherstellen, dass nur ein Dialog offen ist
-    const dialog = this.elements[id];
-    if (dialog) {
-      dialog.classList.add('is-active');
-      AppState.ui.activeOverlay = id;
-    }
-  },
-  
-  closeDialog(id) {
-    const dialog = this.elements[id];
-    if (dialog) {
-      dialog.classList.remove('is-active');
-      if(AppState.ui.activeOverlay === id) {
-          AppState.ui.activeOverlay = null;
-      }
-    }
-  },
-
-  closeAllDialogs() {
-    document.querySelectorAll('.dialog-overlay').forEach(d => d.classList.remove('is-active'));
-    AppState.ui.activeOverlay = null;
-  },
-
-  // ----- Dynamisches Rendering der Inhalte -----
-  renderLeftPanel() {
-    let content = `<h2 style="font-size: 16px; margin: 0 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Hauptmenü</h2>`;
-
-    // Zeige Navigations-Buttons basierend auf Benutzer-Berechtigungen
-    if (AppState.user.permissions.includes('view_finances') || AppState.user.permissions.includes('*')) {
-        content += `<button class="btn" data-action="open-management-hub" style="width:100%; margin-bottom:10px;">🏢 Management Cockpit</button>`;
-    }
-    if (AppState.user.permissions.includes('view_magazine') || AppState.user.permissions.includes('*')) {
-        content += `<button class="btn" data-action="open-magazine-studio" style="width:100%; margin-bottom:10px;">📰 Stadionzeitung Studio</button>`;
-    }
-    
-    content += `<h2 style="font-size: 16px; margin: 24px 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Kader</h2>`;
-    content += '<div class="scroll-content">';
-    // Spielerliste
-    for (const player of Object.values(AppState.team.squad)) {
-      content += `
-        <button data-action="open-player-dashboard" data-player-id="${player.id}" style="width:100%; display:flex; align-items:center; gap:12px; margin-bottom:8px; text-align:left;" class="btn">
-          <span style="background:var(--bg-dark); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-weight:bold;">${player.personal.num}</span>
-          <div>
-            <div>${player.personal.name}</div>
-            <small class="text-muted">${player.personal.position}</small>
-          </div>
-          <span style="margin-left:auto; font-size:16px; font-weight:bold;">${player.attributes.overall}</span>
-        </button>
-      `;
-    }
-    content += '</div>';
-    this.elements['left-panel'].innerHTML = content;
-  },
-  
-  renderManagementHub() {
-    // Hier wird das Management-Cockpit dynamisch basierend auf den Daten und Berechtigungen aufgebaut.
-    // DIES IST EINE VEREINFACHTE DARSTELLUNG FÜR DEN TEST
-    let content = `<h2>Finanzübersicht (Simuliert)</h2>`;
-    if (AppState.finances) {
-        const totalCosts = Object.values(AppState.finances.costs).reduce((a, b) => a + b, 0);
-        content += `
-            <p><strong>Gesamtbudget:</strong> ${AppState.finances.budget_total.toLocaleString('de-DE')} €</p>
-            <p class="text-red"><strong>Aktuelle Kosten (p.a.):</strong> ${totalCosts.toLocaleString('de-DE')} €</p>
-            <p class="text-green"><strong>Verbleibend:</strong> ${(AppState.finances.budget_total - totalCosts).toLocaleString('de-DE')} €</p>
-        `;
-    } else {
-        content += `<p class="text-muted">Keine Zugriffsberechtigung auf Finanzdaten.</p>`;
-    }
-    this.elements['management-content'].innerHTML = content;
-  },
-  
-  renderMagazineStudio() {
-    // Hier wird der Editor für die Stadionzeitung initialisiert
-    this.elements['magazine-editor'].innerHTML = `
-        <div>
-            <h3>Seitenübersicht</h3>
-            <div class="magazine-pages-overview">
-                <div class="page-thumbnail active">Seite 1 (Cover)</div>
-                <div class="page-thumbnail">Seite 2</div>
-                <button class="btn" style="width:100%; margin-top:12px;">+ Seite hinzufügen</button>
-            </div>
-        </div>
-        <div class="magazine-page-view">
-            <div class="editable-region" contenteditable="true">
-                <h1>Schlagzeile hier klicken zum Bearbeiten</h1>
-            </div>
-            <div class="editable-region" contenteditable="true" style="margin-top:20px;">
-                Dies ist ein Textblock. Toni kann hier automatisch Inhalte einfügen, die du dann verfeinern kannst.
-            </div>
-        </div>
-    `;
-  },
-  
-  renderPlayerDashboard(playerId) {
-    // Dies würde einen detaillierten Dialog für den Spieler öffnen.
-    // Vorerst als Platzhalter eine einfache Benachrichtigung:
-    ToniAI.speak(`Öffne Spieler-Dashboard für ${AppState.team.squad[playerId].personal.name}... (Feature in Entwicklung)`);
-    console.log("Angeforderte Spielerdaten:", AppState.team.squad[playerId]);
-  }
-};
-
-// -----------------------------------------------------------------------------
-// MODULE: ToniAI - Steuert den KI-Assistenten und die Live-Session
+// OPTIMIERTES MODULE: ToniAI - Befehls-Dispatcher & RAG-Logik
 // -----------------------------------------------------------------------------
 const ToniAI = {
-  isInitialized: false,
-  recognition: null, // Für die Web Speech API
+  async processCommand(commandOverride = null) {
+    const input = document.getElementById('user-cmd');
+    const cmd = (commandOverride || input.value.trim()).toLowerCase();
+    if (!cmd) return;
 
-  init() {
-    this.elements = UIManager.elements; // Shortcut
-    this.updateStatus('online', 'var(--accent-green)');
-    this.speak(`System-Status für ${AppState.user.name}: Alle Module geladen. Bereit für Anweisungen.`);
-    this.setupSpeechRecognition();
-  },
+    this.speak(commandOverride || input.value.trim(), true);
+    if (!commandOverride) input.value = '';
 
-  updateStatus(text, color) {
-    this.elements['ai-status'].textContent = `● ${text.toUpperCase()}`;
-    this.elements['ai-status'].style.color = color;
-  },
-
-  speak(message, isUser = false) {
-    const chatBox = this.elements['chat-box'];
-    const msgDiv = document.createElement('div');
-    msgDiv.style.marginBottom = '12px';
+    // 1. INTERNET-RECHERCHE & SCOUTING
+    if (cmd.includes("suche") || cmd.includes("scoute") || cmd.includes("info")) {
+      this.updateStatus('searching', 'var(--accent-blue)');
+      this.speak("Ich scanne das Internet nach aktuellen Daten...");
+      const results = await ApiService.searchWeb(cmd);
+      
+      results.forEach(res => {
+        this.renderScoutingCard(res);
+      });
+      
+      this.updateStatus('online', 'var(--accent-green)');
+    } 
     
-    if (isUser) {
-        msgDiv.style.textAlign = 'right';
-        msgDiv.innerHTML = `<div style="display:inline-block; background:var(--accent-blue); color: #fff; padding:8px 12px; border-radius:12px 12px 0 12px;">${message}</div>`;
-    } else {
-        msgDiv.innerHTML = `<small style="color:var(--text-secondary); font-weight:bold;">TONI:</small><div style="padding: 4px 0;">${message}</div>`;
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(message);
-            utterance.lang = 'de-DE';
-            window.speechSynthesis.speak(utterance);
-        }
+    // 2. TAKTIK-VISUALISIERUNG
+    else if (cmd.includes("zeige") || cmd.includes("zeichne") || cmd.includes("rondo")) {
+      ArenaEngine.Tactic.visualizeExercise(cmd);
+    } 
+    
+    // 3. KOMPLEXE ANALYSE VIA OLLAMA (KI-Brain)
+    else {
+      this.updateStatus('thinking', 'var(--neon)');
+      const aiRes = await ApiService.fetchOllama(cmd);
+      this.speak(aiRes.response);
+      this.updateStatus('online', 'var(--accent-green)');
     }
-    chatBox.appendChild(msgDiv);
+  },
+
+  renderScoutingCard(data) {
+    const chatBox = document.getElementById('chat-box');
+    const card = document.createElement('div');
+    card.className = "scouting-card";
+    card.innerHTML = `
+      <div class="scouting-source">${data.source}</div>
+      <div style="font-weight:bold; margin-bottom:5px;">${data.title}</div>
+      <div style="font-size:12px; opacity:0.8;">${data.content}</div>
+      <button class="btn" style="font-size:10px; padding:4px 8px; margin-top:10px;" onclick="ApiService.importScoutingData(${JSON.stringify(data).replace(/"/g, '&quot;')})">IMPORT</button>
+    `;
+    chatBox.appendChild(card);
     chatBox.scrollTop = chatBox.scrollHeight;
   },
 
-  async processCommand(commandOverride = null) {
-      const input = this.elements['user-cmd'];
-      const command = commandOverride || input.value.trim();
-      if (!command) return;
-      
-      this.speak(command, true);
-      if(!commandOverride) input.value = '';
-
-      // *** HIER IST DIE ZENTRALE BEFEHLS-LOGIK ***
-      if (command.toLowerCase().includes("suche") || command.toLowerCase().includes("finde")) {
-          this.speak("Ich starte eine simulierte Websuche...");
-          const result = await ApiService.searchWeb(command);
-          this.speak(result);
-      } else if (command.toLowerCase().includes("zeichne") || command.toLowerCase().includes("zeige übung")) {
-          this.speak("Okay, ich analysiere die Übung und visualisiere sie auf dem Board. (Funktion in ArenaEngine)");
-          // ArenaEngine.visualizeExercise(command); // Platzhalter
-      } else {
-          this.speak("Das habe ich noch nicht gelernt, aber ich leite es an Ollama weiter. (Funktion in Entwicklung)");
-      }
-  },
-
-  // ----- Live-Session Management -----
-  setupSpeechRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      console.warn("Web Speech API wird von diesem Browser nicht unterstützt.");
-      this.elements['live-session-btn'].disabled = true;
-      return;
-    }
-    this.recognition = new SpeechRecognition();
-    this.recognition.continuous = true;
-    this.recognition.interimResults = false;
-    this.recognition.lang = 'de-DE';
-
-    this.recognition.onresult = (event) => {
-      const transcript = event.results[event.results.length - 1][0].transcript.trim();
-      this.speak(`Befehl erkannt: "${transcript}"`, true);
-      this.processCommand(transcript);
-    };
-    this.recognition.onerror = (event) => {
-        console.error("Speech Recognition Error:", event.error);
-        this.updateStatus('error', 'var(--accent-red)');
-    };
-    this.recognition.onend = () => {
-        // Starte die Erkennung neu, wenn sie aktiv sein soll (z.B. bei kurzen Pausen)
-        if (AppState.ui.isLiveSession) {
-            this.recognition.start();
-        }
-    };
-  },
-
-  toggleLiveSession() {
-    if (!this.recognition) return;
-    AppState.ui.isLiveSession =!AppState.ui.isLiveSession;
-    const btn = this.elements['live-session-btn'];
-
-    if (AppState.ui.isLiveSession) {
-      btn.classList.add('active');
-      this.recognition.start();
-      this.speak("Live-Session gestartet. Ich höre jetzt zu.");
-      this.updateStatus('listening', 'var(--accent-red)');
+  speak(msg, isUser = false) {
+    // ... (Deine bestehende speak-Logik mit TTS)
+    const chatBox = document.getElementById('chat-box');
+    const div = document.createElement('div');
+    div.style.marginBottom = "15px";
+    if(isUser) {
+      div.style.textAlign = "right";
+      div.innerHTML = `<div style="display:inline-block; background:var(--accent-blue); padding:10px; border-radius:15px 15px 0 15px;">${msg}</div>`;
     } else {
-      btn.classList.remove('active');
-      this.recognition.stop();
-      this.speak("Live-Session beendet.");
-      this.updateStatus('online', 'var(--accent-green)');
+      div.innerHTML = `<small style="color:var(--text-secondary);">TONI:</small><div style="margin-top:5px;">${msg}</div>`;
+      // TTS
+      if('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(msg);
+        u.lang = 'de-DE';
+        window.speechSynthesis.speak(u);
+      }
+    }
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  },
+
+  updateStatus(text, color) {
+    const s = document.getElementById('ai-status');
+    if(s) {
+      s.textContent = `● ${text.toUpperCase()}`;
+      s.style.color = color;
     }
   }
 };
+// -----------------------------------------------------------------------------
+// ERWEITERUNG: UIManager - Medical Suite & BIA-Visualisierung
+// -----------------------------------------------------------------------------
+UIManager.renderMedicalSuite = function() {
+    const c = this.elements['management-content'] || document.getElementById('hub-content');
+    c.className = "scroll-content";
+    
+    let html = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="color:var(--neon); margin:0;">🧪 BIA-DIAGNOSTIK & BIO-MONITORING</h3>
+            <div class="text-muted" style="font-size:10px;">STANDORT: BAD HERSFELD | LIVE-FEED</div>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:15px;">
+    `;
 
-// App-Controller anpassen, um den UIManager zu initialisieren
-App.bootstrap = async function() { // überschreibt die alte Funktion
-    console.log("Bootstrapping application...");
-    const [teamData, financeData] = await Promise.all([
-        ApiService.getTeamData(),
-        AppState.user.permissions.includes("view_finances") || AppState.user.permissions.includes("*")
-        ? ApiService.getFinanceData()
-          : Promise.resolve(null)
-    ]);
-    AppState.team = teamData;
-    AppState.finances = financeData;
-    
-    console.log("Data loaded. Initializing UI...");
-    document.getElementById('system-loader').hidden = true;
-    
-    // Initialisiere den UIManager und zeige die App an
-    UIManager.init();
-    UIManager.showApp();
-    
-    console.log("AppState after bootstrap:", AppState);
+    Object.values(AppState.team.squad).forEach(p => {
+        const isWarning = p.medical.readiness < 75;
+        const trendIcon = p.medical.readiness > 85 ? '▲' : '▼';
+        
+        html += `
+            <div class="lab-entry" style="position:relative; border-left: 4px solid ${isWarning ? 'var(--accent-red)' : 'var(--neon)'};">
+                <div style="display:flex; justify-content:space-between;">
+                    <div>
+                        <strong style="font-size:16px;">${p.personal.name.toUpperCase()}</strong>
+                        <div class="text-muted">#${p.personal.num} | ${p.personal.position}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <span class="pulse-heart">❤️</span> <b style="font-size:18px;">${p.hr || 62}</b> <small>BPM</small>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:15px; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">
+                    <div style="text-align:center;"><small class="text-muted">FETT</small><br><b>${p.fat || '11.2'}%</b></div>
+                    <div style="text-align:center;"><small class="text-muted">MUSKEL</small><br><b>${p.muscle || '38.5'}kg</b></div>
+                    <div style="text-align:center;"><small class="text-muted">HRV</small><br><b>${p.hrv || '58'}ms</b></div>
+                </div>
+
+                <div style="margin-top:15px;">
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;">
+                        <span>READINESS SCORE</span>
+                        <span style="color:${isWarning ? 'var(--accent-red)' : 'var(--neon)'}">${p.medical.readiness}% ${trendIcon}</span>
+                    </div>
+                    <div class="readiness-bar">
+                        <div class="readiness-fill" style="width:${p.medical.readiness}%; background:${isWarning ? 'var(--accent-red)' : 'var(--neon)'};"></div>
+                    </div>
+                </div>
+                
+                ${isWarning ? `<div style="color:var(--accent-red); font-size:9px; font-weight:bold; margin-top:8px;">⚠️ BELASTUNG REDUZIEREN - REGENERATIONSBEDARF</div>` : ''}
+                
+                <button class="btn" style="width:100%; margin-top:12px; font-size:11px;" onclick="UIManager.renderPlayerDashboard('${p.id}')">VOLLSTÄNDIGE ANALYSE</button>
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    c.innerHTML = html;
 };
 
-</script>
-</body>
-</html>
-<script>
-// Fortsetzung von Teil 3
-
+// Spieler-Dashboard Erweiterung für BIA-Details
+UIManager.renderPlayerDashboard = function(playerId) {
+    const p = AppState.team.squad[playerId];
+    const dialog = this.elements['player-dashboard'];
+    
+    dialog.innerHTML = `
+        <div class="dialog-box" style="max-width: 900px;">
+            <header class="dialog-header">
+                <h2 class="dialog-title">BIO-PERFORMANCE AKTE: ${p.personal.name}</h2>
+                <button class="btn" onclick="UIManager.closeDialog('player-dashboard')">✕</button>
+            </header>
+            <div class="dialog-content">
+                <div style="display:grid; grid-template-columns: 1fr 2fr; gap:30px;">
+                    <div>
+                        <div class="fifa-card" style="margin: 0 auto;">
+                            <div class="card-rating">${p.attributes.overall}</div>
+                            <div class="card-pos">${p.personal.position}</div>
+                            <div style="text-align:center; font-size:50px; margin:10px 0;">👤</div>
+                            <div class="card-name">${p.personal.name}</div>
+                            <div class="card-stats">
+                                <div class="stat-row"><span class="stat-val">${p.attributes.pac}</span>PAC</div>
+                                <div class="stat-row"><span class="stat-val">${p.attributes.dri}</span>DRI</div>
+                                <div class="stat-row"><span class="stat-val">${p.attributes.sho}</span>SHO</div>
+                                <div class="stat-row"><span class="stat-val">${p.attributes.def}</span>DEF</div>
+                                <div class="stat-row"><span class="stat-val">${p.attributes.pas}</span>PAS</div>
+                                <div class="stat-row"><span class="stat-val">${p.attributes.phy}</span>PHY</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="color:var(--neon);">BIA KÖRPERZUSAMMENSETZUNG</h3>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                            <div style="background:var(--bg-dark); padding:15px; border-radius:10px;">
+                                <small class="text-muted">KÖRPERFETT-ANTEIL</small>
+                                <div style="font-size:24px; font-weight:bold;">${p.fat || '11.2'}%</div>
+                                <div style="color:var(--accent-green); font-size:11px;">OPTIMAL-BEREICH</div>
+                            </div>
+                            <div style="background:var(--bg-dark); padding:15px; border-radius:10px;">
+                                <small class="text-muted">SKELETT-MUSKELMASSE</small>
+                                <div style="font-size:24px; font-weight:bold;">${p.muscle || '38.5'}kg</div>
+                                <div style="color:var(--accent-blue); font-size:11px;">+0.4kg SEIT VORWOCHE</div>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin-top:25px; color:var(--accent-blue);">MEDIZINISCHER STATUS</h3>
+                        <p>Status: <b class="text-green">${p.medical.status.toUpperCase()}</b></p>
+                        <p class="text-muted" style="font-size:12px;">Letzte BIA-Messung: Heute, 08:45 Uhr</p>
+                        
+                        <div style="margin-top:20px; padding:15px; background:var(--neon-dim); border:1px solid var(--neon); border-radius:10px;">
+                            <strong>TONI'S COACHING-HINWEIS:</strong><br>
+                            <small>Aufgrund der HRV-Werte von ${p.hrv || '58'}ms empfehle ich für das Training heute eine reduzierte Intensität im Umschaltspiel.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    this.openDialog('player-dashboard');
+};
 // -----------------------------------------------------------------------------
-// MODULE: ArenaEngine - Verwaltet Canvas, Spieler, Zeichnungen, Interaktionen
+// ERWEITERUNG: UIManager - Redaktion & Business-Management
+// -----------------------------------------------------------------------------
+UIManager.renderMagazineStudio = function() {
+    const c = this.elements['magazine-editor'];
+    
+    // Dynamische Seiten-Logik [cite: 2026-02-07]
+    let html = `
+        <div style="display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: 100%;">
+            <div style="border-right: 1px solid var(--border-color); padding-right: 15px;">
+                <h4 style="color:var(--neon);">SEITEN-STRUKTUR</h4>
+                <div class="magazine-pages-overview">
+                    <div class="scouting-card active" style="border-left-color:var(--neon);">
+                        <small>SEITE 1</small><br>Cover & Headline
+                    </div>
+                    <div class="scouting-card">
+                        <small>SEITE 2</small><br>Taktik-Analyse
+                    </div>
+                    <div class="scouting-card">
+                        <small>SEITE 3</small><br>BIA-Report (Müller)
+                    </div>
+                    <button class="btn" style="width:100%; margin-top:10px;">+ NEUE SEITE</button>
+                </div>
+                <div style="margin-top:30px; padding:15px; background:var(--bg-dark); border-radius:10px;">
+                    <small class="text-muted">TONI REDAKTIONS-BOT:</small><br>
+                    <p style="font-size:11px;">Soll ich den Spielbericht vom letzten 3-4-3 Sieg automatisch generieren?</p>
+                    <button class="btn" style="font-size:10px;" onclick="ToniAI.speak('Generiere Entwurf...')">AUTO-FILL</button>
+                </div>
+            </div>
+            
+            <div class="magazine-page-view" style="padding: 40px; overflow-y: auto;">
+                <div style="max-width: 600px; margin: 0 auto; background: #fff; color: #000; min-height: 800px; padding: 50px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); font-family: 'Times New Roman', serif;">
+                    <div style="border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px; text-align: center;">
+                        <h1 style="margin:0; font-size: 38px; letter-spacing: -1px;">BAD HERSFELD TIMES</h1>
+                        <small>AUSGABE FEBRUAR 2026 | TITAN v8.5 EDITION</small>
+                    </div>
+                    <div class="editable-region" contenteditable="true">
+                        <h2 style="font-size: 28px;">UNAUFHALTSAM IM 3-4-3?</h2>
+                        <p>Die Taktikanalyse von Coach ${AppState.user.name} zeigt: Die Kompaktheit im Mittelfeld war der Schlüssel zum Erfolg gegen den SV Asbach.</p>
+                    </div>
+                    <div style="background:#f0f0f0; height: 250px; display: flex; align-items: center; justify-content: center; margin: 20px 0; border: 1px dashed #ccc;">
+                        <span class="text-muted">[ TAKTIK-SNAPSHOT HIER EINSETZEN ]</span>
+                    </div>
+                    <div class="editable-region" contenteditable="true">
+                        <p>Besonders die Bio-Werte von Müller (Readiness 95%) stachen hervor. Toni's Live-Monitoring erlaubte präzise Wechsel zum optimalen Zeitpunkt.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    c.innerHTML = html;
+};
+
+UIManager.renderBusinessWall = function() {
+    const c = this.elements['management-content'];
+    const fin = AppState.finances;
+    const totalCosts = Object.values(fin.costs).reduce((a, b) => a + b, 0);
+    
+    let html = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <div>
+                <h3 style="color:var(--accent-blue);">💰 FINANZ-COCKPIT</h3>
+                <div style="background:var(--bg-dark); padding:20px; border-radius:15px; border:1px solid var(--border-color);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                        <span>GESAMTBUDGET</span>
+                        <strong class="text-green">${fin.budget_total.toLocaleString()} €</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                        <span>FIXKOSTEN (STAFF/PROFIS)</span>
+                        <strong class="text-red">-${(fin.costs.salaries_players + fin.costs.salaries_staff).toLocaleString()} €</strong>
+                    </div>
+                    <div style="border-top:1px solid #333; padding-top:15px; display:flex; justify-content:space-between;">
+                        <span style="font-weight:bold;">LIQUIDITÄT</span>
+                        <strong style="font-size:20px; color:var(--neon);">${(fin.budget_total - totalCosts).toLocaleString()} €</strong>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top:30px; color:var(--accent-green);">🤝 SPONSOREN-RADAR</h3>
+                <div style="display:grid; gap:10px;">
+                    ${fin.sponsors.map(s => `
+                        <div class="scouting-card" style="display:flex; justify-content:space-between; align-items:center; border-left-color:var(--accent-green);">
+                            <div>
+                                <strong>${s.name}</strong><br>
+                                <small class="text-muted">${s.contribution.toLocaleString()} € / Saison</small>
+                            </div>
+                            <span class="text-green" style="font-size:10px;">AKTIV</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <div>
+                <h3 style="color:var(--text-secondary);">🏗️ INFRASTRUKTUR & NLZ</h3>
+                <div style="background:var(--bg-light); padding:20px; border-radius:15px;">
+                    <p style="font-size:12px;">Der Ausbau des Analysezentrums in Bad Hersfeld ist zu 85% abgeschlossen. Toni v2.5 benötigt die nächste Budgettranche für das Kamera-Upgrade.</p>
+                    <div class="readiness-bar"><div class="readiness-fill" style="width:85%;"></div></div>
+                    <button class="btn" style="width:100%; margin-top:20px; background:var(--accent-blue); color:#fff;" onclick="ToniAI.speak('Investition bestätigt. Analyse-Hardware wird bestellt.')">INVESTITION FREIGEBEN (200k)</button>
+                </div>
+                
+                <div style="margin-top:30px; padding:20px; background:var(--neon-dim); border-radius:15px; border:1px solid var(--neon);">
+                    <h4 style="margin:0;">MERCHANDISING-TRENDS</h4>
+                    <p style="font-size:11px;">Die Verkäufe der "Müller #13" Trikots sind nach der letzten Magazin-Story um 22% gestiegen.</p>
+                </div>
+            </div>
+        </div>
+    `;
+    c.innerHTML = html;
+};
+// -----------------------------------------------------------------------------
+// FINALES MODUL: ArenaEngine - High-Performance Tactics & Physics
 // -----------------------------------------------------------------------------
 const ArenaEngine = {
-  canvas: null,
-  ctx: null,
-  dpr: 1, // Device Pixel Ratio für scharfe Darstellung
+  canvas: null, ctx: null, dpr: 1,
+  isDragging: false, dragTarget: null,
   
-  isDragging: false,
-  dragTarget: null,
-  
-  // ----- Initialisierung -----
   init() {
-    this.canvas = UIManager.elements['main-canvas'];
+    this.canvas = document.getElementById('main-canvas');
     this.ctx = this.canvas.getContext('2d');
     this.dpr = window.devicePixelRatio || 1;
-    
     this.setupCanvas();
-    this.bindCanvasEvents();
+    this.bindEvents();
     this.renderControls();
-
-    this.Tactic.setFormation('trainer_343'); // Standard-Formation laden
-    this.History.saveState(); // Initialen Zustand speichern
-
-    window.addEventListener('resize', () => { this.setupCanvas(); this.render(); });
-    console.log("ArenaEngine initialized.");
+    this.startRenderLoop();
+    console.log("ArenaEngine Gold v8.5 active.");
   },
 
   setupCanvas() {
@@ -881,536 +469,131 @@ const ArenaEngine = {
     this.ctx.scale(this.dpr, this.dpr);
   },
 
-  renderControls() {
-    const tools = [
-        { id: 'select', icon: '🖐️', title: 'Auswählen & Verschieben' },
-        { id: 'arrow', icon: '→', title: 'Pfeil zeichnen' },
-        { id: 'line', icon: '—', title: 'Linie zeichnen' },
-        { id: 'zone', icon: '■', title: 'Zone markieren' },
-        { id: 'clear', icon: '🗑️', title: 'Alle Zeichnungen löschen' },
-    ];
-    let html = tools.map(t => `<button class="btn tool-btn" data-tool="${t.id}" title="${t.title}">${t.icon}</button>`).join('');
-    html += `<button class="btn tool-btn" id="btn-undo" title="Rückgängig">↩️</button>`;
-    html += `<button class="btn tool-btn" id="btn-redo" title="Wiederholen">↪️</button>`;
-    UIManager.elements['arena-controls'].innerHTML = html;
-    
-    // Event Listeners für die neuen Buttons
-    UIManager.elements['arena-controls'].addEventListener('click', (e) => {
-        const toolBtn = e.target.closest('[data-tool]');
-        if (toolBtn) this.setTool(toolBtn.dataset.tool);
-        if (e.target.closest('#btn-undo')) this.History.undo();
-        if (e.target.closest('#btn-redo')) this.History.redo();
-    });
-    this.setTool('select'); // Standardwerkzeug
+  // --- TAKTIK-LOGIK: 3-4-3 (TRAINER) VS 4-4-2 (TONI) [cite: 2026-02-07] ---
+  setFormation(mode) {
+    const actives = Object.values(AppState.team.squad).filter(p => p.medical.status === 'fit');
+    ToniAI.speak(`Initialisiere ${mode === 'match' ? '3-4-3 System' : 'Trainings-Modus'}...`);
+
+    if (mode === 'match') {
+      const f343 = [
+        {x:100, y:350}, // GK
+        {x:250, y:150}, {x:250, y:350}, {x:250, y:550}, // 3er Kette
+        {x:450, y:100}, {x:450, y:260}, {x:450, y:440}, {x:450, y:600}, // 4er Mittelfeld
+        {x:750, y:150}, {x:750, y:350}, {x:750, y:550} // 3er Sturm
+      ];
+      actives.forEach((p, i) => { if (f343[i]) { p.canvas.x = f343[i].x; p.canvas.y = f343[i].y; } });
+    } else {
+      // Trainings-Aufreihung (Bank)
+      Object.values(AppState.team.squad).forEach((p, i) => { 
+        p.canvas.x = 50 + (i * 60); p.canvas.y = 650; 
+      });
+    }
+    this.render();
   },
 
-  // ----- Event Handling -----
-  bindCanvasEvents() {
-    this.canvas.addEventListener('pointerdown', (e) => {
-        const pos = this.getCanvasPos(e);
-        const player = this.getPlayerAtPos(pos);
-        
-        if (AppState.ui.activeTool === 'select' && player) {
-            this.isDragging = true;
-            this.dragTarget = player;
-            this.canvas.style.cursor = 'grabbing';
-        } else {
-            this.Drawing.start(pos);
-        }
-    });
-
-    this.canvas.addEventListener('pointermove', (e) => {
-        const pos = this.getCanvasPos(e);
-        if (this.isDragging && this.dragTarget) {
-            this.dragTarget.canvas.x = pos.x;
-            this.dragTarget.canvas.y = pos.y;
-            this.render();
-        } else {
-            this.Drawing.update(pos);
-            if (this.Drawing.current) this.render();
-        }
-    });
-
-    this.canvas.addEventListener('pointerup', () => {
-        if (this.isDragging) {
-            this.isDragging = false;
-            this.dragTarget = null;
-            this.canvas.style.cursor = 'grab';
-            this.History.saveState();
-        } else {
-            this.Drawing.finish();
-        }
-    });
+  // --- RENDER LOOP (60 FPS) ---
+  startRenderLoop() {
+    const frame = () => {
+      this.render();
+      requestAnimationFrame(frame);
+    };
+    frame();
   },
 
-  getCanvasPos(e) {
-    const rect = this.canvas.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  },
-
-  getPlayerAtPos(pos) {
-    // Finde den obersten Spieler an der Klick-Position
-    return Object.values(AppState.team.squad)
-     .reverse() // Um von oben nach unten im DOM zu prüfen
-     .find(p => Math.hypot(p.canvas.x - pos.x, p.canvas.y - pos.y) < 25);
-  },
-
-  // ----- Haupt-Render-Loop -----
   render() {
-    requestAnimationFrame(() => {
-      const w = this.canvas.clientWidth;
-      const h = this.canvas.clientHeight;
-      this.ctx.clearRect(0, 0, w, h);
-      
-      this.drawPitch(w, h);
-      this.Drawing.renderAll();
-      Object.values(AppState.team.squad).forEach(p => this.drawPlayer(p));
-    });
-  },
-
-  drawPitch(w, h) {
-    //... (komplette Spielfeld-Zeichnungslogik, hier gekürzt)
+    const w = this.canvas.clientWidth;
+    const h = this.canvas.clientHeight;
+    this.ctx.clearRect(0, 0, w, h);
+    
+    // Spielfeld-Design
     this.ctx.fillStyle = '#011a01';
     this.ctx.fillRect(0, 0, w, h);
     this.ctx.strokeStyle = 'rgba(57, 255, 20, 0.2)';
-    this.ctx.lineWidth = 2;
-    this.ctx.strokeRect(25, 25, w - 50, h - 50); // Außenlinie
-    this.ctx.beginPath(); this.ctx.moveTo(w / 2, 25); this.ctx.lineTo(w / 2, h - 25); this.ctx.stroke(); // Mittellinie
-    this.ctx.beginPath(); this.ctx.arc(w / 2, h / 2, 70, 0, 2 * Math.PI); this.ctx.stroke(); // Mittelkreis
-  },
-
-  drawPlayer(p) {
-    const { x, y } = p.canvas;
-    const isGk = p.personal.position === 'GK';
-
-    // Puck-Schatten
+    this.ctx.setLineDash([]);
+    this.ctx.strokeRect(30, 30, w - 60, h - 60);
+    
+    // Mittellinie & Kreis
     this.ctx.beginPath();
-    this.ctx.arc(x, y + 2, 20, 0, 2 * Math.PI);
-    this.ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    this.ctx.fill();
-
-    // Puck
-    this.ctx.beginPath();
-    this.ctx.arc(x, y, 20, 0, 2 * Math.PI);
-    this.ctx.fillStyle = isGk? '#ffae00' : '#006eff';
-    this.ctx.fill();
-    this.ctx.strokeStyle = '#fff';
-    this.ctx.lineWidth = 2;
+    this.ctx.moveTo(w/2, 30); this.ctx.lineTo(w/2, h-30);
+    this.ctx.arc(w/2, h/2, 70, 0, Math.PI*2);
     this.ctx.stroke();
 
-    // Nummer
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = 'bold 18px var(--font-sans)';
-    this.ctx.textAlign = 'center';
-    this.ctx.textBaseline = 'middle';
-    this.ctx.fillText(p.personal.num, x, y);
-
-    // Name
-    this.ctx.fillStyle = 'rgba(0,0,0,0.7)';
-    this.ctx.roundRect(x - 35, y + 25, 70, 20, 5);
-    this.ctx.fill();
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = '600 11px var(--font-sans)';
-    this.ctx.fillText(p.personal.name, x, y + 35);
-  },
-
-  setTool(toolId) {
-    if (toolId === 'clear') {
-        AppState.drawings = [];
-        this.History.saveState();
-        this.render();
-        ToniAI.speak('Alle Zeichnungen entfernt.');
-        return;
-    }
-    AppState.ui.activeTool = toolId;
-    document.querySelectorAll('.tool-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tool === toolId);
+    // Spieler-Rendering (Titan-Style)
+    Object.values(AppState.team.squad).forEach(p => {
+      const { x, y } = p.canvas;
+      // Schatten
+      this.ctx.shadowBlur = 10; this.ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      this.ctx.fillStyle = p.personal.position === 'GK' ? '#ffae00' : 'var(--accent-blue)';
+      this.ctx.beginPath(); this.ctx.arc(x, y, 22, 0, Math.PI*2); this.ctx.fill();
+      
+      this.ctx.shadowBlur = 0;
+      this.ctx.fillStyle = '#fff'; this.ctx.font = 'bold 14px Arial';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText(p.personal.num, x, y + 5);
+      
+      this.ctx.font = '9px Arial';
+      this.ctx.fillText(p.personal.name.toUpperCase(), x, y + 40);
+      
+      // Bio-Readiness Warnung auf dem Feld
+      if (p.medical.readiness < 75) {
+        this.ctx.fillStyle = 'var(--accent-red)';
+        this.ctx.fillText('⚠️', x + 25, y - 10);
+      }
     });
-    this.canvas.style.cursor = toolId === 'select'? 'grab' : 'crosshair';
   },
 
-  //... weitere Sub-Module folgen
-};
-
-// -----------------------------------------------------------------------------
-// SUB-MODULE: ArenaEngine.Drawing - Management der Zeichen-Werkzeuge
-// -----------------------------------------------------------------------------
-ArenaEngine.Drawing = {
-  current: null, // Das Objekt, das gerade gezeichnet wird
-
-  start(pos) {
-    if (AppState.ui.activeTool === 'select') return;
-    this.current = {
-      id: `draw_${Date.now()}`,
-      type: AppState.ui.activeTool,
-      color: AppState.ui.activeTool === 'zone'? 'rgba(51, 153, 255, 0.2)' : 'rgba(255, 51, 51, 0.9)',
-      startX: pos.x, startY: pos.y, endX: pos.x, endY: pos.y
+  // --- TOUCH & DRAG (IPHONE OPTIMIZED) ---
+  bindEvents() {
+    const getPos = (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
     };
-  },
-  
-  update(pos) {
-    if (!this.current) return;
-    this.current.endX = pos.x; this.current.endY = pos.y;
-  },
 
-  finish() {
-    if (!this.current) return;
-    if (Math.hypot(this.current.endX - this.current.startX, this.current.endY - this.current.startY) > 10) {
-      if (!AppState.drawings) AppState.drawings = [];
-      AppState.drawings.push(this.current);
-      ArenaEngine.History.saveState();
-    }
-    this.current = null;
-    ArenaEngine.render();
-  },
+    this.canvas.onmousedown = this.canvas.ontouchstart = (e) => {
+      const pos = getPos(e);
+      this.dragTarget = Object.values(AppState.team.squad).find(p => Math.hypot(p.canvas.x - pos.x, p.canvas.y - pos.y) < 30);
+      if (this.dragTarget) this.isDragging = true;
+    };
 
-  renderAll() {
-    const drawings = AppState.drawings || [];
-    drawings.forEach(d => this.drawHelper(d));
-    if (this.current) this.drawHelper(this.current); // Zeichne das aktuelle Objekt live
-  },
+    this.canvas.onmousemove = this.canvas.ontouchmove = (e) => {
+      if (this.isDragging && this.dragTarget) {
+        const pos = getPos(e);
+        this.dragTarget.canvas.x = pos.x;
+        this.dragTarget.canvas.y = pos.y;
+        e.preventDefault();
+      }
+    };
 
-  drawHelper(drawing) {
-    const { ctx } = ArenaEngine;
-    const { type, color, startX, startY, endX, endY } = drawing;
-    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 4;
-
-    if (type === 'zone') {
-        ctx.fillRect(startX, startY, endX - startX, endY - startY);
-    } else { // 'arrow' oder 'line'
-         ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
-        if (type === 'arrow') {
-            const angle = Math.atan2(endY - startY, endX - startX);
-            ctx.beginPath(); ctx.moveTo(endX, endY);
-            ctx.lineTo(endX - 15 * Math.cos(angle - Math.PI / 6), endY - 15 * Math.sin(angle - Math.PI / 6));
-            ctx.moveTo(endX, endY);
-            ctx.lineTo(endX - 15 * Math.cos(angle + Math.PI / 6), endY - 15 * Math.sin(angle + Math.PI / 6));
-            ctx.stroke();
+    window.onmouseup = window.ontouchend = () => { 
+        if(this.isDragging) {
+            this.isDragging = false; 
+            ToniAI.speak("Positionen synchronisiert.");
         }
-    }
+    };
   }
 };
 
-// -----------------------------------------------------------------------------
-// SUB-MODULE: ArenaEngine.History - Undo/Redo Funktionalität
-// -----------------------------------------------------------------------------
-ArenaEngine.History = {
-    past: [], future: [],
-    
-    saveState() {
-        const state = JSON.stringify({
-            positions: Object.values(AppState.team.squad).map(p => ({ id: p.id, x: p.canvas.x, y: p.canvas.y })),
-            drawings: AppState.drawings || [],
-        });
-        if (this.past.length > 0 && this.past[this.past.length - 1] === state) return;
-        this.past.push(state);
-        this.future = [];
-        if (this.past.length > 50) this.past.shift();
-    },
-    
-    loadState(stateString) {
-        const state = JSON.parse(stateString);
-        state.positions.forEach(pos => {
-            if (AppState.team.squad[pos.id]) {
-                AppState.team.squad[pos.id].canvas.x = pos.x;
-                AppState.team.squad[pos.id].canvas.y = pos.y;
-            }
-        });
-        AppState.drawings = state.drawings;
-        ArenaEngine.render();
-    },
+// --- MAGAZIN EXPORT FUNKTION (WHATSAPP/PDF) ---
+function exportMagazine() {
+    ToniAI.speak("Bereite Export für Bad Hersfeld vor...");
+    const content = document.querySelector('.magazine-page-view').innerText;
+    const blob = new Blob([content], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = `whatsapp://send?text=${encodeURIComponent("NEUE STADIONZEITUNG: " + content)}`;
+    a.click();
+    ToniAI.speak("Magazin-Story an Team-Gruppe gesendet.");
+}
 
-    undo() {
-        if (this.past.length <= 1) return;
-        this.future.unshift(this.past.pop());
-        this.loadState(this.past[this.past.length - 1]);
-    },
-    redo() {
-        if (this.future.length === 0) return;
-        const nextState = this.future.shift();
-        this.past.push(nextState);
-        this.loadState(nextState);
-    }
-};
-
-// -----------------------------------------------------------------------------
-// SUB-MODULE: ArenaEngine.Tactic - Formations- und KI-Visualisierung
-// -----------------------------------------------------------------------------
-ArenaEngine.Tactic = {
-    formations: {
-        'trainer_343': { /* Positionen für 3-4-3 */ },
-        'opponent_442': { /* Positionen für 4-4-2 */ },
-    },
-    setFormation(formationId) {
-        // Logik zum Setzen der Spielerpositionen basierend auf der Formation
-        //... (vereinfacht für dieses Snippet)
-        ToniAI.speak(`Formation ${formationId} wird geladen...`);
-        this.visualizeExercise("Setze Spieler auf Standardpositionen."); // Beispiel
-    },
-    visualizeExercise(commandText) {
-        // *** DIES IST DAS SIMULIERTE GEHIRN FÜR DIE VISUALISIERUNG ***
-        console.log("Visualizing command:", commandText);
-        // Beispiel: Wenn der Befehl "Rondo" enthält
-        if (commandText.toLowerCase().includes("rondo")) {
-            ToniAI.speak("Okay, ich baue die Rondo-Übung '6 gegen 2' auf.");
-            
-            // 1. Lösche alte Zeichnungen
-            AppState.drawings = [];
-            
-            // 2. Erstelle Hütchen-Zone als 'zone' Zeichnung
-            AppState.drawings.push({
-                id: 'zone_rondo', type: 'zone', color: 'rgba(255, 174, 0, 0.3)',
-                startX: 400, startY: 200, endX: 800, endY: 500
-            });
-
-            // 3. Positioniere 8 Spieler (6 außen, 2 innen)
-            const playerIds = Object.keys(AppState.team.squad);
-            const positions = [
-                {x: 400, y: 350}, {x: 800, y: 350}, {x: 600, y: 200}, {x: 600, y: 500},
-                {x: 450, y: 220}, {x: 750, y: 480}, // Außen
-                {x: 550, y: 350}, {x: 650, y: 350} // Innen
-            ];
-            for (let i = 0; i < 8; i++) {
-                if(AppState.team.squad[playerIds[i]]) {
-                    AppState.team.squad[playerIds[i]].canvas.x = positions[i].x;
-                    AppState.team.squad[playerIds[i]].canvas.y = positions[i].y;
-                }
-            }
-            
-            this.History.saveState();
-            ArenaEngine.render();
-        } else {
-             ToniAI.speak("Ich konnte diesen Befehl nicht visualisieren.");
-        }
-    }
-};
-
-// App-Controller anpassen, um die ArenaEngine zu initialisieren
-App.bootstrap = async function() { // überschreibt die vorherige Funktion
-    console.log("Bootstrapping application...");
-    const [teamData, financeData] = await Promise.all([
-        ApiService.getTeamData(),
-        AppState.user.permissions.includes("view_finances") || AppState.user.permissions.includes("*")
-       ? ApiService.getFinanceData()
-          : Promise.resolve(null)
-    ]);
-    AppState.team = teamData;
-    AppState.finances = financeData;
-    
-    console.log("Data loaded. Initializing UI and Arena...");
-    document.getElementById('system-loader').hidden = true;
-    
-    UIManager.init();
-    UIManager.showApp();
-    
-    // Initialisiere die ArenaEngine NACHDEM die UI sichtbar ist
-    ArenaEngine.init();
-    
-    console.log("AppState after bootstrap:", AppState);
-};
-</script>
-</body>
-</html>
-<script>
-// Fortsetzung von Teil 4
-
-// =============================================================================
-// FINALE IMPLEMENTIERUNG: Ersetzt die Platzhalter aus den vorherigen Teilen.
-// =============================================================================
-
-// -----------------------------------------------------------------------------
-// ERWEITERUNG: UIManager - Vollständige Render-Funktionen für Dialoge
-// -----------------------------------------------------------------------------
-UIManager.renderLeftPanel = function() { // Überschreibt die alte Funktion
-    let content = `<h2 style="font-size: 16px; margin: 0 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Hauptmenü</h2>`;
-
-    if (AppState.user.permissions.includes('view_finances') || AppState.user.permissions.includes('*')) {
-        content += `<button class="btn" data-action="open-management-hub" style="width:100%; margin-bottom:10px;">🏢 Management Cockpit</button>`;
-    }
-    if (AppState.user.permissions.includes('view_magazine') || AppState.user.permissions.includes('*')) {
-        content += `<button class="btn" data-action="open-magazine-studio" style="width:100%; margin-bottom:10px;">📰 Stadionzeitung Studio</button>`;
-    }
-    
-    // Logout Button
-    content += `<button class="btn" data-action="logout" style="width:100%; margin-top:20px; border-color:var(--accent-red); color:var(--accent-red);">LOGOUT</button>`;
-
-    content += `<h2 style="font-size: 16px; margin: 24px 0 16px 0; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Kader</h2>`;
-    content += '<div class="scroll-content" style="max-height: calc(100vh - 350px);">'; // Begrenze Höhe für Scroll
-    for (const player of Object.values(AppState.team.squad)) {
-        content += `
-        <button data-action="open-player-dashboard" data-player-id="${player.id}" style="width:100%; display:flex; align-items:center; gap:12px; margin-bottom:8px; text-align:left;" class="btn">
-          <span style="background:var(--bg-dark); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-weight:bold;">${player.personal.num}</span>
-          <div>
-            <div>${player.personal.name}</div>
-            <small class="text-muted">${player.personal.position}</small>
-          </div>
-          <span style="margin-left:auto; font-size:16px; font-weight:bold;">${player.attributes.overall}</span>
-        </button>
-      `;
-    }
-    content += '</div>';
-    this.elements['left-panel'].innerHTML = content;
-};
-
-UIManager.renderManagementHub = function() { // Überschreibt die alte Funktion
-    const { finances } = AppState;
-    if (!finances) {
-        this.elements['management-content'].innerHTML = `<p class="text-muted">Keine Zugriffsberechtigung auf Finanzdaten.</p>`;
-        return;
-    }
-    const totalCosts = Object.values(finances.costs).reduce((a, b) => a + b, 0);
-    const remaining = finances.budget_total - totalCosts;
-
-    this.elements['management-content'].innerHTML = `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-            <div>
-                <h3>Finanzstatus (p.a.)</h3>
-                <div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);">
-                    <p>Gesamtbudget: <strong class="text-green">${finances.budget_total.toLocaleString('de-DE')} €</strong></p>
-                    <p>Gesamtkosten: <strong class="text-red">${totalCosts.toLocaleString('de-DE')} €</strong></p>
-                    <hr style="border-color: var(--border-color);">
-                    <p>Liquidität: <strong class="${remaining > 0? 'text-green' : 'text-red'}">${remaining.toLocaleString('de-DE')} €</strong></p>
-                </div>
-                <h3 style="margin-top:24px;">Sponsoren</h3>
-                <div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);">
-                    ${finances.sponsors.map(s => `<p>${s.name}: <strong>${s.contribution.toLocaleString('de-DE')} €</strong> <span class="text-green">(${s.status})</span></p>`).join('')}
-                </div>
-            </div>
-            <div>
-                <h3>Kostenstellen</h3>
-                <div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-md);">
-                    <p>Gehälter (Profis): <strong>${finances.costs.salaries_players.toLocaleString('de-DE')} €</strong></p>
-                    <p>Gehälter (Stab): <strong>${finances.costs.salaries_staff.toLocaleString('de-DE')} €</strong></p>
-                    <p>Infrastruktur: <strong>${finances.costs.infrastructure.toLocaleString('de-DE')} €</strong></p>
-                    <p>Nachwuchs (NLZ): <strong>${finances.costs.nlz.toLocaleString('de-DE')} €</strong></p>
-                    <p>Reisekosten: <strong>${finances.costs.travel.toLocaleString('de-DE')} €</strong></p>
-                </div>
-            </div>
-        </div>
-    `;
-};
-
-UIManager.renderPlayerDashboard = function(playerId) { // Überschreibt die alte Funktion
-    const player = AppState.team.squad[playerId];
-    if (!player) return;
-
-    const dialog = this.elements['player-dashboard'];
-    dialog.innerHTML = `
-     <div class="dialog-box" style="max-width: 800px;">
-        <header class="dialog-header">
-            <h2 class="dialog-title">Spieler-Akte: ${player.personal.name} (#${player.personal.num})</h2>
-            <button class="btn" onclick="UIManager.closeDialog('player-dashboard')">✕</button>
-        </header>
-        <div class="dialog-content">
-            <div style="display:grid; grid-template-columns: 250px 1fr; gap: 24px;">
-                <div>
-                    <!-- Hier käme die FIFA-Karte hin -->
-                    <div style="background:var(--bg-dark); padding:16px; border-radius:var(--radius-md);">
-                        <p><strong>Gesamt: ${player.attributes.overall}</strong></p>
-                        <p>PAC: ${player.attributes.pac} | SHO: ${player.attributes.sho}</p>
-                        <p>PAS: ${player.attributes.pas} | DRI: ${player.attributes.dri}</p>
-                        <p>DEF: ${player.attributes.def} | PHY: ${player.attributes.phy}</p>
-                    </div>
-                </div>
-                <div>
-                    <h3>Medizinische Akte</h3>
-                    <p>Status: <span class="${player.medical.status === 'fit'? 'text-green' : 'text-red'}">${player.medical.status.toUpperCase()}</span> | Readiness: <strong>${player.medical.readiness}%</strong></p>
-                    <h4>Verletzungshistorie:</h4>
-                    ${player.medical.history.length > 0? player.medical.history.map(h => `<p>${h.date}: ${h.injury} (${h.duration_days} Tage)</p>`).join('') : '<p class="text-muted">Keine Einträge.</p>'}
-
-                    <h3 style="margin-top:24px;">Vertragsdetails</h3>
-                    <p>Gehalt: <strong>${player.contract.salary_monthly.toLocaleString('de-DE')} €</strong> / Monat</p>
-                    <p>Gültig bis: <strong>${player.contract.valid_until}</strong></p>
-                    <p>Klausel: <span class="text-muted">${player.contract.clause}</span></p>
-                </div>
-            </div>
-        </div>
-    </div>`;
-    this.openDialog('player-dashboard');
-};
-
-UIManager.bindEvents = function() { // Überschreibt die alte Funktion
-    this.elements['live-session-btn'].addEventListener('click', () => ToniAI.toggleLiveSession());
-    this.elements['left-panel'].addEventListener('click', (e) => {
-        const target = e.target.closest('button[data-action]');
-        if (!target) return;
-        const action = target.dataset.action;
-        switch(action) {
-            case 'open-management-hub': this.openDialog('management-hub'); this.renderManagementHub(); break;
-            case 'open-magazine-studio': this.openDialog('magazine-studio'); this.renderMagazineStudio(); break;
-            case 'open-player-dashboard': this.renderPlayerDashboard(target.dataset.playerId); break;
-            case 'logout': App.logout(); break;
-        }
-    });
-    this.elements['admin-panel-btn'].addEventListener('click', () => this.openDialog('admin-panel-dialog'));
-    this.elements['chat-form'].addEventListener('submit', () => ToniAI.processCommand());
-};
-
-// -----------------------------------------------------------------------------
-// ERWEITERUNG: ToniAI - Vollständiger Befehls-Dispatcher
-// -----------------------------------------------------------------------------
-ToniAI.processCommand = async function(commandOverride = null) { // Überschreibt die alte Funktion
-    const input = this.elements['user-cmd'];
-    const command = (commandOverride || input.value.trim()).toLowerCase();
-    if (!command) return;
-    
-    this.speak(commandOverride || input.value.trim(), true);
-    if (!commandOverride) input.value = '';
-
-    // *** ZENTRALER BEFEHLS-DISPATCHER ***
-    if (command.includes("suche") || command.includes("finde")) {
-        this.speak("Ich starte eine simulierte Websuche...");
-        const result = await ApiService.searchWeb(command);
-        this.speak(result);
-        if (result.toLowerCase().includes("rondo")) {
-            ArenaEngine.Tactic.visualizeExercise(result);
-        }
-    } else if (command.includes("zeige übung") || command.includes("visualisiere")) {
-        ArenaEngine.Tactic.visualizeExercise(command);
-    } else if (command.includes("management") || command.includes("finanzen")) {
-        this.speak("Öffne das Management Cockpit.");
-        UIManager.openDialog('management-hub');
-        UIManager.renderManagementHub();
-    } else if (command.includes("zeitung") || command.includes("magazin")) {
-        this.speak("Öffne das Stadionzeitung Studio.");
-        UIManager.openDialog('magazine-studio');
-        UIManager.renderMagazineStudio();
-    } else if (command.includes("rückgängig")) {
-        this.speak("Aktion wird zurückgenommen.");
-        ArenaEngine.History.undo();
-    } else if (command.includes("wiederholen")) {
-        this.speak("Aktion wird wiederholt.");
-        ArenaEngine.History.redo();
-    } else if (command.includes("lösche alles") || command.includes("alles löschen")) {
-        this.setTool('clear');
-    } else {
-        this.speak("Das habe ich nicht verstanden. Mögliche Befehle: 'suche', 'zeige Übung', 'management', 'zeitung', 'rückgängig', 'wiederholen'.");
-    }
-};
-
-// -----------------------------------------------------------------------------
-// ERWEITERUNG: App - Finale Implementierung mit Logout
-// -----------------------------------------------------------------------------
-App.logout = function() {
-    console.log("User logging out...");
-    sessionStorage.removeItem('toni2_userid');
-    AppState.user = null;
-    AppState.team = null;
-    AppState.finances = null;
-    
-    // Verstecke die App, zeige den Login-Screen
-    document.getElementById('main-app').style.display = 'none';
-    this.showLoginScreen();
-
-    // Stoppe eventuelle Live-Sessions
-    if (AppState.ui.isLiveSession) {
-        ToniAI.toggleLiveSession();
-    }
-    UIManager.closeAllDialogs();
-};
-
-// Start der App (bleibt unverändert)
-document.addEventListener('DOMContentLoaded', () => App.init());
+// --- FINALER SYSTEM-START ---
+document.addEventListener('DOMContentLoaded', () => {
+    App.init();
+    // Bindings für neue v8.5 Features
+    document.getElementById('mode-match').onclick = () => ArenaEngine.setFormation('match');
+    document.getElementById('mode-training').onclick = () => ArenaEngine.setFormation('training');
+});
 </script>
 </body>
 </html>
