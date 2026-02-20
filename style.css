@@ -1,5 +1,5 @@
 /* ==========================================================
-   TONI 2.0 - VOLLSTÄNDIGES ELITE-CSS (UNGEKÜRZT)
+   TONI 2.0 - MASTER CSS (UNGEKÜRZT & STABIL)
    ========================================================== */
 
 :root {
@@ -11,15 +11,15 @@
     --card: #1e293b;
     --danger: #ef4444;
     --warning: #f59e0b;
-    --gold-gradient: linear-gradient(135deg, #eebb4d 0%, #bf953f 50%, #eebb4d 100%);
+    --gold: linear-gradient(135deg, #eebb4d 0%, #bf953f 50%, #eebb4d 100%);
     --paper: #fdfaf0;
 }
 
-/* GRUNDLAYOUT & RESET */
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* GRUNDLAYOUT */
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     background-color: #020617;
     color: var(--text);
     margin: 0;
@@ -29,7 +29,7 @@ body {
     overflow: hidden;
 }
 
-/* NAVIGATION SIDEBAR */
+/* SIDEBAR NAVIGATION */
 .sidebar {
     width: 260px;
     background: var(--primary);
@@ -59,7 +59,6 @@ body {
     border-radius: 12px;
     margin-bottom: 10px;
     font-size: 15px;
-    font-weight: 500;
     transition: 0.2s all;
     display: flex;
     align-items: center;
@@ -74,7 +73,7 @@ body {
     box-shadow: inset 4px 0 0 var(--accent);
 }
 
-/* MAIN CONTENT - FIX FÜR DAS STAPELN */
+/* HAUPTBEREICH & MODUL-TRENNUNG */
 .main-content {
     flex: 1;
     padding: 35px;
@@ -83,25 +82,22 @@ body {
     position: relative;
 }
 
-/* WICHTIG: Das Modul-System */
+/* WICHTIG: Das Modul-System gegen das Stapeln */
 .module-section {
-    display: none !important; /* Alles knallhart verstecken */
-    opacity: 0;
-    transform: translateY(10px);
+    display: none !important; /* Standard: Knallhart aus */
 }
 
 .module-section.active {
-    display: block !important; /* Nur das aktive zeigen */
-    opacity: 1;
-    transform: translateY(0);
-    animation: slideUp 0.4s ease-out forwards;
+    display: block !important; /* Nur aktiv: Einblenden */
+    animation: fadeIn 0.4s ease-out;
 }
 
-@keyframes slideUp {
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* KABINE: FIFA CARDS */
+/* KABINE: FIFA KARTEN DESIGN */
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -109,7 +105,7 @@ body {
 }
 
 .fut-card {
-    background: var(--gold-gradient);
+    background: var(--gold);
     border-radius: 18px;
     padding: 18px;
     color: #1a1a1a;
@@ -120,7 +116,7 @@ body {
     border: 1px solid rgba(255,255,255,0.3);
 }
 
-.fut-card:hover { transform: scale(1.05); }
+.fut-card:hover { transform: scale(1.05); z-index: 10; }
 
 .card-top {
     display: flex;
@@ -140,13 +136,18 @@ body {
     overflow: hidden;
 }
 
+.card-img-container img { width: 100%; height: 100%; object-fit: cover; }
+
+.card-name { text-align: center; font-weight: 800; font-size: 16px; margin-bottom: 10px; text-transform: uppercase; }
+
 .card-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
     font-size: 11px;
-    gap: 4px;
+    gap: 5px;
     font-weight: 800;
     padding-top: 8px;
+    border-top: 1px solid rgba(0,0,0,0.1);
 }
 
 /* TAKTIKBOARD */
@@ -164,50 +165,9 @@ body {
 
 #tacticBoard { width: 100%; height: 100%; display: block; }
 
-/* MANAGEMENT & AKTENTASCHE */
-.mgmt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-.mgmt-card {
-    background: var(--card);
-    padding: 25px;
-    border-radius: 20px;
-    border: 1px solid #334155;
-    margin-bottom: 25px;
-}
-
-/* BIO-LABOR ANIMATIONEN */
-.pulse-heart { animation: heartBeat 1.4s infinite; color: var(--danger); }
-@keyframes heartBeat {
-    0%, 100% { transform: scale(1); }
-    15% { transform: scale(1.3); }
-}
-
-.ekg-path {
-    fill: none; stroke-width: 3; stroke-dasharray: 1000;
-    animation: ekgMove 3s linear infinite;
-}
-@keyframes ekgMove { from { stroke-dashoffset: 2000; } to { stroke-dashoffset: 0; } }
-
-/* TONI INTERFACE */
-.toni-interface {
-    width: 360px;
-    background: var(--primary);
-    border-left: 1px solid #334155;
-    display: flex;
-    flex-direction: column;
-    transition: 0.4s;
-}
-
-body.toni-collapsed .toni-interface { width: 0; overflow: hidden; }
-
-#toni-toggle {
-    position: fixed; right: 25px; top: 25px; z-index: 1001;
-    background: var(--accent); border: none; width: 60px; height: 60px;
-    border-radius: 50%; cursor: pointer; font-size: 28px;
-}
-
-/* MODAL: SPIELER-EDITOR FIX */
+/* MODAL: SPIELER-EDITOR (VÖLLIG VERSTECKT BEIM START) */
 .modal {
-    display: none !important; /* Knallhart unsichtbar beim Start */
+    display: none !important;
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.9); z-index: 5000;
     align-items: center; justify-content: center;
@@ -220,21 +180,28 @@ body.toni-collapsed .toni-interface { width: 0; overflow: hidden; }
     border-radius: 25px; border: 2px solid var(--accent);
 }
 
-/* PRINT ENGINE */
+/* PRINT ENGINE (A4 QUERFORMAT FÜR A5 HEFT) */
 @media print {
     body * { visibility: hidden; }
     #newspaper-overlay, #newspaper-overlay * { visibility: visible; }
-    #newspaper-overlay { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+    #newspaper-overlay { position: absolute; left: 0; top: 0; width: 100%; display: block !important; background: white; }
+    .newspaper-actions { display: none; }
     @page { size: A4 landscape; margin: 0; }
-    .a4-sheet { width: 297mm; height: 210mm; display: flex; page-break-after: always; color: #000; background: white; }
-    .a5-page { width: 50%; height: 100%; padding: 20mm; border-right: 1px dashed #ccc; }
+    .a4-sheet { 
+        width: 297mm; height: 210mm; display: flex; 
+        background: white; page-break-after: always;
+    }
+    .a5-page { width: 50%; height: 100%; padding: 20mm; border-right: 1px dashed #ccc; box-sizing: border-box; }
 }
 
-/* MOBILE OPTIMIERUNG */
-@media (max-width: 900px) {
-    body { flex-direction: column; overflow: auto; }
-    .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 10px; }
-    .logo { display: none; }
-    .main-content { height: 60vh; flex: none; }
-    .toni-interface { width: 100%; height: 40vh; }
-}
+/* BIO-LABOR ANIMATIONEN */
+.pulse-heart { animation: heartBeat 1.4s infinite; color: var(--danger); display: inline-block; }
+@keyframes heartBeat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.3); } }
+
+.ekg-path { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 1000; animation: ekgMove 3s linear infinite; }
+@keyframes ekgMove { from { stroke-dashoffset: 2000; } to { stroke-dashoffset: 0; } }
+
+/* TONI UI */
+.toni-interface { width: 360px; background: var(--primary); border-left: 1px solid #334155; display: flex; flex-direction: column; transition: 0.4s; }
+body.toni-collapsed .toni-interface { width: 0; overflow: hidden; }
+#toni-toggle { position: fixed; right: 25px; top: 25px; z-index: 1001; background: var(--accent); border: none; width: 60px; height: 60px; border-radius: 50%; cursor: pointer; font-size: 28px; }
