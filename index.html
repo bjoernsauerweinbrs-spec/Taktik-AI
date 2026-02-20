@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TONI AI - Dein Co-Trainer</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 </head>
 <body>
 
@@ -18,7 +19,6 @@
     </div>
 
     <div class="main-content">
-        
         <div id="dashboard" class="module-section active">
             <h2>Mannschaftskabine</h2>
             <div id="locker-room-container"></div>
@@ -31,9 +31,7 @@
                 <button onclick="setFormation('3-4-3')">Trainer (3-4-3)</button>
                 <button onclick="clearBoard()" class="btn-danger">Reset</button>
             </div>
-            <div class="pitch-container">
-                <canvas id="tacticBoard"></canvas>
-            </div>
+            <div class="pitch-container"><canvas id="tacticBoard"></canvas></div>
         </div>
 
         <div id="management" class="module-section">
@@ -43,33 +41,39 @@
 
         <div id="bio" class="module-section">
             <div class="lab-header">
-                <h2>Health & Performance Lab</h2>
-                <div class="team-battery">Team-Energie: <span id="team-energy">92%</span></div>
+                <h2>Performance Lab</h2>
+                <div class="team-battery">Energie: <span id="team-energy">92%</span></div>
             </div>
-            <div class="lab-grid" id="bio-lab-container">
-                </div>
+            <div class="lab-grid" id="bio-lab-container"></div>
         </div>
 
         <div id="vr" class="module-section">
-            <h2>VR-Center</h2>
-            <div class="placeholder-box">Toni VR (Beta) - Bereit für Meta Quest 3</div>
+            <h2>VR & Cognitive Training</h2>
+            <div class="vr-preview-card">
+                <div class="vr-info">
+                    <h3>Meta Quest 3 Modus</h3>
+                    <p>Trainiere deine Handlungsschnelligkeit in einer 360°-Umgebung. Toni coacht dich live bei deinen Entscheidungen.</p>
+                    <button class="action-btn" onclick="vrCenter.launchVR()">VR-MODUS STARTEN</button>
+                </div>
+                <div id="vr-fallback-preview" style="height: 200px; background: #000; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #22c55e;">
+                    [3D Engine Standby]
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="toni-interface">
-        <div class="chat-header">
-            <div class="chat-status"></div>
-            <span>TONI (Live)</span>
-        </div>
+        <div class="chat-header"><div class="chat-status"></div><span>TONI (Live)</span></div>
         <div class="chat-messages" id="chat-history"></div>
         <div class="chat-input-area">
             <button id="voice-btn" onclick="toggleMic()">🎤</button>
-            <input type="text" id="text-input" placeholder="Anweisung an Toni...">
+            <input type="text" id="text-input" placeholder="Anweisung...">
         </div>
     </div>
 
     <script src="script.js"></script>
     <script src="modules/management.js"></script>
     <script src="modules/bio-lab.js"></script>
+    <script src="modules/vr-center.js"></script>
 </body>
 </html>
