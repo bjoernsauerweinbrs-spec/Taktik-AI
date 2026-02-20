@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI AI - Elite Coaching System</title>
+    <title>TONI AI - Elite Performance System</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
@@ -20,8 +20,9 @@
     </div>
 
     <div class="main-content">
+        
         <div id="dashboard" class="module-section active">
-            <div class="header-flex">
+            <div class="section-header">
                 <h2>Mannschaftskabine</h2>
                 <button class="action-btn" onclick="openPlayerModal()">+ Spieler hinzufügen</button>
             </div>
@@ -29,11 +30,11 @@
         </div>
 
         <div id="tactics" class="module-section">
-            <div class="header-flex">
-                <h2>Taktik-Zentrum</h2>
+            <div class="section-header">
+                <h2>Elite Taktik-Zentrum</h2>
                 <div class="tactic-controls">
-                    <button onclick="setFormation('4-4-2')">4-4-2</button>
-                    <button onclick="setFormation('3-4-3')">3-4-3</button>
+                    <button onclick="setFormation('4-4-2')">4-4-2 (Toni)</button>
+                    <button onclick="setFormation('3-4-3')">3-4-3 (Trainer)</button>
                     <button onclick="clearBoard()" class="btn-danger">Reset</button>
                 </div>
             </div>
@@ -43,12 +44,12 @@
         </div>
 
         <div id="management" class="module-section">
-            <h2>Vereins-Management</h2>
+            <h2>Vereins-Management & Finanzen</h2>
             <div id="mgmt-content"></div>
         </div>
 
         <div id="bio" class="module-section">
-            <h2>Pro Performance Lab</h2>
+            <h2>Performance Bio-Lab (Watch & Scale)</h2>
             <div id="bio-lab-container"></div>
         </div>
 
@@ -63,30 +64,34 @@
                     <div id="vr-container"></div>
                 </div>
                 <div class="logbook-card">
-                    <h3>Trainings-Historie</h3>
+                    <h3>Trainings-Historie (Logbuch)</h3>
                     <div id="vr-logbook"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <button id="toni-toggle" onclick="toggleToni()">🤖</button>
+    <button id="toni-toggle" onclick="toggleToni()" title="Toni ein/ausklappen">🤖</button>
     <div class="toni-interface">
-        <div class="chat-header"><span>TONI AI ANALYST</span></div>
+        <div class="chat-header">
+            <div class="chat-status"></div>
+            <span>TONI AI ANALYST</span>
+        </div>
         <div class="chat-messages" id="chat-history"></div>
         <div class="chat-input-area">
             <button id="voice-btn" onclick="toggleVoice()">🎤</button>
-            <input type="text" id="text-input" placeholder="Befehl an Toni...">
+            <input type="text" id="text-input" placeholder="Anweisung an Toni...">
         </div>
     </div>
 
     <div id="player-modal" class="modal">
         <div class="modal-content">
-            <h3 id="modal-title">Spieler-Profil</h3>
-            <input type="text" id="edit-name" placeholder="Name">
-            <input type="text" id="edit-pos" placeholder="Position">
-            <input type="number" id="edit-rating" placeholder="Rating">
-            <div class="stats-edit-grid">
+            <h3 id="modal-title">Spieler-Profil bearbeiten</h3>
+            <div class="modal-grid">
+                <input type="text" id="edit-name" placeholder="Name">
+                <input type="text" id="edit-pos" placeholder="Pos (z.B. ST)">
+                <input type="number" id="edit-rating" placeholder="Rating">
+                <hr style="grid-column: span 2; width: 100%; border: 0.5px solid #334155;">
                 <input type="number" id="edit-tem" placeholder="TEM">
                 <input type="number" id="edit-sch" placeholder="SCH">
                 <input type="number" id="edit-pas" placeholder="PAS">
@@ -97,7 +102,7 @@
             <div class="modal-actions">
                 <button class="btn-save" onclick="savePlayer()">Speichern</button>
                 <button class="btn-danger" id="btn-delete" onclick="deletePlayer()">Löschen</button>
-                <button onclick="closePlayerModal()">Abbrechen</button>
+                <button class="btn-cancel" onclick="closePlayerModal()">Abbrechen</button>
             </div>
         </div>
     </div>
