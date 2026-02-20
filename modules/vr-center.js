@@ -1,42 +1,50 @@
-/* --- VR-CENTER MODUL (Meta Quest 3 Integration) --- */
+/* --- PRO VR-CENTER MODUL --- */
 
 const vrCenter = {
     launchVR: function() {
-        addMessage("Toni", "Initialisiere VR-Spielfeld... Bitte setze deine Meta Quest 3 auf.");
+        addMessage("Toni", "Lade High-Fidelity Assets... Aktiviere Skeletal Animation Engine.");
         
-        // Erstelle eine virtuelle A-Frame Szene dynamisch
-        const vrScene = document.createElement('a-scene');
-        vrScene.setAttribute('embedded', '');
-        vrScene.style.height = "100%";
-        vrScene.style.width = "100%";
+        const container = document.getElementById('vr-container');
+        container.innerHTML = ""; // Alten Stand löschen
 
-        vrScene.innerHTML = `
-            <a-sky color="#87CEEB"></a-sky>
-            <a-plane position="0 0 -4" rotation="-90 0 0" width="100" height="100" color="#228B22"></a-plane>
-            
-            <a-grid color="#ffffff" opacity="0.2"></a-grid>
+        const scene = document.createElement('a-scene');
+        scene.setAttribute('embedded', '');
+        scene.setAttribute('renderer', 'antialias: true; colorManagement: true; shadowMapEnabled: true;');
 
-            <a-cylinder position="-2 0 -5" radius="0.5" height="1.8" color="#1e293b">
-                <a-sphere position="0 1.2 0" radius="0.4" color="#22c55e"></a-sphere>
-            </a-cylinder>
+        scene.innerHTML = `
+            <a-assets>
+                <a-asset-item id="pro-player" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RiggedFigure/glTF-Binary/RiggedFigure.glb"></a-asset-item>
+                <img id="grass-texture" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/textures/terrain/grasslight-big.jpg">
+            </a-assets>
 
-            <a-box position="2 0 -10" color="red" animation="property: position; to: -2 0 -10; dur: 3000; loop: true; dir: alternate"></a-box>
+            <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+            <a-entity light="type: directional; intensity: 0.8; castShadow: true; shadowCameraBottom: -10; shadowCameraTop: 10; shadowCameraLeft: -10; shadowCameraRight: 10" position="-5 10 5"></a-entity>
 
+            <a-plane position="0 0 0" rotation="-90 0 0" width="50" height="50" src="#grass-texture" repeat="10 10" shadow="receive: true"></a-plane>
+
+            <a-entity id="stürmer-1" 
+                      gltf-model="#pro-player" 
+                      position="0 0 -5" 
+                      scale="1.5 1.5 1.5" 
+                      shadow="cast: true"
+                      animation-mixer="clip: *; loop: repeat">
+            </a-entity>
+
+            <a-entity id="toni-avatar" position="-3 0 -2" rotation="0 45 0">
+                <a-cylinder radius="0.3" height="1.7" color="#1e293b" shadow="cast: true"></a-cylinder>
+                <a-sphere position="0 1.1 0" radius="0.3" color="#22c55e"></a-sphere>
+            </a-entity>
+
+            <a-sky color="#223344"></a-sky>
             <a-entity camera look-controls position="0 1.6 0">
-                <a-cursor color="#22c55e"></a-cursor>
+                <a-cursor color="#22c55e" fuse="true"></a-cursor>
             </a-entity>
         `;
 
-        const previewContainer = document.getElementById('vr-fallback-preview');
-        previewContainer.innerHTML = "";
-        previewContainer.appendChild(vrScene);
-
+        container.appendChild(scene);
+        
         setTimeout(() => {
-            addMessage("Toni", "Verbindung steht. Wenn du in der Brille bist, schau dich um. Ich tracke dein Scanning-Verhalten.");
-        }, 2000);
+            addMessage("Toni", "Skeletal Rigging abgeschlossen. Spieler reagieren jetzt auf physikalische Gesetze.");
+        }, 1500);
     }
 };
-
-window.addEventListener('load', () => {
-    console.log("VR-Center bereit.");
-});
