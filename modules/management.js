@@ -1,7 +1,7 @@
 /* ==========================================================
    MANAGEMENT LAB | TRANSACTION ENGINE & INVENTORY
    ========================================================== */
-
+ 
 const mgmt = {
     data: JSON.parse(localStorage.getItem('toni_mgmt')) || {
         clubName: "FC TONI 2.0 ELITE",
