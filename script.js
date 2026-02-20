@@ -1,114 +1,83 @@
-/**
- * TONI 2.0 - MASTER BRIDGE SCRIPT (ELITE CHOREOGRAPHY)
- * Fokus: Stabiler Router, Voice-Control & AI-Sync
- */
+/* --- DATENBANK (Das Gedächtnis) --- */
+const teamData = [
+    { id: 1, name: "Müller", pos: "ST", rating: 88, stats: { pac: 85, sho: 90, pas: 75, dri: 82, def: 40, phy: 80 } },
+    { id: 2, name: "Schmidt", pos: "TW", rating: 91, stats: { pac: 88, sho: 50, pas: 60, dri: 55, def: 92, phy: 85 } },
+    { id: 3, name: "Schneider", pos: "ZDM", rating: 84, stats: { pac: 70, sho: 65, pas: 88, dri: 75, def: 85, phy: 82 } },
+    { id: 4, name: "Weber", pos: "IV", rating: 82, stats: { pac: 68, sho: 40, pas: 60, dri: 55, def: 88, phy: 90 } },
+    { id: 5, name: "Fischer", pos: "LF", rating: 86, stats: { pac: 92, sho: 80, pas: 78, dri: 88, def: 45, phy: 60 } },
+    { id: 6, name: "Meyer", pos: "RV", rating: 79, stats: { pac: 85, sho: 55, pas: 72, dri: 74, def: 78, phy: 75 } },
+];
 
-// --- 0. GLOBALE INITIALISIERUNG ---
-window.coachInfo = JSON.parse(localStorage.getItem('toni_coach_data')) || { name: "Coach", verein: "Mein Verein" };
-window.aiOnline = false;
-
-// --- 1. TONI VOICE ENGINE ---
-window.ToniVoice = {
-    isListening: false,
-    recognition: null,
-    synth: window.speechSynthesis,
-    init() {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            this.recognition = new SpeechRecognition();
-            this.recognition.lang = 'de-DE';
-            this.recognition.continuous = false;
-            this.recognition.onresult = (e) => {
-                const text = e.results[0][0].transcript;
-                handleCommand(text);
-            };
-        }
-    },
-    speak(text) {
-        this.synth.cancel();
-        const ut = new SpeechSynthesisUtterance(text);
-        ut.lang = 'de-DE';
-        ut.pitch = 0.95; 
-        this.synth.speak(ut);
-        
-        // Anzeige im Chat
-        const chatBox = document.getElementById('chat-box');
-        if(chatBox) {
-            chatBox.innerHTML += `<div class="chat-msg system"><b>TONI:</b> ${text}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    }
-};
-
-// --- 2. NAVIGATION & ROUTER (REPARIERT) ---
-window.openSection = function(name) {
-    console.log("🛰️ Router aktiviert Sektor:", name);
-    const activeDiv = document.getElementById('active-content');
-    const nav = document.getElementById('briefcase-nav');
-    const contentArea = document.getElementById('briefcase-content');
-
-    if (!activeDiv || !contentArea) return;
-
-    // UI-Vorbereitung
-    if (nav) nav.style.display = 'none';
-    contentArea.style.display = 'block';
-    contentArea.classList.remove('hidden');
-
-    activeDiv.innerHTML = `<div style="text-align:center; padding:50px; color:var(--neon-green); font-family:'Orbitron';">SYNCING ${name.toUpperCase()}...</div>`;
-
-    // Das Herzstück: Die Sektor-Verknüpfung
-    setTimeout(() => {
-        const targetMap = {
-            'kabine': window.SektorSporttasche,
-            'analyse': window.SektorAnalyse,
-            'junioren_pool': window.SektorJugendbereich,
-            'stadionzeitung': window.SektorStadionzeitung,
-            'finanzen': window.SektorSponsoring,
-            'video': window.SektorVideo,
-            'settings': window.SektorSettings,
-            'system': window.SektorSettings
-        };
-
-        const target = targetMap[name];
-
-        if (target && typeof target.open === 'function') {
-            target.open();
-            console.log(`✅ Sektor ${name} erfolgreich gestartet.`);
-        } else {
-            console.error(`❌ Fehler: Sektor ${name} ist nicht geladen oder fehlerhaft.`);
-            activeDiv.innerHTML = `
-                <div style="text-align:center; padding:40px;">
-                    <h3 style="color:#ff3131; font-family:'Orbitron';">SEKTOR-CRASH</h3>
-                    <p style="color:#666; font-size:0.8rem;">Die Datei für '${name}' wurde nicht gefunden oder enthält Syntax-Fehler.</p>
-                    <button class="tactic-btn" onclick="location.reload()" style="margin-top:20px;">SYSTEM REBOOT</button>
-                </div>`;
-        }
-    }, 100);
-};
-
-// --- 3. KI-STATUS & INITIALISIERUNG ---
-async function checkAIStatus() {
-    const savedIP = localStorage.getItem('toni_mac_ip') || 'localhost';
-    const light = document.getElementById('ai-status-light');
-    const label = document.getElementById('ai-status-label');
-
-    try {
-        const response = await fetch(`http://${savedIP}:11434/api/tags`);
-        window.aiOnline = response.ok;
-        if(light) light.style.background = response.ok ? 'var(--neon-green)' : '#555';
-        if(label) label.innerText = response.ok ? 'ONLINE' : 'OFFLINE';
-    } catch (err) {
-        window.aiOnline = false;
-        if(light) light.style.background = '#555';
-        if(label) label.innerText = 'OFFLINE';
-    }
+/* --- NAVIGATION LOGIK --- */
+function showModule(moduleId) {
+    // Alle verstecken
+    document.querySelectorAll('.module-section').forEach(m => m.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    
+    // Gewähltes zeigen
+    document.getElementById(moduleId).classList.add('active');
+    
+    // Button markieren (einfache Logik)
+    const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(moduleId));
+    if(btn) btn.classList.add('active');
 }
 
-// Globaler Command-Handler
-window.handleCommand = handleCommand;
+/* --- FIFA KARTEN LOGIK --- */
+function renderLockerRoom() {
+    const container = document.getElementById('locker-room-container');
+    container.innerHTML = '<div class="card-grid" id="card-grid"></div>';
+    const grid = document.getElementById('card-grid');
 
-window.addEventListener('DOMContentLoaded', () => {
-    window.ToniVoice.init();
-    checkAIStatus();
-    setInterval(checkAIStatus, 10000);
+    teamData.forEach(player => {
+        grid.innerHTML += `
+            <div class="fut-card" onclick="playerClick(${player.id})">
+                <div class="card-top">
+                    <div class="card-rating">${player.rating}</div>
+                    <div class="card-position">${player.pos}</div>
+                </div>
+                <div class="card-image"></div>
+                <div class="card-name">${player.name}</div>
+                <div class="card-stats">
+                    <div class="stat"><span class="stat-value">${player.stats.pac}</span> TEM</div>
+                    <div class="stat"><span class="stat-value">${player.stats.sho}</span> SCH</div>
+                    <div class="stat"><span class="stat-value">${player.stats.pas}</span> PAS</div>
+                    <div class="stat"><span class="stat-value">${player.stats.dri}</span> DRI</div>
+                    <div class="stat"><span class="stat-value">${player.stats.def}</span> DEF</div>
+                    <div class="stat"><span class="stat-value">${player.stats.phy}</span> PHY</div>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function playerClick(id) {
+    const p = teamData.find(x => x.id === id);
+    addMessageToChat(`Das ist <b>${p.name}</b> (${p.pos}). Aktuelle Formstärke: ${p.rating}.`, 'toni');
+}
+
+/* --- CHAT LOGIK --- */
+const input = document.getElementById('text-input');
+const chatHistory = document.getElementById('chat-history');
+
+input.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter' && input.value.trim() !== "") {
+        addMessageToChat(input.value, 'user');
+        input.value = '';
+        
+        // Simu-Antwort Toni
+        setTimeout(() => {
+            addMessageToChat("Verstanden. Ich speichere das in der Datenbank.", 'toni');
+        }, 800);
+    }
 });
+
+function addMessageToChat(text, sender) {
+    const div = document.createElement('div');
+    div.className = `message msg-${sender}`;
+    div.innerHTML = text;
+    chatHistory.appendChild(div);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+// Start beim Laden
+renderLockerRoom();
