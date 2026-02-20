@@ -22,7 +22,7 @@
     <div class="main-content">
         
         <div id="dashboard" class="module-section active">
-            <div class="section-header">
+            <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h2>Mannschaftskabine</h2>
                 <button class="action-btn" onclick="openPlayerModal()">+ Spieler hinzufügen</button>
             </div>
@@ -30,12 +30,12 @@
         </div>
 
         <div id="tactics" class="module-section">
-            <div class="section-header">
+            <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h2>Elite Taktik-Zentrum</h2>
                 <div class="tactic-controls">
-                    <button onclick="setFormation('4-4-2')">4-4-2 (Toni)</button>
-                    <button onclick="setFormation('3-4-3')">3-4-3 (Trainer)</button>
-                    <button onclick="clearBoard()" class="btn-danger">Reset</button>
+                    <button class="action-btn" style="padding: 8px 15px;" onclick="setFormation('4-4-2')">4-4-2</button>
+                    <button class="action-btn" style="padding: 8px 15px;" onclick="setFormation('3-4-3')">3-4-3</button>
+                    <button class="action-btn btn-danger" onclick="clearBoard()">Reset</button>
                 </div>
             </div>
             <div class="pitch-container">
@@ -49,34 +49,31 @@
         </div>
 
         <div id="bio" class="module-section">
-            <h2>Performance Bio-Lab (Watch & Scale)</h2>
+            <h2>Performance Bio-Lab</h2>
             <div id="bio-lab-container"></div>
         </div>
 
         <div id="vr" class="module-section">
-            <div class="vr-grid-layout">
+            <div class="vr-grid-layout" style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
                 <div class="vr-preview-card">
                     <h3>Cognitive Simulation</h3>
-                    <div class="vr-actions">
+                    <div class="vr-actions" style="margin-bottom:15px;">
                         <button class="action-btn" onclick="vrCenter.launchVR()">VR STARTEN</button>
-                        <button class="action-btn" style="background:#3b82f6" onclick="vrCenter.triggerDrill()">ÜBUNG STARTEN</button>
+                        <button class="action-btn" style="background:#3b82f6" onclick="vrCenter.triggerDrill()">DRILL STARTEN</button>
                     </div>
-                    <div id="vr-container"></div>
+                    <div id="vr-container" style="height: 400px; background: black; border-radius: 15px;"></div>
                 </div>
-                <div class="logbook-card">
-                    <h3>Trainings-Historie (Logbuch)</h3>
+                <div class="logbook-card" style="background:var(--card); padding:20px; border-radius:15px;">
+                    <h3>VR-Logbuch</h3>
                     <div id="vr-logbook"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <button id="toni-toggle" onclick="toggleToni()" title="Toni ein/ausklappen">🤖</button>
+    <button id="toni-toggle" onclick="toggleToni()">🤖</button>
     <div class="toni-interface">
-        <div class="chat-header">
-            <div class="chat-status"></div>
-            <span>TONI AI ANALYST</span>
-        </div>
+        <div class="chat-header"><span>TONI AI ANALYST</span></div>
         <div class="chat-messages" id="chat-history"></div>
         <div class="chat-input-area">
             <button id="voice-btn" onclick="toggleVoice()">🎤</button>
@@ -84,14 +81,25 @@
         </div>
     </div>
 
-    <div id="player-modal" class="modal">
+    <div id="player-modal" class="modal" style="display:none;">
         <div class="modal-content">
-            <h3 id="modal-title">Spieler-Profil bearbeiten</h3>
-            <div class="modal-grid">
+            <h3 id="modal-title" style="margin-top:0;">Spieler-Profil</h3>
+            <div class="modal-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                 <input type="text" id="edit-name" placeholder="Name">
                 <input type="text" id="edit-pos" placeholder="Pos (z.B. ST)">
-                <input type="number" id="edit-rating" placeholder="Rating">
-                <hr style="grid-column: span 2; width: 100%; border: 0.5px solid #334155;">
+                
+                <div style="grid-column: span 2;">
+                    <label style="font-size:10px; color:#94a3b8;">Bild-URL (z.B. von Imgur)</label>
+                    <input type="text" id="edit-img-url" placeholder="https://beispiel.de/foto.jpg">
+                </div>
+
+                <div style="grid-column: span 2;">
+                    <label style="font-size:10px; color:#94a3b8;">Gesamt-Rating (wird automatisch berechnet)</label>
+                    <input type="number" id="edit-rating" placeholder="Rating" readonly style="background: #0f172a; opacity: 0.8;">
+                </div>
+
+                <hr style="grid-column: span 2; width: 100%; border: 0.5px solid #334155; margin: 5px 0;">
+                
                 <input type="number" id="edit-tem" placeholder="TEM">
                 <input type="number" id="edit-sch" placeholder="SCH">
                 <input type="number" id="edit-pas" placeholder="PAS">
@@ -99,10 +107,10 @@
                 <input type="number" id="edit-def" placeholder="DEF">
                 <input type="number" id="edit-phy" placeholder="PHY">
             </div>
-            <div class="modal-actions">
-                <button class="btn-save" onclick="savePlayer()">Speichern</button>
-                <button class="btn-danger" id="btn-delete" onclick="deletePlayer()">Löschen</button>
-                <button class="btn-cancel" onclick="closePlayerModal()">Abbrechen</button>
+            <div class="modal-actions" style="margin-top:20px; display:flex; gap:10px;">
+                <button class="action-btn" style="flex:2" onclick="savePlayer()">Speichern</button>
+                <button class="action-btn btn-danger" id="btn-delete" style="flex:1" onclick="deletePlayer()">Löschen</button>
+                <button class="action-btn" style="flex:1; background:#64748b" onclick="closePlayerModal()">Abbrechen</button>
             </div>
         </div>
     </div>
