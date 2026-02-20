@@ -1,33 +1,34 @@
 /* ==========================================================
-   TONI 2.0 | VR-TEST ENGINE
+   TONI 2.0 | ELITE VR ENGINE
    ========================================================== */
 
 window.onload = () => {
-    console.log("VR-Modus bereit für Meta Quest.");
+    console.log("Elite VR Stadium geladen.");
     
-    // Einfache Audio-Begrüßung beim Betreten (optional)
     const scene = document.querySelector('a-scene');
+    
+    // VR-Eintritt Logik
     scene.addEventListener('enter-vr', () => {
-        console.log("VR-Modus aktiv!");
-        speak("VR Analysezentrum gestartet. Willkommen auf dem Platz, Coach.");
+        speak("Willkommen im Elite Analysezentrum. Das Spielfeld ist kalibriert.");
     });
 };
 
-/**
- * Sprachausgabe für Toni
- */
 function speak(text) {
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = 'de-DE';
-    msg.pitch = 0.9;
-    window.speechSynthesis.speak(msg);
+    if ('speechSynthesis' in window) {
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'de-DE';
+        msg.pitch = 0.85;
+        window.speechSynthesis.speak(msg);
+    }
 }
 
 /**
- * Funktion für spätere Übungen (Trigger-Test)
+ * Zukünftige Funktion: Spieler dynamisch bewegen
  */
-function testTrigger() {
-    const status = document.getElementById('vr-status');
-    status.setAttribute('value', 'ÜBUNG AKTIV');
-    status.setAttribute('color', 'yellow');
+function movePlayer(id, x, z, rot) {
+    const p = document.getElementById(id);
+    if(p) {
+        p.setAttribute('position', `${x} 0 ${z}`);
+        p.setAttribute('rotation', `0 ${rot} 0`);
+    }
 }
