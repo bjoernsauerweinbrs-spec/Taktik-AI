@@ -2,18 +2,23 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 | Tactical Operating Network</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TONI 2.0 | Elite Tactical Operating Network</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="auth-overlay">
         <div class="auth-card">
-            <h2>TONI 2.0 ACCESS</h2>
-            <input type="password" id="sys-pass" placeholder="Enter Credentials...">
-            <button onclick="checkAuth()">LOGIN</button>
+            <h1 class="brand">TONI 2.0</h1>
+            <p class="security-status">SECURITY PROTOCOL REQUIRED</p>
+            <div class="input-group">
+                <input type="password" id="sys-pass" placeholder="Master Password..." onkeypress="if(event.key === 'Enter') checkAuth()">
+                <button onclick="checkAuth()">INITIALIZE ACCESS</button>
+            </div>
         </div>
     </div>
 
@@ -21,61 +26,83 @@
         
         <aside class="sidebar-left">
             <div class="column-header">AKTENTASCHE</div>
-            
             <div class="accordion">
                 <details open>
                     <summary>MANNSCHAFTSVERWALTUNG</summary>
-                    <div class="sub-nav">
-                        <button onclick="loadModule('kader')">Kader-Analyse</button>
-                        <button onclick="loadModule('medical')">Medical & Reha</button>
-                    </div>
+                    <nav class="sub-nav">
+                        <button onclick="loadModule('kader')">Kader & Profile</button>
+                        <button onclick="loadModule('medical')">Medical & ACWR</button>
+                    </nav>
                 </details>
                 <details>
                     <summary>TRAININGSBETRIEB</summary>
-                    <div class="sub-nav">
+                    <nav class="sub-nav">
                         <button onclick="loadModule('drills')">Übungskatalog</button>
                         <button onclick="loadModule('quest-sync')">Quest Telemetrie</button>
-                    </div>
+                    </nav>
                 </details>
-                <details>
-                    <summary>SPIELBETRIEB</summary>
-                    <div class="sub-nav">
-                        <button onclick="loadModule('match-analysis')">Match Day Analyse</button>
-                        <button onclick="loadModule('scouting')">Scouting Report</button>
-                    </div>
-                </details>
-                <details>
+                <details open>
                     <summary>MANAGEMENT-LABOR</summary>
-                    <div class="sub-nav">
+                    <nav class="sub-nav">
                         <button onclick="loadModule('finance')">Finanz-Labor (GuV)</button>
                         <button onclick="loadModule('sponsoring')">Sponsoring ROI</button>
                         <button onclick="loadModule('stadionzeitung')">Stadion-Zeitung</button>
-                    </div>
+                    </nav>
                 </details>
+            </div>
+            <div class="sidebar-footer">
+                <div class="connection-status"><span class="dot"></span> QUEST LINK ACTIVE</div>
             </div>
         </aside>
 
-        <section class="center-pitch">
-            <div id="tactical-canvas">
-                <div id="pitch-3d-container"></div>
+        <main class="center-pitch">
+            <header class="pitch-header">
+                <h2 id="module-title">PITCH CONTROL CENTER</h2>
+                <div class="quick-stats">
+                    <div class="stat-pill">CASH: <b id="stat-cash">12.5M €</b></div>
+                    <div class="stat-pill">ROI: <b id="stat-roi">+8.2%</b></div>
+                </div>
+            </header>
+            
+            <div id="display-area">
+                <div id="pitch-container">
+                    <canvas id="tactical-pitch"></canvas>
+                </div>
             </div>
-            <div class="pitch-controls">
-                <button>Formation: 4-4-2</button>
-                <button>Pitch Control: ON</button>
-                <button>Passing Lanes: Active</button>
-            </div>
-        </section>
+
+            <footer class="pitch-footer">
+                <div class="btn-group">
+                    <button class="tactical-btn" onclick="toggleHeatmap()">HEATMAP</button>
+                    <button class="tactical-btn" onclick="toggleLanes()">PASS LANES</button>
+                </div>
+                <button class="vr-trigger" onclick="enterVR()">START VR MISSION (QUEST)</button>
+            </footer>
+        </main>
 
         <aside class="sidebar-right">
-            <div class="column-header">TONI AI</div>
-            <div id="toni-chat-history"></div>
-            <div class="toni-input-area">
-                <textarea id="toni-msg" placeholder="Frag Toni..."></textarea>
-                <button onclick="askToni()">ANALYSE ANFORDERN</button>
+            <div class="column-header">TONI ANALYST</div>
+            
+            <div class="telemetry-grid">
+                <div class="t-card">
+                    <label>SCAN RATE</label>
+                    <div class="t-val" id="m-scan">--%</div>
+                </div>
+                <div class="t-card">
+                    <label>DECISION LATENCY</label>
+                    <div class="t-val" id="m-latency">--ms</div>
+                </div>
             </div>
-            <div class="ai-metrics">
-                <p>Decision Latency: <span id="m-latency">-- ms</span></p>
-                <p>Scan Rate: <span id="m-scan">-- %</span></p>
+            
+            <div id="chat-history">
+                <div class="ai-msg">Protokoll gestartet. Erwarte taktische Parameter oder Management-Anweisungen.</div>
+            </div>
+
+            <div class="chat-input-area">
+                <textarea id="toni-input" placeholder="Analyse anfordern oder Quest-Daten abfragen..."></textarea>
+                <div class="chat-btns">
+                    <button class="mic-btn" onclick="voiceEngine.toggle()">🎤</button>
+                    <button class="send-btn" onclick="askToni()">SEND</button>
+                </div>
             </div>
         </aside>
     </div>
