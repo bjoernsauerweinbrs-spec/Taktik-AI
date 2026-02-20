@@ -3,559 +3,541 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="TITAN v11 ELITE - Management System">
-    <title>TITAN v11 ELITE</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>TITAN v11 ELITE - Director's Cut</title>
 
     <style>
         /* ======================================================================= */
-        /* I. DESIGN SYSTEM                                                        */
+        /* I. DESIGN SYSTEM (ELITE PALETTE)                                        */
         /* ======================================================================= */
         :root {
-            --bg-dark: #090c10;
-            --bg-medium: #161b22;
-            --bg-light: #21262d;
-            --border-color: #30363d;
-            --text-primary: #e6edf3;
-            --text-secondary: #8b949e;
-            --accent-blue: #58a6ff;
-            --accent-green: #2ea043;
-            --accent-red: #f85149;
-            --accent-gold: #d29922;
+            /* Hintergründe */
+            --bg-deep: #050505;
+            --bg-panel: #121418;
+            --bg-surface: #1c2128;
+            --border: #30363d;
             
-            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* Text */
+            --txt-main: #f0f6fc;
+            --txt-dim: #8b949e;
+            
+            /* Akzente */
+            --blue: #58a6ff;
+            --green: #238636;
+            --red: #da3633;
+            --gold: #d29922;
+            
+            /* Spezial-Effekte */
+            --glass: rgba(22, 27, 34, 0.85);
+            --gold-grad: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        [hidden] { display: none !important; }
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+        
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
-            font-family: var(--font-stack);
-            font-size: 14px;
+            background-color: var(--bg-deep);
+            color: var(--txt-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             height: 100vh; width: 100vw;
             overflow: hidden;
-            user-select: none; /* App-Feeling */
+            display: flex; flex-direction: column;
         }
 
-        /* LAYOUT GRID */
-        .app-container {
+        /* UTILS */
+        [hidden] { display: none !important; }
+        button { cursor: pointer; border: none; background: none; font-family: inherit; color: inherit; }
+        input { font-family: inherit; }
+
+        /* ======================================================================= */
+        /* II. LAYOUT GRID (Desktop & Mobile Hybrid)                               */
+        /* ======================================================================= */
+        .app-grid {
             display: grid;
-            height: 100%; width: 100%;
+            flex: 1;
             grid-template-columns: 280px 1fr 320px;
             grid-template-rows: 60px 1fr;
-            grid-template-areas: "header header header" "nav main aside";
-            gap: 10px; padding: 10px;
+            grid-template-areas: "head head head" "nav main aside";
+            gap: 12px; padding: 12px;
+            position: relative;
         }
 
-        /* PANELS */
-        .app-header { grid-area: header; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: 12px; }
-        #left-panel { grid-area: nav; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; padding: 15px; }
-        #right-panel { grid-area: aside; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; padding: 15px; }
+        /* Header */
+        .header-bar {
+            grid-area: head;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Panels */
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        #nav-panel { grid-area: nav; padding: 15px; }
+        #aside-panel { grid-area: aside; padding: 15px; }
         
-        #main-arena { 
-            grid-area: main; 
-            background: #0d1117; 
-            border: 1px solid var(--border-color); 
-            border-radius: 12px; 
-            position: relative; 
-            overflow: hidden; 
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        /* Arena */
+        #arena-panel {
+            grid-area: main;
+            background: #0d1117;
+            border: 2px solid #1f6feb; /* Blauer Rahmen für Fokus */
+            border-radius: 12px;
+            position: relative;
         }
 
-        /* UI ELEMENTE */
-        button { cursor: pointer; border: none; background: none; color: inherit; font-family: inherit; }
+        /* ======================================================================= */
+        /* III. UI KOMPONENTEN                                                     */
+        /* ======================================================================= */
         
-        .btn-primary {
-            width: 100%; padding: 12px; background: var(--accent-green); color: #fff;
-            border-radius: 8px; font-weight: 700; font-size: 14px; text-transform: uppercase;
-            box-shadow: 0 4px 12px rgba(46, 160, 67, 0.4); transition: transform 0.1s;
-        }
-        .btn-primary:active { transform: scale(0.98); }
-
-        .menu-btn {
-            width: 100%; padding: 12px; margin-bottom: 8px;
-            background: var(--bg-light); border: 1px solid var(--border-color);
-            border-radius: 8px; color: var(--text-primary); text-align: left;
+        /* Nav Buttons */
+        .nav-btn {
+            width: 100%; padding: 12px 15px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--txt-main);
+            text-align: left;
+            margin-bottom: 8px;
+            transition: all 0.2s;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .menu-btn.active { border-color: var(--accent-blue); background: rgba(88, 166, 255, 0.1); }
+        .nav-btn:active { background: var(--border); transform: scale(0.98); }
+        .nav-btn.active { border-color: var(--blue); background: rgba(88,166,255,0.1); }
 
-        /* INPUT FIELDS (Editable) */
-        .editable-input {
-            background: var(--bg-dark); border: 1px solid var(--border-color);
-            color: #fff; padding: 8px; border-radius: 6px; width: 100%;
-            font-family: monospace; font-size: 14px;
+        /* Primary Action Button */
+        .btn-action {
+            background: var(--green); color: #fff;
+            font-weight: bold; text-transform: uppercase;
+            padding: 12px; border-radius: 8px; width: 100%;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+            margin-top: 10px;
         }
-        .editable-input:focus { border-color: var(--accent-blue); outline: none; }
+        .btn-action:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
 
-        /* ARENA CANVAS */
-        canvas { display: block; width: 100%; height: 100%; touch-action: none; }
-
-        /* MODALS */
-        .dialog-overlay {
-            position: fixed; inset: 0; z-index: 9000;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
-            display: none; align-items: center; justify-content: center;
+        /* Eingabefelder (Editierbar) */
+        .inp-elite {
+            background: #000; border: 1px solid #444;
+            color: #fff; padding: 8px; border-radius: 4px;
+            width: 100%; font-family: monospace; font-size: 14px;
+            margin-top: 5px;
         }
-        .dialog-overlay.is-active { display: flex; }
+        .inp-elite:focus { border-color: var(--blue); outline: none; }
+
+        /* ======================================================================= */
+        /* IV. SPEZIAL-MODULE (FIFA Cards & Briefcase)                             */
+        /* ======================================================================= */
         
-        .dialog-box {
-            width: 90%; max-width: 1000px; max-height: 85vh;
-            background: var(--bg-medium); border: 1px solid var(--border-color);
-            border-radius: 16px; display: flex; flex-direction: column;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        /* FIFA Karte (Detailgetreu) */
+        .fifa-card {
+            background: linear-gradient(150deg, #eecda3 0%, #dbc388 100%); /* Gold */
+            color: #1a1a1a;
+            border-radius: 10px; padding: 10px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.4);
+            display: flex; flex-direction: column; align-items: center;
         }
-        .dialog-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .dialog-content { padding: 20px; overflow-y: auto; flex: 1; }
+        .card-top { width: 100%; display: flex; justify-content: space-between; font-weight: 900; font-size: 18px; border-bottom: 1px solid rgba(0,0,0,0.2); margin-bottom: 5px; }
+        .card-name { font-weight: 800; text-transform: uppercase; font-size: 14px; margin-bottom: 5px; }
+        .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; font-size: 10px; width: 100%; }
+        .stat-row { display: flex; justify-content: space-between; }
 
-        /* RESPONSIVE MOBILE FIX */
-        .mobile-toggle { display: none; font-size: 24px; padding: 10px; }
-        #mobile-backdrop { z-index: 8000 !important; } /* WICHTIG */
+        /* Aktentasche Grid */
+        .briefcase-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;
+        }
+        .folder {
+            background: var(--bg-surface); padding: 20px;
+            border-radius: 12px; border-top: 4px solid var(--border);
+        }
+        .folder.finance { border-color: var(--green); }
+        .folder.sponsors { border-color: var(--blue); }
+        .folder.media { border-color: var(--gold); }
+
+        /* ======================================================================= */
+        /* V. MOBILE OPTIMIERUNG (Der Z-Index Fix)                                 */
+        /* ======================================================================= */
+        .mob-btn { display: none; font-size: 24px; padding: 5px; }
+        
+        /* Der Hintergrund muss unter das Menü! */
+        #backdrop { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
+            z-index: 8000; backdrop-filter: blur(3px); 
+            display: none; 
+        }
 
         @media (max-width: 1100px) {
-            .app-container { 
-                grid-template-columns: 1fr; 
-                grid-template-areas: "header" "main"; 
+            .app-grid {
+                grid-template-columns: 1fr;
+                grid-template-areas: "head" "main";
                 padding: 0; gap: 0;
             }
-            .app-header { border-radius: 0; border-left: 0; border-right: 0; border-top: 0; }
-            #main-arena { border-radius: 0; border: none; }
+            .header-bar { border-radius: 0; border: none; border-bottom: 1px solid var(--border); }
+            #arena-panel { border-radius: 0; border: none; }
             
-            #left-panel, #right-panel {
-                position: fixed; top: 0; bottom: 0; width: 85%; z-index: 8001;
-                transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            #nav-panel, #aside-panel {
+                position: fixed; top: 0; bottom: 0; width: 320px;
+                z-index: 9000; /* Über dem Backdrop */
+                transition: transform 0.3s ease;
+                box-shadow: 0 0 50px rgba(0,0,0,1);
             }
-            #left-panel { left: 0; transform: translateX(-100%); border-radius: 0 16px 16px 0; }
-            #right-panel { right: 0; transform: translateX(100%); border-radius: 16px 0 0 16px; }
+            #nav-panel { left: 0; transform: translateX(-100%); }
+            #aside-panel { right: 0; transform: translateX(100%); }
             
-            #left-panel.is-visible, #right-panel.is-visible { transform: translateX(0); }
-            .mobile-toggle { display: block; }
+            #nav-panel.open, #aside-panel.open { transform: translateX(0); }
+            .mob-btn { display: block; }
         }
+
+        /* MODAL SYSTEM */
+        .modal-wrap {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.9);
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal-box {
+            background: var(--bg-panel); width: 95%; max-width: 1000px; height: 90%;
+            border-radius: 16px; border: 1px solid var(--border);
+            display: flex; flex-direction: column;
+        }
+        .modal-head { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+
     </style>
 </head>
 <body>
 
-    <div id="system-loader" class="dialog-overlay" style="z-index: 9999; background: #000;">
-        <div style="color: var(--accent-blue); font-size: 24px; font-weight: bold; letter-spacing: 2px;">
-            TITAN v11 <span style="animation: blink 1s infinite">_</span>
+    <div id="loader" style="position:fixed; inset:0; background:#000; z-index:10000; display:flex; align-items:center; justify-content:center;">
+        <div style="text-align:center;">
+            <div style="font-size:40px; font-weight:900; color:var(--blue); letter-spacing:5px;">TITAN</div>
+            <div style="color:#666; font-size:12px; margin-top:10px;">SYSTEM INITIALIZING...</div>
         </div>
     </div>
 
-    <div id="login-screen" class="dialog-overlay" style="z-index: 9998; display: flex;">
-        <div class="dialog-box" style="max-width: 400px; text-align: center; padding: 40px;">
-            <h1 style="color: var(--accent-blue); margin-bottom: 10px;">TITAN ELITE</h1>
-            <p style="color: var(--text-secondary); margin-bottom: 30px;">System-Authentifizierung</p>
-            <form id="login-form">
-                <select id="profile-selector" style="width: 100%; padding: 12px; background: var(--bg-dark); color: #fff; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 20px;">
-                    </select>
-                <button type="submit" class="btn-primary">LOGIN</button>
-            </form>
-        </div>
-    </div>
+    <div id="backdrop"></div>
 
-    <div id="mobile-backdrop" class="dialog-overlay" style="background: rgba(0,0,0,0.5);"></div>
-
-    <div id="main-app" class="app-container" style="display: none;">
+    <div id="app" class="app-grid" style="display:none;">
         
-        <header class="app-header">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <button id="toggle-left" class="mobile-toggle">☰</button>
-                <div style="width: 35px; height: 35px; background: var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">BM</div>
-                <div>
-                    <div id="user-name" style="font-weight: bold;">Laden...</div>
-                    <div style="font-size: 11px; color: var(--accent-green);">ONLINE</div>
-                </div>
+        <header class="header-bar">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <button id="btn-menu" class="mob-btn">☰</button>
+                <div style="font-weight:900; font-size:20px; letter-spacing:1px;">TITAN <span style="color:var(--gold);">ELITE</span></div>
             </div>
-
-            <div style="display: flex; gap: 10px;">
-                <button id="btn-live-audio" style="border: 1px solid var(--accent-red); color: var(--accent-red); padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold;">🎙️ LIVE</button>
-                <button id="toggle-right" class="mobile-toggle">💬</button>
+            
+            <div style="display:flex; align-items:center; gap:20px;">
+                <div style="text-align:right; display:none; @media(min-width:600px){display:block;}">
+                    <div style="font-weight:bold; font-size:14px;">Björn Meier</div>
+                    <div style="font-size:11px; color:var(--green);">Cheftrainer</div>
+                </div>
+                <button id="btn-chat" class="mob-btn">💬</button>
             </div>
         </header>
 
-        <aside id="left-panel">
-            <h3 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; margin-bottom: 15px;">Hauptmenü</h3>
+        <aside id="nav-panel" class="panel">
+            <h3 style="color:var(--txt-dim); font-size:11px; text-transform:uppercase; margin-bottom:15px; letter-spacing:1px;">Management Console</h3>
             
-            <nav style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 30px;">
-                <button class="menu-btn" data-action="open-kabine">👕 Mannschaftskabine</button>
-                <button class="menu-btn" data-action="open-aktentasche">💼 Aktentasche (Admin)</button>
-                <button class="menu-btn" data-action="open-video">📹 Video-Analyse</button>
-                <button class="menu-btn" data-action="open-clipboard">📋 Taktik-Board</button>
+            <nav>
+                <button class="nav-btn" onclick="UI.openModal('modal-briefcase')">
+                    <span>💼 Aktentasche (Admin)</span> <span>›</span>
+                </button>
+                <button class="nav-btn" onclick="UI.openModal('modal-squad')">
+                    <span>👕 Mannschaftskabine</span> <span>›</span>
+                </button>
+                <button class="nav-btn" onclick="alert('Video-Modul wird geladen...')">
+                    <span>📹 Video-Analyse</span> <span>›</span>
+                </button>
             </nav>
 
-            <h3 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; margin-bottom: 10px; display: flex; justify-content: space-between;">
-                <span>Kader-Status</span>
-                <span style="font-size: 10px;">(Anwesend?)</span>
-            </h3>
-            <div id="squad-list-mini" style="overflow-y: auto; flex: 1;">
-                </div>
+            <div style="margin-top:30px; border-top:1px solid var(--border); padding-top:20px; flex:1; display:flex; flex-direction:column;">
+                <h3 style="color:var(--txt-dim); font-size:11px; text-transform:uppercase; margin-bottom:10px;">
+                    Trainings-Kader
+                </h3>
+                <div style="font-size:10px; color:#666; margin-bottom:10px;">Haken setzen = Anwesend (auf Bank)</div>
+                
+                <div id="roster-list" style="overflow-y:auto; flex:1; padding-right:5px;"></div>
+            </div>
         </aside>
 
-        <main id="main-arena">
-            <canvas id="main-canvas"></canvas>
+        <main id="arena-panel">
+            <canvas id="pitch"></canvas>
             
-            <div style="position: absolute; top: 15px; left: 15px; background: rgba(22, 27, 34, 0.9); padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; gap: 10px;">
-                <button data-tool="move" style="font-size: 18px;">🖐️</button>
-                <button data-tool="draw" style="font-size: 18px;">✏️</button>
-                <div style="width: 1px; background: #fff; opacity: 0.2;"></div>
-                <button data-action="reset-bench" style="font-size: 18px;" title="Alle auf Bank">bench</button>
+            <div style="position:absolute; top:15px; left:15px; display:flex; gap:10px;">
+                <button onclick="Arena.resetToBench()" style="background:rgba(0,0,0,0.8); color:white; padding:8px 15px; border-radius:20px; font-size:12px; border:1px solid #444;">
+                    🔄 Alle auf Bank
+                </button>
+                <button onclick="Arena.autoLineup()" style="background:var(--blue); color:white; padding:8px 15px; border-radius:20px; font-size:12px; font-weight:bold; box-shadow:0 4px 10px rgba(0,0,0,0.5);">
+                    ⚡ Auto-Match
+                </button>
+            </div>
+            
+            <div style="position:absolute; bottom:90px; right:15px; text-align:right; pointer-events:none; opacity:0.7;">
+                <div style="font-size:10px; color:#fff;">ZONE A (BLAU)</div>
+                <div style="font-size:10px; color:#fff;">ZONE B (ROT)</div>
             </div>
         </main>
 
-        <aside id="right-panel">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3>TONI AI</h3>
-                <button id="close-right" style="font-size: 20px;">&times;</button>
+        <aside id="aside-panel" class="panel">
+            <div style="border-bottom:1px solid var(--border); padding-bottom:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                <strong>TONI AI</strong>
+                <span style="font-size:10px; background:var(--green); color:#000; padding:2px 6px; border-radius:4px; font-weight:bold;">LIVE</span>
             </div>
             
-            <div id="chat-history" style="flex: 1; overflow-y: auto; margin-bottom: 15px; font-size: 13px; display: flex; flex-direction: column; gap: 10px;"></div>
-            
-            <form id="chat-form" style="display: flex; gap: 10px;">
-                <input id="chat-input" type="text" placeholder="Befehl..." style="flex: 1; background: var(--bg-dark); border: 1px solid var(--border-color); color: #fff; padding: 10px; border-radius: 8px;">
-                <button type="submit" style="background: var(--accent-blue); color: #fff; padding: 0 15px; border-radius: 8px;">➤</button>
+            <div id="chat-log" style="flex:1; overflow-y:auto; font-size:13px; margin-bottom:15px; display:flex; flex-direction:column; gap:12px;">
+                <div style="color:var(--txt-dim);">System verbunden. Warte auf Eingabe...</div>
+            </div>
+
+            <form id="chat-form" onsubmit="event.preventDefault(); Toni.handle();">
+                <input id="chat-in" type="text" placeholder="Befehl (z.B. 'Training')..." 
+                       style="width:100%; background:#000; border:1px solid var(--border); color:#fff; padding:12px; border-radius:8px;">
             </form>
         </aside>
 
     </div>
 
-    <div id="aktentasche-dialog" class="dialog-overlay">
-        <div class="dialog-box" style="height: 90vh;">
-            <div class="dialog-header">
-                <h2>💼 Manager-Aktentasche</h2>
-                <button data-action="close-dialog" style="font-size: 24px;">&times;</button>
+    <div id="modal-briefcase" class="modal-wrap">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h2>💼 Manager Aktentasche</h2>
+                <button onclick="UI.closeModal()" style="font-size:24px;">&times;</button>
             </div>
-            <div id="aktentasche-content" class="dialog-content">
+            <div id="briefcase-body" class="modal-body briefcase-grid">
                 </div>
-        </div>
-    </div>
-
-    <div id="kabine-dialog" class="dialog-overlay">
-        <div class="dialog-box" style="height: 90vh;">
-            <div class="dialog-header">
-                <h2>👕 Die Kabine</h2>
-                <button data-action="close-dialog" style="font-size: 24px;">&times;</button>
-            </div>
-            <div id="kabine-content" class="dialog-content" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;"></div>
-        </div>
-    </div>
-    
-    <div id="video-dialog" class="dialog-overlay">
-        <div class="dialog-box">
-             <div class="dialog-header">
-                <h2>📹 Video Analyse</h2>
-                <button data-action="close-dialog" style="font-size: 24px;">&times;</button>
-            </div>
-            <div id="video-content" class="dialog-content" style="text-align: center;">
-                 <div style="background: #000; height: 300px; display: flex; align-items: center; justify-content: center; color: #555;">KEIN SIGNAL</div>
+            <div style="padding:20px; border-top:1px solid var(--border); text-align:right;">
+                <button class="btn-action" style="width:auto; padding:10px 30px;" onclick="Data.saveBriefcase()">Speichern & Schließen</button>
             </div>
         </div>
     </div>
 
-    <div id="player-dialog" class="dialog-overlay">
-        <div class="dialog-box" style="max-width: 500px;">
-             <div class="dialog-header">
-                <h2 id="player-name-title">Spieler</h2>
-                <button data-action="close-dialog" style="font-size: 24px;">&times;</button>
+    <div id="modal-squad" class="modal-wrap">
+        <div class="modal-box">
+             <div class="modal-head">
+                <h2>👕 Der Kader (Live-Daten)</h2>
+                <button onclick="UI.closeModal()" style="font-size:24px;">&times;</button>
             </div>
-            <div id="player-stats-content" class="dialog-content"></div>
+            <div id="squad-body" class="modal-body" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:20px;">
+                </div>
         </div>
     </div>
 <script>
-    'use strict';
+    /* ======================================================================= */
+    /* I. DATA CORE (Die Datenbank)                                            */
+    /* ======================================================================= */
+    const Data = {
+        state: {
+            user: { name: "Björn Meier", role: "Cheftrainer", club: "FC TITAN ELITE" },
+            
+            // KADER: 'present' steuert, ob sie auf der Bank sitzen
+            squad: {
+                "p1": { name: "Neuer", num: 1, pos: "TW", ovr: 89, present: true, x:0, y:0 },
+                "p2": { name: "Rüdiger", num: 2, pos: "IV", ovr: 87, present: true, x:0, y:0 },
+                "p3": { name: "Tah", num: 4, pos: "IV", ovr: 84, present: true, x:0, y:0 },
+                "p4": { name: "Kimmich", num: 6, pos: "ZM", ovr: 88, present: true, x:0, y:0 },
+                "p5": { name: "Musiala", num: 10, pos: "OM", ovr: 89, present: true, x:0, y:0 },
+                "p6": { name: "Wirtz", num: 7, pos: "OM", ovr: 88, present: true, x:0, y:0 },
+                "p7": { name: "Sané", num: 19, pos: "FL", ovr: 85, present: true, x:0, y:0 },
+                "p8": { name: "Füllkrug", num: 9, pos: "ST", ovr: 83, present: true, x:0, y:0 },
+                "p9": { name: "Havertz", num: 29, pos: "ST", ovr: 84, present: true, x:0, y:0 },
+                "p10": { name: "Mittelstädt", num: 18, pos: "LV", ovr: 79, present: false, x:0, y:0 }, // Krank
+                "p11": { name: "Andrich", num: 23, pos: "ZDM", ovr: 82, present: true, x:0, y:0 },
+                "p12": { name: "Gündogan", num: 21, pos: "ZM", ovr: 86, present: true, x:0, y:0 }
+            },
 
-    /* ======================================================================= */
-    /* I. DATENBANK (Startet alle auf der Bank)                                */
-    /* ======================================================================= */
-    const MockData = {
-        profiles: {
-            "coach": { id: "coach", name: "Björn Meier", role: "Cheftrainer", club: "FC TITAN ELITE" }
+            briefcase: {
+                finances: { budget: 15500000, salary: 8200000 },
+                newspaper: { title: "Der Titan-Kurier", print: 12500, price: 2.50 },
+                sponsors: [
+                    { name: "ToniTech Labs", val: 2500000, type: "Haupt" },
+                    { name: "Global Sports", val: 800000, type: "Ärmel" },
+                    { name: "Local Bank", val: 1200000, type: "Stadion" }
+                ]
+            }
         },
-        // 'present': true = Spieler ist beim Training (auf der Bank)
-        // 'present': false = Spieler ist krank (nicht sichtbar)
-        squad: {
-            "p1": { id: "p1", name: "Neuer", num: 1, pos: "TW", ovr: 89, present: true, x: 0, y: 0 },
-            "p2": { id: "p2", name: "Rüdiger", num: 2, pos: "IV", ovr: 87, present: true, x: 0, y: 0 },
-            "p3": { id: "p3", name: "Tah", num: 4, pos: "IV", ovr: 84, present: true, x: 0, y: 0 },
-            "p4": { id: "p4", name: "Hummels", num: 5, pos: "IV", ovr: 85, present: true, x: 0, y: 0 },
-            "p5": { id: "p5", name: "Kimmich", num: 6, pos: "ZM", ovr: 88, present: true, x: 0, y: 0 },
-            "p6": { id: "p6", name: "Gündogan", num: 21, pos: "ZM", ovr: 86, present: true, x: 0, y: 0 },
-            "p7": { id: "p7", name: "Kroos", num: 8, pos: "ZM", ovr: 87, present: true, x: 0, y: 0 },
-            "p8": { id: "p8", name: "Andrich", num: 23, pos: "ZDM", ovr: 82, present: true, x: 0, y: 0 },
-            "p9": { id: "p9", name: "Musiala", num: 10, pos: "OM", ovr: 89, present: true, x: 0, y: 0 },
-            "p10": { id: "p10", name: "Wirtz", num: 7, pos: "OM", ovr: 88, present: true, x: 0, y: 0 },
-            "p11": { id: "p11", name: "Sané", num: 19, pos: "RF", ovr: 85, present: true, x: 0, y: 0 },
-            "p12": { id: "p12", name: "Füllkrug", num: 9, pos: "ST", ovr: 83, present: true, x: 0, y: 0 },
-            "p13": { id: "p13", name: "Havertz", num: 29, pos: "ST", ovr: 84, present: true, x: 0, y: 0 },
-            "p14": { id: "p14", name: "Müller", num: 25, pos: "RA", ovr: 84, present: true, x: 0, y: 0 },
-            "p15": { id: "p15", name: "Mittelstädt", num: 18, pos: "LV", ovr: 79, present: false, x: 0, y: 0 } // Krank
-        },
-        briefcase: {
-            finances: { budget: 15500000, salaries: 8200000, infra: 1200000 },
-            newspaper: { title: "Der Titan-Kurier", print: 12500, price: 2.50 },
-            sponsors: [
-                { name: "ToniTech", val: 2500000, type: "Haupt" },
-                { name: "LocalBank", val: 800000, type: "Stadion" }
-            ]
+
+        // Speichern der Aktentaschen-Werte (Aus den Inputs)
+        saveBriefcase() {
+            const s = this.state.briefcase;
+            // Werte aus Inputs holen
+            s.finances.budget = parseInt(document.getElementById('inp-budget').value) || 0;
+            s.finances.salary = parseInt(document.getElementById('inp-salary').value) || 0;
+            s.newspaper.title = document.getElementById('inp-news-title').value;
+            s.newspaper.print = parseInt(document.getElementById('inp-news-print').value) || 0;
+            
+            alert("✅ Änderungen in Datenbank gespeichert!");
+            UI.closeModal();
         }
     };
 
-    // State Container
-    const AppState = { user: null, squad: null, briefcase: null };
-
     /* ======================================================================= */
-    /* II. UI MANAGER (Steuerung & Interaktion)                                */
+    /* II. UI MANAGER (Interface Steuerung)                                    */
     /* ======================================================================= */
-    const UIManager = {
+    const UI = {
         init() {
-            this.bindEvents();
-            // Automatisch "Coach Meier" in die Login-Box laden
-            const sel = document.getElementById('profile-selector');
-            sel.innerHTML = `<option value="coach">Björn Meier (Cheftrainer)</option>`;
+            // Loader simulieren
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('app').style.display = 'grid'; // App starten
+                this.renderRoster();
+                Arena.init(); // Arena starten (Teil 4)
+                Toni.init();  // AI starten (Teil 4)
+            }, 1500);
+
+            // Event Listeners für Mobile Menü
+            document.getElementById('btn-menu').onclick = () => {
+                document.getElementById('nav-panel').classList.add('open');
+                document.getElementById('backdrop').style.display = 'block';
+            };
+            document.getElementById('btn-chat').onclick = () => {
+                document.getElementById('aside-panel').classList.add('open');
+                document.getElementById('backdrop').style.display = 'block';
+            };
+            document.getElementById('backdrop').onclick = () => {
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
+                document.getElementById('backdrop').style.display = 'none';
+            };
         },
 
-        bindEvents() {
-            // 1. Login
-            document.getElementById('login-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.login();
-            });
-
-            // 2. Mobile Toggles
-            document.getElementById('toggle-left').onclick = () => {
-                document.getElementById('left-panel').classList.toggle('is-visible');
-                document.getElementById('mobile-backdrop').style.display = 'block';
-            };
-            document.getElementById('toggle-right').onclick = () => {
-                document.getElementById('right-panel').classList.toggle('is-visible');
-                document.getElementById('mobile-backdrop').style.display = 'block';
-            };
-            document.getElementById('close-right').onclick = () => {
-                document.getElementById('right-panel').classList.remove('is-visible');
-            };
-            document.getElementById('mobile-backdrop').onclick = () => {
-                document.querySelectorAll('.is-visible').forEach(el => el.classList.remove('is-visible'));
-                document.getElementById('mobile-backdrop').style.display = 'none';
-            };
-
-            // 3. Globale Klick-Handler (Delegation)
-            document.addEventListener('click', (e) => {
-                const action = e.target.closest('[data-action]')?.dataset.action;
-                if (!action) return;
-
-                if (action === 'close-dialog') {
-                    document.querySelectorAll('.dialog-overlay').forEach(el => el.classList.remove('is-active'));
-                }
-                else if (action === 'open-aktentasche') this.renderAktentasche();
-                else if (action === 'open-kabine') this.renderKabine();
-                else if (action === 'open-video') document.getElementById('video-dialog').classList.add('is-active');
-                else if (action === 'save-briefcase') this.saveBriefcase();
-                else if (action === 'reset-bench') window.ArenaEngine.resetToBench();
-            });
-        },
-
-        login() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'grid';
-            
-            // Daten kopieren
-            AppState.squad = JSON.parse(JSON.stringify(MockData.squad));
-            AppState.briefcase = JSON.parse(JSON.stringify(MockData.briefcase));
-            AppState.user = MockData.profiles['coach'];
-            
-            document.getElementById('user-name').textContent = AppState.user.name;
-            
-            // Module starten
-            this.renderSquadList();
-            window.ArenaEngine.init();
-            window.ToniAI.init();
-        },
-
-        // --- RENDER FUNKTIONEN ---
-
-        // Linke Leiste: Kader-Liste mit Checkboxen
-        renderSquadList() {
-            const list = document.getElementById('squad-list-mini');
+        // 1. KADER LISTE (Links) - Mit Checkboxen
+        renderRoster() {
+            const list = document.getElementById('roster-list');
             list.innerHTML = '';
             
-            Object.values(AppState.squad).forEach(p => {
-                const div = document.createElement('div');
-                div.className = 'menu-btn';
-                div.style.opacity = p.present ? '1' : '0.5';
-                
-                div.innerHTML = `
+            Object.values(Data.state.squad).forEach(p => {
+                const row = document.createElement('div');
+                row.style.padding = '8px';
+                row.style.borderBottom = '1px solid #333';
+                row.style.display = 'flex';
+                row.style.justifyContent = 'space-between';
+                row.style.opacity = p.present ? '1' : '0.5'; // Visuelles Feedback
+
+                row.innerHTML = `
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <input type="checkbox" ${p.present ? 'checked' : ''} style="transform: scale(1.3); cursor: pointer;">
-                        <span>${p.num}. ${p.name}</span>
+                        <input type="checkbox" ${p.present ? 'checked' : ''} style="cursor:pointer;">
+                        <span>#${p.num} ${p.name}</span>
                     </div>
-                    <strong>${p.pos}</strong>
+                    <span style="font-weight:bold; font-size:10px; color:#666;">${p.pos}</span>
                 `;
-                
-                // Checkbox Logik
-                div.querySelector('input').onchange = (e) => {
+
+                // Checkbox Logik: Rein/Raus aus dem Training
+                row.querySelector('input').onchange = (e) => {
                     p.present = e.target.checked;
-                    div.style.opacity = p.present ? '1' : '0.5';
-                    window.ArenaEngine.resetToBench(); // Sofortiges Update der Bank!
+                    this.renderRoster(); // Liste neu zeichnen (für Opacity Update)
+                    Arena.resetToBench(); // Arena sofort updaten!
                 };
                 
-                list.appendChild(div);
+                list.appendChild(row);
             });
         },
 
-        // Aktentasche: Editierbare Felder
-        renderAktentasche() {
-            const bc = AppState.briefcase;
-            const content = document.getElementById('aktentasche-content');
+        // 2. AKTENTASCHE (Admin Modal) - Editierbar!
+        renderBriefcase() {
+            const bc = Data.state.briefcase;
+            const container = document.getElementById('briefcase-body');
             
-            content.innerHTML = `
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            container.innerHTML = `
+                <div class="folder finance">
+                    <h3 style="color:var(--green); margin-bottom:10px;">💰 Finanzen</h3>
+                    <label style="font-size:11px; color:#888;">Budget (€)</label>
+                    <input id="inp-budget" type="number" class="inp-elite" value="${bc.finances.budget}">
                     
-                    <div style="background:var(--bg-light); padding:20px; border-radius:12px; border:1px solid var(--border-color);">
-                        <h3 style="color:var(--accent-green); border-bottom:1px solid #444; padding-bottom:10px;">💰 Finanzen</h3>
-                        <label style="font-size:12px; color:#888;">Budget (€)</label>
-                        <input id="inp-budget" type="number" class="editable-input" value="${bc.finances.budget}">
-                        
-                        <label style="font-size:12px; color:#888; margin-top:10px; display:block;">Gehälter (€)</label>
-                        <input id="inp-salary" type="number" class="editable-input" style="color:var(--accent-red);" value="${bc.finances.salaries}">
-                    </div>
-
-                    <div style="background:var(--bg-light); padding:20px; border-radius:12px; border:1px solid var(--border-color);">
-                        <h3 style="color:var(--accent-gold); border-bottom:1px solid #444; padding-bottom:10px;">📰 Stadionzeitung</h3>
-                        <label style="font-size:12px; color:#888;">Titel der Ausgabe</label>
-                        <input id="inp-news-title" type="text" class="editable-input" value="${bc.newspaper.title}">
-                        
-                        <div style="display:flex; gap:10px; margin-top:10px;">
-                            <div style="flex:1;">
-                                <label style="font-size:12px; color:#888;">Auflage</label>
-                                <input id="inp-news-print" type="number" class="editable-input" value="${bc.newspaper.print}">
-                            </div>
-                            <div style="flex:1;">
-                                <label style="font-size:12px; color:#888;">Preis (€)</label>
-                                <input id="inp-news-price" type="number" step="0.1" class="editable-input" value="${bc.newspaper.price}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="background:var(--bg-light); padding:20px; border-radius:12px; border:1px solid var(--border-color);">
-                        <h3 style="color:var(--accent-blue); border-bottom:1px solid #444; padding-bottom:10px;">🤝 Sponsoren</h3>
-                        ${bc.sponsors.map(s => `
-                            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #444;">
-                                <span>${s.name} <small>(${s.type})</small></span>
-                                <strong>${s.val.toLocaleString()} €</strong>
-                            </div>
-                        `).join('')}
-                    </div>
-
+                    <label style="font-size:11px; color:#888; margin-top:10px; display:block;">Gehälter (€)</label>
+                    <input id="inp-salary" type="number" class="inp-elite" style="color:#da3633;" value="${bc.finances.salary}">
                 </div>
-                
-                <button data-action="save-briefcase" class="btn-primary" style="margin-top:20px;">💾 Änderungen speichern</button>
-            `;
-            
-            document.getElementById('aktentasche-dialog').classList.add('is-active');
-        },
 
-        saveBriefcase() {
-            // Werte speichern
-            AppState.briefcase.finances.budget = parseInt(document.getElementById('inp-budget').value);
-            AppState.briefcase.finances.salaries = parseInt(document.getElementById('inp-salary').value);
-            AppState.briefcase.newspaper.title = document.getElementById('inp-news-title').value;
-            
-            alert("✅ Daten erfolgreich aktualisiert!");
-            document.getElementById('aktentasche-dialog').classList.remove('is-active');
-        },
-
-        // Kabine: FIFA Cards
-        renderKabine() {
-            const content = document.getElementById('kabine-content');
-            content.innerHTML = '';
-            
-            Object.values(AppState.squad).forEach(p => {
-                if(!p.present) return; // Nur Anwesende zeigen
-                content.innerHTML += `
-                    <div style="background: linear-gradient(135deg, #d29922, #f9d976); color:#000; padding:15px; border-radius:10px; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.5);">
-                        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:18px; border-bottom:2px solid rgba(0,0,0,0.2); margin-bottom:5px;">
-                            <span>${p.ovr}</span> <span>${p.pos}</span>
+                <div class="folder media">
+                    <h3 style="color:var(--gold); margin-bottom:10px;">📰 Medien & PR</h3>
+                    <label style="font-size:11px; color:#888;">Zeitungstitel</label>
+                    <input id="inp-news-title" type="text" class="inp-elite" value="${bc.newspaper.title}">
+                    
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+                        <div>
+                            <label style="font-size:11px; color:#888;">Auflage</label>
+                            <input id="inp-news-print" type="number" class="inp-elite" value="${bc.newspaper.print}">
                         </div>
-                        <div style="font-weight:900; text-transform:uppercase; margin-bottom:10px;">${p.name}</div>
-                        <div style="font-size:12px; display:grid; grid-template-columns:1fr 1fr; gap:5px;">
-                            <div>PAC <strong>${Math.floor(Math.random()*20+70)}</strong></div>
-                            <div>SHO <strong>${Math.floor(Math.random()*20+70)}</strong></div>
-                            <div>PAS <strong>${Math.floor(Math.random()*20+70)}</strong></div>
-                            <div>DRI <strong>${Math.floor(Math.random()*20+70)}</strong></div>
+                        <div>
+                            <label style="font-size:11px; color:#888;">Preis (€)</label>
+                            <input type="number" class="inp-elite" value="${bc.newspaper.price}" disabled title="Preisbindung">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="folder sponsors">
+                    <h3 style="color:var(--blue); margin-bottom:10px;">🤝 Sponsoren</h3>
+                    ${bc.sponsors.map(s => `
+                        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #444;">
+                            <span>${s.name} <small style="color:#666">(${s.type})</small></span>
+                            <strong>${s.val.toLocaleString()} €</strong>
+                        </div>
+                    `).join('')}
+                    <button class="btn-action" style="margin-top:15px; background:#333; font-size:10px;">+ Neuer Sponsor</button>
+                </div>
+            `;
+        },
+
+        // 3. FIFA CARDS (Live Stats)
+        renderSquad() {
+            const container = document.getElementById('squad-body');
+            container.innerHTML = '';
+            
+            Object.values(Data.state.squad).forEach(p => {
+                // Nur Anwesende anzeigen? Oder alle? Hier zeigen wir alle für den Überblick.
+                container.innerHTML += `
+                    <div class="fifa-card">
+                        <div class="card-top">
+                            <span>${p.ovr}</span>
+                            <span>${p.pos}</span>
+                        </div>
+                        <div class="card-name">${p.name}</div>
+                        <div class="card-stats">
+                            <div class="stat-row"><span>PAC</span> <b>${Math.floor(Math.random()*15+75)}</b></div>
+                            <div class="stat-row"><span>SHO</span> <b>${Math.floor(Math.random()*15+70)}</b></div>
+                            <div class="stat-row"><span>PAS</span> <b>${Math.floor(Math.random()*15+75)}</b></div>
+                            <div class="stat-row"><span>DRI</span> <b>${Math.floor(Math.random()*15+80)}</b></div>
                         </div>
                     </div>
                 `;
             });
-            document.getElementById('kabine-dialog').classList.add('is-active');
+        },
+
+        // MODAL CONTROLS
+        openModal(id) {
+            if(id === 'modal-briefcase') this.renderBriefcase();
+            if(id === 'modal-squad') this.renderSquad();
+            document.getElementById(id).style.display = 'flex';
+        },
+        closeModal() {
+            document.querySelectorAll('.modal-wrap').forEach(m => m.style.display = 'none');
         }
     };
     /* ======================================================================= */
-    /* III. ARENA ENGINE (Das interaktive Spielfeld)                           */
+    /* III. ARENA ENGINE (Das Spielfeld & Die Bank)                            */
     /* ======================================================================= */
-    const ArenaEngine = {
+    const Arena = {
         init() {
-            this.canvas = document.getElementById('main-canvas');
+            this.canvas = document.getElementById('pitch');
             this.ctx = this.canvas.getContext('2d');
             
             // Canvas Größe anpassen
             this.resize();
             window.addEventListener('resize', () => this.resize());
 
-            // --- DRAG & DROP LOGIK ---
-            let isDragging = false;
-            let dragTarget = null;
+            // Drag & Drop Status
+            this.isDragging = false;
+            this.dragTarget = null;
 
-            // Hilfsfunktion: Position berechnen (für Maus & Touch)
-            const getPos = (e) => {
-                const r = this.canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return { x: clientX - r.left, y: clientY - r.top };
-            };
-
-            const start = (e) => {
-                const pos = getPos(e);
-                // Finde Spieler unter dem Finger (nur Anwesende!)
-                dragTarget = Object.values(AppState.squad).find(p => {
-                    return p.present && Math.hypot(p.x - pos.x, p.y - pos.y) < 30;
-                });
-                if(dragTarget) isDragging = true;
-            };
-
-            const move = (e) => {
-                if(isDragging && dragTarget) {
-                    e.preventDefault(); // Verhindert Scrollen auf Handy
-                    const pos = getPos(e);
-                    dragTarget.x = pos.x;
-                    dragTarget.y = pos.y;
-                    
-                    // Automatische Team-Erkennung (Oben/Unten oder Links/Rechts)
-                    // Hier einfach: Ist er auf dem Rasen? -> Team A/B Logik später
-                    if(dragTarget.y < this.canvas.height - 80) {
-                        // Auf dem Feld
-                        dragTarget.team = (dragTarget.x < this.canvas.width / 2) ? "A" : "B";
-                    } else {
-                        // Zurück auf der Bank
-                        dragTarget.team = "neutral";
-                    }
-                }
-            };
-
-            const end = () => { isDragging = false; dragTarget = null; };
-
-            // Event Listener hinzufügen
-            this.canvas.addEventListener('mousedown', start);
-            this.canvas.addEventListener('mousemove', move);
-            this.canvas.addEventListener('mouseup', end);
-            
-            this.canvas.addEventListener('touchstart', start, {passive: false});
-            this.canvas.addEventListener('touchmove', move, {passive: false});
-            this.canvas.addEventListener('touchend', end);
+            // Event Listeners (Maus & Touch)
+            this.setupInput();
 
             // Start: Alle auf die Bank
             this.resetToBench();
             
-            // Loop starten
+            // Render Loop starten
             this.loop();
         },
 
@@ -563,84 +545,137 @@
             const parent = this.canvas.parentElement;
             this.canvas.width = parent.clientWidth;
             this.canvas.height = parent.clientHeight;
-            this.resetToBench(); // Positionen neu berechnen bei Resize
+            // Wenn Größe sich ändert, Positionen neu berechnen, damit keiner verschwindet
+            this.resetToBench(); 
         },
 
-        // --- POSITIONIERUNG ---
+        // --- STEUERUNG (Touch & Mouse) ---
+        setupInput() {
+            const getPos = (e) => {
+                const r = this.canvas.getBoundingClientRect();
+                const x = e.touches ? e.touches[0].clientX : e.clientX;
+                const y = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: x - r.left, y: y - r.top };
+            };
+
+            const start = (e) => {
+                const pos = getPos(e);
+                // Suche Spieler unter dem Finger (Nur wenn 'present' == true)
+                this.dragTarget = Object.values(Data.state.squad).find(p => {
+                    return p.present && Math.hypot(p.x - pos.x, p.y - pos.y) < 25;
+                });
+                if(this.dragTarget) this.isDragging = true;
+            };
+
+            const move = (e) => {
+                if(this.isDragging && this.dragTarget) {
+                    e.preventDefault(); // Verhindert Scrollen beim Ziehen
+                    const pos = getPos(e);
+                    
+                    // Grenzen setzen (nicht aus dem Bild schieben)
+                    this.dragTarget.x = Math.max(20, Math.min(this.canvas.width - 20, pos.x));
+                    this.dragTarget.y = Math.max(20, Math.min(this.canvas.height - 20, pos.y));
+                    
+                    // Automatische Team-Erkennung
+                    const pitchHeight = this.canvas.height - 80; // Höhe ohne Bank
+                    
+                    if(this.dragTarget.y > pitchHeight) {
+                        this.dragTarget.team = "neutral"; // Ist auf der Bank
+                    } else {
+                        // Auf dem Feld: Links = Team A, Rechts = Team B
+                        this.dragTarget.team = (this.dragTarget.x < this.canvas.width / 2) ? "A" : "B";
+                    }
+                }
+            };
+
+            const end = () => { this.isDragging = false; this.dragTarget = null; };
+
+            // Maus Events
+            this.canvas.addEventListener('mousedown', start);
+            this.canvas.addEventListener('mousemove', move);
+            this.canvas.addEventListener('mouseup', end);
+            
+            // Touch Events (Wichtig für Handy!)
+            this.canvas.addEventListener('touchstart', start, {passive: false});
+            this.canvas.addEventListener('touchmove', move, {passive: false});
+            this.canvas.addEventListener('touchend', end);
+        },
+
+        // --- LOGIK: BANK & AUFSTELLUNG ---
         
         resetToBench() {
             const h = this.canvas.height;
-            const startX = 30;
-            const gap = 45;
-            let i = 0;
+            const startX = 40;
+            const gap = 50;
+            let count = 0;
 
-            Object.values(AppState.squad).forEach(p => {
+            Object.values(Data.state.squad).forEach(p => {
                 if(!p.present) {
-                    // Kranke Spieler aus dem Bild
-                    p.x = -100; p.y = -100;
+                    p.x = -1000; // Weg vom Fenster
                 } else {
-                    // Auf die Bank (Grauer Streifen unten)
-                    p.x = startX + (i * gap);
-                    p.y = h - 40; // 40px von unten
+                    // Ab auf die graue Bank unten
+                    p.x = startX + (count * gap);
+                    p.y = h - 40; 
                     p.team = "neutral";
-                    i++;
+                    count++;
                 }
             });
         },
 
         autoLineup() {
             const w = this.canvas.width;
-            const h = this.canvas.height - 80; // Rasenhöhe
-            const players = Object.values(AppState.squad).filter(p => p.present);
+            const h = this.canvas.height - 80; // Nur Rasenhöhe
+            const players = Object.values(Data.state.squad).filter(p => p.present);
             
-            // Zufällig verteilen (Training)
-            players.forEach((p, idx) => {
-                if(idx % 2 === 0) {
+            // Wir verteilen sie zufällig auf Links (Blau) und Rechts (Rot)
+            players.forEach((p, i) => {
+                if(i % 2 === 0) {
                     p.team = "A"; // Blau
-                    p.x = w * 0.25 + (Math.random() * 50);
-                    p.y = h * 0.5 + (Math.random() * 100 - 50);
+                    p.x = w * 0.25 + (Math.random() * 60 - 30);
+                    p.y = h * 0.5 + (Math.random() * 150 - 75);
                 } else {
                     p.team = "B"; // Rot
-                    p.x = w * 0.75 - (Math.random() * 50);
-                    p.y = h * 0.5 + (Math.random() * 100 - 50);
+                    p.x = w * 0.75 + (Math.random() * 60 - 30);
+                    p.y = h * 0.5 + (Math.random() * 150 - 75);
                 }
             });
         },
 
-        // --- RENDERING ---
+        // --- ZEICHNEN (RENDER LOOP) ---
         
         loop() {
             const ctx = this.ctx;
             const w = this.canvas.width;
             const h = this.canvas.height;
-            
-            ctx.clearRect(0, 0, w, h);
-
-            // 1. Der Rasen
             const benchH = 80;
             const pitchH = h - benchH;
             
-            // Rasen Grün
-            ctx.fillStyle = '#1e3a1e';
+            ctx.clearRect(0, 0, w, h);
+
+            // 1. RASEN (Dunkelgrün)
+            ctx.fillStyle = '#1a2e1a'; 
             ctx.fillRect(0, 0, w, pitchH);
             
-            // Linien
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            // Linien (Weiß, transparent)
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
             ctx.lineWidth = 2;
-            ctx.strokeRect(10, 10, w-20, pitchH-20); // Außenlinie
-            ctx.beginPath(); ctx.moveTo(w/2, 10); ctx.lineTo(w/2, pitchH-10); ctx.stroke(); // Mitte
-            ctx.beginPath(); ctx.arc(w/2, pitchH/2, 40, 0, Math.PI*2); ctx.stroke(); // Kreis
+            ctx.strokeRect(20, 20, w-40, pitchH-40); // Außenlinie
+            ctx.beginPath(); ctx.moveTo(w/2, 20); ctx.lineTo(w/2, pitchH-20); ctx.stroke(); // Mittellinie
+            ctx.beginPath(); ctx.arc(w/2, pitchH/2, 50, 0, Math.PI*2); ctx.stroke(); // Mittelkreis
 
-            // 2. Die Bank (Technische Zone)
-            ctx.fillStyle = '#161b22'; // UI Grau
+            // 2. TECHNISCHE ZONE (Bank) - Grau
+            ctx.fillStyle = '#161b22';
             ctx.fillRect(0, pitchH, w, benchH);
             
-            ctx.fillStyle = '#8b949e';
-            ctx.font = '10px sans-serif';
-            ctx.fillText("TECHNISCHE ZONE / ERSATZBANK", 10, pitchH + 15);
+            // Trennlinie (Gold)
+            ctx.beginPath(); ctx.moveTo(0, pitchH); ctx.lineTo(w, pitchH);
+            ctx.strokeStyle = '#d29922'; ctx.lineWidth = 2; ctx.stroke();
+            
+            // Text "BANK"
+            ctx.fillStyle = '#444'; ctx.font = 'bold 12px Arial'; ctx.fillText("TECHNISCHE ZONE", 20, pitchH + 20);
 
-            // 3. Spieler zeichnen
-            Object.values(AppState.squad).forEach(p => {
+            // 3. SPIELER
+            Object.values(Data.state.squad).forEach(p => {
                 if(p.present) this.drawPlayer(p);
             });
 
@@ -650,78 +685,82 @@
         drawPlayer(p) {
             const ctx = this.ctx;
             
+            // Kreis
             ctx.beginPath();
-            ctx.arc(p.x, p.y, 16, 0, Math.PI*2);
+            ctx.arc(p.x, p.y, 18, 0, Math.PI*2);
             
-            // Farben (Apple Canvas Fix: Harte Hex Codes)
-            if(p.pos === 'TW') ctx.fillStyle = '#d4af37'; // Gold
+            // Farbe basierend auf Team/Position
+            if(p.pos === 'TW') ctx.fillStyle = '#d29922'; // Gold
             else if(p.team === 'A') ctx.fillStyle = '#58a6ff'; // Blau
             else if(p.team === 'B') ctx.fillStyle = '#f85149'; // Rot
-            else ctx.fillStyle = '#30363d'; // Neutral (Bank Grau)
-
+            else ctx.fillStyle = '#30363d'; // Grau (Bank)
+            
             ctx.fill();
             
-            // Rand
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#fff';
-            ctx.stroke();
+            // Rand (Weiß)
+            ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
 
             // Nummer
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(p.num, p.x, p.y);
-            
-            // Name
-            ctx.font = '9px Arial';
-            ctx.fillText(p.name, p.x, p.y + 24);
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Arial'; 
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(p.num, p.x, p.y + 1);
+
+            // Name (unter dem Kreis)
+            ctx.font = '10px Arial';
+            ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
+            ctx.fillText(p.name, p.x, p.y + 28);
+            ctx.shadowBlur = 0; // Reset Shadow
         }
     };
 
     /* ======================================================================= */
-    /* IV. TONI AI (Chat-Logik)                                                */
+    /* IV. TONI AI (Chat Interface)                                            */
     /* ======================================================================= */
-    const ToniAI = {
+    const Toni = {
         init() {
-            const form = document.getElementById('chat-form');
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handle();
-            });
-            this.say("System bereit. Kader geladen.");
+            this.log = document.getElementById('chat-log');
+            this.speak("Coach, System bereit. Wer spielt heute?");
         },
-
-        say(msg) {
-            const hist = document.getElementById('chat-history');
+        
+        speak(msg) {
             const div = document.createElement('div');
-            div.innerHTML = `<span style="color:#2ea043; font-weight:bold;">TONI:</span> ${msg}`;
-            hist.appendChild(div);
-            hist.scrollTop = hist.scrollHeight;
+            div.innerHTML = `<span style="color:var(--green); font-weight:bold;">TONI:</span> ${msg}`;
+            this.log.appendChild(div);
+            this.log.scrollTop = this.log.scrollHeight;
         },
 
         handle() {
-            const inp = document.getElementById('chat-input');
+            const inp = document.getElementById('chat-in');
             const txt = inp.value.toLowerCase();
-            inp.value = '';
+            inp.value = ''; // Reset Input
 
-            if(txt.includes('team') || txt.includes('training')) {
-                ArenaEngine.autoLineup();
-                this.say("Habe zwei Teams für das Trainingsspiel eingeteilt.");
+            // User Nachricht anzeigen
+            const userDiv = document.createElement('div');
+            userDiv.style.textAlign = 'right'; userDiv.style.color = '#888';
+            userDiv.innerText = txt;
+            this.log.appendChild(userDiv);
+
+            // Logik
+            if(txt.includes('training') || txt.includes('team') || txt.includes('match')) {
+                Arena.autoLineup();
+                this.speak("Verstanden. Ich habe zwei Teams für das Trainingsspiel gebildet.");
             } else if(txt.includes('bank') || txt.includes('reset')) {
-                ArenaEngine.resetToBench();
-                this.say("Alle Spieler zurück auf die Bank.");
+                Arena.resetToBench();
+                this.speak("Alle Spieler zurück in die Technische Zone.");
+            } else if(txt.includes('hallo')) {
+                this.speak("Servus Coach! Wie ist der Status?");
             } else {
-                this.say("Befehl nicht erkannt. Versuche 'Mach Teams' oder 'Alle auf Bank'.");
+                this.speak("Befehl unklar. Sag 'Training' für Teams oder 'Bank' für Reset.");
             }
         }
     };
 
-    // BOOT
-    document.addEventListener('DOMContentLoaded', () => {
-        UIManager.init();
-    });
+    // BOOTSTRAP (Starten, sobald HTML geladen ist)
+    window.onload = () => {
+        UI.init();
+    };
 
 </script>
 </body>
 </html>
+
