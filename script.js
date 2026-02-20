@@ -1,4 +1,3 @@
-/* --- PLAYER MANAGEMENT --- */
 let playersData = JSON.parse(localStorage.getItem('toni_players')) || [
     { id: 1, name: "Müller", pos: "ST", rating: 88, stats: [85, 90, 82, 82, 40, 80] },
     { id: 2, name: "Schmidt", pos: "TW", rating: 91, stats: [88, 50, 60, 55, 92, 85] }
@@ -13,9 +12,8 @@ function renderLockerRoom() {
             <div class="card-top"><span>${p.rating}</span><span>${p.pos}</span></div>
             <div class="card-name">${p.name}</div>
             <div class="card-stats">
-                <span>TEM: ${p.stats[0]}</span><span>DRI: ${p.stats[3]}</span>
-                <span>SCH: ${p.stats[1]}</span><span>DEF: ${p.stats[4]}</span>
-                <span>PAS: ${p.stats[2]}</span><span>PHY: ${p.stats[5]}</span>
+                <span>TEM: ${p.stats[0]}</span><span>SCH: ${p.stats[1]}</span>
+                <span>PAS: ${p.stats[2]}</span><span>DRI: ${p.stats[3]}</span>
             </div>
         </div>
     `).join('');
@@ -25,7 +23,6 @@ function openPlayerModal(id = null) {
     editingPlayerId = id;
     const modal = document.getElementById('player-modal');
     modal.style.display = "block";
-    
     if (id) {
         const p = playersData.find(x => x.id === id);
         document.getElementById('edit-name').value = p.name;
@@ -70,19 +67,7 @@ function deletePlayer() {
 
 function closePlayerModal() { document.getElementById('player-modal').style.display = "none"; }
 
-/* --- INTERFACE CONTROL --- */
 function toggleToni() { document.body.classList.toggle('toni-collapsed'); }
-
-function toggleVoice() {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'de-DE';
-    recognition.start();
-    recognition.onresult = (e) => {
-        const text = e.results[0][0].transcript;
-        addMessage("Du", text);
-        handleToniCommand(text);
-    };
-}
 
 function showModule(m) {
     document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active'));
@@ -90,8 +75,8 @@ function showModule(m) {
     if (m === 'tactics') setTimeout(initBoard, 100);
 }
 
-/* --- TACTICS LOGIC --- */
-let canvas, ctx, pitchPlayers = [];
+// Taktik-Board Initialisierung (Dummy für Zeichnung)
+let canvas, ctx;
 function initBoard() {
     canvas = document.getElementById('tacticBoard'); ctx = canvas.getContext('2d');
     canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
@@ -100,8 +85,8 @@ function initBoard() {
 function drawPitch() {
     ctx.clearRect(0,0,canvas.width,canvas.height); ctx.strokeStyle = "white"; ctx.lineWidth = 2;
     ctx.strokeRect(10,10,canvas.width-20,canvas.height-20);
-    ctx.strokeRect(canvas.width*0.2,10,canvas.width*0.6,60); // Strafraum oben
-    ctx.strokeRect(canvas.width*0.2,canvas.height-70,canvas.width*0.6,60); // Strafraum unten
+    ctx.strokeRect(canvas.width*0.2,10,canvas.width*0.6,60);
+    ctx.strokeRect(canvas.width*0.2,canvas.height-70,canvas.width*0.6,60);
 }
 
 window.onload = () => { renderLockerRoom(); };
