@@ -1,12 +1,12 @@
 /* ==========================================================
-   TONI 2.0 - MASTER SKRIPT (UNGEKÜRZT)
+   TONI 2.0 - MASTER SKRIPT (VOLLSTÄNDIG & UNGEKÜRZT)
    ========================================================== */
 
+// 1. MUSTER-KADER (Sorgt für volle Kabine beim Start)
 function getInitialPlayers() {
     const saved = localStorage.getItem('toni_players');
     if (saved && JSON.parse(saved).length > 0) return JSON.parse(saved);
 
-    // MUSTER-KADER (Fix für die leere Kabine)
     return [
         { id: 101, name: "M. Müller", pos: "ST", rating: 88, stats: [85, 90, 78, 84, 42, 81], img: "" },
         { id: 102, name: "L. Schmidt", pos: "TW", rating: 91, stats: [88, 45, 62, 58, 92, 85], img: "" },
@@ -19,8 +19,9 @@ function getInitialPlayers() {
 let playersData = getInitialPlayers();
 let editingPlayerId = null;
 
+// INITIALISIERUNG
 window.onload = () => {
-    // SICHERHEIT: Modal beim Start verstecken
+    // Modal verstecken
     const modal = document.getElementById('player-modal');
     if(modal) modal.classList.remove('active');
     
@@ -29,14 +30,16 @@ window.onload = () => {
     }
     renderLockerRoom();
     showModule('dashboard'); 
-    addMessage("Toni", "Elite System 2.0 online. Analyse gestartet.");
+    addMessage("Toni", "Elite System 2.0 online. Analyse-Protokoll gestartet.");
 };
 
-/* --- NAVIGATION --- */
+// MODUL-NAVIGATION (VERHINDERT STAPELN)
 function showModule(moduleId) {
+    // Alle Sektionen aus
     const sections = document.querySelectorAll('.module-section');
     sections.forEach(s => s.classList.remove('active'));
 
+    // Alle Buttons aus
     const buttons = document.querySelectorAll('.nav-btn');
     buttons.forEach(b => b.classList.remove('active'));
 
@@ -49,10 +52,11 @@ function showModule(moduleId) {
     const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(moduleId));
     if (activeBtn) activeBtn.classList.add('active');
 
+    // Taktik-Reset bei Wechsel
     if (moduleId === 'tactics') setTimeout(initBoard, 150);
 }
 
-/* --- KABINE & FIFA CARDS --- */
+// SPIELER-KABINE RENDERN
 function renderLockerRoom() {
     const container = document.getElementById('locker-room-container');
     if (!container) return;
@@ -73,7 +77,71 @@ function renderLockerRoom() {
     `).join('');
 }
 
-/* --- TAKTIK ENGINE (MIT TOREN) --- */
+// PLAYER-MODAL STEUERUNG
+function openPlayerModal(id = null) {
+    editingPlayerId = id;
+    const modal = document.getElementById('player-modal');
+    modal.classList.add('active');
+    
+    const ratingInput = document.getElementById('edit-rating');
+    ratingInput.readOnly = true;
+
+    if (id) {
+        const p = playersData.find(x => x.id === id);
+        document.getElementById('edit-name').value = p.name;
+        document.getElementById('edit-pos').value = p.pos;
+        document.getElementById('edit-rating').value = p.rating;
+        document.getElementById('edit-img-url').value = p.img || "";
+        document.getElementById('edit-tem').value = p.stats[0];
+        document.getElementById('edit-sch').value = p.stats[1];
+        document.getElementById('edit-pas').value = p.stats[2];
+        document.getElementById('edit-dri').value = p.stats[3];
+        document.getElementById('edit-def').value = p.stats[4];
+        document.getElementById('edit-phy').value = p.stats[5];
+        document.getElementById('btn-delete').style.display = "block";
+    } else {
+        document.querySelectorAll('#player-modal input').forEach(i => i.value = "");
+        document.getElementById('btn-delete').style.display = "none";
+    }
+}
+
+// INTELLIGENTES SPEICHERN MIT AUTO-RATING
+function savePlayer() {
+    const name = document.getElementById('edit-name').value;
+    if (!name) return;
+
+    const s = [
+        parseInt(document.getElementById('edit-tem').value) || 50,
+        parseInt(document.getElementById('edit-sch').value) || 50,
+        parseInt(document.getElementById('edit-pas').value) || 50,
+        parseInt(document.getElementById('edit-dri').value) || 50,
+        parseInt(document.getElementById('edit-def').value) || 50,
+        parseInt(document.getElementById('edit-phy').value) || 50
+    ];
+
+    // Toni rechnet den Durchschnitt
+    const autoRating = Math.round(s.reduce((a, b) => a + b, 0) / 6);
+
+    const p = {
+        id: editingPlayerId || Date.now(),
+        name: name,
+        pos: document.getElementById('edit-pos').value.toUpperCase() || "??",
+        rating: autoRating,
+        stats: s,
+        img: document.getElementById('edit-img-url').value
+    };
+
+    if (editingPlayerId) playersData = playersData.map(x => x.id === editingPlayerId ? p : x);
+    else playersData.push(p);
+
+    localStorage.setItem('toni_players', JSON.stringify(playersData));
+    closePlayerModal();
+    renderLockerRoom();
+}
+
+function closePlayerModal() { document.getElementById('player-modal').classList.remove('active'); }
+
+// TAKTIK ENGINE (JETZT MIT TOREN)
 let canvas, ctx, pitchPlayers = [];
 
 function initBoard() {
@@ -90,26 +158,24 @@ function drawBoard() {
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Spielfeld-Linien
     ctx.strokeStyle = "white"; ctx.lineWidth = 2;
     ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20); // Außen
     
-    // TORE (Fix für Screenshot 3)
+    // TORE ZEICHNEN
     ctx.lineWidth = 6;
     ctx.beginPath();
-    ctx.moveTo(canvas.width * 0.4, 10); ctx.lineTo(canvas.width * 0.6, 10); // Tor Oben
-    ctx.moveTo(canvas.width * 0.4, canvas.height - 10); ctx.lineTo(canvas.width * 0.6, canvas.height - 10); // Tor Unten
+    ctx.moveTo(canvas.width * 0.4, 10); ctx.lineTo(canvas.width * 0.6, 10);
+    ctx.moveTo(canvas.width * 0.4, canvas.height - 10); ctx.lineTo(canvas.width * 0.6, canvas.height - 10);
     ctx.stroke();
-    
+
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(10, canvas.height / 2); ctx.lineTo(canvas.width - 10, canvas.height / 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 45, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, 45, 0, Math.PI*2); ctx.stroke();
 
-    // Spieler zeichnen
     pitchPlayers.forEach(p => {
-        ctx.fillStyle = p.color;
-        ctx.beginPath(); ctx.arc(p.x, p.y, 16, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "white"; ctx.font = "bold 11px Arial"; ctx.fillText(p.label, p.x - 12, p.y + 35);
+        ctx.fillStyle = p.c;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 16, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "white"; ctx.font = "bold 11px Arial"; ctx.fillText(p.l, p.x-12, p.y+35);
     });
 }
 
@@ -118,35 +184,10 @@ function setFormation(type) {
     const w = canvas.width, h = canvas.height;
     const color = type === '4-4-2' ? '#ef4444' : '#3b82f6';
     if (type === '4-4-2') {
-        [0.2, 0.4, 0.6, 0.8].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.75, label: "ABW", color: color }));
-        [0.2, 0.4, 0.6, 0.8].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.5, label: "MF", color: color }));
-        [0.4, 0.6].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.25, label: "ST", color: color }));
+        [0.2, 0.4, 0.6, 0.8].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.75, l: "ABW", c: color }));
+        [0.2, 0.4, 0.6, 0.8].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.5, l: "MF", c: color }));
+        [0.4, 0.6].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.25, l: "ST", c: color }));
     }
-    pitchPlayers.push({ x: w / 2, y: h - 45, label: "TW", color: color });
+    pitchPlayers.push({ x: w / 2, y: h - 45, l: "TW", c: color });
     drawBoard();
-}
-
-/* --- PLAYER MODAL FIX --- */
-function openPlayerModal(id = null) {
-    editingPlayerId = id;
-    const modal = document.getElementById('player-modal');
-    modal.classList.add('active'); // Öffnet das Modal nur bei Klick
-
-    if (id) {
-        const p = playersData.find(x => x.id === id);
-        document.getElementById('edit-name').value = p.name;
-        document.getElementById('edit-pos').value = p.pos;
-        document.getElementById('edit-rating').value = p.rating;
-        // ... stats laden ...
-    }
-}
-
-function closePlayerModal() {
-    document.getElementById('player-modal').classList.remove('active');
-}
-
-function savePlayer() {
-    // ... Speicher-Logik mit Auto-Rating Berechnung ...
-    closePlayerModal();
-    renderLockerRoom();
 }
