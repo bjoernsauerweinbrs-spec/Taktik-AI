@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI AI - Pro Coaching & VR System</title>
+    <title>TONI AI - Pro Elite Coaching System</title>
     <link rel="stylesheet" href="style.css">
-    
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
 </head>
-<body>
+<body class="toni-expanded">
 
     <div class="sidebar">
         <div class="logo">⚽ TONI AI</div>
-        
         <button class="nav-btn active" onclick="showModule('dashboard')">🏠 Kabine</button>
         <button class="nav-btn" onclick="showModule('tactics')">📋 Taktik</button>
         <button class="nav-btn" onclick="showModule('management')">💼 Aktentasche</button>
@@ -22,95 +20,94 @@
     </div>
 
     <div class="main-content">
-        
         <div id="dashboard" class="module-section active">
-            <h2>Mannschaftskabine</h2>
-            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Klicke auf einen Spieler, um die Detail-Analyse zu starten.</p>
-            <div id="locker-room-container">
-                </div>
+            <div class="section-header">
+                <h2>Mannschaftskabine</h2>
+                <button class="action-btn" onclick="openPlayerModal()">+ Spieler hinzufügen</button>
+            </div>
+            <div id="locker-room-container" class="card-grid"></div>
         </div>
 
         <div id="tactics" class="module-section">
-            <h2>Taktik-Board</h2>
-            <div class="tactic-controls">
-                <button onclick="setFormation('4-4-2')">Toni (4-4-2)</button>
-                <button onclick="setFormation('3-4-3')">Trainer (3-4-3)</button>
-                <button onclick="clearBoard()" class="btn-danger">Reset</button>
+            <div class="section-header">
+                <h2>Elite Taktik-Zentrum</h2>
+                <div class="tactic-controls">
+                    <button onclick="setFormation('4-4-2')">4-4-2</button>
+                    <button onclick="setFormation('3-4-3')">3-4-3</button>
+                    <button onclick="clearBoard()" class="btn-danger">Reset</button>
+                </div>
             </div>
             <div class="pitch-container">
                 <canvas id="tacticBoard"></canvas>
             </div>
-            <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 10px;">Drag & Drop Steuerung für Aufstellung und Laufwege.</p>
         </div>
 
         <div id="management" class="module-section">
-            <h2>Die Aktentasche</h2>
-            <div class="management-container" id="mgmt-content">
-                </div>
+            <h2>Vereins-Management & Finanzen</h2>
+            <div id="mgmt-content"></div>
         </div>
 
         <div id="bio" class="module-section">
-            <div class="lab-header">
-                <h2>Performance Bio-Lab</h2>
-                <div class="team-battery">Team-Energie: <span id="team-energy">92%</span></div>
-            </div>
-            <div class="lab-grid" id="bio-lab-container">
-                </div>
+            <h2>Performance Bio-Lab (Wearable & Scale Data)</h2>
+            <div id="bio-lab-container"></div>
         </div>
 
         <div id="vr" class="module-section">
-            <div class="lab-header">
-                <h2>Cognitive VR Training</h2>
-                <div class="team-battery">Status: Quest 3 bereit</div>
-            </div>
-            
-            <div class="vr-grid-layout" style="display: grid; grid-template-columns: 1fr 350px; gap: 20px;">
+            <div class="vr-grid-layout">
                 <div class="vr-preview-card">
-                    <div class="vr-info">
-                        <h3>Ego-Perspektive & Analyse</h3>
-                        <p>Scanning-Check und Joystick-Steuerung aktiv.</p>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="action-btn" onclick="vrCenter.launchVR()">VR STARTEN</button>
-                            <button class="action-btn" style="background:#3b82f6;" onclick="vrCenter.triggerDrill()">ÜBUNG STARTEN</button>
-                        </div>
+                    <h3>Cognitive Simulation</h3>
+                    <div class="vr-actions">
+                        <button class="action-btn" onclick="vrCenter.launchVR()">VR STARTEN</button>
+                        <button class="action-btn" onclick="vrCenter.triggerDrill()">DRILL STARTEN</button>
                     </div>
-                    <div id="vr-container" style="height: 400px; background: #000; border-radius: 10px; overflow: hidden; margin-top: 15px;">
-                        </div>
+                    <div id="vr-container"></div>
                 </div>
-
-                <div class="logbook-card" style="background: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid #334155;">
-                    <h3 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Leistungs-Logbuch</h3>
-                    <div id="vr-logbook">
-                        </div>
-                    <button class="nav-btn" style="margin-top:20px; width:100%; border: 1px solid #ef4444; color: #ef4444;" onclick="localStorage.removeItem('toni_vr_log'); vrCenter.renderLogbook();">
-                        Historie löschen
-                    </button>
+                <div class="logbook-card">
+                    <h3>Trainings-Historie</h3>
+                    <div id="vr-logbook"></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <button id="toni-toggle" onclick="toggleToni()">🤖</button>
     <div class="toni-interface">
         <div class="chat-header">
             <div class="chat-status"></div>
-            <span>TONI (KI Co-Trainer)</span>
+            <span>TONI AI ANALYST</span>
         </div>
-        <div class="chat-messages" id="chat-history">
-            <div class="message msg-toni">
-                <b>Toni:</b> Hallo Coach! Alle Systeme sind online. Dein VR-Logbuch ist aktuell. Was steht heute an?
-            </div>
-        </div>
+        <div class="chat-messages" id="chat-history"></div>
         <div class="chat-input-area">
-            <button id="voice-btn" title="Sprachsteuerung" onclick="toggleMic()">🎤</button>
-            <input type="text" id="text-input" placeholder="Schreib Toni etwas...">
+            <button id="voice-btn" onclick="toggleVoice()">🎤</button>
+            <input type="text" id="text-input" placeholder="Anweisung...">
+        </div>
+    </div>
+
+    <div id="player-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title">Spieler bearbeiten</h3>
+            <input type="text" id="edit-name" placeholder="Name">
+            <input type="text" id="edit-pos" placeholder="Position (z.B. ST)">
+            <input type="number" id="edit-rating" placeholder="Gesamt-Rating">
+            <div class="stats-edit-grid">
+                <input type="number" id="edit-tem" placeholder="TEM">
+                <input type="number" id="edit-sch" placeholder="SCH">
+                <input type="number" id="edit-pas" placeholder="PAS">
+                <input type="number" id="edit-dri" placeholder="DRI">
+                <input type="number" id="edit-def" placeholder="DEF">
+                <input type="number" id="edit-phy" placeholder="PHY">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-save" onclick="savePlayer()">Speichern</button>
+                <button class="btn-danger" id="btn-delete" onclick="deletePlayer()">Löschen</button>
+                <button onclick="closePlayerModal()">Abbrechen</button>
+            </div>
         </div>
     </div>
 
     <script src="script.js"></script>
-    
     <script src="modules/management.js"></script>
     <script src="modules/bio-lab.js"></script>
     <script src="modules/vr-center.js"></script>
-
 </body>
 </html>
