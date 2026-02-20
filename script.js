@@ -1,193 +1,131 @@
 /* ==========================================================
-   TONI 2.0 ELITE | CORE ENGINE (FULL REPLACEMENT)
+   TONI 2.0 | ELITE MASTER SCRIPT
    ========================================================== */
 
-/**
- * 1. CENTRAL STATE MANAGER (Single Source of Truth)
- */
 const eliteStore = {
-    // Kader mit kognitiven & physischen Profilen
-    players: JSON.parse(localStorage.getItem('toni_players')) || [
-        { id: 101, name: "M. Müller", pos: "ST", rating: 88, stats: [85, 90, 78, 84, 42, 81], load: [15, 12, 18, 20, 15, 12, 19], img: "" },
-        { id: 102, name: "L. Schmidt", pos: "TW", rating: 91, stats: [88, 45, 62, 58, 92, 85], load: [5, 4, 6, 5, 4, 5, 6], img: "" },
-        { id: 103, name: "K. Schneider", pos: "IV", rating: 84, stats: [72, 68, 85, 78, 84, 82], load: [10, 10, 11, 12, 10, 9, 11], img: "" },
-        { id: 104, name: "J. Weber", pos: "IV", rating: 82, stats: [68, 45, 65, 60, 88, 90], load: [8, 9, 8, 10, 8, 9, 8], img: "" }
-    ],
-    // Finanz- & Infrastruktur-Daten (Management-Labor)
-    mgmt: JSON.parse(localStorage.getItem('toni_mgmt')) || {
-        liquidAssets: 12500000,
-        sponsorships: [{ partner: "Global Dynamics", value: 3500000, roi: 0.88 }],
-        infrastructure: [{ name: "VR Tactical Hub", level: 5, bonus: 0.25 }]
-    },
-    formations: {
-        toni: { name: '4-4-2', color: '#22c55e', side: 1 },
-        trainer: { name: '3-4-3', color: '#3b82f6', side: -1 }
-    }
+    players: [
+        { id: 1, name: "M. Neuer", pos: "TW", rating: 89, stats: [87,55,90,60,91,85], load: [12,14,12,15,13,12,14] },
+        { id: 2, name: "H. Kane", pos: "ST", rating: 91, stats: [82,93,85,84,45,88], load: [20,18,22,25,20,19,24] }
+    ]
+};
+
+window.onload = () => {
+    renderLockerRoom();
+    renderMgmt();
+    trainingEngine.init();
 };
 
 /**
- * 2. INITIALISIERUNG
+ * MODUL STEUERUNG
  */
-window.onload = () => {
-    console.log("TONI 2.0: System-Check vollständig. Elite-Layer aktiv.");
-    
-    // UI Setup
-    updateClock();
-    setInterval(updateClock, 1000);
-    
-    // Erster Start: VR-Modus vorbereiten
-    init3DEnvironment();
-    
-    // Voice Engine aktivieren
-    if (typeof voiceEngine !== 'undefined') voiceEngine.init();
-};
-
-/* ==========================================================
-   3. VR ANALYSIS ENGINE (PITCH CONTROL & xG)
-   ========================================================== */
-
-function init3DEnvironment() {
-    const scene = document.querySelector('a-scene');
-    if (!scene) return;
-
-    // Grid-Berechnung für Pitch Control
-    generateAnalyticsGrid(scene);
-    
-    // Spieler-Spawning (Meta Quest Ready)
-    spawnVRTeam(eliteStore.formations.toni);
-    spawnVRTeam(eliteStore.formations.trainer);
+function showModule(id) {
+    document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
 }
 
-function generateAnalyticsGrid(scene) {
-    const gridContainer = document.getElementById('analysis-grid');
-    if (!gridContainer) return;
+/**
+ * VR TRAINING ENGINE (META QUEST)
+ */
+const trainingEngine = {
+    timer: null,
     
-    // 10x15 Raster für mathematische Raumkontrolle
-    for (let x = -30; x <= 30; x += 6) {
-        for (let z = -50; z <= 50; z += 7) {
-            const cell = document.createElement('a-plane');
-            const xG = calculateXG(x, z);
-            
-            cell.setAttribute('position', `${x} 0.05 ${z}`);
-            cell.setAttribute('rotation', '-90 0 0');
-            cell.setAttribute('width', '5.8');
-            cell.setAttribute('height', '6.8');
-            cell.setAttribute('material', `color: ${xG > 0.4 ? '#22c55e' : '#0f172a'}; opacity: ${xG * 0.5}; transparent: true; shader: flat`);
-            cell.setAttribute('class', 'analysis-cell');
-            gridContainer.appendChild(cell);
-        }
-    }
-}
-
-function calculateXG(x, z) {
-    const distToGoal = Math.hypot(x, z + 52.5);
-    return Math.max(0.01, Math.min(0.95, 1 / (distToGoal * 0.1)));
-}
-
-function spawnVRTeam(form) {
-    const container = document.getElementById('players-3d');
-    const positions = getPositionsByFormation(form.name, form.side);
-
-    positions.forEach((pos, i) => {
-        const player = document.createElement('a-entity');
-        player.setAttribute('position', `${pos.x} 0.9 ${pos.z}`);
-        player.innerHTML = `
-            <a-cylinder color="${form.color}" height="1.8" radius="0.5" metalness="0.5"></a-cylinder>
-            <a-text value="${i === 0 ? 'GK' : 'ELITE'}" position="0 1.6 0" align="center" width="5"></a-text>
-            <a-ring color="white" radius-inner="0.6" radius-outer="0.7" rotation="-90 0 0" position="0 -0.85 0" opacity="0.3"></a-ring>
-        `;
-        container.appendChild(player);
-    });
-}
-
-function getPositionsByFormation(name, side) {
-    const p = [];
-    const h = 50 * side;
-    p.push({ x: 0, z: h > 0 ? 48 : -48 }); // Keeper
-    
-    if (name === '4-4-2') {
-        [-18, -6, 6, 18].forEach(x => p.push({ x: x, z: h * 0.7 })); // DEF
-        [-18, -6, 6, 18].forEach(x => p.push({ x: x, z: h * 0.3 })); // MID
-        [-6, 6].forEach(x => p.push({ x: x, z: h * 0.1 })); // ATK
-    } else {
-        [-15, 0, 15].forEach(x => p.push({ x: x, z: h * 0.7 })); // 3er DEF
-        [-20, -7, 7, 20].forEach(x => p.push({ x: x, z: h * 0.4 })); // 4er MID
-        [-12, 0, 12].forEach(x => p.push({ x: x, z: h * 0.1 })); // 3er ATK
-    }
-    return p;
-}
-
-/* ==========================================================
-   4. MEDICAL & LOCKER ROOM (ACWR DIAGNOSTICS)
-   ========================================================= */
-
-function calculateACWR(loadArray) {
-    if (!loadArray || loadArray.length < 7) return 1.0;
-    const acute = loadArray.slice(-7).reduce((a, b) => a + b, 0) / 7;
-    const chronic = loadArray.reduce((a, b) => a + b, 0) / loadArray.length;
-    return chronic > 0 ? (acute / chronic) : 1.0;
-}
-
-/* ==========================================================
-   5. VOICE AI (SPATIAL ANALYST)
-   ========================================================== */
-
-const voiceEngine = {
-    recognition: null,
-    isListening: false,
-    synth: window.speechSynthesis,
-
     init: function() {
-        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!window.SpeechRecognition) return;
-        this.recognition = new SpeechRecognition();
-        this.recognition.lang = 'de-DE';
-        this.recognition.onresult = (e) => {
-            const cmd = e.results[e.results.length - 1][0].transcript.toLowerCase();
-            this.handleCommand(cmd);
-        };
+        console.log("VR Engine bereit.");
     },
 
-    toggle: function() {
-        if (this.isListening) {
-            this.recognition.stop();
-            this.isListening = false;
-        } else {
-            this.recognition.start();
-            this.isListening = true;
-            this.speak("Ich analysiere die Raumkontrolle im VR-Sektor, Coach.");
+    startLevel: function(lvl) {
+        const assets = document.getElementById('training-assets');
+        assets.innerHTML = '';
+        this.stopTimer();
+
+        if (lvl === 1) { // SCANNING
+            voiceEngine.speak("Scanning Drill. Identifizieren Sie die Spieler hinter Ihnen.");
+            for(let i=0; i<3; i++) this.create3DPlayer(assets, (i*10)-10, 15, "red");
+        } 
+        else if (lvl === 2) { // GAP FINDER
+            voiceEngine.speak("Lücke finden. Wo ist der freie Passweg?");
+            this.create3DPlayer(assets, -5, -15, "blue");
+            this.create3DPlayer(assets, 5, -15, "blue");
+            this.create3DPlayer(assets, 0, -25, "green"); // Ziel
+        }
+        else if (lvl === 3) { // PRESSURE
+            voiceEngine.speak("Elite Pressing. Sie haben 3 Sekunden!");
+            const p = this.create3DPlayer(assets, 0, -5, "red");
+            p.setAttribute('animation', 'property: position; to: 0 0.9 -1; dur: 3000');
+            this.startTimer(3);
         }
     },
 
-    handleCommand: function(cmd) {
-        if (cmd.includes("status")) {
-            this.speak("Die xG-Werte im Zentrum sind optimal. Defensive Kompression stabil.");
-        }
+    create3DPlayer: function(parent, x, z, color) {
+        const el = document.createElement('a-entity');
+        el.setAttribute('position', `${x} 0.9 ${z}`);
+        el.innerHTML = `<a-cylinder color="${color}" height="1.8" radius="0.5"></a-cylinder>`;
+        parent.appendChild(el);
+        return el;
     },
 
-    speak: function(text) {
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = 'de-DE';
-        msg.pitch = 0.9;
-        this.synth.speak(msg);
-    }
+    startTimer: function(s) {
+        let time = s;
+        const hud = document.getElementById('vr-timer');
+        this.timer = setInterval(() => {
+            time--;
+            hud.setAttribute('value', `TIME: ${time}`);
+            if(time <= 0) { clearInterval(this.timer); voiceEngine.speak("Zeit abgelaufen."); }
+        }, 1000);
+    },
+
+    stopTimer: function() { clearInterval(this.timer); document.getElementById('vr-timer').setAttribute('value', ''); }
 };
 
-/* ==========================================================
-   6. UTILS & NAVIGATION
-   ========================================================== */
-
-function updateClock() {
-    const el = document.getElementById('system-clock');
-    if (el) el.innerText = new Date().toLocaleTimeString('de-DE');
+/**
+ * MANAGER BEREICH (LABOR)
+ */
+function renderMgmt() {
+    const dashboard = document.getElementById('mgmt-dashboard');
+    dashboard.innerHTML = `
+        <div class="mgmt-card">
+            <h3>Finanz-Status (ROI)</h3>
+            <p>Budget: 12.500.000 €</p>
+            <p>Sponsoring-Einnahmen: +2.4M € (Prognose)</p>
+        </div>
+        <div class="mgmt-card">
+            <h3>Infrastruktur</h3>
+            <p>Analyse-Zentrum Lvl 5</p>
+            <p>Effekt: +20% Trainingsgeschwindigkeit</p>
+        </div>
+    `;
 }
 
-function toggleHeatmap() {
-    const grid = document.getElementById('analysis-grid');
-    grid.setAttribute('visible', !grid.getAttribute('visible'));
+/**
+ * TRAINER BEREICH (MEDICAL)
+ */
+function renderLockerRoom() {
+    const container = document.getElementById('player-container');
+    container.innerHTML = eliteStore.players.map(p => {
+        const acwr = (p.load.slice(-7).reduce((a,b)=>a+b)/7) / (p.load.reduce((a,b)=>a+b)/p.load.length);
+        return `
+            <div class="fut-card">
+                <div style="font-size:12px">${p.rating} ${p.pos}</div>
+                <div style="font-weight:900; margin:15px 0;">${p.name}</div>
+                <div style="font-size:10px; background:${acwr > 1.5 ? 'red' : 'green'}; color:white; padding:5px;">
+                    ACWR: ${acwr.toFixed(2)}
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
-function showVRView() {
-    console.log("Navigiere zum VR-Viewport...");
-    // Hier können Transitionen eingefügt werden
-}
+/**
+ * KI SPRACHE
+ */
+const voiceEngine = {
+    speak: function(text) {
+        const m = new SpeechSynthesisUtterance(text);
+        m.lang = 'de-DE';
+        window.speechSynthesis.speak(m);
+        document.getElementById('toni-msg').setAttribute('value', text);
+    },
+    toggle: function() { this.speak("System Analyse aktiv."); }
+};
