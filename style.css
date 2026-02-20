@@ -1,5 +1,5 @@
 /* ==========================================================
-   TONI 2.0 - MASTER STYLESHEET (UNGEKÜRZT)
+   TONI 2.0 - VOLLSTÄNDIGES ELITE-CSS (UNGEKÜRZT)
    ========================================================== */
 
 :root {
@@ -15,7 +15,9 @@
     --paper: #fdfaf0;
 }
 
-/* GRUNDLAYOUT */
+/* GRUNDLAYOUT & RESET */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: #020617;
@@ -23,11 +25,11 @@ body {
     margin: 0;
     display: flex;
     height: 100vh;
+    width: 100vw;
     overflow: hidden;
-    transition: all 0.3s ease-in-out;
 }
 
-/* SIDEBAR NAVIGATION */
+/* NAVIGATION SIDEBAR */
 .sidebar {
     width: 260px;
     background: var(--primary);
@@ -35,8 +37,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 25px;
-    z-index: 100;
-    transition: transform 0.3s ease;
+    z-index: 1000;
 }
 
 .logo {
@@ -65,11 +66,7 @@ body {
     gap: 12px;
 }
 
-.nav-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
-}
-
+.nav-btn:hover { background: rgba(255, 255, 255, 0.05); color: white; }
 .nav-btn.active {
     background: rgba(34, 197, 94, 0.15);
     color: var(--accent);
@@ -77,27 +74,30 @@ body {
     box-shadow: inset 4px 0 0 var(--accent);
 }
 
-/* HAUPTBEREICH */
+/* MAIN CONTENT - FIX FÜR DAS STAPELN */
 .main-content {
     flex: 1;
     padding: 35px;
     overflow-y: auto;
     background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+    position: relative;
 }
 
+/* WICHTIG: Das Modul-System */
 .module-section {
-    display: none;
-    max-width: 1200px;
-    margin: 0 auto;
+    display: none !important; /* Alles knallhart verstecken */
+    opacity: 0;
+    transform: translateY(10px);
 }
 
 .module-section.active {
-    display: block;
-    animation: slideIn 0.4s ease-out;
+    display: block !important; /* Nur das aktive zeigen */
+    opacity: 1;
+    transform: translateY(0);
+    animation: slideUp 0.4s ease-out forwards;
 }
 
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(20px); }
+@keyframes slideUp {
     to { opacity: 1; transform: translateY(0); }
 }
 
@@ -120,10 +120,7 @@ body {
     border: 1px solid rgba(255,255,255,0.3);
 }
 
-.fut-card:hover {
-    transform: scale(1.05) rotate(1deg);
-    box-shadow: 0 20px 45px rgba(34, 197, 94, 0.2);
-}
+.fut-card:hover { transform: scale(1.05); }
 
 .card-top {
     display: flex;
@@ -131,44 +128,25 @@ body {
     font-weight: 900;
     font-size: 24px;
     border-bottom: 1px solid rgba(0,0,0,0.1);
-    padding-bottom: 5px;
 }
 
 .card-img-container {
-    width: 80px;
-    height: 80px;
-    margin: 15px auto;
+    width: 75px; height: 75px;
+    margin: 12px auto;
     border-radius: 50%;
-    overflow: hidden;
     background: rgba(255,255,255,0.2);
     border: 3px solid #bf953f;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.card-img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.card-name {
-    text-align: center;
-    font-weight: 800;
-    font-size: 16px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
 }
 
 .card-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    font-size: 12px;
-    gap: 6px;
+    font-size: 11px;
+    gap: 4px;
     font-weight: 800;
-    border-top: 1px solid rgba(0,0,0,0.1);
-    padding-top: 10px;
+    padding-top: 8px;
 }
 
 /* TAKTIKBOARD */
@@ -176,64 +154,38 @@ body {
     width: 100%;
     max-width: 500px;
     aspect-ratio: 2 / 3;
-    background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+    background: #15803d;
     border: 5px solid white;
     margin: 0 auto;
-    position: relative;
     border-radius: 12px;
+    position: relative;
     box-shadow: 0 25px 60px rgba(0,0,0,0.7);
 }
 
-#tacticBoard {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
+#tacticBoard { width: 100%; height: 100%; display: block; }
 
-/* MANAGEMENT CARDS */
+/* MANAGEMENT & AKTENTASCHE */
+.mgmt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
 .mgmt-card {
     background: var(--card);
     padding: 25px;
     border-radius: 20px;
-    margin-bottom: 25px;
     border: 1px solid #334155;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-.mgmt-list-item {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
-    align-items: center;
+    margin-bottom: 25px;
 }
 
 /* BIO-LABOR ANIMATIONEN */
-.pulse-heart {
-    animation: heartBeat 1.4s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
-    display: inline-block;
-    color: var(--danger);
-    filter: drop-shadow(0 0 8px var(--danger));
-}
-
+.pulse-heart { animation: heartBeat 1.4s infinite; color: var(--danger); }
 @keyframes heartBeat {
-    0% { transform: scale(1); }
-    15% { transform: scale(1.25); }
-    30% { transform: scale(1.1); }
-    45% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.3); }
 }
 
 .ekg-path {
-    fill: none;
-    stroke-width: 3;
-    stroke-dasharray: 1000;
+    fill: none; stroke-width: 3; stroke-dasharray: 1000;
     animation: ekgMove 3s linear infinite;
 }
-
-@keyframes ekgMove {
-    from { stroke-dashoffset: 2000; }
-    to { stroke-dashoffset: 0; }
-}
+@keyframes ekgMove { from { stroke-dashoffset: 2000; } to { stroke-dashoffset: 0; } }
 
 /* TONI INTERFACE */
 .toni-interface {
@@ -242,101 +194,40 @@ body {
     border-left: 1px solid #334155;
     display: flex;
     flex-direction: column;
-    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: 0.4s;
 }
 
-body.toni-collapsed .toni-interface {
-    width: 0;
-    transform: translateX(360px);
-}
+body.toni-collapsed .toni-interface { width: 0; overflow: hidden; }
 
 #toni-toggle {
-    position: fixed;
-    right: 25px;
-    top: 25px;
-    z-index: 1001;
-    background: var(--accent);
-    border: none;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 28px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: fixed; right: 25px; top: 25px; z-index: 1001;
+    background: var(--accent); border: none; width: 60px; height: 60px;
+    border-radius: 50%; cursor: pointer; font-size: 28px;
 }
 
-/* ZEITUNGS-OVERLAY & PRINT */
-.newspaper-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #111;
-    z-index: 3000;
-    padding: 50px 0;
-    overflow-y: auto;
+/* MODAL: SPIELER-EDITOR FIX */
+.modal {
+    display: none !important; /* Knallhart unsichtbar beim Start */
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); z-index: 5000;
+    align-items: center; justify-content: center;
 }
 
-.a4-sheet {
-    width: 297mm;
-    height: 210mm;
-    background: var(--paper);
-    margin: 0 auto 30px;
-    display: flex;
-    box-shadow: 0 0 50px rgba(0,0,0,0.8);
-    position: relative;
-    color: #1a1a1a;
+.modal.active { display: flex !important; }
+
+.modal-content {
+    background: var(--card); padding: 35px; width: 90%; max-width: 450px;
+    border-radius: 25px; border: 2px solid var(--accent);
 }
 
-.a5-page {
-    width: 50%;
-    height: 100%;
-    padding: 20mm;
-    box-sizing: border-box;
-    border-right: 1px dashed #ccc;
-    position: relative;
-}
-
-.a5-page:last-child { border-right: none; }
-
-.news-title-main {
-    font-family: 'Playfair Display', serif;
-    font-size: 52px;
-    text-align: center;
-    border-bottom: 5px double #1a1a1a;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-}
-
-/* BUTTONS & FORMS */
-.action-btn {
-    background: var(--accent);
-    color: #020617;
-    border: none;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.action-btn:hover {
-    background: var(--accent-hover);
-    transform: translateY(-2px);
-}
-
-input, select, textarea {
-    background: #0f172a;
-    border: 1px solid #334155;
-    color: white;
-    padding: 14px;
-    border-radius: 10px;
-    font-size: 14px;
+/* PRINT ENGINE */
+@media print {
+    body * { visibility: hidden; }
+    #newspaper-overlay, #newspaper-overlay * { visibility: visible; }
+    #newspaper-overlay { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+    @page { size: A4 landscape; margin: 0; }
+    .a4-sheet { width: 297mm; height: 210mm; display: flex; page-break-after: always; color: #000; background: white; }
+    .a5-page { width: 50%; height: 100%; padding: 20mm; border-right: 1px dashed #ccc; }
 }
 
 /* MOBILE OPTIMIERUNG */
@@ -346,13 +237,4 @@ input, select, textarea {
     .logo { display: none; }
     .main-content { height: 60vh; flex: none; }
     .toni-interface { width: 100%; height: 40vh; }
-}
-
-@media print {
-    @page { size: A4 landscape; margin: 0; }
-    body * { visibility: hidden; }
-    #newspaper-overlay, #newspaper-overlay * { visibility: visible; }
-    #newspaper-overlay { position: absolute; left: 0; top: 0; width: 100%; display: block !important; background: white; }
-    .newspaper-actions { display: none; }
-    .a4-sheet { box-shadow: none; margin: 0; page-break-after: always; }
 }
