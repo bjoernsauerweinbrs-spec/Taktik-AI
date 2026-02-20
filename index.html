@@ -2,87 +2,72 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 VR ELITE CORE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>TONI 2.0 | VR ELITE CENTER</title>
     
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
 </head>
-<body style="background-color: #000;">
+<body class="vr-elite-environment">
 
-    <a-scene 
-        renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true;"
-        fog="type: exponential; color: #050a14; density: 0.01"
-        background="color: #050a14">
+    <header id="vr-hud">
+        <div class="hud-left">
+            <span class="system-id">TONI 2.0 // VR-CORE</span>
+            <span id="system-clock">--:--:--</span>
+        </div>
+        <div class="hud-right">
+            <span class="role-tag">CHIEF ANALYST</span>
+            <div class="pulse-indicator"></div>
+        </div>
+    </header>
 
-        <a-assets timeout="10000">
-            <img id="grass-tex" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/city.jpg" crossorigin="anonymous"> </a-assets>
+    <aside class="vr-sidebar">
+        <div class="brand">TONI 2.0</div>
+        <nav class="vr-nav">
+            <p class="nav-label">CONTROL UNIT</p>
+            <button class="v-btn active" onclick="showVRView()"><i>🥽</i> VR VIEW</button>
+            <button class="v-btn" onclick="toggleHeatmap()"><i>🔥</i> HEATMAP</button>
+            <button class="v-btn" onclick="toggleLanes()"><i>📏</i> LANES</button>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="ai-trigger" onclick="voiceEngine.toggle()">🎤 KI ANALYSE</button>
+        </div>
+    </aside>
 
+    <main class="vr-viewport">
+        <a-scene embedded vr-mode-ui="enabled: true" renderer="antialias: true; colorManagement: true;">
+            
+            <a-sky color="#020617"></a-sky>
+            <a-entity light="type: ambient; intensity: 0.4"></a-entity>
+            <a-entity light="type: directional; intensity: 1.2; castShadow: true" position="-10 30 10"></a-entity>
 
-        <a-entity light="type: ambient; color: #BBB; intensity: 0.3"></a-entity>
-        <a-entity light="type: directional; color: #FFF; intensity: 1.2; castShadow: true" position="-20 40 20"></a-entity>
-        <a-sky color="#050a14"></a-sky>
+            <a-plane id="pitch" position="0 0 0" rotation="-90 0 0" width="68" height="105" color="#14532d" material="roughness: 1; metalness: 0"></a-plane>
+            
+            <a-entity id="analysis-grid"></a-entity>
 
-
-        <a-plane 
-            id="pitch" 
-            position="0 0 0" 
-            rotation="-90 0 0" 
-            width="68" 
-            height="105" 
-            color="#14532d" 
-            material="roughness: 1; metalness: 0;"
-            shadow="receive: true">
-        </a-plane>
-        <a-plane position="0 0.01 0" rotation="-90 0 0" width="68.2" height="105.2" color="white" material="side: back"></a-plane>
-
-
-        <a-entity id="toni-coach" position="36 0 -5">
-            <a-cylinder position="0 0.9 0" height="1.8" radius="0.4" color="#22c55e" material="roughness: 0.5; metalness: 0.5" shadow="cast: true"></a-cylinder>
-            <a-text value="COACH TONI\n(AI ANALYST)" position="0 2.2 0" color="white" align="center" side="double" scale="1.5 1.5 1.5"></a-text>
-            <a-circle rotation="-90 0 0" radius="2" color="#22c55e" opacity="0.3" position="0 0.01 0"></a-circle>
-        </a-entity>
-
-
-        <a-entity id="team-red">
-            <a-entity position="-10 0 20" shadow="cast: true">
-                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#ef4444" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
-                <a-text value="IV (L)" position="0 2 0" align="center" color="white" side="double"></a-text>
+            <a-entity id="toni-avatar" position="36 0 0">
+                <a-cylinder color="#22c55e" height="1.8" radius="0.4" shadow></a-cylinder>
+                <a-text value="COACH TONI" position="0 2.2 0" align="center" width="6" font="mozillavr"></a-text>
+                <a-circle rotation="-90 0 0" radius="2" color="#22c55e" opacity="0.2" position="0 0.01 0"></a-circle>
             </a-entity>
-            <a-entity position="10 0 20" shadow="cast: true">
-                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#ef4444" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
-                <a-text value="IV (R)" position="0 2 0" align="center" color="white" side="double"></a-text>
-            </a-entity>
-             <a-entity position="-25 0 15" shadow="cast: true">
-                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#ef4444" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
-                <a-text value="AV (L)" position="0 2 0" align="center" color="white" side="double"></a-text>
-            </a-entity>
-            <a-entity position="25 0 15" shadow="cast: true">
-                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#ef4444" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
-                <a-text value="AV (R)" position="0 2 0" align="center" color="white" side="double"></a-text>
-            </a-entity>
-        </a-entity>
 
-        <a-entity id="team-blue">
-            <a-entity position="-10 0 -10" shadow="cast: true">
-                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#3b82f6" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
-                <a-text value="OPP IV" position="0 2 0" align="center" color="white" side="double"></a-text>
+            <a-entity id="players-3d"></a-entity>
+
+            <a-entity id="rig" movement-controls="speed: 0.3" position="0 0 45">
+                <a-camera position="0 1.7 0" look-controls>
+                    <a-cursor color="#22c55e" opacity="0.5"></a-cursor>
+                </a-camera>
+                <a-entity oculus-touch-controls="hand: left"></a-entity>
+                <a-entity oculus-touch-controls="hand: right"></a-entity>
             </a-entity>
-            <a-entity position="10 0 -10" shadow="cast: true">
-                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#3b82f6" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
-                <a-text value="OPP IV" position="0 2 0" align="center" color="white" side="double"></a-text>
-            </a-entity>
-        </a-entity>
 
+        </a-scene>
+    </main>
 
-        <a-entity id="rig" movement-controls="speed: 0.3" position="0 0 40">
-            <a-camera position="0 1.7 0" look-controls="pointerLockEnabled: false">
-                <a-cursor color="white" opacity="0.5" scale="0.5 0.5 0.5"></a-cursor>
-            </a-camera>
-            <a-entity oculus-touch-controls="hand: left"></a-entity>
-            <a-entity oculus-touch-controls="hand: right"></a-entity>
-        </a-entity>
-
-    </a-scene>
+    <script src="script.js"></script>
 </body>
 </html>
