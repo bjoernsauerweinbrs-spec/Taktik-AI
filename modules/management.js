@@ -12,7 +12,7 @@ const mgmt = {
         newsDraft: "Toni 2.0 ist bereit.",
         newsSettings: { pages: 4 }
     },
-
+ 
     init: function() { this.render(); },
 
     save: function() {
