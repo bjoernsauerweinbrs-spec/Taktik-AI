@@ -38,29 +38,16 @@
 
         <div id="management" class="module-section">
             <h2>Die Aktentasche</h2>
-            <div class="management-container">
-                <div class="mgmt-card">
-                    <h3>Sponsoren-Manager</h3>
-                    <div id="sponsor-list"></div>
-                    <button class="action-btn" onclick="mgmt.openSponsorDialog()">Neuer Sponsor</button>
-                </div>
-                
-                <div class="mgmt-card">
-                    <h3>Finanz-Check</h3>
-                    <div id="finance-stats"></div>
-                </div>
-
-                <div class="mgmt-card">
-                    <h3>Stadionzeitung (14-tägig)</h3>
-                    <p id="newspaper-status">Status: Bereit zur Analyse</p>
-                    <button class="action-btn" onclick="mgmt.generateNewspaper()">Zeitung jetzt generieren</button>
-                </div>
-            </div>
+            <div class="management-container" id="mgmt-content"></div>
         </div>
 
         <div id="bio" class="module-section">
-            <h2>Bio-Labor</h2>
-            <div class="placeholder-box">Warte auf Spieler-Checkins...</div>
+            <div class="lab-header">
+                <h2>Health & Performance Lab</h2>
+                <div class="team-battery">Team-Energie: <span id="team-energy">92%</span></div>
+            </div>
+            <div class="lab-grid" id="bio-lab-container">
+                </div>
         </div>
 
         <div id="vr" class="module-section">
@@ -83,5 +70,6 @@
 
     <script src="script.js"></script>
     <script src="modules/management.js"></script>
+    <script src="modules/bio-lab.js"></script>
 </body>
 </html>
