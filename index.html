@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI AI - Dein Co-Trainer</title>
+    <title>TONI AI - Pro VR Training</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
 </head>
 <body>
 
@@ -48,16 +49,18 @@
         </div>
 
         <div id="vr" class="module-section">
-            <h2>VR & Cognitive Training</h2>
+            <div class="lab-header">
+                <h2>Pro Cognitive Training</h2>
+                <div class="team-battery">Quest 3: Verbunden</div>
+            </div>
             <div class="vr-preview-card">
                 <div class="vr-info">
-                    <h3>Meta Quest 3 Modus</h3>
-                    <p>Trainiere deine Handlungsschnelligkeit in einer 360°-Umgebung. Toni coacht dich live bei deinen Entscheidungen.</p>
-                    <button class="action-btn" onclick="vrCenter.launchVR()">VR-MODUS STARTEN</button>
+                    <h3>High-Fidelity Simulation</h3>
+                    <p>Nutzt Skeletal-Animationen und Real-Time Lighting für professionelles Entscheidungstraining.</p>
+                    <button class="action-btn" onclick="vrCenter.launchVR()">VR-TRAINING STARTEN</button>
                 </div>
-                <div id="vr-fallback-preview" style="height: 200px; background: #000; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #22c55e;">
-                    [3D Engine Standby]
-                </div>
+                <div id="vr-container" style="height: 400px; background: #000; border-radius: 10px; overflow: hidden;">
+                    </div>
             </div>
         </div>
     </div>
