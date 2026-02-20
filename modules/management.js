@@ -1,150 +1,174 @@
 /* ==========================================================
-   MANAGEMENT MODUL (Finanz-Board & Stadionzeitung)
+   MANAGEMENT & REDAKTION MODUL - UNGEKÜRZT
    ========================================================== */
- 
+
 const mgmt = {
-    // Datenstruktur für das Vereins-Management
+    // Datenstruktur für das Vereins-Wesen
     data: JSON.parse(localStorage.getItem('toni_mgmt')) || {
+        clubName: "FC TONI 2.0 ELITE",
+        clubLogo: "https://cdn-icons-png.flaticon.com/512/1165/1165187.png",
         income: [
-            { id: 101, label: "Hauptsponsor (Trikot)", amount: 8000 },
-            { id: 102, label: "Ticketverkäufe", amount: 1500 },
-            { id: 103, label: "Mitgliedsbeiträge", amount: 3000 },
-            { id: 104, label: "Catering / Grillstand", amount: 850 }
+            { id: 1, label: "Hauptsponsor CyberFit", amount: 12000 },
+            { id: 2, label: "Ticket-Einnahmen", amount: 4500 }
         ],
         expenses: [
-            { id: 201, label: "Platzmiete & Pflege", amount: 600 },
-            { id: 202, label: "Energie / Flutlicht", amount: 450 },
-            { id: 203, label: "Verbandsabgaben", amount: 200 },
-            { id: 204, label: "Marketing / Plakate", amount: 150 }
+            { id: 3, label: "Platzmiete & Energie", amount: 1200 },
+            { id: 4, label: "Ausrüstung & Bälle", amount: 850 }
         ],
-        planned: [
-            { id: 301, label: "Neue Trainingsbälle", amount: 500 },
-            { id: 302, label: "Ausrüstung Medizinkoffer", amount: 250 }
+        sponsors: [
+            { id: 1, name: "CyberFit Wearables", logo: "https://via.placeholder.com/150x80?text=CyberFit" },
+            { id: 2, name: "Elite Energy Drink", logo: "https://via.placeholder.com/150x80?text=EliteEnergy" },
+            { id: 3, name: "Sauerwein Coaching", logo: "https://via.placeholder.com/150x80?text=Sauerwein" }
         ],
-        newsDraft: "Sensationeller Trainingsauftakt! TONI AI analysiert die ersten VR-Daten..."
+        newsDraft: "Die Ära Toni 2.0 hat begonnen. Mit modernster VR-Technologie und kognitivem Training setzen wir neue Maßstäbe im Amateurfußball.",
+        newsSettings: {
+            pages: 4,
+            showTactics: true,
+            showBio: true,
+            showSponsors: true
+        }
     },
 
     init: function() {
         this.render();
     },
 
-    // Speichert den aktuellen Stand im LocalStorage
     save: function() {
         localStorage.setItem('toni_mgmt', JSON.stringify(this.data));
         this.render();
     },
 
+    // FINANZ-LOGIK
+    updateFinance: function(type, id, field, value) {
+        const list = this.data[type];
+        const item = list.find(i => i.id === id);
+        if (item) {
+            item[field] = field === 'amount' ? parseInt(value) || 0 : value;
+            this.save();
+        }
+    },
+
+    addFinanceRow: function(type) {
+        this.data[type].push({
+            id: Date.now(),
+            label: "Neue Position",
+            amount: 0
+        });
+        this.save();
+    },
+
+    deleteFinanceRow: function(type, id) {
+        this.data[type] = this.data[type].filter(i => i.id !== id);
+        this.save();
+    },
+
+    // SPONSOREN-LOGIK
+    updateSponsor: function(id, field, value) {
+        const sponsor = this.data.sponsors.find(s => s.id === id);
+        if (sponsor) {
+            sponsor[field] = value;
+            this.save();
+        }
+    },
+
+    addSponsor: function() {
+        this.data.sponsors.push({
+            id: Date.now(),
+            name: "Neuer Partner",
+            logo: ""
+        });
+        this.save();
+    },
+
+    // HAUPT-RENDERING
     render: function() {
         const container = document.getElementById('mgmt-content');
         if (!container) return;
 
-        const totalIncome = this.data.income.reduce((sum, i) => sum + i.amount, 0);
-        const totalExpenses = this.data.expenses.reduce((sum, i) => sum + i.amount, 0);
+        const totalIncome = this.data.income.reduce((s, i) => s + i.amount, 0);
+        const totalExpenses = this.data.expenses.reduce((s, i) => s + i.amount, 0);
         const saldo = totalIncome - totalExpenses;
 
         container.innerHTML = `
-            <div class="mgmt-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                
-                <div class="mgmt-card" style="background:var(--card); padding:20px; border-radius:15px; border-top:5px solid var(--accent);">
-                    <h3 style="margin-top:0; color:var(--accent);">Einnahmen & Sponsoring</h3>
-                    <div class="mgmt-list">
-                        ${this.renderRows(this.data.income, 'income')}
+            <div class="mgmt-card" style="border-top: 5px solid var(--accent);">
+                <div style="display:flex; gap:20px; align-items:center;">
+                    <div style="width:80px; height:80px; background:#0f172a; border-radius:15px; padding:10px;">
+                        <img src="${this.data.clubLogo}" style="width:100%; height:100%; object-fit:contain;">
                     </div>
-                    <button class="action-btn" style="width:100%; margin-top:10px; background:none; border:1px dashed var(--accent); color:var(--accent);" onclick="mgmt.addRow('income')">+ Position hinzufügen</button>
-                    <div style="margin-top:15px; text-align:right; font-weight:bold;">Ist: ${totalIncome.toLocaleString()} €</div>
-                </div>
-
-                <div class="mgmt-card" style="background:var(--card); padding:20px; border-radius:15px; border-top:5px solid var(--danger);">
-                    <h3 style="margin-top:0; color:var(--danger);">Ausgaben & Fixkosten</h3>
-                    <div class="mgmt-list">
-                        ${this.renderRows(this.data.expenses, 'expenses')}
+                    <div style="flex:1;">
+                        <input type="text" value="${this.data.clubName}" onchange="mgmt.data.clubName=this.value; mgmt.save()" style="font-size:24px; font-weight:900; width:100%;">
+                        <input type="text" value="${this.data.clubLogo}" onchange="mgmt.data.clubLogo=this.value; mgmt.save()" placeholder="Logo URL" style="font-size:12px; margin-top:5px;">
                     </div>
-                    <button class="action-btn" style="width:100%; margin-top:10px; background:none; border:1px dashed var(--danger); color:var(--danger);" onclick="mgmt.addRow('expenses')">+ Position hinzufügen</button>
-                    <div style="margin-top:15px; text-align:right; font-weight:bold;">Ist: ${totalExpenses.toLocaleString()} €</div>
                 </div>
+            </div>
 
-                <div class="mgmt-card" style="grid-column: span 2; background:var(--card); padding:20px; border-radius:15px; border-top:5px solid var(--warning);">
-                    <h3 style="margin-top:0; color:var(--warning);">Geplante Investitionen</h3>
-                    <div class="mgmt-list" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                        ${this.renderRows(this.data.planned, 'planned')}
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
+                <div class="mgmt-card">
+                    <h3>💰 Budget-Planung</h3>
+                    <div style="margin-bottom:15px;">
+                        <h4 style="color:var(--accent)">Einnahmen</h4>
+                        ${this.renderFinanceList('income')}
+                        <button onclick="mgmt.addFinanceRow('income')" style="background:none; border:1px dashed var(--accent); color:var(--accent); width:100%; padding:8px; cursor:pointer;">+ Hinzufügen</button>
                     </div>
-                    <button class="action-btn" style="width:100%; margin-top:10px; background:none; border:1px dashed var(--warning); color:var(--warning);" onclick="mgmt.addRow('planned')">+ Neue Planung</button>
+                    <div style="margin-bottom:15px;">
+                        <h4 style="color:var(--danger)">Ausgaben</h4>
+                        ${this.renderFinanceList('expenses')}
+                        <button onclick="mgmt.addFinanceRow('expenses')" style="background:none; border:1px dashed var(--danger); color:var(--danger); width:100%; padding:8px; cursor:pointer;">+ Hinzufügen</button>
+                    </div>
+                    <div style="text-align:center; padding:15px; background:#0f172a; border-radius:10px;">
+                        <span>Verfügbares Budget:</span>
+                        <h2 style="margin:5px 0; color:${saldo >= 0 ? 'var(--accent)' : 'var(--danger)'}">${saldo.toLocaleString()} €</h2>
+                    </div>
                 </div>
 
-                <div style="grid-column: span 2; background:#0f172a; padding:25px; border-radius:20px; text-align:center; border: 1px solid #334155;">
-                    <span style="color:#94a3b8; font-size:14px;">Aktueller Finanz-Status</span>
-                    <h2 style="margin:5px 0 0 0; color: ${saldo >= 0 ? 'var(--accent)' : 'var(--danger)'}; font-size:32px;">
-                        ${saldo.toLocaleString()} €
-                    </h2>
+                <div class="mgmt-card">
+                    <h3>🤝 Sponsoring-Partner</h3>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        ${this.data.sponsors.map(s => `
+                            <div style="background:#0f172a; padding:10px; border-radius:10px;">
+                                <input type="text" value="${s.name}" onchange="mgmt.updateSponsor(${s.id}, 'name', this.value)" style="font-size:11px; margin-bottom:5px;">
+                                <input type="text" value="${s.logo}" onchange="mgmt.updateSponsor(${s.id}, 'logo', this.value)" placeholder="Logo URL" style="font-size:9px;">
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button onclick="mgmt.addSponsor()" class="action-btn" style="width:100%; margin-top:15px;">+ Neuer Partner</button>
                 </div>
+            </div>
 
-                <div class="mgmt-card" style="grid-column: span 2;">
-                    <h3>Redaktion Stadionzeitung</h3>
-                    <p style="font-size:12px; color:#94a3b8; margin-bottom:10px;">Schreibe hier den Leitartikel. TONI integriert automatisch die Finanzdaten.</p>
-                    <textarea id="news-editor-input" onchange="mgmt.updateDraft(this.value)" style="width:100%; height:100px; padding:15px; background:#0f172a; color:white; border-radius:10px; border:1px solid #334155; font-family:inherit;">${this.data.newsDraft}</textarea>
-                    <button class="action-btn" style="margin-top:15px; width:auto; padding:10px 30px;" onclick="mgmt.generatePreview()">ZEITUNG DRUCKEN (VORSCHAU)</button>
-                    
-                    <div id="news-print-preview" style="display:none; background:#f0f0f0; color:#1a1a1a; padding:40px; margin-top:30px; border:8px double #333; font-family:'Times New Roman', serif; box-shadow: 20px 20px 0 rgba(0,0,0,0.2);">
+            <div class="mgmt-card" style="border: 2px solid var(--accent);">
+                <h2 style="color:var(--accent); margin-top:0;">📰 Toni 2.0 Redaktions-Büro</h2>
+                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:30px;">
+                    <div>
+                        <label>Haupt-Story (Leitartikel):</label>
+                        <textarea onchange="mgmt.data.newsDraft=this.value; mgmt.save()" style="width:100%; height:150px; margin-top:10px; font-family:inherit; line-height:1.6;">${this.data.newsDraft}</textarea>
+                    </div>
+                    <div>
+                        <label>Heft-Einstellungen:</label>
+                        <select onchange="mgmt.data.newsSettings.pages=parseInt(this.value); mgmt.save()" style="width:100%; margin:10px 0;">
+                            <option value="4" ${this.data.newsSettings.pages === 4 ? 'selected' : ''}>4 Seiten (1 Blatt)</option>
+                            <option value="8" ${this.data.newsSettings.pages === 8 ? 'selected' : ''}>8 Seiten (2 Blätter)</option>
+                            <option value="12" ${this.data.newsSettings.pages === 12 ? 'selected' : ''}>12 Seiten (3 Blätter)</option>
+                        </select>
+                        <div style="font-size:13px; color:var(--text-muted); margin-top:10px;">
+                            <input type="checkbox" checked disabled> Automatische Taktik-Grafik<br>
+                            <input type="checkbox" checked disabled> Spieler-Fokus (Bild & Stats)<br>
+                            <input type="checkbox" checked disabled> Sponsoren-Rückseite
                         </div>
+                        <button class="action-btn" style="width:100%; margin-top:20px; font-size:18px;" onclick="newspaper.open()">JETZT GENERIEREN</button>
+                    </div>
                 </div>
             </div>
         `;
     },
 
-    renderRows: function(list, type) {
-        return list.map((item, idx) => `
-            <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;">
-                <input type="text" value="${item.label}" onchange="mgmt.updateEntry('${type}', ${idx}, 'label', this.value)" style="flex:3; font-size:13px;">
-                <input type="number" value="${item.amount}" onchange="mgmt.updateEntry('${type}', ${idx}, 'amount', this.value)" style="flex:1; font-size:13px;">
-                <button onclick="mgmt.deleteRow('${type}', ${idx})" style="background:none; border:none; color:var(--danger); cursor:pointer;">✕</button>
+    renderFinanceList: function(type) {
+        return this.data[type].map(i => `
+            <div class="mgmt-list-item">
+                <input type="text" value="${i.label}" onchange="mgmt.updateFinance('${type}', ${i.id}, 'label', this.value)" style="flex:2;">
+                <input type="number" value="${i.amount}" onchange="mgmt.updateFinance('${type}', ${i.id}, 'amount', this.value)" style="flex:1;">
+                <button onclick="mgmt.deleteFinanceRow('${type}', ${i.id})" style="background:none; border:none; color:var(--danger); cursor:pointer;">✕</button>
             </div>
         `).join('');
-    },
-
-    updateEntry: function(type, idx, field, val) {
-        this.data[type][idx][field] = field === 'amount' ? (parseInt(val) || 0) : val;
-        this.save();
-    },
-
-    addRow: function(type) {
-        this.data[type].push({ id: Date.now(), label: "Neue Position", amount: 0 });
-        this.save();
-    },
-
-    deleteRow: function(type, idx) {
-        this.data[type].splice(idx, 1);
-        this.save();
-    },
-
-    updateDraft: function(val) {
-        this.data.newsDraft = val;
-        localStorage.setItem('toni_mgmt', JSON.stringify(this.data));
-    },
-
-    generatePreview: function() {
-        const preview = document.getElementById('news-print-preview');
-        const sal = this.data.income.reduce((s,i)=>s+i.amount,0) - this.data.expenses.reduce((s,i)=>s+i.amount,0);
-        preview.style.display = "block";
-        preview.innerHTML = `
-            <div style="text-align:center; border-bottom:3px solid #1a1a1a; margin-bottom:20px;">
-                <h1 style="margin:0; font-size:48px; letter-spacing:-1px;">VEREINS-ECHO</h1>
-                <div style="display:flex; justify-content:space-between; font-weight:bold; text-transform:uppercase; font-size:14px; padding:5px 0;">
-                    <span>Ausgabe: ${new Date().toLocaleDateString()}</span>
-                    <span>Preis: Gratis für Mitglieder</span>
-                </div>
-            </div>
-            <h2 style="font-size:32px; line-height:1.1; margin-bottom:15px;">"${this.data.newsDraft.substring(0, 50)}..."</h2>
-            <p style="font-size:18px; line-height:1.5; column-count:1;">${this.data.newsDraft}</p>
-            <div style="margin-top:30px; padding:20px; border:2px solid #1a1a1a; background:rgba(0,0,0,0.05);">
-                <h4 style="margin:0 0 10px 0;">Wirtschaftliche Analyse durch TONI AI:</h4>
-                Der Verein plant aktuell mit einem Saldo von <b>${sal.toLocaleString()} €</b>. 
-                Besonders hervorzuheben ist die Position "${this.data.income[0].label}".
-            </div>
-            <div style="margin-top:20px; text-align:center; border-top:1px solid #ccc; font-style:italic;">
-                Gedruckt im TONI AI Management-Center
-            </div>
-        `;
-        addMessage("Toni", "Stadionzeitung generiert. Das Layout wurde für den Druck optimiert.");
     }
 };
 
