@@ -4,44 +4,100 @@
     --text-color: #f8fafc;
     --card-bg: #1e293b;
     --danger: #ef4444;
-    --warning: #f59e0b;
 }
 
-body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: #020617; color: var(--text-color); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+body {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background-color: #020617;
+    color: var(--text-color);
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
 
-/* SIDEBAR */
-.sidebar { width: 220px; background: var(--primary-color); display: flex; flex-direction: column; border-right: 1px solid #334155; padding: 20px; }
+/* SIDEBAR (Wird auf Handy zum Header) */
+.sidebar {
+    width: 220px;
+    background: var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #334155;
+    padding: 20px;
+    z-index: 10;
+}
+
 .logo { font-size: 22px; font-weight: bold; color: var(--accent-color); margin-bottom: 30px; text-align: center; }
-.nav-btn { background: none; border: none; color: #94a3b8; padding: 12px; text-align: left; cursor: pointer; border-radius: 8px; margin-bottom: 5px; }
-.nav-btn.active { background: rgba(34, 197, 94, 0.1); color: var(--accent-color); }
+
+.nav-btn {
+    background: none; border: none; color: #94a3b8; padding: 12px; text-align: left;
+    cursor: pointer; border-radius: 8px; margin-bottom: 5px; font-size: 14px;
+}
+
+.nav-btn.active { background: rgba(34, 197, 94, 0.1); color: var(--accent-color); font-weight: bold; }
 
 /* MAIN CONTENT */
-.main-content { flex: 1; padding: 20px; overflow-y: auto; background: radial-gradient(#1e293b 1px, transparent 1px); background-size: 20px 20px; }
+.main-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: radial-gradient(#1e293b 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
 .module-section { display: none; animation: fadeIn 0.3s ease-in-out; }
 .module-section.active { display: block; }
 
-/* VR CENTER DESIGN */
-.vr-preview-card { background: var(--card-bg); border-radius: 15px; border: 1px solid #334155; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-.vr-info h3 { margin: 0; color: var(--accent-color); }
-.vr-info p { color: #94a3b8; font-size: 14px; }
+/* FIFA KARTEN LOOK (Kabine) */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+.fut-card {
+    background: linear-gradient(135deg, #eebb4d 0%, #bf953f 100%);
+    border-radius: 10px; padding: 10px; color: #1e293b;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4); cursor: pointer;
+    transition: transform 0.2s;
+}
+.fut-card:hover { transform: scale(1.05); }
+.card-top { display: flex; justify-content: space-between; font-weight: 900; font-size: 18px; }
+.card-name { text-align: center; font-weight: bold; margin: 5px 0; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.1); }
+.card-stats { display: grid; grid-template-columns: 1fr 1fr; font-size: 10px; gap: 2px; font-weight: bold; }
 
-/* MANAGEMENT & BIO STYLES BLEIBEN GLEICH */
-.management-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-.mgmt-card { background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid #334155; }
-.action-btn { background: var(--accent-color); color: #020617; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
+/* TAKTIK BOARD */
+.pitch-container {
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 2/3;
+    background: #15803d;
+    border: 3px solid white;
+    margin: 10px auto;
+    position: relative;
+    border-radius: 5px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+#tacticBoard { width: 100%; height: 100%; cursor: crosshair; }
 
-.lab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-.bio-card { background: #0f172a; border-radius: 12px; padding: 15px; border-left: 5px solid var(--accent-color); cursor: pointer; }
-.pulse-heart { animation: heartBeat 1.2s infinite; display: inline-block; }
-
-/* CHAT */
-.toni-interface { width: 320px; background: var(--card-bg); border-left: 1px solid #334155; display: flex; flex-direction: column; }
+/* CHAT INTERFACE */
+.toni-interface {
+    width: 320px;
+    background: var(--card-bg);
+    border-left: 1px solid #334155;
+    display: flex;
+    flex-direction: column;
+}
 .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-.message { padding: 10px; border-radius: 8px; font-size: 13px; max-width: 85%; }
+.message { padding: 10px; border-radius: 8px; font-size: 13px; max-width: 85%; line-height: 1.4; }
 .msg-toni { background: rgba(34, 197, 94, 0.1); border-left: 3px solid var(--accent-color); align-self: flex-start; }
 .msg-user { background: rgba(255, 255, 255, 0.05); align-self: flex-end; }
 .chat-input-area { padding: 15px; border-top: 1px solid #334155; display: flex; gap: 10px; }
 #text-input { flex: 1; background: #0f172a; border: 1px solid #334155; color: white; padding: 8px; border-radius: 5px; }
 
-@keyframes heartBeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+/* MOBILE OPTIMIERUNG (Wichtig für deinen Screenshot) */
+@media (max-width: 768px) {
+    body { flex-direction: column; overflow: auto; }
+    .sidebar { width: 100%; height: auto; flex-direction: row; padding: 10px; border-right: none; border-bottom: 1px solid #334155; overflow-x: auto; }
+    .nav-btn { white-space: nowrap; margin-right: 10px; padding: 8px 15px; }
+    .main-content { height: 60vh; flex: none; }
+    .toni-interface { width: 100%; height: 40vh; border-left: none; border-top: 1px solid #334155; }
+    .logo { display: none; } /* Spart Platz am Handy */
+}
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
