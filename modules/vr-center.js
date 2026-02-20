@@ -1,103 +1,65 @@
-/* --- PRO VR-CENTER MODUL (Laufwege & Animationen) --- */
+/* --- PRO VR-CENTER MODUL (Mit Leistungs-Logbuch) --- */
 
 const vrCenter = {
-    isVRMode: false,
-    isMüllerRunning: false,
-
-    launchVR: function() {
-        this.isVRMode = true;
-        addMessage("Toni", "VR-System bereit. Sag 'Lauf Müller' oder klicke auf den Button.");
+    // ... (vorherige Variablen bleiben gleich)
+    
+    evaluatePerformance: function(time, scanned) {
+        let score = scanned ? 100 : 30;
+        if (time > 2.5) score -= 20;
         
-        const container = document.getElementById('vr-container');
-        container.innerHTML = ""; 
+        const stats = {
+            date: new Date().toLocaleString('de-DE'),
+            time: time.toFixed(2),
+            scanned: scanned,
+            score: Math.max(0, score)
+        };
 
-        const scene = document.createElement('a-scene');
-        scene.setAttribute('xr-mode-ui', 'enabled: true');
-        scene.setAttribute('embedded', '');
-        scene.setAttribute('renderer', 'antialias: true; shadowMapEnabled: true;');
+        // Daten im Logbuch speichern
+        this.saveToLog(stats);
 
-        scene.innerHTML = `
-            <a-assets>
-                <a-asset-item id="pro-player" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RiggedFigure/glTF-Binary/RiggedFigure.glb"></a-asset-item>
-                <img id="grass" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/textures/terrain/grasslight-big.jpg">
-            </a-assets>
+        let rating = scanned ? "SEHR GUT" : "VERBESSERUNGSFÄHIG";
+        let feedback = scanned ? "Perfektes Scanning." : "Du hast den Schulterblick vergessen!";
 
-            <a-sky color="#87CEEB"></a-sky>
-            <a-plane position="0 0 0" rotation="-90 0 0" width="105" height="68" src="#grass" repeat="15 10" shadow="receive: true"></a-plane>
-            
-            <a-box position="0 10 -40" width="110" height="20" depth="2" color="#1e293b"></a-box>
+        addMessage("Toni", `--- ANALYSE ---`);
+        addMessage("Toni", `Score: ${stats.score}/100 | Scanning: ${scanned ? '✅' : '❌'}`);
+        addMessage("Toni", `Coach-Hinweis: ${feedback}`);
+    },
 
-            <a-entity light="type: ambient; intensity: 0.5"></a-entity>
-            <a-entity light="type: directional; intensity: 0.8; castShadow: true" position="-5 10 5"></a-entity>
+    saveToLog: function(stats) {
+        let log = JSON.parse(localStorage.getItem('toni_vr_log')) || [];
+        log.push(stats);
+        // Wir behalten nur die letzten 50 Einheiten
+        if (log.length > 50) log.shift(); 
+        localStorage.setItem('toni_vr_log', JSON.stringify(log));
+        this.renderLogbook();
+    },
 
-            <a-entity id="rig" position="0 0 0">
-                <a-entity id="camera" camera look-controls position="0 1.6 0">
-                    <a-cursor color="#22c55e"></a-cursor>
-                </a-entity>
-                <a-entity oculus-touch-controls="hand: right" ontriggerdown="vrCenter.handlePass()"></a-entity>
-            </a-entity>
+    renderLogbook: function() {
+        const logContainer = document.getElementById('vr-logbook');
+        if (!logContainer) return;
 
-            <a-entity id="player-mueller" 
-                      gltf-model="#pro-player" 
-                      position="5 0 -10" 
-                      scale="1.5 1.5 1.5" 
-                      shadow="cast: true"
-                      animation-mixer="clip: *">
-                <a-text value="MUELLER" align="center" position="0 1.8 0" color="white" scale="0.5 0.5 0.5"></a-text>
-            </a-entity>
+        let log = JSON.parse(localStorage.getItem('toni_vr_log')) || [];
+        if (log.length === 0) {
+            logContainer.innerHTML = "<p style='color:#94a3b8'>Noch keine Trainingsdaten vorhanden.</p>";
+            return;
+        }
+
+        const avgScore = (log.reduce((acc, curr) => acc + curr.score, 0) / log.length).toFixed(0);
+
+        logContainer.innerHTML = `
+            <div class="log-summary">Durchschnitts-Leistung: ${avgScore}%</div>
+            <div class="log-list">
+                ${log.reverse().slice(0, 5).map(entry => `
+                    <div class="log-entry">
+                        <span>${entry.date.split(',')[0]}</span>
+                        <span>Score: <b>${entry.score}</b></span>
+                        <span>${entry.scanned ? '✅ Scan' : '❌ Blind'}</span>
+                    </div>
+                `).join('')}
+            </div>
         `;
-
-        container.appendChild(scene);
-    },
-
-    // Müller startet seinen Laufweg
-    triggerRunPath: function() {
-        if (this.isMüllerRunning) return;
-        this.isMüllerRunning = true;
-
-        const mueller = document.getElementById('player-mueller');
-        
-        addMessage("Toni", "Müller startet den Tiefenlauf! Schau nach rechts!");
-
-        // 1. Animation umschalten (Skeletal Animation)
-        mueller.setAttribute('animation-mixer', 'clip: walk; loop: repeat; timeScale: 1.5');
-
-        // 2. Bewegung im Raum (Translation)
-        mueller.setAttribute('animation', {
-            property: 'position',
-            to: '5 0 -25', // Er läuft 15 Meter tief
-            dur: 4000,
-            easing: 'linear'
-        });
-
-        // 3. Nach dem Lauf anhalten
-        setTimeout(() => {
-            mueller.setAttribute('animation-mixer', 'clip: *'); // Zurück zu Idle
-            this.isMüllerRunning = false;
-            addMessage("Toni", "Müller hat die Endposition erreicht. Er wartet auf den Pass.");
-        }, 4000);
-    },
-
-    handlePass: function() {
-        const mueller = document.getElementById('player-mueller');
-        const targetPos = mueller.getAttribute('position');
-        
-        addMessage("Toni", "Pass in den Lauf!");
-
-        const ball = document.createElement('a-sphere');
-        ball.setAttribute('radius', '0.15');
-        ball.setAttribute('color', 'white');
-        ball.setAttribute('position', '0 0.2 -1');
-        
-        // Der Ball fliegt exakt dorthin, wo Müller gerade steht
-        ball.setAttribute('animation', {
-            property: 'position',
-            to: `${targetPos.x} 0.2 ${targetPos.z}`,
-            dur: 600,
-            easing: 'easeOutQuad'
-        });
-
-        document.querySelector('a-scene').appendChild(ball);
-        setTimeout(() => ball.remove(), 700);
     }
 };
+
+// Initiales Laden des Logbuchs
+window.addEventListener('load', () => vrCenter.renderLogbook());
