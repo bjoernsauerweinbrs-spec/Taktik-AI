@@ -20,43 +20,21 @@ body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: #020617; c
 .module-section { display: none; animation: fadeIn 0.3s ease-in-out; }
 .module-section.active { display: block; }
 
-/* BIO LABOR DESIGN */
-.lab-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.team-battery { background: #1e293b; padding: 10px 20px; border-radius: 20px; border: 1px solid var(--accent-color); color: var(--accent-color); font-weight: bold; }
+/* VR CENTER DESIGN */
+.vr-preview-card { background: var(--card-bg); border-radius: 15px; border: 1px solid #334155; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+.vr-info h3 { margin: 0; color: var(--accent-color); }
+.vr-info p { color: #94a3b8; font-size: 14px; }
+
+/* MANAGEMENT & BIO STYLES BLEIBEN GLEICH */
+.management-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.mgmt-card { background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid #334155; }
+.action-btn { background: var(--accent-color); color: #020617; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
+
 .lab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+.bio-card { background: #0f172a; border-radius: 12px; padding: 15px; border-left: 5px solid var(--accent-color); cursor: pointer; }
+.pulse-heart { animation: heartBeat 1.2s infinite; display: inline-block; }
 
-.bio-card { background: #0f172a; border-radius: 12px; padding: 15px; border-left: 5px solid var(--accent-color); cursor: pointer; transition: 0.3s; }
-.bio-card.warning { border-left-color: var(--warning); }
-.bio-card.danger { border-left-color: var(--danger); }
-.bio-card:hover { background: #1e293b; transform: translateY(-5px); }
-
-.bio-card-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; }
-
-/* Pulsierendes Herz */
-.pulse-heart { animation: heartBeat 1.2s infinite; filter: drop-shadow(0 0 5px red); }
-@keyframes heartBeat {
-    0% { transform: scale(1); }
-    15% { transform: scale(1.3); }
-    30% { transform: scale(1); }
-    45% { transform: scale(1.15); }
-    60% { transform: scale(1); }
-}
-
-/* EKG Linien */
-.ekg-line { height: 40px; margin: 10px 0; }
-.ekg-svg { width: 100%; height: 100%; }
-.path-fit { stroke: var(--accent-color); fill: none; stroke-width: 2; stroke-dasharray: 1000; animation: ekgMove 2s linear infinite; }
-.path-warning { stroke: var(--warning); fill: none; stroke-width: 2; animation: ekgMove 1.5s linear infinite; }
-.path-danger { stroke: var(--danger); fill: none; stroke-width: 3; animation: ekgMove 0.8s linear infinite; }
-
-@keyframes ekgMove {
-    from { stroke-dashoffset: 1000; }
-    to { stroke-dashoffset: 0; }
-}
-
-.bio-stats { font-size: 12px; display: flex; justify-content: space-between; margin-top: 10px; color: #94a3b8; }
-
-/* CHAT INTERFACE */
+/* CHAT */
 .toni-interface { width: 320px; background: var(--card-bg); border-left: 1px solid #334155; display: flex; flex-direction: column; }
 .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 .message { padding: 10px; border-radius: 8px; font-size: 13px; max-width: 85%; }
@@ -65,5 +43,5 @@ body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: #020617; c
 .chat-input-area { padding: 15px; border-top: 1px solid #334155; display: flex; gap: 10px; }
 #text-input { flex: 1; background: #0f172a; border: 1px solid #334155; color: white; padding: 8px; border-radius: 5px; }
 
-/* ANIMATION */
+@keyframes heartBeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
