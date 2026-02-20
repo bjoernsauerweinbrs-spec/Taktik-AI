@@ -1,57 +1,57 @@
 const mgmt = {
-    finances: {
-        income: [{ label: "Tickets", amount: 1500 }, { label: "Hauptsponsor", amount: 8000 }],
-        expenses: [{ label: "Platzpflege", amount: 600 }, { label: "Ausrüstung", amount: 2000 }]
+    data: JSON.parse(localStorage.getItem('toni_mgmt')) || {
+        income: [{l: "Hauptsponsor", a: 8000}, {l: "Tickets", a: 1500}],
+        expenses: [{l: "Ausrüstung", a: 2000}, {l: "Flutlicht", a: 450}],
+        planned: [{l: "Neue Bälle", a: 500}],
+        newsText: "Cheftrainer optimistisch nach Finanz-Check."
     },
 
     init: function() { this.render(); },
 
     render: function() {
         const container = document.getElementById('mgmt-content');
-        if (!container) return;
-
-        const totalI = this.finances.income.reduce((s, i) => s + i.amount, 0);
-        const totalE = this.finances.expenses.reduce((s, i) => s + i.amount, 0);
-
+        const sal = this.data.income.reduce((s,i)=>s+i.a,0) - this.data.expenses.reduce((s,i)=>s+i.a,0);
+        
         container.innerHTML = `
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div style="background:#1e293b; padding:20px; border-radius:12px; border-top:4px solid #22c55e;">
-                    <h4>Einnahmen (editierbar)</h4>
-                    ${this.renderTable(this.finances.income, 'income')}
-                    <button onclick="mgmt.add('income')" style="width:100%; border:1px dashed #22c55e; background:none; color:#22c55e; margin-top:10px;">+ Position</button>
+            <div class="mgmt-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                <div class="mgmt-card">
+                    <h4>Einnahmen & Sponsoren</h4>
+                    ${this.renderTable(this.data.income, 'income')}
+                    <button onclick="mgmt.add('income')">+ Position</button>
                 </div>
-                <div style="background:#1e293b; padding:20px; border-radius:12px; border-top:4px solid #ef4444;">
-                    <h4>Ausgaben (editierbar)</h4>
-                    ${this.renderTable(this.finances.expenses, 'expenses')}
-                    <button onclick="mgmt.add('expenses')" style="width:100%; border:1px dashed #ef4444; background:none; color:#ef4444; margin-top:10px;">+ Position</button>
+                <div class="mgmt-card">
+                    <h4>Fixkosten & Ausgaben</h4>
+                    ${this.renderTable(this.data.expenses, 'expenses')}
+                    <button onclick="mgmt.add('expenses')">+ Position</button>
                 </div>
             </div>
-            <div style="background:#0f172a; padding:25px; margin-top:20px; border-radius:15px; border:1px solid #334155; text-align:center;">
-                <h2 style="margin:0; color:${totalI-totalE >= 0 ? '#22c55e' : '#ef4444'}">Saldo: ${(totalI - totalE).toLocaleString()} €</h2>
-                <button class="action-btn" onclick="mgmt.news()" style="margin-top:15px; width:auto; padding:10px 30px;">STADIONZEITUNG GENERIEREN</button>
+            <div class="saldo-box" style="background:#0f172a; padding:20px; border-radius:15px; text-align:center; margin:20px 0;">
+                <h2 style="color: ${sal>=0?'var(--accent)':'var(--danger)'}">Saldo: ${sal.toLocaleString()} €</h2>
             </div>
-            <div id="news-paper" style="display:none; background:#f5f5f5; color:#222; padding:30px; margin-top:20px; font-family:serif; border: 5px double #333; box-shadow: 10px 10px 0 #999;"></div>
+            <div class="news-editor">
+                <h3>Redaktion Stadionzeitung</h3>
+                <textarea id="news-edit" onchange="mgmt.data.newsText=this.value; mgmt.save()" style="width:100%; height:80px; background:#0f172a; color:white;">${this.data.newsText}</textarea>
+                <button class="action-btn" onclick="mgmt.printNews()">Vorschau Stadionzeitung</button>
+                <div id="news-preview" style="display:none; background:white; color:black; padding:30px; margin-top:20px; font-family:serif; border:5px double #333;"></div>
+            </div>
         `;
     },
 
-    renderTable: function(data, type) {
-        return data.map((item, idx) => `
-            <div style="display:flex; gap:10px; margin-bottom:8px;">
-                <input type="text" value="${item.label}" onchange="mgmt.upd('${type}',${idx},'label',this.value)" style="flex:2; background:#0f172a; border:1px solid #334155; color:white; padding:5px; border-radius:4px;">
-                <input type="number" value="${item.amount}" onchange="mgmt.upd('${type}',${idx},'amount',this.value)" style="flex:1; background:#0f172a; border:1px solid #334155; color:white; padding:5px; border-radius:4px;">
+    renderTable: function(list, type) {
+        return list.map((item, idx) => `
+            <div style="display:flex; gap:5px; margin-bottom:5px;">
+                <input type="text" value="${item.l}" onchange="mgmt.upd('${type}',${idx},'l',this.value)">
+                <input type="number" value="${item.a}" onchange="mgmt.upd('${type}',${idx},'a',this.value)">
             </div>
         `).join('');
     },
 
-    upd: function(t, i, f, v) { this.finances[t][i][f] = f === 'amount' ? parseInt(v) : v; this.render(); },
-    add: function(t) { this.finances[t].push({label: "Neu...", amount: 0}); this.render(); },
-    news: function() {
-        const p = document.getElementById('news-paper');
-        p.style.display = "block";
-        p.innerHTML = `<h1 style="text-align:center; border-bottom:2px solid #333;">VEREINS-ECHO</h1>
-                       <h3>Exklusiv: TONI AI analysiert die Finanzen</h3>
-                       <p>Heute wurde bekannt, dass der Verein mit einem Saldo von <b>${this.finances.income[0].amount - this.finances.expenses[0].amount}€</b> im Kernbereich plant. Chef-Trainer optimistisch!</p>`;
-        addMessage("Toni", "Stadionzeitung ist im Druck!");
+    upd: function(t,i,f,v) { this.data[t][i][f] = f==='a'?parseInt(v):v; this.save(); },
+    add: function(t) { this.data[t].push({l: "Neu", a:0}); this.save(); },
+    save: function() { localStorage.setItem('toni_mgmt', JSON.stringify(this.data)); this.render(); },
+    printNews: function() {
+        const p = document.getElementById('news-preview'); p.style.display="block";
+        p.innerHTML = `<h1>VEREINS-ECHO</h1><p>${this.data.newsText}</p><hr><h4>Saldo aktuell: ${this.data.income.reduce((s,i)=>s+i.a,0)-this.data.expenses.reduce((s,i)=>s+i.a,0)}€</h4>`;
     }
 };
 window.addEventListener('load', () => mgmt.init());
