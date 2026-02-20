@@ -1,112 +1,72 @@
 :root {
-    --primary-color: #0f172a;
-    --accent-color: #22c55e;
-    --text-color: #f8fafc;
-    --card-bg: #1e293b;
-    --danger: #ef4444;
-    --warning: #f59e0b;
+    --primary: #0f172a; --accent: #22c55e; --text: #f8fafc;
+    --card: #1e293b; --danger: #ef4444; --warning: #f59e0b;
 }
 
 body {
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    background-color: #020617;
-    color: var(--text-color);
-    margin: 0;
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
+    font-family: 'Inter', sans-serif; background: #020617; color: var(--text);
+    margin: 0; display: flex; height: 100vh; overflow: hidden; transition: 0.3s;
 }
 
-/* NAVIGATION */
+/* SIDEBAR */
 .sidebar {
-    width: 240px;
-    background: var(--primary-color);
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid #334155;
-    padding: 20px;
-    z-index: 100;
+    width: 240px; background: var(--primary); border-right: 1px solid #334155;
+    display: flex; flex-direction: column; padding: 20px; z-index: 100;
 }
-
-.logo { font-size: 24px; font-weight: bold; color: var(--accent-color); margin-bottom: 30px; text-align: center; letter-spacing: 2px; }
-
+.logo { font-size: 24px; font-weight: 800; color: var(--accent); margin-bottom: 30px; }
 .nav-btn {
-    background: none; border: none; color: #94a3b8; padding: 14px; text-align: left;
-    cursor: pointer; border-radius: 8px; margin-bottom: 8px; font-size: 15px;
-    transition: all 0.3s ease;
+    background: none; border: none; color: #94a3b8; padding: 15px; text-align: left;
+    cursor: pointer; border-radius: 12px; margin-bottom: 5px; font-size: 15px;
 }
+.nav-btn.active { background: rgba(34, 197, 94, 0.15); color: var(--accent); font-weight: bold; }
 
-.nav-btn:hover { background: rgba(255, 255, 255, 0.05); color: white; }
-.nav-btn.active { background: rgba(34, 197, 94, 0.15); color: var(--accent-color); font-weight: bold; border-left: 4px solid var(--accent-color); }
-
-/* HAUPTBEREICH */
-.main-content {
-    flex: 1;
-    padding: 25px;
-    overflow-y: auto;
-    background: radial-gradient(#1e293b 1px, transparent 1px);
-    background-size: 30px 30px;
-}
-
+/* MAIN CONTENT */
+.main-content { flex: 1; padding: 25px; overflow-y: auto; transition: 0.3s; }
 .module-section { display: none; }
-.module-section.active { display: block; animation: fadeIn 0.4s ease-out; }
+.module-section.active { display: block; animation: fadeIn 0.4s; }
 
-/* KABINE: FIFA CARDS */
-.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
+/* FIFA KARTEN */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
 .fut-card {
-    background: linear-gradient(135deg, #eebb4d 0%, #bf953f 50%, #eebb4d 100%);
-    border-radius: 12px; padding: 12px; color: #1e293b;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-    transition: transform 0.3s ease;
-    cursor: pointer;
-    position: relative;
+    background: linear-gradient(135deg, #eebb4d 0%, #bf953f 100%);
+    border-radius: 15px; padding: 15px; color: #1e293b; cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5); position: relative;
 }
-.fut-card:hover { transform: scale(1.05) rotate(1deg); }
-.card-top { display: flex; justify-content: space-between; font-weight: 900; font-size: 20px; }
-.card-name { text-align: center; font-weight: bold; margin: 8px 0; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.2); }
-.card-stats { display: grid; grid-template-columns: 1fr 1fr; font-size: 11px; gap: 4px; font-weight: 800; }
+.fut-card:hover { transform: scale(1.05); }
 
-/* TAKTIK-BOARD (2:3 Ratio Fix) */
+/* TAKTIKBOARD 2:3 RATIO */
 .pitch-container {
-    width: 100%;
-    max-width: 500px;
-    aspect-ratio: 2 / 3;
-    background: linear-gradient(to bottom, #065f25, #0a7e33);
-    border: 4px solid white;
-    margin: 20px auto;
-    position: relative;
-    border-radius: 8px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    width: 100%; max-width: 500px; aspect-ratio: 2 / 3; background: #15803d;
+    border: 4px solid white; margin: 0 auto; position: relative; border-radius: 10px;
 }
-#tacticBoard { width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+#tacticBoard { width: 100%; height: 100%; touch-action: none; }
 
-/* BIO-LABOR: EKG & HERZ */
-.pulse-heart { animation: heartBeat 1.2s infinite; display: inline-block; filter: drop-shadow(0 0 5px red); }
-@keyframes heartBeat {
-    0%, 30%, 100% { transform: scale(1); }
-    15% { transform: scale(1.3); }
-    45% { transform: scale(1.15); }
+/* TONI INTERFACE & TOGGLE */
+.toni-interface {
+    width: 350px; background: var(--card); border-left: 1px solid #334155;
+    display: flex; flex-direction: column; transition: 0.3s;
 }
-.ekg-path { fill: none; stroke-width: 3; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: ekgMove 2.5s linear infinite; }
-@keyframes ekgMove { from { stroke-dashoffset: 2000; } to { stroke-dashoffset: 0; } }
+#toni-toggle {
+    position: fixed; right: 20px; top: 20px; z-index: 1000;
+    background: var(--accent); border: none; padding: 15px; border-radius: 50%; cursor: pointer;
+}
+body.toni-collapsed .toni-interface { transform: translateX(100%); width: 0; }
 
-/* TONI INTERFACE */
-.toni-interface { width: 340px; background: var(--card-bg); border-left: 1px solid #334155; display: flex; flex-direction: column; }
-.chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-.message { padding: 12px; border-radius: 12px; font-size: 14px; line-height: 1.5; max-width: 90%; }
-.msg-toni { background: rgba(34, 197, 94, 0.1); border-left: 4px solid var(--accent-color); align-self: flex-start; }
-.msg-user { background: rgba(255, 255, 255, 0.05); border-right: 4px solid #64748b; align-self: flex-end; }
-.chat-input-area { padding: 20px; border-top: 1px solid #334155; display: flex; gap: 10px; }
-#text-input { flex: 1; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; outline: none; }
+/* BIO LABOR GRID FIX */
+.bio-input-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
+.bio-card { background: var(--card); padding: 15px; border-radius: 15px; border-left: 5px solid var(--accent); }
 
-/* MOBILE OPTIMIERUNG */
+/* MODAL */
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+.modal-content { background: var(--card); margin: 5% auto; padding: 30px; width: 400px; border-radius: 20px; border: 1px solid var(--accent); }
+input, select { width: 100%; padding: 12px; margin: 8px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; }
+
 @media (max-width: 850px) {
     body { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; flex-direction: row; padding: 10px; overflow-x: auto; border-right: none; border-bottom: 1px solid #334155; }
-    .nav-btn { white-space: nowrap; margin: 0 5px; padding: 10px 15px; }
-    .logo { display: none; }
-    .main-content { height: 50vh; padding: 15px; }
-    .toni-interface { width: 100%; height: 40vh; border-left: none; border-top: 1px solid #334155; }
+    .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 10px; }
+    .nav-btn { margin-right: 10px; }
+    .main-content { height: 60vh; }
+    .toni-interface { width: 100%; height: 40vh; }
 }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
