@@ -308,3 +308,159 @@
     </script>
 </body>
 </html>
+/* --- FIFA CARD DESIGN (Füge dies in <style> ein) --- */
+
+/* Das Gitter für die Karten (passt sich automatisch an Handy/PC an) */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+/* Die Karte selbst */
+.fut-card {
+    background: linear-gradient(135deg, #eebb4d 0%, #bf953f 100%); /* Gold-Look */
+    border: 2px solid #fde08d;
+    border-radius: 12px;
+    padding: 10px;
+    color: #1e293b; /* Dunkle Schrift auf Gold */
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: transform 0.2s;
+    cursor: pointer;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+}
+
+.fut-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(238, 187, 77, 0.4); /* Goldenes Leuchten */
+}
+
+/* Oberer Teil: Rating & Position */
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 5px;
+}
+
+.card-rating {
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.card-position {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Bild Platzhalter */
+.card-image {
+    width: 80px;
+    height: 80px;
+    background-color: #333;
+    border-radius: 50%;
+    margin: 5px auto;
+    background-image: url('https://cdn-icons-png.flaticon.com/512/166/166344.png'); /* Dummy Bild */
+    background-size: cover;
+    border: 3px solid rgba(255,255,255,0.3);
+}
+
+.card-name {
+    text-align: center;
+    font-weight: 800;
+    font-size: 16px;
+    margin: 5px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Die 6 Stats unten */
+.card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    font-size: 11px;
+    gap: 2px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    padding-top: 5px;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 5px;
+}
+
+.stat-label {
+    opacity: 0.7;
+}
+
+.stat-value {
+    font-weight: bold;
+}
+// --- DATEN FÜR DIE KABINE ---
+
+// Hier simulieren wir deine Datenbank mit Spielern
+const teamData = [
+    { id: 1, name: "Müller", pos: "ST", rating: 88, stats: { pac: 85, sho: 90, pas: 75, dri: 82, def: 40, phy: 80 } },
+    { id: 2, name: "Schmidt", pos: "TW", rating: 91, stats: { pac: 88, sho: 50, pas: 60, dri: 55, def: 92, phy: 85 } }, // TW Stats (PAC=DIV, etc.)
+    { id: 3, name: "Schneider", pos: "ZDM", rating: 84, stats: { pac: 70, sho: 65, pas: 88, dri: 75, def: 85, phy: 82 } },
+    { id: 4, name: "Weber", pos: "IV", rating: 82, stats: { pac: 68, sho: 40, pas: 60, dri: 55, def: 88, phy: 90 } },
+    { id: 5, name: "Fischer", pos: "LF", rating: 86, stats: { pac: 92, sho: 80, pas: 78, dri: 88, def: 45, phy: 60 } },
+    { id: 6, name: "Meyer", pos: "RV", rating: 79, stats: { pac: 85, sho: 55, pas: 72, dri: 74, def: 78, phy: 75 } },
+];
+
+// Funktion, um die Karten zu erstellen
+function renderLockerRoom() {
+    const container = document.getElementById('locker-room-container');
+    
+    // Leere den Container (lösche den Platzhalter-Text)
+    container.innerHTML = '<div class="card-grid" id="card-grid"></div>';
+    const grid = document.getElementById('card-grid');
+
+    // Gehe durch jeden Spieler und baue die HTML-Karte
+    teamData.forEach(player => {
+        const cardHTML = `
+            <div class="fut-card" onclick="openPlayerDetails(${player.id})">
+                <div class="card-top">
+                    <div class="card-rating">${player.rating}</div>
+                    <div class="card-position">${player.pos}</div>
+                </div>
+                <div class="card-image"></div>
+                <div class="card-name">${player.name}</div>
+                <div class="card-stats">
+                    <div class="stat"><span class="stat-value">${player.stats.pac}</span> <span class="stat-label">TEM</span></div>
+                    <div class="stat"><span class="stat-value">${player.stats.dri}</span> <span class="stat-label">DRI</span></div>
+                    <div class="stat"><span class="stat-value">${player.stats.sho}</span> <span class="stat-label">SCH</span></div>
+                    <div class="stat"><span class="stat-value">${player.stats.def}</span> <span class="stat-label">DEF</span></div>
+                    <div class="stat"><span class="stat-value">${player.stats.pas}</span> <span class="stat-label">PAS</span></div>
+                    <div class="stat"><span class="stat-value">${player.stats.phy}</span> <span class="stat-label">PHY</span></div>
+                </div>
+            </div>
+        `;
+        grid.innerHTML += cardHTML;
+    });
+}
+
+function openPlayerDetails(id) {
+    // Einfache Simulation einer Detail-Ansicht
+    const player = teamData.find(p => p.id === id);
+    const chat = document.getElementById('chat-history');
+    
+    // Toni kommentiert den Klick
+    const msg = document.createElement('div');
+    msg.className = 'message msg-toni';
+    msg.innerText = `Das ist ${player.name}. Seine Formkurve zeigt nach oben! Soll ich dir seine letzten Trainingsdaten zeigen?`;
+    chat.appendChild(msg);
+    chat.scrollTop = chatHistory.scrollHeight;
+}
+
+// Starte die Funktion sofort beim Laden
+renderLockerRoom();
+
