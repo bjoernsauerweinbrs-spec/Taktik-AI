@@ -1,5 +1,5 @@
 /* ==========================================================
-   TONI 2.0 - MASTER CSS (UNGEKÜRZT & STABIL)
+   TONI 2.0 - MASTER CSS (ULTIMATE EDITION - UNGEKÜRZT)
    ========================================================== */
 
 :root {
@@ -11,12 +11,13 @@
     --card: #1e293b;
     --danger: #ef4444;
     --warning: #f59e0b;
-    --gold: linear-gradient(135deg, #eebb4d 0%, #bf953f 50%, #eebb4d 100%);
+    --gold-gradient: linear-gradient(135deg, #eebb4d 0%, #bf953f 50%, #eebb4d 100%);
     --paper: #fdfaf0;
+    --glass: rgba(255, 255, 255, 0.03);
 }
 
-/* GRUNDLAYOUT */
-* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+/* GRUNDLAYOUT & RESET */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 body {
     font-family: 'Inter', -apple-system, sans-serif;
@@ -59,6 +60,7 @@ body {
     border-radius: 12px;
     margin-bottom: 10px;
     font-size: 15px;
+    font-weight: 500;
     transition: 0.2s all;
     display: flex;
     align-items: center;
@@ -73,7 +75,7 @@ body {
     box-shadow: inset 4px 0 0 var(--accent);
 }
 
-/* HAUPTBEREICH & MODUL-TRENNUNG */
+/* MAIN CONTENT - FIX FÜR DAS STAPELN (Screenshots 13:30) */
 .main-content {
     flex: 1;
     padding: 35px;
@@ -82,22 +84,21 @@ body {
     position: relative;
 }
 
-/* WICHTIG: Das Modul-System gegen das Stapeln */
 .module-section {
-    display: none !important; /* Standard: Knallhart aus */
+    display: none !important; /* Standardmäßig ALLES unsichtbar */
 }
 
 .module-section.active {
-    display: block !important; /* Nur aktiv: Einblenden */
-    animation: fadeIn 0.4s ease-out;
+    display: block !important; /* Nur aktive Sektion anzeigen */
+    animation: slideIn 0.4s ease-out forwards;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(15px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* KABINE: FIFA KARTEN DESIGN */
+/* KABINE: FIFA CARDS */
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -105,7 +106,7 @@ body {
 }
 
 .fut-card {
-    background: var(--gold);
+    background: var(--gold-gradient);
     border-radius: 18px;
     padding: 18px;
     color: #1a1a1a;
@@ -165,9 +166,37 @@ body {
 
 #tacticBoard { width: 100%; height: 100%; display: block; }
 
-/* MODAL: SPIELER-EDITOR (VÖLLIG VERSTECKT BEIM START) */
+/* MANAGEMENT & REDAKTIONS-BÜRO (WOW-EFFEKT FIX) */
+.mgmt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+.mgmt-card {
+    background: var(--card);
+    padding: 25px;
+    border-radius: 20px;
+    border: 1px solid #334155;
+    margin-bottom: 25px;
+    transition: 0.3s;
+}
+
+.redaktion-panel {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 2px solid var(--accent);
+    padding: 30px;
+    border-radius: 25px;
+    box-shadow: 0 20px 50px rgba(34, 197, 94, 0.1);
+}
+
+.redaktion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+    padding-bottom: 15px;
+}
+
+/* MODAL: SPIELER-EDITOR (Fix Screenshot 14:24:04) */
 .modal {
-    display: none !important;
+    display: none !important; /* Initial knallhart aus */
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.9); z-index: 5000;
     align-items: center; justify-content: center;
@@ -176,11 +205,12 @@ body {
 .modal.active { display: flex !important; }
 
 .modal-content {
-    background: var(--card); padding: 35px; width: 90%; max-width: 450px;
+    background: var(--card); padding: 35px; width: 95%; max-width: 450px;
     border-radius: 25px; border: 2px solid var(--accent);
+    box-shadow: 0 0 50px rgba(34, 197, 94, 0.3);
 }
 
-/* PRINT ENGINE (A4 QUERFORMAT FÜR A5 HEFT) */
+/* PRINT ENGINE */
 @media print {
     body * { visibility: hidden; }
     #newspaper-overlay, #newspaper-overlay * { visibility: visible; }
@@ -191,17 +221,14 @@ body {
         width: 297mm; height: 210mm; display: flex; 
         background: white; page-break-after: always;
     }
-    .a5-page { width: 50%; height: 100%; padding: 20mm; border-right: 1px dashed #ccc; box-sizing: border-box; }
+    .a5-page { width: 50%; height: 100%; padding: 20mm; border-right: 1px dashed #ccc; box-sizing: border-box; color: #000; }
 }
 
-/* BIO-LABOR ANIMATIONEN */
-.pulse-heart { animation: heartBeat 1.4s infinite; color: var(--danger); display: inline-block; }
-@keyframes heartBeat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.3); } }
-
-.ekg-path { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 1000; animation: ekgMove 3s linear infinite; }
-@keyframes ekgMove { from { stroke-dashoffset: 2000; } to { stroke-dashoffset: 0; } }
-
-/* TONI UI */
-.toni-interface { width: 360px; background: var(--primary); border-left: 1px solid #334155; display: flex; flex-direction: column; transition: 0.4s; }
-body.toni-collapsed .toni-interface { width: 0; overflow: hidden; }
-#toni-toggle { position: fixed; right: 25px; top: 25px; z-index: 1001; background: var(--accent); border: none; width: 60px; height: 60px; border-radius: 50%; cursor: pointer; font-size: 28px; }
+/* MOBILE OPTIMIERUNG */
+@media (max-width: 900px) {
+    body { flex-direction: column; overflow: auto; }
+    .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 10px; border-bottom: 1px solid #334155; }
+    .logo { display: none; }
+    .main-content { height: 60vh; flex: none; padding: 15px; }
+    .toni-interface { width: 100%; height: 40vh; }
+}
