@@ -2,119 +2,89 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | Elite Management & Simulation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>TONI 2.0 | Elite Management & VR Simulation</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="elite-mode role-manager">
+<body class="elite-level-active">
 
-    <div id="auth-gate">
-        <div class="status-dot"></div>
-        <span id="current-role">CHIEF ANALYST</span>
-        <span id="system-clock">2026-02-20 | 16:20</span>
-    </div>
-
-    <nav class="sidebar">
-        <div class="logo">TONI 2.0</div>
-        
-        <div class="nav-group">
-            <p class="nav-label">PERFORMANCE</p>
-            <button class="nav-btn active" onclick="showModule('vr-center')">
-                <i>🎯</i> VR Center
-            </button>
-            <button class="nav-btn" onclick="showModule('locker-room')">
-                <i>👤</i> Locker Room
-            </button>
+    <header id="elite-hud">
+        <div class="hud-left">
+            <span class="system-tag">TONI 2.0 // ELITE CORE</span>
+            <span id="system-clock">--:--:--</span>
         </div>
-
-        <div class="nav-group">
-            <p class="nav-label">OPERATIONS</p>
-            <button class="nav-btn" onclick="showModule('mgmt-lab')">
-                <i>💼</i> Management Lab
-            </button>
-            <button class="nav-btn" onclick="showModule('press-center')">
-                <i>🗞️</i> Press Center
-            </button>
+        <div class="hud-right">
+            <span class="role-badge">CHIEF ANALYST</span>
+            <div class="connection-pulse"></div>
         </div>
+    </header>
 
-        <div class="nav-group settings">
-            <button class="nav-btn" onclick="showModule('settings')">
-                <i>⚙️</i> System Settings
-            </button>
+    <aside class="sidebar">
+        <div class="brand">TONI 2.0</div>
+        <nav class="main-nav">
+            <button class="nav-btn active" onclick="showModule('vr-center')"><i>🎯</i> VR CENTER</button>
+            <button class="nav-btn" onclick="showModule('locker-room')"><i>👤</i> KABINE</button>
+            <button class="nav-btn" onclick="showModule('mgmt-lab')"><i>💼</i> LABOR</button>
+            <button class="nav-btn" onclick="showModule('press-center')"><i>🗞️</i> PRESSE</button>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="mic-trigger" id="mic-btn" onclick="voiceEngine.toggle()">🎤 KI ANALYSE</button>
         </div>
-    </nav>
+    </aside>
 
-    <main class="main-content">
+    <main class="content-area">
         
         <section id="vr-center" class="module-section active">
-            <div class="module-header">
-                <h2>Tactical Simulation & Pitch Control</h2>
-                <div class="engine-controls">
-                    <button class="control-btn" onclick="vrEngine.start()">START SIM</button>
-                    <button class="control-btn" onclick="vrEngine.toggleHeatmap()">HEATMAP</button>
+            <div class="module-info">
+                <h2>VR Analysezentrum <small>Meta Quest Ready</small></h2>
+                <div class="metric-grid">
+                    <div class="m-box">PITCH CONTROL <span id="m-pitch">0%</span></div>
+                    <div class="m-box">SCANNING RATE <span id="m-scan">0%</span></div>
                 </div>
             </div>
-            <div class="pitch-container" id="pitch-frame">
-                <canvas id="tacticBoard"></canvas>
-                <div id="toni-sideline-coach" class="coach-avatar"></div>
-            </div>
-            <div class="live-metrics-bar">
-                <div class="metric">Control Index: <span id="m-control">0%</span></div>
-                <div class="metric">Scanning Rate: <span id="m-scanning">0%</span></div>
-                <div class="metric">Transition: <span id="m-transition">READY</span></div>
+            
+            <div class="vr-frame-container">
+                <a-scene embedded vr-mode-ui="enabled: true">
+                    <a-assets>
+                        </a-assets>
+                    <a-sky color="#020617"></a-sky>
+                    <a-plane position="0 0 0" rotation="-90 0 0" width="68" height="105" color="#14532d" material="roughness: 0.8"></a-plane>
+                    <a-entity id="toni-avatar" position="36 0 0">
+                        <a-cylinder color="#22c55e" height="1.8" radius="0.4"></a-cylinder>
+                        <a-text value="COACH TONI" position="0 2.2 0" align="center" scale="2 2 2"></a-text>
+                    </a-entity>
+                    <a-camera position="0 15 30" rotation="-30 0 0"></a-camera>
+                </a-scene>
             </div>
         </section>
 
         <section id="locker-room" class="module-section">
-            <div class="module-header">
-                <h2>Squad Registry & Load Management</h2>
-                <button class="action-btn" onclick="openPlayerModal()">+ Add Asset</button>
-            </div>
+            <div class="module-info"><h2>Kader-Register // Medical</h2></div>
             <div class="card-grid" id="locker-room-container"></div>
         </section>
 
         <section id="mgmt-lab" class="module-section">
-            <div class="module-header">
-                <h2>Strategic Management Lab</h2>
-            </div>
-            <div id="mgmt-content"></div>
+            <div class="module-info"><h2>Manager-Labor // ROI Analysis</h2></div>
+            <div id="mgmt-dashboard"></div>
         </section>
 
         <section id="press-center" class="module-section">
-            <div class="module-header">
-                <h2>Media & Press Operations</h2>
-            </div>
-            <div id="press-content"></div>
+            <div class="module-info"><h2>Redaktions-Schaltzentrale</h2></div>
+            <div id="magazine-preview-container"></div>
         </section>
 
     </main>
 
-    <div id="toni-interface">
-        <div class="chat-header" onclick="toggleToni()">
-            <span>TONI AI ANALYST</span>
-            <button id="mic-btn" onclick="toggleVoice()">🎤</button>
-        </div>
-        <div id="chat-history"></div>
-        <div class="chat-input-area">
-            <input type="text" id="user-msg" placeholder="Analyse anfordern...">
-        </div>
-    </div>
-
     <div id="player-modal" class="modal">
         <div class="modal-content">
-            <h3>Asset Profile Editor</h3>
             <div id="modal-form"></div>
             <div class="modal-actions">
-                <button class="save-btn" onclick="savePlayer()">Commit Changes</button>
-                <button class="close-btn" onclick="closePlayerModal()">Abort</button>
+                <button class="save-btn" onclick="savePlayer()">SYST. COMMIT</button>
+                <button class="close-btn" onclick="closePlayerModal()">ABORT</button>
             </div>
         </div>
-    </div>
-
-    <div id="newspaper-overlay" class="modal">
-        <div id="printable-newspaper"></div>
-        <button class="close-overlay" onclick="newspaper.close()">Close Preview</button>
     </div>
 
     <script src="modules/management.js"></script>
