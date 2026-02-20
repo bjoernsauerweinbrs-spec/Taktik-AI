@@ -1,7 +1,7 @@
 /* ==========================================================
    MANAGEMENT MODUL (Finanz-Board & Stadionzeitung)
    ========================================================== */
-
+ 
 const mgmt = {
     // Datenstruktur für das Vereins-Management
     data: JSON.parse(localStorage.getItem('toni_mgmt')) || {
