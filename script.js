@@ -1,5 +1,5 @@
 /* ==========================================================
-   TONI 2.0 | ELITE COMMAND CORE (QUEST-INTEGRATED)
+   TONI 2.0 | ELITE COMMAND CORE (QUEST & MEDIA INTEGRATED)
    ========================================================== */
 
 const sysConfig = {
@@ -73,11 +73,54 @@ function loadModule(modId) {
             title.innerText = "MEDICAL CENTER // REHA-DIAGNOSTIK";
             renderMedical(display);
             break;
+        case 'stadionzeitung':
+            title.innerText = "STADION-ZEITUNG // EDITOR";
+            renderNewspaper(display);
+            break;
     }
 }
 
 /**
- * 3. QUEST ELITE HUB (DEIN LUXUS-BOARD)
+ * 3. STADION-ZEITUNG MODUL
+ */
+function renderNewspaper(target) {
+    target.innerHTML = `
+        <div class="newspaper-module">
+            <div class="news-controls" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                <button onclick="generateArticle()" class="vr-trigger">KI-ARTIKEL GENERIEREN</button>
+                <button onclick="window.print()" style="background:var(--glass); color:white; border:1px solid var(--border); padding: 10px; cursor:pointer;">PDF EXPORT</button>
+            </div>
+            
+            <div class="magazine-preview">
+                <div class="mag-page">
+                    <h1 class="orbitron" style="color:black; border-bottom: 2px solid black;">ELITE MATCHDAY</h1>
+                    <div class="mag-content" style="margin-top: 20px; color:black;">
+                        <h2 id="news-headline" style="font-weight:900;">TITELSTORY: BEREIT FÜR DIE ANALYSE</h2>
+                        <p id="news-text" style="margin-top: 15px; line-height: 1.6;">Wähle einen Fokus aus der Aktentasche oder generiere einen Artikel basierend auf den aktuellen Quest-Telemetriedaten.</p>
+                    </div>
+                    <div class="mag-footer" style="margin-top: 40px; font-size: 10px; border-top: 1px solid #ccc; padding-top: 10px; color: #666;">
+                        TONI 2.0 // STRATEGIE-AUSGABE // FEBRUAR 2026
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function generateArticle() {
+    const headline = document.getElementById('news-headline');
+    const text = document.getElementById('news-text');
+    
+    const rate = sysConfig.questData.scanRate > 0 ? sysConfig.questData.scanRate : 85;
+
+    headline.innerText = "VR-ANALYSE: SCAN-RATE AUF REKORDNIVEAU";
+    text.innerText = `Die neuesten Telemetrie-Daten aus der Meta Quest zeigen eine beeindruckende kognitive Leistung. Mit einer Scanning-Rate von ${rate}% setzt der Kader neue Maßstäbe in der Raumwahrnehmung. Coach Toni empfiehlt, dieses Niveau im nächsten taktischen Block gegen das 3-4-3 System zu validieren.`;
+    
+    speak("Die Stadionzeitung wurde mit aktuellen Daten aus dem VR-Sektor aktualisiert.");
+}
+
+/**
+ * 4. QUEST ELITE HUB
  */
 function renderQuestHub(target) {
     target.innerHTML = `
@@ -105,12 +148,12 @@ function renderQuestHub(target) {
 
                 <div class="mgmt-card full-width">
                     <h3>PITCH CONTROL MATRIX (PROBABILISTIC MODEL)</h3>
-                    <div class="matrix-viz">
-                        <div class="matrix-cell" style="opacity: 0.8"></div><div class="matrix-cell" style="opacity: 0.4"></div>
-                        <div class="matrix-cell" style="opacity: 0.9"></div><div class="matrix-cell" style="opacity: 0.2"></div>
-                        <div class="matrix-cell" style="opacity: 0.6"></div><div class="matrix-cell" style="opacity: 0.7"></div>
+                    <div class="matrix-viz" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; height: 100px; margin-top:15px;">
+                        <div class="matrix-cell" style="background:var(--accent); opacity: 0.8"></div><div class="matrix-cell" style="background:var(--accent); opacity: 0.4"></div>
+                        <div class="matrix-cell" style="background:var(--accent); opacity: 0.9"></div><div class="matrix-cell" style="background:var(--accent); opacity: 0.2"></div>
+                        <div class="matrix-cell" style="background:var(--accent); opacity: 0.6"></div><div class="matrix-cell" style="background:var(--accent); opacity: 0.7"></div>
                     </div>
-                    <p class="small">Berechnung: Softmax-Distribution basierend auf v_max und t_reaction</p>
+                    <p class="small" style="margin-top:10px;">Berechnung: Softmax-Distribution basierend auf v_max und t_reaction</p>
                 </div>
             </div>
 
@@ -122,7 +165,7 @@ function renderQuestHub(target) {
 }
 
 /**
- * 4. MANAGEMENT LABOR (G&V)
+ * 5. MANAGEMENT LABOR (G&V)
  */
 function renderFinance(target) {
     const balance = sysConfig.transactions.reduce((acc, t) => acc + t.amount, sysConfig.assets);
@@ -153,15 +196,15 @@ function renderFinance(target) {
 }
 
 /**
- * 5. KADER & MEDICAL
+ * 6. KADER & MEDICAL
  */
 function renderKader(target) {
-    target.innerHTML = `<div class="card-grid">
+    target.innerHTML = `<div class="card-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:20px;">
         ${sysConfig.players.map(p => `
             <div class="mgmt-card player-card">
-                <div class="p-rating">${p.rating}</div>
-                <div class="p-name">${p.name}</div>
-                <div class="p-status ${p.medical === 'Reha' ? 'warn' : ''}">${p.medical}</div>
+                <div class="p-rating" style="font-family:'Orbitron'; color:var(--accent); font-size:24px;">${p.rating}</div>
+                <div class="p-name" style="font-weight:900; margin:10px 0;">${p.name}</div>
+                <div class="p-status ${p.medical === 'Reha' ? 'warn' : ''}" style="font-size:10px;">STATUS: ${p.medical}</div>
             </div>
         `).join('')}
     </div>`;
@@ -172,9 +215,9 @@ function renderMedical(target) {
         <div class="mgmt-card">
             <h3>WASM REHA ENGINE // SYMMETRIE-ANALYSE</h3>
             <p>Echtzeit-Verarbeitung von Bewegungsdaten (Quest Telemetrie)</p>
-            <div class="symmetry-meter">
-                <div class="bar-left" style="width: 48%"></div>
-                <div class="bar-right" style="width: 52%"></div>
+            <div class="symmetry-meter" style="display:flex; height:20px; background:#1e293b; margin:20px 0; border-radius:10px; overflow:hidden;">
+                <div class="bar-left" style="width: 48%; background:var(--accent); border-right:2px solid black;"></div>
+                <div class="bar-right" style="width: 52%; background:var(--accent);"></div>
             </div>
             <p class="small">Abweichung: 4% (Innerhalb der Toleranz)</p>
         </div>
@@ -182,7 +225,7 @@ function renderMedical(target) {
 }
 
 /**
- * 6. TELEMETRIE LOGIK & KI
+ * 7. TELEMETRIE LOGIK & KI
  */
 function simulateQuestData() {
     sysConfig.questData.connected = true;
@@ -203,11 +246,11 @@ function askToni() {
     const history = document.getElementById('chat-history');
     if(!input.value) return;
 
-    history.innerHTML += `<div class="user-msg">> ${input.value}</div>`;
+    history.innerHTML += `<div class="user-msg" style="margin-bottom:10px; color:var(--text-muted);">> ${input.value}</div>`;
     
     setTimeout(() => {
         const response = "Taktische Empfehlung: Die Pitch Control Probability zeigt eine Schwäche in Zone 4. Ich empfehle das Quest-Szenario 'Gap Finder' Level 2.";
-        history.innerHTML += `<div class="ai-msg">${response}</div>`;
+        history.innerHTML += `<div class="ai-msg" style="background:var(--glass); padding:10px; border-radius:8px; border-left:3px solid var(--accent); margin-bottom:10px;">${response}</div>`;
         history.scrollTop = history.scrollHeight;
         speak(response);
     }, 1000);
@@ -221,3 +264,8 @@ function speak(text) {
     msg.pitch = 0.85;
     window.speechSynthesis.speak(msg);
 }
+
+// Initialer Checkup
+window.onload = () => {
+    console.log("TONI 2.0 ELITE INITIALIZED.");
+};
