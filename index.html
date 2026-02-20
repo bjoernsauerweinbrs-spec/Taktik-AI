@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI AI - Pro Elite Coaching System</title>
+    <title>TONI AI - Elite Coaching System</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
@@ -21,7 +21,7 @@
 
     <div class="main-content">
         <div id="dashboard" class="module-section active">
-            <div class="section-header">
+            <div class="header-flex">
                 <h2>Mannschaftskabine</h2>
                 <button class="action-btn" onclick="openPlayerModal()">+ Spieler hinzufügen</button>
             </div>
@@ -29,8 +29,8 @@
         </div>
 
         <div id="tactics" class="module-section">
-            <div class="section-header">
-                <h2>Elite Taktik-Zentrum</h2>
+            <div class="header-flex">
+                <h2>Taktik-Zentrum</h2>
                 <div class="tactic-controls">
                     <button onclick="setFormation('4-4-2')">4-4-2</button>
                     <button onclick="setFormation('3-4-3')">3-4-3</button>
@@ -43,12 +43,12 @@
         </div>
 
         <div id="management" class="module-section">
-            <h2>Vereins-Management & Finanzen</h2>
+            <h2>Vereins-Management</h2>
             <div id="mgmt-content"></div>
         </div>
 
         <div id="bio" class="module-section">
-            <h2>Performance Bio-Lab (Wearable & Scale Data)</h2>
+            <h2>Pro Performance Lab</h2>
             <div id="bio-lab-container"></div>
         </div>
 
@@ -58,7 +58,7 @@
                     <h3>Cognitive Simulation</h3>
                     <div class="vr-actions">
                         <button class="action-btn" onclick="vrCenter.launchVR()">VR STARTEN</button>
-                        <button class="action-btn" onclick="vrCenter.triggerDrill()">DRILL STARTEN</button>
+                        <button class="action-btn" style="background:#3b82f6" onclick="vrCenter.triggerDrill()">ÜBUNG STARTEN</button>
                     </div>
                     <div id="vr-container"></div>
                 </div>
@@ -72,23 +72,20 @@
 
     <button id="toni-toggle" onclick="toggleToni()">🤖</button>
     <div class="toni-interface">
-        <div class="chat-header">
-            <div class="chat-status"></div>
-            <span>TONI AI ANALYST</span>
-        </div>
+        <div class="chat-header"><span>TONI AI ANALYST</span></div>
         <div class="chat-messages" id="chat-history"></div>
         <div class="chat-input-area">
             <button id="voice-btn" onclick="toggleVoice()">🎤</button>
-            <input type="text" id="text-input" placeholder="Anweisung...">
+            <input type="text" id="text-input" placeholder="Befehl an Toni...">
         </div>
     </div>
 
     <div id="player-modal" class="modal">
         <div class="modal-content">
-            <h3 id="modal-title">Spieler bearbeiten</h3>
+            <h3 id="modal-title">Spieler-Profil</h3>
             <input type="text" id="edit-name" placeholder="Name">
-            <input type="text" id="edit-pos" placeholder="Position (z.B. ST)">
-            <input type="number" id="edit-rating" placeholder="Gesamt-Rating">
+            <input type="text" id="edit-pos" placeholder="Position">
+            <input type="number" id="edit-rating" placeholder="Rating">
             <div class="stats-edit-grid">
                 <input type="number" id="edit-tem" placeholder="TEM">
                 <input type="number" id="edit-sch" placeholder="SCH">
