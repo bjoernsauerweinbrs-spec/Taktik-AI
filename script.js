@@ -1,76 +1,77 @@
 /* ==========================================================
-   1. GLOBALER SPEICHER & INITIALISIERUNG
+   1. GLOBALER SPEICHER & MUSTER-KADER (MIT AUTO-RATING)
    ========================================================== */
 
-// Spieler-Daten mit allen 6 Attributen (TEM, SCH, PAS, DRI, DEF, PHY)
-let playersData = JSON.parse(localStorage.getItem('toni_players')) || [
-    { id: 1, name: "Müller", pos: "ST", rating: 88, stats: [85, 90, 82, 82, 40, 80] },
-    { id: 2, name: "Schmidt", pos: "TW", rating: 91, stats: [88, 50, 60, 55, 92, 85] }
-];
+function getInitialPlayers() {
+    const saved = localStorage.getItem('toni_players');
+    if (saved) return JSON.parse(saved);
 
+    // Elite Muster-Kader: Falls leer, wird dieser erstellt
+    return [
+        { id: 101, name: "M. Müller", pos: "ST", rating: 88, stats: [85, 90, 78, 84, 42, 81], img: "" },
+        { id: 102, name: "L. Schmidt", pos: "TW", rating: 91, stats: [88, 45, 62, 58, 92, 85], img: "" },
+        { id: 103, name: "K. Schneider", pos: "ZDM", rating: 84, stats: [72, 68, 85, 78, 84, 82], img: "" },
+        { id: 104, name: "J. Weber", pos: "IV", rating: 82, stats: [68, 45, 65, 60, 88, 90], img: "" }
+    ];
+}
+
+let playersData = getInitialPlayers();
 let editingPlayerId = null;
 
-// Initialer Start beim Laden der Seite
+// Start-Routine
 window.onload = () => {
+    if (!localStorage.getItem('toni_players')) {
+        localStorage.setItem('toni_players', JSON.stringify(playersData));
+    }
     renderLockerRoom();
-    addMessage("Toni", "Elite Performance System aktiv. Alle Module synchronisiert.");
-    // Falls ein Modul in der URL steht oder Standard:
-    showModule('dashboard');
+    showModule('dashboard'); 
+    addMessage("Toni", "Elite System online. Kader-Daten wurden geladen.");
 };
 
 /* ==========================================================
-   2. NAVIGATION & UI-STEUERUNG
+   2. NAVIGATION & PLATZMANAGEMENT (TONI-TOGGLE)
    ========================================================== */
 
 function showModule(moduleId) {
-    // Verhindert das "Stapeln": Alle Sektionen verstecken
-    const sections = document.querySelectorAll('.module-section');
-    sections.forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-    // Buttons in der Sidebar aktualisieren
-    const buttons = document.querySelectorAll('.nav-btn');
-    buttons.forEach(b => b.classList.remove('active'));
-
-    // Ziel-Sektion aktivieren
     const target = document.getElementById(moduleId);
     if (target) {
         target.classList.add('active');
-        // Scrollt nach oben, wichtig für Smartphone
         document.querySelector('.main-content').scrollTop = 0;
     }
 
-    // Aktiven Button markieren
-    const activeBtn = Array.from(buttons).find(btn => 
-        btn.getAttribute('onclick').includes(moduleId)
-    );
-    if (activeBtn) activeBtn.classList.add('active');
+    const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(moduleId));
+    if (btn) btn.classList.add('active');
 
-    // Spezielle Initialisierungen beim Wechsel
-    if (moduleId === 'tactics') {
-        setTimeout(initBoard, 150);
-    }
+    if (moduleId === 'tactics') setTimeout(initBoard, 150);
 }
 
-// Toni AI ein- und ausklappen für mehr Platz (besonders auf Handy/Taktik)
 function toggleToni() {
     document.body.classList.toggle('toni-collapsed');
-    // Canvas-Größe nach dem Einklappen korrigieren
+    // Canvas Fix nach Größenänderung
     if (document.getElementById('tactics').classList.contains('active')) {
         setTimeout(initBoard, 300);
     }
 }
 
 /* ==========================================================
-   3. MANNSCHAFTSKABINE (SPIELER-VERWALTUNG / CRUD)
+   3. KABINE: SPIELER-MANAGEMENT & AUTO-CALCULATION
    ========================================================== */
 
 function renderLockerRoom() {
     const container = document.getElementById('locker-room-container');
     if (!container) return;
-    
+
     container.innerHTML = playersData.map(p => `
         <div class="fut-card" onclick="openPlayerModal(${p.id})">
             <div class="card-top"><span>${p.rating}</span><span>${p.pos}</span></div>
+            
+            <div style="height:65px; width:65px; margin:8px auto; border-radius:50%; overflow:hidden; background:rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center; border:2px solid rgba(255,255,255,0.2);">
+                ${p.img ? `<img src="${p.img}" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:32px;">👤</span>'}
+            </div>
+
             <div class="card-name">${p.name}</div>
             <div class="card-stats">
                 <span>TEM: ${p.stats[0]}</span><span>DRI: ${p.stats[3]}</span>
@@ -83,21 +84,29 @@ function renderLockerRoom() {
 
 function openPlayerModal(id = null) {
     editingPlayerId = id;
-    const modal = document.getElementById('player-modal');
-    modal.style.display = "flex"; // Nutzt Flex für Zentrierung
+    document.getElementById('player-modal').style.display = "flex";
     
+    // Rating Feld auf Schreibgeschützt setzen
+    const ratingInput = document.getElementById('edit-rating');
+    ratingInput.readOnly = true;
+    ratingInput.style.opacity = "0.7";
+
     if (id) {
         const p = playersData.find(x => x.id === id);
         document.getElementById('modal-title').innerText = "Spieler bearbeiten";
         document.getElementById('edit-name').value = p.name;
         document.getElementById('edit-pos').value = p.pos;
         document.getElementById('edit-rating').value = p.rating;
+        
         document.getElementById('edit-tem').value = p.stats[0];
         document.getElementById('edit-sch').value = p.stats[1];
         document.getElementById('edit-pas').value = p.stats[2];
         document.getElementById('edit-dri').value = p.stats[3];
         document.getElementById('edit-def').value = p.stats[4];
         document.getElementById('edit-phy').value = p.stats[5];
+        // Bild URL (falls vorhanden)
+        document.getElementById('edit-img-url').value = p.img || "";
+        
         document.getElementById('btn-delete').style.display = "block";
     } else {
         document.getElementById('modal-title').innerText = "Neuer Spieler";
@@ -108,51 +117,52 @@ function openPlayerModal(id = null) {
 
 function savePlayer() {
     const name = document.getElementById('edit-name').value;
-    if (!name) return alert("Name erforderlich!");
+    if (!name) return;
+
+    // HIER PASSIERT DIE INTELLIGENTE BERECHNUNG
+    const s = [
+        parseInt(document.getElementById('edit-tem').value) || 50,
+        parseInt(document.getElementById('edit-sch').value) || 50,
+        parseInt(document.getElementById('edit-pas').value) || 50,
+        parseInt(document.getElementById('edit-dri').value) || 50,
+        parseInt(document.getElementById('edit-def').value) || 50,
+        parseInt(document.getElementById('edit-phy').value) || 50
+    ];
+
+    // Durchschnittsberechnung für das Rating
+    const autoRating = Math.round(s.reduce((a, b) => a + b, 0) / 6);
 
     const p = {
         id: editingPlayerId || Date.now(),
         name: name,
-        pos: document.getElementById('edit-pos').value.toUpperCase(),
-        rating: document.getElementById('edit-rating').value,
-        stats: [
-            document.getElementById('edit-tem').value || 50,
-            document.getElementById('edit-sch').value || 50,
-            document.getElementById('edit-pas').value || 50,
-            document.getElementById('edit-dri').value || 50,
-            document.getElementById('edit-def').value || 50,
-            document.getElementById('edit-phy').value || 50
-        ]
+        pos: document.getElementById('edit-pos').value.toUpperCase() || "??",
+        rating: autoRating,
+        stats: s,
+        img: document.getElementById('edit-img-url').value // Speichert die Bild-URL
     };
 
-    if (editingPlayerId) {
-        playersData = playersData.map(x => x.id === editingPlayerId ? p : x);
-    } else {
-        playersData.push(p);
-    }
+    if (editingPlayerId) playersData = playersData.map(x => x.id === editingPlayerId ? p : x);
+    else playersData.push(p);
 
     localStorage.setItem('toni_players', JSON.stringify(playersData));
     closePlayerModal();
     renderLockerRoom();
-    addMessage("Toni", `${p.name} wurde im Kader aktualisiert.`);
+    addMessage("Toni", `Analyse abgeschlossen: ${p.name} (Rating: ${autoRating}) gespeichert.`);
 }
 
 function deletePlayer() {
-    if (confirm("Spieler wirklich aus dem Kader entfernen?")) {
+    if (confirm("Spieler wirklich löschen?")) {
         playersData = playersData.filter(x => x.id !== editingPlayerId);
         localStorage.setItem('toni_players', JSON.stringify(playersData));
         closePlayerModal();
         renderLockerRoom();
-        addMessage("Toni", "Spieler wurde gelöscht.");
     }
 }
 
-function closePlayerModal() {
-    document.getElementById('player-modal').style.display = "none";
-}
+function closePlayerModal() { document.getElementById('player-modal').style.display = "none"; }
 
 /* ==========================================================
-   4. ELITE TAKTIK-BOARD (ENGINE)
+   4. TAKTIK-BOARD ENGINE (PITCH)
    ========================================================== */
 
 let canvas, ctx, pitchPlayers = [], zones = [];
@@ -162,12 +172,9 @@ function initBoard() {
     canvas = document.getElementById('tacticBoard');
     if (!canvas) return;
     ctx = canvas.getContext('2d');
-    
-    // Canvas-Größe an Container anpassen
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     
-    // Maus- & Touch-Events
     canvas.onmousedown = canvas.ontouchstart = startDrag;
     canvas.onmousemove = canvas.ontouchmove = doDrag;
     canvas.onmouseup = canvas.ontouchend = stopDrag;
@@ -180,53 +187,24 @@ function drawBoard() {
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Spielfeld-Linien (Weiß)
+    // Spielfeld-Zeichnung
     ctx.strokeStyle = "rgba(255,255,255,0.9)";
     ctx.lineWidth = 2;
-    
-    // Außenlinie
-    ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
-    
-    // Mittellinie & Kreis
-    ctx.beginPath();
-    ctx.moveTo(10, canvas.height / 2);
-    ctx.lineTo(canvas.width - 10, canvas.height / 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(canvas.width / 2, canvas.height / 2, 45, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20); // Außen
+    ctx.beginPath(); ctx.moveTo(10, canvas.height / 2); ctx.lineTo(canvas.width - 10, canvas.height / 2); ctx.stroke(); // Mitte
+    ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 45, 0, Math.PI * 2); ctx.stroke(); // Kreis
 
-    // Strafräume
     const boxW = canvas.width * 0.65;
     ctx.strokeRect((canvas.width - boxW) / 2, 10, boxW, 80); // Oben
     ctx.strokeRect((canvas.width - boxW) / 2, canvas.height - 90, boxW, 80); // Unten
     
-    // Tore
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(canvas.width * 0.4, 10); ctx.lineTo(canvas.width * 0.6, 10);
-    ctx.moveTo(canvas.width * 0.4, canvas.height - 10); ctx.lineTo(canvas.width * 0.6, canvas.height - 10);
-    ctx.stroke();
-    ctx.lineWidth = 2;
+    // Strategische Zonen
+    zones.forEach(z => { ctx.fillStyle = z.c; ctx.fillRect(z.x, z.y, z.w, z.h); });
 
-    // Strategische Zonen zeichnen
-    zones.forEach(z => {
-        ctx.fillStyle = z.c;
-        ctx.fillRect(z.x, z.y, z.w, z.h);
-        ctx.fillStyle = "white";
-        ctx.font = "italic 11px Inter";
-        ctx.fillText(z.l, z.x + 10, z.y + 20);
-    });
-
-    // Spieler zeichnen
+    // Spieler-Markierungen
     pitchPlayers.forEach(p => {
-        ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0,0,0,0.5)";
-        ctx.fillStyle = p.c;
-        ctx.beginPath(); ctx.arc(p.x, p.y, 16, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = "white";
-        ctx.font = "bold 11px Inter";
-        ctx.fillText(p.l, p.x - 12, p.y + 32);
+        ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, 16, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "white"; ctx.font = "bold 11px Inter"; ctx.fillText(p.l, p.x - 12, p.y + 32);
     });
 }
 
@@ -236,96 +214,57 @@ function setFormation(type) {
     const color = type === '4-4-2' ? '#ef4444' : '#3b82f6';
 
     if (type === '4-4-2') {
-        zones.push({ x: 10, y: h * 0.4, w: w - 20, h: h * 0.2, c: "rgba(34, 197, 94, 0.25)", l: "PRESSING-ZONE" });
-        [0.2, 0.4, 0.6, 0.8].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.75, l: "ABW", c: color }));
-        [0.2, 0.4, 0.6, 0.8].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.5, l: "MF", c: color }));
-        [0.4, 0.6].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.25, l: "ST", c: color }));
+        zones.push({ x: 10, y: h * 0.4, w: w - 20, h: h * 0.2, c: "rgba(34, 197, 94, 0.25)", l: "PRESSING" });
+        [0.2, 0.4, 0.6, 0.8].forEach(x => pitchPlayers.push({ x: w * x, y: h * 0.75, l: "ABW", c: color }));
+        [0.2, 0.4, 0.6, 0.8].forEach(x => pitchPlayers.push({ x: w * x, y: h * 0.5, l: "MF", c: color }));
+        [0.4, 0.6].forEach(x => pitchPlayers.push({ x: w * x, y: h * 0.25, l: "ST", c: color }));
     } else {
-        zones.push({ x: 10, y: 10, w: w * 0.15, h: h - 20, c: "rgba(59, 130, 246, 0.2)", l: "FLÜGEL" });
-        zones.push({ x: w * 0.85, y: 10, w: w * 0.15, h: h - 20, c: "rgba(59, 130, 246, 0.2)", l: "FLÜGEL" });
-        [0.25, 0.5, 0.75].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.75, l: "ABW", c: color }));
-        [0.2, 0.4, 0.6, 0.8].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.4, l: "MF", c: color }));
-        [0.2, 0.5, 0.8].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.2, l: "ST", c: color }));
+        [0.25, 0.5, 0.75].forEach(x => pitchPlayers.push({ x: w * x, y: h * 0.75, l: "ABW", c: color }));
+        [0.2, 0.4, 0.6, 0.8].forEach(x => pitchPlayers.push({ x: w * x, y: h * 0.4, l: "MF", c: color }));
+        [0.2, 0.5, 0.8].forEach(x => pitchPlayers.push({ x: w * x, y: h * 0.2, l: "ST", c: color }));
     }
     pitchPlayers.push({ x: w / 2, y: h - 45, l: "TW", c: color });
     drawBoard();
-    addMessage("Toni", `Formation ${type} aufgestellt. Analyse der Laufwege aktiv.`);
 }
 
-function clearBoard() {
-    pitchPlayers = []; zones = [];
-    drawBoard();
-}
+function clearBoard() { pitchPlayers = []; zones = []; drawBoard(); }
 
-/* --- DRAG & DROP LOGIK --- */
 function startDrag(e) {
     const pos = getPos(e);
     activeP = pitchPlayers.find(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 25);
     if (activeP) dragging = true;
 }
-function doDrag(e) {
-    if (!dragging) return;
-    const pos = getPos(e);
-    activeP.x = pos.x; activeP.y = pos.y;
-    drawBoard();
-}
+function doDrag(e) { if (!dragging) return; const pos = getPos(e); activeP.x = pos.x; activeP.y = pos.y; drawBoard(); }
 function stopDrag() { dragging = false; activeP = null; }
 function getPos(e) {
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: clientX - rect.left, y: clientY - rect.top };
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: cx - rect.left, y: cy - rect.top };
 }
 
 /* ==========================================================
-   5. TONI AI INTERAKTION (CHAT & VOICE)
+   5. TONI CHAT & VOICE
    ========================================================== */
 
 function addMessage(sender, text) {
     const history = document.getElementById('chat-history');
     if (!history) return;
-    
-    const div = document.createElement('div');
-    div.className = `message msg-${sender.toLowerCase() === 'toni' ? 'toni' : 'user'}`;
-    div.innerHTML = `<b>${sender}:</b> ${text}`;
-    history.appendChild(div);
-    
-    // Auto-Scroll
+    const d = document.createElement('div');
+    d.className = `message msg-${sender.toLowerCase() === 'toni' ? 'toni' : 'user'}`;
+    d.innerHTML = `<b>${sender}:</b> ${text}`;
+    history.appendChild(d);
     history.scrollTop = history.scrollHeight;
 }
 
-// Sprachsteuerung (Web Speech API)
 function toggleVoice() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert("Browser unterstützt keine Sprachsteuerung.");
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'de-DE';
-    recognition.start();
-
-    addMessage("System", "Toni hört zu...");
-
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        addMessage("Du", transcript);
-        processCommand(transcript.toLowerCase());
+    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Speech) return alert("Browser inkompatibel");
+    const rec = new Speech(); rec.lang = 'de-DE'; rec.start();
+    rec.onresult = (e) => {
+        const t = e.results[0][0].transcript.toLowerCase();
+        addMessage("Du", t);
+        if (t.includes("taktik")) showModule('tactics');
+        if (t.includes("kabine")) showModule('dashboard');
     };
 }
-
-function processCommand(cmd) {
-    if (cmd.includes("taktik") || cmd.includes("board")) showModule('tactics');
-    else if (cmd.includes("kabine") || cmd.includes("spieler")) showModule('dashboard');
-    else if (cmd.includes("finanz") || cmd.includes("geld")) showModule('management');
-    else if (cmd.includes("labor") || cmd.includes("werte")) showModule('bio');
-    else if (cmd.includes("formation 4-4-2")) setFormation('4-4-2');
-    else addMessage("Toni", "Befehl erkannt. Analysiere Umsetzung...");
-}
-
-// Texteingabe-Event
-document.getElementById('text-input')?.addEventListener('keypress', function (e) {
-    if (e.key === 'Enter' && this.value) {
-        addMessage("Du", this.value);
-        processCommand(this.value.toLowerCase());
-        this.value = '';
-    }
-});
