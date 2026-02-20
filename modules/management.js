@@ -1,107 +1,100 @@
 /* ==========================================================
-   MANAGEMENT LAB | EXECUTIVE COMMAND & ROI ENGINE
+   MANAGEMENT LAB | EXECUTIVE ROI & ASSET ENGINE
    ========================================================== */
 
 const mgmt = {
     data: JSON.parse(localStorage.getItem('toni_mgmt')) || {
-        clubName: "FC TONI ELITE",
-        liquidAssets: 12500000, // 12.5 Mio Startkapital
-        squadValue: 85000000,
-        infrastructure: [
-            { id: 'INF-01', name: 'High-End Med-Center', level: 3, effect: 'Injury-Reduction -15%' },
-            { id: 'INF-02', name: 'VR-Tactical Hub', level: 5, effect: 'Tactical-Growth +25%' }
-        ],
+        liquidAssets: 15250000, 
         sponsorships: [
-            { id: 'SP-01', partner: 'Global Dynamics', value: 2500000, type: 'Main', kpi: 0.85 },
-            { id: 'SP-02', partner: 'CyberFit', value: 850000, type: 'Equipment', kpi: 0.92 }
+            { partner: "Global Dynamics", value: 3500000, status: "Active", kpi: 0.88 },
+            { partner: "CyberFit Analytics", value: 1200000, status: "Active", kpi: 0.94 },
+            { partner: "Elite Energy", value: 950000, status: "Pending", kpi: 0.60 }
         ],
-        marketForecast: []
+        infrastructure: [
+            { name: "Medical Excellence Center", level: 4, effect: "Injury Risk -12%" },
+            { name: "VR Tactical Hub", level: 5, effect: "Tactical Growth +20%" }
+        ]
     },
 
     init: function() {
-        this.calculateSquadROI();
         this.render();
     },
 
     /**
-     * ROI CALCULATOR (Elite Metric)
-     * Berechnet den finanziellen Impact von Training & Medizin
+     * BERECHNET DEN FINANZIELLEN RISK-INDEX
+     * Koppelung von ACWR (Medizin) und Marktwert (Asset)
      */
-    calculateSquadROI: function() {
-        const players = eliteStore.players;
-        this.data.squadValue = players.reduce((sum, p) => sum + (p.rating * 1000000), 0);
-        
-        // Risiko-Analyse: Wie viele Spieler sind im roten ACWR-Bereich?
-        const riskyPlayers = players.filter(p => {
+    getRiskAnalysis: function() {
+        const players = typeof eliteStore !== 'undefined' ? eliteStore.players : [];
+        let totalRiskValue = 0;
+
+        players.forEach(p => {
             const acute = p.load.slice(-7).reduce((a,b) => a+b, 0) / 7;
             const chronic = p.load.reduce((a,b) => a+b, 0) / p.load.length;
-            return (acute / chronic) > 1.5;
+            const acwr = chronic > 0 ? (acute / chronic) : 1.0;
+
+            // Risiko-Kosten: Ein verletzter Top-Spieler kostet prozentual seinen Marktwert
+            if (acwr > 1.5) {
+                totalRiskValue += (p.rating * 150000); 
+            }
         });
-        
-        this.data.riskValue = riskyPlayers.length * 2500000; // Potential loss in value
+        return totalRiskValue;
     },
 
     render: function() {
         const container = document.getElementById('mgmt-dashboard');
         if (!container) return;
 
+        const squadValue = (typeof eliteStore !== 'undefined' ? eliteStore.players.length : 0) * 8500000;
+        const risk = this.getRiskAnalysis();
+
         container.innerHTML = `
             <div class="mgmt-grid">
                 <div class="mgmt-card high-end">
-                    <div class="card-label">TOTAL SQUAD ASSETS</div>
-                    <div class="card-value">${(this.data.squadValue / 1000000).toFixed(1)}M €</div>
-                    <div class="card-sub">Market Risk Index: <span style="color:var(--danger)">-${(this.data.riskValue / 1000000).toFixed(1)}M €</span></div>
-                    
-                    <div class="chart-mini">
-                        <div style="width:75%; background:var(--accent); height:100%"></div>
+                    <h3 class="orbitron">CAPITAL ASSETS</h3>
+                    <div class="big-value">${(this.data.liquidAssets / 1000000).toFixed(2)}M €</div>
+                    <p>Squad Market Value: ${(squadValue / 1000000).toFixed(1)}M €</p>
+                    <div class="risk-bar">
+                        <div class="risk-fill" style="width: ${(risk / 5000000 * 100)}%; background: #ef4444;"></div>
                     </div>
+                    <small>Market Risk Exposure: <span style="color:#ef4444">${risk.toLocaleString()} €</span></small>
                 </div>
 
                 <div class="mgmt-card">
-                    <h3 class="orbitron">Sponsorship CRM</h3>
-                    <div class="sp-list">
+                    <h3 class="orbitron">SPONSORSHIP PORTFOLIO</h3>
+                    <div class="sp-table">
                         ${this.data.sponsorships.map(s => `
-                            <div class="sp-item">
-                                <div class="sp-info">
-                                    <span class="sp-name">${s.partner}</span>
-                                    <span class="sp-type">${s.type}</span>
-                                </div>
-                                <div class="sp-value">${(s.value / 1000).toFixed(0)}k €</div>
-                                <div class="sp-kpi-bar"><div style="width:${s.kpi * 100}%"></div></div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <div class="mgmt-card">
-                    <h3 class="orbitron">Capital Investments</h3>
-                    <div class="infra-grid">
-                        ${this.data.infrastructure.map(i => `
-                            <div class="infra-box">
-                                <strong>${i.name}</strong>
-                                <p>Lvl ${i.level}</p>
-                                <small>${i.effect}</small>
+                            <div class="sp-row">
+                                <span>${s.partner}</span>
+                                <span class="sp-kpi">${(s.kpi * 100).toFixed(0)}% ROI</span>
+                                <strong>${(s.value / 1000).toFixed(0)}k €</strong>
                             </div>
                         `).join('')}
                     </div>
                 </div>
 
                 <div class="mgmt-card active-border">
-                    <h3 class="orbitron">Strategic Decision Engine</h3>
-                    <p style="font-size:12px; margin-bottom:15px;">Simulieren Sie Investitionen in den Kader oder die Infrastruktur.</p>
-                    <button class="elite-btn" onclick="mgmt.simulateInvestment('MED')">INVEST: MEDICAL HUB (1.2M €)</button>
-                    <button class="elite-btn" onclick="mgmt.simulateInvestment('VR')">UPGRADE: VR-ENGINE (0.5M €)</button>
+                    <h3 class="orbitron">INFRASTRUCTURE UPGRADES</h3>
+                    <div class="infra-list">
+                        ${this.data.infrastructure.map(i => `
+                            <div class="infra-item">
+                                <strong>${i.name} (Lvl ${i.level})</strong>
+                                <p>${i.effect}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="elite-btn" onclick="mgmt.invest()">INVEST: DATA-CENTER UPGRADE (2.5M €)</button>
                 </div>
             </div>
         `;
     },
 
-    simulateInvestment: function(type) {
-        if (type === 'MED') {
-            this.data.liquidAssets -= 1200000;
-            voiceEngine.speak("Investition getätigt. Das Verletzungsrisiko sinkt prognostisch um 12 Prozent.");
+    invest: function() {
+        if (this.data.liquidAssets >= 2500000) {
+            this.data.liquidAssets -= 2500000;
+            this.save();
+            if (typeof voiceEngine !== 'undefined') voiceEngine.speak("Investition bestätigt. Infrastruktur-Level erhöht.");
         }
-        this.save();
     },
 
     save: function() {
@@ -109,3 +102,5 @@ const mgmt = {
         this.render();
     }
 };
+
+window.addEventListener('load', () => mgmt.init());
