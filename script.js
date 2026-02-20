@@ -1,181 +1,112 @@
 /* ==========================================================
-   TONI 2.0 | ELITE COMMAND CORE (UNABRIDGED)
+   TONI 2.0 ELITE | CORE ENGINE (VR & ANALYTICS)
    ========================================================== */
- 
-/**
- * GLOBAL DATA STORE & STATE MANAGEMENT
- */
+
 const eliteStore = {
+    // Zentraler Datenspeicher (Single Source of Truth)
     players: JSON.parse(localStorage.getItem('toni_players')) || [
-        { id: 101, name: "M. Müller", pos: "ST", rating: 88, stats: [85, 90, 78, 84, 42, 81], load: [12, 14, 15, 12, 18, 20, 15], img: "" },
-        { id: 102, name: "L. Schmidt", pos: "TW", rating: 91, stats: [88, 45, 62, 58, 92, 85], load: [5, 6, 5, 8, 5, 7, 6], img: "" },
-        { id: 103, name: "K. Schneider", pos: "ZDM", rating: 84, stats: [72, 68, 85, 78, 84, 82], load: [10, 12, 11, 10, 12, 11, 13], img: "" },
-        { id: 104, name: "J. Weber", pos: "IV", rating: 82, stats: [68, 45, 65, 60, 88, 90], load: [8, 9, 8, 10, 8, 9, 8], img: "" },
-        { id: 105, name: "A. Fischer", pos: "LM", rating: 86, stats: [92, 78, 82, 88, 50, 70], load: [15, 16, 14, 15, 17, 18, 16], img: "" }
+        { id: 101, name: "M. Müller", pos: "ST", rating: 88, stats: [85, 90, 78, 84, 42, 81], load: [15, 12, 18, 20, 15, 12, 19], img: "" },
+        { id: 102, name: "L. Schmidt", pos: "TW", rating: 91, stats: [88, 45, 62, 58, 92, 85], load: [5, 4, 6, 5, 4, 5, 6], img: "" },
+        { id: 103, name: "K. Schneider", pos: "IV", rating: 84, stats: [72, 68, 85, 78, 84, 82], load: [10, 10, 11, 12, 10, 9, 11], img: "" }
     ],
-    formation: { home: '4-4-2', away: '3-4-3' },
+    formation: { toni: '4-4-2', trainer: '3-4-3' },
     activeModule: 'vr-center',
-    metrics: { control: 0, scanning: 0 }
+    isSimulating: false
 };
 
-let editingPlayerId = null;
-
 /**
- * INITIALISIERUNG
+ * START-SEQUENZ
  */
 window.onload = () => {
-    console.log("TONI 2.0 Elite-System initialisiert.");
+    console.log("SYSTEM BOOT: TONI 2.0 ELITE ACTIVE");
+    updateClock();
+    setInterval(updateClock, 1000);
     
-    // UI-Setup
-    const modal = document.getElementById('player-modal');
-    if (modal) modal.classList.remove('active');
-    
-    // Daten-Persistenz
-    if (!localStorage.getItem('toni_players')) {
-        localStorage.setItem('toni_players', JSON.stringify(eliteStore.players));
-    }
-
+    // Initiales Rendering
     renderLockerRoom();
     showModule('vr-center');
-    
-    // Startet die Uhr im Dashboard
-    setInterval(updateSystemClock, 1000);
 };
 
-/* ==========================================================
-   MODULE NAVIGATION (ANTI-STAPEL-LOGIK)
-   ========================================================== */
-
+/**
+ * MODUL-MANAGER
+ */
 function showModule(modId) {
-    document.querySelectorAll('.module-section').forEach(s => {
-        s.classList.remove('active');
-        s.style.display = 'none';
-    });
-
+    document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active'));
     const target = document.getElementById(modId);
-    if (target) {
-        target.classList.add('active');
-        target.style.display = 'block';
-    }
+    if (target) target.classList.add('active');
 
-    // Sidebar-Aktivierung
+    // Sidebar Update
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => 
-        b.getAttribute('onclick').includes(modId)
-    );
+    const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(modId));
     if (activeBtn) activeBtn.classList.add('active');
 
-    // Modul-spezifische Initialisierung
-    if (modId === 'vr-center') setTimeout(initVR, 150);
-    if (modId === 'mgmt-lab' && typeof mgmt !== 'undefined') mgmt.render();
+    if (modId === 'vr-center') init3DPitch();
+    if (modId === 'mgmt-lab') mgmt.render();
 }
 
-/* ==========================================================
-   VR ANALYSIS CENTER (PITCH CONTROL & PASSING LANES)
-   ========================================================== */
+/**
+ * VR ANALYSIS ENGINE (A-FRAME)
+ */
+function init3DPitch() {
+    const scene = document.querySelector('a-scene');
+    if (!scene) return;
 
-let canvas, ctx, pitchPlayers = [];
+    // Bestehende Spieler-Modelle entfernen
+    document.querySelectorAll('.player-model').forEach(p => p.remove());
 
-function initVR() {
-    canvas = document.getElementById('tacticBoard');
-    if (!canvas) return;
-    ctx = canvas.getContext('2d');
+    // Toni-Team (4-4-2) in 3D positionieren
+    const toniColor = "#22c55e";
+    spawn3DTeam(eliteStore.formation.toni, toniColor, "TONI_ASSET", 1);
     
-    // MacBook Retina / Screen Scaling
-    const container = canvas.parentElement;
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
-
-    // Simulation zurücksetzen und neu befüllen
-    pitchPlayers = [];
-    setFormation(eliteStore.formation.home, '#ef4444', 'TONI');
-    setFormation(eliteStore.formation.away, '#3b82f6', 'OPP');
-    
-    drawElitePitch();
+    // Trainer-Team (3-4-3)
+    const trainerColor = "#3b82f6";
+    spawn3DTeam(eliteStore.formation.trainer, trainerColor, "TRAINER_ASSET", -1);
 }
 
-function drawElitePitch() {
-    if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // 1. Spielfeld-Geometrie
-    ctx.strokeStyle = "rgba(255,255,255,0.9)";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
-    
-    // Tore (Massiv weiß)
-    ctx.lineWidth = 10;
-    ctx.beginPath();
-    ctx.moveTo(canvas.width * 0.38, 10); ctx.lineTo(canvas.width * 0.62, 10);
-    ctx.moveTo(canvas.width * 0.38, canvas.height - 10); ctx.lineTo(canvas.width * 0.62, canvas.height - 10);
-    ctx.stroke();
-
-    // 2. Passing Lane Analysis
-    drawPassingLanes();
-
-    // 3. Spieler & Scanning Cones
-    pitchPlayers.forEach(p => {
-        // Schatten für Tiefenwirkung
-        ctx.shadowBlur = 15; ctx.shadowColor = "rgba(0,0,0,0.5)";
-        ctx.fillStyle = p.c;
-        ctx.beginPath(); ctx.arc(p.x, p.y, 16, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // Scanning Cone Simulation
-        ctx.fillStyle = "rgba(255,255,255,0.08)";
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.arc(p.x, p.y, 70, -Math.PI/4, Math.PI/4);
-        ctx.fill();
-
-        ctx.fillStyle = "white";
-        ctx.font = "bold 10px Inter";
-        ctx.textAlign = "center";
-        ctx.fillText(p.team, p.x, p.y + 32);
-    });
+function spawn3DTeam(formation, color, label, side) {
+    const scene = document.querySelector('a-scene');
+    // Einfache Positions-Logik für 3D-Raum
+    for(let i=0; i<5; i++) {
+        const entity = document.createElement('a-entity');
+        entity.setAttribute('class', 'player-model');
+        const x = (i * 10) - 20;
+        const z = side * 15;
+        
+        entity.setAttribute('position', `${x} 0.9 ${z}`);
+        entity.innerHTML = `
+            <a-cylinder color="${color}" height="1.8" radius="0.5" metalness="0.5"></a-cylinder>
+            <a-text value="${label}" position="0 1.5 0" align="center" scale="1.5 1.5 1.5" look-at="[camera]"></a-text>
+        `;
+        scene.appendChild(entity);
+    }
 }
 
-function drawPassingLanes() {
-    ctx.setLineDash([5, 5]);
-    pitchPlayers.filter(p => p.team === 'TONI').forEach(p1 => {
-        pitchPlayers.filter(p => p.team === 'TONI').forEach(p2 => {
-            if (p1 === p2) return;
-            const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-            if (dist < 220) {
-                ctx.strokeStyle = "rgba(34, 197, 94, 0.3)"; // Grüne Lanes für sichere Optionen
-                ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-            }
-        });
-    });
-    ctx.setLineDash([]);
-}
-
-/* ==========================================================
-   LOCKER ROOM (FIFA CARDS & MEDICAL ACWR)
-   ========================================================== */
-
+/**
+ * MEDICAL HUB: ACWR CALCULATION
+ */
 function renderLockerRoom() {
     const container = document.getElementById('locker-room-container');
     if (!container) return;
 
     container.innerHTML = eliteStore.players.map(p => {
-        const acwr = calculateACWR(p.load);
-        const statusColor = acwr > 1.5 ? 'var(--danger)' : acwr < 0.8 ? 'var(--accent-blue)' : 'var(--accent-green)';
-        const s = p.stats || [50, 50, 50, 50, 50, 50];
+        // ACWR Logik: Akut (7 Tage) vs Chronisch (28 Tage)
+        const acute = p.load.slice(-7).reduce((a,b) => a+b, 0) / 7;
+        const chronic = p.load.reduce((a,b) => a+b, 0) / p.load.length;
+        const acwr = chronic > 0 ? (acute / chronic) : 1.0;
+
+        let medicalClass = "status-green";
+        if (acwr > 1.3) medicalClass = "status-yellow";
+        if (acwr > 1.5) medicalClass = "status-red";
 
         return `
             <div class="fut-card" onclick="openPlayerModal(${p.id})">
                 <div class="card-top"><span>${p.rating}</span><span>${p.pos}</span></div>
-                <div class="card-img-container">
-                    ${p.img ? `<img src="${p.img}">` : '<span style="font-size:35px;">👤</span>'}
-                </div>
                 <div class="card-name">${p.name}</div>
                 <div class="card-stats">
-                    <span>TEM: ${s[0]}</span><span>DRI: ${s[3]}</span>
+                    <span>TEM: ${p.stats[0]}</span><span>DRI: ${p.stats[3]}</span>
                     <span>SCH: ${s[1]}</span><span>DEF: ${s[4]}</span>
-                    <span>PAS: ${s[2]}</span><span>PHY: ${s[5]}</span>
                 </div>
-                <div class="medical-badge" style="background:${statusColor}">
+                <div class="medical-badge ${medicalClass}">
                     ACWR: ${acwr.toFixed(2)}
                 </div>
             </div>
@@ -183,163 +114,48 @@ function renderLockerRoom() {
     }).join('');
 }
 
-function calculateACWR(loadArray) {
-    if (!loadArray || loadArray.length < 7) return 1.0;
-    const acute = loadArray.slice(-7).reduce((a, b) => a + b, 0) / 7;
-    const chronic = loadArray.reduce((a, b) => a + b, 0) / loadArray.length;
-    return chronic === 0 ? 0 : acute / chronic;
-}
-
 /**
- * PLAYER MODAL LOGIK
+ * VOICE AI ANALYST (Spatial Audio Toni)
  */
-function openPlayerModal(id = null) {
-    editingPlayerId = id;
-    const modal = document.getElementById('player-modal');
-    const formContainer = document.getElementById('modal-form');
-    
-    modal.classList.add('active');
-    
-    const p = id ? eliteStore.players.find(x => x.id === id) : { name: "", pos: "ST", rating: 50, stats: [50,50,50,50,50,50], img: "" };
-
-    formContainer.innerHTML = `
-        <div class="elite-form">
-            <input type="text" id="edit-name" value="${p.name}" placeholder="Name">
-            <input type="text" id="edit-pos" value="${p.pos}" placeholder="Position">
-            <div class="stat-inputs">
-                <input type="number" id="edit-tem" value="${p.stats[0]}" placeholder="TEM">
-                <input type="number" id="edit-sch" value="${p.stats[1]}" placeholder="SCH">
-                <input type="number" id="edit-pas" value="${p.stats[2]}" placeholder="PAS">
-                <input type="number" id="edit-dri" value="${p.stats[3]}" placeholder="DRI">
-                <input type="number" id="edit-def" value="${p.stats[4]}" placeholder="DEF">
-                <input type="number" id="edit-phy" value="${p.stats[5]}" placeholder="PHY">
-            </div>
-            <input type="text" id="edit-img-url" value="${p.img}" placeholder="Bild URL">
-        </div>
-    `;
-}
-
-function savePlayer() {
-    const name = document.getElementById('edit-name').value;
-    if (!name) return;
-
-    const stats = [
-        parseInt(document.getElementById('edit-tem').value) || 50,
-        parseInt(document.getElementById('edit-sch').value) || 50,
-        parseInt(document.getElementById('edit-pas').value) || 50,
-        parseInt(document.getElementById('edit-dri').value) || 50,
-        parseInt(document.getElementById('edit-def').value) || 50,
-        parseInt(document.getElementById('edit-phy').value) || 50
-    ];
-
-    const updated = {
-        id: editingPlayerId || Date.now(),
-        name,
-        pos: document.getElementById('edit-pos').value.toUpperCase(),
-        stats,
-        rating: Math.round(stats.reduce((a, b) => a + b, 0) / 6),
-        img: document.getElementById('edit-img-url').value,
-        load: editingPlayerId ? eliteStore.players.find(x => x.id === editingPlayerId).load : [10,10,10,10,10,10,10]
-    };
-
-    if (editingPlayerId) {
-        eliteStore.players = eliteStore.players.map(x => x.id === editingPlayerId ? updated : x);
-    } else {
-        eliteStore.players.push(updated);
-    }
-
-    localStorage.setItem('toni_players', JSON.stringify(eliteStore.players));
-    closePlayerModal();
-    renderLockerRoom();
-}
-
-function closePlayerModal() {
-    document.getElementById('player-modal').classList.remove('active');
-}
-
-/* ==========================================================
-   VOICE INTELLIGENCE ENGINE (WEB SPEECH)
-   ========================================================== */
-
 const voiceEngine = {
-    recognition: null,
     isListening: false,
-    
-    init: function() {
-        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!window.SpeechRecognition) return;
+    synth: window.speechSynthesis,
 
-        this.recognition = new SpeechRecognition();
-        this.recognition.lang = 'de-DE';
-        this.recognition.onresult = (e) => {
-            const cmd = e.results[e.results.length - 1][0].transcript.toLowerCase();
-            this.processCommand(cmd);
-        };
-    },
-
-    processCommand: function(cmd) {
-        addMessage("User", cmd);
-        if (cmd.includes("status") || cmd.includes("raumkontrolle")) {
-            this.speak("Die Raumkontrolle ist stabil bei 62 Prozent. Passing-Lanes sind offen.");
-        } else if (cmd.includes("simulation")) {
-            this.speak("Simulation wird neu berechnet.");
-            initVR();
+    toggle: function() {
+        if (!this.isListening) {
+            this.speak("System-Analyse bereit. Ich überwache die Laufwege und die Belastungswerte, Coach.");
+            document.getElementById('mic-btn').classList.add('active-mic');
+            this.isListening = true;
         } else {
-            this.speak("Befehl erkannt. Analyse läuft.");
+            this.isListening = false;
+            document.getElementById('mic-btn').classList.remove('active-mic');
         }
     },
 
     speak: function(text) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'de-DE';
-        utterance.pitch = 0.85;
-        window.speechSynthesis.speak(utterance);
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'de-DE';
+        msg.pitch = 0.8; // Seriöser Ton
+        msg.rate = 1.0;
+        this.synth.speak(msg);
         addMessage("Toni", text);
-    },
-
-    toggle: function() {
-        if (!this.recognition) this.init();
-        if (this.isListening) {
-            this.recognition.stop();
-            this.isListening = false;
-            document.getElementById('mic-btn').style.boxShadow = "none";
-        } else {
-            this.recognition.start();
-            this.isListening = true;
-            document.getElementById('mic-btn').style.boxShadow = "0 0 15px var(--danger)";
-            this.speak("Ich höre zu.");
-        }
     }
 };
 
-/* ==========================================================
-   UTILITIES
-   ========================================================== */
+/**
+ * UTILS
+ */
+function updateClock() {
+    const now = new Date();
+    const clock = document.getElementById('system-clock');
+    if (clock) clock.innerText = now.toLocaleTimeString('de-DE');
+}
 
 function addMessage(sender, text) {
     const history = document.getElementById('chat-history');
     if (!history) return;
     const div = document.createElement('div');
-    div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+    div.className = `msg-${sender.toLowerCase()}`;
+    div.innerHTML = `<strong>${sender.toUpperCase()}:</strong> ${text}`;
     history.appendChild(div);
-    history.scrollTop = history.scrollHeight;
-}
-
-function updateSystemClock() {
-    const clock = document.getElementById('system-clock');
-    if (clock) {
-        const now = new Date();
-        clock.innerText = now.toLocaleString('de-DE').replace(',', ' |');
-    }
-}
-
-function setFormation(type, color, teamLabel) {
-    const w = canvas.width, h = canvas.height;
-    if (type === '4-4-2') {
-        [0.2, 0.4, 0.6, 0.8].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.75, c: color, team: teamLabel }));
-        pitchPlayers.push({ x: w/2, y: h-50, c: color, team: teamLabel });
-    } else {
-        [0.25, 0.5, 0.75].forEach(f => pitchPlayers.push({ x: w * f, y: h * 0.25, c: color, team: teamLabel }));
-        pitchPlayers.push({ x: w/2, y: 50, c: color, team: teamLabel });
-    }
 }
