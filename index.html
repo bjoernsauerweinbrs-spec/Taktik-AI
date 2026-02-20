@@ -2,15 +2,14 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI - KI Co-Trainer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TONI AI - Dein Co-Trainer</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="sidebar">
         <div class="logo">⚽ TONI AI</div>
-        
         <button class="nav-btn active" onclick="showModule('dashboard')">🏠 Kabine</button>
         <button class="nav-btn" onclick="showModule('tactics')">📋 Taktik</button>
         <button class="nav-btn" onclick="showModule('management')">💼 Aktentasche</button>
@@ -22,30 +21,40 @@
         
         <div id="dashboard" class="module-section active">
             <h2>Mannschaftskabine</h2>
-            <div id="locker-room-container">
-                </div>
+            <div id="locker-room-container"></div>
         </div>
 
         <div id="tactics" class="module-section">
-            <h2>Taktik & Training</h2>
-            <div class="placeholder-box">[Taktik-Board folgt im nächsten Update]</div>
+            <h2>Taktik-Board</h2>
+            <div class="tactic-controls">
+                <button onclick="setFormation('4-4-2')">Toni (4-4-2)</button>
+                <button onclick="setFormation('3-4-3')">Trainer (3-4-3)</button>
+                <button onclick="clearBoard()" class="btn-danger">Reset</button>
+            </div>
+            <div class="pitch-container">
+                <canvas id="tacticBoard"></canvas>
+            </div>
+            <p style="font-size: 12px; color: #64748b; text-align: center;">Tippe Spieler an, um sie zu verschieben.</p>
         </div>
 
         <div id="management" class="module-section">
             <h2>Die Aktentasche</h2>
-            <div class="placeholder-box">[Management folgt im nächsten Update]</div>
+            <div class="management-grid">
+                <div class="placeholder-box">Sponsoring-Übersicht (Coming Soon)</div>
+                <div class="placeholder-box">Stadionzeitung Generator</div>
+                <div class="placeholder-box">Finanz-Check</div>
+            </div>
         </div>
 
         <div id="bio" class="module-section">
             <h2>Bio-Labor</h2>
-            <div class="placeholder-box">[EKG-Kurven folgen im nächsten Update]</div>
+            <div class="placeholder-box">EKG-Analysen & Leistungsdaten</div>
         </div>
 
         <div id="vr" class="module-section">
             <h2>VR-Center</h2>
-            <div class="placeholder-box">[VR-Verbindung folgt im nächsten Update]</div>
+            <div class="placeholder-box">Schnittstelle Meta Quest 3</div>
         </div>
-
     </div>
 
     <div class="toni-interface">
@@ -55,12 +64,12 @@
         </div>
         <div class="chat-messages" id="chat-history">
             <div class="message msg-toni">
-                Hallo Coach! Die Kabine ist bereit. Soll ich dir die Werte von Müller zeigen?
+                Hallo Coach! Ich habe das Taktik-Board kalibriert. Sollen wir die 4-4-2 Formation testen?
             </div>
         </div>
         <div class="chat-input-area">
-            <button id="voice-btn">🎤</button>
-            <input type="text" id="text-input" placeholder="Nachricht an Toni...">
+            <button id="voice-btn" onclick="toggleMic()">🎤</button>
+            <input type="text" id="text-input" placeholder="Anweisung an Toni...">
         </div>
     </div>
 
