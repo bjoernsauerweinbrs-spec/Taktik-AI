@@ -1,75 +1,153 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI AI - Pro VR Training</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
-</head>
-<body>
+/* --- PRO VR-CENTER MODUL (Joystick, Scanning & Analyse) --- */
 
-    <div class="sidebar">
-        <div class="logo">⚽ TONI AI</div>
-        <button class="nav-btn active" onclick="showModule('dashboard')">🏠 Kabine</button>
-        <button class="nav-btn" onclick="showModule('tactics')">📋 Taktik</button>
-        <button class="nav-btn" onclick="showModule('management')">💼 Aktentasche</button>
-        <button class="nav-btn" onclick="showModule('bio')">❤️ Bio-Labor</button>
-        <button class="nav-btn" onclick="showModule('vr')">🥽 VR-Center</button>
-    </div>
+const vrCenter = {
+    isVRMode: false,
+    isMüllerRunning: false,
+    hasScanned: false,
+    startTime: 0,
+    drillActive: false,
 
-    <div class="main-content">
-        <div id="dashboard" class="module-section active">
-            <h2>Mannschaftskabine</h2>
-            <div id="locker-room-container"></div>
-        </div>
+    launchVR: function() {
+        this.isVRMode = true;
+        this.drillActive = false;
+        addMessage("Toni", "VR-Analyse aktiv. Nutze den Joystick-Trigger zum Passen.");
+        
+        const container = document.getElementById('vr-container');
+        container.innerHTML = ""; 
 
-        <div id="tactics" class="module-section">
-            <h2>Taktik-Board</h2>
-            <div class="tactic-controls">
-                <button onclick="setFormation('4-4-2')">Toni (4-4-2)</button>
-                <button onclick="setFormation('3-4-3')">Trainer (3-4-3)</button>
-                <button onclick="clearBoard()" class="btn-danger">Reset</button>
-            </div>
-            <div class="pitch-container"><canvas id="tacticBoard"></canvas></div>
-        </div>
+        const scene = document.createElement('a-scene');
+        scene.setAttribute('xr-mode-ui', 'enabled: true');
+        scene.setAttribute('embedded', '');
+        scene.setAttribute('renderer', 'antialias: true; shadowMapEnabled: true;');
 
-        <div id="management" class="module-section">
-            <h2>Die Aktentasche</h2>
-            <div class="management-container" id="mgmt-content"></div>
-        </div>
+        scene.innerHTML = `
+            <a-assets>
+                <a-asset-item id="pro-player" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RiggedFigure/glTF-Binary/RiggedFigure.glb"></a-asset-item>
+                <img id="grass" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/textures/terrain/grasslight-big.jpg">
+            </a-assets>
 
-        <div id="bio" class="module-section">
-            <div class="lab-header"><h2>Performance Lab</h2></div>
-            <div class="lab-grid" id="bio-lab-container"></div>
-        </div>
+            <a-sky color="#87CEEB"></a-sky>
+            <a-plane position="0 0 0" rotation="-90 0 0" width="105" height="68" src="#grass" repeat="15 10" shadow="receive: true"></a-plane>
+            
+            <a-entity light="type: ambient; intensity: 0.5"></a-entity>
+            <a-entity light="type: directional; intensity: 0.8; castShadow: true" position="-5 10 5"></a-entity>
 
-        <div id="vr" class="module-section">
-            <div class="lab-header"><h2>VR Training</h2></div>
-            <div class="vr-preview-card">
-                <div class="vr-info">
-                    <h3>Drill-Modus</h3>
-                    <button class="action-btn" onclick="vrCenter.launchVR()">1. VR STARTEN</button>
-                    <button class="action-btn" style="background:#3b82f6; margin-top:10px" onclick="vrCenter.triggerRunPath()">2. LAUF MÜLLER!</button>
-                </div>
-                <div id="vr-container" style="height: 400px; background: #000; border-radius: 10px; overflow: hidden;"></div>
-            </div>
-        </div>
-    </div>
+            <a-entity id="rig" position="0 0 0">
+                <a-entity id="camera" camera look-controls position="0 1.6 0">
+                    <a-cursor color="#22c55e"></a-cursor>
+                </a-entity>
+                <a-entity oculus-touch-controls="hand: right" ontriggerdown="vrCenter.handlePass()"></a-entity>
+            </a-entity>
 
-    <div class="toni-interface">
-        <div class="chat-header"><div class="chat-status"></div><span>TONI (Live)</span></div>
-        <div class="chat-messages" id="chat-history"></div>
-        <div class="chat-input-area">
-            <button id="voice-btn" onclick="toggleMic()">🎤</button>
-            <input type="text" id="text-input" placeholder="Anweisung...">
-        </div>
-    </div>
+            <a-entity id="player-mueller" 
+                      gltf-model="#pro-player" 
+                      position="5 0 -10" 
+                      scale="1.5 1.5 1.5" 
+                      shadow="cast: true"
+                      animation-mixer="clip: *">
+                <a-text value="MUELLER" align="center" position="0 1.8 0" color="white" scale="0.5 0.5 0.5"></a-text>
+            </a-entity>
 
-    <script src="script.js"></script>
-    <script src="modules/management.js"></script>
-    <script src="modules/bio-lab.js"></script>
-    <script src="modules/vr-center.js"></script>
-</body>
-</html>
+            <a-entity id="opponent" 
+                      gltf-model="#pro-player" 
+                      position="0 0 5" 
+                      scale="1.5 1.5 1.5" 
+                      visible="false">
+                <a-text value="GEGNER" align="center" position="0 1.8 0" color="red" scale="0.5 0.5 0.5"></a-text>
+            </a-entity>
+        `;
+
+        container.appendChild(scene);
+        this.monitorScanning();
+    },
+
+    // Überwacht, ob der User den Kopf nach hinten dreht
+    monitorScanning: function() {
+        const cam = document.getElementById('camera');
+        setInterval(() => {
+            if(!this.drillActive) return;
+            const rotation = cam.getAttribute('rotation');
+            // Wenn Kopf um mehr als 100 Grad gedreht wurde -> Scanning ok
+            if (Math.abs(rotation.y) > 100) {
+                if(!this.hasScanned) {
+                    this.hasScanned = true;
+                    console.log("Scanning erkannt!");
+                }
+            }
+        }, 100);
+    },
+
+    triggerDrill: function() {
+        this.drillActive = true;
+        this.hasScanned = false;
+        this.isMüllerRunning = true;
+        this.startTime = Date.now();
+
+        const mueller = document.getElementById('player-mueller');
+        const opponent = document.getElementById('opponent');
+
+        addMessage("Toni", "Übung startet! Müller geht steil. Check dein Umfeld!");
+
+        // Gegner im Rücken wird sichtbar
+        opponent.setAttribute('visible', 'true');
+
+        // Müller läuft
+        mueller.setAttribute('animation-mixer', 'clip: walk; loop: repeat; timeScale: 1.5');
+        mueller.setAttribute('animation', {
+            property: 'position',
+            to: '15 0 -30',
+            dur: 3000,
+            easing: 'linear'
+        });
+
+        setTimeout(() => {
+            this.isMüllerRunning = false;
+            mueller.setAttribute('animation-mixer', 'clip: *');
+        }, 3000);
+    },
+
+    handlePass: function() {
+        if(!this.drillActive) return;
+
+        const mueller = document.getElementById('player-mueller');
+        const mPos = mueller.getAttribute('position');
+        const endTime = Date.now();
+        const reactionTime = (endTime - this.startTime) / 1000;
+
+        // Ball Animation
+        const ball = document.createElement('a-sphere');
+        ball.setAttribute('radius', '0.15');
+        ball.setAttribute('color', 'white');
+        ball.setAttribute('position', '0 0.2 -1');
+        ball.setAttribute('animation', {
+            property: 'position',
+            to: `${mPos.x} 0.2 ${mPos.z}`,
+            dur: 500,
+            easing: 'easeOutQuad'
+        });
+        document.querySelector('a-scene').appendChild(ball);
+
+        // DIREKTE AUSWERTUNG DURCH TONI
+        this.evaluatePerformance(reactionTime, this.hasScanned);
+        this.drillActive = false;
+    },
+
+    evaluatePerformance: function(time, scanned) {
+        let rating = "SEHR GUT";
+        let feedback = "Perfektes Timing und guter Schulterblick.";
+
+        if (!scanned) {
+            rating = "VERBESSERUNGSFÄHIG";
+            feedback = "Du hast den Pass gespielt, ohne den Gegner in deinem Rücken zu prüfen. Im Spiel wäre das ein Ballverlust!";
+        } else if (time > 2.5) {
+            rating = "ZU LANGSAM";
+            feedback = "Der Schulterblick war gut, aber du hast zu lange mit dem Pass gewartet. Die Gasse war schon fast zu.";
+        }
+
+        addMessage("Toni", `--- ANALYSE PROTOKOLL ---`);
+        addMessage("Toni", `Ergebnis: ${rating}`);
+        addMessage("Toni", `Reaktionszeit: ${time}s`);
+        addMessage("Toni", `Scanning: ${scanned ? '✅ JA' : '❌ NEIN'}`);
+        addMessage("Toni", `Coach-Hinweis: ${feedback}`);
+    }
+};
