@@ -2,36 +2,22 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | VR ELITE CENTER</title>
-    
+    <title>TONI 2.0 | VR TRAINING ENGINE</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="vr-elite-environment">
-
-    <header id="vr-hud">
-        <div class="hud-left">
-            <span class="system-id">TONI 2.0 // VR-CORE</span>
-            <span id="system-clock">--:--:--</span>
-        </div>
-        <div class="hud-right">
-            <span class="role-tag">CHIEF ANALYST</span>
-            <div class="pulse-indicator"></div>
-        </div>
-    </header>
+<body class="vr-elite">
 
     <aside class="vr-sidebar">
         <div class="brand">TONI 2.0</div>
         <nav class="vr-nav">
-            <p class="nav-label">CONTROL UNIT</p>
-            <button class="v-btn active" onclick="showVRView()"><i>🥽</i> VR VIEW</button>
-            <button class="v-btn" onclick="toggleHeatmap()"><i>🔥</i> HEATMAP</button>
-            <button class="v-btn" onclick="toggleLanes()"><i>📏</i> LANES</button>
+            <p class="nav-label">TRAINING UNITS</p>
+            <button class="v-btn" onclick="trainingEngine.startLevel(1)"><i>👁️</i> Lvl 1: Scanning</button>
+            <button class="v-btn" onclick="trainingEngine.startLevel(2)"><i>📏</i> Lvl 2: Gap Finder</button>
+            <button class="v-btn" onclick="trainingEngine.startLevel(3)"><i>⚡</i> Lvl 3: Elite Pressure</button>
+            <button class="v-btn danger" onclick="trainingEngine.stop()"><i>🛑</i> Training Stop</button>
         </nav>
         <div class="sidebar-footer">
             <button class="ai-trigger" onclick="voiceEngine.toggle()">🎤 KI ANALYSE</button>
@@ -39,32 +25,25 @@
     </aside>
 
     <main class="vr-viewport">
-        <a-scene embedded vr-mode-ui="enabled: true" renderer="antialias: true; colorManagement: true;">
-            
+        <a-scene embedded vr-mode-ui="enabled: true">
             <a-sky color="#020617"></a-sky>
-            <a-entity light="type: ambient; intensity: 0.4"></a-entity>
-            <a-entity light="type: directional; intensity: 1.2; castShadow: true" position="-10 30 10"></a-entity>
-
-            <a-plane id="pitch" position="0 0 0" rotation="-90 0 0" width="68" height="105" color="#14532d" material="roughness: 1; metalness: 0"></a-plane>
             
-            <a-entity id="analysis-grid"></a-entity>
+            <a-plane id="pitch" position="0 0 0" rotation="-90 0 0" width="68" height="105" color="#14532d"></a-plane>
+            
+            <a-entity id="training-assets"></a-entity>
+            <a-entity id="analysis-grid" visible="false"></a-entity>
 
             <a-entity id="toni-avatar" position="36 0 0">
-                <a-cylinder color="#22c55e" height="1.8" radius="0.4" shadow></a-cylinder>
-                <a-text value="COACH TONI" position="0 2.2 0" align="center" width="6" font="mozillavr"></a-text>
-                <a-circle rotation="-90 0 0" radius="2" color="#22c55e" opacity="0.2" position="0 0.01 0"></a-circle>
+                <a-cylinder color="#22c55e" height="1.8" radius="0.4"></a-cylinder>
+                <a-text id="toni-speech-bubble" value="BEREIT FÜR DRILLS?" position="0 2.5 0" align="center" width="4"></a-text>
             </a-entity>
 
-            <a-entity id="players-3d"></a-entity>
-
-            <a-entity id="rig" movement-controls="speed: 0.3" position="0 0 45">
-                <a-camera position="0 1.7 0" look-controls>
-                    <a-cursor color="#22c55e" opacity="0.5"></a-cursor>
+            <a-entity id="rig" movement-controls="speed: 0.3" position="0 0 0">
+                <a-camera id="main-cam" position="0 1.7 0" look-controls>
+                    <a-cursor color="#22c55e"></a-cursor>
+                    <a-text id="vr-timer" value="" position="0 0.5 -1" align="center" width="2" color="#ef4444"></a-text>
                 </a-camera>
-                <a-entity oculus-touch-controls="hand: left"></a-entity>
-                <a-entity oculus-touch-controls="hand: right"></a-entity>
             </a-entity>
-
         </a-scene>
     </main>
 
