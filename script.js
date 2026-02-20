@@ -1,7 +1,7 @@
 /* ==========================================================
    TONI 2.0 - MASTER SKRIPT (VOLLSTÄNDIG & UNGEKÜRZT)
    ========================================================== */
-
+ 
 // 1. MUSTER-KADER (Sorgt für volle Kabine beim Start)
 function getInitialPlayers() {
     const saved = localStorage.getItem('toni_players');
