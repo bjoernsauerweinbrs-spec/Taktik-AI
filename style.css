@@ -13,9 +13,10 @@
     --gold-gradient: linear-gradient(135deg, #eebb4d 0%, #bf953f 50%, #eebb4d 100%);
     --glass: rgba(255, 255, 255, 0.05);
     --paper: #fdfaf0;
+    --input-bg: #020617;
 }
 
-/* GRUNDLAYOUT & RESET */
+/* 1. GRUNDLAYOUT & RESET */
 * { 
     box-sizing: border-box; 
     -webkit-tap-highlight-color: transparent; 
@@ -33,7 +34,7 @@ body {
     overflow: hidden;
 }
 
-/* NAVIGATION SIDEBAR */
+/* 2. NAVIGATION SIDEBAR */
 .sidebar {
     width: 280px;
     background: var(--primary);
@@ -85,7 +86,7 @@ body {
     box-shadow: inset 5px 0 0 var(--accent);
 }
 
-/* HAUPTBEREICH */
+/* 3. HAUPTBEREICH & MODUL-TRENNUNG (Anti-Stapel-System) */
 .main-content {
     flex: 1;
     padding: 40px;
@@ -94,21 +95,20 @@ body {
     position: relative;
 }
 
-/* MODUL-SYSTEM GEGEN DAS STAPELN */
 .module-section {
-    display: none !important;
+    display: none !important; /* Knallhart aus */
     opacity: 0;
     transform: scale(0.98);
     transition: 0.4s ease-out;
 }
 
 .module-section.active {
-    display: block !important;
+    display: block !important; /* Nur aktiv einblenden */
     opacity: 1;
     transform: scale(1);
 }
 
-/* KABINE: FIFA CARDS DESIGN */
+/* 4. KABINE: FIFA CARDS DESIGN */
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -178,7 +178,7 @@ body {
     padding-top: 10px;
 }
 
-/* TAKTIKBOARD: MACBOOK-OPTIMIERUNG */
+/* 5. TAKTIKBOARD: MACBOOK-OPTIMIERUNG (Ratio Fix) */
 .pitch-container {
     width: 100%;
     max-width: 440px;
@@ -198,7 +198,7 @@ body {
     touch-action: none;
 }
 
-/* MANAGEMENT: ELITE BÜRO DESIGN */
+/* 6. MANAGEMENT: ELITE BÜRO DESIGN (Hoher Kontrast) */
 .mgmt-grid {
     display: grid;
     grid-template-columns: 1.4fr 1fr;
@@ -206,7 +206,7 @@ body {
 }
 
 .mgmt-card {
-    background: rgba(30, 41, 59, 0.7);
+    background: rgba(30, 41, 59, 0.8);
     backdrop-filter: blur(15px);
     padding: 35px;
     border-radius: 30px;
@@ -215,11 +215,11 @@ body {
 }
 
 .budget-input-group {
-    background: rgba(15, 23, 42, 0.6);
+    background: rgba(15, 23, 42, 0.8);
     padding: 20px;
     border-radius: 18px;
     margin-bottom: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .budget-input-group label {
@@ -228,7 +228,7 @@ body {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     display: block;
 }
 
@@ -239,17 +239,23 @@ body {
     align-items: center;
 }
 
+/* Fix für Sichtbarkeit: Weiß auf Dunkel */
 .budget-row input {
-    background: #0f172a !important;
+    background: var(--input-bg) !important;
     color: #ffffff !important;
     border: 1px solid #334155;
     padding: 12px 15px;
     border-radius: 10px;
     font-size: 14px;
     font-weight: 600;
+    outline: none;
 }
 
-/* REDAKTIONS-BÜRO PANEL */
+.budget-row input:focus {
+    border-color: var(--accent);
+}
+
+/* 7. REDAKTIONS-BÜRO PANEL */
 .redaktion-panel {
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     border: 3px solid var(--accent);
@@ -268,7 +274,7 @@ body {
     padding-bottom: 20px;
 }
 
-/* MODAL FIX */
+/* 8. MODAL FIX (Initial versteckt) */
 .modal {
     display: none !important;
     position: fixed;
@@ -297,13 +303,7 @@ body {
     box-shadow: 0 0 60px rgba(34, 197, 94, 0.3);
 }
 
-.modal-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-/* BIO-LABOR ANIMATIONEN */
+/* 9. BIO-LABOR & VR ANIMATIONEN */
 .pulse-heart {
     animation: heartBeat 1.4s infinite;
     color: var(--danger);
@@ -330,7 +330,7 @@ body {
     to { stroke-dashoffset: 0; }
 }
 
-/* TONI INTERFACE */
+/* 10. TONI INTERFACE (Chat) */
 .toni-interface {
     width: 380px;
     background: var(--primary);
@@ -363,41 +363,45 @@ body.toni-collapsed .toni-interface {
     justify-content: center;
 }
 
-/* PRINT ENGINE (A4 QUER FÜR A5) */
-@media print {
-    body * { visibility: hidden; }
-    #newspaper-overlay, #newspaper-overlay * { visibility: visible; }
-    #newspaper-overlay { 
-        position: absolute; 
-        left: 0; 
-        top: 0; 
-        width: 100%; 
-        display: block !important; 
-        background: white; 
-    }
-    @page { size: A4 landscape; margin: 0; }
-    .a4-sheet { 
-        width: 297mm; 
-        height: 210mm; 
-        display: flex; 
-        background: white; 
-        page-break-after: always;
-        color: #000;
-    }
-    .a5-page { 
-        width: 50%; 
-        height: 100%; 
-        padding: 20mm; 
-        border-right: 1px dashed #ccc; 
-        box-sizing: border-box; 
-    }
+/* 11. PRINT ENGINE (Vorschau-Design) */
+.magazine-spread {
+    display: flex;
+    width: 90%;
+    max-width: 1200px;
+    height: 80vh;
+    background: white;
+    box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+    margin: 20px auto;
+    position: relative;
 }
 
-/* MOBILE OPTIMIERUNG */
+.magazine-page {
+    width: 50%;
+    height: 100%;
+    background: var(--paper);
+    padding: 30px;
+    border: 1px solid #ddd;
+    position: relative;
+    overflow: hidden;
+    color: #1a1a1a;
+}
+
+.magazine-page.left { border-radius: 5px 0 0 5px; box-shadow: inset -20px 0 30px rgba(0,0,0,0.05); }
+.magazine-page.right { border-radius: 0 5px 5px 0; box-shadow: inset 20px 0 30px rgba(0,0,0,0.05); }
+
+/* 12. MOBILE OPTIMIERUNG */
 @media (max-width: 900px) {
     body { flex-direction: column; overflow: auto; }
-    .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 15px; }
+    .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 15px; border-bottom: 1px solid #334155; }
     .logo { display: none; }
     .main-content { height: 60vh; flex: none; padding: 20px; }
     .toni-interface { width: 100%; height: 40vh; }
+}
+
+@media print {
+    @page { size: A4 landscape; margin: 0; }
+    body * { visibility: hidden; }
+    #newspaper-overlay, #newspaper-overlay * { visibility: visible; }
+    #newspaper-overlay { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+    .preview-nav-controls { display: none; }
 }
