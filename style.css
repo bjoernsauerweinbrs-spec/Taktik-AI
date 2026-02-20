@@ -1,5 +1,5 @@
 /* ==========================================================
-   TONI 2.0 - ELITE MASTER CSS (HEAVYWEIGHT EDITION)
+   TONI 2.0 - ELITE MASTER CSS (PRO-EDITION)
    ========================================================== */
 
 :root {
@@ -7,24 +7,21 @@
     --accent: #22c55e;
     --accent-glow: rgba(34, 197, 94, 0.4);
     --text: #f8fafc;
-    --text-dark: #1e293b;
-    --card: #1e293b;
-    --office-bg: #f1f5f9;
-    --gold-gradient: linear-gradient(135deg, #eebb4d 0%, #bf953f 50%, #eebb4d 100%);
-    --glass: rgba(255, 255, 255, 0.05);
+    --card-bg: #1e293b;
+    --danger: #ef4444;
+    --gold-card: linear-gradient(135deg, #eebb4d 0%, #bf953f 50%, #eebb4d 100%);
     --paper: #fdfaf0;
-    --input-bg: #020617;
+    --input-bg: #0f172a;
 }
 
-/* 1. GRUNDLAYOUT & RESET */
+/* GRUNDLAYOUT */
 * { 
     box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent; 
     -webkit-font-smoothing: antialiased;
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     background-color: #020617;
     color: var(--text);
     margin: 0;
@@ -34,120 +31,118 @@ body {
     overflow: hidden;
 }
 
-/* 2. NAVIGATION SIDEBAR */
+/* NAVIGATION SIDEBAR */
 .sidebar {
-    width: 280px;
+    width: 260px;
     background: var(--primary);
     border-right: 1px solid #334155;
     display: flex;
     flex-direction: column;
-    padding: 30px;
+    padding: 25px;
     z-index: 1000;
-    flex-shrink: 0;
 }
 
 .logo {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 900;
     color: var(--accent);
-    margin-bottom: 50px;
-    letter-spacing: -1.5px;
+    margin-bottom: 40px;
+    letter-spacing: -1px;
     text-transform: uppercase;
-    text-shadow: 0 0 20px var(--accent-glow);
+    text-shadow: 0 0 15px var(--accent-glow);
 }
 
 .nav-btn {
     background: none;
     border: none;
     color: #94a3b8;
-    padding: 18px;
+    padding: 16px;
     text-align: left;
     cursor: pointer;
-    border-radius: 15px;
-    margin-bottom: 12px;
-    font-size: 16px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    font-size: 15px;
     font-weight: 600;
-    transition: 0.3s all cubic-bezier(0.4, 0, 0.2, 1);
+    transition: 0.2s all;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .nav-btn:hover {
     background: rgba(255, 255, 255, 0.05);
     color: white;
-    transform: translateX(5px);
 }
 
 .nav-btn.active {
     background: rgba(34, 197, 94, 0.15);
     color: var(--accent);
-    font-weight: 800;
-    box-shadow: inset 5px 0 0 var(--accent);
+    font-weight: 700;
+    box-shadow: inset 4px 0 0 var(--accent);
 }
 
-/* 3. HAUPTBEREICH & MODUL-TRENNUNG (Anti-Stapel-System) */
+/* HAUPTBEREICH & MODUL-TRENNUNG */
 .main-content {
     flex: 1;
-    padding: 40px;
+    padding: 35px;
     overflow-y: auto;
     background: radial-gradient(circle at top right, #1e293b, #020617);
     position: relative;
 }
 
 .module-section {
-    display: none !important; /* Knallhart aus */
-    opacity: 0;
-    transform: scale(0.98);
-    transition: 0.4s ease-out;
+    display: none !important;
 }
 
 .module-section.active {
-    display: block !important; /* Nur aktiv einblenden */
-    opacity: 1;
-    transform: scale(1);
+    display: block !important;
+    animation: fadeIn 0.4s ease-out;
 }
 
-/* 4. KABINE: FIFA CARDS DESIGN */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* KABINE: ECHTE FIFA-KARTEN OPTIK */
 .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 25px;
 }
 
 .fut-card {
-    background: var(--gold-gradient);
-    border-radius: 20px;
-    padding: 20px;
+    background: var(--gold-card);
+    border-radius: 18px;
+    padding: 18px;
     color: #1a1a1a;
     cursor: pointer;
-    box-shadow: 0 20px 45px rgba(0,0,0,0.6);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
     position: relative;
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 1px solid rgba(255,255,255,0.4);
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
 .fut-card:hover {
-    transform: translateY(-15px) scale(1.05);
-    box-shadow: 0 30px 60px rgba(34, 197, 94, 0.25);
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 20px 45px rgba(34, 197, 94, 0.3);
 }
 
 .card-top {
     display: flex;
     justify-content: space-between;
     font-weight: 900;
-    font-size: 26px;
+    font-size: 24px;
     border-bottom: 2px solid rgba(0,0,0,0.1);
-    padding-bottom: 5px;
 }
 
 .card-img-container {
-    width: 85px;
-    height: 85px;
-    margin: 15px auto;
+    width: 75px;
+    height: 75px;
+    margin: 12px auto;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.2);
-    border: 4px solid #bf953f;
+    border: 3px solid #bf953f;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -162,64 +157,61 @@ body {
 
 .card-name {
     text-align: center;
-    font-weight: 900;
-    font-size: 18px;
+    font-weight: 800;
+    font-size: 16px;
     text-transform: uppercase;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .card-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    font-size: 13px;
-    gap: 8px;
+    font-size: 11px;
+    gap: 5px;
     font-weight: 800;
+    padding-top: 8px;
     border-top: 2px solid rgba(0,0,0,0.1);
-    padding-top: 10px;
 }
 
-/* 5. TAKTIKBOARD: MACBOOK-OPTIMIERUNG (Ratio Fix) */
+/* TAKTIKBOARD: MACBOOK OPTIMIERUNG */
 .pitch-container {
     width: 100%;
     max-width: 440px;
-    margin: 0 auto;
     aspect-ratio: 2 / 3;
-    background: linear-gradient(to bottom, #15803d, #166534);
-    border: 6px solid white;
-    border-radius: 15px;
+    background: #15803d;
+    border: 5px solid white;
+    margin: 0 auto;
+    border-radius: 12px;
     position: relative;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.7);
 }
 
 #tacticBoard {
     width: 100%;
     height: 100%;
     display: block;
-    touch-action: none;
 }
 
-/* 6. MANAGEMENT: ELITE BÜRO DESIGN (Hoher Kontrast) */
+/* MANAGEMENT: ELITE BÜRO DESIGN */
 .mgmt-grid {
     display: grid;
     grid-template-columns: 1.4fr 1fr;
-    gap: 35px;
+    gap: 30px;
 }
 
 .mgmt-card {
     background: rgba(30, 41, 59, 0.8);
-    backdrop-filter: blur(15px);
-    padding: 35px;
-    border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 25px;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .budget-input-group {
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15, 23, 42, 0.7);
     padding: 20px;
     border-radius: 18px;
     margin-bottom: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .budget-input-group label {
@@ -227,63 +219,32 @@ body {
     font-size: 12px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     display: block;
 }
 
 .budget-row {
     display: flex;
-    gap: 15px;
-    margin-bottom: 12px;
-    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
 }
 
-/* Fix für Sichtbarkeit: Weiß auf Dunkel */
+/* Fix für Lesbarkeit: Weiße Schrift auf dunklen Feldern */
 .budget-row input {
     background: var(--input-bg) !important;
-    color: #ffffff !important;
+    color: white !important;
     border: 1px solid #334155;
-    padding: 12px 15px;
-    border-radius: 10px;
-    font-size: 14px;
+    padding: 10px;
+    border-radius: 8px;
     font-weight: 600;
-    outline: none;
 }
 
-.budget-row input:focus {
-    border-color: var(--accent);
-}
-
-/* 7. REDAKTIONS-BÜRO PANEL */
-.redaktion-panel {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    border: 3px solid var(--accent);
-    padding: 40px;
-    border-radius: 35px;
-    margin-top: 40px;
-    box-shadow: 0 0 70px rgba(34, 197, 94, 0.2);
-}
-
-.redaktion-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    border-bottom: 2px solid rgba(34, 197, 94, 0.2);
-    padding-bottom: 20px;
-}
-
-/* 8. MODAL FIX (Initial versteckt) */
+/* MODAL: SPIELER-EDITOR (VERSTECKT BEIM START) */
 .modal {
     display: none !important;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(2, 6, 23, 0.96);
-    backdrop-filter: blur(10px);
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.92);
     z-index: 5000;
     align-items: center;
     justify-content: center;
@@ -294,114 +255,48 @@ body {
 }
 
 .modal-content {
-    background: var(--card);
-    padding: 40px;
-    width: 95%;
-    max-width: 480px;
-    border-radius: 30px;
+    background: var(--card-bg);
+    padding: 35px;
+    width: 90%;
+    max-width: 460px;
+    border-radius: 25px;
     border: 2px solid var(--accent);
-    box-shadow: 0 0 60px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 50px rgba(34, 197, 94, 0.3);
 }
 
-/* 9. BIO-LABOR & VR ANIMATIONEN */
-.pulse-heart {
-    animation: heartBeat 1.4s infinite;
-    color: var(--danger);
-    display: inline-block;
-}
-
-@keyframes heartBeat {
-    0%, 100% { transform: scale(1); }
-    15% { transform: scale(1.3); }
-    30% { transform: scale(1.1); }
-    45% { transform: scale(1.2); }
-}
-
-.ekg-path {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 3;
-    stroke-dasharray: 1000;
-    animation: ekgMove 3s linear infinite;
-}
-
-@keyframes ekgMove {
-    from { stroke-dashoffset: 2000; }
-    to { stroke-dashoffset: 0; }
-}
-
-/* 10. TONI INTERFACE (Chat) */
-.toni-interface {
-    width: 380px;
-    background: var(--primary);
-    border-left: 1px solid #334155;
-    display: flex;
-    flex-direction: column;
-    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-body.toni-collapsed .toni-interface {
-    width: 0;
-    transform: translateX(380px);
-}
-
-#toni-toggle {
-    position: fixed;
-    right: 30px;
-    top: 30px;
-    z-index: 1001;
-    background: var(--accent);
-    border: none;
-    width: 65px;
-    height: 65px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 30px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* 11. PRINT ENGINE (Vorschau-Design) */
+/* ZEITUNGS-VORSCHAU */
 .magazine-spread {
     display: flex;
-    width: 90%;
-    max-width: 1200px;
-    height: 80vh;
-    background: white;
-    box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+    width: 95%;
+    max-width: 1100px;
+    height: 75vh;
     margin: 20px auto;
-    position: relative;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
 }
 
 .magazine-page {
     width: 50%;
-    height: 100%;
     background: var(--paper);
-    padding: 30px;
-    border: 1px solid #ddd;
-    position: relative;
-    overflow: hidden;
     color: #1a1a1a;
+    padding: 25px;
+    position: relative;
+    border: 1px solid #ddd;
 }
 
-.magazine-page.left { border-radius: 5px 0 0 5px; box-shadow: inset -20px 0 30px rgba(0,0,0,0.05); }
-.magazine-page.right { border-radius: 0 5px 5px 0; box-shadow: inset 20px 0 30px rgba(0,0,0,0.05); }
+.magazine-page.left { border-radius: 5px 0 0 5px; box-shadow: inset -15px 0 20px rgba(0,0,0,0.05); }
+.magazine-page.right { border-radius: 0 5px 5px 0; box-shadow: inset 15px 0 20px rgba(0,0,0,0.05); }
 
-/* 12. MOBILE OPTIMIERUNG */
+/* MOBILE ANPASSUNG */
 @media (max-width: 900px) {
     body { flex-direction: column; overflow: auto; }
-    .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 15px; border-bottom: 1px solid #334155; }
+    .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 15px; }
     .logo { display: none; }
-    .main-content { height: 60vh; flex: none; padding: 20px; }
+    .main-content { height: 60vh; flex: none; }
     .toni-interface { width: 100%; height: 40vh; }
 }
 
 @media print {
-    @page { size: A4 landscape; margin: 0; }
     body * { visibility: hidden; }
     #newspaper-overlay, #newspaper-overlay * { visibility: visible; }
-    #newspaper-overlay { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
-    .preview-nav-controls { display: none; }
+    @page { size: A4 landscape; margin: 0; }
 }
