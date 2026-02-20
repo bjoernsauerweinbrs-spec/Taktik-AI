@@ -3,7 +3,7 @@ const bioLab = {
         { name: "Müller", rhr: 48, hrv: 65, kfa: 11.2, mus: 44.8, h2o: 62.5, vo2: 58, rpe: 4, status: "fit" },
         { name: "Schmidt", rhr: 58, hrv: 41, kfa: 13.5, mus: 41.2, h2o: 59.8, vo2: 52, rpe: 8, status: "warning" }
     ],
- 
+  
     init: function() { this.render(); },
 
     render: function() {
