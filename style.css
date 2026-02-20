@@ -6,7 +6,7 @@
     --glass: rgba(255, 255, 255, 0.05);
     --gold: linear-gradient(135deg, #f3cf5f 0%, #bf953f 50%, #8a6d29 100%);
 }
-
+ 
 body {
     margin: 0; font-family: 'Inter', sans-serif;
     background: var(--bg); color: var(--text);
