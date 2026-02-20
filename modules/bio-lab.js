@@ -1,50 +1,65 @@
-/* --- BIO-LAB MODUL (Gesundheit & Leistung) --- */
+/* --- BIO-LAB MODUL (Gesundheit & Performance) --- */
 
 const bioLab = {
-    players: [
-        { id: 1, name: "Müller", status: "fit", hr: 58, sleep: 8.5, stress: "low" },
-        { id: 2, name: "Schmidt", status: "warning", hr: 72, sleep: 5.0, stress: "high" },
-        { id: 3, name: "Schneider", status: "fit", hr: 60, sleep: 7.5, stress: "mid" },
-        { id: 4, name: "Weber", status: "danger", hr: 85, sleep: 4.5, stress: "very high" }
+    // Echtzeit-Simulationsdaten der Spieler
+    playerHealth: [
+        { id: 1, name: "Müller", hr: 62, oxygen: 98, sleep: 8.2, status: "fit" },
+        { id: 2, name: "Schmidt", hr: 78, oxygen: 96, sleep: 5.4, status: "warning" },
+        { id: 3, name: "Schneider", hr: 58, oxygen: 99, sleep: 7.8, status: "fit" },
+        { id: 4, name: "Weber", hr: 92, oxygen: 94, sleep: 4.1, status: "danger" }
     ],
 
     init: function() {
-        this.renderLab();
-        console.log("Bio-Lab initialisiert");
+        this.render();
+        console.log("Bio-Lab: Daten-Synchronisation aktiv.");
     },
 
-    renderLab: function() {
+    render: function() {
         const container = document.getElementById('bio-lab-container');
         if (!container) return;
 
-        container.innerHTML = this.players.map(p => `
-            <div class="bio-card ${p.status}" onclick="bioLab.showDetails('${p.name}')">
+        container.innerHTML = this.playerHealth.map(p => `
+            <div class="bio-card ${p.status}" onclick="bioLab.analyze('${p.name}')">
                 <div class="bio-card-header">
-                    <span>${p.name}</span>
-                    <div class="pulse-heart">❤️</div>
+                    <span class="p-name">${p.name}</span>
+                    <span class="heart-icon">❤️</span>
                 </div>
-                <div class="ekg-line">
+                
+                <div class="ekg-container">
                     <svg viewBox="0 0 100 30" class="ekg-svg">
-                        <path d="M0 15 L10 15 L15 5 L20 25 L25 15 L100 15" class="path-${p.status}" />
+                        <path class="ekg-path" d="M0,15 L10,15 L15,5 L20,25 L25,15 L35,15 L40,10 L45,20 L50,15 L100,15" />
                     </svg>
                 </div>
-                <div class="bio-stats">
-                    <div class="b-stat"><span>Puls:</span> <b>${p.hr} BPM</b></div>
-                    <div class="b-stat"><span>Schlaf:</span> <b>${p.sleep}h</b></div>
+
+                <div class="bio-data-grid">
+                    <div class="bio-stat">
+                        <small>PULS</small>
+                        <div class="val">${p.hr} <small>BPM</small></div>
+                    </div>
+                    <div class="bio-stat">
+                        <small>SCHLAF</small>
+                        <div class="val">${p.sleep} <small>h</small></div>
+                    </div>
+                    <div class="bio-stat">
+                        <small>SPO2</small>
+                        <div class="val">${p.oxygen} <small>%</small></div>
+                    </div>
                 </div>
             </div>
         `).join('');
     },
 
-    showDetails: function(name) {
-        const p = this.players.find(x => x.name === name);
-        let advice = "Alles im grünen Bereich. Volle Belastung möglich.";
-        if(p.status === 'warning') advice = "Erhöhtes Infektrisiko. Belastung reduzieren.";
-        if(p.status === 'danger') advice = "STOPP! Sofortige Pause empfohlen. Herzfrequenz zu hoch.";
+    analyze: function(name) {
+        const p = this.playerHealth.find(x => x.name === name);
+        let msg = "";
         
-        addMessage("Toni", `<b>Labor-Analyse ${p.name}:</b> ${advice}`);
+        if(p.status === "fit") msg = `${name} ist in Top-Verfassung. Volle Belastung im Training möglich.`;
+        if(p.status === "warning") msg = `Achtung: ${name} weist Schlafmangel auf. Belastung heute moderat halten.`;
+        if(p.status === "danger") msg = `ALARM: Erhöhter Ruhepuls bei ${name}. Toni empfiehlt einen medizinischen Check-up!`;
+
+        addMessage("Toni", `<b>Bio-Analyse:</b> ${msg}`);
     }
 };
 
-// Start
+// Start des Moduls
 window.addEventListener('load', () => bioLab.init());
