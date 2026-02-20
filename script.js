@@ -6,7 +6,7 @@
 function getInitialPlayers() {
     const saved = localStorage.getItem('toni_players');
     if (saved && JSON.parse(saved).length > 0) return JSON.parse(saved);
-
+ 
     // Initialer Elite-Kader
     return [
         { id: 101, name: "M. Müller", pos: "ST", rating: 88, stats: [85, 90, 78, 84, 42, 81], img: "" },
