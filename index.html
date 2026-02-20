@@ -3,240 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI - Dein KI Co-Trainer</title>
-    <style>
-        /* --- GRUNDDESIGN (CSS) --- */
-        :root {
-            --primary-color: #0f172a; /* Dunkelblau (Taktik) */
-            --accent-color: #22c55e;  /* Rasen-Grün */
-            --text-color: #f8fafc;
-            --card-bg: #1e293b;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-        }
-
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #020617;
-            color: var(--text-color);
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* --- SIDEBAR (Links) --- */
-        .sidebar {
-            width: 250px;
-            background-color: var(--primary-color);
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #334155;
-            padding: 20px;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--accent-color);
-            margin-bottom: 40px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-align: center;
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            padding: 15px;
-            text-align: left;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
-            border-radius: 8px;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-btn:hover, .nav-btn.active {
-            background-color: rgba(34, 197, 94, 0.1);
-            color: var(--accent-color);
-        }
-
-        /* --- MAIN CONTENT (Mitte) --- */
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background-image: radial-gradient(#1e293b 1px, transparent 1px);
-            background-size: 20px 20px; /* Raster-Look */
-            position: relative;
-        }
-
-        .module-section {
-            display: none; /* Alle Module erst mal unsichtbar */
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        .module-section.active {
-            display: block; /* Nur das aktive Modul zeigen */
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h2 { border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; display: inline-block; }
-
-        /* --- TONI CHAT (Rechts) --- */
-        .toni-interface {
-            width: 300px;
-            background-color: var(--card-bg);
-            border-left: 1px solid #334155;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-header {
-            padding: 20px;
-            background-color: rgba(0,0,0,0.2);
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .chat-status {
-            width: 10px; height: 10px;
-            background-color: var(--accent-color);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-color);
-            animation: pulse 2s infinite;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            font-size: 14px;
-        }
-
-        .message {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            line-height: 1.4;
-        }
-
-        .msg-toni {
-            background-color: rgba(34, 197, 94, 0.1);
-            border-left: 3px solid var(--accent-color);
-        }
-
-        .msg-user {
-            background-color: rgba(255, 255, 255, 0.05);
-            text-align: right;
-        }
-
-        .chat-input-area {
-            padding: 15px;
-            border-top: 1px solid #334155;
-            display: flex;
-            gap: 10px;
-        }
-
-        #voice-btn {
-            background-color: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px; height: 40px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #text-input {
-            flex: 1;
-            background: #0f172a;
-            border: 1px solid #334155;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
-
-        /* --- PLATZHALTER FÜR SPÄTERE MODULE --- */
-        .placeholder-box {
-            border: 2px dashed #334155;
-            padding: 40px;
-            text-align: center;
-            color: #64748b;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-    </style>
+    <title>TONI - KI Co-Trainer</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="sidebar">
         <div class="logo">⚽ TONI AI</div>
         
-        <button class="nav-btn active" onclick="showModule('dashboard')">🏠 Kabine (Dashboard)</button>
-        <button class="nav-btn" onclick="showModule('tactics')">📋 Taktik & Training</button>
+        <button class="nav-btn active" onclick="showModule('dashboard')">🏠 Kabine</button>
+        <button class="nav-btn" onclick="showModule('tactics')">📋 Taktik</button>
         <button class="nav-btn" onclick="showModule('management')">💼 Aktentasche</button>
         <button class="nav-btn" onclick="showModule('bio')">❤️ Bio-Labor</button>
         <button class="nav-btn" onclick="showModule('vr')">🥽 VR-Center</button>
-        <button class="nav-btn" onclick="showModule('settings')">⚙️ Einstellungen</button>
     </div>
 
     <div class="main-content">
         
         <div id="dashboard" class="module-section active">
             <h2>Mannschaftskabine</h2>
-            <p>Willkommen zurück, Coach!</p>
-            <div id="locker-room-container" class="placeholder-box">
-                [Hier werden die FIFA-Karten geladen]
-            </div>
+            <div id="locker-room-container">
+                </div>
         </div>
 
         <div id="tactics" class="module-section">
             <h2>Taktik & Training</h2>
-            <div class="placeholder-box">
-                [Hier entsteht das Taktik-Board]
-            </div>
+            <div class="placeholder-box">[Taktik-Board folgt im nächsten Update]</div>
         </div>
 
         <div id="management" class="module-section">
             <h2>Die Aktentasche</h2>
-            <div class="placeholder-box">
-                [Hier entsteht der Management-Bereich]
-            </div>
+            <div class="placeholder-box">[Management folgt im nächsten Update]</div>
         </div>
 
         <div id="bio" class="module-section">
-            <h2>Bio-Labor & Gesundheit</h2>
-            <div class="placeholder-box">
-                [Hier entstehen die EKG-Kurven und Analysen]
-            </div>
+            <h2>Bio-Labor</h2>
+            <div class="placeholder-box">[EKG-Kurven folgen im nächsten Update]</div>
         </div>
-        
+
         <div id="vr" class="module-section">
-            <h2>VR & Cognitive Training</h2>
-            <div class="placeholder-box">
-                [Schnittstelle zur Meta Quest 3]
-            </div>
+            <h2>VR-Center</h2>
+            <div class="placeholder-box">[VR-Verbindung folgt im nächsten Update]</div>
         </div>
+
     </div>
 
     <div class="toni-interface">
@@ -246,221 +55,15 @@
         </div>
         <div class="chat-messages" id="chat-history">
             <div class="message msg-toni">
-                Hallo Coach! Ich bin bereit. Sollen wir das Training planen oder die Finanzen checken?
+                Hallo Coach! Die Kabine ist bereit. Soll ich dir die Werte von Müller zeigen?
             </div>
         </div>
         <div class="chat-input-area">
             <button id="voice-btn">🎤</button>
-            <input type="text" id="text-input" placeholder="Schreib was oder sprich...">
+            <input type="text" id="text-input" placeholder="Nachricht an Toni...">
         </div>
     </div>
 
-    <script>
-        // --- LOGIK (JS) ---
-
-        // Navigation zwischen den Modulen
-        function showModule(moduleId) {
-            // 1. Alle Module ausblenden
-            const modules = document.querySelectorAll('.module-section');
-            modules.forEach(mod => mod.classList.remove('active'));
-
-            // 2. Alle Buttons "inaktiv" machen
-            const buttons = document.querySelectorAll('.nav-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-
-            // 3. Gewähltes Modul zeigen
-            document.getElementById(moduleId).classList.add('active');
-
-            // 4. Button aktivieren (wir suchen den Button, der onclick="...moduleId..." hat)
-            // Einfachheitshalber loop ich hier nicht kompliziert, sondern vertraue auf die UI-Klasse.
-            // In einer echten App würde man das Event-Target nutzen.
-        }
-
-        // Einfache Chat-Simulation für den Anfang
-        const input = document.getElementById('text-input');
-        const chatHistory = document.getElementById('chat-history');
-
-        input.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                const text = input.value;
-                if(text.trim() === "") return;
-
-                // User Nachricht
-                const userMsg = document.createElement('div');
-                userMsg.className = 'message msg-user';
-                userMsg.innerText = text;
-                chatHistory.appendChild(userMsg);
-                input.value = '';
-
-                // Auto-Scroll nach unten
-                chatHistory.scrollTop = chatHistory.scrollHeight;
-
-                // Toni antwortet (Simuliert)
-                setTimeout(() => {
-                    const toniMsg = document.createElement('div');
-                    toniMsg.className = 'message msg-toni';
-                    toniMsg.innerText = "Das habe ich verstanden. Da ich aktuell noch im Aufbau bin, kann ich das noch nicht ausführen, aber das Grundgerüst steht!";
-                    chatHistory.appendChild(toniMsg);
-                    chatHistory.scrollTop = chatHistory.scrollHeight;
-                }, 1000);
-            }
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
-/* --- FIFA CARD DESIGN (Füge dies in <style> ein) --- */
-
-/* Das Gitter für die Karten (passt sich automatisch an Handy/PC an) */
-.card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 15px;
-    padding: 10px;
-}
-
-/* Die Karte selbst */
-.fut-card {
-    background: linear-gradient(135deg, #eebb4d 0%, #bf953f 100%); /* Gold-Look */
-    border: 2px solid #fde08d;
-    border-radius: 12px;
-    padding: 10px;
-    color: #1e293b; /* Dunkle Schrift auf Gold */
-    position: relative;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    transition: transform 0.2s;
-    cursor: pointer;
-    font-family: 'Arial', sans-serif;
-    overflow: hidden;
-}
-
-.fut-card:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 10px 25px rgba(238, 187, 77, 0.4); /* Goldenes Leuchten */
-}
-
-/* Oberer Teil: Rating & Position */
-.card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 5px;
-}
-
-.card-rating {
-    font-size: 24px;
-    font-weight: 900;
-}
-
-.card-position {
-    font-size: 14px;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-/* Bild Platzhalter */
-.card-image {
-    width: 80px;
-    height: 80px;
-    background-color: #333;
-    border-radius: 50%;
-    margin: 5px auto;
-    background-image: url('https://cdn-icons-png.flaticon.com/512/166/166344.png'); /* Dummy Bild */
-    background-size: cover;
-    border: 3px solid rgba(255,255,255,0.3);
-}
-
-.card-name {
-    text-align: center;
-    font-weight: 800;
-    font-size: 16px;
-    margin: 5px 0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Die 6 Stats unten */
-.card-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    font-size: 11px;
-    gap: 2px;
-    border-top: 1px solid rgba(0,0,0,0.1);
-    padding-top: 5px;
-}
-
-.stat {
-    display: flex;
-    justify-content: space-between;
-    padding: 0 5px;
-}
-
-.stat-label {
-    opacity: 0.7;
-}
-
-.stat-value {
-    font-weight: bold;
-}
-// --- DATEN FÜR DIE KABINE ---
-
-// Hier simulieren wir deine Datenbank mit Spielern
-const teamData = [
-    { id: 1, name: "Müller", pos: "ST", rating: 88, stats: { pac: 85, sho: 90, pas: 75, dri: 82, def: 40, phy: 80 } },
-    { id: 2, name: "Schmidt", pos: "TW", rating: 91, stats: { pac: 88, sho: 50, pas: 60, dri: 55, def: 92, phy: 85 } }, // TW Stats (PAC=DIV, etc.)
-    { id: 3, name: "Schneider", pos: "ZDM", rating: 84, stats: { pac: 70, sho: 65, pas: 88, dri: 75, def: 85, phy: 82 } },
-    { id: 4, name: "Weber", pos: "IV", rating: 82, stats: { pac: 68, sho: 40, pas: 60, dri: 55, def: 88, phy: 90 } },
-    { id: 5, name: "Fischer", pos: "LF", rating: 86, stats: { pac: 92, sho: 80, pas: 78, dri: 88, def: 45, phy: 60 } },
-    { id: 6, name: "Meyer", pos: "RV", rating: 79, stats: { pac: 85, sho: 55, pas: 72, dri: 74, def: 78, phy: 75 } },
-];
-
-// Funktion, um die Karten zu erstellen
-function renderLockerRoom() {
-    const container = document.getElementById('locker-room-container');
-    
-    // Leere den Container (lösche den Platzhalter-Text)
-    container.innerHTML = '<div class="card-grid" id="card-grid"></div>';
-    const grid = document.getElementById('card-grid');
-
-    // Gehe durch jeden Spieler und baue die HTML-Karte
-    teamData.forEach(player => {
-        const cardHTML = `
-            <div class="fut-card" onclick="openPlayerDetails(${player.id})">
-                <div class="card-top">
-                    <div class="card-rating">${player.rating}</div>
-                    <div class="card-position">${player.pos}</div>
-                </div>
-                <div class="card-image"></div>
-                <div class="card-name">${player.name}</div>
-                <div class="card-stats">
-                    <div class="stat"><span class="stat-value">${player.stats.pac}</span> <span class="stat-label">TEM</span></div>
-                    <div class="stat"><span class="stat-value">${player.stats.dri}</span> <span class="stat-label">DRI</span></div>
-                    <div class="stat"><span class="stat-value">${player.stats.sho}</span> <span class="stat-label">SCH</span></div>
-                    <div class="stat"><span class="stat-value">${player.stats.def}</span> <span class="stat-label">DEF</span></div>
-                    <div class="stat"><span class="stat-value">${player.stats.pas}</span> <span class="stat-label">PAS</span></div>
-                    <div class="stat"><span class="stat-value">${player.stats.phy}</span> <span class="stat-label">PHY</span></div>
-                </div>
-            </div>
-        `;
-        grid.innerHTML += cardHTML;
-    });
-}
-
-function openPlayerDetails(id) {
-    // Einfache Simulation einer Detail-Ansicht
-    const player = teamData.find(p => p.id === id);
-    const chat = document.getElementById('chat-history');
-    
-    // Toni kommentiert den Klick
-    const msg = document.createElement('div');
-    msg.className = 'message msg-toni';
-    msg.innerText = `Das ist ${player.name}. Seine Formkurve zeigt nach oben! Soll ich dir seine letzten Trainingsdaten zeigen?`;
-    chat.appendChild(msg);
-    chat.scrollTop = chatHistory.scrollHeight;
-}
-
-// Starte die Funktion sofort beim Laden
-renderLockerRoom();
-
