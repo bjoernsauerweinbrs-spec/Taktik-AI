@@ -2,89 +2,71 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | Elite Management & VR Simulation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TONI 2.0 | Elite Tactic & VR</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="elite-level-active">
-
-    <header id="elite-hud">
-        <div class="hud-left">
-            <span class="system-tag">TONI 2.0 // ELITE CORE</span>
-            <span id="system-clock">--:--:--</span>
-        </div>
-        <div class="hud-right">
-            <span class="role-badge">CHIEF ANALYST</span>
-            <div class="connection-pulse"></div>
-        </div>
-    </header>
+<body>
 
     <aside class="sidebar">
         <div class="brand">TONI 2.0</div>
-        <nav class="main-nav">
-            <button class="nav-btn active" onclick="showModule('vr-center')"><i>🎯</i> VR CENTER</button>
-            <button class="nav-btn" onclick="showModule('locker-room')"><i>👤</i> KABINE</button>
-            <button class="nav-btn" onclick="showModule('mgmt-lab')"><i>💼</i> LABOR</button>
-            <button class="nav-btn" onclick="showModule('press-center')"><i>🗞️</i> PRESSE</button>
+        <nav>
+            <button class="nav-btn active" onclick="showModule('tactic-board')"><i>📋</i> Taktikboard</button>
+            <button class="nav-btn" onclick="showModule('locker-room')"><i>👤</i> Kabine</button>
+            <button class="nav-btn" onclick="showModule('mgmt-lab')"><i>💼</i> Labor</button>
+            <button class="nav-btn" onclick="showModule('press-center')"><i>🗞️</i> Presse</button>
         </nav>
         <div class="sidebar-footer">
-            <button class="mic-trigger" id="mic-btn" onclick="voiceEngine.toggle()">🎤 KI ANALYSE</button>
+            <button class="vr-master-btn" onclick="startVRMode()">START VR (META QUEST)</button>
         </div>
     </aside>
 
-    <main class="content-area">
-        
-        <section id="vr-center" class="module-section active">
-            <div class="module-info">
-                <h2>VR Analysezentrum <small>Meta Quest Ready</small></h2>
-                <div class="metric-grid">
-                    <div class="m-box">PITCH CONTROL <span id="m-pitch">0%</span></div>
-                    <div class="m-box">SCANNING RATE <span id="m-scan">0%</span></div>
+    <main class="content">
+        <header class="top-bar">
+            <div class="status-indicator"><span class="dot"></span> SYSTEM ONLINE</div>
+            <div id="system-clock">16:32:42</div>
+        </header>
+
+        <section id="tactic-board" class="module-section active">
+            <div class="board-header">
+                <h2>Taktische Analyse & Training</h2>
+                <div class="board-controls">
+                    <button onclick="setFormation('4-4-2')">4-4-2 (Toni)</button>
+                    <button onclick="setFormation('3-4-3')">3-4-3 (Gegner)</button>
+                    <button class="clear-btn" onclick="initBoard()">Reset</button>
                 </div>
             </div>
-            
-            <div class="vr-frame-container">
-                <a-scene embedded vr-mode-ui="enabled: true">
-                    <a-assets>
-                        </a-assets>
-                    <a-sky color="#020617"></a-sky>
-                    <a-plane position="0 0 0" rotation="-90 0 0" width="68" height="105" color="#14532d" material="roughness: 0.8"></a-plane>
-                    <a-entity id="toni-avatar" position="36 0 0">
-                        <a-cylinder color="#22c55e" height="1.8" radius="0.4"></a-cylinder>
-                        <a-text value="COACH TONI" position="0 2.2 0" align="center" scale="2 2 2"></a-text>
-                    </a-entity>
-                    <a-camera position="0 15 30" rotation="-30 0 0"></a-camera>
-                </a-scene>
+            <div class="pitch-area">
+                <canvas id="mainTacticBoard"></canvas>
             </div>
         </section>
 
         <section id="locker-room" class="module-section">
-            <div class="module-info"><h2>Kader-Register // Medical</h2></div>
+            <h2>Elite Mannschaftskabine</h2>
             <div class="card-grid" id="locker-room-container"></div>
         </section>
 
         <section id="mgmt-lab" class="module-section">
-            <div class="module-info"><h2>Manager-Labor // ROI Analysis</h2></div>
-            <div id="mgmt-dashboard"></div>
+            <h2>Strategisches Management Labor</h2>
+            <div id="mgmt-content"></div>
         </section>
 
         <section id="press-center" class="module-section">
-            <div class="module-info"><h2>Redaktions-Schaltzentrale</h2></div>
-            <div id="magazine-preview-container"></div>
+            <h2>Redaktions-Büro</h2>
+            <div id="press-content"></div>
         </section>
-
     </main>
 
-    <div id="player-modal" class="modal">
-        <div class="modal-content">
-            <div id="modal-form"></div>
-            <div class="modal-actions">
-                <button class="save-btn" onclick="savePlayer()">SYST. COMMIT</button>
-                <button class="close-btn" onclick="closePlayerModal()">ABORT</button>
-            </div>
-        </div>
+    <div id="vr-overlay">
+        <a-scene embedded vr-mode-ui="enabled: true">
+            <a-sky color="#020617"></a-sky>
+            <a-plane position="0 0 0" rotation="-90 0 0" width="68" height="105" color="#14532d"></a-plane>
+            <a-entity id="vr-players-container"></a-entity>
+            <a-camera position="0 10 20"></a-camera>
+        </a-scene>
+        <button class="exit-vr" onclick="stopVRMode()">Beenden</button>
     </div>
 
     <script src="modules/management.js"></script>
