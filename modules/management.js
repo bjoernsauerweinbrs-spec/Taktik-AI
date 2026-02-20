@@ -1,130 +1,57 @@
-/* --- MANAGEMENT MODUL (Finanz-Board & Stadionzeitung) --- */
-
 const mgmt = {
-    // Musterdaten: Diese können vom User direkt in der App geändert werden
-    financeData: {
-        income: [
-            { id: 101, label: "Hauptsponsor (Trikot)", amount: 5000 },
-            { id: 102, label: "Ticketverkauf (Heimspiel)", amount: 1200 },
-            { id: 103, label: "Mitgliedsbeiträge", amount: 3500 },
-            { id: 104, label: "Catering / Verkauf", amount: 850 }
-        ],
-        expenses: [
-            { id: 201, label: "Trainingsanzüge (Team)", amount: 1500 },
-            { id: 202, label: "Flutlicht & Strom", amount: 450 },
-            { id: 203, label: "Schiedsrichterkosten", amount: 120 },
-            { id: 204, label: "Verbandsabgaben", amount: 300 }
-        ]
+    finances: {
+        income: [{ label: "Tickets", amount: 1500 }, { label: "Hauptsponsor", amount: 8000 }],
+        expenses: [{ label: "Platzpflege", amount: 600 }, { label: "Ausrüstung", amount: 2000 }]
     },
 
-    init: function() {
-        // Lade gespeicherte Daten aus dem Speicher, falls vorhanden
-        const saved = localStorage.getItem('toni_mgmt_data');
-        if (saved) {
-            this.financeData = JSON.parse(saved);
-        }
-        this.render();
-    },
-
-    // Speichert den aktuellen Stand lokal ab
-    save: function() {
-        localStorage.setItem('toni_mgmt_data', JSON.stringify(this.financeData));
-        this.render();
-    },
+    init: function() { this.render(); },
 
     render: function() {
         const container = document.getElementById('mgmt-content');
         if (!container) return;
 
-        const totalIncome = this.financeData.income.reduce((sum, item) => sum + item.amount, 0);
-        const totalExpenses = this.financeData.expenses.reduce((sum, item) => sum + item.amount, 0);
-        const balance = totalIncome - totalExpenses;
+        const totalI = this.finances.income.reduce((s, i) => s + i.amount, 0);
+        const totalE = this.finances.expenses.reduce((s, i) => s + i.amount, 0);
 
         container.innerHTML = `
-            <div class="mgmt-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                
-                <div class="mgmt-card" style="background: #1e293b; padding: 20px; border-radius: 12px; border-top: 4px solid #22c55e;">
-                    <h3 style="margin-top:0; color:#22c55e;">Einnahmen (Muster)</h3>
-                    <div id="income-list">
-                        ${this.renderList(this.financeData.income, 'income')}
-                    </div>
-                    <button onclick="mgmt.addItem('income')" style="background:none; border:1px dashed #22c55e; color:#22c55e; width:100%; padding:5px; margin-top:10px; cursor:pointer;">+ Position hinzufügen</button>
-                    <div style="margin-top:15px; text-align:right; font-weight:bold;">Gesamt: ${totalIncome} €</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="background:#1e293b; padding:20px; border-radius:12px; border-top:4px solid #22c55e;">
+                    <h4>Einnahmen (editierbar)</h4>
+                    ${this.renderTable(this.finances.income, 'income')}
+                    <button onclick="mgmt.add('income')" style="width:100%; border:1px dashed #22c55e; background:none; color:#22c55e; margin-top:10px;">+ Position</button>
                 </div>
-
-                <div class="mgmt-card" style="background: #1e293b; padding: 20px; border-radius: 12px; border-top: 4px solid #ef4444;">
-                    <h3 style="margin-top:0; color:#ef4444;">Ausgaben (Muster)</h3>
-                    <div id="expense-list">
-                        ${this.renderList(this.financeData.expenses, 'expenses')}
-                    </div>
-                    <button onclick="mgmt.addItem('expenses')" style="background:none; border:1px dashed #ef4444; color:#ef4444; width:100%; padding:5px; margin-top:10px; cursor:pointer;">+ Position hinzufügen</button>
-                    <div style="margin-top:15px; text-align:right; font-weight:bold;">Gesamt: ${totalExpenses} €</div>
+                <div style="background:#1e293b; padding:20px; border-radius:12px; border-top:4px solid #ef4444;">
+                    <h4>Ausgaben (editierbar)</h4>
+                    ${this.renderTable(this.finances.expenses, 'expenses')}
+                    <button onclick="mgmt.add('expenses')" style="width:100%; border:1px dashed #ef4444; background:none; color:#ef4444; margin-top:10px;">+ Position</button>
                 </div>
-
-                <div class="mgmt-card" style="grid-column: span 2; display: flex; justify-content: space-between; align-items: center; background: #0f172a; border: 1px solid #334155;">
-                    <div>
-                        <span style="color:#94a3b8;">Aktueller Saldo:</span>
-                        <h2 style="margin:0; color: ${balance >= 0 ? '#22c55e' : '#ef4444'}">${balance.toLocaleString()} €</h2>
-                    </div>
-                    <div style="text-align: right;">
-                        <button class="action-btn" style="width:auto; padding: 10px 20px;" onclick="mgmt.generateNews()">Stadionzeitung generieren</button>
-                    </div>
-                </div>
-                
-                <div id="news-output" style="grid-column: span 2; display:none; background:white; color:black; padding:20px; font-family:'Times New Roman'; border: 1px solid #ddd;">
-                    </div>
             </div>
+            <div style="background:#0f172a; padding:25px; margin-top:20px; border-radius:15px; border:1px solid #334155; text-align:center;">
+                <h2 style="margin:0; color:${totalI-totalE >= 0 ? '#22c55e' : '#ef4444'}">Saldo: ${(totalI - totalE).toLocaleString()} €</h2>
+                <button class="action-btn" onclick="mgmt.news()" style="margin-top:15px; width:auto; padding:10px 30px;">STADIONZEITUNG GENERIEREN</button>
+            </div>
+            <div id="news-paper" style="display:none; background:#f5f5f5; color:#222; padding:30px; margin-top:20px; font-family:serif; border: 5px double #333; box-shadow: 10px 10px 0 #999;"></div>
         `;
     },
 
-    // Erstellt die editierbaren Zeilen
-    renderList: function(list, type) {
-        return list.map((item, index) => `
-            <div style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
-                <input type="text" value="${item.label}" 
-                    onchange="mgmt.updateItem('${type}', ${index}, 'label', this.value)" 
-                    style="flex: 2; background: #0f172a; color: white; border: 1px solid #334155; padding: 5px; border-radius: 4px;">
-                <input type="number" value="${item.amount}" 
-                    onchange="mgmt.updateItem('${type}', ${index}, 'amount', this.value)" 
-                    style="flex: 1; background: #0f172a; color: white; border: 1px solid #334155; padding: 5px; border-radius: 4px;">
-                <button onclick="mgmt.deleteItem('${type}', ${index})" style="background:none; border:none; color:#ef4444; cursor:pointer;">✕</button>
+    renderTable: function(data, type) {
+        return data.map((item, idx) => `
+            <div style="display:flex; gap:10px; margin-bottom:8px;">
+                <input type="text" value="${item.label}" onchange="mgmt.upd('${type}',${idx},'label',this.value)" style="flex:2; background:#0f172a; border:1px solid #334155; color:white; padding:5px; border-radius:4px;">
+                <input type="number" value="${item.amount}" onchange="mgmt.upd('${type}',${idx},'amount',this.value)" style="flex:1; background:#0f172a; border:1px solid #334155; color:white; padding:5px; border-radius:4px;">
             </div>
         `).join('');
     },
 
-    updateItem: function(type, index, field, value) {
-        if (field === 'amount') value = parseInt(value) || 0;
-        this.financeData[type][index][field] = value;
-        this.save();
-    },
-
-    addItem: function(type) {
-        this.financeData[type].push({ id: Date.now(), label: "Neue Position", amount: 0 });
-        this.save();
-    },
-
-    deleteItem: function(type, index) {
-        this.financeData[type].splice(index, 1);
-        this.save();
-    },
-
-    generateNews: function() {
-        const output = document.getElementById('news-output');
-        const balance = this.financeData.income.reduce((sum, item) => sum + item.amount, 0) - this.financeData.expenses.reduce((sum, item) => sum + item.amount, 0);
-        
-        output.style.display = "block";
-        output.innerHTML = `
-            <div style="text-align:center; border-bottom: 2px solid black; margin-bottom: 10px;">
-                <h1 style="margin:0">VEREINS-ECHO</h1>
-                <small>Ausgabe vom ${new Date().toLocaleDateString()}</small>
-            </div>
-            <h3>Finanzbericht: Verein steht auf ${balance >= 0 ? 'solidem Fundament' : 'wackligen Beinen'}</h3>
-            <p>Nach der neuesten Analyse von TONI AI beträgt der aktuelle Saldo ${balance} €. 
-               Besonders die Position "${this.financeData.income[0].label}" sticht hervor.</p>
-            <p style="text-align:right;"><i>Cheftrainer-Analyse Ende.</i></p>
-        `;
-        addMessage("Toni", "Stadionzeitung wurde basierend auf deinen Finanzdaten erstellt.");
+    upd: function(t, i, f, v) { this.finances[t][i][f] = f === 'amount' ? parseInt(v) : v; this.render(); },
+    add: function(t) { this.finances[t].push({label: "Neu...", amount: 0}); this.render(); },
+    news: function() {
+        const p = document.getElementById('news-paper');
+        p.style.display = "block";
+        p.innerHTML = `<h1 style="text-align:center; border-bottom:2px solid #333;">VEREINS-ECHO</h1>
+                       <h3>Exklusiv: TONI AI analysiert die Finanzen</h3>
+                       <p>Heute wurde bekannt, dass der Verein mit einem Saldo von <b>${this.finances.income[0].amount - this.finances.expenses[0].amount}€</b> im Kernbereich plant. Chef-Trainer optimistisch!</p>`;
+        addMessage("Toni", "Stadionzeitung ist im Druck!");
     }
 };
-
 window.addEventListener('load', () => mgmt.init());
