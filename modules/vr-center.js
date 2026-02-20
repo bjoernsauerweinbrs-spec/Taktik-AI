@@ -15,7 +15,7 @@ const vrCenter = {
             </a-scene>
         `;
     },
-
+ 
     evaluatePerformance: function(time, scanned) {
         let score = scanned ? 100 : 30;
         if (time > 2.5) score -= 20;
