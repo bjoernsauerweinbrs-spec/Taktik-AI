@@ -2,82 +2,87 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 | ELITE COMMAND CENTER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TONI 2.0 VR ELITE CORE</title>
+    
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
 </head>
-<body class="role-admin">
+<body style="background-color: #000;">
 
-    <nav class="top-nav">
-        <div class="logo">TONI 2.0 <span class="elite-tag">ELITE</span></div>
-        <div class="role-selector">
-            <button onclick="setRole('trainer')" class="role-btn active">TRAINER-MODE</button>
-            <button onclick="setRole('manager')" class="role-btn">MANAGER-LAB</button>
-        </div>
-        <div id="system-clock"></div>
-    </nav>
+    <a-scene 
+        renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true;"
+        fog="type: exponential; color: #050a14; density: 0.01"
+        background="color: #050a14">
 
-    <div class="app-container">
-        <aside class="sidebar">
-            <div class="nav-group">
-                <p>PERFORMANCE</p>
-                <button onclick="showModule('tactic-board')">📋 Taktik-Board</button>
-                <button onclick="showModule('vr-center')">🥽 VR-Training</button>
-                <button onclick="showModule('locker-room')">👤 Kabine</button>
-            </div>
-            <div class="nav-group">
-                <p>OPERATIONS</p>
-                <button onclick="showModule('mgmt-lab')">💼 Finanz-Labor</button>
-                <button onclick="showModule('press-center')">🗞️ Redaktion</button>
-            </div>
-            <button class="mic-btn" id="mic-btn" onclick="voiceEngine.toggle()">🎤 KI ANALYSE STARTEN</button>
-        </aside>
+        <a-assets timeout="10000">
+            <img id="grass-tex" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/city.jpg" crossorigin="anonymous"> </a-assets>
 
-        <main class="viewport">
-            <section id="tactic-board" class="module active">
-                <div class="module-header">
-                    <h2>Taktik-Analyse & Drills</h2>
-                    <div class="controls">
-                        <button onclick="setFormation('4-4-2')">4-4-2 (Toni)</button>
-                        <button onclick="setFormation('3-4-3')">3-4-3 (Gegner)</button>
-                    </div>
-                </div>
-                <div class="canvas-wrapper">
-                    <canvas id="mainBoard"></canvas>
-                </div>
-            </section>
 
-            <section id="vr-center" class="module">
-                <div class="vr-overlay-ui">
-                    <h2>VR Simulation <small>Meta Quest Mode</small></h2>
-                    <p>Sensomotorisches Training für Reha & Offensive</p>
-                </div>
-                <a-scene embedded vr-mode-ui="enabled: true">
-                    <a-sky color="#020617"></a-sky>
-                    <a-plane position="0 0 0" rotation="-90 0 0" width="68" height="105" color="#14532d"></a-plane>
-                    <a-entity id="vr-players"></a-entity>
-                    <a-entity id="toni-coach" position="35 0 0">
-                        <a-cylinder color="#22c55e" height="1.8" radius="0.4"></a-cylinder>
-                        <a-text value="COACH TONI" position="0 2 0" align="center"></a-text>
-                    </a-entity>
-                    <a-camera position="0 15 30" rotation="-30 0 0"></a-camera>
-                </a-scene>
-            </section>
+        <a-entity light="type: ambient; color: #BBB; intensity: 0.3"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 1.2; castShadow: true" position="-20 40 20"></a-entity>
+        <a-sky color="#050a14"></a-sky>
 
-            <section id="mgmt-lab" class="module">
-                <h2>Finanz-Matrix & ROI Analysis</h2>
-                <div class="mgmt-grid" id="mgmt-content"></div>
-            </section>
 
-            <section id="locker-room" class="module">
-                <h2>Kader-Register & Medical Check</h2>
-                <div class="card-grid" id="player-container"></div>
-            </section>
-        </main>
-    </div>
+        <a-plane 
+            id="pitch" 
+            position="0 0 0" 
+            rotation="-90 0 0" 
+            width="68" 
+            height="105" 
+            color="#14532d" 
+            material="roughness: 1; metalness: 0;"
+            shadow="receive: true">
+        </a-plane>
+        <a-plane position="0 0.01 0" rotation="-90 0 0" width="68.2" height="105.2" color="white" material="side: back"></a-plane>
 
-    <script src="modules/management.js"></script>
-    <script src="script.js"></script>
+
+        <a-entity id="toni-coach" position="36 0 -5">
+            <a-cylinder position="0 0.9 0" height="1.8" radius="0.4" color="#22c55e" material="roughness: 0.5; metalness: 0.5" shadow="cast: true"></a-cylinder>
+            <a-text value="COACH TONI\n(AI ANALYST)" position="0 2.2 0" color="white" align="center" side="double" scale="1.5 1.5 1.5"></a-text>
+            <a-circle rotation="-90 0 0" radius="2" color="#22c55e" opacity="0.3" position="0 0.01 0"></a-circle>
+        </a-entity>
+
+
+        <a-entity id="team-red">
+            <a-entity position="-10 0 20" shadow="cast: true">
+                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#ef4444" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
+                <a-text value="IV (L)" position="0 2 0" align="center" color="white" side="double"></a-text>
+            </a-entity>
+            <a-entity position="10 0 20" shadow="cast: true">
+                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#ef4444" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
+                <a-text value="IV (R)" position="0 2 0" align="center" color="white" side="double"></a-text>
+            </a-entity>
+             <a-entity position="-25 0 15" shadow="cast: true">
+                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#ef4444" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
+                <a-text value="AV (L)" position="0 2 0" align="center" color="white" side="double"></a-text>
+            </a-entity>
+            <a-entity position="25 0 15" shadow="cast: true">
+                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#ef4444" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
+                <a-text value="AV (R)" position="0 2 0" align="center" color="white" side="double"></a-text>
+            </a-entity>
+        </a-entity>
+
+        <a-entity id="team-blue">
+            <a-entity position="-10 0 -10" shadow="cast: true">
+                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#3b82f6" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
+                <a-text value="OPP IV" position="0 2 0" align="center" color="white" side="double"></a-text>
+            </a-entity>
+            <a-entity position="10 0 -10" shadow="cast: true">
+                <a-cylinder position="0 0.9 0" height="1.8" radius="0.5" color="#3b82f6" material="roughness: 0.6; metalness: 0.2"></a-cylinder>
+                <a-text value="OPP IV" position="0 2 0" align="center" color="white" side="double"></a-text>
+            </a-entity>
+        </a-entity>
+
+
+        <a-entity id="rig" movement-controls="speed: 0.3" position="0 0 40">
+            <a-camera position="0 1.7 0" look-controls="pointerLockEnabled: false">
+                <a-cursor color="white" opacity="0.5" scale="0.5 0.5 0.5"></a-cursor>
+            </a-camera>
+            <a-entity oculus-touch-controls="hand: left"></a-entity>
+            <a-entity oculus-touch-controls="hand: right"></a-entity>
+        </a-entity>
+
+    </a-scene>
 </body>
 </html>
