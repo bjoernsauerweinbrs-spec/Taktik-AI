@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TONI 2.0 | Elite Tactical Operating Network</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -23,35 +23,26 @@
     </div>
 
     <div id="main-board" class="hidden">
-        
         <aside class="sidebar-left">
             <div class="column-header">AKTENTASCHE</div>
             <div class="accordion">
-                <details open>
-                    <summary>MANNSCHAFTSVERWALTUNG</summary>
+                <details open><summary>MANNSCHAFTSVERWALTUNG</summary>
                     <nav class="sub-nav">
                         <button onclick="loadModule('kader')">Kader & Profile</button>
                         <button onclick="loadModule('medical')">Medical & ACWR</button>
                     </nav>
                 </details>
-                <details>
-                    <summary>TRAININGSBETRIEB</summary>
+                <details><summary>TRAININGSBETRIEB</summary>
                     <nav class="sub-nav">
-                        <button onclick="loadModule('drills')">Übungskatalog</button>
                         <button onclick="loadModule('quest-sync')">Quest Telemetrie</button>
                     </nav>
                 </details>
-                <details open>
-                    <summary>MANAGEMENT-LABOR</summary>
+                <details open><summary>MANAGEMENT-LABOR</summary>
                     <nav class="sub-nav">
                         <button onclick="loadModule('finance')">Finanz-Labor (GuV)</button>
-                        <button onclick="loadModule('sponsoring')">Sponsoring ROI</button>
                         <button onclick="loadModule('stadionzeitung')">Stadion-Zeitung</button>
                     </nav>
                 </details>
-            </div>
-            <div class="sidebar-footer">
-                <div class="connection-status"><span class="dot"></span> QUEST LINK ACTIVE</div>
             </div>
         </aside>
 
@@ -60,52 +51,62 @@
                 <h2 id="module-title">PITCH CONTROL CENTER</h2>
                 <div class="quick-stats">
                     <div class="stat-pill">CASH: <b id="stat-cash">12.5M €</b></div>
-                    <div class="stat-pill">ROI: <b id="stat-roi">+8.2%</b></div>
                 </div>
             </header>
-            
             <div id="display-area">
-                <div id="pitch-container">
-                    <canvas id="tactical-pitch"></canvas>
-                </div>
+                <div id="dashboard-view">
+                    </div>
             </div>
-
             <footer class="pitch-footer">
-                <div class="btn-group">
-                    <button class="tactical-btn" onclick="toggleHeatmap()">HEATMAP</button>
-                    <button class="tactical-btn" onclick="toggleLanes()">PASS LANES</button>
-                </div>
-                <button class="vr-trigger" onclick="enterVR()">START VR MISSION (QUEST)</button>
+                <button class="vr-trigger" onclick="enterVR()">START VR MISSION (STADIUM MODE)</button>
             </footer>
         </main>
 
         <aside class="sidebar-right">
             <div class="column-header">TONI ANALYST</div>
-            
             <div class="telemetry-grid">
-                <div class="t-card">
-                    <label>SCAN RATE</label>
-                    <div class="t-val" id="m-scan">--%</div>
-                </div>
-                <div class="t-card">
-                    <label>DECISION LATENCY</label>
-                    <div class="t-val" id="m-latency">--ms</div>
-                </div>
+                <div class="t-card"><label>SCAN RATE</label><div class="t-val" id="m-scan">--%</div></div>
+                <div class="t-card"><label>DECISION LATENCY</label><div class="t-val" id="m-latency">--ms</div></div>
             </div>
-            
-            <div id="chat-history">
-                <div class="ai-msg">Protokoll gestartet. Erwarte taktische Parameter oder Management-Anweisungen.</div>
-            </div>
-
+            <div id="chat-history"></div>
             <div class="chat-input-area">
-                <textarea id="toni-input" placeholder="Analyse anfordern oder Quest-Daten abfragen..."></textarea>
-                <div class="chat-btns">
-                    <button class="mic-btn" onclick="voiceEngine.toggle()">🎤</button>
-                    <button class="send-btn" onclick="askToni()">SEND</button>
-                </div>
+                <textarea id="toni-input" placeholder="Analyse anfordern..."></textarea>
+                <button class="send-btn" onclick="askToni()">SEND</button>
             </div>
         </aside>
     </div>
+
+    <a-scene id="vr-stadium" style="display:none;" physics="debug: false">
+        <a-assets>
+            <img id="pitch-texture" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/terrain/grasslight-big.jpg">
+        </a-assets>
+
+        <a-plane src="#pitch-texture" rotation="-90 0 0" width="68" height="105" repeat="10 15"></a-plane>
+        <a-sky color="#050a14"></a-sky>
+
+        <a-entity id="toni-ai-player" position="5 0 -20">
+            <a-cylinder color="#22c55e" height="1.8" radius="0.4"></a-cylinder>
+            <a-text value="TONI: GAP IDENTIFIED" position="0 2.2 0" align="center" width="3"></a-text>
+            <a-entity id="pass-line" line="start: 0 0 0; end: -5 0 10; color: #22c55e; opacity: 0.8"></a-entity>
+        </a-entity>
+
+        <a-entity id="goal-unit" position="0 0 -52.5">
+            <a-box color="white" width="7.32" height="2.44" depth="0.1" opacity="0.3"></a-box>
+            <a-text id="xg-display" value="GOAL PROBABILITY: 0%" position="0 4 0" align="center" width="8" color="#fbbf24"></a-text>
+        </a-entity>
+
+        <a-entity id="rig" movement-controls="speed: 0.3">
+            <a-camera id="quest-cam" look-controls>
+                <a-entity position="0 0 -1">
+                    <a-text id="hud-metrics" value="SCANNING ACTIVE" position="-0.5 0.4 0" width="1" color="#22c55e"></a-text>
+                    <a-ring color="#22c55e" radius-inner="0.01" radius-outer="0.015"></a-ring>
+                </a-entity>
+            </a-camera>
+        </a-entity>
+
+        <a-light type="ambient" intensity="0.6"></a-light>
+        <a-light type="directional" position="-1 10 5" intensity="0.8"></a-light>
+    </a-scene>
 
     <script src="script.js"></script>
 </body>
