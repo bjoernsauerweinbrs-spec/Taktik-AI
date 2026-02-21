@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | TACTICAL OPERATING NETWORK INTELLIGENCE</title>
+    <title>TONI 2.0 | RETINA STRIKER OPS</title>
     
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;600;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -17,21 +15,17 @@
 
     <div id="auth-layer">
         <div class="auth-terminal">
-            <div class="terminal-header">
-                <i class="fa-solid fa-shield-halved"></i> SYSTEM LOCKED
-            </div>
-            <h1 class="auth-brand">TONI 2.0 <span class="version-tag">ELITE BUILD</span></h1>
-            <p class="auth-msg">IDENTIFIKATION ERFORDERLICH. BITTE ZUGANGSDATEN EINGEBEN.</p>
-            
-            <div class="input-wrapper">
-                <input type="password" id="sys-pass" placeholder="ACCESS KEY..." autocomplete="off">
-                <button onclick="systemBootSequence()"><i class="fa-solid fa-power-off"></i> LOGIN</button>
-            </div>
-            
-            <div class="terminal-footer">
-                <span>STATUS: SECURE</span>
-                <span>SERVER: FRANKFURT (AWS)</span>
-                <span>ENCRYPTION: AES-256</span>
+            <div class="auth-inner">
+                <div class="auth-brand">TONI 2.0</div>
+                <div class="auth-msg">SYSTEM SECURE // BIOMETRIC SCAN REQUIRED</div>
+                <div class="input-wrapper">
+                    <input type="password" id="sys-pass" placeholder="ACCESS CODE" autocomplete="off">
+                    <button onclick="systemBootSequence()">LOGIN</button>
+                </div>
+                <div class="terminal-footer">
+                    <span>V 4.3.0 (RETINA)</span>
+                    <span>SERVER: ONLINE</span>
+                </div>
             </div>
         </div>
     </div>
@@ -40,169 +34,151 @@
         
         <header class="global-header">
             <div class="header-left">
-                <div class="logo">TONI 2.0</div>
+                <div class="logo">RB LEIPZIG <span style="font-size:10px; opacity:0.7;">// OPS CENTER</span></div>
                 <div class="breadcrumb" id="active-module-display">DASHBOARD // ÜBERSICHT</div>
             </div>
             
-            <div class="header-center">
-                <button id="live-match-btn" class="live-btn" onclick="toggleLiveMode()">
-                    <span class="record-dot"></span> LIVE MATCHDAY MODE
-                </button>
-            </div>
-            
             <div class="header-right">
-                <div class="sys-clock" id="clock-display">00:00</div>
-                <div class="connection-status"><i class="fa-solid fa-wifi"></i> ONLINE</div>
-                <div class="user-profile">
-                    <img src="https://ui-avatars.com/api/?name=Head+Coach&background=22c55e&color=fff" alt="User">
-                    <span>HEAD COACH</span>
+                <div class="stat-item">
+                    <span class="label">BUDGET</span>
+                    <span class="value val-pos" id="kpi-budget">--</span>
                 </div>
+                <div class="stat-item">
+                    <span class="label">KADERWERT</span>
+                    <span class="value" id="kpi-squad-value">--</span>
+                </div>
+
+                <div class="sys-clock" id="clock-display">00:00</div>
+                
+                <button class="live-btn" id="live-match-btn" onclick="toggleLiveMode()">
+                    <div class="record-dot"></div> LIVE
+                </button>
+                
+                <div class="user-profile">HEAD COACH</div>
             </div>
         </header>
 
         <div class="workspace-grid">
             
             <aside class="sidebar-left">
-                <div class="sidebar-header">
-                    <i class="fa-solid fa-briefcase"></i> AKTENTASCHE
-                </div>
-                
+                <div class="sidebar-header">SYSTEM MODULE</div>
                 <div class="nav-accordion">
+                    
                     <details open>
-                        <summary><i class="fa-solid fa-users-line"></i> MANNSCHAFTSVERWALTUNG</summary>
+                        <summary><i class="fa-solid fa-layer-group"></i> MANAGEMENT</summary>
                         <div class="nav-content">
-                            <button onclick="loadModule('kader')"><i class="fa-solid fa-id-card"></i> Kader & FIFA Cards</button>
-                            <button onclick="loadModule('medical')"><i class="fa-solid fa-heart-pulse"></i> Medical Center (ACWR)</button>
-                            <button onclick="loadModule('scouting')"><i class="fa-solid fa-binoculars"></i> Scouting Datenbank</button>
+                            <button class="active" onclick="loadModule('kader')">Kader & Status</button>
+                            <button onclick="loadModule('finance')">Finanz Labor</button>
+                            <button onclick="loadModule('sponsors')">Sponsoring (WIP)</button>
+                        </div>
+                    </details>
+
+                    <details open>
+                        <summary><i class="fa-solid fa-clipboard-check"></i> COACHING ZONE</summary>
+                        <div class="nav-content">
+                            <button onclick="loadModule('tactics')">Taktik Board Pro</button>
+                            <button onclick="loadModule('scouting')">Match Prep (Nagelsmann)</button>
+                            <button onclick="loadModule('drills')">Übungskatalog (Planner)</button>
                         </div>
                     </details>
 
                     <details>
-                        <summary><i class="fa-solid fa-vr-cardboard"></i> INNOVATION LAB</summary>
+                        <summary><i class="fa-solid fa-microchip"></i> INNOVATION</summary>
                         <div class="nav-content">
-                            <button onclick="loadModule('vr-hub')"><i class="fa-brands fa-meta"></i> Quest Telemetrie Hub</button>
-                            <button onclick="loadModule('drills')"><i class="fa-solid fa-futbol"></i> Übungskatalog</button>
+                            <button onclick="loadModule('vr-hub')">OCTAGON VR HUB</button>
+                            <button onclick="loadModule('medical')">Medical Center</button>
                         </div>
                     </details>
 
-                    <details open>
-                        <summary><i class="fa-solid fa-building-columns"></i> MANAGEMENT SUITE</summary>
+                    <details>
+                        <summary><i class="fa-solid fa-bullhorn"></i> MEDIA</summary>
                         <div class="nav-content">
-                            <button onclick="loadModule('finance')"><i class="fa-solid fa-chart-line"></i> Finanz-Labor</button>
-                            <button onclick="loadModule('stadionzeitung')"><i class="fa-solid fa-newspaper"></i> Stadion-Zeitung (CMS)</button>
-                            <button onclick="loadModule('sponsors')"><i class="fa-solid fa-handshake"></i> Sponsoring & ROI</button>
+                            <button onclick="loadModule('stadionzeitung')">Stadion Zeitung CMS</button>
                         </div>
                     </details>
+
                 </div>
-
-                <div class="sidebar-footer">
-                    <div class="storage-info">
-                        <span>DATA STORAGE</span>
-                        <div class="progress-bar"><div class="fill" style="width: 45%"></div></div>
-                        <small>Local Storage Active</small>
-                    </div>
+                
+                <div style="padding:20px; margin-top:auto;">
+                     <div style="font-size:9px; color:#444;">LOCAL STORAGE: ACTIVE</div>
+                     <div style="height:2px; background:#333; width:100%; margin-top:5px;"><div style="height:100%; width:45%; background:var(--neon-main);"></div></div>
                 </div>
             </aside>
 
             <main class="center-stage">
-                <div class="stage-stats-bar">
-                    <div class="stat-item">
-                        <span class="label">BUDGET (LIQUID)</span>
-                        <span class="value val-pos" id="kpi-budget">-- €</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="label">KADER-WERT</span>
-                        <span class="value" id="kpi-squad-value">-- €</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="label">NÄCHSTES SPIEL</span>
-                        <span class="value text-accent">VS. DORTMUND (H)</span>
-                    </div>
-                </div>
-
                 <div id="content-viewport">
                     </div>
-
+                
                 <div id="vr-viewport" class="hidden">
-                    <a-scene embedded physics="debug: false">
-                        <a-assets>
-                            <img id="grass-tex" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/terrain/grasslight-big.jpg">
-                            <img id="sky-tex" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg">
-                        </a-assets>
-
-                        <a-sky color="#0f172a"></a-sky>
-                        <a-plane src="#grass-tex" rotation="-90 0 0" width="105" height="68" repeat="20 20" shadow="receive: true"></a-plane>
-                        
-                        <a-light type="ambient" intensity="0.4"></a-light>
-                        <a-light type="spot" position="0 20 0" rotation="-90 0 0" intensity="0.8" penumbra="0.5" castShadow="true"></a-light>
-
-                        <a-entity id="vr-rig" movement-controls="speed: 0.5">
-                            <a-camera id="vr-cam" look-controls>
-                                <a-entity position="0 0 -1" geometry="primitive: plane; width: 0.8; height: 0.2" material="color: black; opacity: 0.7; transparent: true" position="0 -0.8 -1">
-                                    <a-text id="vr-hud-text" value="SYSTEM ONLINE | xG: 0.0" align="center" color="#22c55e" width="2"></a-text>
-                                </a-entity>
-                                <a-cursor color="#22c55e" scale="0.5 0.5 0.5"></a-cursor>
-                            </a-camera>
+                    <a-scene embedded loading-screen="dotsColor: #00ff41; backgroundColor: black">
+                        <a-entity camera look-controls wasd-controls position="0 1.6 0">
+                            <a-text id="vr-hud-text" 
+                                    value="SYSTEM INITIALIZING..." 
+                                    position="0 0 -1" 
+                                    align="center" 
+                                    width="1.5"
+                                    color="#00ff41">
+                            </a-text>
+                            <a-cursor color="#00ff41" scale="0.5 0.5 0.5"></a-cursor>
                         </a-entity>
+
+                        <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100" color="#000"></a-plane>
+                        <a-sky color="#020408"></a-sky>
                         
-                        <a-entity id="tactical-elements"></a-entity>
+                        <a-entity light="type: ambient; color: #FFF; intensity: 0.5"></a-entity>
+                        <a-entity light="type: point; intensity: 1; distance: 50; decay: 2" position="0 10 0"></a-entity>
                     </a-scene>
-                    
-                    <button class="vr-exit-btn" onclick="exitVRMode()">BEENDEN</button>
+
+                    <button class="vr-exit-btn" onclick="exitVRMode()">
+                        <i class="fa-solid fa-power-off"></i> SYSTEM SHUTDOWN
+                    </button>
                 </div>
             </main>
 
             <aside class="sidebar-right">
-                <div class="sidebar-header">
-                    <i class="fa-solid fa-robot"></i> TONI AI CORE
-                </div>
-
                 <div class="toni-visualizer">
-                    <div class="brain-mesh">
-                        <i class="fa-solid fa-brain fa-beat" style="--fa-animation-duration: 2s;"></i>
-                    </div>
-                    <div class="ai-status">
-                        <span class="status-dot"></span> NEURAL ENGINE ACTIVE
-                    </div>
+                    <div class="brain-mesh"><i class="fa-solid fa-brain"></i></div>
+                    <div style="font-size:10px; letter-spacing:2px; color:var(--neon-main);">AI ONLINE</div>
                 </div>
 
-                <div id="chat-stream" class="chat-container">
+                <div class="chat-container" id="chat-stream">
                     <div class="msg ai">
                         <div class="msg-header">TONI</div>
-                        <div class="msg-body">Systeme hochgefahren. Alle Module der Aktentasche sind synchronisiert. Ich warte auf deine taktischen Anweisungen.</div>
-                    </div>
-                </div>
-
-                <div class="chat-input-wrapper">
-                    <textarea id="toni-input" placeholder="Frage an Co-Trainer Toni... (z.B. 'Analysiere die Finanzen')"></textarea>
-                    <div class="chat-actions">
-                        <button class="mic-btn" onclick="activateVoice()"><i class="fa-solid fa-microphone"></i></button>
-                        <button class="send-btn" onclick="askToni()"><i class="fa-solid fa-paper-plane"></i></button>
+                        <div class="msg-body">System bereit. Warte auf Input.</div>
                     </div>
                 </div>
 
                 <div class="telemetry-widget">
-                    <h4>VR LIVE DATEN</h4>
+                    <h4><i class="fa-solid fa-satellite-dish"></i> LIVE TELEMETRIE</h4>
                     <div class="metric-row">
                         <span>SCAN RATE</span>
-                        <div class="bar-bg"><div class="bar-fill" id="bar-scan" style="width: 0%"></div></div>
-                        <span id="val-scan">0%</span>
+                        <div class="bar-bg"><div class="bar-fill" id="bar-scan" style="width:0%"></div></div>
+                        <span id="val-scan" style="width:30px; text-align:right;">0%</span>
                     </div>
                     <div class="metric-row">
-                        <span>LATENCY</span>
-                        <div class="bar-bg"><div class="bar-fill" id="bar-lat" style="width: 0%"></div></div>
-                        <span id="val-lat">0ms</span>
+                        <span>LATENZ</span>
+                        <div class="bar-bg"><div class="bar-fill" id="bar-lat" style="width:0%; background:var(--neon-warn);"></div></div>
+                        <span id="val-lat" style="width:30px; text-align:right;">0ms</span>
+                    </div>
+                </div>
+
+                <div class="chat-input-wrapper">
+                    <textarea id="toni-input" placeholder="Befehl eingeben... (Enter)"></textarea>
+                    <div class="chat-actions">
+                        <button onclick="activateVoice()"><i class="fa-solid fa-microphone"></i></button>
+                        <button class="send-btn" onclick="askToni()">SENDEN</button>
                     </div>
                 </div>
             </aside>
+
         </div>
     </div>
 
     <div id="modal-player-editor" class="modal-overlay hidden">
         <div class="modal-window">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-user-pen"></i> SPIELERKARTE BEARBEITEN</h3>
-                <button onclick="closeModal('modal-player-editor')"><i class="fa-solid fa-xmark"></i></button>
+                <h3>SPIELER PROFIL EDITIEREN</h3>
+                <button onclick="closeModal('modal-player-editor')"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="edit-p-id">
@@ -213,29 +189,24 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Position</label>
-                        <select id="edit-p-pos">
-                            <option value="TW">TW</option><option value="IV">IV</option>
-                            <option value="AV">AV</option><option value="ZDM">ZDM</option>
-                            <option value="ZM">ZM</option><option value="ZOM">ZOM</option>
-                            <option value="FL">FL</option><option value="ST">ST</option>
-                        </select>
+                        <input type="text" id="edit-p-pos">
                     </div>
                     <div class="form-group">
-                        <label>Rating (0-99)</label>
-                        <input type="number" id="edit-p-rating" min="0" max="99">
+                        <label>Rating</label>
+                        <input type="number" id="edit-p-rating">
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Medizinischer Status</label>
                     <select id="edit-p-med">
-                        <option value="Fit">🟢 Fit (Einsatzbereit)</option>
-                        <option value="Reha">🟡 Reha (Eingeschränkt)</option>
-                        <option value="Verletzt">🔴 Verletzt (Ausfall)</option>
+                        <option value="Fit">Fit</option>
+                        <option value="Reha">Reha (Leichtes Training)</option>
+                        <option value="Verletzt">Verletzt (Ausfall)</option>
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('modal-player-editor')">Abbrechen</button>
+                <button class="btn-cancel" onclick="closeModal('modal-player-editor')">ABBRECHEN</button>
                 <button class="btn-save" onclick="savePlayerChanges()">SPEICHERN</button>
             </div>
         </div>
