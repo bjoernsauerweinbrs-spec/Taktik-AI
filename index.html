@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | COGNITIVE ELITE OPS</title>
+    <title>TONI 2.0 | RETINA ELITE PATTERN</title>
     
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     
@@ -17,13 +17,13 @@
         <div class="auth-terminal">
             <div class="auth-inner">
                 <div class="auth-brand">TONI 2.0</div>
-                <div class="auth-msg">SYSTEM SECURE // COGNITIVE ENGINE V5.3</div>
+                <div class="auth-msg">SYSTEM SECURE // RETINA ELITE ENGINE V5.5</div>
                 <div class="input-wrapper">
                     <input type="password" id="sys-pass" placeholder="ACCESS CODE" autocomplete="off">
                     <button onclick="systemBootSequence()">LOGIN</button>
                 </div>
                 <div class="terminal-footer">
-                    <span>V 5.3.0 (ELITE)</span>
+                    <span>V 5.5.0 (ELITE PATTERN)</span>
                     <span>SERVER: ONLINE</span>
                 </div>
             </div>
@@ -69,7 +69,7 @@
                         <div class="nav-content">
                             <button class="active" onclick="loadModule('kader')">Kader & Status</button>
                             <button onclick="loadModule('finance')">Finanz Labor</button>
-                            <button onclick="loadModule('sponsors')">Sponsoring (WIP)</button>
+                            <button onclick="loadModule('leaderboard')">Bestenliste (Elite)</button>
                         </div>
                     </details>
 
@@ -101,7 +101,7 @@
                 
                 <div style="padding:20px; margin-top:auto;">
                      <div style="font-size:9px; color:#444;">LOCAL STORAGE: ACTIVE</div>
-                     <div style="height:2px; background:#333; width:100%; margin-top:5px;"><div style="height:100%; width:45%; background:var(--neon-main);"></div></div>
+                     <div style="height:2px; background:#333; width:100%; margin-top:5px;"><div id="storage-bar" style="height:100%; width:45%; background:var(--neon-main);"></div></div>
                 </div>
             </aside>
 
@@ -111,17 +111,23 @@
                 <div id="vr-viewport" class="hidden">
                     <a-scene embedded loading-screen="dotsColor: #00ff41; backgroundColor: black">
                         
+                        <a-assets>
+                            <audio id="snd-pass" src="https://actions.google.com/sounds/v1/sports/kickball.ogg" preload="auto"></audio>
+                            <audio id="snd-coach" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+                        </a-assets>
+
                         <a-entity id="player-rig" position="0 0 0">
-                            <a-camera look-controls wasd-controls position="0 1.6 0">
+                            <a-camera id="vr-cam" look-controls wasd-controls position="0 1.6 0">
                                 <a-entity position="0 0 -1">
-                                    <a-plane width="0.8" height="0.25" material="color: black; opacity: 0.8; transparent: true" position="0 -0.7 0"></a-plane>
+                                    <a-plane width="0.9" height="0.3" material="color: black; opacity: 0.85; transparent: true" position="0 -0.65 0"></a-plane>
                                     <a-text id="vr-hud-text" 
-                                            value="SYSTEM INITIALIZING..." 
-                                            position="0 -0.7 0.01" 
+                                            value="SCANNING CALIBRATION..." 
+                                            position="0 -0.65 0.01" 
                                             align="center" 
-                                            width="1.8"
+                                            width="1.6"
                                             color="#00ff41">
                                     </a-text>
+                                    <a-box id="hud-timing-bar" position="0 -0.78 0.01" width="0.6" height="0.02" color="#333"></a-box>
                                 </a-entity>
                                 <a-cursor color="#00ff41" scale="0.5 0.5 0.5"></a-cursor>
                             </a-camera>
@@ -133,26 +139,31 @@
                         </a-plane>
 
                         <a-entity id="target-L" position="-8 0 -2">
-                            <a-cylinder radius="0.4" height="2" color="#333" material="opacity: 0.6; transparent: true"></a-cylinder>
-                            <a-text value="STATION 1" align="center" position="0 1.2 0" width="4"></a-text>
+                            <a-cylinder radius="0.4" height="2" color="#111" material="opacity: 0.8"></a-cylinder>
+                            <a-text id="icon-L" value="X" color="red" align="center" position="0 1.2 0.5" width="8"></a-text>
                         </a-entity>
+                        
                         <a-entity id="target-R" position="8 0 -2">
-                            <a-cylinder radius="0.4" height="2" color="#333" material="opacity: 0.6; transparent: true"></a-cylinder>
-                            <a-text value="STATION 2" align="center" position="0 1.2 0" width="4"></a-text>
+                            <a-cylinder radius="0.4" height="2" color="#111" material="opacity: 0.8"></a-cylinder>
+                            <a-text id="icon-R" value="X" color="red" align="center" position="0 1.2 0.5" width="8"></a-text>
                         </a-entity>
+                        
                         <a-entity id="target-DL" position="-5 0 -8">
-                            <a-cylinder radius="0.4" height="2" color="#333" material="opacity: 0.6; transparent: true"></a-cylinder>
-                            <a-text value="STATION 3" align="center" position="0 1.2 0" width="4"></a-text>
+                            <a-cylinder radius="0.4" height="2" color="#111" material="opacity: 0.8"></a-cylinder>
+                            <a-text id="icon-DL" value="X" color="red" align="center" position="0 1.2 0.5" width="8"></a-text>
                         </a-entity>
+                        
                         <a-entity id="target-DR" position="5 0 -8">
-                            <a-cylinder radius="0.4" height="2" color="#333" material="opacity: 0.6; transparent: true"></a-cylinder>
-                            <a-text value="STATION 4" align="center" position="0 1.2 0" width="4"></a-text>
+                            <a-cylinder radius="0.4" height="2" color="#111" material="opacity: 0.8"></a-cylinder>
+                            <a-text id="icon-DR" value="X" color="red" align="center" position="0 1.2 0.5" width="8"></a-text>
                         </a-entity>
+
+                        <a-entity id="spatial-coach" sound="src: #snd-coach; poolSize: 5"></a-entity>
 
                         <a-cylinder position="-2 1 -5" radius="0.3" height="1.8" color="#ff2a2a" material="opacity: 0.8"></a-cylinder>
                         <a-cylinder position="2 1 -5" radius="0.3" height="1.8" color="#ff2a2a" material="opacity: 0.8"></a-cylinder>
 
-                        <a-sphere id="vr-ball" position="0 0.2 -15" radius="0.22" color="white" material="roughness: 0.4"></a-sphere>
+                        <a-sphere id="vr-ball" position="0 0.2 -15" radius="0.22" color="white" sound="src: #snd-pass; on: move"></a-sphere>
 
                         <a-light type="ambient" color="#222"></a-light>
                         <a-light type="point" position="0 5 0" intensity="0.8" color="#00ff41" distance="20"></a-light>
@@ -160,7 +171,7 @@
                     </a-scene>
 
                     <button class="vr-exit-btn" onclick="exitVRMode()">
-                        <i class="fa-solid fa-power-off"></i> SYSTEM SHUTDOWN
+                        <i class="fa-solid fa-power-off"></i> SESSION BEENDEN
                     </button>
                 </div>
             </main>
@@ -174,14 +185,14 @@
                 <div class="chat-container" id="chat-stream">
                     <div class="msg ai">
                         <div class="msg-header">TONI</div>
-                        <div class="msg-body">Cognitive Elite Modus bereit. Warte auf Training-Start.</div>
+                        <div class="msg-body">Elite Engine v5.5 aktiv. Bereit für Pattern-Simulation.</div>
                     </div>
                 </div>
 
                 <div class="telemetry-widget">
-                    <h4><i class="fa-solid fa-satellite-dish"></i> LIVE TELEMETRIE</h4>
+                    <h4><i class="fa-solid fa-satellite-dish"></i> ELITE METRIKEN</h4>
                     <div class="metric-row">
-                        <span>SCAN RATE</span>
+                        <span>SCAN TIMING</span>
                         <div class="bar-bg"><div class="bar-fill" id="bar-scan" style="width:0%"></div></div>
                         <span id="val-scan" style="width:30px; text-align:right;">0%</span>
                     </div>
@@ -193,7 +204,7 @@
                 </div>
 
                 <div class="chat-input-wrapper">
-                    <textarea id="toni-input" placeholder="Befehl eingeben..."></textarea>
+                    <textarea id="toni-input" placeholder="Feedback an TONI..."></textarea>
                     <div class="chat-actions">
                         <button onclick="activateVoice()"><i class="fa-solid fa-microphone"></i></button>
                         <button class="send-btn" onclick="askToni()">SENDEN</button>
@@ -204,30 +215,21 @@
         </div>
     </div>
 
-    <div id="modal-player-editor" class="modal-overlay hidden">
+    <div id="modal-player-editor" class="hidden modal-overlay">
         <div class="modal-window">
             <div class="modal-header">
-                <h3>SPIELER PROFIL EDITIEREN</h3>
+                <h3>PROFIL EDITIEREN</h3>
                 <button onclick="closeModal('modal-player-editor')"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="edit-p-id">
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" id="edit-p-name">
-                </div>
+                <div class="form-group"><label>Name</label><input type="text" id="edit-p-name"></div>
                 <div class="form-row">
-                    <div class="form-group">
-                        <label>Position</label>
-                        <input type="text" id="edit-p-pos">
-                    </div>
-                    <div class="form-group">
-                        <label>Rating</label>
-                        <input type="number" id="edit-p-rating">
-                    </div>
+                    <div class="form-group"><label>Position</label><input type="text" id="edit-p-pos"></div>
+                    <div class="form-group"><label>Rating</label><input type="number" id="edit-p-rating"></div>
                 </div>
                 <div class="form-group">
-                    <label>Medizinischer Status</label>
+                    <label>Status</label>
                     <select id="edit-p-med">
                         <option value="Fit">Fit</option>
                         <option value="Reha">Reha</option>
@@ -236,7 +238,6 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('modal-player-editor')">ABBRECHEN</button>
                 <button class="btn-save" onclick="savePlayerChanges()">SPEICHERN</button>
             </div>
         </div>
