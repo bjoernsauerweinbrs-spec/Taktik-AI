@@ -1,6 +1,6 @@
 /* ==========================================================================
    TONI 2.0 | ELITE CORE ENGINE
-   Version: 4.2.0 (MATCH PREP UPDATE)
+   Version: 4.3.0 (SESSION PLANNER COMPLETED)
    Architecture: Monolith / Local-First / VR-Hybrid / Retina-Design
    ========================================================================== */
 
@@ -14,7 +14,7 @@ const DEFAULT_DB = {
         pass: "Toni2026",
         clubName: "RB Leipzig",
         coachName: "Head Coach",
-        version: "4.2.0"
+        version: "4.3.0"
     },
     // Finanz-Daten (Transaktionsbasiert)
     finance: [
@@ -166,16 +166,19 @@ function loadModule(moduleId) {
             break;
         case 'tactics':
             displayTitle.innerText = "COACHING // TAKTIK BOARD PRO";
-            renderTacticsBoard(viewport); // Volle Taktik-Engine laden
+            renderTacticsBoard(viewport); 
             break;
-        // NEU: MATCH PREP / SCOUTING
         case 'scouting':
             displayTitle.innerText = "MATCH PREP // SPIELTAGS-CLIPBOARD";
             renderMatchPrep(viewport);
             break;
+        // NEU: Session Planner
+        case 'drills':
+            displayTitle.innerText = "COACHING // SESSION PLANNER";
+            renderDrillPlanner(viewport);
+            break;
         
         // Platzhalter für zukünftige Module
-        case 'drills':
         case 'medical':
         case 'sponsors':
             displayTitle.innerText = "DASHBOARD // " + moduleId.toUpperCase();
@@ -411,7 +414,7 @@ function generateAIArticle() {
 function renderVRHub(target) {
     target.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
-            <h2 style="font-family:'Orbitron'; color:var(--neon-main); margin-bottom:20px; letter-spacing:3px;">RETINA STRIKER v4.0</h2>
+            <h2 style="font-family:'Orbitron'; color:var(--neon-main); margin-bottom:20px; letter-spacing:3px;">RETINA STRIKER v4.3</h2>
             <div style="background:rgba(0,0,0,0.8); padding:40px; border:1px solid var(--neon-main); border-radius:4px; text-align:center; width:500px; box-shadow:0 0 30px rgba(0,255,65,0.1);">
                 <i class="fa-brands fa-meta" style="font-size:60px; color:white; margin-bottom:20px; animation: pulse 2s infinite;"></i>
                 <p style="color:var(--text-dim); margin-bottom:30px;">
@@ -764,7 +767,6 @@ function renderMatchPrep(target) {
     // Dropdown-Optionen aus dem Kader generieren
     let playerOptions = `<option value="">-- Wähle Spieler --</option>`;
     DB.squad.forEach(p => {
-        // Nur fitte Spieler anzeigen (optional)
         if(p.status !== 'Verletzt') {
             playerOptions += `<option value="${p.name}">${p.pos} - ${p.name} (${p.rating})</option>`;
         }
@@ -860,4 +862,142 @@ function toniAutoAnalyze() {
         area.value += "\n\n[TONI UPDATE]: Torwart hat Schwächen bei Fernschüssen. Pressing-Trigger: Sobald der Innenverteidiger aufdreht.";
         speak("Analyse ergänzt. Pressing-Trigger identifiziert.");
     }, 1500);
+}
+
+/**
+ * --------------------------------------------------------------------------
+ * 12. MODULE: SESSION PLANNER (Training)
+ * --------------------------------------------------------------------------
+ */
+const DRILL_DB = [
+    { id: 'd1', name: "Rondo 5vs2 (Klassik)", time: 15, cat: "Warmup", icon: "fa-ring" },
+    { id: 'd2', name: "Passform Y-Muster", time: 20, cat: "Technik", icon: "fa-share-nodes" },
+    { id: 'd3', name: "Torschuss aus Drehung", time: 25, cat: "Abschluss", icon: "fa-bullseye" },
+    { id: 'd4', name: "Pressing-Simulation (VR)", time: 30, cat: "Taktik", icon: "fa-vr-cardboard" },
+    { id: 'd5', name: "Laktat-Shuttles", time: 20, cat: "Physis", icon: "fa-heart-pulse" },
+    { id: 'd6', name: "Cool Down / Dehnen", time: 10, cat: "Recovery", icon: "fa-bed" },
+    { id: 'd7', name: "11vs11 Abschlussspiel", time: 30, cat: "Match", icon: "fa-users" }
+];
+
+let currentSession = [];
+
+function renderDrillPlanner(target) {
+    target.innerHTML = `
+        <div class="planner-wrapper">
+            <div class="drill-library">
+                <div class="lib-header">ÜBUNGS-KATALOG</div>
+                ${DRILL_DB.map(d => `
+                    <div class="drill-item" onclick="addDrillToSession('${d.id}')">
+                        <i class="fa-solid ${d.icon} drill-icon"></i>
+                        <span class="drill-name">${d.name}</span>
+                        <span class="drill-time">${d.time} min</span>
+                        <i class="fa-solid fa-plus" style="font-size:10px; color:#666;"></i>
+                    </div>
+                `).join('')}
+                
+                <div style="margin-top:20px; border-top:1px solid #333; padding-top:10px;">
+                    <div class="lib-header">KI ASSISTENT</div>
+                    <button class="live-btn" style="width:100%; justify-content:center; margin-bottom:10px;" onclick="aiGenerateSession('hard')">
+                        <i class="fa-solid fa-fire"></i> INTENSITÄT (High)
+                    </button>
+                    <button class="live-btn" style="width:100%; justify-content:center; border-color:var(--neon-warn); color:var(--neon-warn);" onclick="aiGenerateSession('recovery')">
+                        <i class="fa-solid fa-battery-half"></i> REGENERATION
+                    </button>
+                </div>
+            </div>
+
+            <div class="session-board" id="session-list">
+                <div class="session-header">
+                    <div>
+                        <h2 style="font-family:'Orbitron'; color:white;">TRAININGSPLAN: HEUTE</h2>
+                        <small style="color:#888;">Start: 10:00 Uhr | Platz 1</small>
+                    </div>
+                    <div class="total-time" id="total-session-time">0 min</div>
+                </div>
+                
+                <div id="active-drills-container">
+                    <div style="text-align:center; color:#444; padding:50px;">
+                        <i>Wähle Übungen aus der Bibliothek...</i>
+                    </div>
+                </div>
+
+                <div class="session-footer" style="margin-top:30px; border-top:1px solid #333; padding-top:20px; display:flex; gap:10px;">
+                    <button class="live-btn active" onclick="window.print()" style="flex:1; justify-content:center;">
+                        <i class="fa-solid fa-print"></i> DRUCKEN
+                    </button>
+                    <button class="live-btn" onclick="clearSession()" style="flex:1; justify-content:center; border-color:var(--neon-alert); color:var(--neon-alert);">
+                        <i class="fa-solid fa-trash"></i> CLEAR
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    updateSessionView();
+}
+
+function addDrillToSession(id) {
+    const drill = DRILL_DB.find(d => d.id === id);
+    if(drill) {
+        currentSession.push(drill);
+        updateSessionView();
+    }
+}
+
+function removeDrill(index) {
+    currentSession.splice(index, 1);
+    updateSessionView();
+}
+
+function clearSession() {
+    currentSession = [];
+    updateSessionView();
+}
+
+function updateSessionView() {
+    const container = document.getElementById('active-drills-container');
+    const timeDisplay = document.getElementById('total-session-time');
+    
+    if(!container) return; // Schutz falls Modul gewechselt wurde
+
+    if(currentSession.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:#444; padding:50px;"><i>Liste leer...</i></div>`;
+        timeDisplay.innerText = "0 min";
+        return;
+    }
+
+    let total = 0;
+    container.innerHTML = currentSession.map((d, index) => {
+        total += d.time;
+        return `
+        <div class="active-drill">
+            <div style="font-family:'Orbitron'; color:var(--neon-main); font-size:18px; width:30px;">${index + 1}</div>
+            <div style="flex:1;">
+                <div class="drill-name" style="font-size:14px; margin-bottom:2px;">${d.name}</div>
+                <div style="font-size:10px; color:#888;">${d.cat}</div>
+            </div>
+            <div style="font-family:'Orbitron'; font-size:14px;">${d.time}'</div>
+            <i class="fa-solid fa-xmark" style="cursor:pointer; color:#666;" onclick="removeDrill(${index})"></i>
+        </div>`;
+    }).join('');
+
+    timeDisplay.innerText = total + " min";
+    
+    // Warnung bei zu langer Einheit
+    if(total > 90) timeDisplay.style.color = "var(--neon-alert)";
+    else timeDisplay.style.color = "var(--neon-main)";
+}
+
+function aiGenerateSession(type) {
+    currentSession = [];
+    if(type === 'hard') {
+        addDrillToSession('d1'); // Rondo
+        addDrillToSession('d2'); // Passform
+        addDrillToSession('d5'); // Physis
+        addDrillToSession('d7'); // Abschlussspiel
+        speak("Intensives Training erstellt. Dauer: 85 Minuten.");
+    } else {
+        addDrillToSession('d1'); // Rondo
+        addDrillToSession('d6'); // Cool Down
+        speak("Regenerations-Einheit erstellt. Dauer: 25 Minuten.");
+    }
 }
