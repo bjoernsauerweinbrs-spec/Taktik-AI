@@ -296,3 +296,72 @@ summary:hover, details[open] summary { color: var(--neon-main); text-shadow: 0 0
     .newspaper-wrapper, .newspaper-wrapper * { visibility: visible; }
     .newspaper-wrapper { position: absolute; left: 0; top: 0; margin: 0; box-shadow: none; width: 100%; }
 }
+/* ==========================================================================
+   MODULE: MATCH PREP CLIPBOARD (Nagelsmann Style)
+   ========================================================================== */
+
+.clipboard-wrapper {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 30px; height: 100%;
+}
+
+/* LINKE SEITE: TAKTIK BOARD MINI */
+.formation-board {
+    background: #0b1812; border: 2px solid rgba(0,255,65,0.3); border-radius: 8px;
+    position: relative;
+    background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+.pos-slot {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 100px; text-align: center;
+}
+.pos-dot {
+    width: 20px; height: 20px; background: var(--neon-main); border-radius: 50%;
+    margin: 0 auto 5px auto; box-shadow: 0 0 10px var(--neon-main);
+    border: 2px solid black;
+}
+.pos-select {
+    background: black; color: white; border: 1px solid var(--neon-main);
+    font-size: 10px; padding: 2px; width: 100%; text-align: center;
+    font-family: var(--font-hud);
+}
+
+/* RECHTE SEITE: ANALYSE */
+.analysis-sheet {
+    display: flex; flex-direction: column; gap: 15px;
+    background: rgba(0,0,0,0.3); padding: 20px; border: 1px solid var(--border-tech);
+}
+.sheet-header {
+    border-bottom: 1px solid var(--neon-main); padding-bottom: 10px; margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.sheet-title { font-family: var(--font-hud); color: var(--neon-main); font-size: 18px; letter-spacing: 2px; }
+
+.notes-area {
+    background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: white;
+    width: 100%; height: 100px; padding: 10px; font-family: monospace; resize: none;
+}
+.notes-label { font-size: 10px; color: var(--neon-warn); text-transform: uppercase; margin-bottom: 5px; display: block; }
+
+/* DRUCK STYLES (Wird nur beim Drucken aktiv) */
+@media print {
+    body { background: white; color: black; }
+    #main-interface, .sidebar-left, .sidebar-right, .global-header { display: none !important; }
+    
+    #content-viewport { display: block !important; position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 0; }
+    .clipboard-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; visibility: visible; }
+    
+    .formation-board { border: 2px solid black; background: white; -webkit-print-color-adjust: exact; }
+    .pos-dot { background: black; border: none; }
+    .pos-select { border: 1px solid black; color: black; background: white; -webkit-appearance: none; }
+    
+    .analysis-sheet { border: none; color: black; }
+    .sheet-title { color: black; border-bottom: 2px solid black; }
+    .notes-area { border: 1px solid #ccc; color: black; background: white; height: 150px; }
+    .notes-label { color: black; font-weight: bold; }
+    
+    /* Verstecke Buttons beim Drucken */
+    button { display: none !important; }
+}
+
