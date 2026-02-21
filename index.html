@@ -23,7 +23,7 @@
                     <button onclick="systemBootSequence()">LOGIN</button>
                 </div>
                 <div class="terminal-footer">
-                    <span>V 4.3.0 (RETINA)</span>
+                    <span>V 5.0.0 (PHYSICS)</span>
                     <span>SERVER: ONLINE</span>
                 </div>
             </div>
@@ -111,26 +111,44 @@
                 
                 <div id="vr-viewport" class="hidden">
                     <a-scene embedded loading-screen="dotsColor: #00ff41; backgroundColor: black">
-                        <a-entity camera look-controls wasd-controls position="0 1.6 0">
-                            <a-text id="vr-hud-text" 
-                                    value="SYSTEM INITIALIZING..." 
-                                    position="0 0 -1" 
-                                    align="center" 
-                                    width="1.5"
-                                    color="#00ff41">
-                            </a-text>
-                            <a-cursor color="#00ff41" scale="0.5 0.5 0.5"></a-cursor>
+                        
+                        <a-entity id="player-rig" position="0 0 0">
+                            <a-camera look-controls wasd-controls position="0 1.6 0">
+                                <a-text id="vr-hud-text" 
+                                        value="SYSTEM READY | WARTE AUF START" 
+                                        position="0 0 -1" 
+                                        align="center" 
+                                        width="1.5"
+                                        color="#00ff41">
+                                </a-text>
+                                <a-cursor color="#00ff41" scale="0.5 0.5 0.5"></a-cursor>
+                            </a-camera>
                         </a-entity>
 
-                        <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100" color="#000"></a-plane>
-                        <a-sky color="#020408"></a-sky>
+                        <a-sky color="#050505"></a-sky>
                         
-                        <a-entity light="type: ambient; color: #FFF; intensity: 0.5"></a-entity>
-                        <a-entity light="type: point; intensity: 1; distance: 50; decay: 2" position="0 10 0"></a-entity>
+                        <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100" 
+                                 material="color: #000; wireframe: true; wireframeLinewidth: 2; opacity: 1; color: #00ff41">
+                        </a-plane>
+
+                        <a-entity position="0 0 -10">
+                            <a-box position="-3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="#00ff41" material="opacity: 0.5; transparent: true"></a-box>
+                            <a-box position="3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="#00ff41" material="opacity: 0.5; transparent: true"></a-box>
+                            <a-box position="0 2.44 0" width="7.52" height="0.2" depth="0.2" color="#00ff41" material="opacity: 0.5; transparent: true"></a-box>
+                        </a-entity>
+
+                        <a-cylinder position="-2 1 -5" radius="0.3" height="1.8" color="#ff2a2a" material="opacity: 0.8"></a-cylinder>
+                        <a-cylinder position="2 1 -5" radius="0.3" height="1.8" color="#ff2a2a" material="opacity: 0.8"></a-cylinder>
+
+                        <a-sphere id="vr-ball" position="0 0.2 -2" radius="0.2" color="white"></a-sphere>
+
+                        <a-light type="ambient" color="#222"></a-light>
+                        <a-light type="point" position="0 5 0" intensity="0.8" color="#00ff41" distance="20"></a-light>
+
                     </a-scene>
 
                     <button class="vr-exit-btn" onclick="exitVRMode()">
-                        <i class="fa-solid fa-power-off"></i> SYSTEM SHUTDOWN
+                        <i class="fa-solid fa-power-off"></i> BEENDEN
                     </button>
                 </div>
             </main>
