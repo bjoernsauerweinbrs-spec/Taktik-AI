@@ -24,7 +24,7 @@
                     <button onclick="systemBootSequence()">LOGIN</button>
                 </div>
                 <div class="terminal-footer">
-                    <span>V 6.0.0 (ELITE ENGINE)</span>
+                    <span>V 6.5.0 (SIMULATION ENGINE)</span>
                     <span>SERVER: ONLINE</span>
                 </div>
             </div>
@@ -108,16 +108,18 @@
                 <div id="vr-viewport" class="hidden">
                     <a-scene embedded loading-screen="dotsColor: #00ff41; backgroundColor: black" renderer="antialias: true; colorManagement: true;">
                         <a-assets>
+                            <img id="pitch-markings" src="https://upload.wikimedia.org/wikipedia/commons/8/82/Football_pitch_metric.svg" crossorigin="anonymous">
                             <img id="pitch-tex" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/terrain/grasslight-big.jpg" crossorigin="anonymous">
                             <audio id="snd-pass" src="https://actions.google.com/sounds/v1/sports/kickball.ogg" preload="auto"></audio>
                         </a-assets>
 
                         <a-entity id="player-rig" movement-controls="speed: 0.3" position="0 0 10">
                             <a-camera id="vr-cam" look-controls wasd-controls position="0 1.6 0">
-                                <a-entity position="0 0 -1">
-                                    <a-plane width="1.1" height="0.35" material="color: black; opacity: 0.9" position="0 -0.65 0"></a-plane>
-                                    <a-text id="vr-hud-text" value="NEURAL SYNC..." position="0 -0.62 0.01" align="center" width="1.8" color="#00ff41"></a-text>
-                                    <a-box id="hud-timing-bar" position="0 -0.78 0.01" width="0.8" height="0.02" color="#333"></a-box>
+                                <a-entity position="0 0.5 -1.2">
+                                    <a-plane width="2.2" height="0.6" material="color: black; opacity: 0.8" position="0 0.1 0"></a-plane>
+                                    <a-text id="mission-briefing" value="INITIALISIERE TAKTIK-PROFIL..." position="0 0.2 0.01" align="center" width="2" color="#00ff41" font="mozillavr"></a-text>
+                                    <a-text id="vr-hud-text" value="WARTE AUF PASS-SEQUENZ" position="0 -0.05 0.01" align="center" width="1.5" color="#00f3ff"></a-text>
+                                    <a-box id="hud-timing-bar" position="0 -0.15 0.01" width="1.8" height="0.02" color="#333"></a-box>
                                 </a-entity>
                             </a-camera>
                             <a-entity oculus-touch-controls="hand: left"></a-entity>
@@ -125,28 +127,31 @@
                         </a-entity>
 
                         <a-sky color="#020202"></a-sky>
-                        <a-entity id="pitch-complex">
+                        
+                        <a-entity id="stadium-complex">
                             <a-plane rotation="-90 0 0" width="68" height="105" src="#pitch-tex" repeat="10 15" material="roughness: 1;"></a-plane>
-                            <a-plane rotation="-90 0 0" width="68.2" height="105.2" color="white" position="0 0.01 0" material="side: back"></a-plane>
-                            <a-ring color="white" radius-inner="9.1" radius-outer="9.3" rotation="-90 0 0" position="0 0.02 0"></a-ring>
+                            <a-plane rotation="-90 0 0" width="68" height="105" material="src: #pitch-markings; transparent: true; opacity: 0.6; offset: 0 0.01"></a-plane>
                             
                             <a-entity id="goal-north" position="0 0 -52.5">
                                 <a-box position="-3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
                                 <a-box position="3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
                                 <a-box position="0 2.44 0" width="7.52" height="0.2" depth="0.2" color="white"></a-box>
+                                <a-plane position="0 1.22 -1" width="7.32" height="2.44" material="color: white; opacity: 0.1; side: double; wireframe: true"></a-plane>
                             </a-entity>
+                            
                             <a-entity id="goal-south" position="0 0 52.5">
                                 <a-box position="-3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
                                 <a-box position="3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
                                 <a-box position="0 2.44 0" width="7.52" height="0.2" depth="0.2" color="white"></a-box>
+                                <a-plane position="0 1.22 1" width="7.32" height="2.44" material="color: white; opacity: 0.1; side: double; wireframe: true"></a-plane>
                             </a-entity>
                         </a-entity>
 
-                        <a-entity id="vr-player-assets"></a-entity>
+                        <a-entity id="match-simulation-layer"></a-entity>
                         <a-entity id="analysis-heatmaps" visible="false"></a-entity>
 
-                        <a-light type="ambient" color="#333"></a-light>
-                        <a-light type="point" position="0 15 0" intensity="1.2" color="#00ff41"></a-light>
+                        <a-light type="ambient" color="#444"></a-light>
+                        <a-light type="point" position="0 20 0" intensity="1.5" color="#00ff41"></a-light>
                     </a-scene>
 
                     <button class="vr-exit-btn" onclick="exitVRMode()">
@@ -164,7 +169,7 @@
                 <div class="chat-container" id="chat-stream">
                     <div class="msg ai">
                         <div class="msg-header">TONI ELITE</div>
-                        <div class="msg-body">System bereit. Pitch-Control Layer 1 geladen.</div>
+                        <div class="msg-body">11v11 Simulation kalibriert. Warte auf Drills.</div>
                     </div>
                 </div>
 
@@ -176,9 +181,9 @@
                         <span id="val-epi">0%</span>
                     </div>
                     <div class="metric-row">
-                        <span>LATENZ</span>
-                        <div class="bar-bg"><div class="bar-fill" id="bar-lat" style="width:0%; background:var(--neon-warn);"></div></div>
-                        <span id="val-lat">0ms</span>
+                        <span>PASSING ACC</span>
+                        <div class="bar-bg"><div class="bar-fill" id="bar-lat" style="width:0%; background:var(--neon-main);"></div></div>
+                        <span id="val-lat">0%</span>
                     </div>
                 </div>
 
