@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | RETINA STRIKER OPS</title>
+    <title>TONI 2.0 | COGNITIVE ELITE OPS</title>
     
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     
@@ -17,13 +17,13 @@
         <div class="auth-terminal">
             <div class="auth-inner">
                 <div class="auth-brand">TONI 2.0</div>
-                <div class="auth-msg">SYSTEM SECURE // BIOMETRIC SCAN REQUIRED</div>
+                <div class="auth-msg">SYSTEM SECURE // COGNITIVE ENGINE V5.3</div>
                 <div class="input-wrapper">
                     <input type="password" id="sys-pass" placeholder="ACCESS CODE" autocomplete="off">
                     <button onclick="systemBootSequence()">LOGIN</button>
                 </div>
                 <div class="terminal-footer">
-                    <span>V 5.0.0 (PHYSICS)</span>
+                    <span>V 5.3.0 (ELITE)</span>
                     <span>SERVER: ONLINE</span>
                 </div>
             </div>
@@ -106,41 +106,53 @@
             </aside>
 
             <main class="center-stage">
-                <div id="content-viewport">
-                    </div>
+                <div id="content-viewport"></div>
                 
                 <div id="vr-viewport" class="hidden">
                     <a-scene embedded loading-screen="dotsColor: #00ff41; backgroundColor: black">
                         
                         <a-entity id="player-rig" position="0 0 0">
                             <a-camera look-controls wasd-controls position="0 1.6 0">
-                                <a-text id="vr-hud-text" 
-                                        value="SYSTEM READY | WARTE AUF START" 
-                                        position="0 0 -1" 
-                                        align="center" 
-                                        width="1.5"
-                                        color="#00ff41">
-                                </a-text>
+                                <a-entity position="0 0 -1">
+                                    <a-plane width="0.8" height="0.25" material="color: black; opacity: 0.8; transparent: true" position="0 -0.7 0"></a-plane>
+                                    <a-text id="vr-hud-text" 
+                                            value="SYSTEM INITIALIZING..." 
+                                            position="0 -0.7 0.01" 
+                                            align="center" 
+                                            width="1.8"
+                                            color="#00ff41">
+                                    </a-text>
+                                </a-entity>
                                 <a-cursor color="#00ff41" scale="0.5 0.5 0.5"></a-cursor>
                             </a-camera>
                         </a-entity>
 
                         <a-sky color="#050505"></a-sky>
-                        
                         <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100" 
                                  material="color: #000; wireframe: true; wireframeLinewidth: 2; opacity: 1; color: #00ff41">
                         </a-plane>
 
-                        <a-entity position="0 0 -10">
-                            <a-box position="-3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="#00ff41" material="opacity: 0.5; transparent: true"></a-box>
-                            <a-box position="3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="#00ff41" material="opacity: 0.5; transparent: true"></a-box>
-                            <a-box position="0 2.44 0" width="7.52" height="0.2" depth="0.2" color="#00ff41" material="opacity: 0.5; transparent: true"></a-box>
+                        <a-entity id="target-L" position="-8 0 -2">
+                            <a-cylinder radius="0.4" height="2" color="#333" material="opacity: 0.6; transparent: true"></a-cylinder>
+                            <a-text value="STATION 1" align="center" position="0 1.2 0" width="4"></a-text>
+                        </a-entity>
+                        <a-entity id="target-R" position="8 0 -2">
+                            <a-cylinder radius="0.4" height="2" color="#333" material="opacity: 0.6; transparent: true"></a-cylinder>
+                            <a-text value="STATION 2" align="center" position="0 1.2 0" width="4"></a-text>
+                        </a-entity>
+                        <a-entity id="target-DL" position="-5 0 -8">
+                            <a-cylinder radius="0.4" height="2" color="#333" material="opacity: 0.6; transparent: true"></a-cylinder>
+                            <a-text value="STATION 3" align="center" position="0 1.2 0" width="4"></a-text>
+                        </a-entity>
+                        <a-entity id="target-DR" position="5 0 -8">
+                            <a-cylinder radius="0.4" height="2" color="#333" material="opacity: 0.6; transparent: true"></a-cylinder>
+                            <a-text value="STATION 4" align="center" position="0 1.2 0" width="4"></a-text>
                         </a-entity>
 
                         <a-cylinder position="-2 1 -5" radius="0.3" height="1.8" color="#ff2a2a" material="opacity: 0.8"></a-cylinder>
                         <a-cylinder position="2 1 -5" radius="0.3" height="1.8" color="#ff2a2a" material="opacity: 0.8"></a-cylinder>
 
-                        <a-sphere id="vr-ball" position="0 0.2 -2" radius="0.2" color="white"></a-sphere>
+                        <a-sphere id="vr-ball" position="0 0.2 -15" radius="0.22" color="white" material="roughness: 0.4"></a-sphere>
 
                         <a-light type="ambient" color="#222"></a-light>
                         <a-light type="point" position="0 5 0" intensity="0.8" color="#00ff41" distance="20"></a-light>
@@ -148,7 +160,7 @@
                     </a-scene>
 
                     <button class="vr-exit-btn" onclick="exitVRMode()">
-                        <i class="fa-solid fa-power-off"></i> BEENDEN
+                        <i class="fa-solid fa-power-off"></i> SYSTEM SHUTDOWN
                     </button>
                 </div>
             </main>
@@ -162,7 +174,7 @@
                 <div class="chat-container" id="chat-stream">
                     <div class="msg ai">
                         <div class="msg-header">TONI</div>
-                        <div class="msg-body">System bereit. Warte auf Input.</div>
+                        <div class="msg-body">Cognitive Elite Modus bereit. Warte auf Training-Start.</div>
                     </div>
                 </div>
 
@@ -174,14 +186,14 @@
                         <span id="val-scan" style="width:30px; text-align:right;">0%</span>
                     </div>
                     <div class="metric-row">
-                        <span>LATENZ</span>
+                        <span>REAKTION</span>
                         <div class="bar-bg"><div class="bar-fill" id="bar-lat" style="width:0%; background:var(--neon-warn);"></div></div>
                         <span id="val-lat" style="width:30px; text-align:right;">0ms</span>
                     </div>
                 </div>
 
                 <div class="chat-input-wrapper">
-                    <textarea id="toni-input" placeholder="Befehl eingeben... (Enter)"></textarea>
+                    <textarea id="toni-input" placeholder="Befehl eingeben..."></textarea>
                     <div class="chat-actions">
                         <button onclick="activateVoice()"><i class="fa-solid fa-microphone"></i></button>
                         <button class="send-btn" onclick="askToni()">SENDEN</button>
@@ -218,8 +230,8 @@
                     <label>Medizinischer Status</label>
                     <select id="edit-p-med">
                         <option value="Fit">Fit</option>
-                        <option value="Reha">Reha (Leichtes Training)</option>
-                        <option value="Verletzt">Verletzt (Ausfall)</option>
+                        <option value="Reha">Reha</option>
+                        <option value="Verletzt">Verletzt</option>
                     </select>
                 </div>
             </div>
