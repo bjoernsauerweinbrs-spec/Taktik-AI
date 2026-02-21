@@ -1,19 +1,17 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL ELITE ENGINE CORE (FULL VERSION V6.0)
+   TONI 2.0 | NEURAL ELITE ENGINE CORE (V6.5 - SIMULATION EDITION)
    ========================================================================== */
 
 /**
  * 1. GLOBAL STATE & DATA ARCHITECTURE
  */
 const eliteStore = {
-    // Kader-Daten mit kognitiven & physischen Profilen
     players: JSON.parse(localStorage.getItem('toni_players')) || [
         { id: 101, name: "M. Müller", pos: "ST", rating: 88, stats: [85, 90, 78, 84, 42, 81], load: [15, 12, 18, 20, 15, 12, 19], med: "Fit" },
         { id: 102, name: "L. Schmidt", pos: "TW", rating: 91, stats: [88, 45, 62, 58, 92, 85], load: [5, 4, 6, 5, 4, 5, 6], med: "Fit" },
         { id: 103, name: "K. Schneider", pos: "IV", rating: 84, stats: [72, 68, 85, 78, 84, 82], load: [10, 10, 11, 12, 10, 9, 11], med: "Reha" },
         { id: 104, name: "J. Weber", pos: "IV", rating: 82, stats: [68, 45, 65, 60, 88, 90], load: [8, 9, 8, 10, 8, 9, 8], med: "Fit" }
     ],
-    // Finanz-Daten (Management Labor)
     mgmt: JSON.parse(localStorage.getItem('toni_mgmt')) || {
         liquidAssets: 12500000,
         budget: 25000000,
@@ -21,13 +19,8 @@ const eliteStore = {
             { id: 1, partner: "Global Dynamics", value: 3500000, roi: 0.85, status: "Active" },
             { id: 2, partner: "CyberFit Analytics", value: 1200000, roi: 0.92, status: "Active" }
         ],
-        infrastructure: {
-            medicalLevel: 4,
-            analysisLevel: 5,
-            stadiumPaperActive: true
-        }
+        infrastructure: { medicalLevel: 4, analysisLevel: 5, stadiumPaperActive: true }
     },
-    // Taktik-Konfiguration (Bayern/Leipzig Standard)
     tactics: {
         activeFormation: '4-4-2',
         oppFormation: '3-4-3',
@@ -42,7 +35,6 @@ const eliteStore = {
  */
 function systemBootSequence() {
     const pass = document.getElementById('sys-pass').value;
-    // Der Code "1234" schaltet den Zugang frei
     if (pass === "1234") { 
         document.getElementById('auth-layer').classList.add('hidden');
         document.getElementById('main-interface').classList.remove('hidden');
@@ -56,7 +48,6 @@ function initEliteCore() {
     console.log("TONI 2.0: Neural Core Synchronized.");
     updateClock();
     setInterval(updateClock, 1000);
-    
     loadModule(eliteStore.activeModule);
     updateKPIs();
     voiceEngine.init();
@@ -102,57 +93,96 @@ function loadModule(modId) {
 }
 
 /* ==========================================================================
-   MODULE: VR HUB (Meta Quest Engine)
+   MODULE: VR HUB & 11v11 SIMULATION ENGINE
    ========================================================================== */
 
 const trainingEngine = {
     currentLevel: 0,
+    
+    initHUD: function(title, instruction) {
+        const briefing = document.getElementById('mission-briefing');
+        const hudText = document.getElementById('vr-hud-text');
+        if(briefing) briefing.setAttribute('value', title);
+        if(hudText) hudText.setAttribute('value', instruction);
+    },
+
     startLevel: function(lvl) {
         this.currentLevel = lvl;
-        const assets = document.getElementById('vr-player-assets');
-        if(!assets) return;
-        assets.innerHTML = ''; 
+        const container = document.getElementById('match-simulation-layer');
+        if(!container) return;
+        container.innerHTML = ''; 
         
-        if (lvl === 1) { // SCANNING (Reha Modus)
-            voiceEngine.speak("Scanning Drill aktiv. Identifizieren Sie die Farbcodes hinter Ihnen.");
-            this.spawnVRPlayers(assets, 5, true);
-        } else if (lvl === 2) { // GAP FINDER
-            voiceEngine.speak("Lücke finden. Analysieren Sie die Abwehrkette.");
-            this.spawnVRPlayers(assets, 11, false);
+        if (lvl === 1) { // SCANNING & REHA
+            this.initHUD("LEVEL 1: SCANNING ADAPTION", "Finde die markierten Spieler im Rücken.");
+            voiceEngine.speak("Scanning-Modus aktiv. Überprüfen Sie die Halbräume.");
+            this.spawnTeam(container, 'home', '4-4-2', '#00ff41'); // Eigene
+            this.spawnTeam(container, 'away', '4-4-2', '#ef4444'); // Gegner
+        } else if (lvl === 2) { // 11v11 GAP FINDER
+            this.initHUD("LEVEL 2: VERTICAL PASSING", "Finde die Lücke in der 3er-Kette.");
+            voiceEngine.speak("11 gegen 11 Simulation gestartet. Analysieren Sie die Verschiebebewegung.");
+            this.spawnTeam(container, 'home', '4-4-2', '#00ff41');
+            this.spawnTeam(container, 'away', '3-4-3', '#3b82f6');
         }
     },
 
-    spawnVRPlayers: function(container, count, random) {
-        for(let i=0; i<count; i++) {
-            const p = document.createElement('a-entity');
-            const x = random ? (Math.random() * 40 - 20) : (i * 6 - 30);
-            const z = random ? (Math.random() * 40 - 20) : -15;
+    /**
+     * Erzeugt ein komplettes Team mit realistischen Avataren
+     */
+    spawnTeam: function(container, side, formation, color) {
+        const coords = this.getFormationCoords(formation, side);
+        coords.forEach((pos, i) => {
+            const player = document.createElement('a-entity');
+            player.setAttribute('position', `${pos.x} 0 ${pos.z}`);
             
-            p.setAttribute('position', `${x} 0 ${z}`);
-            p.innerHTML = `
-                <a-cylinder radius="0.5" height="1.8" color="${i % 2 === 0 ? '#ef4444' : '#3b82f6'}"></a-cylinder>
-                <a-sphere position="0 1.7 0" radius="0.25" color="#ffccaa">
-                    <a-box position="0 0 0.2" width="0.1" height="0.1" depth="0.2" color="black"></a-box>
-                </a-sphere>
+            // Blickrichtung bestimmen
+            const rotation = side === 'home' ? "0 0 0" : "0 180 0";
+            player.setAttribute('rotation', rotation);
+
+            // Avatar-Geometrie (Torso + Kopf mit Visier)
+            player.innerHTML = `
+                <a-box width="0.6" height="1.4" depth="0.3" color="${color}" material="roughness: 1;"></a-box>
+                <a-sphere position="0 1.6 0" radius="0.25" color="#ffccaa">
+                    <a-box position="0 0 0.2" width="0.15" height="0.1" depth="0.2" color="black"></a-box> </a-sphere>
+                <a-text value="${i+1}" position="0 2 0" align="center" width="4" color="white"></a-text>
             `;
-            container.appendChild(p);
+            container.appendChild(player);
+        });
+    },
+
+    getFormationCoords: function(type, side) {
+        const p = [];
+        const dir = side === 'home' ? 1 : -1;
+        const offset = side === 'home' ? 5 : -5;
+
+        // Tormann
+        p.push({x: 0, z: 50 * dir});
+
+        if (type === '4-4-2') {
+            [-18, -6, 6, 18].forEach(x => p.push({x: x, z: 32 * dir})); // Abwehr
+            [-20, -7, 7, 20].forEach(x => p.push({x: x, z: 12 * dir})); // Mittelfeld
+            [-7, 7].forEach(x => p.push({x: x, z: -5 * dir}));        // Sturm
+        } else if (type === '3-4-3') {
+            [-15, 0, 15].forEach(x => p.push({x: x, z: 35 * dir}));    // Abwehr
+            [-22, -8, 8, 22].forEach(x => p.push({x: x, z: 15 * dir})); // Mittelfeld
+            [-15, 0, 15].forEach(x => p.push({x: x, z: -8 * dir}));    // Sturm
         }
+        return p;
     }
 };
 
 function initVRHub() {
     const scene = document.querySelector('a-scene');
     if (scene && scene.hasLoaded) {
-        trainingEngine.startLevel(1);
+        trainingEngine.startLevel(2); // Direktstart 11v11
     } else if(scene) {
-        scene.addEventListener('loaded', () => trainingEngine.startLevel(1));
+        scene.addEventListener('loaded', () => trainingEngine.startLevel(2));
     }
 }
 
 function exitVRMode() { loadModule('kader'); }
 
 /* ==========================================================================
-   MODULE: MANAGEMENT LABOR
+   MODULE: MANAGEMENT & KADER (Original-Logik erhalten & optimiert)
    ========================================================================== */
 
 function renderFinanceLab() {
@@ -187,16 +217,10 @@ function investInInfra(type) {
         eliteStore.mgmt.liquidAssets -= 1000000;
         if (type === 'med') eliteStore.mgmt.infrastructure.medicalLevel++;
         else eliteStore.mgmt.infrastructure.analysisLevel++;
-        saveState();
-        renderFinanceLab();
-        updateKPIs();
+        saveState(); renderFinanceLab(); updateKPIs();
         voiceEngine.speak("Investition bestätigt. Infrastruktur-Level erhöht.");
     }
 }
-
-/* ==========================================================================
-   MODULE: KADER & MEDICAL (ACWR Logic)
-   ========================================================================== */
 
 function renderLockerRoom() {
     const viewport = document.getElementById('content-viewport');
@@ -231,7 +255,7 @@ function calculateACWR(load) {
 }
 
 /* ==========================================================================
-   MODULE: TACTICS & MEDIA (Missing Renders)
+   KI & SYSTEM TOOLS
    ========================================================================== */
 
 function renderTacticBoard() {
@@ -239,13 +263,14 @@ function renderTacticBoard() {
     viewport.innerHTML = `
         <div class="tactics-container">
             <div class="tactics-pitch">
-                <div class="t-obj obj-player" style="top:50%; left:50%;">10</div>
-                <div class="t-obj obj-ball" style="top:55%; left:52%;"></div>
+                <div class="t-obj obj-player" style="top:30%; left:50%; border-color:#00ff41;">9</div>
+                <div class="t-obj obj-player" style="top:70%; left:40%;">4</div>
+                <div class="t-obj obj-ball" style="top:50%; left:50%;"></div>
             </div>
             <div class="analysis-sheet">
-                <h3 class="sheet-title">MATCH PREP</h3>
-                <textarea class="notes-area" placeholder="Taktische Anweisungen hier..."></textarea>
-                <button class="btn-save" onclick="voiceEngine.speak('Taktik gespeichert.')">PUBLISH TO SQUAD</button>
+                <h3 class="sheet-title">TACTICAL BRIEFING</h3>
+                <textarea class="notes-area" placeholder="Analysen für das Team..."></textarea>
+                <button class="btn-save" onclick="voiceEngine.speak('Analyse an alle Spieler-Tablets gesendet.')">SYNC TO SQUAD</button>
             </div>
         </div>
     `;
@@ -255,20 +280,15 @@ function renderNewspaperCMS() {
     const viewport = document.getElementById('content-viewport');
     viewport.innerHTML = `
         <div class="newspaper-wrapper">
-            <h1>STADION-ECHO // ELITE EDITION</h1>
-            <p>Aktueller Kaderwert: ${eliteStore.mgmt.liquidAssets.toLocaleString()} €</p>
-            <div style="border:1px solid #ccc; padding:20px; margin-top:20px;">
-                <h3>TOP STORY: NEURAL TRAINING SUCCESS</h3>
-                <p>Die VR-Sitzungen zeigen Wirkung bei der Scanning-Rate.</p>
-            </div>
-            <button onclick="window.print()">DRUCKVERSION GENERIEREN (A4)</button>
+            <h1 style="font-family:var(--font-hud); color:black;">RB LEIPZIG // DAILY INSIGHT</h1>
+            <p>Finanz-Status: ${eliteStore.mgmt.liquidAssets.toLocaleString()} €</p>
+            <hr>
+            <h3>FOKUS: NEURALES REHA-TRAINING</h3>
+            <p>Die Belastungswerte (ACWR) sind im grünen Bereich. VR-Einheiten stabilisieren die kognitive Rate.</p>
+            <button class="btn-save" style="background:black; color:white; margin-top:20px;" onclick="window.print()">PRINT EDITION</button>
         </div>
     `;
 }
-
-/* ==========================================================================
-   KI & SYSTEM TOOLS
-   ========================================================================== */
 
 const voiceEngine = {
     init: function() {
@@ -281,7 +301,7 @@ const voiceEngine = {
     },
     speak: function(text) {
         const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'de-DE'; u.pitch = 0.85;
+        u.lang = 'de-DE'; u.pitch = 0.9;
         window.speechSynthesis.speak(u);
         addChatMessage("TONI ELITE", text);
     },
@@ -290,8 +310,8 @@ const voiceEngine = {
 
 function handleVoiceCommand(cmd) {
     const c = cmd.toLowerCase();
-    if (c.includes("status")) voiceEngine.speak("System stabil. Alle Sensoren kalibriert.");
-    if (c.includes("finanzen")) loadModule('finance');
+    if (c.includes("status")) voiceEngine.speak("Die Simulation läuft stabil. Pitch Control bei 68%.");
+    if (c.includes("kader")) loadModule('kader');
 }
 
 function updateClock() {
