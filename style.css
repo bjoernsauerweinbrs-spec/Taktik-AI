@@ -289,3 +289,54 @@ summary i { width: 20px; text-align: center; color: var(--accent-primary); }
 }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* ==========================================================================
+   MODULE: TACTICS BOARD (ADDON)
+   ========================================================================== */
+
+.tactics-container {
+    display: flex; gap: 20px; height: 100%;
+}
+
+/* Werkzeugleiste links */
+.tactics-tools {
+    width: 80px; background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 15px; align-items: center;
+}
+.tool-btn {
+    width: 50px; height: 50px; border-radius: 8px; border: 1px solid var(--border-light);
+    background: var(--bg-deep); color: var(--text-muted); cursor: pointer; transition: 0.2s;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.tool-btn:hover, .tool-btn.active { border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(34,197,94,0.1); }
+
+/* Das Spielfeld */
+.tactics-pitch {
+    flex: 1; background: #2f855a; /* Rasengrün */
+    border: 2px solid white; border-radius: 4px; position: relative; overflow: hidden;
+    background-image: 
+        linear-gradient(white 2px, transparent 2px),
+        linear-gradient(90deg, white 2px, transparent 2px),
+        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+}
+
+/* Zeichen-Ebene */
+#tactics-canvas {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; /* Klicks gehen durch auf Objekte */
+    z-index: 10;
+}
+
+/* Bewegliche Objekte */
+.t-obj {
+    position: absolute; cursor: grab; z-index: 20; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-family: var(--font-head); user-select: none; transition: transform 0.1s;
+}
+.t-obj:active { cursor: grabbing; transform: scale(1.1); }
+
+/* Objekt-Typen */
+.obj-player { width: 40px; height: 40px; background: var(--bg-deep); border: 2px solid var(--accent-primary); border-radius: 50%; color: white; font-size: 12px; }
+.obj-ball { width: 20px; height: 20px; background: white; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+.obj-cone { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid #f59e0b; }
+.obj-goal { width: 60px; height: 10px; background: transparent; border: 2px solid white; border-bottom: none; }
+
