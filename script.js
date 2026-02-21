@@ -1,12 +1,12 @@
 /* ==========================================================================
    TONI 2.0 | ELITE CORE ENGINE
-   Version: 5.1.0 (MASTER MERGE: FULL UI + PHYSICS ENGINE)
+   Version: 5.2.2 (FULL INDUSTRIAL BUILD - NO COMPRESSION)
    Architecture: Monolith / Local-First / VR-Hybrid / Retina-Design
    ========================================================================== */
 
 /**
  * --------------------------------------------------------------------------
- * 1. DATABASE & STATE MANAGEMENT (Local Storage Engine)
+ * 1. DATABASE & STATE MANAGEMENT
  * --------------------------------------------------------------------------
  */
 const DEFAULT_DB = {
@@ -14,16 +14,14 @@ const DEFAULT_DB = {
         pass: "Toni2026",
         clubName: "RB Leipzig",
         coachName: "Head Coach",
-        version: "5.1.0"
+        version: "5.2.2"
     },
-    // Finanz-Daten
     finance: [
         { id: 1708221, date: "2026-02-20", desc: "Sponsoring: Red Bull Global", amount: 4500000, type: "in" },
         { id: 1708222, date: "2026-02-21", desc: "Gehaltslauf: Profikader Feb", amount: -2100000, type: "out" },
         { id: 1708223, date: "2026-02-22", desc: "Reha-Equipment: Cryo Chamber", amount: -45000, type: "out" },
         { id: 1708224, date: "2026-02-23", desc: "Ticketing: Vorverkauf CL", amount: 850000, type: "in" }
     ],
-    // Spieler-Daten
     squad: [
         { id: 101, name: "Péter Gulácsi", pos: "TW", rating: 84, status: "Fit", img: "" },
         { id: 102, name: "Willi Orbán", pos: "IV", rating: 83, status: "Fit", img: "" },
@@ -33,36 +31,29 @@ const DEFAULT_DB = {
         { id: 106, name: "Benjamin Henrichs", pos: "AV", rating: 81, status: "Fit", img: "" },
         { id: 107, name: "Xaver Schlager", pos: "ZM", rating: 82, status: "Fit", img: "" }
     ],
-    // VR Telemetrie Cache
     telemetry: {
         lastScanRate: 0,
-        lastLatency: 0,
-        sessionCount: 12,
-        highScore: 94
+        totalBalls: 0,
+        successScans: 0
     },
-    tactics: []
+    tactics: {
+        formation: "4-4-2",
+        objects: []
+    }
 };
 
-// Initialisiere DB beim Start oder lade Backup
 let DB = JSON.parse(localStorage.getItem('toni_elite_db')) || DEFAULT_DB;
 
-/**
- * Speichert den aktuellen Zustand persistent im Browser.
- */
 function saveSystem() {
     try {
         localStorage.setItem('toni_elite_db', JSON.stringify(DB));
         refreshKPIs();
-        console.log("System state saved successfully.");
+        console.log("System saved.");
     } catch (e) {
-        console.error("Save failed:", e);
-        speak("Fehler beim Speichern der Datenbank.");
+        console.error("Save Error", e);
     }
 }
 
-/**
- * Berechnet KPIs für den Header neu (Live-Budget).
- */
 function refreshKPIs() {
     let budget = 10000000; 
     DB.finance.forEach(tx => budget += tx.amount);
@@ -71,13 +62,7 @@ function refreshKPIs() {
     const budgetEl = document.getElementById('kpi-budget');
     if(budgetEl) {
         budgetEl.innerText = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(budget);
-        if(budget < 0) { 
-            budgetEl.classList.remove('val-pos'); 
-            budgetEl.classList.add('val-neg'); 
-        } else { 
-            budgetEl.classList.add('val-pos'); 
-            budgetEl.classList.remove('val-neg'); 
-        }
+        budgetEl.className = budget < 0 ? 'value val-neg' : 'value val-pos';
     }
     
     const squadEl = document.getElementById('kpi-squad-value');
@@ -86,7 +71,7 @@ function refreshKPIs() {
 
 /**
  * --------------------------------------------------------------------------
- * 2. AUTHENTICATION & BOOT SEQUENCE (Security Layer)
+ * 2. AUTHENTICATION & BOOT
  * --------------------------------------------------------------------------
  */
 function systemBootSequence() {
@@ -95,26 +80,22 @@ function systemBootSequence() {
     
     if (input === DB.settings.pass) {
         terminal.style.opacity = '0';
-        speak("Identifikation bestätigt. Willkommen im RETINA STRIKER System.");
-        
+        speak("System-Check erfolgreich. Willkommen zurück.");
         setTimeout(() => {
             terminal.classList.add('hidden');
             document.getElementById('main-interface').classList.remove('hidden');
             refreshKPIs();
             startSystemClock();
-            loadModule('kader'); 
+            loadModule('kader');
         }, 800);
     } else {
-        const wrap = document.querySelector('.input-wrapper');
-        wrap.style.animation = "shake 0.5s";
-        setTimeout(() => wrap.style.animation = "", 500);
-        speak("Zugriff verweigert. Sicherheitsprotokoll aktiv.");
+        alert("ZUGRIFF VERWEIGERT.");
     }
 }
 
 /**
  * --------------------------------------------------------------------------
- * 3. MODULE NAVIGATION (The Switchboard)
+ * 3. MODULE NAVIGATION
  * --------------------------------------------------------------------------
  */
 function loadModule(moduleId) {
@@ -122,64 +103,46 @@ function loadModule(moduleId) {
     const displayTitle = document.getElementById('active-module-display');
 
     document.querySelectorAll('.nav-content button').forEach(b => b.classList.remove('active'));
-    if(event && event.target && event.target.tagName === 'BUTTON') {
-        event.target.classList.add('active');
-    }
-
-    const vrView = document.getElementById('vr-viewport');
-    if(vrView) vrView.classList.add('hidden');
+    
+    // UI Reset
+    document.getElementById('vr-viewport').classList.add('hidden');
     viewport.classList.remove('hidden');
 
     switch(moduleId) {
         case 'kader':
-            displayTitle.innerText = "DASHBOARD // MANNSCHAFT";
+            displayTitle.innerText = "DASHBOARD // KADER";
             renderSquadModule(viewport);
             break;
         case 'finance':
-            displayTitle.innerText = "DASHBOARD // FINANZ LABOR";
+            displayTitle.innerText = "MANAGEMENT // FINANZEN";
             renderFinanceModule(viewport);
             break;
-        case 'stadionzeitung':
-            displayTitle.innerText = "MEDIA // STADION ZEITUNG CMS";
-            renderNewspaperModule(viewport);
-            break;
         case 'vr-hub':
-            displayTitle.innerText = "INNOVATION // OCTAGON VR HUB";
+            displayTitle.innerText = "INNOVATION // OCTAGON VR";
             renderVRHub(viewport);
             break;
         case 'tactics':
-            displayTitle.innerText = "COACHING // TAKTIK BOARD PRO";
-            renderTacticsBoard(viewport); 
+            displayTitle.innerText = "COACHING // TAKTIK BOARD";
+            renderTacticsBoard(viewport);
             break;
         case 'scouting':
-            displayTitle.innerText = "MATCH PREP // SPIELTAGS-CLIPBOARD";
+            displayTitle.innerText = "COACHING // MATCH PREP";
             renderMatchPrep(viewport);
             break;
         case 'drills':
-            displayTitle.innerText = "COACHING // SESSION PLANNER";
+            displayTitle.innerText = "COACHING // PLANNER";
             renderDrillPlanner(viewport);
             break;
-        
-        case 'medical':
-        case 'sponsors':
-            displayTitle.innerText = "DASHBOARD // " + moduleId.toUpperCase();
-            renderPlaceholder(viewport, moduleId);
+        case 'stadionzeitung':
+            displayTitle.innerText = "MEDIA // ZEITUNG CMS";
+            renderNewspaperModule(viewport);
             break;
     }
 }
 
-function renderPlaceholder(target, id) {
-    target.innerHTML = `
-        <div style="padding:100px; text-align:center; color:#64748b; border:1px dashed #333; border-radius:8px;">
-            <i class="fa-solid fa-person-digging" style="font-size:40px; margin-bottom:20px;"></i>
-            <h1>MODUL: ${id.toUpperCase()}</h1>
-            <p>Dieses Modul wird in Kürze freigeschaltet.</p>
-        </div>`;
-}
-
 /**
  * --------------------------------------------------------------------------
- * 4. MODULE: SQUAD MANAGEMENT (CRUD Editor)
+ * 4. KADER-MANAGEMENT (Full FIFA-Card-System)
  * --------------------------------------------------------------------------
  */
 function renderSquadModule(target) {
@@ -197,13 +160,16 @@ function renderSquadModule(target) {
             <div class="player-name">${p.name}</div>
         </div>`;
     });
-    html += `
-        <div class="fifa-card add-new" onclick="createNewPlayer()">
-            <i class="fa-solid fa-plus" style="font-size:40px;"></i>
-            <span style="margin-top:10px; font-size:12px; font-weight:700;">NEUER SPIELER</span>
-        </div>
-    </div>`;
+    html += `<div class="fifa-card add-new" onclick="createNewPlayer()"><i class="fa-solid fa-plus"></i></div></div>`;
     target.innerHTML = html;
+}
+
+function createNewPlayer() {
+    const newId = Date.now();
+    DB.squad.push({ id: newId, name: "Neuer Spieler", pos: "ZM", rating: 75, status: "Fit", img: "" });
+    saveSystem();
+    renderSquadModule(document.getElementById('content-viewport'));
+    openPlayerEditor(newId);
 }
 
 function openPlayerEditor(id) {
@@ -217,14 +183,6 @@ function openPlayerEditor(id) {
     document.getElementById('modal-player-editor').classList.remove('hidden');
 }
 
-function createNewPlayer() {
-    const newId = Date.now();
-    DB.squad.push({ id: newId, name: "Neuer Spieler", pos: "ZM", rating: 75, status: "Fit", img: "" });
-    saveSystem();
-    renderSquadModule(document.getElementById('content-viewport'));
-    openPlayerEditor(newId);
-}
-
 function savePlayerChanges() {
     const id = parseInt(document.getElementById('edit-p-id').value);
     const index = DB.squad.findIndex(x => x.id === id);
@@ -236,15 +194,14 @@ function savePlayerChanges() {
         saveSystem();
         closeModal('modal-player-editor');
         renderSquadModule(document.getElementById('content-viewport'));
-        speak(`Profil von ${DB.squad[index].name} aktualisiert.`);
     }
 }
 
-function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
 /**
  * --------------------------------------------------------------------------
- * 5. MODULE: FINANCE LABORATORY
+ * 5. FINANZ-LABOR (Vollständige Buchhaltung)
  * --------------------------------------------------------------------------
  */
 function renderFinanceModule(target) {
@@ -252,23 +209,30 @@ function renderFinanceModule(target) {
         <div class="finance-dashboard">
             <div class="input-panel">
                 <input type="date" id="fin-date" value="${new Date().toISOString().split('T')[0]}">
-                <input type="text" id="fin-desc" placeholder="Verwendungszweck">
-                <input type="number" id="fin-amount" placeholder="Betrag (+/-)">
+                <input type="text" id="fin-desc" placeholder="Buchungstext...">
+                <input type="number" id="fin-amount" placeholder="Betrag € (+/-)">
                 <button class="btn-action" onclick="addFinanceTransaction()">BUCHEN</button>
             </div>
-            <div style="background:rgba(0,0,0,0.5); padding:20px; border-radius:8px; border:1px solid var(--border-tech);">
+            <div class="table-container">
                 <table class="data-table">
-                    <thead><tr><th>ID</th><th>Datum</th><th>Beschreibung</th><th style="text-align:right;">Betrag</th><th style="text-align:center;">Aktion</th></tr></thead>
-                    <tbody id="finance-tbody">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Beschreibung</th>
+                            <th style="text-align:right;">Betrag</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         ${DB.finance.map(tx => `
-                            <tr>
-                                <td style="color:#64748b; font-family:monospace;">#${tx.id}</td>
-                                <td>${tx.date}</td>
-                                <td><b style="color:white;">${tx.desc}</b></td>
-                                <td style="text-align:right;" class="${tx.type === 'in' ? 'val-pos' : 'val-neg'}">${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(tx.amount)}</td>
-                                <td style="text-align:center;"><i class="fa-solid fa-trash" style="cursor:pointer; color:#64748b;" onclick="deleteTransaction(${tx.id})"></i></td>
-                            </tr>
-                        `).join('')}
+                        <tr>
+                            <td>${tx.date}</td>
+                            <td>${tx.desc}</td>
+                            <td style="text-align:right;" class="${tx.type === 'in' ? 'val-pos' : 'val-neg'}">
+                                ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(tx.amount)}
+                            </td>
+                            <td style="text-align:center;"><i class="fa-solid fa-trash" onclick="deleteTransaction(${tx.id})"></i></td>
+                        </tr>`).join('')}
                     </tbody>
                 </table>
             </div>
@@ -280,196 +244,126 @@ function addFinanceTransaction() {
     const amount = parseFloat(document.getElementById('fin-amount').value);
     const date = document.getElementById('fin-date').value;
     if(desc && amount && date) {
-        DB.finance.unshift({ id: Date.now(), date: date, desc: desc, amount: amount, type: amount >= 0 ? 'in' : 'out' });
+        DB.finance.unshift({ id: Date.now(), date, desc, amount, type: amount >= 0 ? 'in' : 'out' });
         saveSystem();
-        loadModule('finance'); 
-        speak("Transaktion erfolgreich verbucht.");
-    } else { alert("Bitte alle Felder ausfüllen."); }
+        loadModule('finance');
+    }
 }
 
 function deleteTransaction(id) {
-    if(confirm("Soll diese Buchung wirklich storniert werden?")) { DB.finance = DB.finance.filter(tx => tx.id !== id); saveSystem(); loadModule('finance'); }
+    if(confirm("Löschen?")) {
+        DB.finance = DB.finance.filter(tx => tx.id !== id);
+        saveSystem();
+        loadModule('finance');
+    }
 }
 
 /**
  * --------------------------------------------------------------------------
- * 6. MODULE: STADION ZEITUNG (CMS)
+ * 6. VR OCTAGON COGNITIVE PRO (Die Profi-Physik)
  * --------------------------------------------------------------------------
  */
-function renderNewspaperModule(target) {
-    target.innerHTML = `
-        <div style="display:flex; justify-content:center;">
-            <div class="newspaper-wrapper">
-                <div class="paper-header"><h1 class="paper-brand">DIE ROTE BULLEN ARENA</h1><div class="paper-meta"><span>AUSGABE #24</span><span>SAISON 2025/26</span></div></div>
-                <h1 class="headline-l cms-editable" contenteditable="true">MATCHDAY VORSCHAU: ALLES ODER NICHTS</h1>
-                <div style="width:100%; height:300px; background:#e2e8f0; display:flex; align-items:center; justify-content:center; margin:20px 0; color:#666;" class="cms-editable">[BILD EINFÜGEN - HIER KLICKEN]</div>
-                <div class="article-text cms-editable" contenteditable="true" id="paper-body">Hier beginnt der Text. Klicken Sie, um zu schreiben.</div>
-                <div style="margin-top:40px; border-top:2px solid black; padding-top:20px; text-align:center;">
-                     <button onclick="window.print()" class="btn-action"><i class="fa-solid fa-print"></i> DRUCKEN / PDF</button>
-                     <button onclick="generateAIArticle()" class="btn-action" style="background:#0f172a; color:white;"><i class="fa-solid fa-wand-magic-sparkles"></i> KI TEXT GENERIEREN</button>
-                </div>
-            </div>
-        </div>`;
-}
+let trainingActive = false;
+let ballInterval;
+let scanCount = 0;
+let totalBalls = 0;
+let lastScanTime = 0;
 
-function generateAIArticle() {
-    document.getElementById('paper-body').innerText += " Die Arena wird beben. Analysten sehen einen klaren Vorteil im Umschaltspiel.";
-    speak("Artikel wurde durch KI erweitert.");
-}
-
-/**
- * --------------------------------------------------------------------------
- * 7. MODULE: VR HUB & PHYSICS ENGINE (THE CORE)
- * --------------------------------------------------------------------------
- */
 function renderVRHub(target) {
     target.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
-            <h2 style="font-family:'Orbitron'; color:var(--neon-main); margin-bottom:20px; letter-spacing:3px;">RETINA STRIKER v5.1</h2>
-            <div style="background:rgba(0,0,0,0.8); padding:40px; border:1px solid var(--neon-main); border-radius:4px; text-align:center; width:500px; box-shadow:0 0 30px rgba(0,255,65,0.1);">
-                <i class="fa-brands fa-meta" style="font-size:60px; color:white; margin-bottom:20px; animation: pulse 2s infinite;"></i>
-                <p style="color:var(--text-dim); margin-bottom:30px;">
-                    PHYSICS ENGINE ONLINE.<br>
-                    Lade 3D-Umgebung: Tor, Ball, Gegner-KI.
-                </p>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
-                     <div style="border:1px solid #333; padding:10px; color:#666; font-size:10px;">WAR ROOM<br>(Inaktiv)</div>
-                     <div style="border:1px solid var(--neon-main); padding:10px; color:var(--neon-main); font-size:10px; background:rgba(0,255,65,0.1);">OCTAGON<br>(Bereit)</div>
+        <div class="vr-hub-ui">
+            <h1 style="font-family:'Orbitron'; color:var(--neon-main);">OCTAGON COGNITIVE v5.2</h1>
+            <p>PROFESSIONAL SCANNING TRAINING SYSTEM</p>
+            <div class="stats-grid" style="display:flex; gap:20px; margin:30px 0;">
+                <div class="v-card" style="background:#000; padding:20px; border:1px solid #333; flex:1;">
+                    <h3>SCAN RATE</h3>
+                    <div id="vr-live-scan" style="font-size:32px; color:var(--neon-main);">0%</div>
                 </div>
-                <button class="live-btn active" style="width:100%; justify-content:center; padding:20px; font-size:16px;" onclick="enterVRMode()">
-                    START SIMULATION
-                </button>
+                <div class="v-card" style="background:#000; padding:20px; border:1px solid #333; flex:1;">
+                    <h3>DURCHGÄNGE</h3>
+                    <div id="vr-live-balls" style="font-size:32px;">0</div>
+                </div>
             </div>
+            <button class="live-btn active" style="padding:20px 50px; font-size:18px;" onclick="enterVRMode()">
+                START VR SIMULATION (QUEST 3)
+            </button>
         </div>`;
 }
 
-// PHYSICS LOOP
-let ballInterval;
-
 function enterVRMode() {
-    const viewport = document.getElementById('content-viewport');
-    const vrView = document.getElementById('vr-viewport');
-    
-    viewport.classList.add('hidden');
-    vrView.classList.remove('hidden');
-
+    document.getElementById('content-viewport').classList.add('hidden');
+    document.getElementById('vr-viewport').classList.remove('hidden');
     const scene = document.querySelector('a-scene');
-    
-    // BODEN FIX FÜR META QUEST (SICHTBARKEIT)
-    const plane = document.querySelector('a-plane');
-    if(plane) {
-        plane.removeAttribute('src'); 
-        plane.setAttribute('material', 'color: #00ff41; wireframe: true; wireframeLinewidth: 2; opacity: 1;');
-    }
-    
-    if (scene.enterVR) {
-        scene.enterVR();
-    }
-
-    speak("Physics Engine gestartet. Ball-Simulation aktiv.");
-    startBallSimulation();
+    if (scene.enterVR) scene.enterVR();
+    trainingActive = true;
+    scanCount = 0;
+    totalBalls = 0;
+    speak("Cognitive Engine geladen. Achte auf den Schulterblick.");
+    startCognitiveLoop();
 }
 
-function startBallSimulation() {
+function startCognitiveLoop() {
     const ball = document.getElementById('vr-ball');
     const hud = document.getElementById('vr-hud-text');
-    let posZ = -2;
-    let direction = -1; 
+    const camera = document.querySelector('a-camera');
+    let bZ = -15; 
+    let hasScanned = false;
 
     if(ballInterval) clearInterval(ballInterval);
 
     ballInterval = setInterval(() => {
-        // Ball Physik (Ping Pong)
-        posZ += (0.1 * direction);
-        if(posZ < -8) direction = 1; 
-        if(posZ > -1) direction = -1;
+        if(!trainingActive) return;
 
-        if(ball) ball.setAttribute('position', `0 0.2 ${posZ}`);
-
-        // Live HUD Telemetrie
-        if(hud) {
-            let dist = Math.abs(posZ).toFixed(1);
-            let xG = (1/dist).toFixed(2); if(xG>0.99)xG=0.99;
-            hud.setAttribute('value', `DIST: ${dist}m | xG: ${xG}`);
-            hud.setAttribute('color', '#00ff41'); 
+        // Ball Bewegung
+        bZ += 0.2;
+        if(bZ > 0) {
+            totalBalls++;
+            if(hasScanned) scanCount++;
+            else speak("Kein Scan erfolgt!");
+            
+            bZ = -15; 
+            hasScanned = false;
         }
+
+        if(ball) ball.setAttribute('position', `0 0.15 ${bZ}`);
+
+        // Kognitive Erkennung: Kopfdrehung
+        const rot = camera.getAttribute('rotation');
+        if(Math.abs(rot.y) > 45) {
+            hasScanned = true;
+            lastScanTime = Date.now();
+        }
+
+        // HUD Feedback
+        let rate = totalBalls > 0 ? Math.round((scanCount/totalBalls)*100) : 0;
+        if(hud) {
+            hud.setAttribute('value', `SCAN: ${hasScanned ? 'OK' : 'FEHLT'}\nRATE: ${rate}%`);
+            hud.setAttribute('color', hasScanned ? "#00ff41" : "#ffae00");
+        }
+
+        // Live Dashboard Update
+        document.getElementById('vr-live-scan').innerText = rate + "%";
+        document.getElementById('vr-live-balls').innerText = totalBalls;
+        
+        // Telemetrie Widget synchronisieren
+        const sideScan = document.getElementById('val-scan');
+        if(sideScan) sideScan.innerText = rate + "%";
+        const sideBar = document.getElementById('bar-scan');
+        if(sideBar) sideBar.style.width = rate + "%";
+
     }, 50);
 }
 
 function exitVRMode() {
-    if(ballInterval) clearInterval(ballInterval);
+    trainingActive = false;
+    clearInterval(ballInterval);
     document.getElementById('vr-viewport').classList.add('hidden');
     document.getElementById('content-viewport').classList.remove('hidden');
 }
 
 /**
  * --------------------------------------------------------------------------
- * 8. TONI AI PERSONA
- * --------------------------------------------------------------------------
- */
-function askToni() {
-    const input = document.getElementById('toni-input');
-    const container = document.getElementById('chat-stream');
-    const question = input.value;
-    if(!question) return;
-
-    container.innerHTML += `<div class="msg user"><div class="msg-header">COACH</div><div class="msg-body">${question}</div></div>`;
-    input.value = "";
-    container.scrollTop = container.scrollHeight;
-    
-    speak("Moment...");
-    setTimeout(() => {
-        let answer = "Checke die Daten...";
-        const q = question.toLowerCase();
-        if(q.includes("finanz") || q.includes("geld")) answer = "Das Budget ist stabil. Sponsoring deckt die Kosten.";
-        else if(q.includes("taktik") || q.includes("aufstellung")) answer = "Gegen tiefstehende Gegner empfehle ich Breite im Spiel. Openda muss in die Tiefe starten.";
-        else if(q.includes("training") || q.includes("vr")) answer = "Die Scan-Raten im Octagon sind um 15% gestiegen.";
-        else answer = "Die Intensität im Training muss hoch bleiben. Das ist der Schlüssel.";
-
-        container.innerHTML += `<div class="msg ai"><div class="msg-header">TONI</div><div class="msg-body">${answer}</div></div>`;
-        container.scrollTop = container.scrollHeight;
-        speak(answer);
-    }, 1500);
-}
-
-function activateVoice() { alert("Mikrofon-Zugriff wird angefordert... (Browser-Feature)"); }
-
-function speak(text) {
-    if ('speechSynthesis' in window) {
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = 'de-DE';
-        msg.rate = 1.05;
-        window.speechSynthesis.speak(msg);
-    }
-}
-
-/**
- * --------------------------------------------------------------------------
- * 9. UTILS & HELPERS
- * --------------------------------------------------------------------------
- */
-function startSystemClock() {
-    setInterval(() => {
-        const now = new Date();
-        document.getElementById('clock-display').innerText = now.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
-    }, 1000);
-}
-
-function toggleLiveMode() {
-    const btn = document.getElementById('live-match-btn');
-    btn.classList.toggle('active');
-    if(btn.classList.contains('active')) speak("Matchday Modus aktiviert. Live-Tracking läuft.");
-    else speak("Training Modus.");
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const passInput = document.getElementById('sys-pass');
-    if(passInput) passInput.focus();
-});
-
-/**
- * --------------------------------------------------------------------------
- * 10. MODULE: TACTICS BOARD LOGIC (Full Engine)
+ * 7. TAKTIK-BOARD PRO (Vollständige Canvas-Engine)
  * --------------------------------------------------------------------------
  */
 let canvasContext = null;
@@ -480,43 +374,64 @@ function renderTacticsBoard(target) {
     target.innerHTML = `
         <div class="tactics-container">
             <div class="tactics-tools">
-                <button class="tool-btn active" onclick="setTool('move')" title="Verschieben"><i class="fa-solid fa-arrows-up-down-left-right"></i></button>
-                <button class="tool-btn" onclick="setTool('draw-pass')" title="Passlinie"><i class="fa-solid fa-share"></i></button>
-                <button class="tool-btn" onclick="setTool('draw-run')" title="Laufweg"><i class="fa-solid fa-person-running"></i></button>
-                <hr style="width:100%; border:0; border-top:1px solid #333; margin:10px 0;">
-                <button class="tool-btn" onclick="addObj('cone')" title="Hütchen"><i class="fa-solid fa-cone"></i></button>
-                <button class="tool-btn" onclick="addObj('ball')" title="Ball"><i class="fa-solid fa-futbol"></i></button>
-                <button class="tool-btn" onclick="addObj('goal')" title="Tor"><i class="fa-solid fa-square"></i></button>
-                <hr style="width:100%; border:0; border-top:1px solid #333; margin:10px 0;">
+                <button class="tool-btn active" onclick="setTool('move', this)"><i class="fa-solid fa-arrows-up-down-left-right"></i></button>
+                <button class="tool-btn" onclick="setTool('draw', this)"><i class="fa-solid fa-pen-nib"></i></button>
+                <button class="tool-btn" onclick="addObj('cone')"><i class="fa-solid fa-cone"></i></button>
+                <button class="tool-btn" onclick="addObj('ball')"><i class="fa-solid fa-futbol"></i></button>
                 <button class="tool-btn" onclick="clearBoard()" style="color:var(--neon-alert);"><i class="fa-solid fa-trash"></i></button>
-                <button class="tool-btn" onclick="toniGenerateDrill()" style="color:var(--neon-main);"><i class="fa-solid fa-robot"></i></button>
+                <button class="tool-btn" onclick="toniAutoFormation()" style="color:var(--neon-main);"><i class="fa-solid fa-robot"></i></button>
             </div>
-
             <div class="tactics-pitch" id="pitch-area" onmousedown="handleBoardClick(event)">
                 <canvas id="tactics-canvas"></canvas>
                 ${DB.squad.map((p, i) => `
-                    <div class="t-obj obj-player" id="p-${p.id}" style="top:${50 + (i*10)}%; left:${10 + (i*5)}%;" onmousedown="startDrag(event, this)">
+                    <div class="t-obj obj-player" style="top:${20+(i*5)}%; left:${10+(i*8)}%;" onmousedown="startDrag(event, this)">
                         ${p.pos}
-                    </div>
-                `).join('')}
+                    </div>`).join('')}
             </div>
-        </div>
-    `;
-
-    setTimeout(() => {
-        const canvas = document.getElementById('tactics-canvas');
-        if(canvas) {
-            canvas.width = document.getElementById('pitch-area').offsetWidth;
-            canvas.height = document.getElementById('pitch-area').offsetHeight;
-            canvasContext = canvas.getContext('2d');
-        }
-    }, 100);
+        </div>`;
+    setTimeout(initCanvas, 100);
 }
 
-function setTool(tool) {
+function initCanvas() {
+    const c = document.getElementById('tactics-canvas');
+    if(c) {
+        c.width = c.parentElement.offsetWidth;
+        c.height = c.parentElement.offsetHeight;
+        canvasContext = c.getContext('2d');
+    }
+}
+
+function setTool(tool, btn) {
     activeTool = tool;
     document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-    if(event && event.currentTarget) event.currentTarget.classList.add('active');
+    btn.classList.add('active');
+}
+
+function startDrag(e, el) { 
+    if(activeTool !== 'move') return;
+    draggedEl = el; 
+    e.stopPropagation(); 
+}
+
+document.addEventListener('mousemove', (e) => {
+    if(!draggedEl) return;
+    const rect = document.getElementById('pitch-area').getBoundingClientRect();
+    draggedEl.style.left = (e.clientX - rect.left) + 'px';
+    draggedEl.style.top = (e.clientY - rect.top) + 'px';
+});
+
+document.addEventListener('mouseup', () => draggedEl = null);
+
+function handleBoardClick(e) {
+    if(activeTool !== 'draw' || !canvasContext) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    canvasContext.strokeStyle = "#00ff41";
+    canvasContext.lineWidth = 3;
+    canvasContext.beginPath();
+    canvasContext.arc(x, y, 5, 0, Math.PI*2);
+    canvasContext.stroke();
 }
 
 function addObj(type) {
@@ -528,124 +443,48 @@ function addObj(type) {
 }
 
 function clearBoard() {
-    document.querySelectorAll('.obj-cone, .obj-ball, .obj-goal').forEach(o => o.remove());
-    if(canvasContext) {
-        const c = document.getElementById('tactics-canvas');
-        canvasContext.clearRect(0, 0, c.width, c.height);
-    }
-}
-
-function startDrag(e, el) {
-    if(activeTool !== 'move') return;
-    draggedEl = el;
-    e.stopPropagation(); 
-}
-
-document.addEventListener('mousemove', (e) => {
-    if (!draggedEl) return;
-    const pitch = document.getElementById('pitch-area');
-    if(!pitch) return;
-    const rect = pitch.getBoundingClientRect();
-    let x = e.clientX - rect.left;
-    let y = e.clientY - rect.top;
-    x = Math.max(0, Math.min(x, rect.width));
-    y = Math.max(0, Math.min(y, rect.height));
-    draggedEl.style.left = x + 'px'; 
-    draggedEl.style.top = y + 'px';
-});
-
-document.addEventListener('mouseup', () => { draggedEl = null; });
-
-function handleBoardClick(e) {
-    if (activeTool === 'move' || !canvasContext) return;
-    const pitch = document.getElementById('pitch-area').getBoundingClientRect();
-    const x = e.clientX - pitch.left;
-    const y = e.clientY - pitch.top;
-    const ctx = canvasContext;
-    ctx.strokeStyle = activeTool === 'draw-pass' ? '#ffae00' : '#00ff41';
-    ctx.lineWidth = 3;
-    if (activeTool === 'draw-pass') ctx.setLineDash([5, 5]); else ctx.setLineDash([]);
-    ctx.beginPath(); ctx.arc(x, y, 5, 0, 2 * Math.PI); ctx.stroke();
-}
-
-function toniGenerateDrill() {
-    clearBoard();
-    speak("Rondo wird aufgebaut. Fokus auf schnelles Passspiel.");
-    const pitch = document.getElementById('pitch-area');
-    const w = pitch.offsetWidth; const h = pitch.offsetHeight;
-    
-    [{x:w*0.3, y:h*0.3}, {x:w*0.7, y:h*0.3}, {x:w*0.7, y:h*0.7}, {x:w*0.3, y:h*0.7}].forEach(pos => {
-        const c = document.createElement('div'); c.className = 't-obj obj-cone';
-        c.style.left = pos.x + 'px'; c.style.top = pos.y + 'px';
-        c.onmousedown = function(e) { startDrag(e, this); };
-        pitch.appendChild(c);
-    });
+    document.querySelectorAll('.obj-cone, .obj-ball').forEach(o => o.remove());
+    if(canvasContext) canvasContext.clearRect(0,0,5000,5000);
 }
 
 /**
  * --------------------------------------------------------------------------
- * 11. MODULE: MATCH PREP CLIPBOARD (Nagelsmann Mode)
+ * 8. MATCH PREP (Nagelsmann Clipboard)
  * --------------------------------------------------------------------------
  */
 function renderMatchPrep(target) {
-    let playerOptions = `<option value="">-- Wähle Spieler --</option>`;
-    DB.squad.forEach(p => {
-        if(p.status !== 'Verletzt') {
-            playerOptions += `<option value="${p.name}">${p.pos} - ${p.name} (${p.rating})</option>`;
-        }
-    });
-
+    let opts = `<option value="">-- Spieler wählen --</option>` + DB.squad.map(p => `<option>${p.pos} - ${p.name}</option>`).join('');
     target.innerHTML = `
         <div class="clipboard-wrapper">
             <div class="formation-board">
-                <div class="pos-slot" style="bottom: 5%; left: 50%;"><div class="pos-dot"></div><select class="pos-select">${playerOptions}</select></div>
-                <div class="pos-slot" style="bottom: 20%; left: 35%;"><div class="pos-dot"></div><select class="pos-select">${playerOptions}</select></div>
-                <div class="pos-slot" style="bottom: 20%; left: 65%;"><div class="pos-dot"></div><select class="pos-select">${playerOptions}</select></div>
-                <div class="pos-slot" style="bottom: 25%; left: 10%;"><div class="pos-dot"></div><select class="pos-select">${playerOptions}</select></div>
-                <div class="pos-slot" style="bottom: 25%; left: 90%;"><div class="pos-dot"></div><select class="pos-select">${playerOptions}</select></div>
-                <div class="pos-slot" style="bottom: 40%; left: 40%;"><div class="pos-dot"></div><select class="pos-select">${playerOptions}</select></div>
-                <div class="pos-slot" style="bottom: 40%; left: 60%;"><div class="pos-dot"></div><select class="pos-select">${playerOptions}</select></div>
-                <div class="pos-slot" style="top: 35%; left: 15%;"><div class="pos-dot"></div><select class="pos-select">${playerOptions}</select></div>
-                <div class="pos-slot" style="top: 30%; left: 50%;"><div class="pos-dot"></div><select class="pos-select">${playerOptions}</select></div>
-                <div class="pos-slot" style="top: 35%; left: 85%;"><div class="pos-dot"></div><select class="pos-select">${playerOptions}</select></div>
-                <div class="pos-slot" style="top: 15%; left: 50%;"><div class="pos-dot"></div><select class="pos-select">${playerOptions}</select></div>
+                ${[...Array(11)].map((_, i) => `
+                <div class="pos-slot slot-${i}">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${opts}</select>
+                </div>`).join('')}
             </div>
-
             <div class="analysis-sheet">
-                <div class="sheet-header"><div class="sheet-title">MATCHPLAN: SAISON 25/26</div><div style="font-size:10px; color:#666;">COACHING ZONE ONLY</div></div>
-                <div class="form-group"><label class="notes-label">GEGNER</label><input type="text" style="width:100%; background:black; color:white; border:1px solid #333; padding:5px;" value="Borussia Dortmund"></div>
-                <div class="form-group"><label class="notes-label">GEGNERISCHE SCHWÄCHEN (ANALYSE)</label><textarea class="notes-area" id="enemy-weakness">Hohe Kette bei Ballverlust anfällig. Außenverteidiger rücken zu weit auf. Umschaltspiel über Openda forcieren.</textarea></div>
-                <div class="form-group"><label class="notes-label">STANDARDS / KEY DUELS</label><textarea class="notes-area" id="key-duels">Ecken auf den ersten Pfosten (Orban). Simons vs. Can im Zentrum isolieren.</textarea></div>
-                <div style="margin-top:auto; display:flex; gap:10px;">
-                    <button class="live-btn" onclick="toniAutoAnalyze()"><i class="fa-solid fa-brain"></i> TONI ANALYSE</button>
-                    <button class="live-btn active" onclick="window.print()"><i class="fa-solid fa-print"></i> DRUCKEN (KABINE)</button>
+                <div class="sheet-header">MATCHPLAN SAISON 25/26</div>
+                <label class="notes-label">GEGNER: BAYERN MÜNCHEN</label>
+                <textarea id="match-notes" class="notes-area">Harry Kane isolieren. Überladen der Außenbahnen bei Ballbesitz.</textarea>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button class="live-btn active" onclick="speak('Gegneranalyse Bayern abgeschlossen. Fokus auf Umschaltspiel.')">AI ANALYSE</button>
+                    <button class="live-btn" onclick="window.print()">PRINT</button>
                 </div>
             </div>
         </div>`;
 }
 
-function toniAutoAnalyze() {
-    speak("Ich lade die Daten der letzten 5 Spiele des Gegners...");
-    const area = document.getElementById('enemy-weakness');
-    setTimeout(() => {
-        area.value += "\n\n[TONI UPDATE]: Torwart hat Schwächen bei Fernschüssen. Pressing-Trigger: Sobald der Innenverteidiger aufdreht.";
-        speak("Analyse ergänzt. Pressing-Trigger identifiziert.");
-    }, 1500);
-}
-
 /**
  * --------------------------------------------------------------------------
- * 12. MODULE: SESSION PLANNER (Training)
+ * 9. SESSION PLANNER (Training)
  * --------------------------------------------------------------------------
  */
-const DRILL_DB = [
-    { id: 'd1', name: "Rondo 5vs2 (Klassik)", time: 15, cat: "Warmup", icon: "fa-ring" },
-    { id: 'd2', name: "Passform Y-Muster", time: 20, cat: "Technik", icon: "fa-share-nodes" },
-    { id: 'd3', name: "Torschuss aus Drehung", time: 25, cat: "Abschluss", icon: "fa-bullseye" },
-    { id: 'd4', name: "Pressing-Simulation (VR)", time: 30, cat: "Taktik", icon: "fa-vr-cardboard" },
-    { id: 'd5', name: "Laktat-Shuttles", time: 20, cat: "Physis", icon: "fa-heart-pulse" },
-    { id: 'd6', name: "Cool Down / Dehnen", time: 10, cat: "Recovery", icon: "fa-bed" },
-    { id: 'd7', name: "11vs11 Abschlussspiel", time: 30, cat: "Match", icon: "fa-users" }
+const DRILL_LIB = [
+    { id: 1, name: "Rondo 5vs2", time: 15, cat: "Warmup" },
+    { id: 2, name: "Kognitives VR Scanning", time: 10, cat: "Elite" },
+    { id: 3, name: "Torschuss unter Druck", time: 25, cat: "Technik" },
+    { id: 4, name: "Spielform 11vs11", time: 30, cat: "Taktik" }
 ];
 let currentSession = [];
 
@@ -653,86 +492,95 @@ function renderDrillPlanner(target) {
     target.innerHTML = `
         <div class="planner-wrapper">
             <div class="drill-library">
-                <div class="lib-header">ÜBUNGS-KATALOG</div>
-                ${DRILL_DB.map(d => `
-                    <div class="drill-item" onclick="addDrillToSession('${d.id}')">
-                        <i class="fa-solid ${d.icon} drill-icon"></i>
-                        <span class="drill-name">${d.name}</span>
-                        <span class="drill-time">${d.time} min</span>
-                        <i class="fa-solid fa-plus" style="font-size:10px; color:#666;"></i>
-                    </div>
-                `).join('')}
-                <div style="margin-top:20px; border-top:1px solid #333; padding-top:10px;">
-                    <div class="lib-header">KI ASSISTENT</div>
-                    <button class="live-btn" style="width:100%; justify-content:center; margin-bottom:10px;" onclick="aiGenerateSession('hard')"><i class="fa-solid fa-fire"></i> INTENSITÄT (High)</button>
-                    <button class="live-btn" style="width:100%; justify-content:center; border-color:var(--neon-warn); color:var(--neon-warn);" onclick="aiGenerateSession('recovery')"><i class="fa-solid fa-battery-half"></i> REGENERATION</button>
-                </div>
+                <div class="lib-header">ÜBUNGSKATALOG</div>
+                ${DRILL_LIB.map(d => `<div class="drill-item" onclick="addDrillToSession(${d.id})"><span>${d.name}</span><span>${d.time}'</span></div>`).join('')}
             </div>
-            <div class="session-board" id="session-list">
-                <div class="session-header">
-                    <div><h2 style="font-family:'Orbitron'; color:white;">TRAININGSPLAN: HEUTE</h2><small style="color:#888;">Start: 10:00 Uhr | Platz 1</small></div>
-                    <div class="total-time" id="total-session-time">0 min</div>
-                </div>
-                <div id="active-drills-container"><div style="text-align:center; color:#444; padding:50px;"><i>Wähle Übungen aus der Bibliothek...</i></div></div>
-                <div class="session-footer" style="margin-top:30px; border-top:1px solid #333; padding-top:20px; display:flex; gap:10px;">
-                    <button class="live-btn active" onclick="window.print()" style="flex:1; justify-content:center;"><i class="fa-solid fa-print"></i> DRUCKEN</button>
-                    <button class="live-btn" onclick="clearSession()" style="flex:1; justify-content:center; border-color:var(--neon-alert); color:var(--neon-alert);"><i class="fa-solid fa-trash"></i> CLEAR</button>
-                </div>
+            <div class="session-board">
+                <div class="session-header">HEUTIGER PLAN: <span id="total-time">0</span> min</div>
+                <div id="session-list-container"></div>
+                <button class="live-btn" style="margin-top:20px;" onclick="currentSession=[]; updateSView();">RESET</button>
             </div>
         </div>`;
-    updateSessionView();
+    updateSView();
 }
 
 function addDrillToSession(id) {
-    const drill = DRILL_DB.find(d => d.id === id);
-    if(drill) { currentSession.push(drill); updateSessionView(); }
-}
-
-function removeDrill(index) {
-    currentSession.splice(index, 1);
-    updateSessionView();
-}
-
-function clearSession() {
-    currentSession = [];
-    updateSessionView();
-}
-
-function updateSessionView() {
-    const container = document.getElementById('active-drills-container');
-    const timeDisplay = document.getElementById('total-session-time');
-    if(!container) return;
-    if(currentSession.length === 0) {
-        container.innerHTML = `<div style="text-align:center; color:#444; padding:50px;"><i>Liste leer...</i></div>`;
-        timeDisplay.innerText = "0 min";
-        return;
+    const drill = DRILL_LIB.find(x => x.id === id);
+    if(drill) {
+        currentSession.push(drill);
+        updateSView();
     }
-    let total = 0;
-    container.innerHTML = currentSession.map((d, index) => {
-        total += d.time;
-        return `
-        <div class="active-drill">
-            <div style="font-family:'Orbitron'; color:var(--neon-main); font-size:18px; width:30px;">${index + 1}</div>
-            <div style="flex:1;">
-                <div class="drill-name" style="font-size:14px; margin-bottom:2px;">${d.name}</div>
-                <div style="font-size:10px; color:#888;">${d.cat}</div>
+}
+
+function updateSView() {
+    const c = document.getElementById('session-list-container');
+    if(!c) return;
+    c.innerHTML = currentSession.map((d, i) => `<div class="active-drill"><b>${i+1}.</b> ${d.name} (${d.time} min)</div>`).join('');
+    let total = currentSession.reduce((acc, val) => acc + val.time, 0);
+    document.getElementById('total-time').innerText = total;
+}
+
+/**
+ * --------------------------------------------------------------------------
+ * 10. NEWS ZEITUNG CMS
+ * --------------------------------------------------------------------------
+ */
+function renderNewspaperModule(target) {
+    target.innerHTML = `
+        <div style="display:flex; justify-content:center;">
+            <div class="newspaper-wrapper">
+                <h1 class="paper-brand">DIE ROTE BULLEN ARENA</h1>
+                <h2 contenteditable="true" class="headline-l">TOP-SPIEL: LEIPZIG FORDERT DEN REKORDMEISTER</h2>
+                <div style="width:100%; height:250px; background:#333; margin:20px 0;"></div>
+                <div contenteditable="true" id="paper-body" class="article-text">
+                    Die Mannschaft ist bereit. In der Kabine herrscht vollste Konzentration.
+                </div>
+                <button class="btn-action" onclick="generateAIArticle()">KI TEXT</button>
             </div>
-            <div style="font-family:'Orbitron'; font-size:14px;">${d.time}'</div>
-            <i class="fa-solid fa-xmark" style="cursor:pointer; color:#666;" onclick="removeDrill(${index})"></i>
         </div>`;
-    }).join('');
-    timeDisplay.innerText = total + " min";
-    if(total > 90) timeDisplay.style.color = "var(--neon-alert)";
-    else timeDisplay.style.color = "var(--neon-main)";
 }
 
-function aiGenerateSession(type) {
-    currentSession = [];
-    if(type === 'hard') {
-        addDrillToSession('d1'); addDrillToSession('d2'); addDrillToSession('d5'); addDrillToSession('d7');
-        speak("Intensives Training erstellt. Dauer: 85 Minuten.");
-    } else {
-        addDrillToSession('d1'); addDrillToSession('d6');
-        speak("Regenerations-Einheit erstellt. Dauer: 25 Minuten.");
+function generateAIArticle() {
+    document.getElementById('paper-body').innerText += " Toni prognostiziert einen Sieg durch überlegene kognitive Geschwindigkeit.";
+}
+
+/**
+ * --------------------------------------------------------------------------
+ * 11. CORE UTILS (AI & CLOCK)
+ * --------------------------------------------------------------------------
+ */
+function speak(t) {
+    if('speechSynthesis' in window) {
+        const m = new SpeechSynthesisUtterance(t);
+        m.lang = 'de-DE';
+        window.speechSynthesis.speak(m);
     }
 }
+
+function startSystemClock() {
+    setInterval(() => {
+        const el = document.getElementById('clock-display');
+        if(el) el.innerText = new Date().toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
+    }, 1000);
+}
+
+function askToni() {
+    const input = document.getElementById('toni-input');
+    const chat = document.getElementById('chat-stream');
+    if(!input.value) return;
+    chat.innerHTML += `<div class="msg user"><div class="msg-header">COACH</div><div class="msg-body">${input.value}</div></div>`;
+    let q = input.value.toLowerCase();
+    input.value = "";
+    setTimeout(() => {
+        let res = "Analyse läuft... Alle Systeme im Elite-Bereich.";
+        if(q.includes("scan")) res = "Die Scanning-Rate liegt aktuell bei " + (totalBalls > 0 ? Math.round((scanCount/totalBalls)*100) : 0) + "%.";
+        chat.innerHTML += `<div class="msg ai"><div class="msg-header">TONI</div><div class="msg-body">${res}</div></div>`;
+        speak(res);
+        chat.scrollTop = chat.scrollHeight;
+    }, 1000);
+}
+
+// Global Listener
+document.addEventListener('DOMContentLoaded', () => {
+    if(document.getElementById('sys-pass')) document.getElementById('sys-pass').focus();
+});
