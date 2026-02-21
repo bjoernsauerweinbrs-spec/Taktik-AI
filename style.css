@@ -364,4 +364,62 @@ summary:hover, details[open] summary { color: var(--neon-main); text-shadow: 0 0
     /* Verstecke Buttons beim Drucken */
     button { display: none !important; }
 }
+/* ==========================================================================
+   MODULE: SESSION PLANNER (Training)
+   ========================================================================== */
+
+.planner-wrapper {
+    display: grid; grid-template-columns: 300px 1fr; gap: 20px; height: 100%;
+}
+
+/* Linke Seite: Bibliothek */
+.drill-library {
+    background: rgba(0,0,0,0.5); border-right: 1px solid var(--border-tech);
+    padding: 15px; overflow-y: auto;
+}
+.lib-header {
+    font-family: var(--font-hud); color: var(--text-dim); font-size: 10px;
+    text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;
+}
+
+.drill-item {
+    background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1);
+    padding: 10px; margin-bottom: 10px; border-radius: 4px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center; transition: 0.2s;
+}
+.drill-item:hover { border-color: var(--neon-main); transform: translateX(5px); }
+.drill-icon { color: var(--neon-blue); width: 20px; text-align: center; }
+.drill-name { font-size: 12px; color: white; font-weight: 600; }
+.drill-time { font-size: 10px; color: var(--text-dim); background: black; padding: 2px 5px; border-radius: 4px; }
+
+/* Rechte Seite: Der Plan */
+.session-board {
+    background: rgba(0, 255, 65, 0.02); border: 1px dashed var(--border-tech);
+    padding: 20px; position: relative; overflow-y: auto;
+}
+.session-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+}
+.total-time { font-family: var(--font-hud); font-size: 24px; color: var(--neon-main); }
+
+.active-drill {
+    background: black; border-left: 4px solid var(--neon-main);
+    padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px;
+    animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* MOBILE / PRINT OPTIMIERUNG */
+@media (max-width: 768px) {
+    .planner-wrapper { grid-template-columns: 1fr; }
+    .drill-library { height: 200px; border-bottom: 1px solid var(--border-tech); }
+}
+
+@media print {
+    .planner-wrapper { display: block; }
+    .drill-library, .session-footer { display: none; }
+    .session-board { border: 2px solid black; background: white; color: black; }
+    .active-drill { border: 1px solid #ccc; background: white; color: black; border-left: 4px solid black; }
+    .drill-name { color: black; }
+}
 
