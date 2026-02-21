@@ -6,12 +6,13 @@
     <title>TONI 2.0 | NEURAL ELITE ENGINE</title>
     
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="elite-theme">
 
     <div id="auth-layer">
         <div class="auth-terminal">
@@ -23,7 +24,7 @@
                     <button onclick="systemBootSequence()">LOGIN</button>
                 </div>
                 <div class="terminal-footer">
-                    <span>V 6.0.0 (NEURAL ENGINE)</span>
+                    <span>V 6.0.0 (ELITE ENGINE)</span>
                     <span>SERVER: ONLINE</span>
                 </div>
             </div>
@@ -79,8 +80,8 @@
                         </div>
                     </details>
 
-                    <details>
-                        <summary><i class="fa-solid fa-microchip"></i> INNOVATION</summary>
+                    <details open>
+                        <summary><i class="fa-solid fa-microchip"></i> INNOVATION (VR)</summary>
                         <div class="nav-content">
                             <button onclick="loadModule('vr-hub')">OCTAGON VR HUB</button>
                             <button onclick="loadModule('medical')">Medical Center</button>
@@ -95,9 +96,9 @@
                     </details>
                 </div>
                 
-                <div style="padding:20px; margin-top:auto;">
-                     <div style="font-size:9px; color:#444;">LOCAL STORAGE: ACTIVE</div>
-                     <div style="height:2px; background:#333; width:100%; margin-top:5px;"><div id="storage-bar" style="height:100%; width:100%; background:var(--neon-main);"></div></div>
+                <div class="sidebar-storage">
+                     <div style="font-size:9px; color:#444; letter-spacing:1px;">LOCAL STORAGE: ACTIVE</div>
+                     <div class="storage-track"><div id="storage-bar" style="width:100%;"></div></div>
                 </div>
             </aside>
 
@@ -105,13 +106,13 @@
                 <div id="content-viewport"></div>
                 
                 <div id="vr-viewport" class="hidden">
-                    <a-scene embedded loading-screen="dotsColor: #00ff41; backgroundColor: black">
+                    <a-scene embedded loading-screen="dotsColor: #00ff41; backgroundColor: black" renderer="antialias: true; colorManagement: true;">
                         <a-assets>
+                            <img id="pitch-tex" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/terrain/grasslight-big.jpg" crossorigin="anonymous">
                             <audio id="snd-pass" src="https://actions.google.com/sounds/v1/sports/kickball.ogg" preload="auto"></audio>
-                            <audio id="snd-fail" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
                         </a-assets>
 
-                        <a-entity id="player-rig" position="0 0 0">
+                        <a-entity id="player-rig" movement-controls="speed: 0.3" position="0 0 10">
                             <a-camera id="vr-cam" look-controls wasd-controls position="0 1.6 0">
                                 <a-entity position="0 0 -1">
                                     <a-plane width="1.1" height="0.35" material="color: black; opacity: 0.9" position="0 -0.65 0"></a-plane>
@@ -119,37 +120,35 @@
                                     <a-box id="hud-timing-bar" position="0 -0.78 0.01" width="0.8" height="0.02" color="#333"></a-box>
                                 </a-entity>
                             </a-camera>
+                            <a-entity oculus-touch-controls="hand: left"></a-entity>
+                            <a-entity oculus-touch-controls="hand: right"></a-entity>
                         </a-entity>
 
                         <a-sky color="#020202"></a-sky>
-                        <a-plane rotation="-90 0 0" width="100" height="100" material="color: #000; wireframe: true; wireframeLinewidth: 2; color: #00ff41; opacity: 0.15"></a-plane>
-
-                        <a-entity id="target-L" position="-10 0 -2">
-                            <a-cylinder radius="0.5" height="2.5" color="#111" material="opacity: 0.8; wireframe: true"></a-cylinder>
-                            <a-text id="icon-L" value="X" color="red" align="center" position="0 1.5 0.5" width="12"></a-text>
-                        </a-entity>
-                        <a-entity id="target-R" position="10 0 -2">
-                            <a-cylinder radius="0.5" height="2.5" color="#111" material="opacity: 0.8; wireframe: true"></a-cylinder>
-                            <a-text id="icon-R" value="X" color="red" align="center" position="0 1.5 0.5" width="12"></a-text>
-                        </a-entity>
-                        <a-entity id="target-DL" position="-6 0 -12">
-                            <a-cylinder radius="0.5" height="2.5" color="#111" material="opacity: 0.8; wireframe: true"></a-cylinder>
-                            <a-text id="icon-DL" value="X" color="red" align="center" position="0 1.5 0.5" width="12"></a-text>
-                        </a-entity>
-                        <a-entity id="target-DR" position="6 0 -12">
-                            <a-cylinder radius="0.5" height="2.5" color="#111" material="opacity: 0.8; wireframe: true"></a-cylinder>
-                            <a-text id="icon-DR" value="X" color="red" align="center" position="0 1.5 0.5" width="12"></a-text>
+                        <a-entity id="pitch-complex">
+                            <a-plane rotation="-90 0 0" width="68" height="105" src="#pitch-tex" repeat="10 15" material="roughness: 1;"></a-plane>
+                            <a-plane rotation="-90 0 0" width="68.2" height="105.2" color="white" position="0 0.01 0" material="side: back"></a-plane>
+                            <a-ring color="white" radius-inner="9.1" radius-outer="9.3" rotation="-90 0 0" position="0 0.02 0"></a-ring>
+                            
+                            <a-entity id="goal-north" position="0 0 -52.5">
+                                <a-box position="-3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
+                                <a-box position="3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
+                                <a-box position="0 2.44 0" width="7.52" height="0.2" depth="0.2" color="white"></a-box>
+                            </a-entity>
+                            <a-entity id="goal-south" position="0 0 52.5">
+                                <a-box position="-3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
+                                <a-box position="3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
+                                <a-box position="0 2.44 0" width="7.52" height="0.2" depth="0.2" color="white"></a-box>
+                            </a-entity>
                         </a-entity>
 
-                        <a-entity id="shadow-defender" position="0 1.25 -8">
-                            <a-box width="0.8" height="2.5" depth="0.2" color="#ff2a2a" material="opacity: 0.3; transparent: true"></a-box>
-                        </a-entity>
-
-                        <a-sphere id="vr-ball" position="0 0.22 -20" radius="0.25" color="white"></a-sphere>
+                        <a-entity id="vr-player-assets"></a-entity>
+                        <a-entity id="analysis-heatmaps" visible="false"></a-entity>
 
                         <a-light type="ambient" color="#333"></a-light>
-                        <a-light type="point" position="0 10 0" intensity="1" color="#00ff41"></a-light>
+                        <a-light type="point" position="0 15 0" intensity="1.2" color="#00ff41"></a-light>
                     </a-scene>
+
                     <button class="vr-exit-btn" onclick="exitVRMode()">
                         <i class="fa-solid fa-power-off"></i> SESSION BEENDEN
                     </button>
@@ -159,21 +158,32 @@
             <aside class="sidebar-right">
                 <div class="toni-visualizer">
                     <div class="brain-mesh"><i class="fa-solid fa-brain"></i></div>
-                    <div style="font-size:10px; letter-spacing:2px; color:var(--neon-main);">NEURAL LINK ACTIVE</div>
+                    <div class="neural-link-text">NEURAL LINK ACTIVE</div>
                 </div>
 
                 <div class="chat-container" id="chat-stream">
-                    <div class="msg ai"><div class="msg-header">TONI</div><div class="msg-body">System bereit. Warte auf Neural Link.</div></div>
+                    <div class="msg ai">
+                        <div class="msg-header">TONI ELITE</div>
+                        <div class="msg-body">System bereit. Pitch-Control Layer 1 geladen.</div>
+                    </div>
                 </div>
 
                 <div class="telemetry-widget">
                     <h4>LIVE ANALYTICS</h4>
-                    <div class="metric-row"><span>EPI SCORE</span><div class="bar-bg"><div class="bar-fill" id="bar-epi" style="width:0%"></div></div><span id="val-epi">0%</span></div>
-                    <div class="metric-row"><span>REAKTION</span><div class="bar-bg"><div class="bar-fill" id="bar-lat" style="width:0%; background:var(--neon-warn);"></div></div><span id="val-lat">0ms</span></div>
+                    <div class="metric-row">
+                        <span>EPI SCORE</span>
+                        <div class="bar-bg"><div class="bar-fill" id="bar-epi" style="width:0%"></div></div>
+                        <span id="val-epi">0%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>LATENZ</span>
+                        <div class="bar-bg"><div class="bar-fill" id="bar-lat" style="width:0%; background:var(--neon-warn);"></div></div>
+                        <span id="val-lat">0ms</span>
+                    </div>
                 </div>
 
                 <div class="chat-input-wrapper">
-                    <textarea id="toni-input" placeholder="Analyse anfordern..."></textarea>
+                    <textarea id="toni-input" placeholder="Taktische Analyse anfordern..."></textarea>
                     <button class="send-btn" onclick="askToni()">SENDEN</button>
                 </div>
             </aside>
@@ -182,23 +192,28 @@
 
     <div id="modal-player-editor" class="modal-overlay hidden">
         <div class="modal-window">
-            <div class="modal-header"><h3>SPIELER EDITIEREN</h3><button onclick="closeModal('modal-player-editor')"><i class="fa-solid fa-times"></i></button></div>
+            <div class="modal-header">
+                <h3>ASSET PROFILE EDITOR</h3>
+                <button onclick="closeModal('modal-player-editor')"><i class="fa-solid fa-times"></i></button>
+            </div>
             <div class="modal-body">
                 <input type="hidden" id="edit-p-id">
-                <div class="form-group"><label>Name</label><input type="text" id="edit-p-name"></div>
+                <div class="form-group"><label>Asset Name</label><input type="text" id="edit-p-name"></div>
                 <div class="form-row">
-                    <div class="form-group"><label>Position</label><input type="text" id="edit-p-pos"></div>
+                    <div class="form-group"><label>Rolle</label><input type="text" id="edit-p-pos"></div>
                     <div class="form-group"><label>Rating</label><input type="number" id="edit-p-rating"></div>
                 </div>
-                <div class="form-group"><label>Medizinischer Status</label>
+                <div class="form-group"><label>Biometrischer Status</label>
                     <select id="edit-p-med">
-                        <option value="Fit">Fit</option>
-                        <option value="Reha">Reha</option>
-                        <option value="Verletzt">Verletzt</option>
+                        <option value="Fit">Fit / Optimal</option>
+                        <option value="Reha">Reha / Monitoring</option>
+                        <option value="Verletzt">Critical / Out</option>
                     </select>
                 </div>
             </div>
-            <div class="modal-footer"><button class="btn-save" onclick="savePlayerChanges()">SPEICHERN</button></div>
+            <div class="modal-footer">
+                <button class="btn-save" onclick="savePlayerChanges()">COMMIT CHANGES</button>
+            </div>
         </div>
     </div>
 
