@@ -1,6 +1,6 @@
 /* ==========================================================================
    TONI 2.0 | ELITE CORE ENGINE
-   Version: 4.3.0 (SESSION PLANNER COMPLETED)
+   Version: 4.3.1 (VR STABILITY & VISIBILITY FIX)
    Architecture: Monolith / Local-First / VR-Hybrid / Retina-Design
    ========================================================================== */
 
@@ -14,7 +14,7 @@ const DEFAULT_DB = {
         pass: "Toni2026",
         clubName: "RB Leipzig",
         coachName: "Head Coach",
-        version: "4.3.0"
+        version: "4.3.1"
     },
     // Finanz-Daten (Transaktionsbasiert)
     finance: [
@@ -172,7 +172,6 @@ function loadModule(moduleId) {
             displayTitle.innerText = "MATCH PREP // SPIELTAGS-CLIPBOARD";
             renderMatchPrep(viewport);
             break;
-        // NEU: Session Planner
         case 'drills':
             displayTitle.innerText = "COACHING // SESSION PLANNER";
             renderDrillPlanner(viewport);
@@ -433,6 +432,7 @@ function renderVRHub(target) {
     `;
 }
 
+// HIER WAR DER FEHLER: Wir müssen sicherstellen, dass das Grid SICHTBAR ist!
 function enterVRMode() {
     const viewport = document.getElementById('content-viewport');
     const vrView = document.getElementById('vr-viewport');
@@ -441,27 +441,27 @@ function enterVRMode() {
     viewport.classList.add('hidden');
     vrView.classList.remove('hidden');
 
-    // SETUP VR SCENE (Elite Neon Style)
     const scene = document.querySelector('a-scene');
     
-    // Wireframe Grid Boden (TRON Style)
+    // WICHTIG: Ändere die Farbe des Bodens zu NEON-GRÜN (#00ff41), sonst sieht man im Dunkeln nichts!
     const plane = document.querySelector('a-plane');
     if(plane) {
-        plane.setAttribute('color', '#000000');
-        plane.setAttribute('src', ''); // Textur entfernen
-        plane.setAttribute('material', 'color: #000; wireframe: true; wireframeLinewidth: 2; opacity: 0.3;');
+        // Entferne alte Texturen falls vorhanden
+        plane.removeAttribute('src'); 
+        // Setze Wireframe auf LEUCHTENDES GRÜN
+        plane.setAttribute('material', 'color: #00ff41; wireframe: true; wireframeLinewidth: 2; opacity: 1;');
     }
     
-    // Himmel schwarz
+    // Himmel bleibt schwarz für Kontrast
     const sky = document.querySelector('a-sky');
     if(sky) sky.setAttribute('color', '#020408');
 
-    // Browser-Befehl für Fullscreen VR
+    // Versuche VR Modus zu starten
     if (scene.enterVR) {
         scene.enterVR();
     }
 
-    speak("Willkommen im Octagon. Starten Sie das Scanning.");
+    speak("Willkommen im Octagon. Gitter-Struktur geladen.");
     startVRTelemetryLoop();
 }
 
@@ -482,8 +482,9 @@ function startVRTelemetryLoop() {
         // Update VR HUD (Text direkt vor der Linse)
         const hud = document.getElementById('vr-hud-text');
         if(hud) {
+            // WICHTIG: Setze auch hier die Farbe auf Grün
             hud.setAttribute('value', `SCAN: ${scanQuality}% | xG: ${xG}`);
-            hud.setAttribute('color', scanQuality > 90 ? '#00ff41' : '#ffae00');
+            hud.setAttribute('color', '#00ff41'); 
         }
 
         // Update Dashboard Sidebar (Live Daten am Laptop)
@@ -497,7 +498,6 @@ function startVRTelemetryLoop() {
             barScan.style.width = scanQuality + "%";
         }
         if(barLat && valLat) {
-            // Latenz Simulation
             let lat = Math.floor(Math.random() * 20 + 70);
             valLat.innerText = lat + "ms";
             barLat.style.width = (100 - (lat-50)) + "%";
