@@ -1,6 +1,6 @@
 /* ==========================================================================
    TONI 2.0 | ELITE CORE ENGINE
-   Version: 3.5.0 (Production Build)
+   Version: 3.6.0 (Tactics Update)
    Architecture: Monolith / Local-First / VR-Hybrid
    ========================================================================== */
 
@@ -60,13 +60,16 @@ function refreshKPIs() {
     let squadValue = DB.squad.reduce((acc, p) => acc + (p.rating * 1500000), 0);
 
     // 3. UI Updates
-    document.getElementById('kpi-budget').innerText = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(budget);
-    document.getElementById('kpi-squad-value').innerText = (squadValue / 1000000).toFixed(1) + "M €";
+    const budgetEl = document.getElementById('kpi-budget');
+    if(budgetEl) {
+        budgetEl.innerText = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(budget);
+        // Budget Farbe (Rot wenn negativ)
+        if(budget < 0) { budgetEl.classList.remove('val-pos'); budgetEl.classList.add('val-neg'); }
+        else { budgetEl.classList.add('val-pos'); budgetEl.classList.remove('val-neg'); }
+    }
     
-    // Budget Farbe (Rot wenn negativ)
-    const budgetElement = document.getElementById('kpi-budget');
-    if(budget < 0) { budgetElement.classList.remove('val-pos'); budgetElement.classList.add('val-neg'); }
-    else { budgetElement.classList.add('val-pos'); budgetElement.classList.remove('val-neg'); }
+    const squadEl = document.getElementById('kpi-squad-value');
+    if(squadEl) squadEl.innerText = (squadValue / 1000000).toFixed(1) + "M €";
 }
 
 /**
@@ -134,6 +137,12 @@ function loadModule(moduleId) {
             displayTitle.innerText = "INNOVATION // VR TELEMETRIE";
             renderVRHub(viewport);
             break;
+        // NEU: TAKTIK BOARD
+        case 'tactics':
+            displayTitle.innerText = "COACHING // TAKTIK BOARD";
+            renderTacticsBoard(viewport);
+            break;
+        // Platzhalter
         case 'drills':
         case 'medical':
         case 'scouting':
@@ -523,5 +532,196 @@ function toggleLiveMode() {
 // Event Listener für "Enter" im Passwortfeld
 document.addEventListener('DOMContentLoaded', () => {
     // Optional: Fokus auf Passwortfeld beim Start
-    document.getElementById('sys-pass').focus();
+    const passInput = document.getElementById('sys-pass');
+    if(passInput) passInput.focus();
 });
+
+
+/**
+ * --------------------------------------------------------------------------
+ * 10. MODULE: TACTICS BOARD LOGIC (AI INTEGRATED)
+ * --------------------------------------------------------------------------
+ */
+let canvasContext = null;
+let activeTool = 'move'; // move, draw-pass, draw-run
+let draggedEl = null;
+
+function renderTacticsBoard(target) {
+    target.innerHTML = `
+        <div class="tactics-container" style="display:flex; gap:20px; height:100%;">
+            <div class="tactics-tools">
+                <button class="tool-btn active" onclick="setTool('move')" title="Verschieben"><i class="fa-solid fa-arrows-up-down-left-right"></i></button>
+                <button class="tool-btn" onclick="setTool('draw-pass')" title="Passlinie (Gestrichelt)"><i class="fa-solid fa-share"></i></button>
+                <button class="tool-btn" onclick="setTool('draw-run')" title="Laufweg (Durchgezogen)"><i class="fa-solid fa-person-running"></i></button>
+                <hr style="width:100%; border:0; border-top:1px solid #333; margin:10px 0;">
+                <button class="tool-btn" onclick="addObj('cone')" title="Hütchen"><i class="fa-solid fa-cone"></i></button>
+                <button class="tool-btn" onclick="addObj('ball')" title="Ball"><i class="fa-solid fa-futbol"></i></button>
+                <button class="tool-btn" onclick="addObj('goal')" title="Kleinfeld-Tor"><i class="fa-solid fa-square"></i></button>
+                <hr style="width:100%; border:0; border-top:1px solid #333; margin:10px 0;">
+                <button class="tool-btn" onclick="clearBoard()" style="color:#ef4444;" title="Alles löschen"><i class="fa-solid fa-trash"></i></button>
+                <button class="tool-btn" onclick="toniGenerateDrill('rondo')" style="color:#22c55e;" title="AI: Rondo erstellen"><i class="fa-solid fa-robot"></i></button>
+            </div>
+
+            <div class="tactics-pitch" id="pitch-area" style="position:relative; flex:1;" onmousedown="handleBoardClick(event)">
+                <canvas id="tactics-canvas"></canvas>
+                ${DB.squad.map((p, i) => `
+                    <div class="t-obj obj-player" id="p-${p.id}" style="top:${50 + (i*10)}%; left:${10 + (i*5)}%;" onmousedown="startDrag(event, this)">
+                        ${p.pos}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    // Canvas Init (Sicherstellen, dass DOM geladen ist)
+    setTimeout(() => {
+        const canvas = document.getElementById('tactics-canvas');
+        if(canvas) {
+            canvas.width = document.getElementById('pitch-area').offsetWidth;
+            canvas.height = document.getElementById('pitch-area').offsetHeight;
+            canvasContext = canvas.getContext('2d');
+        }
+    }, 100);
+}
+
+// --- WERKZEUGE ---
+function setTool(tool) {
+    activeTool = tool;
+    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+    if(event && event.currentTarget) event.currentTarget.classList.add('active');
+}
+
+function addObj(type) {
+    const pitch = document.getElementById('pitch-area');
+    const el = document.createElement('div');
+    el.className = `t-obj obj-${type}`;
+    el.style.top = '50%';
+    el.style.left = '50%';
+    el.onmousedown = function(e) { startDrag(e, this); };
+    pitch.appendChild(el);
+}
+
+function clearBoard() {
+    // Löscht Hütchen/Bälle, behält Spieler
+    const objs = document.querySelectorAll('.obj-cone, .obj-ball, .obj-goal');
+    objs.forEach(o => o.remove());
+    // Canvas leeren
+    if(canvasContext) {
+        const canvas = document.getElementById('tactics-canvas');
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
+// --- DRAG & DROP ENGINE ---
+function startDrag(e, el) {
+    if(activeTool !== 'move') return;
+    draggedEl = el;
+    e.stopPropagation(); // Verhindert Canvas Zeichnen
+}
+
+// Globale Listener für Dragging
+document.addEventListener('mousemove', (e) => {
+    if (!draggedEl) return;
+    const pitch = document.getElementById('pitch-area');
+    if(!pitch) return;
+
+    const rect = pitch.getBoundingClientRect();
+    
+    // Position relativ zum Spielfeld berechnen
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+    
+    // Grenzen beachten
+    x = Math.max(0, Math.min(x, rect.width));
+    y = Math.max(0, Math.min(y, rect.height));
+
+    draggedEl.style.left = x + 'px';
+    draggedEl.style.top = y + 'px';
+});
+
+document.addEventListener('mouseup', () => { draggedEl = null; });
+
+// --- ZEICHNEN & TONI AI ---
+function handleBoardClick(e) {
+    if (activeTool === 'move' || !canvasContext) return;
+
+    const pitch = document.getElementById('pitch-area').getBoundingClientRect();
+    const x = e.clientX - pitch.left;
+    const y = e.clientY - pitch.top;
+
+    const ctx = canvasContext;
+    ctx.strokeStyle = activeTool === 'draw-pass' ? '#fbbf24' : '#ffffff'; // Gelb für Pass, Weiß für Lauf
+    ctx.lineWidth = 3;
+    
+    if (activeTool === 'draw-pass') ctx.setLineDash([5, 5]);
+    else ctx.setLineDash([]);
+
+    // Zeichne kleinen Marker wo geklickt wurde (Vereinfachtes Zeichnen)
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+    ctx.stroke();
+    // Hier könnte man komplexe Linienlogik hinzufügen (Start->Ende)
+}
+
+/**
+ * TONI INTELLIGENCE: Automatischer Übungsaufbau
+ * Toni stellt Hütchen auf und zeichnet Laufwege automatisch.
+ */
+function toniGenerateDrill(type) {
+    clearBoard();
+    speak("Ich baue das Rondo 5-gegen-2 auf. Fokus auf schnelles Passspiel.");
+    
+    const pitch = document.getElementById('pitch-area');
+    if(!pitch) return;
+
+    const w = pitch.offsetWidth;
+    const h = pitch.offsetHeight;
+
+    // 1. Hütchen Quadrat aufstellen
+    const cones = [
+        {x: w*0.3, y: h*0.3}, {x: w*0.7, y: h*0.3},
+        {x: w*0.7, y: h*0.7}, {x: w*0.3, y: h*0.7}
+    ];
+    
+    cones.forEach(pos => {
+        const c = document.createElement('div');
+        c.className = 't-obj obj-cone';
+        c.style.left = pos.x + 'px';
+        c.style.top = pos.y + 'px';
+        c.onmousedown = function(e) { startDrag(e, this); };
+        pitch.appendChild(c);
+    });
+
+    // 2. Spieler positionieren (Die ersten 5 aus der DB)
+    const players = document.querySelectorAll('.obj-player');
+    const positions = [
+        {x: w*0.3, y: h*0.5}, {x: w*0.5, y: h*0.3}, 
+        {x: w*0.7, y: h*0.5}, {x: w*0.5, y: h*0.7},
+        {x: w*0.5, y: h*0.5} // Der in der Mitte
+    ];
+
+    players.forEach((p, i) => {
+        if(positions[i]) {
+            p.style.transition = "all 1s ease"; // Schöne Animation
+            p.style.left = positions[i].x + 'px';
+            p.style.top = positions[i].y + 'px';
+            // Reset Transition nach Animation
+            setTimeout(() => { p.style.transition = ""; }, 1000);
+        }
+    });
+
+    // 3. Laufwege/Pässe zeichnen (Canvas)
+    setTimeout(() => {
+        const ctx = canvasContext;
+        if(ctx) {
+            ctx.strokeStyle = '#fbbf24'; // Passfarbe
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(w*0.3, h*0.5);
+            ctx.lineTo(w*0.5, h*0.3);
+            ctx.lineTo(w*0.7, h*0.5);
+            ctx.stroke();
+        }
+    }, 1100);
+}
