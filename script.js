@@ -18,8 +18,8 @@ const eliteStore = {
         liquidAssets: 12500000,
         budget: 25000000,
         sponsorships: [
-            { id: 1, name: "Global Dynamics", value: 3500000, roi: 0.85, status: "Active" },
-            { id: 2, name: "CyberFit Analytics", value: 1200000, roi: 0.92, status: "Active" }
+            { id: 1, partner: "Global Dynamics", value: 3500000, roi: 0.85, status: "Active" },
+            { id: 2, partner: "CyberFit Analytics", value: 1200000, roi: 0.92, status: "Active" }
         ],
         infrastructure: {
             medicalLevel: 4,
@@ -29,8 +29,8 @@ const eliteStore = {
     },
     // Taktik-Konfiguration (Bayern/Leipzig Standard)
     tactics: {
-        activeFormation: '4-4-2', // Toni Mannschaft
-        oppFormation: '3-4-3',   // Trainer Mannschaft
+        activeFormation: '4-4-2',
+        oppFormation: '3-4-3',
         pitchControlActive: true
     },
     activeModule: 'kader',
@@ -42,7 +42,8 @@ const eliteStore = {
  */
 function systemBootSequence() {
     const pass = document.getElementById('sys-pass').value;
-    if (pass === "1234") { // Platzhalter für Elite-Key
+    // Der Code "1234" schaltet den Zugang frei
+    if (pass === "1234") { 
         document.getElementById('auth-layer').classList.add('hidden');
         document.getElementById('main-interface').classList.remove('hidden');
         initEliteCore();
@@ -56,16 +57,13 @@ function initEliteCore() {
     updateClock();
     setInterval(updateClock, 1000);
     
-    // Initiales Laden
     loadModule(eliteStore.activeModule);
     updateKPIs();
-    
-    // Voice Engine Initialisierung
     voiceEngine.init();
 }
 
 /**
- * 3. MODULE CONTROLLER (Die Schaltzentrale)
+ * 3. MODULE CONTROLLER
  */
 function loadModule(modId) {
     eliteStore.activeModule = modId;
@@ -73,7 +71,6 @@ function loadModule(modId) {
     const vrViewport = document.getElementById('vr-viewport');
     const display = document.getElementById('active-module-display');
     
-    // UI Cleanup
     viewport.classList.remove('hidden');
     vrViewport.classList.add('hidden');
     document.querySelectorAll('.nav-content button').forEach(b => b.classList.remove('active'));
@@ -110,12 +107,11 @@ function loadModule(modId) {
 
 const trainingEngine = {
     currentLevel: 0,
-    timer: null,
-
     startLevel: function(lvl) {
         this.currentLevel = lvl;
         const assets = document.getElementById('vr-player-assets');
-        assets.innerHTML = ''; // Reset
+        if(!assets) return;
+        assets.innerHTML = ''; 
         
         if (lvl === 1) { // SCANNING (Reha Modus)
             voiceEngine.speak("Scanning Drill aktiv. Identifizieren Sie die Farbcodes hinter Ihnen.");
@@ -146,26 +142,22 @@ const trainingEngine = {
 
 function initVRHub() {
     const scene = document.querySelector('a-scene');
-    if (scene.hasLoaded) {
+    if (scene && scene.hasLoaded) {
         trainingEngine.startLevel(1);
-    } else {
+    } else if(scene) {
         scene.addEventListener('loaded', () => trainingEngine.startLevel(1));
     }
 }
 
-function exitVRMode() {
-    loadModule('kader');
-}
+function exitVRMode() { loadModule('kader'); }
 
 /* ==========================================================================
-   MODULE: MANAGEMENT LABOR (Finance & ROI)
+   MODULE: MANAGEMENT LABOR
    ========================================================================== */
 
 function renderFinanceLab() {
     const viewport = document.getElementById('content-viewport');
     const m = eliteStore.mgmt;
-    
-    // Berechnung des Kaderwerts (Elite-Metrik)
     const squadValue = eliteStore.players.reduce((s, p) => s + (p.rating * 150000), 0);
 
     viewport.innerHTML = `
@@ -180,22 +172,10 @@ function renderFinanceLab() {
                 </div>
             </div>
             <div class="mgmt-card">
-                <h3>INFRASTRUKTUR-INVESTITIONEN</h3>
+                <h3>INFRASTRUKTUR-ROI</h3>
                 <div style="display:grid; gap:10px; margin-top:15px;">
-                    <button class="tool-btn" style="width:100%" onclick="investInInfra('med')">UPGRADE MEDICAL CENTER (Lvl ${m.infrastructure.medicalLevel})</button>
-                    <button class="tool-btn" style="width:100%" onclick="investInInfra('vr')">ERWEITERUNG ANALYSEZENTRUM (Lvl ${m.infrastructure.analysisLevel})</button>
-                </div>
-            </div>
-            <div class="mgmt-card" style="grid-column: span 2;">
-                <h3>AKTIVE SPONSOREN</h3>
-                <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr;">
-                    ${m.sponsorships.map(s => `
-                        <div class="fifa-card" style="height:120px; padding:15px;">
-                            <div style="font-family:var(--font-hud); color:var(--neon-blue);">${s.partner}</div>
-                            <div style="font-size:18px; margin:10px 0;">${s.value.toLocaleString()} €</div>
-                            <div style="font-size:9px; color:var(--neon-main);">KPI: ${(s.roi * 100).toFixed(0)}% Erreicht</div>
-                        </div>
-                    `).join('')}
+                    <button class="btn-save" style="width:100%" onclick="investInInfra('med')">UPGRADE MEDICAL CENTER (Lvl ${m.infrastructure.medicalLevel})</button>
+                    <button class="btn-save" style="width:100%" onclick="investInInfra('vr')">EXTEND ANALYSEZENTRUM (Lvl ${m.infrastructure.analysisLevel})</button>
                 </div>
             </div>
         </div>
@@ -236,16 +216,9 @@ function renderLockerRoom() {
                         <div style="text-align:center; font-size:10px; margin-top:10px; color:var(--text-dim);">
                             ACWR INDEX: <span style="color:white">${acwr.toFixed(2)}</span>
                         </div>
-                        <div class="telemetry-widget" style="border:none; background:transparent;">
-                            <div class="bar-bg"><div class="bar-fill" style="width:${p.rating}%"></div></div>
-                        </div>
                     </div>
                 `;
             }).join('')}
-            <div class="fifa-card add-new" onclick="addNewPlayer()">
-                <i class="fa-solid fa-plus" style="font-size:30px;"></i>
-                <p>ASSET HINZUFÜGEN</p>
-            </div>
         </div>
     `;
 }
@@ -258,55 +231,71 @@ function calculateACWR(load) {
 }
 
 /* ==========================================================================
-   4. TONI AI & VOICE ENGINE
+   MODULE: TACTICS & MEDIA (Missing Renders)
+   ========================================================================== */
+
+function renderTacticBoard() {
+    const viewport = document.getElementById('content-viewport');
+    viewport.innerHTML = `
+        <div class="tactics-container">
+            <div class="tactics-pitch">
+                <div class="t-obj obj-player" style="top:50%; left:50%;">10</div>
+                <div class="t-obj obj-ball" style="top:55%; left:52%;"></div>
+            </div>
+            <div class="analysis-sheet">
+                <h3 class="sheet-title">MATCH PREP</h3>
+                <textarea class="notes-area" placeholder="Taktische Anweisungen hier..."></textarea>
+                <button class="btn-save" onclick="voiceEngine.speak('Taktik gespeichert.')">PUBLISH TO SQUAD</button>
+            </div>
+        </div>
+    `;
+}
+
+function renderNewspaperCMS() {
+    const viewport = document.getElementById('content-viewport');
+    viewport.innerHTML = `
+        <div class="newspaper-wrapper">
+            <h1>STADION-ECHO // ELITE EDITION</h1>
+            <p>Aktueller Kaderwert: ${eliteStore.mgmt.liquidAssets.toLocaleString()} €</p>
+            <div style="border:1px solid #ccc; padding:20px; margin-top:20px;">
+                <h3>TOP STORY: NEURAL TRAINING SUCCESS</h3>
+                <p>Die VR-Sitzungen zeigen Wirkung bei der Scanning-Rate.</p>
+            </div>
+            <button onclick="window.print()">DRUCKVERSION GENERIEREN (A4)</button>
+        </div>
+    `;
+}
+
+/* ==========================================================================
+   KI & SYSTEM TOOLS
    ========================================================================== */
 
 const voiceEngine = {
-    recognition: null,
-    synth: window.speechSynthesis,
-    
     init: function() {
         window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (window.SpeechRecognition) {
             this.recognition = new SpeechRecognition();
             this.recognition.lang = 'de-DE';
-            this.recognition.onresult = (e) => {
-                const msg = e.results[e.results.length - 1][0].transcript;
-                handleVoiceCommand(msg);
-            };
+            this.recognition.onresult = (e) => handleVoiceCommand(e.results[e.results.length - 1][0].transcript);
         }
     },
-
     speak: function(text) {
         const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'de-DE';
-        u.pitch = 0.85;
-        this.synth.speak(u);
-        addChatMessage("TONI", text);
+        u.lang = 'de-DE'; u.pitch = 0.85;
+        window.speechSynthesis.speak(u);
+        addChatMessage("TONI ELITE", text);
     },
-
-    toggle: function() {
-        if (this.recognition) {
-            this.recognition.start();
-            addChatMessage("SYSTEM", "KI hört zu...");
-        }
-    }
+    toggle: function() { if(this.recognition) this.recognition.start(); }
 };
 
 function handleVoiceCommand(cmd) {
     const c = cmd.toLowerCase();
-    if (c.includes("status")) voiceEngine.speak("Die Kader-Kompaktheit liegt bei 84 Prozent. Zwei Spieler im Reha-Status.");
+    if (c.includes("status")) voiceEngine.speak("System stabil. Alle Sensoren kalibriert.");
     if (c.includes("finanzen")) loadModule('finance');
-    if (c.includes("vr")) loadModule('vr-hub');
 }
 
-/* ==========================================================================
-   5. UTILS & SYSTEM HELPERS
-   ========================================================================== */
-
 function updateClock() {
-    const now = new Date();
-    document.getElementById('clock-display').innerText = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('clock-display').innerText = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 }
 
 function updateKPIs() {
@@ -316,6 +305,7 @@ function updateKPIs() {
 
 function addChatMessage(sender, text) {
     const stream = document.getElementById('chat-stream');
+    if(!stream) return;
     const msg = document.createElement('div');
     msg.className = `msg ${sender === 'USER' ? 'user' : 'ai'}`;
     msg.innerHTML = `<div class="msg-header">${sender}</div><div class="msg-body">${text}</div>`;
@@ -347,8 +337,7 @@ function savePlayerChanges() {
         p.pos = document.getElementById('edit-p-pos').value;
         p.rating = parseInt(document.getElementById('edit-p-rating').value);
         p.med = document.getElementById('edit-p-med').value;
-        saveState();
-        loadModule('kader');
+        saveState(); loadModule('kader');
         document.getElementById('modal-player-editor').classList.add('hidden');
     }
 }
