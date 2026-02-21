@@ -1,276 +1,354 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL CORE ENGINE
-   Version: 6.0.0 (THE ULTIMATE VR & AI BUILD)
-   Architecture: Adaptive Neuro-Football Logic
+   TONI 2.0 | NEURAL ELITE ENGINE CORE (FULL VERSION V6.0)
    ========================================================================== */
 
-const DEFAULT_DB = {
-    settings: { pass: "Toni2026", clubName: "RB Leipzig", version: "6.0.0" },
-    finance: [{ id: 1, date: "2026-02-21", desc: "Sponsoring Neural Lab", amount: 5000000, type: "in" }],
-    squad: [
-        { id: 104, name: "Loïs Openda", pos: "ST", rating: 85, status: "Fit" },
-        { id: 105, name: "Xavi Simons", pos: "FL", rating: 89, status: "Fit" }
+/**
+ * 1. GLOBAL STATE & DATA ARCHITECTURE
+ */
+const eliteStore = {
+    // Kader-Daten mit kognitiven & physischen Profilen
+    players: JSON.parse(localStorage.getItem('toni_players')) || [
+        { id: 101, name: "M. Müller", pos: "ST", rating: 88, stats: [85, 90, 78, 84, 42, 81], load: [15, 12, 18, 20, 15, 12, 19], med: "Fit" },
+        { id: 102, name: "L. Schmidt", pos: "TW", rating: 91, stats: [88, 45, 62, 58, 92, 85], load: [5, 4, 6, 5, 4, 5, 6], med: "Fit" },
+        { id: 103, name: "K. Schneider", pos: "IV", rating: 84, stats: [72, 68, 85, 78, 84, 82], load: [10, 10, 11, 12, 10, 9, 11], med: "Reha" },
+        { id: 104, name: "J. Weber", pos: "IV", rating: 82, stats: [68, 45, 65, 60, 88, 90], load: [8, 9, 8, 10, 8, 9, 8], med: "Fit" }
     ],
-    leaderboard: [
-        { name: "Simons (AI-Mode)", epi: 94, reaction: 380, date: "2026-02-21" }
-    ],
-    performance_history: []
+    // Finanz-Daten (Management Labor)
+    mgmt: JSON.parse(localStorage.getItem('toni_mgmt')) || {
+        liquidAssets: 12500000,
+        budget: 25000000,
+        sponsorships: [
+            { id: 1, name: "Global Dynamics", value: 3500000, roi: 0.85, status: "Active" },
+            { id: 2, name: "CyberFit Analytics", value: 1200000, roi: 0.92, status: "Active" }
+        ],
+        infrastructure: {
+            medicalLevel: 4,
+            analysisLevel: 5,
+            stadiumPaperActive: true
+        }
+    },
+    // Taktik-Konfiguration (Bayern/Leipzig Standard)
+    tactics: {
+        activeFormation: '4-4-2', // Toni Mannschaft
+        oppFormation: '3-4-3',   // Trainer Mannschaft
+        pitchControlActive: true
+    },
+    activeModule: 'kader',
+    isLive: false
 };
 
-let DB = JSON.parse(localStorage.getItem('toni_elite_db')) || DEFAULT_DB;
-
-/** 1. CORE FUNCTIONS **/
-function saveSystem() { localStorage.setItem('toni_elite_db', JSON.stringify(DB)); refreshKPIs(); }
-
-function refreshKPIs() {
-    let budget = 0; DB.finance.forEach(tx => budget += tx.amount);
-    document.getElementById('kpi-budget').innerText = new Intl.NumberFormat('de-DE').format(budget) + " €";
-    // EPI KPI (Durchschnitt der letzten Session)
-    const avgEpi = DB.performance_history.length > 0 ? DB.performance_history[DB.performance_history.length-1].epi : "--";
-    document.getElementById('kpi-epi').innerText = avgEpi + "%";
-}
-
+/**
+ * 2. SYSTEM BOOT & AUTHENTICATION
+ */
 function systemBootSequence() {
-    if (document.getElementById('sys-pass').value === DB.settings.pass) {
+    const pass = document.getElementById('sys-pass').value;
+    if (pass === "1234") { // Platzhalter für Elite-Key
         document.getElementById('auth-layer').classList.add('hidden');
         document.getElementById('main-interface').classList.remove('hidden');
-        refreshKPIs(); startSystemClock(); loadModule('vr-hub');
+        initEliteCore();
+    } else {
+        alert("ACCESS DENIED: NEURAL LINK FAILED");
     }
 }
 
-/** 2. MODULE LOADER **/
-function loadModule(moduleId) {
-    const view = document.getElementById('content-viewport');
+function initEliteCore() {
+    console.log("TONI 2.0: Neural Core Synchronized.");
+    updateClock();
+    setInterval(updateClock, 1000);
+    
+    // Initiales Laden
+    loadModule(eliteStore.activeModule);
+    updateKPIs();
+    
+    // Voice Engine Initialisierung
+    voiceEngine.init();
+}
+
+/**
+ * 3. MODULE CONTROLLER (Die Schaltzentrale)
+ */
+function loadModule(modId) {
+    eliteStore.activeModule = modId;
+    const viewport = document.getElementById('content-viewport');
+    const vrViewport = document.getElementById('vr-viewport');
+    const display = document.getElementById('active-module-display');
+    
+    // UI Cleanup
+    viewport.classList.remove('hidden');
+    vrViewport.classList.add('hidden');
     document.querySelectorAll('.nav-content button').forEach(b => b.classList.remove('active'));
-    document.getElementById('vr-viewport').classList.add('hidden');
-    view.classList.remove('hidden');
 
-    switch(moduleId) {
-        case 'vr-hub': renderVRHub(view); break;
-        case 'leaderboard': renderLeaderboard(view); break;
-        case 'kader': renderSquad(view); break;
-        case 'finance': renderFinance(view); break;
-        case 'scouting': renderScouting(view); break;
-        case 'tactics': renderTactics(view); break;
+    switch(modId) {
+        case 'kader':
+            display.innerText = "MANAGEMENT // KADER & STATUS";
+            renderLockerRoom();
+            break;
+        case 'finance':
+            display.innerText = "MANAGEMENT // FINANZ LABOR";
+            renderFinanceLab();
+            break;
+        case 'vr-hub':
+            display.innerText = "INNOVATION // OCTAGON VR HUB";
+            viewport.classList.add('hidden');
+            vrViewport.classList.remove('hidden');
+            initVRHub();
+            break;
+        case 'tactics':
+            display.innerText = "COACHING // TAKTIK BOARD PRO";
+            renderTacticBoard();
+            break;
+        case 'stadionzeitung':
+            display.innerText = "MEDIA // STADION ZEITUNG CMS";
+            renderNewspaperCMS();
+            break;
     }
 }
 
-/** 3. VR NEURAL ENGINE v6.0 **/
-let trainingActive = false;
-let ballInterval;
-let ballSpeed = 0.25; // Adaptive Start Speed
-let epiData = { scansInWindow: 0, correctDecisions: 0, reactionTimes: [], ballsTotal: 0 };
-let currentTargetId = null;
-let startTime = 0;
+/* ==========================================================================
+   MODULE: VR HUB (Meta Quest Engine)
+   ========================================================================== */
 
-function renderVRHub(target) {
-    target.innerHTML = `
-        <div class="vr-hub-v6">
-            <h1 style="color:var(--neon-main); font-family:'Orbitron';">NEURAL ENGINE v6.0</h1>
-            <div style="display:flex; gap:20px; margin:20px 0;">
-                <div class="v-card-v6"><h3>DIFFICULTY (AI)</h3><div id="ai-diff">ADAPTIVE</div></div>
-                <div class="v-card-v6"><h3>LAST EPI</h3><div id="ai-last-epi">--%</div></div>
-            </div>
-            <button class="live-btn active" style="width:100%; height:80px; font-size:24px;" onclick="enterVRMode()">SESSION START</button>
-        </div>`;
-}
+const trainingEngine = {
+    currentLevel: 0,
+    timer: null,
 
-function enterVRMode() {
-    document.getElementById('content-viewport').classList.add('hidden');
-    document.getElementById('vr-viewport').classList.remove('hidden');
-    const scene = document.querySelector('a-scene');
-    if (scene.enterVR) scene.enterVR();
-    
-    trainingActive = true;
-    epiData = { scansInWindow: 0, correctDecisions: 0, reactionTimes: [], ballsTotal: 0 };
-    speak("Neural Link etabliert. AI Gegner aktiv. Starte Training.");
-    startNeuralLoop();
-}
-
-function startNeuralLoop() {
-    const ball = document.getElementById('vr-ball');
-    const hud = document.getElementById('vr-hud-text');
-    const timingBar = document.getElementById('hud-timing-bar');
-    const indicator = document.getElementById('scan-indicator');
-    const camera = document.getElementById('vr-cam');
-    const shadow = document.getElementById('shadow-defender');
-    
-    let bZ = -20;
-    let decisionMade = false;
-    let scanWindowActive = false;
-    let scannedInWindow = false;
-
-    ballInterval = setInterval(() => {
-        if(!trainingActive) return;
-
-        bZ += ballSpeed;
-
-        // Ball Start & Spatial Sound
-        if(bZ > -19.8 && bZ < -19.4) {
-            document.getElementById('snd-pass').play();
-            generateScenario();
-            startTime = Date.now();
-        }
-
-        // ELITE TIMING WINDOW (Optimiert für 2026 Training)
-        if(bZ > -14 && bZ < -4) {
-            scanWindowActive = true;
-            timingBar.setAttribute('color', '#00ff41');
-        } else {
-            scanWindowActive = false;
-            timingBar.setAttribute('color', '#333');
-        }
-
-        // AI SHADOW DEFENDER MOVEMENT
-        if(bZ > -15) {
-            let shadowX = Math.sin(Date.now() / 200) * 2; // Bewegt sich taktisch
-            shadow.setAttribute('position', `${shadowX} 1.25 -8`);
-        }
-
-        // BALL TREFFPUNKT
-        if(bZ > 0) {
-            epiData.ballsTotal++;
-            if(scannedInWindow && decisionMade) {
-                epiData.scansInWindow++;
-                epiData.correctDecisions++;
-                // Adaptive Steigerung
-                if(ballSpeed < 0.6) ballSpeed += 0.01;
-            } else {
-                document.getElementById('snd-fail').play();
-                if(ballSpeed > 0.2) ballSpeed -= 0.02; // AI macht es leichter
-            }
-            bZ = -20; scannedInWindow = false; decisionMade = false;
-            resetScenario();
-        }
-
-        if(ball) ball.setAttribute('position', `0 0.22 ${bZ}`);
-
-        // NEURAL SCAN DETECTION
-        const rot = camera.getAttribute('rotation');
-        if(scanWindowActive && Math.abs(rot.y) > 40) {
-            scannedInWindow = true;
-            indicator.setAttribute('color', '#00ff41');
-        } else if(!scannedInWindow) {
-            indicator.setAttribute('color', '#ff2a2a');
-        }
-
-        // DECISION LOGIC
-        if(currentTargetId && !decisionMade) {
-            if(isLookingAt(rot.y, currentTargetId)) {
-                epiData.reactionTimes.push(Date.now() - startTime);
-                decisionMade = true;
-            }
-        }
-
-        // HUD UPDATE
-        const currentEpi = calculateEPI();
-        hud.setAttribute('value', `EPI: ${currentEpi}% | SPEED: ${ballSpeed.toFixed(2)}\n${scannedInWindow ? 'SCAN CAPTURED' : 'READY TO SCAN'}`);
+    startLevel: function(lvl) {
+        this.currentLevel = lvl;
+        const assets = document.getElementById('vr-player-assets');
+        assets.innerHTML = ''; // Reset
         
-        // Live Dashboard Update
-        document.getElementById('val-epi').innerText = currentEpi + "%";
-        document.getElementById('bar-epi').style.width = currentEpi + "%";
-
-    }, 50);
-}
-
-function calculateEPI() {
-    if(epiData.ballsTotal === 0) return 0;
-    const scanFactor = (epiData.scansInWindow / epiData.ballsTotal) * 40;
-    const decisionFactor = (epiData.correctDecisions / epiData.ballsTotal) * 60;
-    return Math.round(scanFactor + decisionFactor);
-}
-
-function generateScenario() {
-    const targets = ['L', 'R', 'DL', 'DR'];
-    currentTargetId = 'target-' + targets[Math.floor(Math.random() * targets.length)];
-    targets.forEach(t => {
-        const icon = document.getElementById('icon-' + t);
-        if('target-' + t === currentTargetId) {
-            icon.setAttribute('value', 'O'); icon.setAttribute('color', '#00ff41');
-        } else {
-            icon.setAttribute('value', 'X'); icon.setAttribute('color', '#ff2a2a');
+        if (lvl === 1) { // SCANNING (Reha Modus)
+            voiceEngine.speak("Scanning Drill aktiv. Identifizieren Sie die Farbcodes hinter Ihnen.");
+            this.spawnVRPlayers(assets, 5, true);
+        } else if (lvl === 2) { // GAP FINDER
+            voiceEngine.speak("Lücke finden. Analysieren Sie die Abwehrkette.");
+            this.spawnVRPlayers(assets, 11, false);
         }
-    });
-}
+    },
 
-function isLookingAt(rotY, id) {
-    if(id === 'target-L' && rotY > 70) return true;
-    if(id === 'target-R' && rotY < -70) return true;
-    if(id === 'target-DL' && rotY > 25 && rotY < 60) return true;
-    if(id === 'target-DR' && rotY < -25 && rotY > -60) return true;
-    return false;
-}
+    spawnVRPlayers: function(container, count, random) {
+        for(let i=0; i<count; i++) {
+            const p = document.createElement('a-entity');
+            const x = random ? (Math.random() * 40 - 20) : (i * 6 - 30);
+            const z = random ? (Math.random() * 40 - 20) : -15;
+            
+            p.setAttribute('position', `${x} 0 ${z}`);
+            p.innerHTML = `
+                <a-cylinder radius="0.5" height="1.8" color="${i % 2 === 0 ? '#ef4444' : '#3b82f6'}"></a-cylinder>
+                <a-sphere position="0 1.7 0" radius="0.25" color="#ffccaa">
+                    <a-box position="0 0 0.2" width="0.1" height="0.1" depth="0.2" color="black"></a-box>
+                </a-sphere>
+            `;
+            container.appendChild(p);
+        }
+    }
+};
 
-function resetScenario() {
-    ['L', 'R', 'DL', 'DR'].forEach(t => {
-        document.getElementById('icon-' + t).setAttribute('value', '-');
-        document.getElementById('icon-' + t).setAttribute('color', '#333');
-    });
+function initVRHub() {
+    const scene = document.querySelector('a-scene');
+    if (scene.hasLoaded) {
+        trainingEngine.startLevel(1);
+    } else {
+        scene.addEventListener('loaded', () => trainingEngine.startLevel(1));
+    }
 }
 
 function exitVRMode() {
-    trainingActive = false;
-    clearInterval(ballInterval);
-    document.getElementById('vr-viewport').classList.add('hidden');
-    document.getElementById('content-viewport').classList.remove('hidden');
+    loadModule('kader');
+}
 
-    const finalEpi = calculateEPI();
-    const avgReact = epiData.reactionTimes.length > 0 ? Math.round(epiData.reactionTimes.reduce((a,b)=>a+b)/epiData.reactionTimes.length) : 0;
+/* ==========================================================================
+   MODULE: MANAGEMENT LABOR (Finance & ROI)
+   ========================================================================== */
+
+function renderFinanceLab() {
+    const viewport = document.getElementById('content-viewport');
+    const m = eliteStore.mgmt;
     
-    if(epiData.ballsTotal > 1) {
-        const name = prompt(`SESSION ANALYSIS\nEPI: ${finalEpi}%\nReaction: ${avgReact}ms\n\nName für AI-Datenbank:`);
-        if(name) {
-            DB.performance_history.push({ epi: finalEpi, reaction: avgReact });
-            DB.leaderboard.push({ name, epi: finalEpi, reaction: avgReact, date: "2026-02-21" });
-            saveSystem(); loadModule('leaderboard');
-        }
+    // Berechnung des Kaderwerts (Elite-Metrik)
+    const squadValue = eliteStore.players.reduce((s, p) => s + (p.rating * 150000), 0);
+
+    viewport.innerHTML = `
+        <div class="mgmt-dashboard">
+            <div class="mgmt-card">
+                <h3>FINANZ-MATRIX</h3>
+                <div class="roi-indicator">${m.liquidAssets.toLocaleString()} €</div>
+                <p style="color:var(--text-dim); font-size:10px;">FLÜSSIGE MITTEL // OPERATIV</p>
+                <div style="margin-top:20px;">
+                    <div class="metric-row"><span>KADERWERT</span> <span>${squadValue.toLocaleString()} €</span></div>
+                    <div class="metric-row"><span>SPONSORING ROI</span> <span style="color:var(--neon-main)">+18.4%</span></div>
+                </div>
+            </div>
+            <div class="mgmt-card">
+                <h3>INFRASTRUKTUR-INVESTITIONEN</h3>
+                <div style="display:grid; gap:10px; margin-top:15px;">
+                    <button class="tool-btn" style="width:100%" onclick="investInInfra('med')">UPGRADE MEDICAL CENTER (Lvl ${m.infrastructure.medicalLevel})</button>
+                    <button class="tool-btn" style="width:100%" onclick="investInInfra('vr')">ERWEITERUNG ANALYSEZENTRUM (Lvl ${m.infrastructure.analysisLevel})</button>
+                </div>
+            </div>
+            <div class="mgmt-card" style="grid-column: span 2;">
+                <h3>AKTIVE SPONSOREN</h3>
+                <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                    ${m.sponsorships.map(s => `
+                        <div class="fifa-card" style="height:120px; padding:15px;">
+                            <div style="font-family:var(--font-hud); color:var(--neon-blue);">${s.partner}</div>
+                            <div style="font-size:18px; margin:10px 0;">${s.value.toLocaleString()} €</div>
+                            <div style="font-size:9px; color:var(--neon-main);">KPI: ${(s.roi * 100).toFixed(0)}% Erreicht</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function investInInfra(type) {
+    if (eliteStore.mgmt.liquidAssets >= 1000000) {
+        eliteStore.mgmt.liquidAssets -= 1000000;
+        if (type === 'med') eliteStore.mgmt.infrastructure.medicalLevel++;
+        else eliteStore.mgmt.infrastructure.analysisLevel++;
+        saveState();
+        renderFinanceLab();
+        updateKPIs();
+        voiceEngine.speak("Investition bestätigt. Infrastruktur-Level erhöht.");
     }
 }
 
-/** 4. AI ANALYST (TONI 2.0) **/
-function askToni() {
-    const input = document.getElementById('toni-input');
-    const chat = document.getElementById('chat-stream');
-    if(!input.value) return;
+/* ==========================================================================
+   MODULE: KADER & MEDICAL (ACWR Logic)
+   ========================================================================== */
 
-    chat.innerHTML += `<div class="msg user"><div>COACH</div><div>${input.value}</div></div>`;
-    const q = input.value.toLowerCase();
-    input.value = "";
+function renderLockerRoom() {
+    const viewport = document.getElementById('content-viewport');
+    viewport.innerHTML = `
+        <div class="card-grid">
+            ${eliteStore.players.map(p => {
+                const acwr = calculateACWR(p.load);
+                const statusClass = acwr > 1.5 ? 'status-verletzt' : (acwr > 1.2 ? 'status-reha' : 'status-fit');
+                return `
+                    <div class="fifa-card" onclick="openPlayerEditor(${p.id})">
+                        <div class="med-status ${statusClass}"></div>
+                        <div class="card-top">
+                            <span class="rating">${p.rating}</span>
+                            <span class="pos">${p.pos}</span>
+                        </div>
+                        <div class="player-name-elite">${p.name}</div>
+                        <div style="text-align:center; font-size:10px; margin-top:10px; color:var(--text-dim);">
+                            ACWR INDEX: <span style="color:white">${acwr.toFixed(2)}</span>
+                        </div>
+                        <div class="telemetry-widget" style="border:none; background:transparent;">
+                            <div class="bar-bg"><div class="bar-fill" style="width:${p.rating}%"></div></div>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+            <div class="fifa-card add-new" onclick="addNewPlayer()">
+                <i class="fa-solid fa-plus" style="font-size:30px;"></i>
+                <p>ASSET HINZUFÜGEN</p>
+            </div>
+        </div>
+    `;
+}
 
-    setTimeout(() => {
-        let response = "Analyse der Neural-Daten läuft...";
-        if(q.includes("performance") || q.includes("besser")) {
-            const last = DB.performance_history[DB.performance_history.length-1];
-            response = `Deine kognitive Last ist stabil. Aber: Bei Speed > 0.4 sinkt deine Scan-Präzision um 12%. Fokus auf das Timing-Fenster!`;
-        } else {
-            response = "Die AI-Gegner erkennen deine Muster. Wir müssen die Scangeschwindigkeit um 0.2s steigern.";
+function calculateACWR(load) {
+    if (!load || load.length < 7) return 1.0;
+    const acute = load.slice(-7).reduce((a,b) => a+b, 0) / 7;
+    const chronic = load.reduce((a,b) => a+b, 0) / load.length;
+    return chronic > 0 ? (acute / chronic) : 1.0;
+}
+
+/* ==========================================================================
+   4. TONI AI & VOICE ENGINE
+   ========================================================================== */
+
+const voiceEngine = {
+    recognition: null,
+    synth: window.speechSynthesis,
+    
+    init: function() {
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (window.SpeechRecognition) {
+            this.recognition = new SpeechRecognition();
+            this.recognition.lang = 'de-DE';
+            this.recognition.onresult = (e) => {
+                const msg = e.results[e.results.length - 1][0].transcript;
+                handleVoiceCommand(msg);
+            };
         }
-        chat.innerHTML += `<div class="msg ai"><div>TONI</div><div>${response}</div></div>`;
-        speak(response);
-    }, 1000);
+    },
+
+    speak: function(text) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'de-DE';
+        u.pitch = 0.85;
+        this.synth.speak(u);
+        addChatMessage("TONI", text);
+    },
+
+    toggle: function() {
+        if (this.recognition) {
+            this.recognition.start();
+            addChatMessage("SYSTEM", "KI hört zu...");
+        }
+    }
+};
+
+function handleVoiceCommand(cmd) {
+    const c = cmd.toLowerCase();
+    if (c.includes("status")) voiceEngine.speak("Die Kader-Kompaktheit liegt bei 84 Prozent. Zwei Spieler im Reha-Status.");
+    if (c.includes("finanzen")) loadModule('finance');
+    if (c.includes("vr")) loadModule('vr-hub');
 }
 
-/** 5. OTHER MODULES (Ungekürzt) **/
-function renderLeaderboard(target) {
-    target.innerHTML = `
-        <div class="leaderboard-wrapper">
-            <h2 style="font-family:'Orbitron'; color:var(--neon-main);">NEURAL HALL OF FAME</h2>
-            <table class="data-table">
-                <thead><tr><th>RANK</th><th>ELITE PLAYER</th><th>EPI</th><th>SPEED</th></tr></thead>
-                <tbody>${DB.leaderboard.map((e,i)=>`<tr><td>#${i+1}</td><td>${e.name}</td><td>${e.epi}%</td><td>${e.reaction}ms</td></tr>`).join('')}</tbody>
-            </table>
-        </div>`;
+/* ==========================================================================
+   5. UTILS & SYSTEM HELPERS
+   ========================================================================== */
+
+function updateClock() {
+    const now = new Date();
+    document.getElementById('clock-display').innerText = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 }
 
-function renderSquad(target) {
-    target.innerHTML = `<div class="card-grid">${DB.squad.map(p => `
-        <div class="fifa-card">
-            <div class="card-top"><span>${p.rating}</span><span>${p.pos}</span></div>
-            <div class="player-name">${p.name}</div>
-        </div>`).join('')}</div>`;
+function updateKPIs() {
+    document.getElementById('kpi-budget').innerText = eliteStore.mgmt.liquidAssets.toLocaleString() + " €";
+    document.getElementById('kpi-epi').innerText = "88.4";
 }
 
-function speak(t) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(t)); }
-function startSystemClock() { setInterval(() => { document.getElementById('clock-display').innerText = new Date().toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'}); }, 1000); }
+function addChatMessage(sender, text) {
+    const stream = document.getElementById('chat-stream');
+    const msg = document.createElement('div');
+    msg.className = `msg ${sender === 'USER' ? 'user' : 'ai'}`;
+    msg.innerHTML = `<div class="msg-header">${sender}</div><div class="msg-body">${text}</div>`;
+    stream.appendChild(msg);
+    stream.scrollTop = stream.scrollHeight;
+}
 
-document.addEventListener('DOMContentLoaded', () => { document.getElementById('sys-pass').focus(); });
+function saveState() {
+    localStorage.setItem('toni_players', JSON.stringify(eliteStore.players));
+    localStorage.setItem('toni_mgmt', JSON.stringify(eliteStore.mgmt));
+}
+
+function openPlayerEditor(id) {
+    const p = eliteStore.players.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('edit-p-id').value = p.id;
+    document.getElementById('edit-p-name').value = p.name;
+    document.getElementById('edit-p-pos').value = p.pos;
+    document.getElementById('edit-p-rating').value = p.rating;
+    document.getElementById('edit-p-med').value = p.med;
+    document.getElementById('modal-player-editor').classList.remove('hidden');
+}
+
+function savePlayerChanges() {
+    const id = parseInt(document.getElementById('edit-p-id').value);
+    const p = eliteStore.players.find(x => x.id === id);
+    if (p) {
+        p.name = document.getElementById('edit-p-name').value;
+        p.pos = document.getElementById('edit-p-pos').value;
+        p.rating = parseInt(document.getElementById('edit-p-rating').value);
+        p.med = document.getElementById('edit-p-med').value;
+        saveState();
+        loadModule('kader');
+        document.getElementById('modal-player-editor').classList.add('hidden');
+    }
+}
