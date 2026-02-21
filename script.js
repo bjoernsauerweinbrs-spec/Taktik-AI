@@ -1,6 +1,6 @@
 /* ==========================================================================
    TONI 2.0 | ELITE CORE ENGINE
-   Version: 4.1.0 (MAXIMUM INTEGRITY BUILD)
+   Version: 4.2.0 (MATCH PREP UPDATE)
    Architecture: Monolith / Local-First / VR-Hybrid / Retina-Design
    ========================================================================== */
 
@@ -14,7 +14,7 @@ const DEFAULT_DB = {
         pass: "Toni2026",
         clubName: "RB Leipzig",
         coachName: "Head Coach",
-        version: "4.1.0"
+        version: "4.2.0"
     },
     // Finanz-Daten (Transaktionsbasiert)
     finance: [
@@ -168,11 +168,15 @@ function loadModule(moduleId) {
             displayTitle.innerText = "COACHING // TAKTIK BOARD PRO";
             renderTacticsBoard(viewport); // Volle Taktik-Engine laden
             break;
+        // NEU: MATCH PREP / SCOUTING
+        case 'scouting':
+            displayTitle.innerText = "MATCH PREP // SPIELTAGS-CLIPBOARD";
+            renderMatchPrep(viewport);
+            break;
         
         // Platzhalter für zukünftige Module
         case 'drills':
         case 'medical':
-        case 'scouting':
         case 'sponsors':
             displayTitle.innerText = "DASHBOARD // " + moduleId.toUpperCase();
             renderPlaceholder(viewport, moduleId);
@@ -749,4 +753,111 @@ function toniGenerateDrill() {
             canvasContext.stroke();
         }
     }, 1100);
+}
+
+/**
+ * --------------------------------------------------------------------------
+ * 11. MODULE: MATCH PREP CLIPBOARD (Nagelsmann Mode)
+ * --------------------------------------------------------------------------
+ */
+function renderMatchPrep(target) {
+    // Dropdown-Optionen aus dem Kader generieren
+    let playerOptions = `<option value="">-- Wähle Spieler --</option>`;
+    DB.squad.forEach(p => {
+        // Nur fitte Spieler anzeigen (optional)
+        if(p.status !== 'Verletzt') {
+            playerOptions += `<option value="${p.name}">${p.pos} - ${p.name} (${p.rating})</option>`;
+        }
+    });
+
+    target.innerHTML = `
+        <div class="clipboard-wrapper">
+            <div class="formation-board">
+                <div class="pos-slot" style="bottom: 5%; left: 50%;">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${playerOptions}</select>
+                </div>
+                <div class="pos-slot" style="bottom: 20%; left: 35%;">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${playerOptions}</select>
+                </div>
+                <div class="pos-slot" style="bottom: 20%; left: 65%;">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${playerOptions}</select>
+                </div>
+                <div class="pos-slot" style="bottom: 25%; left: 10%;">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${playerOptions}</select>
+                </div>
+                <div class="pos-slot" style="bottom: 25%; left: 90%;">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${playerOptions}</select>
+                </div>
+                <div class="pos-slot" style="bottom: 40%; left: 40%;">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${playerOptions}</select>
+                </div>
+                <div class="pos-slot" style="bottom: 40%; left: 60%;">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${playerOptions}</select>
+                </div>
+                <div class="pos-slot" style="top: 35%; left: 15%;">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${playerOptions}</select>
+                </div>
+                <div class="pos-slot" style="top: 30%; left: 50%;">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${playerOptions}</select>
+                </div>
+                <div class="pos-slot" style="top: 35%; left: 85%;">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${playerOptions}</select>
+                </div>
+                <div class="pos-slot" style="top: 15%; left: 50%;">
+                    <div class="pos-dot"></div>
+                    <select class="pos-select">${playerOptions}</select>
+                </div>
+            </div>
+
+            <div class="analysis-sheet">
+                <div class="sheet-header">
+                    <div class="sheet-title">MATCHPLAN: SAISON 25/26</div>
+                    <div style="font-size:10px; color:#666;">COACHING ZONE ONLY</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="notes-label">GEGNER</label>
+                    <input type="text" style="width:100%; background:black; color:white; border:1px solid #333; padding:5px;" value="Borussia Dortmund">
+                </div>
+
+                <div class="form-group">
+                    <label class="notes-label">GEGNERISCHE SCHWÄCHEN (ANALYSE)</label>
+                    <textarea class="notes-area" id="enemy-weakness">Hohe Kette bei Ballverlust anfällig. Außenverteidiger rücken zu weit auf. Umschaltspiel über Openda forcieren.</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="notes-label">STANDARDS / KEY DUELS</label>
+                    <textarea class="notes-area" id="key-duels">Ecken auf den ersten Pfosten (Orban). Simons vs. Can im Zentrum isolieren.</textarea>
+                </div>
+
+                <div style="margin-top:auto; display:flex; gap:10px;">
+                    <button class="live-btn" onclick="toniAutoAnalyze()">
+                        <i class="fa-solid fa-brain"></i> TONI ANALYSE
+                    </button>
+                    <button class="live-btn active" onclick="window.print()">
+                        <i class="fa-solid fa-print"></i> DRUCKEN (KABINE)
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function toniAutoAnalyze() {
+    speak("Ich lade die Daten der letzten 5 Spiele des Gegners...");
+    const area = document.getElementById('enemy-weakness');
+    setTimeout(() => {
+        area.value += "\n\n[TONI UPDATE]: Torwart hat Schwächen bei Fernschüssen. Pressing-Trigger: Sobald der Innenverteidiger aufdreht.";
+        speak("Analyse ergänzt. Pressing-Trigger identifiziert.");
+    }, 1500);
 }
