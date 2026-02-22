@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TONI 2.0 | ELITE TECH NEON DESIGN (MASTER VERSION)
+   TONI 2.0 | ELITE TECH NEON DESIGN (MASTER VERSION 10.0)
    ========================================================================== */
 
 :root {
@@ -193,7 +193,12 @@ summary:hover, details[open] summary { color: var(--neon-main); background: rgba
 .modal-header button { background: none; border: none; color: white; cursor: pointer; }
 
 .modal-body { padding: 25px; }
-.form-group { margin-bottom: 15px; }
+
+/* FIX: Fehlende Form-Row für Modals */
+.form-row { display: flex; gap: 15px; width: 100%; }
+.form-row .form-group { flex: 1; }
+
+.form-group { margin-bottom: 15px; width: 100%; }
 .form-group label { display: block; font-size: 10px; color: var(--text-dim); margin-bottom: 5px; font-family: var(--font-hud); }
 .form-group input, .form-group select {
     width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid #333; color: white; font-family: var(--font-ui);
@@ -215,6 +220,7 @@ summary:hover, details[open] summary { color: var(--neon-main); background: rgba
     .newspaper-wrapper { position: absolute; left: 0; top: 0; width: 100%; background: white; color: black; padding: 20px; }
     .center-stage { overflow: visible; }
 }
+
 /* --- TACTICS BOARD PRO (V9.0) --- */
 .tactics-wrapper { display: grid; grid-template-columns: 250px 1fr 250px; height: 100%; gap: 10px; }
 
@@ -237,6 +243,7 @@ summary:hover, details[open] summary { color: var(--neon-main); background: rgba
     font-size: 11px; cursor: grab; display: flex; justify-content: space-between;
 }
 .draggable-player:hover { border-color: var(--neon-blue); color: var(--neon-blue); }
+
 /* --- CALENDAR MODULE (V10.0) --- */
 .calendar-wrapper { display: flex; flex-direction: column; height: 100%; }
 .cal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid #333; margin-bottom: 20px; }
