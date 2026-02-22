@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL ELITE ENGINE CORE (V9.0 - TACTICAL WAR ROOM)
+   TONI 2.0 | NEURAL ELITE ENGINE CORE (V10.0 - THE TEAM BRAIN)
    ========================================================================== */
 
 // GLOBALE KONFIGURATION
@@ -7,13 +7,19 @@ let USER_API_KEY = localStorage.getItem('toni_api_key') || "";
 
 // ZENTRALER DATENSPEICHER
 const eliteStore = {
-    // V9.0 Update: Erweiterte Spielerdaten für Taktik (Nummer, Position)
+    // V9.0 Update: Erweiterte Spielerdaten für Taktik
     players: JSON.parse(localStorage.getItem('toni_players')) || [
         { id: 101, name: "M. Müller", number: 25, pos: "ST", rating: 88, med: "Fit", attributes: [] },
         { id: 102, name: "L. Schmidt", number: 1, pos: "TW", rating: 91, med: "Fit", attributes: [] },
         { id: 103, name: "K. Schneider", number: 4, pos: "IV", rating: 84, med: "Reha", attributes: [] },
         { id: 104, name: "J. Weber", number: 5, pos: "IV", rating: 82, med: "Fit", attributes: [] },
         { id: 105, name: "D. Raum", number: 22, pos: "LAV", rating: 80, med: "Fit", attributes: [] }
+    ],
+    // V10.0 Update: Kalender & Termine
+    calendar: JSON.parse(localStorage.getItem('toni_calendar')) || [
+        { id: 1, day: 1, time: "10:00", title: "Laktattest", type: "physio", attendance: [] },
+        { id: 2, day: 1, time: "15:00", title: "Team-Training", type: "training", attendance: [] },
+        { id: 3, day: 5, time: "15:30", title: "Ligaspiel vs. BVB", type: "match", attendance: [] }
     ],
     mgmt: JSON.parse(localStorage.getItem('toni_mgmt')) || {
         liquidAssets: 12500000,
@@ -74,7 +80,10 @@ function loadModule(modId) {
     if(modId === 'finance') renderFinanceLab();
     if(modId === 'stadionzeitung') renderNewspaperCMS();
     
-    // Taktik Board mit Canvas-Init Verzögerung (damit DOM bereit ist)
+    // V10.0: Kalender Routing (ehemals Übungskatalog)
+    if(modId === 'drills') renderCalendar();
+
+    // Taktik Board mit Canvas-Init Verzögerung
     if(modId === 'tactics') { 
         renderTacticBoard(); 
         setTimeout(tacticsCore.init, 100); 
@@ -89,7 +98,127 @@ function loadModule(modId) {
 }
 
 /* ==========================================================================
-   3. TACTICS CORE ENGINE (V9.0 NEW FEATURE)
+   3. CALENDAR & ORGANIZATION ENGINE (V10.0 NEW)
+   ========================================================================== */
+
+function renderCalendar() {
+    const viewport = document.getElementById('content-viewport');
+    const days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+    const todayIndex = (new Date().getDay() + 6) % 7; // Mo=0, So=6
+
+    let gridHtml = days.map((day, index) => {
+        // Events für diesen Tag filtern und sortieren
+        const dayEvents = eliteStore.calendar
+            .filter(e => e.day === index)
+            .sort((a,b) => a.time.localeCompare(b.time));
+
+        let eventsHtml = dayEvents.map(e => {
+            const attendingCount = e.attendance ? e.attendance.filter(a => a.present).length : 0;
+            const total = eliteStore.players.length;
+            return `
+            <div class="cal-event type-${e.type}" onclick="openAttendance(${e.id})">
+                <div style="font-weight:bold;">${e.time}</div>
+                <div>${e.title}</div>
+                <div class="attendance-badge"><i class="fa-solid fa-users"></i> ${attendingCount}/${total}</div>
+            </div>`;
+        }).join('');
+
+        return `
+            <div class="cal-day ${index === todayIndex ? 'today' : ''}">
+                <div class="cal-day-header">${day}</div>
+                <div style="flex:1; overflow-y:auto;">${eventsHtml}</div>
+            </div>
+        `;
+    }).join('');
+
+    viewport.innerHTML = `
+        <div class="calendar-wrapper">
+            <div class="cal-header">
+                <h2 style="font-family:var(--font-hud);">WOCHENPLANUNG (KW ${getWeekNumber(new Date())})</h2>
+                <button class="btn-save" onclick="document.getElementById('modal-event-create').classList.remove('hidden')">+ TERMIN</button>
+            </div>
+            <div class="cal-grid">
+                ${gridHtml}
+            </div>
+        </div>
+    `;
+}
+
+function createEvent() {
+    const title = document.getElementById('evt-title').value;
+    const day = parseInt(document.getElementById('evt-day').value);
+    const time = document.getElementById('evt-time').value;
+    const type = document.getElementById('evt-type').value;
+
+    if(title) {
+        // Initiale Anwesenheit: Alle auf "present: false"
+        const initialAttendance = eliteStore.players.map(p => ({ playerId: p.id, present: false }));
+        
+        eliteStore.calendar.push({
+            id: Date.now(),
+            day, time, title, type,
+            attendance: initialAttendance
+        });
+        saveState();
+        renderCalendar();
+        closeModal('modal-event-create');
+        voiceEngine.speak("Termin erstellt.");
+    }
+}
+
+function openAttendance(eventId) {
+    const evt = eliteStore.calendar.find(e => e.id === eventId);
+    if(!evt) return;
+
+    document.getElementById('modal-attendance').classList.remove('hidden');
+    document.getElementById('att-evt-title').innerText = evt.title;
+    document.getElementById('att-evt-id').value = evt.id;
+
+    const list = document.getElementById('attendance-list');
+    list.innerHTML = eliteStore.players.map(p => {
+        // Prüfen ob Status schon gespeichert, sonst default false
+        const status = evt.attendance ? evt.attendance.find(a => a.playerId === p.id) : null;
+        const isPresent = status ? status.present : false;
+        
+        return `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #333;">
+            <span>${p.name}</span>
+            <input type="checkbox" class="att-check" data-pid="${p.id}" ${isPresent ? 'checked' : ''} style="width:20px; height:20px;">
+        </div>`;
+    }).join('');
+}
+
+function saveAttendance() {
+    const eventId = parseInt(document.getElementById('att-evt-id').value);
+    const evt = eliteStore.calendar.find(e => e.id === eventId);
+    
+    // Checkboxen auslesen
+    const checks = document.querySelectorAll('.att-check');
+    const newAttendance = [];
+    checks.forEach(c => {
+        newAttendance.push({
+            playerId: parseInt(c.dataset.pid),
+            present: c.checked
+        });
+    });
+
+    evt.attendance = newAttendance;
+    saveState();
+    renderCalendar();
+    closeModal('modal-attendance');
+    voiceEngine.speak("Anwesenheit gespeichert.");
+}
+
+function getWeekNumber(d) {
+    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+    return weekNo;
+}
+
+/* ==========================================================================
+   4. TACTICS CORE ENGINE (V9.0)
    ========================================================================== */
 const tacticsCore = {
     canvas: null,
@@ -285,7 +414,7 @@ const tacticsCore = {
 };
 
 /* ==========================================================================
-   4. UI RENDERERS
+   5. UI RENDERERS
    ========================================================================== */
 
 function renderTacticBoard() {
@@ -392,8 +521,15 @@ function renderNewspaperCMS() {
 }
 
 /* ==========================================================================
-   5. UTILS, AI & VR
+   6. UTILS, AI & VR
    ========================================================================== */
+
+function saveState() {
+    // Globaler Speicher-Helfer
+    localStorage.setItem('toni_players', JSON.stringify(eliteStore.players));
+    localStorage.setItem('toni_calendar', JSON.stringify(eliteStore.calendar));
+    localStorage.setItem('toni_mgmt', JSON.stringify(eliteStore.mgmt));
+}
 
 function openSysConfig() {
     document.getElementById('modal-sys-config').classList.remove('hidden');
@@ -513,7 +649,7 @@ function savePlayerChanges() {
         p.pos = document.getElementById('edit-p-pos').value;
         p.rating = parseInt(document.getElementById('edit-p-rating').value);
         p.med = document.getElementById('edit-p-med').value;
-        localStorage.setItem('toni_players', JSON.stringify(eliteStore.players));
+        saveState(); // Nutzt jetzt die globale Speicherfunktion
         loadModule('kader');
         closeModal('modal-player-editor');
     }
@@ -543,10 +679,9 @@ const voiceEngine = {
     toggle: function() { if(this.recognition) this.recognition.start(); }
 };
 
-// VR Placeholder (Damit es nicht crasht, wenn du auf VR klickst)
+// VR Placeholder
 const trainingEngine = { startLevel: function() { console.log("VR Start"); }};
 function initVRHub() { 
-    // Hier würde die A-Frame Logik starten. Für Web-Fokus V9.0 minimiert.
     const container = document.getElementById('match-simulation-layer');
     if(container) container.innerHTML = '<a-text value="VR MODUL - BITTE HEADSET AUFSETZEN" position="-2 1.6 -3" color="white"></a-text>';
 }
