@@ -237,3 +237,22 @@ summary:hover, details[open] summary { color: var(--neon-main); background: rgba
     font-size: 11px; cursor: grab; display: flex; justify-content: space-between;
 }
 .draggable-player:hover { border-color: var(--neon-blue); color: var(--neon-blue); }
+/* --- CALENDAR MODULE (V10.0) --- */
+.calendar-wrapper { display: flex; flex-direction: column; height: 100%; }
+.cal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid #333; margin-bottom: 20px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; height: 100%; }
+
+.cal-day { background: rgba(255,255,255,0.02); border: 1px solid #333; display: flex; flex-direction: column; }
+.cal-day-header { background: rgba(255,255,255,0.05); padding: 10px; text-align: center; font-family: var(--font-hud); font-size: 11px; border-bottom: 1px solid #333; }
+.cal-day.today .cal-day-header { background: var(--neon-main); color: black; font-weight: bold; }
+
+.cal-event { margin: 5px; padding: 8px; border-radius: 4px; font-size: 10px; cursor: pointer; border-left: 3px solid transparent; transition: 0.2s; position: relative; }
+.cal-event:hover { transform: scale(1.02); filter: brightness(1.2); }
+
+/* Event Typen Farben */
+.type-training { background: rgba(0, 255, 65, 0.1); border-left-color: var(--neon-main); color: #dcfce7; }
+.type-match { background: rgba(255, 42, 42, 0.1); border-left-color: var(--neon-alert); color: #fee2e2; }
+.type-physio { background: rgba(0, 243, 255, 0.1); border-left-color: var(--neon-blue); color: #e0faff; }
+.type-social { background: rgba(255, 174, 0, 0.1); border-left-color: var(--neon-warn); color: #fef3c7; }
+
+.attendance-badge { position: absolute; top: 5px; right: 5px; font-size: 8px; background: rgba(0,0,0,0.5); padding: 2px 4px; border-radius: 2px; }
