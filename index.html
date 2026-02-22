@@ -18,13 +18,13 @@
         <div class="auth-terminal">
             <div class="auth-inner">
                 <div class="auth-brand">TONI 2.0</div>
-                <div class="auth-msg">NEURAL CORE V6.0 // BIOMETRIC SCAN REQUIRED</div>
+                <div class="auth-msg">NEURAL CORE V7.5 // API GATEWAY READY</div>
                 <div class="input-wrapper">
                     <input type="password" id="sys-pass" placeholder="ACCESS CODE" autocomplete="off">
                     <button onclick="systemBootSequence()">LOGIN</button>
                 </div>
                 <div class="terminal-footer">
-                    <span>V 6.5.0 (SIMULATION ENGINE)</span>
+                    <span>STATUS: WAITING FOR USER</span>
                     <span>SERVER: ONLINE</span>
                 </div>
             </div>
@@ -40,65 +40,51 @@
             </div>
             
             <div class="header-right">
+                <button class="sys-btn" onclick="openSysConfig()">
+                    <i class="fa-solid fa-gear"></i> SYSTEM
+                </button>
+                
                 <div class="stat-item">
                     <span class="label">BUDGET</span>
                     <span class="value val-pos" id="kpi-budget">--</span>
-                </div>
-                <div class="stat-item">
-                    <span class="label">EPI SCORE</span>
-                    <span class="value" id="kpi-epi" style="color:var(--neon-main);">--</span>
                 </div>
                 <div class="sys-clock" id="clock-display">00:00</div>
                 <button class="live-btn" id="live-match-btn" onclick="toggleLiveMode()">
                     <div class="record-dot"></div> LIVE
                 </button>
-                <div class="user-profile">HEAD COACH</div>
             </div>
         </header>
 
         <div class="workspace-grid">
-            
             <aside class="sidebar-left">
                 <div class="sidebar-header">SYSTEM MODULE</div>
                 <div class="nav-accordion">
-                    
                     <details open>
                         <summary><i class="fa-solid fa-layer-group"></i> MANAGEMENT</summary>
                         <div class="nav-content">
                             <button class="active" onclick="loadModule('kader')">Kader & Status</button>
                             <button onclick="loadModule('finance')">Finanz Labor</button>
-                            <button onclick="loadModule('leaderboard')">Bestenliste (Elite)</button>
                         </div>
                     </details>
-
                     <details open>
                         <summary><i class="fa-solid fa-clipboard-check"></i> COACHING ZONE</summary>
                         <div class="nav-content">
                             <button onclick="loadModule('tactics')">Taktik Board Pro</button>
-                            <button onclick="loadModule('scouting')">Match Prep (Nagelsmann)</button>
-                            <button onclick="loadModule('drills')">Übungskatalog (Planner)</button>
+                            <button onclick="loadModule('drills')">Übungskatalog</button>
                         </div>
                     </details>
-
                     <details open>
                         <summary><i class="fa-solid fa-microchip"></i> INNOVATION (VR)</summary>
                         <div class="nav-content">
                             <button onclick="loadModule('vr-hub')">OCTAGON VR HUB</button>
-                            <button onclick="loadModule('medical')">Medical Center</button>
                         </div>
                     </details>
-
                     <details>
                         <summary><i class="fa-solid fa-bullhorn"></i> MEDIA</summary>
                         <div class="nav-content">
                             <button onclick="loadModule('stadionzeitung')">Stadion Zeitung CMS</button>
                         </div>
                     </details>
-                </div>
-                
-                <div class="sidebar-storage">
-                     <div style="font-size:9px; color:#444; letter-spacing:1px;">LOCAL STORAGE: ACTIVE</div>
-                     <div class="storage-track"><div id="storage-bar" style="width:100%;"></div></div>
                 </div>
             </aside>
 
@@ -108,18 +94,14 @@
                 <div id="vr-viewport" class="hidden">
                     <a-scene embedded loading-screen="dotsColor: #00ff41; backgroundColor: black" renderer="antialias: true; colorManagement: true;">
                         <a-assets>
-                            <img id="pitch-markings" src="https://upload.wikimedia.org/wikipedia/commons/8/82/Football_pitch_metric.svg" crossorigin="anonymous">
                             <img id="pitch-tex" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/terrain/grasslight-big.jpg" crossorigin="anonymous">
-                            <audio id="snd-pass" src="https://actions.google.com/sounds/v1/sports/kickball.ogg" preload="auto"></audio>
                         </a-assets>
 
                         <a-entity id="player-rig" movement-controls="speed: 0.3" position="0 0 10">
                             <a-camera id="vr-cam" look-controls wasd-controls position="0 1.6 0">
                                 <a-entity position="0 0.5 -1.2">
-                                    <a-plane width="2.2" height="0.6" material="color: black; opacity: 0.8" position="0 0.1 0"></a-plane>
-                                    <a-text id="mission-briefing" value="INITIALISIERE TAKTIK-PROFIL..." position="0 0.2 0.01" align="center" width="2" color="#00ff41" font="mozillavr"></a-text>
-                                    <a-text id="vr-hud-text" value="WARTE AUF PASS-SEQUENZ" position="0 -0.05 0.01" align="center" width="1.5" color="#00f3ff"></a-text>
-                                    <a-box id="hud-timing-bar" position="0 -0.15 0.01" width="1.8" height="0.02" color="#333"></a-box>
+                                    <a-plane width="2.2" height="0.6" material="color: black; opacity: 0.8"></a-plane>
+                                    <a-text id="vr-hud-text" value="SYSTEM ONLINE" position="0 0.1 0.01" align="center" width="2" color="#00ff41"></a-text>
                                 </a-entity>
                             </a-camera>
                             <a-entity oculus-touch-controls="hand: left"></a-entity>
@@ -127,98 +109,78 @@
                         </a-entity>
 
                         <a-sky color="#020202"></a-sky>
-                        
-                        <a-entity id="stadium-complex">
-                            <a-plane rotation="-90 0 0" width="68" height="105" src="#pitch-tex" repeat="10 15" material="roughness: 1;"></a-plane>
-                            <a-plane rotation="-90 0 0" width="68" height="105" material="src: #pitch-markings; transparent: true; opacity: 0.6; offset: 0 0.01"></a-plane>
-                            
-                            <a-entity id="goal-north" position="0 0 -52.5">
-                                <a-box position="-3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
-                                <a-box position="3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
-                                <a-box position="0 2.44 0" width="7.52" height="0.2" depth="0.2" color="white"></a-box>
-                                <a-plane position="0 1.22 -1" width="7.32" height="2.44" material="color: white; opacity: 0.1; side: double; wireframe: true"></a-plane>
-                            </a-entity>
-                            
-                            <a-entity id="goal-south" position="0 0 52.5">
-                                <a-box position="-3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
-                                <a-box position="3.66 1.22 0" width="0.2" height="2.44" depth="0.2" color="white"></a-box>
-                                <a-box position="0 2.44 0" width="7.52" height="0.2" depth="0.2" color="white"></a-box>
-                                <a-plane position="0 1.22 1" width="7.32" height="2.44" material="color: white; opacity: 0.1; side: double; wireframe: true"></a-plane>
-                            </a-entity>
+                        <a-entity id="pitch-complex">
+                            <a-plane rotation="-90 0 0" width="68" height="105" src="#pitch-tex" repeat="10 15"></a-plane>
+                            <a-plane rotation="-90 0 0" width="68.2" height="105.2" color="white" position="0 0.01 0" material="side: back"></a-plane>
+                            <a-ring color="white" radius-inner="9.1" radius-outer="9.3" rotation="-90 0 0" position="0 0.02 0"></a-ring>
+                            <a-entity position="0 0 -52.5"><a-box position="0 1.22 0" width="7.32" height="2.44" depth="0.1" color="white" material="wireframe:true"></a-box></a-entity>
+                            <a-entity position="0 0 52.5"><a-box position="0 1.22 0" width="7.32" height="2.44" depth="0.1" color="white" material="wireframe:true"></a-box></a-entity>
                         </a-entity>
 
                         <a-entity id="match-simulation-layer"></a-entity>
-                        <a-entity id="analysis-heatmaps" visible="false"></a-entity>
-
                         <a-light type="ambient" color="#444"></a-light>
                         <a-light type="point" position="0 20 0" intensity="1.5" color="#00ff41"></a-light>
                     </a-scene>
-
-                    <button class="vr-exit-btn" onclick="exitVRMode()">
-                        <i class="fa-solid fa-power-off"></i> SESSION BEENDEN
-                    </button>
+                    <button class="vr-exit-btn" onclick="exitVRMode()">SESSION BEENDEN</button>
                 </div>
             </main>
 
             <aside class="sidebar-right">
                 <div class="toni-visualizer">
                     <div class="brain-mesh"><i class="fa-solid fa-brain"></i></div>
-                    <div class="neural-link-text">NEURAL LINK ACTIVE</div>
+                    <div id="ai-status-text" class="neural-link-text">NEURAL LINK: STANDBY</div>
                 </div>
-
                 <div class="chat-container" id="chat-stream">
-                    <div class="msg ai">
-                        <div class="msg-header">TONI ELITE</div>
-                        <div class="msg-body">11v11 Simulation kalibriert. Warte auf Drills.</div>
-                    </div>
+                    <div class="msg ai"><div class="msg-header">TONI</div><div class="msg-body">System bereit. Bitte API Key in den Systemeinstellungen hinterlegen für volle Intelligenz.</div></div>
                 </div>
-
-                <div class="telemetry-widget">
-                    <h4>LIVE ANALYTICS</h4>
-                    <div class="metric-row">
-                        <span>EPI SCORE</span>
-                        <div class="bar-bg"><div class="bar-fill" id="bar-epi" style="width:0%"></div></div>
-                        <span id="val-epi">0%</span>
-                    </div>
-                    <div class="metric-row">
-                        <span>PASSING ACC</span>
-                        <div class="bar-bg"><div class="bar-fill" id="bar-lat" style="width:0%; background:var(--neon-main);"></div></div>
-                        <span id="val-lat">0%</span>
-                    </div>
-                </div>
-
                 <div class="chat-input-wrapper">
-                    <textarea id="toni-input" placeholder="Taktische Analyse anfordern..."></textarea>
+                    <textarea id="toni-input" placeholder="Frage an Toni (GPT-4)..."></textarea>
                     <button class="send-btn" onclick="askToni()">SENDEN</button>
                 </div>
             </aside>
         </div>
     </div>
 
-    <div id="modal-player-editor" class="modal-overlay hidden">
-        <div class="modal-window">
+    <div id="modal-sys-config" class="modal-overlay hidden">
+        <div class="modal-window" style="border-color: var(--neon-main);">
             <div class="modal-header">
-                <h3>ASSET PROFILE EDITOR</h3>
-                <button onclick="closeModal('modal-player-editor')"><i class="fa-solid fa-times"></i></button>
+                <h3>NEURAL LINK CONFIGURATOR</h3>
+                <button onclick="closeModal('modal-sys-config')"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="modal-body">
-                <input type="hidden" id="edit-p-id">
-                <div class="form-group"><label>Asset Name</label><input type="text" id="edit-p-name"></div>
-                <div class="form-row">
-                    <div class="form-group"><label>Rolle</label><input type="text" id="edit-p-pos"></div>
-                    <div class="form-group"><label>Rating</label><input type="number" id="edit-p-rating"></div>
+                <p style="font-size:11px; color:#aaa; margin-bottom:15px;">
+                    Geben Sie Ihren OpenAI API Key ein, um das Gehirn von Toni zu aktivieren. 
+                    Der Key wird <strong>nur lokal</strong> in Ihrem Browser gespeichert.
+                </p>
+                <div class="form-group">
+                    <label>OPENAI API KEY (sk-...)</label>
+                    <input type="password" id="input-api-key" placeholder="sk-proj-...">
                 </div>
-                <div class="form-group"><label>Biometrischer Status</label>
-                    <select id="edit-p-med">
-                        <option value="Fit">Fit / Optimal</option>
-                        <option value="Reha">Reha / Monitoring</option>
-                        <option value="Verletzt">Critical / Out</option>
-                    </select>
+                <div class="form-group" style="margin-top:10px;">
+                    <label>STATUS</label>
+                    <div id="key-status-display" style="color:var(--neon-alert);">NICHT VERBUNDEN</div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-save" onclick="savePlayerChanges()">COMMIT CHANGES</button>
+                <button class="btn-save" onclick="saveSystemConfig()">VERBINDUNG HERSTELLEN</button>
+                <button class="btn-cancel" onclick="clearSystemConfig()">KEY LÖSCHEN</button>
             </div>
+        </div>
+    </div>
+
+    <div id="modal-player-editor" class="modal-overlay hidden">
+        <div class="modal-window">
+            <div class="modal-header"><h3>ASSET PROFILE EDITOR</h3><button onclick="closeModal('modal-player-editor')"><i class="fa-solid fa-times"></i></button></div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-p-id">
+                <div class="form-group"><label>Name</label><input type="text" id="edit-p-name"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Pos</label><input type="text" id="edit-p-pos"></div>
+                    <div class="form-group"><label>Rating</label><input type="number" id="edit-p-rating"></div>
+                </div>
+                <div class="form-group"><label>Status</label><select id="edit-p-med"><option value="Fit">Fit</option><option value="Reha">Reha</option><option value="Verletzt">Verletzt</option></select></div>
+            </div>
+            <div class="modal-footer"><button class="btn-save" onclick="savePlayerChanges()">SPEICHERN</button></div>
         </div>
     </div>
 
