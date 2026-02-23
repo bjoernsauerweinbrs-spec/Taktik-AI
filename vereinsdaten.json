@@ -1,1 +1,53 @@
-
+{
+  "projekt": "Toni 2.0 - Professional Tactical Lab",
+  "einstellungen": {
+    "formation_toni": "4-4-2",
+    "formation_trainer": "3-4-3",
+    "spielfeld_masse": "105x68"
+  },
+  "aktentasche": {
+    "analysezentrum": "aktiv",
+    "sponsoring": "aktiv",
+    "stadionzeitung": "aktiv"
+  },
+  "kader": [
+    {
+      "id": 1,
+      "name": "Muster_Spieler_01",
+      "position": "Torwart",
+      "waage_daten": {
+        "gewicht_kg": 85.0,
+        "kfa_prozent": 11.2,
+        "muskelmasse_kg": 72.5
+      },
+      "sportuhr_daten": {
+        "puls_aktuell": 120,
+        "max_puls_tag": 185,
+        "distanz_m": 0
+      },
+      "taktik": {
+        "start_pos_x": 0,
+        "start_pos_z": -48
+      }
+    },
+    {
+      "id": 2,
+      "name": "Muster_Spieler_02",
+      "position": "Innenverteidiger",
+      "waage_daten": {
+        "gewicht_kg": 88.5,
+        "kfa_prozent": 12.8,
+        "muskelmasse_kg": 76.0
+      },
+      "sportuhr_daten": {
+        "puls_aktuell": 135,
+        "max_puls_tag": 192,
+        "distanz_m": 0
+      },
+      "taktik": {
+        "start_pos_x": -15,
+        "start_pos_z": -35
+      }
+    }
+  ]
+}
