@@ -2,76 +2,32 @@
   "verein": "Toni 2.0 - Profi Campus",
   "match_setup": {
     "formation_toni": "4-4-2",
-    "formation_gegner": "3-4-3",
-    "wetter": "Trocken",
-    "rasen_zustand": "Schnell"
+    "formation_gegner": "3-4-3"
   },
   "kader_toni": [
-    {
-      "id": 1, "name": "Toni_TW_01", "position": "TW",
-      "physis": { "gewicht": 86.0, "kfa": 10.5, "muskel_kg": 74.0 },
-      "sportuhr": { "puls": 130, "km_laufleistung": 4.2 },
-      "taktik_start": { "x": 0, "z": -48 } 
-    },
-    {
-      "id": 2, "name": "Toni_RV_02", "position": "RV",
-      "physis": { "gewicht": 78.0, "kfa": 9.8, "muskel_kg": 68.5 },
-      "sportuhr": { "puls": 155, "km_laufleistung": 9.1 },
-      "taktik_start": { "x": 22, "z": -35 }
-    },
-    {
-      "id": 3, "name": "Toni_IV_03", "position": "IV",
-      "physis": { "gewicht": 84.5, "kfa": 11.0, "muskel_kg": 73.0 },
-      "sportuhr": { "puls": 145, "km_laufleistung": 8.4 },
-      "taktik_start": { "x": 8, "z": -35 }
-    },
-    {
-      "id": 4, "name": "Toni_IV_04", "position": "IV",
-      "physis": { "gewicht": 85.0, "kfa": 10.8, "muskel_kg": 73.5 },
-      "sportuhr": { "puls": 144, "km_laufleistung": 8.3 },
-      "taktik_start": { "x": -8, "z": -35 }
-    },
-    {
-      "id": 5, "name": "Toni_LV_05", "position": "LV",
-      "physis": { "gewicht": 77.5, "kfa": 9.5, "muskel_kg": 67.0 },
-      "sportuhr": { "puls": 158, "km_laufleistung": 9.4 },
-      "taktik_start": { "x": -22, "z": -35 }
-    },
-    {
-      "id": 6, "name": "Toni_RM_06", "position": "RM",
-      "physis": { "gewicht": 75.0, "kfa": 8.5, "muskel_kg": 65.0 },
-      "sportuhr": { "puls": 165, "km_laufleistung": 11.2 },
-      "taktik_start": { "x": 25, "z": -15 }
-    },
-    {
-      "id": 7, "name": "Toni_ZM_07", "position": "ZM",
-      "physis": { "gewicht": 80.0, "kfa": 9.2, "muskel_kg": 70.0 },
-      "sportuhr": { "puls": 160, "km_laufleistung": 11.5 },
-      "taktik_start": { "x": 6, "z": -15 }
-    },
-    {
-      "id": 8, "name": "Toni_ZM_08", "position": "ZM",
-      "physis": { "gewicht": 79.5, "kfa": 9.0, "muskel_kg": 69.5 },
-      "sportuhr": { "puls": 162, "km_laufleistung": 11.8 },
-      "taktik_start": { "x": -6, "z": -15 }
-    },
-    {
-      "id": 9, "name": "Toni_LM_09", "position": "LM",
-      "physis": { "gewicht": 74.0, "kfa": 8.2, "muskel_kg": 64.0 },
-      "sportuhr": { "puls": 168, "km_laufleistung": 11.0 },
-      "taktik_start": { "x": -25, "z": -15 }
-    },
-    {
-      "id": 10, "name": "Toni_ST_10", "position": "ST",
-      "physis": { "gewicht": 82.0, "kfa": 9.5, "muskel_kg": 71.0 },
-      "sportuhr": { "puls": 170, "km_laufleistung": 10.2 },
-      "taktik_start": { "x": 5, "z": 5 }
-    },
-    {
-      "id": 11, "name": "Toni_ST_11", "position": "ST",
-      "physis": { "gewicht": 83.0, "kfa": 9.7, "muskel_kg": 71.5 },
-      "sportuhr": { "puls": 172, "km_laufleistung": 10.1 },
-      "taktik_start": { "x": -5, "z": 5 }
-    }
+    { "id": 1, "name": "Toni_TW", "position": "TW", "taktik_start": { "x": 0, "z": -48 } },
+    { "id": 2, "name": "Toni_RV", "position": "RV", "taktik_start": { "x": 22, "z": -35 } },
+    { "id": 3, "name": "Toni_IV_R", "position": "IV", "taktik_start": { "x": 8, "z": -35 } },
+    { "id": 4, "name": "Toni_IV_L", "position": "IV", "taktik_start": { "x": -8, "z": -35 } },
+    { "id": 5, "name": "Toni_LV", "position": "LV", "taktik_start": { "x": -22, "z": -35 } },
+    { "id": 6, "name": "Toni_RM", "position": "RM", "taktik_start": { "x": 25, "z": -15 } },
+    { "id": 7, "name": "Toni_ZM_R", "position": "ZM", "taktik_start": { "x": 6, "z": -15 } },
+    { "id": 8, "name": "Toni_ZM_L", "position": "ZM", "taktik_start": { "x": -6, "z": -15 } },
+    { "id": 9, "name": "Toni_LM", "position": "LM", "taktik_start": { "x": -25, "z": -15 } },
+    { "id": 10, "name": "Toni_ST_R", "position": "ST", "taktik_start": { "x": 5, "z": 5 } },
+    { "id": 11, "name": "Toni_ST_L", "position": "ST", "taktik_start": { "x": -5, "z": 5 } }
+  ],
+  "kader_gegner": [
+    { "id": 1, "name": "Gegner_TW", "position": "TW", "taktik_start": { "x": 0, "z": 48 } },
+    { "id": 2, "name": "Gegner_IV_R", "position": "IV", "taktik_start": { "x": 15, "z": 30 } },
+    { "id": 3, "name": "Gegner_IV_C", "position": "IV", "taktik_start": { "x": 0, "z": 30 } },
+    { "id": 4, "name": "Gegner_IV_L", "position": "IV", "taktik_start": { "x": -15, "z": 30 } },
+    { "id": 5, "name": "Gegner_RM", "position": "RM", "taktik_start": { "x": 25, "z": 10 } },
+    { "id": 6, "name": "Gegner_ZM_R", "position": "ZM", "taktik_start": { "x": 8, "z": 10 } },
+    { "id": 7, "name": "Gegner_ZM_L", "position": "ZM", "taktik_start": { "x": -8, "z": 10 } },
+    { "id": 8, "name": "Gegner_LM", "position": "LM", "taktik_start": { "x": -25, "z": 10 } },
+    { "id": 9, "name": "Gegner_RA", "position": "RA", "taktik_start": { "x": 20, "z": -10 } },
+    { "id": 10, "name": "Gegner_MS", "position": "MS", "taktik_start": { "x": 0, "z": -10 } },
+    { "id": 11, "name": "Gegner_LA", "position": "LA", "taktik_start": { "x": -20, "z": -10 } }
   ]
 }
