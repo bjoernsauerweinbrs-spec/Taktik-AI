@@ -10,6 +10,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="elite-theme">
@@ -18,7 +19,7 @@
         <div class="auth-terminal">
             <div class="auth-inner">
                 <div class="auth-brand">TONI 2.0</div>
-                <div class="auth-msg">NEURAL CORE V10.0 // SYSTEM ONLINE</div>
+                <div class="auth-msg">NEURAL CORE V10.1 // LABOR UPGRADE</div>
                 <div class="input-wrapper">
                     <input type="password" id="sys-pass" placeholder="ACCESS CODE" autocomplete="off">
                     <button onclick="systemBootSequence()">LOGIN</button>
@@ -173,12 +174,30 @@
             <div class="modal-header"><h3>ASSET PROFILE EDITOR</h3><button onclick="closeModal('modal-player-editor')"><i class="fa-solid fa-times"></i></button></div>
             <div class="modal-body">
                 <input type="hidden" id="edit-p-id">
-                <div class="form-group"><label>Name</label><input type="text" id="edit-p-name"></div>
-                <div class="form-row">
-                    <div class="form-group"><label>Pos</label><input type="text" id="edit-p-pos"></div>
-                    <div class="form-group"><label>Rating</label><input type="number" id="edit-p-rating"></div>
+                
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="edit-p-name" placeholder="Spielername">
                 </div>
-                <div class="form-group"><label>Status</label><select id="edit-p-med"><option value="Fit">Fit</option><option value="Reha">Reha</option><option value="Verletzt">Verletzt</option></select></div>
+                
+                <div class="form-group">
+                    <label>Bild URL (Face)</label>
+                    <input type="text" id="edit-p-img" placeholder="https://...">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"><label>Pos</label><input type="text" id="edit-p-pos" placeholder="ST"></div>
+                    <div class="form-group"><label>Rating</label><input type="number" id="edit-p-rating" placeholder="85"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="edit-p-med">
+                        <option value="Fit">Fit</option>
+                        <option value="Reha">Reha</option>
+                        <option value="Verletzt">Verletzt</option>
+                    </select>
+                </div>
             </div>
             <div class="modal-footer"><button class="btn-save" onclick="savePlayerChanges()">SPEICHERN</button></div>
         </div>
