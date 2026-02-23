@@ -1,33 +1,49 @@
 {
-  "verein": "Toni 2.0 - Profi Campus",
-  "match_setup": {
-    "formation_toni": "4-4-2",
-    "formation_gegner": "3-4-3"
+  "verein": "Toni 2.0 - Elite Academy",
+  "config": {
+    "budget": 12500000,
+    "next_match": "vs. RB Leipzig (U19)",
+    "saison_ziel": "Aufstieg"
   },
   "kader_toni": [
-    { "id": 1, "name": "Toni_TW", "position": "TW", "taktik_start": { "x": 0, "z": -48 } },
-    { "id": 2, "name": "Toni_RV", "position": "RV", "taktik_start": { "x": 22, "z": -35 } },
-    { "id": 3, "name": "Toni_IV_R", "position": "IV", "taktik_start": { "x": 8, "z": -35 } },
-    { "id": 4, "name": "Toni_IV_L", "position": "IV", "taktik_start": { "x": -8, "z": -35 } },
-    { "id": 5, "name": "Toni_LV", "position": "LV", "taktik_start": { "x": -22, "z": -35 } },
-    { "id": 6, "name": "Toni_RM", "position": "RM", "taktik_start": { "x": 25, "z": -15 } },
-    { "id": 7, "name": "Toni_ZM_R", "position": "ZM", "taktik_start": { "x": 6, "z": -15 } },
-    { "id": 8, "name": "Toni_ZM_L", "position": "ZM", "taktik_start": { "x": -6, "z": -15 } },
-    { "id": 9, "name": "Toni_LM", "position": "LM", "taktik_start": { "x": -25, "z": -15 } },
-    { "id": 10, "name": "Toni_ST_R", "position": "ST", "taktik_start": { "x": 5, "z": 5 } },
-    { "id": 11, "name": "Toni_ST_L", "position": "ST", "taktik_start": { "x": -5, "z": 5 } }
+    {
+      "id": 1,
+      "name": "Manuel Neuer",
+      "position": "TW",
+      "img_url": "https://bjoernsauerweinbrs-spec.github.io/Taktik-AI/media/neuer_face.png",
+      "rating": 89,
+      "status": {
+        "im_kader": true,
+        "im_training": true,
+        "verletzt": false
+      },
+      "fifa_stats": {
+        "div": 88, "han": 85, "kic": 91, "ref": 89, "spd": 56, "pos": 88
+      },
+      "labor_daten": {
+        "waage": { "gewicht": 92.5, "kfa": 11.2, "muskelanteil": 48.5 },
+        "uhr": { "ruhepuls": 48, "schlaf_score": 85, "belastung": "Optimal" }
+      }
+    },
+    {
+      "id": 2,
+      "name": "Virgil van Dijk",
+      "position": "IV",
+      "img_url": "https://bjoernsauerweinbrs-spec.github.io/Taktik-AI/media/vandijk_face.png",
+      "rating": 88,
+      "status": {
+        "im_kader": true,
+        "im_training": true,
+        "verletzt": false
+      },
+      "fifa_stats": {
+        "pac": 78, "sho": 60, "pas": 71, "dri": 72, "def": 89, "phy": 86
+      },
+      "labor_daten": {
+        "waage": { "gewicht": 92.0, "kfa": 9.8, "muskelanteil": 50.2 },
+        "uhr": { "ruhepuls": 52, "schlaf_score": 91, "belastung": "Hoch" }
+      }
+    }
   ],
-  "kader_gegner": [
-    { "id": 1, "name": "Gegner_TW", "position": "TW", "taktik_start": { "x": 0, "z": 48 } },
-    { "id": 2, "name": "Gegner_IV_R", "position": "IV", "taktik_start": { "x": 15, "z": 30 } },
-    { "id": 3, "name": "Gegner_IV_C", "position": "IV", "taktik_start": { "x": 0, "z": 30 } },
-    { "id": 4, "name": "Gegner_IV_L", "position": "IV", "taktik_start": { "x": -15, "z": 30 } },
-    { "id": 5, "name": "Gegner_RM", "position": "RM", "taktik_start": { "x": 25, "z": 10 } },
-    { "id": 6, "name": "Gegner_ZM_R", "position": "ZM", "taktik_start": { "x": 8, "z": 10 } },
-    { "id": 7, "name": "Gegner_ZM_L", "position": "ZM", "taktik_start": { "x": -8, "z": 10 } },
-    { "id": 8, "name": "Gegner_LM", "position": "LM", "taktik_start": { "x": -25, "z": 10 } },
-    { "id": 9, "name": "Gegner_RA", "position": "RA", "taktik_start": { "x": 20, "z": -10 } },
-    { "id": 10, "name": "Gegner_MS", "position": "MS", "taktik_start": { "x": 0, "z": -10 } },
-    { "id": 11, "name": "Gegner_LA", "position": "LA", "taktik_start": { "x": -20, "z": -10 } }
-  ]
+  "kader_gegner": [] 
 }
