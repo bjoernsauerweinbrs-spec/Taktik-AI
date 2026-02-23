@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TONI 2.0 | ELITE TECH NEON DESIGN (MASTER VERSION 10.0)
+   TONI 2.0 | ELITE TECH NEON DESIGN (MASTER VERSION 10.1 - LAB UPDATE)
    ========================================================================== */
 
 :root {
@@ -131,24 +131,125 @@ summary:hover, details[open] summary { color: var(--neon-main); background: rgba
 .center-stage { position: relative; overflow: hidden; background: rgba(0,0,0,0.2); }
 #content-viewport { padding: 30px; height: 100%; overflow-y: auto; }
 
-/* --- MODULE: FIFA CARDS --- */
-.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+/* --- MODULE: FIFA CARDS (3D FLIP UPGRADE) --- */
+.kader-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 30px;
+    padding: 20px;
+}
 
 .fifa-card {
-    height: 260px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1);
-    position: relative; transition: 0.3s; cursor: pointer;
-    clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+    background-color: transparent;
+    width: 100%;
+    max-width: 260px;
+    height: 400px; /* Mehr Platz für Daten */
+    perspective: 1000px; /* Wichtig für 3D Effekt */
+    cursor: pointer;
+    margin: 0 auto;
 }
-.fifa-card:hover { border-color: var(--neon-main); box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); transform: translateY(-5px); }
 
-.card-top { padding: 15px; display: flex; justify-content: space-between; align-items: flex-start; }
-.rating { font-family: var(--font-hud); font-size: 32px; color: white; text-shadow: 0 0 10px black; }
-.pos { font-family: var(--font-hud); font-size: 12px; color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 2px 5px; }
-.player-name-elite { text-align: center; font-family: var(--font-hud); font-size: 14px; margin-top: 50px; color: var(--text-bright); }
-.med-status { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; }
-.status-fit { background: var(--neon-main); box-shadow: 0 0 5px var(--neon-main); }
-.status-reha { background: var(--neon-warn); box-shadow: 0 0 5px var(--neon-warn); }
-.status-verletzt { background: var(--neon-alert); box-shadow: 0 0 5px var(--neon-alert); }
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smoother Flip */
+    transform-style: preserve-3d;
+}
+
+/* Klasse zum Drehen (wird per JS aktiviert) */
+.fifa-card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+/* Vorder- und Rückseite Gemeinsamkeiten */
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* VORDERSEITE: Gold/Elite Look */
+.card-front {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid var(--neon-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card-front::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 120px;
+    background: linear-gradient(180deg, rgba(0,255,65,0.1), transparent);
+    clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
+}
+
+.player-img {
+    width: 160px; height: 160px; object-fit: cover;
+    margin-top: 30px; border-radius: 50%;
+    border: 3px solid var(--neon-main);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    z-index: 2;
+}
+
+.card-info { margin-top: 15px; width: 100%; padding: 0 15px; z-index: 2; }
+.card-name { font-family: var(--font-hud); font-size: 18px; color: white; letter-spacing: 1px; margin-bottom: 5px; }
+.card-pos { color: var(--neon-blue); font-size: 12px; font-weight: bold; letter-spacing: 2px; }
+.card-rating { 
+    position: absolute; top: 15px; left: 15px; 
+    font-family: var(--font-hud); font-size: 24px; color: var(--neon-main); 
+}
+
+.stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; width: 85%; margin-top: 20px;
+    font-family: var(--font-hud); font-size: 10px; color: var(--text-dim);
+}
+.stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px; }
+.stat-val { color: white; font-weight: bold; }
+
+/* RÜCKSEITE: Das Labor (Tech-Look) */
+.card-back {
+    background: #0a0a0a;
+    color: var(--neon-blue);
+    transform: rotateY(180deg);
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 10px;
+    border: 1px solid var(--neon-blue);
+    box-shadow: inset 0 0 30px rgba(0, 243, 255, 0.1);
+}
+
+.lab-header { font-family: var(--font-hud); font-size: 14px; text-transform: uppercase; border-bottom: 1px solid var(--neon-blue); padding-bottom: 10px; margin-bottom: 10px; }
+
+.lab-group { margin-bottom: 8px; }
+.lab-label { font-size: 9px; color: var(--text-dim); display: block; margin-bottom: 3px; }
+.lab-input {
+    background: rgba(255,255,255,0.05); border: 1px solid #333; color: white;
+    width: 100%; padding: 8px; font-family: var(--font-hud); text-align: center;
+    border-radius: 4px; font-size: 12px;
+}
+.lab-input:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
+
+.lab-toggles { display: flex; gap: 10px; margin-top: 10px; }
+.toggle-btn {
+    flex: 1; padding: 8px; font-size: 10px; cursor: pointer;
+    background: transparent; border: 1px solid #444; color: #666;
+    transition: 0.3s;
+}
+.toggle-btn.active { background: var(--neon-main); color: black; border-color: var(--neon-main); font-weight: bold; }
+.toggle-btn.absent { background: var(--neon-alert); color: white; border-color: var(--neon-alert); }
+
+.card-actions { margin-top: auto; display: flex; gap: 10px; }
+.action-btn { flex: 1; padding: 10px; cursor: pointer; font-family: var(--font-hud); font-size: 10px; border: none; border-radius: 4px; }
+.btn-save-card { background: var(--neon-blue); color: black; }
+.btn-delete-card { background: transparent; border: 1px solid var(--neon-alert); color: var(--neon-alert); }
 
 /* --- MODULE: MANAGEMENT & FINANCE --- */
 .mgmt-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -194,7 +295,6 @@ summary:hover, details[open] summary { color: var(--neon-main); background: rgba
 
 .modal-body { padding: 25px; }
 
-/* FIX: Fehlende Form-Row für Modals */
 .form-row { display: flex; gap: 15px; width: 100%; }
 .form-row .form-group { flex: 1; }
 
@@ -223,8 +323,6 @@ summary:hover, details[open] summary { color: var(--neon-main); background: rgba
 
 /* --- TACTICS BOARD PRO (V9.0) --- */
 .tactics-wrapper { display: grid; grid-template-columns: 250px 1fr 250px; height: 100%; gap: 10px; }
-
-/* Werkzeugleiste (Links) */
 .tactics-sidebar { background: var(--bg-panel); border: var(--border-tech); padding: 15px; display: flex; flex-direction: column; gap: 10px; }
 .tool-btn {
     background: rgba(255,255,255,0.05); border: 1px solid #333; color: var(--text-dim);
@@ -232,11 +330,9 @@ summary:hover, details[open] summary { color: var(--neon-main); background: rgba
 }
 .tool-btn:hover, .tool-btn.active { border-color: var(--neon-main); color: var(--neon-main); background: rgba(0,255,65,0.05); }
 
-/* Canvas Bereich (Mitte) */
 .tactics-stage { position: relative; background: #0b1812; border: 1px solid #333; overflow: hidden; display: flex; justify-content: center; align-items: center; }
 #tactics-canvas { background: url('https://upload.wikimedia.org/wikipedia/commons/8/82/Football_pitch_metric.svg') no-repeat center center; background-size: cover; cursor: crosshair; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
 
-/* Spieler-Liste (Rechts) */
 .squad-list { overflow-y: auto; height: 100%; }
 .draggable-player {
     background: rgba(0,0,0,0.5); border: 1px solid #444; padding: 8px; margin-bottom: 5px;
@@ -248,18 +344,13 @@ summary:hover, details[open] summary { color: var(--neon-main); background: rgba
 .calendar-wrapper { display: flex; flex-direction: column; height: 100%; }
 .cal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid #333; margin-bottom: 20px; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; height: 100%; }
-
 .cal-day { background: rgba(255,255,255,0.02); border: 1px solid #333; display: flex; flex-direction: column; }
 .cal-day-header { background: rgba(255,255,255,0.05); padding: 10px; text-align: center; font-family: var(--font-hud); font-size: 11px; border-bottom: 1px solid #333; }
 .cal-day.today .cal-day-header { background: var(--neon-main); color: black; font-weight: bold; }
-
 .cal-event { margin: 5px; padding: 8px; border-radius: 4px; font-size: 10px; cursor: pointer; border-left: 3px solid transparent; transition: 0.2s; position: relative; }
 .cal-event:hover { transform: scale(1.02); filter: brightness(1.2); }
-
-/* Event Typen Farben */
 .type-training { background: rgba(0, 255, 65, 0.1); border-left-color: var(--neon-main); color: #dcfce7; }
 .type-match { background: rgba(255, 42, 42, 0.1); border-left-color: var(--neon-alert); color: #fee2e2; }
 .type-physio { background: rgba(0, 243, 255, 0.1); border-left-color: var(--neon-blue); color: #e0faff; }
 .type-social { background: rgba(255, 174, 0, 0.1); border-left-color: var(--neon-warn); color: #fef3c7; }
-
 .attendance-badge { position: absolute; top: 5px; right: 5px; font-size: 8px; background: rgba(0,0,0,0.5); padding: 2px 4px; border-radius: 2px; }
