@@ -1,49 +1,156 @@
 {
   "verein": "Toni 2.0 - Elite Academy",
-  "config": {
-    "budget": 12500000,
-    "next_match": "vs. RB Leipzig (U19)",
-    "saison_ziel": "Aufstieg"
-  },
+  "config": { "budget": 12500000 },
   "kader_toni": [
     {
-      "id": 1,
-      "name": "Manuel Neuer",
-      "position": "TW",
-      "img_url": "https://bjoernsauerweinbrs-spec.github.io/Taktik-AI/media/neuer_face.png",
-      "rating": 89,
-      "status": {
-        "im_kader": true,
-        "im_training": true,
-        "verletzt": false
-      },
-      "fifa_stats": {
-        "div": 88, "han": 85, "kic": 91, "ref": 89, "spd": 56, "pos": 88
-      },
+      "id": 1, "name": "Manuel Neuer", "position": "TW", "rating": 89,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/17259-1707137395.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": true },
+      "fifa_stats": { "pac": 88, "sho": 85, "pas": 91, "dri": 89, "def": 56, "phy": 88 },
       "labor_daten": {
-        "waage": { "gewicht": 92.5, "kfa": 11.2, "muskelanteil": 48.5 },
-        "uhr": { "ruhepuls": 48, "schlaf_score": 85, "belastung": "Optimal" }
+        "waage": { "gewicht": 92.5, "kfa": 11.2, "muskel": 48.5, "wasser": 60.1, "viszeral": 4 },
+        "uhr": { "ruhepuls": 42, "hrv": 85, "schlaf": 92, "vo2max": 55, "belastung": 7.5 }
       }
     },
     {
-      "id": 2,
-      "name": "Virgil van Dijk",
-      "position": "IV",
-      "img_url": "https://bjoernsauerweinbrs-spec.github.io/Taktik-AI/media/vandijk_face.png",
-      "rating": 88,
-      "status": {
-        "im_kader": true,
-        "im_training": true,
-        "verletzt": false
-      },
-      "fifa_stats": {
-        "pac": 78, "sho": 60, "pas": 71, "dri": 72, "def": 89, "phy": 86
-      },
+      "id": 2, "name": "Antonio Rüdiger", "position": "IV", "rating": 87,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/86202-1694608337.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": true },
+      "fifa_stats": { "pac": 82, "sho": 55, "pas": 70, "dri": 68, "def": 88, "phy": 90 },
       "labor_daten": {
-        "waage": { "gewicht": 92.0, "kfa": 9.8, "muskelanteil": 50.2 },
-        "uhr": { "ruhepuls": 52, "schlaf_score": 91, "belastung": "Hoch" }
+        "waage": { "gewicht": 85.0, "kfa": 9.5, "muskel": 52.0, "wasser": 62.0, "viszeral": 3 },
+        "uhr": { "ruhepuls": 48, "hrv": 78, "schlaf": 80, "vo2max": 58, "belastung": 8.2 }
+      }
+    },
+    {
+      "id": 3, "name": "Matthijs de Ligt", "position": "IV", "rating": 86,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/326031-1662998634.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": true },
+      "fifa_stats": { "pac": 76, "sho": 60, "pas": 72, "dri": 70, "def": 87, "phy": 85 },
+      "labor_daten": {
+        "waage": { "gewicht": 89.0, "kfa": 10.1, "muskel": 50.5, "wasser": 61.5, "viszeral": 3 },
+        "uhr": { "ruhepuls": 50, "hrv": 75, "schlaf": 85, "vo2max": 56, "belastung": 6.8 }
+      }
+    },
+    {
+      "id": 4, "name": "Alphonso Davies", "position": "LV", "rating": 85,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/424204-1694608778.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": true },
+      "fifa_stats": { "pac": 96, "sho": 68, "pas": 76, "dri": 84, "def": 75, "phy": 78 },
+      "labor_daten": {
+        "waage": { "gewicht": 75.0, "kfa": 8.5, "muskel": 46.0, "wasser": 63.5, "viszeral": 2 },
+        "uhr": { "ruhepuls": 45, "hrv": 92, "schlaf": 78, "vo2max": 62, "belastung": 9.0 }
+      }
+    },
+    {
+      "id": 5, "name": "Joshua Kimmich", "position": "RV", "rating": 88,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/161056-1694609384.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": true },
+      "fifa_stats": { "pac": 78, "sho": 74, "pas": 89, "dri": 85, "def": 82, "phy": 79 },
+      "labor_daten": {
+        "waage": { "gewicht": 74.0, "kfa": 10.0, "muskel": 45.0, "wasser": 61.0, "viszeral": 3 },
+        "uhr": { "ruhepuls": 47, "hrv": 88, "schlaf": 82, "vo2max": 65, "belastung": 8.5 }
+      }
+    },
+    {
+      "id": 6, "name": "Rodri", "position": "ZDM", "rating": 89,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/357565-1682502672.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": true },
+      "fifa_stats": { "pac": 68, "sho": 75, "pas": 86, "dri": 80, "def": 86, "phy": 84 },
+      "labor_daten": {
+        "waage": { "gewicht": 82.0, "kfa": 11.0, "muskel": 49.0, "wasser": 60.5, "viszeral": 4 },
+        "uhr": { "ruhepuls": 52, "hrv": 70, "schlaf": 88, "vo2max": 59, "belastung": 7.0 }
+      }
+    },
+    {
+      "id": 7, "name": "Jude Bellingham", "position": "ZM", "rating": 88,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/581678-1693987944.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": true },
+      "fifa_stats": { "pac": 82, "sho": 84, "pas": 85, "dri": 88, "def": 78, "phy": 82 },
+      "labor_daten": {
+        "waage": { "gewicht": 78.0, "kfa": 9.2, "muskel": 47.5, "wasser": 62.2, "viszeral": 2 },
+        "uhr": { "ruhepuls": 49, "hrv": 85, "schlaf": 75, "vo2max": 64, "belastung": 9.5 }
+      }
+    },
+    {
+      "id": 8, "name": "Jamal Musiala", "position": "ZOM", "rating": 87,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/580195-1694609800.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": true },
+      "fifa_stats": { "pac": 85, "sho": 78, "pas": 82, "dri": 92, "def": 55, "phy": 60 },
+      "labor_daten": {
+        "waage": { "gewicht": 70.0, "kfa": 8.0, "muskel": 42.0, "wasser": 64.0, "viszeral": 1 },
+        "uhr": { "ruhepuls": 54, "hrv": 90, "schlaf": 84, "vo2max": 60, "belastung": 8.0 }
+      }
+    },
+    {
+      "id": 9, "name": "Leroy Sané", "position": "RM", "rating": 85,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/192565-1694609598.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": true },
+      "fifa_stats": { "pac": 91, "sho": 81, "pas": 79, "dri": 86, "def": 45, "phy": 70 },
+      "labor_daten": {
+        "waage": { "gewicht": 76.0, "kfa": 9.0, "muskel": 44.0, "wasser": 62.0, "viszeral": 2 },
+        "uhr": { "ruhepuls": 51, "hrv": 82, "schlaf": 70, "vo2max": 61, "belastung": 8.8 }
+      }
+    },
+    {
+      "id": 10, "name": "Vinicius Jr.", "position": "LM", "rating": 89,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/371998-1662055627.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": true },
+      "fifa_stats": { "pac": 95, "sho": 82, "pas": 81, "dri": 90, "def": 40, "phy": 72 },
+      "labor_daten": {
+        "waage": { "gewicht": 73.0, "kfa": 8.8, "muskel": 43.5, "wasser": 63.0, "viszeral": 2 },
+        "uhr": { "ruhepuls": 53, "hrv": 86, "schlaf": 79, "vo2max": 63, "belastung": 9.2 }
+      }
+    },
+    {
+      "id": 11, "name": "Harry Kane", "position": "ST", "rating": 90,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/132098-1700213278.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": true },
+      "fifa_stats": { "pac": 75, "sho": 93, "pas": 85, "dri": 83, "def": 50, "phy": 84 },
+      "labor_daten": {
+        "waage": { "gewicht": 86.0, "kfa": 10.5, "muskel": 48.0, "wasser": 61.0, "viszeral": 3 },
+        "uhr": { "ruhepuls": 46, "hrv": 80, "schlaf": 88, "vo2max": 57, "belastung": 7.8 }
+      }
+    },
+    {
+      "id": 12, "name": "Thomas Müller", "position": "MS", "rating": 84,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/58358-1683884826.jpg?lm=1",
+      "status": { "im_kader": true, "im_training": false },
+      "fifa_stats": { "pac": 68, "sho": 80, "pas": 82, "dri": 78, "def": 55, "phy": 70 },
+      "labor_daten": {
+        "waage": { "gewicht": 76.0, "kfa": 9.8, "muskel": 45.0, "wasser": 61.5, "viszeral": 3 },
+        "uhr": { "ruhepuls": 50, "hrv": 76, "schlaf": 81, "vo2max": 60, "belastung": 5.0 }
+      }
+    },
+    {
+      "id": 13, "name": "Leon Goretzka", "position": "ZM", "rating": 85,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/153084-1694609204.jpg?lm=1",
+      "status": { "im_kader": false, "im_training": true },
+      "fifa_stats": { "pac": 78, "sho": 81, "pas": 82, "dri": 80, "def": 80, "phy": 86 },
+      "labor_daten": {
+        "waage": { "gewicht": 83.0, "kfa": 9.0, "muskel": 51.0, "wasser": 62.5, "viszeral": 2 },
+        "uhr": { "ruhepuls": 48, "hrv": 84, "schlaf": 86, "vo2max": 62, "belastung": 8.0 }
+      }
+    },
+    {
+      "id": 14, "name": "Konrad Laimer", "position": "RV", "rating": 83,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/223967-1662999088.jpg?lm=1",
+      "status": { "im_kader": false, "im_training": true },
+      "fifa_stats": { "pac": 84, "sho": 70, "pas": 78, "dri": 79, "def": 80, "phy": 82 },
+      "labor_daten": {
+        "waage": { "gewicht": 77.0, "kfa": 9.5, "muskel": 46.5, "wasser": 61.8, "viszeral": 3 },
+        "uhr": { "ruhepuls": 51, "hrv": 81, "schlaf": 83, "vo2max": 63, "belastung": 8.9 }
+      }
+    },
+    {
+      "id": 15, "name": "Mathys Tel", "position": "ST", "rating": 79,
+      "img_url": "https://img.a.transfermarkt.technology/portrait/header/802967-1694610191.jpg?lm=1",
+      "status": { "im_kader": false, "im_training": true },
+      "fifa_stats": { "pac": 88, "sho": 79, "pas": 70, "dri": 82, "def": 35, "phy": 72 },
+      "labor_daten": {
+        "waage": { "gewicht": 78.0, "kfa": 8.2, "muskel": 47.0, "wasser": 63.0, "viszeral": 1 },
+        "uhr": { "ruhepuls": 53, "hrv": 89, "schlaf": 85, "vo2max": 61, "belastung": 7.5 }
       }
     }
-  ],
-  "kader_gegner": [] 
+  ]
 }
