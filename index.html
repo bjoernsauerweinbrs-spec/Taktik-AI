@@ -19,7 +19,7 @@
         <div class="auth-terminal">
             <div class="auth-inner">
                 <div class="auth-brand">TONI 2.0</div>
-                <div class="auth-msg">NEURAL CORE V10.1 // LABOR UPGRADE</div>
+                <div class="auth-msg">NEURAL CORE V12.0 // PROFESSIONAL FINANCE EDITION</div>
                 <div class="input-wrapper">
                     <input type="password" id="sys-pass" placeholder="ACCESS CODE" autocomplete="off">
                     <button onclick="systemBootSequence()">LOGIN</button>
@@ -41,6 +41,11 @@
             </div>
             
             <div class="header-right">
+                <div id="weather-header-widget" class="stat-item" style="border-right: 1px solid #333; padding-right: 15px; margin-right: 15px;">
+                    <span class="label">UMWELT</span>
+                    <span class="value" id="weather-display" style="color: var(--neon-blue);"><i class="fa-solid fa-cloud-sun"></i> --°C</span>
+                </div>
+
                 <button class="sys-btn" onclick="openSysConfig()">
                     <i class="fa-solid fa-gear"></i> SYSTEM
                 </button>
@@ -60,13 +65,21 @@
             <aside class="sidebar-left">
                 <div class="sidebar-header">SYSTEM MODULE</div>
                 <div class="nav-accordion">
+                    
                     <details open>
                         <summary><i class="fa-solid fa-layer-group"></i> MANAGEMENT</summary>
                         <div class="nav-content">
                             <button class="active" onclick="loadModule('kader')">Kader & Status</button>
-                            <button onclick="loadModule('finance')">Finanz & Wetter</button>
                         </div>
                     </details>
+
+                    <details open>
+                        <summary><i class="fa-solid fa-file-invoice-dollar"></i> FINANZEN</summary>
+                        <div class="nav-content">
+                            <button onclick="loadModule('finance')">Bilanz & Budget</button>
+                        </div>
+                    </details>
+
                     <details open>
                         <summary><i class="fa-solid fa-clipboard-check"></i> COACHING ZONE</summary>
                         <div class="nav-content">
@@ -74,12 +87,14 @@
                             <button onclick="loadModule('drills')">Kalender & Orga</button>
                         </div>
                     </details>
+
                     <details open>
                         <summary><i class="fa-solid fa-microchip"></i> INNOVATION (VR)</summary>
                         <div class="nav-content">
                             <button onclick="loadModule('vr-hub')">OCTAGON VR HUB</button>
                         </div>
                     </details>
+
                     <details>
                         <summary><i class="fa-solid fa-bullhorn"></i> MEDIA</summary>
                         <div class="nav-content">
@@ -149,10 +164,7 @@
                 <button onclick="closeModal('modal-sys-config')"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="modal-body">
-                <p style="font-size:11px; color:#aaa; margin-bottom:15px;">
-                    Geben Sie Ihren OpenAI API Key ein, um das Gehirn von Toni zu aktivieren. 
-                    Der Key wird <strong>nur lokal</strong> in Ihrem Browser gespeichert.
-                </p>
+                <p style="font-size:11px; color:#aaa; margin-bottom:15px;">API Key wird lokal gespeichert.</p>
                 <div class="form-group">
                     <label>OPENAI API KEY (sk-...)</label>
                     <input type="password" id="input-api-key" placeholder="sk-proj-...">
@@ -169,72 +181,9 @@
         </div>
     </div>
 
-    <div id="modal-player-editor" class="modal-overlay hidden">
-        <div class="modal-window">
-            <div class="modal-header"><h3>ASSET PROFILE EDITOR</h3><button onclick="closeModal('modal-player-editor')"><i class="fa-solid fa-times"></i></button></div>
-            <div class="modal-body">
-                <input type="hidden" id="edit-p-id">
-                
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" id="edit-p-name" placeholder="Spielername">
-                </div>
-                
-                <div class="form-group">
-                    <label>Bild URL (Face)</label>
-                    <input type="text" id="edit-p-img" placeholder="https://...">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group"><label>Pos</label><input type="text" id="edit-p-pos" placeholder="ST"></div>
-                    <div class="form-group"><label>Rating</label><input type="number" id="edit-p-rating" placeholder="85"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="edit-p-med">
-                        <option value="Fit">Fit</option>
-                        <option value="Reha">Reha</option>
-                        <option value="Verletzt">Verletzt</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer"><button class="btn-save" onclick="savePlayerChanges()">SPEICHERN</button></div>
-        </div>
-    </div>
-
-    <div id="modal-event-create" class="modal-overlay hidden">
-        <div class="modal-window">
-            <div class="modal-header"><h3>NEUER TERMIN</h3><button onclick="closeModal('modal-event-create')"><i class="fa-solid fa-times"></i></button></div>
-            <div class="modal-body">
-                <div class="form-group"><label>Titel</label><input type="text" id="evt-title" placeholder="z.B. Abschlusstraining"></div>
-                <div class="form-row">
-                    <div class="form-group"><label>Tag</label><select id="evt-day">
-                        <option value="0">Montag</option><option value="1">Dienstag</option><option value="2">Mittwoch</option>
-                        <option value="3">Donnerstag</option><option value="4">Freitag</option><option value="5">Samstag</option><option value="6">Sonntag</option>
-                    </select></div>
-                    <div class="form-group"><label>Uhrzeit</label><input type="time" id="evt-time" value="19:00"></div>
-                </div>
-                <div class="form-group"><label>Typ</label><select id="evt-type">
-                    <option value="training">Training</option><option value="match">Spieltag</option>
-                    <option value="physio">Physio/Reha</option><option value="social">Team-Event</option>
-                </select></div>
-            </div>
-            <div class="modal-footer"><button class="btn-save" onclick="createEvent()">ERSTELLEN</button></div>
-        </div>
-    </div>
-
-    <div id="modal-attendance" class="modal-overlay hidden">
-        <div class="modal-window">
-            <div class="modal-header"><h3>ANWESENHEITSPRÜFUNG</h3><button onclick="closeModal('modal-attendance')"><i class="fa-solid fa-times"></i></button></div>
-            <div class="modal-body">
-                <h4 id="att-evt-title" style="color:var(--neon-main); margin-bottom:10px;"></h4>
-                <input type="hidden" id="att-evt-id">
-                <div id="attendance-list" style="max-height:300px; overflow-y:auto;"></div>
-            </div>
-            <div class="modal-footer"><button class="btn-save" onclick="saveAttendance()">SPEICHERN</button></div>
-        </div>
-    </div>
+    <div id="modal-player-editor" class="modal-overlay hidden">...</div>
+    <div id="modal-event-create" class="modal-overlay hidden">...</div>
+    <div id="modal-attendance" class="modal-overlay hidden">...</div>
 
     <script src="script.js"></script>
 </body>
