@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL ELITE ENGINE CORE (V10.1 - THE TEAM BRAIN)
+   TONI 2.0 | NEURAL ELITE ENGINE CORE (V10.2 - MEDIZIN & LABOR UPDATE)
    ========================================================================== */
 
 // 1. KONFIGURATION & DATENBANK
@@ -121,7 +121,7 @@ function loadModule(modId) {
 }
 
 /* ==========================================================================
-   4. KADER & LABOR ENGINE (3D CARDS)
+   4. KADER & LABOR ENGINE (PROFI UPDATE V10.2)
    ========================================================================== */
 
 function renderDynamicSquad() {
@@ -130,26 +130,36 @@ function renderDynamicSquad() {
     // Header
     let html = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 style="font-family:var(--font-hud); color:white;">KADER & LABOR ANALYSE</h2>
-        <div style="font-size:10px; color:var(--text-dim);">DATENQUELLE: GITHUB RAW</div>
+        <h2 style="font-family:var(--font-hud); color:white;">MEDIZIN & LEISTUNGSZENTRUM</h2>
+        <div style="font-size:10px; color:var(--text-dim);">DATENQUELLE: GITHUB RAW + LOKAL CACHE</div>
         <button class="btn-save" onclick="openPlayerEditor(-1)">+ NEUER SPIELER</button>
     </div>
     <div class="kader-grid">`;
 
     // Karten Loop
     eliteStore.players.forEach(p => {
-        // Fallback für fehlende Datenstrukturen (falls JSON unvollständig)
-        const stats = p.fifa_stats || { pac:0, sho:0, pas:0, dri:0, def:0, phy:0 };
-        const lab = p.labor_daten || { waage: { gewicht:0, kfa:0 }, uhr: { ruhepuls:0 } };
+        // Fallback für fehlende Datenstrukturen (Sicherheit)
+        const s = p.fifa_stats || { pac:0, sho:0, pas:0, dri:0, def:0, phy:0 };
+        // Erweiterte Labordaten Initialisierung
+        const lab = p.labor_daten || { 
+            waage: { gewicht:0, kfa:0, muskel:0, wasser:0, viszeral:0 }, 
+            uhr: { ruhepuls:0, hrv:0, schlaf:0, vo2max:0, belastung:0 } 
+        };
         const status = p.status || { im_kader: true, im_training: true };
-        const img = p.img_url || "https://cdn-icons-png.flaticon.com/512/21/21104.png"; // Placeholder Bild
+        const img = p.img_url || "https://cdn-icons-png.flaticon.com/512/21/21104.png";
+
+        // VISUAL FEEDBACK: Training & Kader Status
+        const opacity = status.im_training ? "1" : "0.5";
+        const borderCol = status.im_kader ? "var(--neon-main)" : "#444";
+        const statusIcon = status.im_training ? '<i class="fa-solid fa-heart-pulse" style="color:var(--neon-main)"></i>' : '<i class="fa-solid fa-bed-pulse" style="color:var(--neon-alert)"></i>';
 
         html += `
-        <div class="fifa-card" onclick="this.classList.toggle('flipped')">
+        <div class="fifa-card" style="opacity:${opacity}; border-color:${borderCol};" onclick="this.classList.toggle('flipped')">
             <div class="card-inner">
                 
                 <div class="card-front">
                     <div class="card-rating">${p.rating || 75}</div>
+                    <div style="position:absolute; top:15px; right:15px;">${statusIcon}</div>
                     <img src="${img}" class="player-img" alt="${p.name}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/21/21104.png'">
                     
                     <div class="card-info">
@@ -157,38 +167,63 @@ function renderDynamicSquad() {
                         <div class="card-pos">${p.position}</div>
                         
                         <div class="stats-grid">
-                            <div class="stat-row"><span class="stat-label">PAC</span><span class="stat-val">${stats.pac || stats.div || 0}</span></div>
-                            <div class="stat-row"><span class="stat-label">SHO</span><span class="stat-val">${stats.sho || stats.han || 0}</span></div>
-                            <div class="stat-row"><span class="stat-label">PAS</span><span class="stat-val">${stats.pas || stats.kic || 0}</span></div>
-                            <div class="stat-row"><span class="stat-label">DRI</span><span class="stat-val">${stats.dri || stats.ref || 0}</span></div>
+                            <div class="stat-row"><span class="stat-label">PAC</span><span class="stat-val">${s.pac || s.div || 0}</span></div>
+                            <div class="stat-row"><span class="stat-label">SHO</span><span class="stat-val">${s.sho || s.han || 0}</span></div>
+                            <div class="stat-row"><span class="stat-label">PAS</span><span class="stat-val">${s.pas || s.kic || 0}</span></div>
+                            <div class="stat-row"><span class="stat-label">DRI</span><span class="stat-val">${s.dri || s.ref || 0}</span></div>
+                            <div class="stat-row"><span class="stat-label">DEF</span><span class="stat-val">${s.def || 0}</span></div>
+                            <div class="stat-row"><span class="stat-label">PHY</span><span class="stat-val">${s.phy || 0}</span></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="card-back" onclick="event.stopPropagation()">
-                    <div class="lab-header">MEDIZIN & LABOR</div>
+                    <div class="lab-header">LABOR ANALYSE</div>
                     
-                    <div class="lab-group">
-                        <span class="lab-label">Körperanalyse (kg / KFA)</span>
-                        <div style="display:flex; gap:5px;">
-                            <input type="number" class="lab-input" value="${lab.waage.gewicht}" onchange="updateLabData(${p.id}, 'weight', this.value)">
-                            <input type="number" class="lab-input" value="${lab.waage.kfa}" onchange="updateLabData(${p.id}, 'kfa', this.value)">
+                    <div style="overflow-y:auto; height:100%; padding-right:5px;">
+                        
+                        <div class="lab-group">
+                            <span class="lab-label"><i class="fa-solid fa-weight-scale"></i> BIO-IMPEDANZ (Waage)</span>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                                <input type="number" class="lab-input" placeholder="kg" value="${lab.waage.gewicht}" onchange="updateLabData(${p.id}, 'weight', this.value)" title="Gewicht">
+                                <input type="number" class="lab-input" placeholder="KFA%" value="${lab.waage.kfa}" onchange="updateLabData(${p.id}, 'kfa', this.value)" title="Körperfett">
+                                <input type="number" class="lab-input" placeholder="Muskel" value="${lab.waage.muskel || 0}" onchange="updateLabData(${p.id}, 'muskel', this.value)" title="Muskelmasse">
+                                <input type="number" class="lab-input" placeholder="H2O%" value="${lab.waage.wasser || 0}" onchange="updateLabData(${p.id}, 'wasser', this.value)" title="Wasseranteil">
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="lab-group">
-                        <span class="lab-label">Fitness Tracker (Ruhepuls)</span>
-                        <input type="number" class="lab-input" value="${lab.uhr.ruhepuls}" onchange="updateLabData(${p.id}, 'puls', this.value)">
-                    </div>
+                        <div class="lab-group">
+                            <span class="lab-label"><i class="fa-solid fa-stopwatch"></i> SMART TRACKING (Uhr)</span>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                                <input type="number" class="lab-input" placeholder="Puls" value="${lab.uhr.ruhepuls}" onchange="updateLabData(${p.id}, 'puls', this.value)" title="Ruhepuls">
+                                <input type="number" class="lab-input" placeholder="HRV" value="${lab.uhr.hrv || 0}" onchange="updateLabData(${p.id}, 'hrv', this.value)" title="Herzvariabilität">
+                                <input type="number" class="lab-input" placeholder="Sleep" value="${lab.uhr.schlaf || 0}" onchange="updateLabData(${p.id}, 'schlaf', this.value)" title="Schlaf-Score">
+                                <input type="number" class="lab-input" placeholder="VO2" value="${lab.uhr.vo2max || 0}" onchange="updateLabData(${p.id}, 'vo2max', this.value)" title="VO2 Max">
+                            </div>
+                        </div>
 
-                    <div class="lab-toggles">
-                        <button class="toggle-btn ${status.im_kader ? 'active' : ''}" onclick="toggleStatus(${p.id}, 'kader')">KADER</button>
-                        <button class="toggle-btn ${status.im_training ? 'active' : 'absent'}" onclick="toggleStatus(${p.id}, 'training')">TRAINING</button>
-                    </div>
+                        <div class="lab-group">
+                            <span class="lab-label"><i class="fa-solid fa-gamepad"></i> SCOUTING WERTE</span>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:3px;">
+                                <input type="number" class="lab-input" value="${s.pac || 0}" onchange="updFifa(${p.id}, 'pac', this.value)" title="PAC">
+                                <input type="number" class="lab-input" value="${s.sho || 0}" onchange="updFifa(${p.id}, 'sho', this.value)" title="SHO">
+                                <input type="number" class="lab-input" value="${s.pas || 0}" onchange="updFifa(${p.id}, 'pas', this.value)" title="PAS">
+                                <input type="number" class="lab-input" value="${s.dri || 0}" onchange="updFifa(${p.id}, 'dri', this.value)" title="DRI">
+                                <input type="number" class="lab-input" value="${s.def || 0}" onchange="updFifa(${p.id}, 'def', this.value)" title="DEF">
+                                <input type="number" class="lab-input" value="${s.phy || 0}" onchange="updFifa(${p.id}, 'phy', this.value)" title="PHY">
+                            </div>
+                        </div>
 
-                    <div class="card-actions">
-                        <button class="action-btn btn-save-card" onclick="voiceEngine.speak('Daten für ${p.name} aktualisiert.')">UPDATE</button>
-                        <button class="action-btn btn-delete-card" onclick="alert('Löschen via GitHub JSON erforderlich.')"><i class="fa-solid fa-trash"></i></button>
+                        <div class="lab-toggles" style="margin-top:15px;">
+                            <button class="toggle-btn ${status.im_kader ? 'active' : ''}" onclick="toggleStatus(${p.id}, 'kader')">IM KADER</button>
+                            <button class="toggle-btn ${status.im_training ? 'active' : 'absent'}" onclick="toggleStatus(${p.id}, 'training')">IM TRAINING</button>
+                        </div>
+
+                        <div class="card-actions">
+                            <button class="action-btn btn-save-card" onclick="voiceEngine.speak('Profil von ${p.name} aktualisiert.')">SYNC</button>
+                            <button class="action-btn btn-delete-card" onclick="alert('Löschen via GitHub JSON erforderlich.')"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+
                     </div>
                 </div>
 
@@ -200,21 +235,37 @@ function renderDynamicSquad() {
     viewport.innerHTML = html;
 }
 
-// Funktionen für die Rückseite der Karte
+// UPDATE FUNKTIONEN (ERWEITERT)
 function updateLabData(id, type, val) {
     const p = eliteStore.players.find(x => x.id === id);
     if(!p) return;
     
-    // Datenstruktur sicherstellen
+    // Sicherstellen, dass Objekt existiert
     if(!p.labor_daten) p.labor_daten = { waage: {}, uhr: {} };
 
+    // Waage Updates
     if(type === 'weight') p.labor_daten.waage.gewicht = parseFloat(val);
     if(type === 'kfa') p.labor_daten.waage.kfa = parseFloat(val);
+    if(type === 'muskel') p.labor_daten.waage.muskel = parseFloat(val);
+    if(type === 'wasser') p.labor_daten.waage.wasser = parseFloat(val);
+
+    // Uhr Updates
     if(type === 'puls') p.labor_daten.uhr.ruhepuls = parseInt(val);
+    if(type === 'hrv') p.labor_daten.uhr.hrv = parseInt(val);
+    if(type === 'schlaf') p.labor_daten.uhr.schlaf = parseInt(val);
+    if(type === 'vo2max') p.labor_daten.uhr.vo2max = parseInt(val);
     
-    // Lokal speichern (Backup)
+    // Backup
     localStorage.setItem('toni_players_backup', JSON.stringify(eliteStore.players));
-    console.log(`📝 LABOR: ${p.name} -> ${type}: ${val}`);
+    console.log(`📝 LABOR UPDATE: ${p.name} -> ${type}: ${val}`);
+}
+
+function updFifa(id, stat, val) {
+    const p = eliteStore.players.find(x => x.id === id);
+    if(p && p.fifa_stats) {
+        p.fifa_stats[stat] = parseInt(val);
+        localStorage.setItem('toni_players_backup', JSON.stringify(eliteStore.players));
+    }
 }
 
 function toggleStatus(id, type) {
@@ -225,7 +276,8 @@ function toggleStatus(id, type) {
     if(type === 'kader') p.status.im_kader = !p.status.im_kader;
     if(type === 'training') p.status.im_training = !p.status.im_training;
     
-    // UI neu laden um Farben zu aktualisieren
+    localStorage.setItem('toni_players_backup', JSON.stringify(eliteStore.players));
+    // Sofortiges Re-Rendering für visuelles Feedback
     renderDynamicSquad(); 
 }
 
