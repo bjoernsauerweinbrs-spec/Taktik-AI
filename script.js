@@ -1,338 +1,490 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL ELITE ENGINE (V15.5 - ULTIMATE EDITION)
-   BLOCK 1 VON 4: SYSTEM CORE & DATENBANK
+   TONI 2.0 | NEURAL ELITE ENGINE (V15.8 - FULL RECONSTRUCTION)
+   BLOCK 1 VON 6: CORE CONFIG & GLOBAL STATE
    ========================================================================== */
 
-// --------------------------------------------------------------------------
-// 1. KONFIGURATION & API
-// --------------------------------------------------------------------------
-
+// 1. SYSTEM SETTINGS
 let USER_API_KEY = localStorage.getItem('toni_api_key') || "";
 const GITHUB_REPO_URL = "https://raw.githubusercontent.com/bjoernsauerweinbrs-spec/Taktik-AI/refs/heads/main/vereinsdaten.json";
 
-// --------------------------------------------------------------------------
-// 2. ZENTRALER SPEICHER (STATE)
-// --------------------------------------------------------------------------
-
+// 2. DER GLOBALE SPEICHER (DER "STATE")
+// Hier definieren wir jedes Detail, damit wir später darauf zugreifen können.
 const eliteStore = {
-    // KADER (Spieler-Datenbank)
-    players: [], 
+    players: [], // Wird via GitHub oder generateDefaultSquad gefüllt
     
-    // PERSONAL (Neu in V15: Mitarbeiter-Stamm)
-    staff: [], 
+    // PERSONAL & STAFF
+    staff: JSON.parse(localStorage.getItem('toni_staff')) || [
+        { id: 1, role: "Co-Trainer", name: "Hansi M.", salary: 5000, effect: "Taktik-Analyse +10%", level: 3 },
+        { id: 2, role: "Chef-Physio", name: "Dr. Müller", salary: 8500, effect: "Verletzungsrisiko -15%", level: 5 },
+        { id: 3, role: "Chef-Scout", name: "Sven Mislintat", salary: 12000, effect: "Transfer-Wissen Pro", level: 5 }
+    ],
 
-    // KALENDER (Training & Events)
+    // KALENDER (Training, Matches, Events)
     calendar: JSON.parse(localStorage.getItem('toni_calendar')) || [
-        { 
-            id: 1, 
-            day: 1, 
-            time: "10:00", 
-            title: "Laktattest", 
-            type: "physio", 
-            attendance: [] 
-        },
-        { 
-            id: 2, 
-            day: 1, 
-            time: "15:00", 
-            title: "Team-Training", 
-            type: "training", 
-            attendance: [] 
-        },
-        { 
-            id: 3, 
-            day: 5, 
-            time: "15:30", 
-            title: "Ligaspiel vs. BVB", 
-            type: "match", 
-            attendance: [] 
-        }
+        { id: 1, day: 1, time: "10:00", title: "Laktattest (Bio-Lab)", type: "physio", attendance: [] },
+        { id: 2, day: 1, time: "15:00", title: "Team-Taktik 4-4-2", type: "training", attendance: [] },
+        { id: 3, day: 2, time: "11:00", title: "Sponsoren-Termin", type: "event", attendance: [] },
+        { id: 4, day: 5, time: "15:30", title: "HEIMSPIEL (STADION)", type: "match", attendance: [] }
     ],
 
-    // FINANZEN (Erweitert für V15 Office & Bilanz)
+    // FINANZEN & AKTENTASCHE (Sponsoring)
     finance: JSON.parse(localStorage.getItem('toni_finance')) || [
-        { id: 1, label: "TV-Rechte / Streaming", value: 4500000, type: "income", cat: "pro" },
+        { id: 1, label: "TV-Rechte (Zentralvermarktung)", value: 4500000, type: "income", cat: "pro" },
         { id: 2, label: "Hauptsponsor (Brust)", value: 2500000, type: "income", cat: "pro" },
-        { id: 3, label: "Bandenwerbung (Lokal)", value: 12500, type: "income", cat: "amateur" },
-        { id: 4, label: "Spielergehälter (Auto)", value: 0, type: "expense", cat: "pro" }, 
-        { id: 5, label: "Personal / Staff", value: 0, type: "expense", cat: "pro" },     
-        { id: 6, label: "Stadionbetrieb", value: -120000, type: "expense", cat: "pro" }
+        { id: 3, label: "Ausrüster (Premium)", value: 800000, type: "income", cat: "pro" },
+        { id: 4, label: "Bandenwerbung (Lokal)", value: 12500, type: "income", cat: "amateur" },
+        { id: 5, label: "Spielergehälter (Gesamt)", value: 0, type: "expense", cat: "pro" }, // Auto-berechnet
+        { id: 6, label: "Staff & Mitarbeiter", value: 0, type: "expense", cat: "pro" },     // Auto-berechnet
+        { id: 7, label: "Stadionmiete & Betrieb", value: -125000, type: "expense", cat: "pro" },
+        { id: 8, label: "Jugendförderung", value: -45000, type: "expense", cat: "pro" }
     ],
 
-    // MEDIENZENTRUM (Gazette Inhalte)
-    gazette: {
-        headline: "SAISONSTART: ALLES AUF ANGRIFF",
-        lead: "Der Vorstand gibt die Marschroute vor.",
-        body: "Mit neuen Strukturen und modernster Analysetechnik startet der Verein in die Zukunft..."
+    // DIE AKTENTASCHE (ERWEITERUNGEN)
+    briefcase: {
+        sponsoring: {
+            activeSponsors: ["Adidas", "Telekom"],
+            negotiationStatus: "Läuft",
+            potentialIncome: 500000
+        },
+        analysisCenter: {
+            level: 1,
+            nextUpgradeCost: 250000,
+            features: ["Video-Analyse", "Neural-Tracking"]
+        },
+        stadiumPress: {
+            lastEdition: "Ausgabe #42",
+            headline: "Saisonstart geglückt!",
+            status: "Druckfertig"
+        }
     },
 
-    // MANAGEMENT & AI CONTEXT
+    // MEDIENZENTRUM
+    gazette: {
+        headline: "TRANSFERS UND TAKTIK",
+        lead: "Der Neural-Advisor übernimmt die Analyse.",
+        body: "Mit modernster KI-Technik analysiert der Verein nun jedes Detail der Spieler..."
+    },
+
+    // MANAGEMENT & SYSTEM-STATUS
     mgmt: {
         liquidAssets: 0,
-        infrastructure: { medicalLevel: 5, analysisLevel: 5 },
+        clubReputation: 75, // 0-100
+        infrastructure: { 
+            medical: 5, 
+            analysis: 3,
+            stadium: 4
+        },
         liveData: { temp: "--", condition: "Lade...", wind: "--" },
         aiContext: "" 
     },
 
-    activeModule: 'kader' // Das Start-Modul
+    activeModule: 'kader' // Start-Modul
 };
 
-// --------------------------------------------------------------------------
-// 3. SYSTEM BOOT & LOGIN (FIXED)
-// --------------------------------------------------------------------------
-
-function systemBootSequence() {
-    console.log("TONI 2.0: Boot Sequence Initiated...");
-    const passField = document.getElementById('sys-pass');
-    
-    // Wir akzeptieren alles oder leeres Feld, da wir lokal sind
-    const pass = passField ? passField.value : "1234";
-    
-    // Login-Layer ausblenden
-    const auth = document.getElementById('auth-layer');
-    if(auth) {
-        auth.classList.add('hidden');
-        auth.style.display = 'none'; // Zur Sicherheit
-    }
-        
-    // Haupt-Interface einblenden
-    const main = document.getElementById('main-interface');
-    if(main) {
-        main.classList.remove('hidden');
-    }
-        
-    initEliteCore();
-}
-
-// Enter-Taste Support für Login
-document.addEventListener('keydown', function(event) {
-    if (event.key === "Enter") {
-        const auth = document.getElementById('auth-layer');
-        if (auth && !auth.classList.contains('hidden')) {
-            systemBootSequence();
-        }
-    }
-});
-
-// --------------------------------------------------------------------------
-// 4. INITIALISIERUNG & DATEN-CHECK
-// --------------------------------------------------------------------------
-
+// 3. INITIALISIERUNG (BOOT-LOGIK)
 async function initEliteCore() {
-    console.log("TONI 2.0 V15.5: Loading High-End Suite...");
+    console.log("TONI 2.0: Starting High-End Reconstruction (V15.8)...");
     
-    // Uhren & Services starten
+    // Zeit-Dienste
     updateClock(); 
     setInterval(updateClock, 1000);
     checkAIConnection();
     
-    // Daten laden (GitHub oder Backup)
+    // Daten-Sync
     await syncWithGitHub();
     
-    // V15 UPGRADE ROUTINE: Prüft auf alte Daten und aktualisiert sie
-    upgradeDatabaseToV15();
+    // Datenbank auf V15.8 Tiefe bringen
+    upgradeDatabaseToFullDetail();
 
-    // Wetter & Styles laden
+    // System-Ready
     fetchWeatherData();
-    injectLabStyles(); 
-    
-    // Finanzen initial berechnen
+    injectFullStyles(); // Kommt in Block 2
     updateFinanceTotals();
     
-    // Start-Modul laden
+    // Modul laden
     loadModule(eliteStore.activeModule);
     
-    // Voice Engine bereitmachen
+    // Sprachsteuerung & Mikrofon
     voiceEngine.init();
 }
 
-// 5. DATENBANK MANAGEMENT
-function upgradeDatabaseToV15() {
-    // 1. Wenn gar keine Spieler da sind: Generiere Standard-Team
+// 4. DEEP-DATABASE UPGRADE (Detaillierung der Daten)
+function upgradeDatabaseToFullDetail() {
+    // Falls keine Spieler da sind (Erster Start)
     if(eliteStore.players.length === 0) {
-        console.log("V15: Database empty. Generating Default Squad...");
-        generateDefaultSquad();
+        generateHighDetailSquad();
     }
     
-    // 2. Iteriere durch alle Spieler und füge fehlende CEO-Daten hinzu
-    // Dies macht aus "alten" Spielern echte "Profi-Datensätze"
+    // Fehlende Felder bei bestehenden Spielern ergänzen
     eliteStore.players.forEach(p => {
-        // Gehalt berechnen
-        if(!p.salary) {
-            const baseSalary = (p.rating || 60) * 2500;
-            p.salary = Math.round(baseSalary);
-        }
-        // Vertragslaufzeit setzen
-        if(!p.contract_exp) {
-            p.contract_exp = 2026 + Math.floor(Math.random() * 3);
-        }
-        // Marktwert berechnen
-        if(!p.market_value) {
-            p.market_value = (p.rating || 60) * 150000;
-        }
-        // Moral hinzufügen
-        if(!p.status.morale) {
-            p.status.morale = 70 + Math.floor(Math.random() * 30);
-        }
+        // V15.8 Finanz-Daten
+        if(!p.salary) p.salary = Math.round((p.rating || 60) * 2800);
+        if(!p.contract_exp) p.contract_exp = 2026 + Math.floor(Math.random() * 4);
+        if(!p.market_value) p.market_value = (p.rating || 60) * 185000;
+        
+        // V15.8 Medical-Daten (Bio-Lab Tiefe)
+        if(!p.labor_daten) p.labor_daten = { waage: {}, uhr: {} };
+        if(!p.labor_daten.waage.gewicht) p.labor_daten.waage.gewicht = 75 + Math.floor(Math.random() * 10);
+        if(!p.labor_daten.waage.kfa) p.labor_daten.waage.kfa = 8 + Math.floor(Math.random() * 6);
+        if(!p.labor_daten.waage.muskel_kg) p.labor_daten.waage.muskel_kg = 38 + Math.floor(Math.random() * 5);
+        if(!p.labor_daten.waage.wasser) p.labor_daten.waage.wasser = 62 + Math.floor(Math.random() * 5);
+        if(!p.labor_daten.waage.viszeral) p.labor_daten.waage.viszeral = 4 + Math.floor(Math.random() * 3);
+        if(!p.labor_daten.waage.metabolic) p.labor_daten.waage.metabolic = 22 + Math.floor(Math.random() * 5);
+        
+        // V15.8 Performance-Daten (Smartwatch)
+        if(!p.labor_daten.uhr.ruhepuls) p.labor_daten.uhr.ruhepuls = 48 + Math.floor(Math.random() * 10);
+        if(!p.labor_daten.uhr.load) p.labor_daten.uhr.load = 3.5 + Math.random() * 4;
+        if(!p.labor_daten.uhr.vo2max) p.labor_daten.uhr.vo2max = 52 + Math.floor(Math.random() * 10);
+        
+        // V15.8 Status-Daten
+        if(!p.status) p.status = { im_kader: true, im_training: true, morale: 85 };
     });
-
-    // 3. Wenn kein Personal da ist: Generiere Standard-Staff
-    if(eliteStore.staff.length === 0) {
-        eliteStore.staff = [
-            { id: 1, role: "Co-Trainer", name: "Hansi M.", salary: 5000, effect: "Taktik +5%" },
-            { id: 2, role: "Physio-Head", name: "Dr. Müller", salary: 8000, effect: "Regeneration +10%" },
-            { id: 3, role: "Scout", name: "Sven M.", salary: 12000, effect: "Transfers +15%" }
-        ];
-    }
-    
-    console.log("V15: Database Upgrade Complete.");
 }
 
-function generateDefaultSquad() {
-    const positions = ["TW", "IV", "IV", "RV", "LV", "ZDM", "ZM", "ZM", "RF", "LF", "ST", "TW", "IV", "ZM", "OM", "ST"];
+function generateHighDetailSquad() {
+    const positions = ["TW", "IV", "IV", "RV", "LV", "ZDM", "ZM", "ZM", "RF", "LF", "ST", "TW", "IV", "ZM", "OM", "ST", "ST", "IV"];
     positions.forEach((pos, i) => {
         eliteStore.players.push({
-            id: Date.now() + i, name: `Spieler ${i+1}`, position: pos, rating: 75 + (i%10),
-            img_url: "https://cdn-icons-png.flaticon.com/512/21/21104.png",
-            status: { im_kader: true, im_training: true, morale: 80 },
-            fifa_stats: { pac:70, sho:70, pas:70, dri:70, def:70, phy:70 },
-            labor_daten: { waage: {gewicht:75}, uhr: {ruhepuls:55} },
-            salary: 35000, contract_exp: 2027, market_value: 500000
+            id: Date.now() + i, 
+            name: `Elite Player ${i+1}`, 
+            position: pos, 
+            rating: 78 + (i%5),
+            img_url: `https://cdn-icons-png.flaticon.com/512/21/21104.png`,
+            status: { im_kader: (i < 11), im_training: true, morale: 80 },
+            fifa_stats: { pac:75, sho:70, pas:78, dri:80, def:65, phy:75 },
+            labor_daten: { 
+                waage: { gewicht: 78, kfa: 10, muskel_kg: 40, wasser: 65, viszeral: 5, metabolic: 24 }, 
+                uhr: { ruhepuls: 50, load: 4.0, vo2max: 55 } 
+            },
+            salary: 42000, 
+            contract_exp: 2028, 
+            market_value: 1250000
         });
     });
 }
 
-function updateFinanceTotals() {
-    // 1. Spielergehälter summieren
-    const totalPlayerSalary = eliteStore.players.reduce((acc, p) => acc + (p.salary * 12), 0);
-    const salaryItem = eliteStore.finance.find(f => f.label.includes("Spielergehälter"));
-    if(salaryItem) salaryItem.value = -totalPlayerSalary;
-
-    // 2. Personal summieren
-    const totalStaffSalary = eliteStore.staff.reduce((acc, s) => acc + (s.salary * 12), 0);
-    const staffItem = eliteStore.finance.find(f => f.label.includes("Personal"));
-    if(staffItem) staffItem.value = -totalStaffSalary;
-
-    // 3. Liquidität berechnen
-    const total = eliteStore.finance.reduce((acc, curr) => acc + curr.value, 0);
-    eliteStore.mgmt.liquidAssets = total;
-    
-    // 4. Update UI
-    updateKPIs();
-    
-    // 5. Update AI Context (für Ollama)
-    eliteStore.mgmt.aiContext = `SYSTEM: Verein Budget: ${total}€. Kadergröße: ${eliteStore.players.length}.`;
-}
-
+// 5. DATA SYNC (GITHUB)
 async function syncWithGitHub() {
     try {
         const response = await fetch(GITHUB_REPO_URL);
-        if (!response.ok) throw new Error("GitHub Offline");
+        if (!response.ok) throw new Error("GitHub Verbindung fehlgeschlagen.");
         const data = await response.json();
-        if(data.kader_toni && data.kader_toni.length > 0) eliteStore.players = data.kader_toni;
+        if(data.kader_toni && data.kader_toni.length > 0) {
+            eliteStore.players = data.kader_toni;
+        }
     } catch (error) {
-        // Fallback LocalStorage
+        console.warn("Lade Daten aus lokalem Speicher...");
         const local = localStorage.getItem('toni_players_backup');
         if(local) eliteStore.players = JSON.parse(local);
     }
-}
-// --- ENDE BLOCK 1 ---
-/* ==========================================================================
-   BLOCK 2 VON 4: DESIGN ENGINE, ROUTER & V15 MODULE
+   /* ==========================================================================
+   BLOCK 2 VON 6: DESIGN ENGINE (EXTENDED CSS SUITE)
    ========================================================================== */
 
-// --------------------------------------------------------------------------
-// 6. STYLESHEET INJECTION (DESIGN ENGINE)
-// --------------------------------------------------------------------------
-
-function injectLabStyles() {
-    if (document.getElementById('lab-styles-v15')) return;
+function injectFullStyles() {
+    if (document.getElementById('toni-elite-styles')) return;
     const style = document.createElement('style');
-    style.id = 'lab-styles-v15';
+    style.id = 'toni-elite-styles';
     style.innerHTML = `
-        /* --- CORE OVERLAY & LAYOUT --- */
-        .lab-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 9000; padding: 25px; display: flex; flex-direction: column; backdrop-filter: blur(15px); }
-        .lab-grid { display: grid; grid-template-columns: 320px 1fr 1fr; gap: 20px; height: 100%; margin-top: 20px; overflow: hidden; }
-        .lab-panel { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 25px; overflow-y: auto; display:flex; flex-direction:column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .lab-title { font-family: var(--font-hud); color: var(--neon-blue); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; font-size: 14px; letter-spacing: 2px; }
-        
-        /* --- V15 CEO DASHBOARD ELEMENTS --- */
-        .ceo-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .ceo-card { background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid #334155; padding: 20px; border-radius: 12px; text-align: center; }
-        .ceo-val { font-size: 24px; color: white; font-family: monospace; display: block; margin-top: 5px; }
-        .ceo-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .contract-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .contract-table th { text-align: left; color: #64748b; padding: 8px; border-bottom: 1px solid #333; }
-        .contract-table td { padding: 8px; border-bottom: 1px solid #1e293b; color: #ccc; }
-        
-        .action-btn { background: var(--neon-blue); color: black; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; transition: 0.2s; }
-        .action-btn:hover { background: white; }
-        .action-btn.danger { background: #f43f5e; color: white; }
-        
-        .audit-alert { background: rgba(244, 63, 94, 0.1); border: 1px solid #f43f5e; color: #f43f5e; padding: 10px; margin-bottom: 5px; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .audit-success { background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; color: #10b981; padding: 10px; margin-bottom: 5px; border-radius: 6px; font-size: 12px; }
+        /* --- 1. CORE LAYOUT & GLASSMORPHISM --- */
+        :root {
+            --panel-bg: rgba(15, 23, 42, 0.95);
+            --border-color: #334155;
+            --neon-blue: #00f3ff;
+            --neon-main: #10b981;
+            --neon-alert: #f43f5e;
+            --font-hud: 'Orbitron', sans-serif;
+        }
 
-        /* --- V14 BIO LAB ELEMENTS --- */
-        .bio-val { background: transparent; border: none; color: white; font-family: var(--font-hud); font-size: 18px; width: 100%; text-align: center; border-bottom: 1px solid #444; }
-        .scale-display { background: #000; border: 4px solid #333; border-radius: 10px; padding: 25px; text-align: center; color: var(--neon-main); font-family: monospace; font-size: 36px; margin-bottom: 20px; }
-        .bio-input-group { background: rgba(255,255,255,0.04); padding: 12px; border-radius: 6px; margin-bottom: 8px; }
-        .bio-label { display: block; font-size: 10px; color: #888; margin-bottom: 5px; }
-        .metric-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 5px; align-items: center; }
-        
-        /* --- NAVIGATION & TABS --- */
-        .fin-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .fin-tab { background: transparent; border: 1px solid #333; color: #888; padding: 8px 16px; cursor: pointer; border-radius: 4px; }
-        .fin-tab.active { background: var(--neon-blue); color: black; border-color: var(--neon-blue); font-weight: bold; }
-        
-        /* --- LEGACY FINANCE TABLE --- */
-        .finance-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .finance-table td { padding: 8px; border-bottom: 1px solid #333; color: #ccc; }
-        .fin-inp { background: rgba(0,0,0,0.2); border: 1px solid #333; color: white; padding: 4px; width: 100%; font-family: monospace; }
-        .val-pos { color: var(--neon-main); } .val-neg { color: var(--neon-alert); }
-        
-        /* --- TACTICS BOARD --- */
-        .tactics-wrapper { display: grid; grid-template-columns: 200px 1fr 200px; gap: 20px; height: 100%; }
-        .tactics-sidebar { background: #0a0f1d; padding: 15px; border-radius: 8px; border: 1px solid #333; overflow-y: auto; }
-        .tactics-stage { background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Soccer_Field_Transparant.svg/1200px-Soccer_Field_Transparant.svg.png') no-repeat center center; background-size: contain; position: relative; border: 2px solid #444; border-radius: 4px; background-color: #1e3a1e; }
-        .tool-btn { background: #1e293b; color: white; border: 1px solid #333; padding: 8px; margin-bottom: 5px; cursor: pointer; text-align: left; font-size: 11px; display: flex; align-items: center; gap: 8px; }
-        .draggable-player { padding: 5px; background: rgba(255,255,255,0.05); margin-bottom: 5px; cursor: grab; display: flex; justify-content: space-between; font-size: 11px; border-left: 2px solid #555; }
-        
-        /* --- MISC --- */
-        .gazette-editor { background: white; color: black; padding: 40px; font-family: 'Times New Roman', serif; min-height: 500px; }
-        .toggle-btn { background: #333; color: #aaa; border: 1px solid #555; padding: 5px 10px; cursor: pointer; flex: 1; font-size: 10px; }
-        .toggle-btn.active { background: var(--neon-main); color: black; border-color: var(--neon-main); }
-        .watch-face { width: 100px; height: 100px; border-radius: 50%; background: #111; margin: 0 auto; border: 4px solid #333; display:flex; align-items:center; justify-content:center; flex-direction:column; }
+        .lab-overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0, 0, 0, 0.97); 
+            z-index: 9999; 
+            padding: 30px; 
+            display: flex; 
+            flex-direction: column; 
+            backdrop-filter: blur(20px); 
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .lab-grid { 
+            display: grid; 
+            grid-template-columns: 350px 1fr 380px; 
+            gap: 25px; 
+            height: 100%; 
+            margin-top: 25px; 
+            overflow: hidden; 
+        }
+
+        .lab-panel { 
+            background: var(--panel-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 16px; 
+            padding: 25px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            transition: border-color 0.3s ease;
+        }
+
+        .lab-panel:hover {
+            border-color: #475569;
+        }
+
+        .lab-title { 
+            font-family: var(--font-hud); 
+            color: var(--neon-blue); 
+            border-bottom: 2px solid #1e293b; 
+            padding-bottom: 12px; 
+            margin-bottom: 25px; 
+            font-size: 13px; 
+            letter-spacing: 3px; 
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- 2. FIFA CARDS & KADER GRID --- */
+        .kader-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 25px;
+            padding: 10px;
+        }
+
+        .fifa-card {
+            background: linear-gradient(160deg, #1e293b 0%, #020617 100%);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 15px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        .fifa-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+        }
+
+        .card-rating {
+            font-family: var(--font-hud);
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--neon-main);
+            line-height: 1;
+        }
+
+        .player-img {
+            width: 100%;
+            height: 140px;
+            object-fit: contain;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+            margin: 10px 0;
+        }
+
+        /* --- 3. BIO-LAB SPECIALS --- */
+        .bio-val { 
+            background: rgba(0,0,0,0.3); 
+            border: 1px solid #1e293b; 
+            color: #fff; 
+            font-family: monospace; 
+            font-size: 20px; 
+            width: 100%; 
+            text-align: center; 
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 5px;
+        }
+
+        .bio-val:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            background: rgba(0, 243, 255, 0.05);
+        }
+
+        .scale-display { 
+            background: #000; 
+            border: 2px solid #334155; 
+            border-radius: 12px; 
+            padding: 30px; 
+            text-align: center; 
+            color: var(--neon-main); 
+            font-family: 'Courier New', monospace; 
+            font-size: 42px; 
+            margin-bottom: 25px; 
+            text-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+            position: relative;
+        }
+
+        .scale-display::after {
+            content: "LIVE DATA SENSOR";
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            color: #444;
+            letter-spacing: 2px;
+        }
+
+        /* --- 4. CEO & OFFICE UI --- */
+        .ceo-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 20px; 
+            margin-bottom: 25px; 
+        }
+
+        .ceo-card { 
+            background: linear-gradient(145deg, #1e293b, #0f172a); 
+            border: 1px solid #334155; 
+            padding: 25px; 
+            border-radius: 16px; 
+            text-align: center; 
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ceo-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: var(--neon-blue);
+            opacity: 0.5;
+        }
+
+        .contract-table { 
+            width: 100%; 
+            border-collapse: separate; 
+            border-spacing: 0 8px; 
+        }
+
+        .contract-table th { 
+            text-align: left; 
+            color: #64748b; 
+            padding: 12px; 
+            font-size: 11px; 
+            text-transform: uppercase; 
+        }
+
+        .contract-table td { 
+            padding: 15px 12px; 
+            background: rgba(30, 41, 59, 0.5);
+            color: #cbd5e1;
+            border-top: 1px solid #1e293b;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        /* --- 5. TACTICS & INTERACTION --- */
+        .tactics-wrapper { 
+            display: grid; 
+            grid-template-columns: 240px 1fr 240px; 
+            gap: 25px; 
+            height: 100%; 
+        }
+
+        .tactics-stage { 
+            border-radius: 20px;
+            border: 5px solid #0f172a;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+            cursor: crosshair;
+        }
+
+        .fin-inp { 
+            background: rgba(0,0,0,0.4); 
+            border: 1px solid #444; 
+            color: var(--neon-main); 
+            padding: 10px; 
+            width: 100%; 
+            font-family: monospace; 
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        /* --- 6. ANIMATIONS --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-save {
+            background: var(--neon-main);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: var(--font-hud);
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-save:hover {
+            filter: brightness(1.2);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Scrollbar-Design */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
     `;
     document.head.appendChild(style);
 }
+/* ==========================================================================
+   BLOCK 3 VON 6: MODULE CONTROLLER & FINANCIAL ENGINE (EDITABLE)
+   ========================================================================== */
 
 // --------------------------------------------------------------------------
-// 7. MODULE CONTROLLER (ROUTER)
+// 6. MODULE CONTROLLER (DER ROUTER)
 // --------------------------------------------------------------------------
-
 function loadModule(modId) {
+    console.log(`TONI 2.0: Switching to Module [${modId}]`);
     eliteStore.activeModule = modId;
+    
     const viewport = document.getElementById('content-viewport');
     const vrViewport = document.getElementById('vr-viewport');
     
-    // Reset Viewports
-    if(viewport) viewport.classList.remove('hidden');
-    if(viewport) viewport.innerHTML = ""; 
+    // UI Reset
+    if(viewport) {
+        viewport.classList.remove('hidden');
+        viewport.innerHTML = ""; 
+    }
     if(vrViewport) vrViewport.classList.add('hidden');
     
+    // Top-KPIs aktualisieren
     updateKPIs(); 
 
-    // ROUTING
+    // Routing Logik
     switch(modId) {
-        case 'kader': renderSquadOverview(); break;
-        case 'analysis': renderAdvisorHub(); break; // V15: Neural Advisor
-        case 'finance': renderOfficeHub(); break;   // V15: Office Prime
-        case 'stadionzeitung': renderGazetteCMS(); break;
-        case 'drills': renderCalendar(); break;
+        case 'kader': 
+            renderSquadOverview(); 
+            break;
+        case 'status': 
+            renderStatusModule(); 
+            break;
+        case 'analysis': 
+            renderAdvisorHub(); 
+            break;
+        case 'finance': 
+            renderOfficeHub(); 
+            break;
+        case 'stadionzeitung': 
+            renderGazetteCMS(); 
+            break;
+        case 'drills': 
+            renderCalendar(); 
+            break;
         case 'tactics': 
             renderTacticBoard(); 
-            setTimeout(tacticsCore.init, 100); 
+            setTimeout(() => tacticsCore.init(), 100); 
             break;
         case 'vr-hub':
             if(viewport) viewport.classList.add('hidden'); 
@@ -343,872 +495,800 @@ function loadModule(modId) {
 }
 
 // --------------------------------------------------------------------------
-// 8. NEURAL ADVISOR (V15 Feature: Das Gehirn)
+// 7. OFFICE PRIME (FINANZEN & AKTENTASCHE)
 // --------------------------------------------------------------------------
-
-function renderAdvisorHub() {
-    const viewport = document.getElementById('content-viewport');
-    
-    // LIVE-BERECHNUNGEN
-    const count = eliteStore.players.length || 1;
-    const avgRating = Math.round(eliteStore.players.reduce((a,b)=>a+(b.rating||70),0)/count);
-    const totalWage = eliteStore.players.reduce((a,b)=>a+(b.salary||0),0);
-    // Effizienz = Rating pro 1000€ Gehalt
-    const efficiency = (avgRating / (totalWage/100000 || 1)).toFixed(2); 
-
-    viewport.innerHTML = `
-        <div style="height:100%; display:flex; flex-direction:column;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h2 style="font-family:var(--font-hud); color:white; margin:0;">
-                    NEURAL ADVISOR 
-                    <span style="font-size:12px; color:var(--neon-blue); margin-left:10px;">// SYSTEM V15.5 ONLINE</span>
-                </h2>
-                <button class="btn-save" onclick="runNeuralAudit()">
-                    <i class="fa-solid fa-brain"></i> LIVE AUDIT STARTEN
-                </button>
-            </div>
-            
-            <div class="ceo-grid">
-                <div class="ceo-card">
-                    <span class="ceo-label">KADER RATING Ø</span>
-                    <span class="ceo-val" style="color:var(--neon-main)">${avgRating}</span>
-                </div>
-                <div class="ceo-card">
-                    <span class="ceo-label">EFFIZIENZ-SCORE</span>
-                    <span class="ceo-val">${efficiency}</span>
-                </div>
-                <div class="ceo-card">
-                    <span class="ceo-label">GEHALTS-VOLUMEN</span>
-                    <span class="ceo-val" style="color:#f43f5e">${(totalWage/1000).toFixed(1)}K € / M</span>
-                </div>
-            </div>
-
-            <div class="lab-grid" style="flex:1;">
-                <div class="lab-panel">
-                    <div class="lab-title">STRATEGIE-ASSISTENT (OLLAMA PREVIEW)</div>
-                    <div style="font-family:monospace; font-size:11px; color:#64748b; line-height:1.4; padding:10px; background:rgba(0,0,0,0.3); border-radius:4px; margin-bottom:10px;">
-                        > CONTEXT LOADED: CLUB_DATA_V15<br>
-                        > BUDGET: ${eliteStore.mgmt.liquidAssets} €<br>
-                        > SQUAD_SIZE: ${eliteStore.players.length}<br>
-                        > STATUS: WAITING FOR INPUT...
-                    </div>
-                    <div style="margin-top:auto;">
-                        <input type="text" class="fin-inp" placeholder="Frage an die Strategie-KI..." id="advisor-prompt">
-                        <button class="btn-save" style="width:100%; margin-top:5px;" onclick="askToniStrategy()">SENDEN</button>
-                    </div>
-                </div>
-
-                <div class="lab-panel" style="grid-column: span 2;">
-                    <div class="lab-title">AUDIT PROTOKOLL</div>
-                    <div id="audit-results-area" style="overflow-y:auto; max-height:400px;">
-                        <div style="text-align:center; color:#555; margin-top:50px;">
-                            <i class="fa-solid fa-satellite-dish" style="font-size:40px; margin-bottom:10px;"></i><br>
-                            Warte auf Audit-Start...
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function runNeuralAudit() {
-    const area = document.getElementById('audit-results-area');
-    area.innerHTML = `<div style="color:var(--neon-blue); padding:10px;">
-        <i class="fa-solid fa-circle-notch fa-spin"></i> Analysiere ${eliteStore.players.length} Datensätze...
-    </div>`;
-    
-    setTimeout(() => {
-        let html = "";
-        
-        // 1. Analyse: Überbezahlte Spieler
-        eliteStore.players.forEach(p => {
-            if(p.salary > 20000 && p.rating < 78) {
-                html += `
-                <div class="audit-alert">
-                    <span>
-                        <i class="fa-solid fa-triangle-exclamation"></i> 
-                        <b>${p.name}</b> (Rating: ${p.rating}) verdient ${p.salary.toLocaleString()}€ - <b style="color:red">INEFFIZIENT</b>
-                    </span> 
-                    <button class="action-btn danger">VERKAUFEN</button>
-                </div>`;
-            }
-        });
-
-        // 2. Analyse: Auslaufende Verträge
-        eliteStore.players.forEach(p => {
-            if(p.contract_exp <= 2026) {
-                html += `
-                <div class="audit-alert" style="border-color:orange; color:orange;">
-                    <span>
-                        <i class="fa-solid fa-clock"></i> 
-                        Vertrag von <b>${p.name}</b> läuft 2026 aus.
-                    </span> 
-                    <button class="action-btn">VERLÄNGERN</button>
-                </div>`;
-            }
-        });
-        
-        // Wenn alles okay ist
-        if(html === "") html = `
-            <div class="audit-success">
-                <i class="fa-solid fa-check"></i> Keine kritischen Probleme gefunden. Der Laden läuft stabil.
-            </div>`;
-        
-        area.innerHTML = html;
-        voiceEngine.speak("Audit abgeschlossen. Bericht liegt vor.");
-    }, 1200);
-}
-
-function askToniStrategy() {
-    const p = document.getElementById('advisor-prompt').value;
-    if(!p) return;
-    voiceEngine.speak("Verarbeite Strategie-Anfrage: " + p);
-    document.getElementById('advisor-prompt').value = "";
-    // Hier würde später der echte API Call stehen
-}
-
-// --------------------------------------------------------------------------
-// 9. OFFICE PRIME (V15 Feature: Verträge & Personal)
-// --------------------------------------------------------------------------
-
 function renderOfficeHub() {
     const viewport = document.getElementById('content-viewport');
     
-    // Generiere Vertrags-Tabelle aus den Spielerdaten
-    const playerRows = eliteStore.players.map(p => `
-        <tr>
-            <td style="font-weight:bold;">${p.name}</td>
-            <td>${p.contract_exp || 2026}</td>
-            <td>${(p.salary||0).toLocaleString()} €</td>
-            <td>${(p.market_value||0).toLocaleString()} €</td>
-            <td>
-                <div style="width:50px; height:4px; background:#333; border-radius:2px;">
-                    <div style="width:${p.status.morale||50}%; height:100%; background:${(p.status.morale||50)>50?'var(--neon-main)':'red'}"></div>
-                </div>
-            </td>
-            <td><button class="action-btn" onclick="negotiate(${p.id})">EDIT</button></td>
-        </tr>
-    `).join('');
-
     viewport.innerHTML = `
         <div style="height:100%; display:flex; flex-direction:column;">
             <div class="fin-tabs">
-                <button class="fin-tab active" onclick="switchOfficeTab('contracts')">VERTRÄGE & KADER</button>
-                <button class="fin-tab" onclick="switchOfficeTab('staff')">PERSONAL & STAFF</button>
-                <button class="fin-tab" onclick="switchOfficeTab('finance')">BILANZ (LEGACY)</button>
+                <button class="fin-tab active" onclick="switchOfficeTab('contracts', this)">KADER-VERTRÄGE</button>
+                <button class="fin-tab" onclick="switchOfficeTab('staff', this)">PERSONAL & STAFF</button>
+                <button class="fin-tab" onclick="switchOfficeTab('finance', this)">BILANZ-EDITOR</button>
+                <button class="fin-tab" onclick="switchOfficeTab('briefcase', this)">AKTENTASCHE (UPGRADES)</button>
             </div>
             
-            <div id="office-content" style="flex:1; overflow-y:auto; padding-right:5px;">
-                <div class="lab-panel">
-                    <div class="lab-title">VERTRAGSMATRIX (PROFI-KADER)</div>
-                    <table class="contract-table">
-                        <thead>
-                            <tr>
-                                <th>Spieler</th>
-                                <th>Laufzeit</th>
-                                <th>Gehalt/M</th>
-                                <th>Marktwert</th>
-                                <th>Moral</th>
-                                <th>Aktion</th>
-                            </tr>
-                        </thead>
-                        <tbody>${playerRows}</tbody>
-                    </table>
+            <div id="office-content" style="flex:1; overflow-y:auto; padding-right:10px;">
+                </div>
+        </div>
+    `;
+    
+    // Startet mit der Vertragsübersicht
+    switchOfficeTab('contracts');
+}
+
+function switchOfficeTab(tab, btnElement) {
+    const container = document.getElementById('office-content');
+    
+    // Tab-Highlighting
+    if(btnElement) {
+        const tabs = document.querySelectorAll('.fin-tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        btnElement.classList.add('active');
+    }
+
+    switch(tab) {
+        case 'contracts':
+            renderContractMatrix(container);
+            break;
+        case 'staff':
+            renderStaffManagement(container);
+            break;
+        case 'finance':
+            renderEditableBalance(container);
+            break;
+        case 'briefcase':
+            renderBriefcaseUpgrades(container);
+            break;
+    }
+}
+
+// --------------------------------------------------------------------------
+// 8. FINANZ-LOGIK (DIE BEARBEITBARE BILANZ)
+// --------------------------------------------------------------------------
+
+// A. Die bearbeitbare Tabelle
+function renderEditableBalance(container) {
+    let rows = eliteStore.finance.map((item, idx) => `
+        <tr>
+            <td style="color:#94a3b8;">${item.label}</td>
+            <td style="text-align:right;">
+                <input type="number" class="fin-inp" 
+                       value="${item.value}" 
+                       onchange="updateFinanceValue(${idx}, this.value)">
+            </td>
+            <td style="width:40px; color:#444; font-size:12px;">EUR</td>
+        </tr>
+    `).join('');
+
+    container.innerHTML = `
+        <div class="lab-panel">
+            <div class="lab-title"><i class="fa-solid fa-file-invoice-dollar"></i> BILANZ-EDITOR // MANUELLE KORREKTUR</div>
+            <table class="contract-table">
+                <thead>
+                    <tr>
+                        <th>POSITION</th>
+                        <th style="text-align:right; padding-right:45px;">WERT (AKTUELL)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+            
+            <div style="margin-top:30px; padding:20px; background:rgba(16, 185, 129, 0.05); border-radius:12px; border:1px solid rgba(16, 185, 129, 0.2);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#64748b; font-size:12px; text-transform:uppercase;">Aktuelle Liquidität (Gesamt)</span>
+                    <span id="office-total-budget" style="color:var(--neon-main); font-size:24px; font-family:var(--font-hud);">
+                        ${eliteStore.mgmt.liquidAssets.toLocaleString()} €
+                    </span>
                 </div>
             </div>
         </div>
     `;
 }
 
-function switchOfficeTab(tab) {
-    const container = document.getElementById('office-content');
-    if(tab === 'contracts') renderOfficeHub(); // Reload default
+// B. Werte in Echtzeit speichern
+function updateFinanceValue(idx, val) {
+    const newValue = parseInt(val) || 0;
+    eliteStore.finance[idx].value = newValue;
     
-    if(tab === 'staff') {
-        const staffRows = eliteStore.staff.map(s => `
-            <tr>
-                <td><b>${s.role}</b></td>
-                <td>${s.name}</td>
-                <td>${s.salary.toLocaleString()} €</td>
-                <td style="color:var(--neon-blue)">${s.effect}</td>
-                <td><button class="action-btn danger">FEUERN</button></td>
-            </tr>
-        `).join('');
-        
-        container.innerHTML = `
+    // Alles neu berechnen
+    updateFinanceTotals();
+    
+    // UI Update
+    const display = document.getElementById('office-total-budget');
+    if(display) {
+        display.innerText = eliteStore.mgmt.liquidAssets.toLocaleString() + " €";
+    }
+    
+    // In LocalStorage sichern
+    localStorage.setItem('toni_finance', JSON.stringify(eliteStore.finance));
+}
+
+// C. Sponsoring & Aktentasche (Upgrades)
+function renderBriefcaseUpgrades(container) {
+    const b = eliteStore.briefcase;
+    
+    container.innerHTML = `
+        <div class="lab-grid" style="grid-template-columns: 1fr 1fr; margin-top:0;">
             <div class="lab-panel">
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                    <div class="lab-title">PERSONALSTAMM</div>
-                    <button class="btn-save" onclick="alert('Headhunter beauftragt...')">+ MITARBEITER</button>
+                <div class="lab-title"><i class="fa-solid fa-briefcase"></i> SPONSORING-AKTIVITÄTEN</div>
+                <div class="ceo-card" style="margin-bottom:15px; text-align:left;">
+                    <span class="ceo-label">Aktive Partner</span>
+                    <span class="ceo-val" style="font-size:18px;">${b.sponsoring.activeSponsors.join(', ')}</span>
                 </div>
-                <table class="contract-table">
-                    <thead><tr><th>Rolle</th><th>Name</th><th>Gehalt</th><th>Effekt</th><th></th></tr></thead>
-                    <tbody>${staffRows}</tbody>
-                </table>
-            </div>`;
-    }
+                <div class="bio-input-group">
+                    <span class="bio-label">Verhandlungs-Status</span>
+                    <div style="color:var(--neon-blue); font-weight:bold;">${b.sponsoring.negotiationStatus}</div>
+                </div>
+                <button class="btn-save" style="margin-top:auto;" onclick="alert('Verhandlung gestartet...')">NEUEN SPONSOR SUCHEN</button>
+            </div>
 
-    if(tab === 'finance') {
-        // Alte Ansicht für manuelle Eingaben
-        let rows = eliteStore.finance.map((item, idx) => `
-            <tr>
-                <td>${item.label}</td>
-                <td>${item.value.toLocaleString()} €</td>
-            </tr>`).join('');
-        container.innerHTML = `
             <div class="lab-panel">
-                <div class="lab-title">BILANZ-ÜBERSICHT</div>
-                <table class="finance-table"><tbody>${rows}</tbody></table>
-            </div>`;
-    }
+                <div class="lab-title"><i class="fa-solid fa-microchip"></i> ANALYSEZENTRUM (V15)</div>
+                <div class="scale-display" style="font-size:24px; padding:15px;">LEVEL ${b.analysisCenter.level}</div>
+                <p style="font-size:11px; color:#64748b;">Features: ${b.analysisCenter.features.join(' + ')}</p>
+                
+                <div style="margin-top:20px;">
+                    <span class="bio-label">Upgrade-Kosten</span>
+                    <div style="color:var(--neon-alert);">${b.analysisCenter.nextUpgradeCost.toLocaleString()} €</div>
+                </div>
+                <button class="btn-save" style="margin-top:auto; background:var(--neon-blue);" onclick="upgradeInfrastructure()">JETZT AUSBAUEN</button>
+            </div>
+        </div>
+    `;
 }
 
-function negotiate(id) {
-    const p = eliteStore.players.find(x=>x.id===id);
-    const demand = Math.round(p.salary * 1.15);
-    alert(`Verhandlung mit ${p.name} gestartet.\n\nBerater fordert: ${demand} € (+15%)\nAktuell: ${p.salary} €`);
-}
-// --- ENDE BLOCK 2 ---
+function upgradeInfrastructure() {
+    const cost = eliteStore.briefcase.analysisCenter.nextUpgradeCost;
+    if(eliteStore.mgmt.liquidAssets >= cost) {
+        eliteStore.mgmt.liquidAssets -= cost;
+        eliteStore.briefcase.analysisCenter.level++;
+        eliteStore.briefcase.analysisCenter.nextUpgradeCost *= 2;
+        alert("Analysezentrum wurde erweitert!");
+        loadModule('finance');
+    } else {
+        alert("Nicht genügend Budget!");
+    }
+} 
 /* ==========================================================================
-   BLOCK 3 VON 4: TACTICS ENGINE & BIO LAB
+   BLOCK 4 VON 6: SQUAD STATUS, CONTRACT MATRIX & STAFF MANAGEMENT
    ========================================================================== */
 
 // --------------------------------------------------------------------------
-// 10. TACTICS BOARD PRO (Canvas Logic)
+// 9. STATUS-MODUL (DIE KADER-STEUERUNG)
+// --------------------------------------------------------------------------
+/**
+ * Dieses Modul behebt das Problem der "verschwundenen Spieler".
+ * Hier werden ALLE Spieler der Datenbank gelistet, egal ob nominiert oder nicht.
+ */
+function renderStatusModule() {
+    const viewport = document.getElementById('content-viewport');
+    
+    let html = `
+        <div style="margin-bottom:20px;">
+            <h2 style="font-family:var(--font-hud); color:white; margin:0;">KADER-STATUS & VERFÜGBARKEIT</h2>
+            <p style="font-size:12px; color:#64748b; margin-top:5px;">
+                Wähle aus, welche Spieler für den Spieltag nominiert sind (Kader) oder wer aufgrund von Belastung pausiert (Fit).
+            </p>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:15px;">`;
+    
+    eliteStore.players.forEach(p => {
+        const isReady = p.status.im_training && p.status.im_kader;
+        
+        html += `
+            <div class="lab-panel" style="border-left: 4px solid ${isReady ? 'var(--neon-main)' : 'var(--neon-alert)'}; padding:15px; flex-direction:row; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <img src="${p.img_url}" style="width:40px; height:40px; border-radius:50%; background:#000;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/21/21104.png'">
+                    <div>
+                        <div style="font-weight:bold; color:white;">${p.name}</div>
+                        <div style="font-size:10px; color:var(--neon-blue); letter-spacing:1px;">${p.position} // MORAL: ${p.status.morale}%</div>
+                    </div>
+                </div>
+                
+                <div style="display:flex; gap:15px; text-align:center;">
+                    <div class="status-toggle">
+                        <div style="font-size:8px; color:#444; margin-bottom:2px;">KADER</div>
+                        <input type="checkbox" ${p.status.im_kader ? 'checked' : ''} 
+                               style="accent-color:var(--neon-main); scale:1.2; cursor:pointer;"
+                               onchange="updatePlayerStatus(${p.id}, 'im_kader', this.checked)">
+                    </div>
+                    <div class="status-toggle">
+                        <div style="font-size:8px; color:#444; margin-bottom:2px;">FIT</div>
+                        <input type="checkbox" ${p.status.im_training ? 'checked' : ''} 
+                               style="accent-color:var(--neon-blue); scale:1.2; cursor:pointer;"
+                               onchange="updatePlayerStatus(${p.id}, 'im_training', this.checked)">
+                    </div>
+                </div>
+            </div>`;
+    });
+    
+    viewport.innerHTML = html + `</div>`;
+}
+
+function updatePlayerStatus(id, key, val) {
+    const p = eliteStore.players.find(x => x.id === id);
+    if(p) {
+        p.status[key] = val;
+        // Sofortiges Neu-Zeichnen für visuelles Feedback
+        renderStatusModule();
+        // Optional: In LocalStorage sichern
+        localStorage.setItem('toni_players_backup', JSON.stringify(eliteStore.players));
+    }
+}
+
+// --------------------------------------------------------------------------
+// 10. OFFICE-DETAILS: VERTRÄGE & STAFF
 // --------------------------------------------------------------------------
 
-const tacticsCore = {
-    canvas: null, 
-    ctx: null, 
-    mode: 'move',       // 'move' oder 'draw'
-    tacticMode: 'match', // 'match' oder 'training'
-    elements: [],       // Alle Objekte auf dem Feld
+// A. Die Vertragsmatrix (Profi-Ansicht)
+function renderContractMatrix(container) {
+    const rows = eliteStore.players.map(p => {
+        const salaryAnnual = p.salary * 12;
+        const colorClass = p.contract_exp <= 2026 ? 'color:var(--neon-alert);' : '';
+        
+        return `
+            <tr>
+                <td style="font-weight:bold; color:white;">${p.name}</td>
+                <td>${p.position}</td>
+                <td style="${colorClass}">${p.contract_exp}</td>
+                <td style="font-family:monospace;">${p.salary.toLocaleString()} €</td>
+                <td style="font-family:monospace; color:#64748b;">${salaryAnnual.toLocaleString()} €</td>
+                <td>
+                    <button class="action-btn" onclick="negotiate(${p.id})">
+                        <i class="fa-solid fa-file-signature"></i> EDIT
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="lab-panel">
+            <div class="lab-title">VERTRAGSMATRIX // PROFI-ABTEILUNG</div>
+            <table class="contract-table">
+                <thead>
+                    <tr>
+                        <th>SPIELER</th>
+                        <th>POS</th>
+                        <th>LAUFZEIT</th>
+                        <th>MONATSGEHALT</th>
+                        <th>JAHRESGEHALT</th>
+                        <th>AKTION</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+// B. Personalverwaltung
+function renderStaffManagement(container) {
+    const rows = eliteStore.staff.map(s => `
+        <tr>
+            <td style="font-weight:bold; color:var(--neon-blue);">${s.role}</td>
+            <td>${s.name}</td>
+            <td style="color:var(--neon-main); font-size:11px;">${s.effect}</td>
+            <td style="font-family:monospace;">${s.salary.toLocaleString()} €</td>
+            <td>
+                <button class="action-btn danger" onclick="alert('Kündigungsschutz aktiv.')">ENTLASSEN</button>
+            </td>
+        </tr>
+    `).join('');
+
+    container.innerHTML = `
+        <div class="lab-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <div class="lab-title">STAFF & EXPERTEN-TEAM</div>
+                <button class="btn-save" onclick="alert('Stellenausschreibung läuft...')">+ EXPERTE ANSTELLEN</button>
+            </div>
+            <table class="contract-table">
+                <thead>
+                    <tr>
+                        <th>FUNKTION</th>
+                        <th>NAME</th>
+                        <th>EFFEKT</th>
+                        <th>GEHALT/M</th>
+                        <th>AKTION</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function negotiate(id) {
+    const p = eliteStore.players.find(x => x.id === id);
+    if(!p) return;
     
-    // Initialisierung des Canvas
+    const bonus = Math.round(p.salary * 0.1);
+    const text = `VERHANDLUNGS-PROTOKOLL: ${p.name}\n\nBerater fordert eine Erhöhung auf ${(p.salary + bonus).toLocaleString()} €.\n\nSoll das neue Angebot vorgelegt werden?`;
+    
+    if(confirm(text)) {
+        p.salary += bonus;
+        updateFinanceTotals();
+        switchOfficeTab('contracts');
+        voiceEngine.speak("Vertrag für " + p.name + " wurde erfolgreich angepasst.");
+    }
+}   
+/* ==========================================================================
+   BLOCK 5 VON 6: TACTICS ENGINE (4-4-2 vs 3-4-3) & DEEP-DIVE LABOR
+   ========================================================================== */
+
+// --------------------------------------------------------------------------
+// 11. TACTICS ENGINE PRO (CANVAS LOGIC)
+// --------------------------------------------------------------------------
+const tacticsCore = {
+    canvas: null, ctx: null, mode: 'move', elements: [],
+    
     init: function() {
         this.canvas = document.getElementById('tactics-canvas');
         if(!this.canvas) return;
-        
         this.ctx = this.canvas.getContext('2d');
         const stage = document.querySelector('.tactics-stage');
-        
-        // Canvas Größe an Container anpassen
         this.canvas.width = stage.clientWidth;
         this.canvas.height = stage.clientHeight;
         
-        // Event Listener für Maus-Interaktion
+        // Listener für Drag & Drop
         this.canvas.addEventListener('mousedown', (e) => this.startAction(e));
         this.canvas.addEventListener('mousemove', (e) => this.moveAction(e));
         this.canvas.addEventListener('mouseup', (e) => this.endAction(e));
         
-        // Standard-Modus laden
-        this.loadMatchMode(); 
+        this.resetMatchFormation(); // Startet das geforderte Setup
     },
 
-    // Umschalten zwischen Match (11vs11) und Training
-    setTacticMode: function(mode) {
-        this.tacticMode = mode;
-        this.elements = []; // Board leeren
+    // Das Herzstück: Toni (4-4-2) vs. Trainer (3-4-3)
+    resetMatchFormation: function() {
+        this.elements = [];
         
-        // UI Buttons aktualisieren
-        document.getElementById('mode-match-btn').classList.toggle('active', mode === 'match');
-        document.getElementById('mode-training-btn').classList.toggle('active', mode === 'training');
+        // 1. TONI-MANNSCHAFT (Unten, Rot, 4-4-2)
+        const toniPlayers = eliteStore.players.filter(p => p.status.im_kader).slice(0, 11);
+        this.applyFormation(toniPlayers, '4-4-2', '#ef4444', 'bottom');
         
-        if (mode === 'match') {
-            this.loadMatchMode();
-        } else {
-            this.loadTrainingMode();
+        // 2. TRAINER-MANNSCHAFT (Oben, Blau, 3-4-3)
+        // Hier simulieren wir 11 Dummy-Gegner für das Taktik-Training
+        const trainerPlayers = Array(11).fill(0).map((_, i) => ({ name: `Trainer-PL ${i+1}`, position: "G" }));
+        this.applyFormation(trainerPlayers, '3-4-3', '#3b82f6', 'top');
+        
+        this.renderLoop();
+    },
+
+    applyFormation: function(squad, formation, color, side) {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const isTop = (side === 'top');
+        
+        // Einfaches Koordinaten-Mapping für Formationen
+        let positions = [];
+        if(formation === '4-4-2') {
+            positions = [
+                [0.5, 0.9], // TW
+                [0.2, 0.75], [0.4, 0.75], [0.6, 0.75], [0.8, 0.75], // Abwehr
+                [0.2, 0.55], [0.4, 0.55], [0.6, 0.55], [0.8, 0.55], // Mittelfeld
+                [0.4, 0.4], [0.6, 0.4] // Sturm
+            ];
+        } else if(formation === '3-4-3') {
+            positions = [
+                [0.5, 0.1], // TW
+                [0.3, 0.25], [0.5, 0.25], [0.7, 0.25], // Abwehr
+                [0.2, 0.45], [0.4, 0.45], [0.6, 0.45], [0.8, 0.45], // Mittelfeld
+                [0.3, 0.6], [0.5, 0.6], [0.7, 0.6] // Sturm
+            ];
         }
-    },
 
-    loadMatchMode: function() {
-        // 1. Lade Startelf (Rot) - Die ersten 11 Spieler
-        const starters = eliteStore.players.slice(0, 11); 
-        this.applyFormation(starters, '4-4-2', 'player');
-        
-        // 2. Lade Gegner (Blau) - Dummy Daten
-        const opponents = Array(11).fill(0).map((_, i) => ({name: `Gegner ${i+1}`, id: 9000+i}));
-        this.applyFormation(opponents, '4-4-2', 'opponent');
-        
-        this.renderLoop();
-    },
-
-    loadTrainingMode: function() {
-        // Lade nur eigenes Team
-        const starters = eliteStore.players.slice(0, 11);
-        this.applyFormation(starters, 'training', 'player');
-        
-        // Füge Trainingsmaterial hinzu (Ball)
-        this.elements.push({
-            type: 'ball', 
-            x: this.canvas.width / 2, 
-            y: this.canvas.height / 2, 
-            radius: 6
-        });
-        
-        this.renderLoop();
-    },
-
-    applyFormation: function(squad, formation, type) {
-        const color = type === 'player' ? '#ef4444' : '#3b82f6';
-        // Positionierung: Wir unten (400), Gegner oben (100)
-        const startY = type === 'player' ? 400 : 100;
-        
         squad.forEach((p, i) => {
-            // Einfache Grid-Berechnung für 4er Reihen
-            let x = 100 + (i % 4) * 150; 
-            let y = startY + Math.floor(i / 4) * 60;
-            
-            // Zufallsverteilung im Training
-            if(formation === 'training') {
-                x = 50 + Math.random() * (this.canvas.width - 100);
-                y = 50 + Math.random() * (this.canvas.height - 100);
-            }
+            if(!positions[i]) return;
+            const x = positions[i][0] * w;
+            const y = positions[i][1] * h;
             
             this.elements.push({
-                type: type, 
-                id: p.id, 
-                label: type==='player' ? p.position : 'G', 
-                name: p.name, 
-                x: x, 
-                y: y, 
-                color: color, 
-                radius: 14, 
+                id: p.id || Date.now() + i,
+                name: p.name,
+                pos: p.position || "??",
+                x: x, y: y,
+                color: color,
+                radius: 15,
                 isDragging: false
             });
         });
     },
 
-    setMode: function(m) { 
-        this.mode = m; 
-    },
-    
-    // Maus Start
     startAction: function(e) {
         const r = this.canvas.getBoundingClientRect();
-        const x = e.clientX - r.left;
-        const y = e.clientY - r.top;
-        
-        // Prüfen ob ein Element getroffen wurde
+        const x = e.clientX - r.left, y = e.clientY - r.top;
         this.elements.forEach(el => {
-            const dist = Math.hypot(x - el.x, y - el.y);
-            if(dist < el.radius + 5) {
-                el.isDragging = true;
-            }
+            if(Math.hypot(x - el.x, y - el.y) < el.radius + 5) el.isDragging = true;
         });
     },
-    
-    // Maus Bewegung
+
     moveAction: function(e) {
         const r = this.canvas.getBoundingClientRect();
-        const x = e.clientX - r.left;
-        const y = e.clientY - r.top;
-        
-        this.elements.forEach(el => { 
-            if(el.isDragging) { 
-                el.x = x; 
-                el.y = y; 
-            } 
+        const x = e.clientX - r.left, y = e.clientY - r.top;
+        this.elements.forEach(el => {
+            if(el.isDragging) { el.x = x; el.y = y; }
         });
-        
-        this.renderLoop(); // Neu zeichnen bei Bewegung
+        this.renderLoop();
     },
-    
-    // Maus Ende
-    endAction: function() { 
-        this.elements.forEach(el => el.isDragging = false); 
-    },
-    
-    // Zeichenschleife (Rendering)
+
+    endAction: function() { this.elements.forEach(el => el.isDragging = false); },
+
     renderLoop: function() {
         if(!this.ctx) return;
-        
-        // 1. Alles löschen
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // 2. Alle Elemente zeichnen
         this.elements.forEach(el => {
-            if(el.type === 'ball') {
-                // Ball zeichnen
-                this.ctx.beginPath(); 
-                this.ctx.arc(el.x, el.y, el.radius, 0, Math.PI*2); 
-                this.ctx.fillStyle = 'white'; 
-                this.ctx.fill(); 
-                this.ctx.strokeStyle = 'black'; 
-                this.ctx.stroke();
-            } else {
-                // Spieler Kreis
-                this.ctx.beginPath(); 
-                this.ctx.arc(el.x, el.y, el.radius, 0, Math.PI*2); 
-                this.ctx.fillStyle = el.color; 
-                this.ctx.fill();
-                this.ctx.strokeStyle = '#fff'; 
-                this.ctx.lineWidth = 2; 
-                this.ctx.stroke();
-                
-                // Position (Text im Kreis)
-                this.ctx.fillStyle = 'white'; 
-                this.ctx.font = 'bold 10px Arial'; 
-                this.ctx.textAlign = 'center'; 
-                this.ctx.textBaseline = 'middle'; 
-                this.ctx.fillText(el.label, el.x, el.y);
-                
-                // Name (Text unter Kreis)
-                this.ctx.fillStyle = '#ddd'; 
-                this.ctx.font = '9px Arial'; 
-                this.ctx.fillText(el.name, el.x, el.y + 22);
-            }
+            // Schatten
+            this.ctx.shadowBlur = 10; this.ctx.shadowColor = "black";
+            // Kreis
+            this.ctx.beginPath();
+            this.ctx.arc(el.x, el.y, el.radius, 0, Math.PI * 2);
+            this.ctx.fillStyle = el.color;
+            this.ctx.fill();
+            this.ctx.strokeStyle = "white";
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+            this.ctx.shadowBlur = 0;
+            
+            // Text
+            this.ctx.fillStyle = "white";
+            this.ctx.font = "bold 10px Arial";
+            this.ctx.textAlign = "center";
+            this.ctx.fillText(el.pos, el.x, el.y + 4);
+            this.ctx.fillStyle = "rgba(255,255,255,0.7)";
+            this.ctx.font = "9px Arial";
+            this.ctx.fillText(el.name, el.x, el.y + 28);
         });
     }
 };
 
 function renderTacticBoard() {
     const viewport = document.getElementById('content-viewport');
-    
-    // Ersatzbank generieren (Spieler ab Index 11)
-    const bench = eliteStore.players.length > 11 ? eliteStore.players.slice(11) : [];
-    const benchHtml = bench.map(p => `
-        <div class="draggable-player">
-            <span><b>${p.position}</b> ${p.name}</span>
-        </div>
-    `).join('');
-
     viewport.innerHTML = `
         <div class="tactics-wrapper">
-            <aside class="tactics-sidebar">
-                <h3 style="color:var(--neon-main); font-family:var(--font-hud); font-size:12px;">MODUS</h3>
-                <div class="fin-tabs" style="display:block; border:none; margin-bottom:10px;">
-                    <button class="fin-tab active" id="mode-match-btn" style="width:100%; margin-bottom:5px;" onclick="tacticsCore.setTacticMode('match')">MATCH (11vs11)</button>
-                    <button class="fin-tab" id="mode-training-btn" style="width:100%;" onclick="tacticsCore.setTacticMode('training')">TRAINING</button>
+            <aside class="lab-panel" style="padding:15px;">
+                <div class="lab-title">STRATEGIE</div>
+                <button class="tool-btn" onclick="tacticsCore.resetMatchFormation()">RE-SET FORMATION</button>
+                <div style="margin-top:20px;">
+                    <span class="bio-label">TEAM TONI</span>
+                    <div style="color:var(--neon-main); font-weight:bold;">4 - 4 - 2</div>
                 </div>
-                
-                <h3 style="color:var(--neon-main); font-family:var(--font-hud); font-size:12px; margin-top:20px;">WERKZEUGE</h3>
-                <div class="tool-btn" onclick="tacticsCore.setMode('move')">
-                    <i class="fa-solid fa-arrows-up-down-left-right"></i> BEWEGEN
-                </div>
-                <div class="tool-btn" onclick="tacticsCore.setMode('draw')">
-                    <i class="fa-solid fa-pen"></i> ZEICHNEN
+                <div style="margin-top:10px;">
+                    <span class="bio-label">TEAM TRAINER</span>
+                    <div style="color:var(--neon-blue); font-weight:bold;">3 - 4 - 3</div>
                 </div>
             </aside>
-
             <div class="tactics-stage">
                 <canvas id="tactics-canvas"></canvas>
             </div>
-
-            <aside class="tactics-sidebar">
-                <h3 style="color:var(--neon-blue); font-family:var(--font-hud); font-size:12px;">ERSATZBANK (${bench.length})</h3>
-                <div style="margin-top:10px;">${benchHtml}</div>
-                
-                <hr style="border-color:#333; margin:15px 0;">
-                
-                <div class="analysis-sheet">
-                    <h3 style="color:#aaa; font-family:var(--font-hud); font-size:10px;">MATCHPLAN NOTIZEN</h3>
-                    <textarea style="width:100%; height:150px; background:rgba(0,0,0,0.5); color:white; border:1px solid #333; font-size:11px; padding:8px;"></textarea>
-                </div>
+            <aside class="lab-panel" style="padding:15px;">
+                <div class="lab-title">ANALYSE</div>
+                <textarea class="fin-inp" style="height:200px; font-size:11px;" placeholder="Taktische Anweisungen hier eingeben..."></textarea>
+                <button class="btn-save" style="margin-top:10px; width:100%;">MATCHPLAN SPEICHERN</button>
             </aside>
-        </div>`;
+        </div>
+    `;
 }
 
 // --------------------------------------------------------------------------
-// 11. BIO LAB & STANDARD MODULE (KADER)
+// 12. DEEP-DIVE BIO LAB (V15.8 ULTIMATE)
 // --------------------------------------------------------------------------
-
-/* ==========================================================================
-   UPDATE: V15.6 DEEP-DIVE BIO LAB (3 SPALTEN, MAXIMALE TIEFE)
-   Füge dies ganz am Ende deiner Datei ein.
-   ========================================================================== */
-
 function openBioLab(id) {
     let p = eliteStore.players.find(x => x.id === id);
-    
-    // Neuer Spieler Template (Falls ID -1)
-    if(!p && id === -1) {
+    if(!p && id !== -1) return;
+
+    // Falls neuer Spieler
+    if(id === -1) {
         p = {
-            id: Date.now(), name: "Neuer Spieler", position: "ZM", rating: 60,
-            salary: 2500, contract_exp: 2026, market_value: 50000,
-            status: { im_kader: true, im_training: true, morale: 80 },
-            fifa_stats: { pac: 60, sho: 60, pas: 60, dri: 60, def: 60, phy: 60 },
-            labor_daten: { 
-                waage: { gewicht: 75, kfa: 12, muskel_kg: 35, wasser: 60, viszeral: 5, metabolic: 24 }, 
-                uhr: { ruhepuls: 55, load: 4.5, vo2max: 50 } 
-            }
+            id: Date.now(), name: "New Elite", position: "ZM", rating: 70,
+            fifa_stats: { pac: 70, sho: 70, pas: 70, dri: 70, def: 70, phy: 70 },
+            labor_daten: { waage: { gewicht: 75, kfa: 12, muskel_kg: 35, wasser: 60, viszeral: 5, metabolic: 24 }, uhr: { ruhepuls: 55, load: 4.5, vo2max: 50 } },
+            salary: 5000, contract_exp: 2027, market_value: 1000000, status: { im_kader: true, im_training: true, morale: 80 }
         };
+        eliteStore.players.push(p);
     }
-    
-    // Daten-Sicherheit (Falls Felder bei alten Spielern fehlen)
-    if(!p.labor_daten) p.labor_daten = { waage: {}, uhr: {} };
-    if(!p.labor_daten.waage) p.labor_daten.waage = { gewicht: 75 };
-    if(!p.labor_daten.uhr) p.labor_daten.uhr = { ruhepuls: 60 };
-    if(!p.salary) p.salary = 3000;
 
     const s = p.fifa_stats; 
     const l = p.labor_daten;
-    
-    // BMI Berechnung (Live)
-    const bmi = (l.waage.gewicht / (1.80 * 1.80)).toFixed(1); // Annahme 1.80m für Demo
+    const bmi = (l.waage.gewicht / (1.85 * 1.85)).toFixed(1);
 
     const ov = document.createElement('div'); 
-    ov.className = 'lab-overlay'; 
-    ov.id = 'active-bio-lab';
+    ov.className = 'lab-overlay'; ov.id = 'active-bio-lab';
     
     ov.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:15px; border-bottom:1px solid #333;">
         <div>
             <h1 style="font-family:var(--font-hud); color:white; margin:0;">${p.name.toUpperCase()}</h1>
-            <span style="font-size:10px; color:#666;">ID: ${p.id} // DATABASE RECORD</span>
+            <span style="font-size:10px; color:#64748b;">NEURAL BIOMETRIC DATA // UNIT-${p.id}</span>
         </div>
-        <button class="btn-cancel" style="background:#f43f5e; color:white; border:none; padding:10px 20px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('active-bio-lab').remove(); loadModule('kader');">SCHLIESSEN X</button>
+        <button class="btn-save" style="background:var(--neon-alert); color:white;" onclick="document.getElementById('active-bio-lab').remove(); loadModule('kader');">LABOR SCHLIESSEN X</button>
     </div>
     
     <div class="lab-grid">
-        
         <div class="lab-panel" style="border-top: 3px solid var(--neon-blue);">
-            <div class="lab-title">FIFA IDENTITÄT</div>
-            
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
-                <div style="text-align:center;">
-                    <div style="font-size:10px; color:#aaa;">RATING</div>
-                    <div style="font-size:32px; font-weight:bold; color:var(--neon-main);" id="lab-display-rating">${p.rating}</div>
-                </div>
-                <div style="text-align:right;">
-                    <input class="bio-val" value="${p.name}" style="text-align:right; font-weight:bold;" onchange="updateP(${p.id},'name',this.value)">
-                    <input class="bio-val" value="${p.position}" style="text-align:right; font-size:12px; color:var(--neon-blue);" onchange="updateP(${p.id},'position',this.value)">
-                </div>
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                <div class="bio-input-group"><span class="bio-label">PAC (TEMPO)</span><input type="number" class="bio-val" value="${s.pac}" onchange="updateStat(${p.id},'pac',this.value)"></div>
-                <div class="bio-input-group"><span class="bio-label">SHO (SCHUSS)</span><input type="number" class="bio-val" value="${s.sho}" onchange="updateStat(${p.id},'sho',this.value)"></div>
-                <div class="bio-input-group"><span class="bio-label">PAS (PASSEN)</span><input type="number" class="bio-val" value="${s.pas}" onchange="updateStat(${p.id},'pas',this.value)"></div>
-                <div class="bio-input-group"><span class="bio-label">DRI (DRIBBLING)</span><input type="number" class="bio-val" value="${s.dri}" onchange="updateStat(${p.id},'dri',this.value)"></div>
-                <div class="bio-input-group"><span class="bio-label">DEF (DEFENSIVE)</span><input type="number" class="bio-val" value="${s.def}" onchange="updateStat(${p.id},'def',this.value)"></div>
-                <div class="bio-input-group"><span class="bio-label">PHY (PHYSIS)</span><input type="number" class="bio-val" value="${s.phy}" onchange="updateStat(${p.id},'phy',this.value)"></div>
-            </div>
-        </div>
-        
-        <div class="lab-panel" style="border-top: 3px solid #10b981;">
-            <div class="lab-title">MEDIZINISCHE ANALYSE</div>
-            
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                <div style="text-align:center; flex:1;">
-                    <div class="scale-display" style="margin-bottom:5px; font-size:24px;">${l.waage.gewicht || 0} <span style="font-size:12px;">KG</span></div>
-                </div>
-                <div style="text-align:center; flex:1; border-left:1px solid #333;">
-                    <div class="scale-display" style="margin-bottom:5px; font-size:24px; color:${bmi < 25 ? '#10b981' : 'orange'}">${bmi}</div>
-                    <span style="font-size:10px; color:#888;">BMI SCORE</span>
-                </div>
-            </div>
-
+            <div class="lab-title"><i class="fa-solid fa-chart-line"></i> PERFORMANCE PROFILE</div>
+            <div class="scale-display" style="font-size:32px; padding:15px;" id="lab-rating">${p.rating}</div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div class="bio-input-group"><span class="bio-label">GEWICHT (KG)</span><input type="number" class="bio-val" value="${l.waage.gewicht || 0}" onchange="updateLab(${p.id},'waage','gewicht',this.value)"></div>
-                <div class="bio-input-group"><span class="bio-label">KÖRPERFETT (%)</span><input type="number" class="bio-val" value="${l.waage.kfa || 0}" onchange="updateLab(${p.id},'waage','kfa',this.value)"></div>
-                
-                <div class="bio-input-group"><span class="bio-label">MUSKELMASSE (KG)</span><input type="number" class="bio-val" value="${l.waage.muskel_kg || 0}" onchange="updateLab(${p.id},'waage','muskel_kg',this.value)"></div>
-                <div class="bio-input-group"><span class="bio-label">WASSER (%)</span><input type="number" class="bio-val" value="${l.waage.wasser || 0}" onchange="updateLab(${p.id},'waage','wasser',this.value)"></div>
-                
-                <div class="bio-input-group"><span class="bio-label">VISZERALFETT</span><input type="number" class="bio-val" value="${l.waage.viszeral || 0}" onchange="updateLab(${p.id},'waage','viszeral',this.value)"></div>
-                <div class="bio-input-group"><span class="bio-label">METABOLIC AGE</span><input type="number" class="bio-val" value="${l.waage.metabolic || 20}" onchange="updateLab(${p.id},'waage','metabolic',this.value)"></div>
+                ${Object.keys(s).map(key => `
+                    <div class="bio-input-group">
+                        <span class="bio-label">${key.toUpperCase()}</span>
+                        <input type="number" class="bio-val" value="${s[key]}" onchange="updateStat(${p.id}, '${key}', this.value)">
+                    </div>
+                `).join('')}
+            </div>
+            <div style="margin-top:15px;">
+                <span class="bio-label">NAME</span>
+                <input class="bio-val" value="${p.name}" onchange="updateP(${p.id}, 'name', this.value)">
             </div>
         </div>
-        
-        <div class="lab-panel" style="border-top: 3px solid #f43f5e;">
-            
-            <div class="lab-title">MANAGEMENT</div>
-            <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; margin-bottom:20px;">
+
+        <div class="lab-panel" style="border-top: 3px solid var(--neon-main);">
+            <div class="lab-title"><i class="fa-solid fa-dna"></i> BIOMETRIC SCAN</div>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <div class="scale-display" style="flex:1; font-size:20px;">${l.waage.gewicht} <small>KG</small></div>
+                <div class="scale-display" style="flex:1; font-size:20px; color:var(--neon-blue);">${bmi} <small>BMI</small></div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="bio-input-group"><span class="bio-label">KFA %</span><input type="number" class="bio-val" value="${l.waage.kfa}" onchange="updateLab(${p.id}, 'waage', 'kfa', this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">MUSKEL KG</span><input type="number" class="bio-val" value="${l.waage.muskel_kg}" onchange="updateLab(${p.id}, 'waage', 'muskel_kg', this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">WASSER %</span><input type="number" class="bio-val" value="${l.waage.wasser}" onchange="updateLab(${p.id}, 'waage', 'wasser', this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">VISZERAL</span><input type="number" class="bio-val" value="${l.waage.viszeral}" onchange="updateLab(${p.id}, 'waage', 'viszeral', this.value)"></div>
+                <div class="bio-input-group" style="grid-column: span 2;"><span class="bio-label">METABOLIC AGE</span><input type="number" class="bio-val" value="${l.waage.metabolic}" onchange="updateLab(${p.id}, 'waage', 'metabolic', this.value)"></div>
+            </div>
+        </div>
+
+        <div class="lab-panel" style="border-top: 3px solid var(--neon-alert);">
+            <div class="lab-title"><i class="fa-solid fa-file-contract"></i> FINANCE & SENSORS</div>
+            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-bottom:20px;">
                 <span class="bio-label">MONATSGEHALT (€)</span>
-                <input type="number" class="bio-val" value="${p.salary}" style="color:#f43f5e; font-weight:bold;" onchange="updateP(${p.id},'salary',this.value)">
-                
+                <input type="number" class="bio-val" style="color:var(--neon-alert);" value="${p.salary}" onchange="updateP(${p.id}, 'salary', this.value)">
                 <div style="display:flex; gap:10px; margin-top:10px;">
-                    <div style="flex:1;">
-                        <span class="bio-label">LAUFZEIT</span>
-                        <input type="number" class="bio-val" value="${p.contract_exp||2026}" onchange="updateP(${p.id},'contract_exp',this.value)">
-                    </div>
-                    <div style="flex:1;">
-                        <span class="bio-label">MARKTWERT</span>
-                        <input type="number" class="bio-val" value="${p.market_value||0}" onchange="updateP(${p.id},'market_value',this.value)">
-                    </div>
+                    <div style="flex:1;"><span class="bio-label">EXPIRY</span><input type="number" class="bio-val" value="${p.contract_exp}" onchange="updateP(${p.id}, 'contract_exp', this.value)"></div>
+                    <div style="flex:1;"><span class="bio-label">VALUE</span><input type="number" class="bio-val" value="${p.market_value}" onchange="updateP(${p.id}, 'market_value', this.value)"></div>
                 </div>
             </div>
-
-            <div class="lab-title" style="color:orange; border-color:orange;">PERFORMANCE TRACKER</div>
+            <div class="lab-title" style="color:orange; border-color:orange;"><i class="fa-solid fa-stopwatch"></i> LIVE TRACKING</div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div class="bio-input-group"><span class="bio-label">RUHEPULS</span><input type="number" class="bio-val" value="${l.uhr.ruhepuls || 55}" onchange="updateLab(${p.id},'uhr','ruhepuls',this.value)"></div>
-                <div class="bio-input-group"><span class="bio-label">VO2 MAX</span><input type="number" class="bio-val" value="${l.uhr.vo2max || 50}" onchange="updateLab(${p.id},'uhr','vo2max',this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">RUHEPULS</span><input type="number" class="bio-val" value="${l.uhr.ruhepuls}" onchange="updateLab(${p.id}, 'uhr', 'ruhepuls', this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">VO2 MAX</span><input type="number" class="bio-val" value="${l.uhr.vo2max}" onchange="updateLab(${p.id}, 'uhr', 'vo2max', this.value)"></div>
+                <div class="bio-input-group" style="grid-column: span 2;">
+                    <span class="bio-label">DAILY LOAD (1-10)</span>
+                    <input type="range" style="width:100%;" min="1" max="10" step="0.1" value="${l.uhr.load}" onchange="updateLab(${p.id}, 'uhr', 'load', this.value)">
+                </div>
             </div>
-            <div style="margin-top:10px;">
-                <span class="bio-label">BELASTUNG (LOAD)</span>
-                <input type="range" style="width:100%; accent-color:orange;" min="1" max="10" value="${l.uhr.load || 5}" onchange="this.nextElementSibling.innerText=this.value; updateLab(${p.id},'uhr','load',this.value)">
-                <span style="float:right; color:orange; font-family:monospace;">${l.uhr.load || 5}</span>
-            </div>
-
         </div>
-    </div>`;
-    
-    document.body.appendChild(ov);
-}
-
-// HELFER: RATING BERECHNEN (Wichtig für Spalte 1)
-function calculateFifaRating(s) { 
-    return Math.round(( (s.pac||0)+(s.sho||0)+(s.pas||0)+(s.dri||0)+(s.def||0)+(s.phy||0) )/6); 
-}
-
-// Das detaillierte Spieler-Overlay (Herzstück der Datenpflege)
-function openBioLab(id) {
-    let p = eliteStore.players.find(x => x.id === id);
-    
-    // Neuer Spieler Template
-    if(!p && id === -1) {
-        p = {
-            id:Date.now(), name:"Neu", position:"ZM", rating:60,
-            salary:2000, contract_exp:2026, market_value:50000,
-            status:{im_kader:true, im_training:true, morale:80},
-            fifa_stats:{pac:60, sho:60, pas:60, dri:60, def:60, phy:60},
-            labor_daten:{waage:{gewicht:75}, uhr:{ruhepuls:60}}
-        };
-    }
-    
-    const s = p.fifa_stats; 
-    const l = p.labor_daten;
-    
-    // Sicherheits-Check für V15 Daten
-    if(!p.salary) p.salary = 2500;
-    
-    const ov = document.createElement('div'); 
-    ov.className = 'lab-overlay'; 
-    ov.id = 'active-bio-lab';
-    
-    ov.innerHTML = `
-    <div style="display:flex; justify-content:space-between; padding-bottom:15px; border-bottom:1px solid #333;">
-        <h1 style="font-family:var(--font-hud); color:white;">${p.name.toUpperCase()}</h1>
-        <button class="btn-cancel" onclick="document.getElementById('active-bio-lab').remove(); loadModule('kader');">X</button>
     </div>
-    
-    <div class="lab-grid">
-        <div class="lab-panel">
-            <div class="lab-title">STATS & IDENTITÄT</div>
-            <input class="bio-val" value="${p.name}" onchange="updateP(${p.id},'name',this.value)">
-            
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:10px;">
-                <span class="bio-label">PAC</span><input type="number" class="bio-val" value="${s.pac}" onchange="updateStat(${p.id},'pac',this.value)">
-                <span class="bio-label">SHO</span><input type="number" class="bio-val" value="${s.sho}" onchange="updateStat(${p.id},'sho',this.value)">
-                <span class="bio-label">PAS</span><input type="number" class="bio-val" value="${s.pas}" onchange="updateStat(${p.id},'pas',this.value)">
-                <span class="bio-label">DRI</span><input type="number" class="bio-val" value="${s.dri}" onchange="updateStat(${p.id},'dri',this.value)">
-                <span class="bio-label">DEF</span><input type="number" class="bio-val" value="${s.def}" onchange="updateStat(${p.id},'def',this.value)">
-                <span class="bio-label">PHY</span><input type="number" class="bio-val" value="${s.phy}" onchange="updateStat(${p.id},'phy',this.value)">
-            </div>
-        </div>
-        
-        <div class="lab-panel">
-            <div class="lab-title">BODY LAB</div>
-            <span class="bio-label">GEWICHT (KG)</span>
-            <input type="number" class="bio-val" value="${l.waage.gewicht}" onchange="updateLab(${p.id},'waage','gewicht',this.value)">
-            
-            <div style="margin-top:20px; text-align:center;">
-                <div class="scale-display">${l.waage.gewicht}</div>
-            </div>
-        </div>
-        
-        <div class="lab-panel">
-            <div class="lab-title">VERTRAG (OFFICE LINK)</div>
-            
-            <span class="bio-label">MONATSGEHALT (€)</span>
-            <input type="number" class="bio-val" value="${p.salary}" onchange="updateP(${p.id},'salary',this.value)">
-            
-            <span class="bio-label" style="margin-top:10px;">LAUFZEIT (JAHR)</span>
-            <input type="number" class="bio-val" value="${p.contract_exp||2026}" onchange="updateP(${p.id},'contract_exp',this.value)">
-            
-            <span class="bio-label" style="margin-top:10px;">MARKTWERT (€)</span>
-            <input type="number" class="bio-val" value="${p.market_value||0}" onchange="updateP(${p.id},'market_value',this.value)">
-        </div>
-    </div>`;
-    
+    `;
     document.body.appendChild(ov);
-}
-// --- ENDE BLOCK 3 ---
-/* ==========================================================================
-   BLOCK 4 VON 4: HELPER, SERVICES & SYSTEM FINALIZATION
+} 
+ /* ==========================================================================
+   BLOCK 6 VON 6: SQUAD OVERVIEW, AI VOICE & SYSTEM SERVICES
    ========================================================================== */
 
 // --------------------------------------------------------------------------
-// 12. DATA UPDATE HELPER (Die Logik hinter den Eingabefeldern)
+// 13. SQUAD OVERVIEW (DIE ELITE KADER-KARTEN)
+// --------------------------------------------------------------------------
+function renderSquadOverview() {
+    const viewport = document.getElementById('content-viewport');
+    
+    // Header mit Add-Button
+    let html = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+            <div>
+                <h2 style="font-family:var(--font-hud); color:white; margin:0;">ACTIVE ELITE SQUAD</h2>
+                <div style="font-size:10px; color:var(--neon-blue); letter-spacing:2px;">KADERGRÖSSE: ${eliteStore.players.length} SPIELER</div>
+            </div>
+            <button class="btn-save" onclick="openBioLab(-1)">+ NEUER SPIELER-DATENSATZ</button>
+        </div>
+        <div class="kader-grid">
+    `;
+    
+    // Nur Spieler anzeigen, die "im Kader" sind (Nominiert)
+    const activeSquad = eliteStore.players.filter(p => p.status.im_kader);
+    
+    activeSquad.forEach(p => {
+        const isFit = p.status.im_training;
+        const moraleColor = p.status.morale > 70 ? 'var(--neon-main)' : 'var(--neon-alert)';
+        
+        html += `
+        <div class="fifa-card" onclick="openBioLab(${p.id})" style="opacity: ${isFit ? 1 : 0.6}">
+            <div style="position:absolute; top:10px; left:12px; text-align:center;">
+                <div class="card-rating" style="font-size:24px;">${p.rating}</div>
+                <div style="font-size:10px; font-weight:bold; color:#64748b;">${p.position}</div>
+            </div>
+            
+            <div style="position:absolute; top:12px; right:12px;">
+                <i class="fa-solid fa-bolt" style="color:${isFit ? 'var(--neon-main)' : '#444'};"></i>
+            </div>
+
+            <img src="${p.img_url}" class="player-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/21/21104.png'">
+            
+            <div style="text-align:center; border-top:1px solid #1e293b; padding-top:10px;">
+                <div style="color:white; font-weight:bold; font-size:14px; text-transform:uppercase; letter-spacing:1px;">${p.name}</div>
+                <div style="display:flex; justify-content:center; gap:8px; margin-top:5px;">
+                    <span style="font-size:9px; color:#64748b;">PAC <b style="color:#ccc;">${p.fifa_stats.pac}</b></span>
+                    <span style="font-size:9px; color:#64748b;">DRI <b style="color:#ccc;">${p.fifa_stats.dri}</b></span>
+                    <span style="font-size:9px; color:#64748b;">SHO <b style="color:#ccc;">${p.fifa_stats.sho}</b></span>
+                </div>
+                
+                <div style="width:100%; height:2px; background:#111; margin-top:10px; border-radius:1px; overflow:hidden;">
+                    <div style="width:${p.status.morale}%; height:100%; background:${moraleColor}; box-shadow: 0 0 5px ${moraleColor};"></div>
+                </div>
+            </div>
+        </div>`;
+    });
+    
+    viewport.innerHTML = html + `</div>`;
+}
+
+// --------------------------------------------------------------------------
+// 14. DATA PERSISTENCE HELPERS (UPDATE-LOGIK)
 // --------------------------------------------------------------------------
 
-// Aktualisiert Top-Level Eigenschaften (Name, Gehalt, etc.)
+// Update für Top-Level Daten
 function updateP(id, key, val) {
     const p = eliteStore.players.find(x => x.id === id);
     if(p) {
-        // Unterscheidung Text oder Zahl
-        if(key === 'name') {
+        if(key === 'name' || key === 'position') {
             p[key] = val;
         } else {
-            p[key] = parseInt(val);
+            p[key] = parseInt(val) || 0;
         }
-        
-        // V15 SPECIAL: Wenn Gehalt geändert wird, sofort Finanzen neu berechnen
-        if(key === 'salary') {
-            updateFinanceTotals();
-        }
+        if(key === 'salary') updateFinanceTotals();
+        saveToLocalStorage();
     }
 }
 
-// Aktualisiert FIFA Stats (PAC, SHO, etc.) & berechnet Rating neu
+// Update für FIFA Stats & Rating-Berechnung
 function updateStat(id, key, val) {
     const p = eliteStore.players.find(x => x.id === id);
     if(p) {
-        p.fifa_stats[key] = parseInt(val);
-        // Automatisches Rating-Update
+        p.fifa_stats[key] = parseInt(val) || 0;
         p.rating = calculateFifaRating(p.fifa_stats);
         
-        // GUI Update falls Overlay offen
-        const labRatingDisp = document.querySelector('#active-bio-lab .card-rating');
-        if(labRatingDisp) labRatingDisp.innerText = p.rating;
+        // Live-Update im Labor-Overlay
+        const ratingDisp = document.getElementById('lab-rating');
+        if(ratingDisp) ratingDisp.innerText = p.rating;
+        saveToLocalStorage();
     }
 }
 
-// Aktualisiert Labor Daten (Verschachteltes Objekt)
+// Update für Biometrische Labor-Daten
 function updateLab(id, device, key, val) {
     const p = eliteStore.players.find(x => x.id === id);
     if(p && p.labor_daten[device]) {
-        p.labor_daten[device][key] = parseFloat(val);
+        p.labor_daten[device][key] = parseFloat(val) || 0;
+        saveToLocalStorage();
     }
+}
+
+function calculateFifaRating(s) {
+    const avg = (s.pac + s.sho + s.pas + s.dri + s.def + s.phy) / 6;
+    return Math.round(avg);
+}
+
+function saveToLocalStorage() {
+    localStorage.setItem('toni_players_backup', JSON.stringify(eliteStore.players));
+    localStorage.setItem('toni_finance', JSON.stringify(eliteStore.finance));
 }
 
 // --------------------------------------------------------------------------
-// 13. STANDARD MODULE (GAZETTE, KALENDER, WETTER, VR)
+// 15. AI VOICE ENGINE & MIKROFON (AKTIVIERT)
 // --------------------------------------------------------------------------
+const voiceEngine = {
+    recognition: null,
+    isListening: false,
 
-function renderGazetteCMS() { 
-    document.getElementById('content-viewport').innerHTML = `
-        <div class="gazette-editor">
-            <h1 style="border-bottom: 2px solid black;">ELITE GAZETTE V15</h1>
-            <p>Die Redaktion arbeitet an neuen Inhalten...</p>
-            <textarea style="width:100%; height:300px; border:none; outline:none; font-family:'Times New Roman'; font-size:18px;">${eliteStore.gazette.body}</textarea>
-        </div>
-    `; 
-}
-
-function renderCalendar() { 
-    const v = document.getElementById('content-viewport'); 
-    v.innerHTML = `
-        <div class="cal-grid">
-            <div class="cal-header">
-                <h2 style="font-family:var(--font-hud);">WOCHENPLANUNG</h2>
-            </div>
-            <div style="padding:20px; color:#ccc;">
-                Work in Progress: Drag & Drop Trainingseinheiten kommen im nächsten Update.
-            </div>
-        </div>
-    `; 
-}
-
-// Aktualisiert die Anzeige oben rechts (Budget & Wetter)
-function updateKPIs() { 
-    const el = document.getElementById('kpi-budget'); 
-    if(el) {
-        el.innerText = eliteStore.mgmt.liquidAssets.toLocaleString() + " €"; 
-    }
-    
-    const w = document.getElementById('weather-header-widget'); 
-    if(w) {
-        w.innerHTML = `<i class="fa-solid fa-cloud-sun"></i> ${eliteStore.mgmt.liveData.temp}°C`;
-    }
-}
-
-// Holt echtes Wetter (Open-Meteo API)
-async function fetchWeatherData() { 
-    try {
-        // Koordinaten für Deutschland (Zentral)
-        const r = await fetch("https://api.open-meteo.com/v1/forecast?latitude=50.8&longitude=9.4&current_weather=true");
-        const d = await r.json();
+    init: function() {
+        console.log("TONI 2.0: Initializing Voice Engine...");
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         
-        eliteStore.mgmt.liveData.temp = d.current_weather.temperature;
-        eliteStore.mgmt.liveData.condition = "Live";
-        eliteStore.mgmt.liveData.wind = d.current_weather.windspeed;
-        
-        updateKPIs();
-    } catch(e) {
-        console.warn("Wetter-Dienst nicht erreichbar.");
-    } 
-}
+        if (window.SpeechRecognition) {
+            this.recognition = new SpeechRecognition();
+            this.recognition.lang = 'de-DE';
+            this.recognition.continuous = false;
+            this.recognition.interimResults = false;
 
-// VR Modus Platzhalter
-function initVRHub() { 
-    document.getElementById('match-simulation-layer').innerHTML = '<a-text value="VR MODE ACTIVE" position="-1 1.6 -3" color="white"></a-text>'; 
-}
-
-// Prüft ob API Key da ist
-function checkAIConnection() { 
-    const el = document.getElementById('ai-status-text');
-    if(el) {
-        el.innerText = USER_API_KEY ? "AI: ONLINE" : "AI: OFFLINE"; 
-    }
-}
-
-// --------------------------------------------------------------------------
-// 14. VOICE ENGINE (Sprachsteuerung)
-// --------------------------------------------------------------------------
-
-const voiceEngine = { 
-    init: () => { 
-        // Browser Kompatibilität prüfen
-        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; 
-        
-        if(window.SpeechRecognition) {
-            const r = new SpeechRecognition();
-            r.lang = 'de-DE';
-            
-            // Wenn Sprache erkannt wurde
-            r.onresult = (e) => {
-                const text = e.results[e.results.length-1][0].transcript;
-                console.log("Voice Command:", text);
-                
-                // Leite an Strategie-KI weiter
-                const prompt = document.getElementById('advisor-prompt');
-                if(prompt) {
-                    prompt.value = text;
-                    askToniStrategy();
-                }
+            this.recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                console.log("Sprachbefehl erkannt:", transcript);
+                this.handleCommand(transcript);
             };
-            // r.start(); // Auto-Start deaktiviert für Performance
+
+            this.recognition.onend = () => {
+                this.isListening = false;
+                document.getElementById('ai-mic-indicator')?.classList.remove('active');
+            };
         }
-    }, 
-    
-    // Text-to-Speech (Toni spricht)
-    speak: (t) => { 
-        const u = new SpeechSynthesisUtterance(t);
-        u.lang = 'de-DE';
-        window.speechSynthesis.speak(u); 
-    } 
+    },
+
+    startListening: function() {
+        if (!this.recognition) return alert("Sprachsteuerung wird von diesem Browser nicht unterstützt.");
+        if (this.isListening) return;
+        
+        this.isListening = true;
+        this.recognition.start();
+        document.getElementById('ai-mic-indicator')?.classList.add('active');
+        this.speak("Ich höre zu.");
+    },
+
+    handleCommand: function(cmd) {
+        const text = cmd.toLowerCase();
+        // Beispiel-Befehle
+        if (text.includes("kader")) loadModule('kader');
+        if (text.includes("finanzen") || text.includes("geld")) loadModule('finance');
+        if (text.includes("taktik")) loadModule('tactics');
+        
+        // Befehl an den Advisor-Chat senden
+        const promptInput = document.getElementById('advisor-prompt');
+        if(promptInput) {
+            promptInput.value = cmd;
+            this.speak("Analysiere " + cmd);
+        }
+    },
+
+    speak: function(text) {
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'de-DE';
+        msg.pitch = 0.9;
+        msg.rate = 1.0;
+        window.speechSynthesis.speak(msg);
+    }
 };
 
 // --------------------------------------------------------------------------
-// 15. SYSTEM CLOCK & UTILS
+// 16. SYSTEM SERVICES & GAZETTE
 // --------------------------------------------------------------------------
-
-function updateClock() { 
-    const el = document.getElementById('clock-display');
-    if(el) {
-        el.innerText = new Date().toLocaleTimeString('de-DE'); 
-    }
+function renderGazetteCMS() {
+    const viewport = document.getElementById('content-viewport');
+    viewport.innerHTML = `
+        <div class="lab-panel" style="background:#fff; color:#111; font-family:serif; padding:50px; max-width:800px; margin:0 auto; box-shadow: 20px 20px 0px var(--border-color);">
+            <div style="text-align:center; border-bottom:4px double #111; padding-bottom:20px; margin-bottom:20px;">
+                <h1 style="font-size:48px; margin:0;">ELITE GAZETTE</h1>
+                <div style="letter-spacing:5px;">STADIONZEITUNG // V15.8</div>
+            </div>
+            <h2>${eliteStore.gazette.headline}</h2>
+            <p style="font-size:18px; line-height:1.6; font-style:italic;">${eliteStore.gazette.lead}</p>
+            <hr>
+            <textarea style="width:100%; height:400px; border:none; font-family:serif; font-size:16px; line-height:1.5; outline:none;" 
+                      onchange="eliteStore.gazette.body = this.value">${eliteStore.gazette.body}</textarea>
+            <div style="margin-top:30px; border-top:1px solid #ccc; padding-top:10px; font-size:12px; text-align:right;">
+                REDAKTION: NEURAL-AI ADVISOR SYSTEM
+            </div>
+        </div>
+    `;
 }
 
-function closeModal(id) { 
-    document.getElementById(id).classList.add('hidden'); 
+function updateKPIs() {
+    const budgetEl = document.getElementById('kpi-budget');
+    if(budgetEl) budgetEl.innerText = eliteStore.mgmt.liquidAssets.toLocaleString() + " €";
+    
+    const weatherEl = document.getElementById('weather-header-widget');
+    if(weatherEl) weatherEl.innerHTML = `<i class="fa-solid fa-temperature-half"></i> ${eliteStore.mgmt.liveData.temp}°C`;
 }
 
-function openSysConfig() { 
-    document.getElementById('modal-sys-config').classList.remove('hidden'); 
+async function fetchWeatherData() {
+    try {
+        const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=51.5&longitude=7.4&current_weather=true");
+        const data = await res.json();
+        eliteStore.mgmt.liveData.temp = data.current_weather.temperature;
+        updateKPIs();
+    } catch(e) { console.warn("Wetter-API offline."); }
 }
 
-function saveSystemConfig() { 
-    const k = document.getElementById('input-api-key').value; 
-    localStorage.setItem('toni_api_key', k); 
-    USER_API_KEY = k; 
-    closeModal('modal-sys-config');
-    checkAIConnection();
+function updateClock() {
+    const clock = document.getElementById('clock-display');
+    if(clock) clock.innerText = new Date().toLocaleTimeString('de-DE');
 }
 
-// FINAL SYSTEM LOG
-console.log("TONI 2.0 V15.5: ALL SYSTEMS GREEN. READY.");
-/* END OF FILE */
+// --------------------------------------------------------------------------
+// SYSTEM START LOG
+// --------------------------------------------------------------------------
+console.log("=========================================");
+console.log("TONI 2.0 NEURAL ENGINE V15.8 COMPLETED");
+console.log("STATUS: ALL SYSTEMS OPERATIONAL");
+console.log("=========================================");  
+}
