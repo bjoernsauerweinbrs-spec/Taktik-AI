@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 | NEURAL MANAGEMENT ENGINE</title>
+    <title>TONI 2.0 | ULTIMATE MANAGEMENT ENGINE</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -13,65 +13,73 @@
 
     <main id="auth-layer" class="portal-panel">
         <header class="portal-header">
-            <div class="status-led green"></div>
+            <div class="status-led green" id="ki-status-led"></div>
             <div class="header-text">
                 <h1>TONI 2.0</h1>
-                <small>NEURAL MANAGEMENT ENGINE</small>
+                <small>NEURAL ENGINE V15.8</small>
             </div>
         </header>
         <section class="login-core">
-            <p class="ai-greeting">IDENTITÄT BESTÄTIGEN, TRAINER.</p>
+            <p class="ai-greeting" id="ai-voice-text">IDENTITÄT BESTÄTIGEN, TRAINER.</p>
             <div class="input-wrapper">
-                <input type="password" id="passkey" placeholder="PASSKEY EINGEBEN" autocomplete="off">
+                <input type="password" id="passkey" placeholder="PASSKEY" autocomplete="off">
                 <div class="input-glow"></div>
             </div>
-            <button id="login-btn" onclick="systemBootSequence()">SYSTEM STARTEN</button>
+            <button id="login-btn" onclick="systemBootSequence()">BOOT SYSTEM</button>
         </section>
         <footer class="portal-footer">
-            <div class="version-tag">V15.8 PRO</div>
+            <div class="version-tag">SYSTEM READY</div>
             <div class="system-downloads">
-                <span class="badge">APK</span>
-                <span class="badge">MOBILE</span>
+                <span class="badge" title="Meta Quest VR Ready">XR</span>
+                <span class="badge" title="Mobile Optimized">MOBILE</span>
             </div>
         </footer>
     </main>
 
     <div id="main-interface" class="hidden">
         <header id="top-bar">
-            <div class="system-title">TONI 2.0 // CONTROL HUB</div>
+            <div class="system-title">TONI 2.0 // <span id="active-mod-title">DASHBOARD</span></div>
             <div id="clock-display">00:00:00</div>
             <div class="kpi-quick-info">
                 <i class="fa-solid fa-wallet"></i> <span id="kpi-budget">0 €</span>
+                <i class="fa-solid fa-vr-cardboard" style="margin-left:15px; cursor:pointer;" onclick="toggleVRMode()"></i>
             </div>
         </header>
 
         <div class="hud-grid">
             <aside id="nav-left" class="hud-column">
-                <div class="column-header">NAVIGATION</div>
+                <div class="column-header">ZENTRALE</div>
                 <nav class="side-nav">
-                    <button onclick="switchModule('kader')"><i class="fa-solid fa-users"></i> KADER</button>
-                    <button onclick="switchModule('tactics')"><i class="fa-solid fa-clipboard-list"></i> TAKTIK</button>
-                    <button onclick="switchModule('finance')"><i class="fa-solid fa-chart-line"></i> FINANZEN</button>
-                    <button onclick="switchModule('press')"><i class="fa-solid fa-newspaper"></i> GAZETTE</button>
+                    <button onclick="switchModule('kader')" class="nav-btn active"><i class="fa-solid fa-users"></i> KADER</button>
+                    <button onclick="switchModule('tactics')" class="nav-btn"><i class="fa-solid fa-chalkboard-user"></i> TAKTIK-BOARD</button>
+                    <button onclick="switchModule('finance')" class="nav-btn"><i class="fa-solid fa-briefcase"></i> OFFICE PRIME</button>
+                    <button onclick="switchModule('youth')" class="nav-btn"><i class="fa-solid fa-child-reaching"></i> JUNIOR HERO</button>
+                    <button onclick="switchModule('media')" class="nav-btn"><i class="fa-solid fa-clapperboard"></i> MEDIA CENTER</button>
                 </nav>
-                <div class="column-header">KADER LISTE</div>
-                <div id="quick-squad-list"></div>
+                <div class="column-header">SCHNELLAUSWAHL</div>
+                <div id="quick-squad-list" class="scroll-area"></div>
             </aside>
 
-            <main id="stage-center" class="hud-column">
-                <div id="module-content">
-                    </div>
+            <main id="stage-center" class="hud-column stage-main">
+                <div id="module-content"></div>
             </main>
 
             <aside id="info-right" class="hud-column">
-                <div class="column-header">NEURAL ADVISOR</div>
-                <div id="ai-chat-box">
-                    <p class="ai-msg">Willkommen, Trainer. Ich analysiere die aktuelle Lage...</p>
+                <div class="column-header">NEURAL ADVISOR (TONI)</div>
+                <div id="ai-chat-box" class="scroll-area">
+                    <div class="ai-msg">Moin Trainer! Kloppo hier. Lass uns die Jungs heute richtig heiß machen!</div>
                 </div>
-                <div class="column-header">LIVE KPI</div>
+                <div class="voice-control-box">
+                    <button id="mic-btn" class="mic-inactive" onclick="toggleMic()">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <span>KI-LIVE TALK</span>
+                </div>
+                <div class="column-header">SYSTEM KPI</div>
                 <div id="live-kpi-panel">
-                    <div class="kpi-row"><span>MORAL:</span> <span id="kpi-morale">85%</span></div>
-                    <div class="kpi-row"><span>WETTER:</span> <span id="kpi-weather">18°C</span></div>
+                    <div class="kpi-row"><span>MORAL:</span> <b id="kpi-morale">85%</b></div>
+                    <div class="kpi-row"><span>REPUTATION:</span> <b id="kpi-reputation">72/100</b></div>
+                    <div class="kpi-row"><span>WETTER:</span> <b>18°C, HEITER</b></div>
                 </div>
             </aside>
         </div>
