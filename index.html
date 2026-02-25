@@ -3,43 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | MOBILE COMMAND</title>
+    <title>TONI 2.0 | ULTIMATE HUB</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="portal-body">
+
     <div id="portal-background"></div>
 
     <main id="auth-layer" class="portal-panel">
         <header class="portal-header">
             <div class="status-led green"></div>
-            <h1>TONI 2.0</h1>
+            <div class="header-text">
+                <h1>TONI 2.0</h1>
+                <small>NEURAL ENGINE V15.8</small>
+            </div>
         </header>
-        <div class="input-wrapper">
-            <input type="password" id="passkey" placeholder="PASSKEY">
-        </div>
-        <button onclick="systemBootSequence()">BOOT SYSTEM</button>
+        <section class="login-core">
+            <p class="ai-greeting">IDENTITÄT BESTÄTIGEN, TRAINER.</p>
+            <div class="input-wrapper">
+                <input type="password" id="passkey" placeholder="PASSKEY" autocomplete="off">
+            </div>
+            <button id="login-btn" onclick="systemBootSequence()">BOOT SYSTEM</button>
+        </section>
     </main>
 
     <div id="main-interface" class="hidden">
         <header id="top-bar">
-            <div class="top-info"><i class="fa-solid fa-user-tie"></i> KADER</div>
-            <div id="clock-display">00:00</div>
-            <div class="top-info"><i class="fa-solid fa-wallet"></i> <span id="kpi-budget">0 €</span></div>
+            <div class="system-title">TONI 2.0 // <span id="active-mod-title">DASHBOARD</span></div>
+            <div id="clock-display">00:00:00</div>
+            <div class="kpi-quick-info">
+                <i class="fa-solid fa-wallet"></i> <span id="kpi-budget">0 €</span>
+            </div>
         </header>
 
-        <nav id="mobile-nav">
-            <button onclick="switchModule('kader')"><i class="fa-solid fa-users"></i></button>
-            <button onclick="switchModule('tactics')"><i class="fa-solid fa-strategy"></i></button>
-            <button onclick="switchModule('office')"><i class="fa-solid fa-briefcase"></i></button>
-            <button onclick="switchModule('media')"><i class="fa-solid fa-newspaper"></i></button>
-            <button onclick="toggleMic()" id="mic-nav-btn"><i class="fa-solid fa-microphone"></i></button>
-        </nav>
+        <div class="hud-grid">
+            <aside id="nav-left" class="hud-column">
+                <div class="column-header">ZENTRALE</div>
+                <nav class="side-nav">
+                    <button onclick="switchModule('kader')"><i class="fa-solid fa-users"></i> KADER</button>
+                    <button onclick="switchModule('tactics')"><i class="fa-solid fa-chalkboard-user"></i> TAKTIK</button>
+                    <button onclick="switchModule('finance')"><i class="fa-solid fa-briefcase"></i> OFFICE</button>
+                    <button onclick="switchModule('youth')"><i class="fa-solid fa-child-reaching"></i> JUNIOR</button>
+                </nav>
+                <div class="column-header">SCHNELLAUSWAHL</div>
+                <div id="quick-squad-list" class="scroll-area"></div>
+            </aside>
 
-        <main id="stage-center">
-            <div id="module-content"></div>
-        </main>
+            <main id="stage-center" class="hud-column stage-main">
+                <div id="module-content"></div>
+            </main>
+
+            <aside id="info-right" class="hud-column">
+                <div class="column-header">NEURAL ADVISOR</div>
+                <div id="ai-chat-box" class="scroll-area">
+                    <div class="ai-msg">System bereit.</div>
+                </div>
+                <div class="voice-control-box">
+                    <button id="mic-btn" class="mic-inactive" onclick="toggleMic()">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <span>KI-LIVE TALK</span>
+                </div>
+                <div class="column-header">SYSTEM KPI</div>
+                <div id="live-kpi-panel">
+                    <div class="kpi-row"><span>MORAL:</span> <b id="kpi-morale">85%</b></div>
+                </div>
+            </aside>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
