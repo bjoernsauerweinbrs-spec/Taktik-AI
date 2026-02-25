@@ -1,34 +1,78 @@
+/* ==========================================================================
+   TONI 2.0 | THE ULTIMATE DESIGN ENGINE (MAX-CONFIG)
+   ========================================================================== */
+
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
 
 :root {
-    --bg-space: #020617; --bg-purple: #1e1b4b;
-    --neon-cyan: #00f3ff; --neon-pink: #ec4899; --neon-green: #10b981;
-    --glass: rgba(15, 23, 42, 0.9); --border: rgba(51, 65, 85, 0.5);
-    --font-hud: 'Orbitron', sans-serif; --font-main: 'Rajdhani', sans-serif;
+    /* Farbpalette */
+    --bg-space: #020617;
+    --bg-purple: #1e1b4b;
+    --neon-cyan: #00f3ff;
+    --neon-pink: #ec4899;
+    --neon-green: #10b981;
+    --neon-gold: #fbbf24;
+    --neon-alert: #f43f5e;
+    
+    /* Oberflächen */
+    --glass: rgba(15, 23, 42, 0.9);
+    --glass-bright: rgba(30, 41, 59, 0.7);
+    --border: rgba(0, 243, 255, 0.2);
+    
+    /* Fonts */
+    --font-hud: 'Orbitron', sans-serif;
+    --font-main: 'Rajdhani', sans-serif;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { 
-    height: 100vh; width: 100vw; background: var(--bg-space); color: #fff;
-    font-family: var(--font-main); overflow: hidden;
-}
+/* 1. BASIS SETUP */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 .hidden { display: none !important; }
 
-/* HINTERGRUND */
+body {
+    height: 100vh; width: 100vw; 
+    background: var(--bg-space); color: #fff;
+    font-family: var(--font-main); overflow: hidden;
+}
+
 #portal-background {
     position: fixed; inset: 0; z-index: -1;
     background: radial-gradient(circle at top left, var(--bg-purple) 0%, var(--bg-space) 75%);
+    animation: bgPulse 15s infinite alternate ease-in-out;
 }
+@keyframes bgPulse { from { transform: scale(1); } to { transform: scale(1.1); } }
 
-/* LOGIN */
+/* 2. ACCESS PORTAL (LOGIN) */
 .portal-panel {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 90%; max-width: 400px; background: var(--glass); padding: 40px; border-radius: 20px;
-    border: 1px solid var(--neon-cyan); backdrop-filter: blur(20px); text-align: center;
+    width: 90%; max-width: 420px; background: var(--glass);
+    padding: 40px; border-radius: 25px; border: 1px solid var(--neon-cyan);
+    backdrop-filter: blur(20px); text-align: center;
+    box-shadow: 0 0 50px rgba(0, 243, 255, 0.15);
 }
 
-/* DASHBOARD */
-#main-interface { height: 100vh; display: flex; flex-direction: column; }
+.status-led { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; }
+.status-led.green { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+
+.portal-header h1 { font-family: var(--font-hud); letter-spacing: 5px; color: var(--neon-cyan); }
+
+.input-wrapper { position: relative; margin: 30px 0; }
+#passkey {
+    width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--border);
+    padding: 15px; color: #fff; font-family: var(--font-hud); 
+    text-align: center; font-size: 18px; border-radius: 10px; outline: none;
+}
+#passkey:focus { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 243, 255, 0.3); }
+
+#login-btn {
+    width: 100%; padding: 15px; background: transparent; border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan); font-family: var(--font-hud); border-radius: 10px;
+    cursor: pointer; transition: 0.3s;
+}
+#login-btn:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 20px var(--neon-cyan); }
+
+/* 3. MAIN DASHBOARD LAYOUT */
+#main-interface { height: 100vh; display: flex; flex-direction: column; animation: fadeIn 0.5s ease; }
+
 #top-bar {
     height: 60px; background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--border);
     display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
@@ -40,20 +84,95 @@ body {
 }
 
 .hud-column { background: var(--glass); border: 1px solid var(--border); border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; }
-.column-header { padding: 10px; background: rgba(0,0,0,0.5); font-family: var(--font-hud); font-size: 9px; color: var(--neon-cyan); }
-.scroll-area { flex: 1; overflow-y: auto; padding: 10px; }
+.column-header { padding: 12px; background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--border); font-family: var(--font-hud); font-size: 9px; color: var(--neon-cyan); text-transform: uppercase; }
+.scroll-area { flex: 1; overflow-y: auto; padding: 15px; }
 
-/* CARDS */
-.kader-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; padding: 20px; }
-.fifa-card {
-    width: 130px; height: 180px; background: linear-gradient(135deg, #fbbf24, #b45309);
-    border-radius: 8px; padding: 2px; cursor: pointer;
+/* 4. NAVIGATION & QUICK LIST */
+.side-nav { display: flex; flex-direction: column; gap: 5px; padding: 10px; }
+.side-nav button {
+    background: transparent; border: 1px solid transparent; color: #94a3b8;
+    padding: 12px; text-align: left; cursor: pointer; border-radius: 8px;
+    font-family: var(--font-hud); font-size: 10px; transition: 0.3s;
 }
-.card-inner { background: #111; height: 100%; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; align-items: center; }
+.side-nav button:hover, .side-nav button.active { background: rgba(0, 243, 255, 0.1); border-color: var(--neon-cyan); color: #fff; }
 
-/* MOBILE FIXES */
+.list-item {
+    display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer; font-size: 14px;
+}
+.list-item:hover { background: rgba(255,255,255,0.05); }
+
+/* 5. FIFA CARDS & PITCH */
+.stage-main { background: radial-gradient(circle at center, #064e3b 0%, #022c22 100%); position: relative; }
+
+.kader-container { padding: 20px; height: 100%; display: flex; flex-direction: column; }
+.kader-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px; }
+
+.fifa-card {
+    width: 140px; height: 200px; background: linear-gradient(135deg, #fbbf24 0%, #b45309 100%);
+    border-radius: 10px; padding: 2px; cursor: pointer; transition: 0.3s;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+}
+.fifa-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px var(--neon-cyan); }
+
+.card-inner { background: #111; height: 100%; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; align-items: center; position: relative; }
+.card-rating { font-family: var(--font-hud); font-size: 24px; color: var(--neon-gold); align-self: flex-start; }
+.card-name { font-weight: 700; margin: 10px 0; font-size: 14px; }
+.card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 9px; width: 100%; }
+.card-stats b { color: var(--neon-gold); }
+
+/* 6. MODALS / BIO-LAB */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
+    display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px);
+}
+.lab-container {
+    width: 95%; max-width: 900px; background: var(--glass-bright); 
+    border: 1px solid var(--neon-cyan); border-radius: 20px; padding: 30px;
+}
+.lab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+
+/* 7. OFFICE, YOUTH & MEDIA */
+.office-panel { background: rgba(0,0,0,0.3); padding: 20px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 15px; }
+.sticker-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 15px; }
+.sticker { aspect-ratio: 1; border: 1px dashed #444; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+.sticker.unlocked { background: var(--neon-pink); border-style: solid; box-shadow: 0 0 15px var(--neon-pink); }
+
+/* 8. VOICE & KI */
+.voice-control-box { padding: 20px; display: flex; align-items: center; gap: 15px; border-top: 1px solid var(--border); }
+#mic-btn {
+    width: 50px; height: 50px; border-radius: 50%; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.3s;
+}
+.mic-inactive { background: #334155; color: #94a3b8; }
+.mic-active { background: var(--neon-alert); color: #fff; animation: pulseRed 1.5s infinite; }
+
+@keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(244, 63, 94, 0); } }
+
+/* 9. RESPONSIVE / MOBILE FIXES */
 @media (max-width: 1024px) {
     .hud-grid { grid-template-columns: 1fr; overflow-y: auto; }
-    .hud-column { height: auto; min-height: 200px; margin-bottom: 10px; }
-    .kader-grid { grid-template-columns: 1fr 1fr; }
+    .hud-column { height: auto; margin-bottom: 10px; }
+    #nav-left { order: 2; }
+    #stage-center { order: 1; min-height: 500px; }
+    #info-right { order: 3; }
+    
+    .kader-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+@media (max-width: 480px) {
+    .kader-grid { grid-template-columns: 1fr; justify-items: center; }
+    .fifa-card { width: 100%; max-width: 250px; height: 320px; }
+    .card-rating { font-size: 32px; }
+    .card-name { font-size: 20px; }
+    .card-stats { font-size: 14px; }
+}
+
+/* 10. PRINT OPTIMIZATION */
+@media print {
+    body * { visibility: hidden; }
+    .fifa-card, .fifa-card * { visibility: visible; }
+    .fifa-card { position: relative; border: 1px solid #000; background: none !important; color: #000 !important; }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
