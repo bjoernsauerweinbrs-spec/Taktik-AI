@@ -1,69 +1,45 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL ELITE ENGINE (V15.8 - FULL RECONSTRUCTION)
-   BLOCK 1 VON 6: CORE CONFIG & GLOBAL STATE
+   TONI 2.0 | BOOT-LOADER & CORE (REPAIR VERSION)
    ========================================================================== */
 
 // 1. SYSTEM SETTINGS
 let USER_API_KEY = localStorage.getItem('toni_api_key') || "";
 const GITHUB_REPO_URL = "https://raw.githubusercontent.com/bjoernsauerweinbrs-spec/Taktik-AI/refs/heads/main/vereinsdaten.json";
 
-// 2. DER GLOBALE SPEICHER (DER "STATE")
-// Hier definieren wir jedes Detail, damit wir später darauf zugreifen können.
-const eliteStore = {
-    players: [], // Wird via GitHub oder generateDefaultSquad gefüllt
+// 2. BOOT-SEQUENZ (DIESE MUSS GANZ OBEN STEHEN)
+function systemBootSequence() {
+    console.log("Login-Versuch gestartet...");
+    const auth = document.getElementById('auth-layer');
+    const main = document.getElementById('main-interface');
     
-    // PERSONAL & STAFF
-    staff: JSON.parse(localStorage.getItem('toni_staff')) || [
-        { id: 1, role: "Co-Trainer", name: "Hansi M.", salary: 5000, effect: "Taktik-Analyse +10%", level: 3 },
-        { id: 2, role: "Chef-Physio", name: "Dr. Müller", salary: 8500, effect: "Verletzungsrisiko -15%", level: 5 },
-        { id: 3, role: "Chef-Scout", name: "Sven Mislintat", salary: 12000, effect: "Transfer-Wissen Pro", level: 5 }
-    ],
+    if(auth) auth.style.display = 'none';
+    if(main) main.style.display = 'block';
+    
+    // Falls initEliteCore existiert, starten wir es
+    if (typeof initEliteCore === "function") {
+        initEliteCore();
+    } else {
+        console.warn("Core-Initialisierung noch nicht geladen.");
+    }
+}
 
-    // KALENDER (Training, Matches, Events)
-    calendar: JSON.parse(localStorage.getItem('toni_calendar')) || [
-        { id: 1, day: 1, time: "10:00", title: "Laktattest (Bio-Lab)", type: "physio", attendance: [] },
-        { id: 2, day: 1, time: "15:00", title: "Team-Taktik 4-4-2", type: "training", attendance: [] },
-        { id: 3, day: 2, time: "11:00", title: "Sponsoren-Termin", type: "event", attendance: [] },
-        { id: 4, day: 5, time: "15:30", title: "HEIMSPIEL (STADION)", type: "match", attendance: [] }
-    ],
-
-    // FINANZEN & AKTENTASCHE (Sponsoring)
-    finance: JSON.parse(localStorage.getItem('toni_finance')) || [
-        { id: 1, label: "TV-Rechte (Zentralvermarktung)", value: 4500000, type: "income", cat: "pro" },
-        { id: 2, label: "Hauptsponsor (Brust)", value: 2500000, type: "income", cat: "pro" },
-        { id: 3, label: "Ausrüster (Premium)", value: 800000, type: "income", cat: "pro" },
-        { id: 4, label: "Bandenwerbung (Lokal)", value: 12500, type: "income", cat: "amateur" },
-        { id: 5, label: "Spielergehälter (Gesamt)", value: 0, type: "expense", cat: "pro" }, // Auto-berechnet
-        { id: 6, label: "Staff & Mitarbeiter", value: 0, type: "expense", cat: "pro" },     // Auto-berechnet
-        { id: 7, label: "Stadionmiete & Betrieb", value: -125000, type: "expense", cat: "pro" },
-        { id: 8, label: "Jugendförderung", value: -45000, type: "expense", cat: "pro" }
-    ],
-
-    // DIE AKTENTASCHE (ERWEITERUNGEN)
+// 3. GLOBAL STATE
+const eliteStore = {
+    players: [], 
+    staff: [], 
+    calendar: JSON.parse(localStorage.getItem('toni_calendar')) || [],
+    finance: JSON.parse(localStorage.getItem('toni_finance')) || [],
     briefcase: {
-        sponsoring: {
-            activeSponsors: ["Adidas", "Telekom"],
-            negotiationStatus: "Läuft",
-            potentialIncome: 500000
-        },
-        analysisCenter: {
-            level: 1,
-            nextUpgradeCost: 250000,
-            features: ["Video-Analyse", "Neural-Tracking"]
-        },
-        stadiumPress: {
-            lastEdition: "Ausgabe #42",
-            headline: "Saisonstart geglückt!",
-            status: "Druckfertig"
-        }
+        sponsoring: { activeSponsors: ["Telekom"], negotiationStatus: "Stabil" },
+        analysisCenter: { level: 1, nextUpgradeCost: 250000, features: ["Video"] },
+        stadiumPress: { headline: "Willkommen!", status: "Ready" }
     },
+    gazette: { headline: "NEWS", lead: "Start...", body: "..." },
+    mgmt: { liquidAssets: 0, infrastructure: { medical: 5 }, liveData: { temp: "--" } },
+    activeModule: 'kader'
+};
 
-    // MEDIENZENTRUM
-    gazette: {
-        headline: "TRANSFERS UND TAKTIK",
-        lead: "Der Neural-Advisor übernimmt die Analyse.",
-        body: "Mit modernster KI-Technik analysiert der Verein nun jedes Detail der Spieler..."
-    },
+// ... Hier geht dein restlicher Code weiter
 
     // MANAGEMENT & SYSTEM-STATUS
     mgmt: {
