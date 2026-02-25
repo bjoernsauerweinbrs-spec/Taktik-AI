@@ -1,102 +1,33 @@
-/* ==========================================================================
-   TONI 2.0 | THE ULTIMATE CSS ENGINE
-   ========================================================================== */
- 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+/* MOBILE FIRST REFINEMENT */
+@media (max-width: 768px) {
+    #mobile-nav {
+        position: fixed; bottom: 0; left: 0; width: 100%; height: 65px;
+        background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px);
+        display: flex; justify-content: space-around; align-items: center;
+        border-top: 1px solid var(--neon-cyan); z-index: 100;
+    }
 
-:root {
-    --bg-space: #020617; --bg-purple: #1e1b4b;
-    --neon-cyan: #00f3ff; --neon-pink: #ec4899; --neon-green: #10b981;
-    --glass: rgba(15, 23, 42, 0.85); --border: rgba(51, 65, 85, 0.5);
-    --font-hud: 'Orbitron', sans-serif; --font-main: 'Rajdhani', sans-serif;
-}
+    #mobile-nav button {
+        background: none; border: none; color: #64748b; font-size: 20px;
+    }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { 
-    height: 100vh; width: 100vw; background: var(--bg-space); color: #fff;
-    font-family: var(--font-main); overflow: hidden;
-}
-.hidden { display: none !important; }
-.scroll-area { overflow-y: auto; flex: 1; padding: 10px; }
+    #mobile-nav button:active { color: var(--neon-cyan); }
 
-/* ANIMIERTES PORTAL */
-#portal-background {
-    position: fixed; inset: 0; z-index: -1;
-    background: radial-gradient(circle at top left, var(--bg-purple) 0%, var(--bg-space) 75%);
-    animation: bgFloat 20s infinite alternate ease-in-out;
-}
-@keyframes bgFloat { from { transform: scale(1); } to { transform: scale(1.1); } }
+    /* FIFA CARDS HORIZONTAL SLIDER */
+    .kader-grid {
+        display: flex !important; overflow-x: auto; overflow-y: hidden;
+        gap: 20px; padding: 20px; scroll-snap-type: x mandatory;
+        height: 350px;
+    }
 
-.portal-panel {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 400px; background: var(--glass); padding: 40px; border-radius: 20px;
-    border: 1px solid var(--neon-cyan); backdrop-filter: blur(20px); text-align: center;
-    box-shadow: 0 0 50px rgba(0, 243, 255, 0.2);
-}
+    .fifa-card {
+        flex: 0 0 220px; /* Karten werden auf Mobile größer und besser greifbar */
+        height: 300px; scroll-snap-align: center;
+    }
 
-/* DASHBOARD GRID */
-#main-interface { height: 100vh; display: flex; flex-direction: column; }
-#top-bar {
-    height: 60px; background: rgba(0,0,0,0.6); border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
-    font-family: var(--font-hud); font-size: 12px; letter-spacing: 2px;
-}
-
-.hud-grid {
-    flex: 1; display: grid; grid-template-columns: 260px 1fr 300px; gap: 10px; padding: 10px; overflow: hidden;
-}
-
-.hud-column {
-    background: var(--glass); border: 1px solid var(--border); border-radius: 15px;
-    display: flex; flex-direction: column; overflow: hidden;
-}
-
-.column-header {
-    padding: 10px; background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--border);
-    font-family: var(--font-hud); font-size: 10px; color: var(--neon-cyan); letter-spacing: 2px;
-}
-
-/* FIFA CARDS & PITCH */
-.pitch-container {
-    background: linear-gradient(to bottom, #064e3b, #022c22);
-    border-radius: 15px; height: 100%; padding: 20px; display: flex; flex-direction: column;
-}
-
-.kader-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 15px; justify-items: center; overflow-y: auto;
-}
-
-.fifa-card {
-    width: 130px; height: 180px; background: linear-gradient(135deg, #fbbf24, #b45309);
-    border-radius: 8px; padding: 2px; cursor: pointer; transition: 0.3s;
-}
-.fifa-card:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 0 20px var(--neon-cyan); }
-.card-inner { background: #111; height: 100%; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; align-items: center; }
-.card-rating { font-family: var(--font-hud); font-size: 20px; color: #fbbf24; }
-.card-name { font-size: 12px; font-weight: bold; margin: 5px 0; }
-.card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; font-size: 8px; width: 100%; }
-
-/* OFFICE & YOUTH MODUL */
-.office-grid, .youth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-.office-panel { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-.sticker-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 10px; }
-.sticker { aspect-ratio: 1; border: 1px dashed #444; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; }
-.sticker.unlocked { background: var(--neon-pink); border-style: solid; }
-
-/* KI VOICE MIC */
-.voice-control-box {
-    padding: 15px; display: flex; align-items: center; gap: 15px; border-top: 1px solid var(--border);
-}
-#mic-btn {
-    width: 50px; height: 50px; border-radius: 50%; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.3s;
-}
-.mic-inactive { background: #334155; color: #94a3b8; }
-.mic-active { background: var(--neon-alert); color: #fff; animation: pulseRed 1s infinite; }
-@keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(244, 63, 94, 0); } }
-
-/* RESPONSIVE */
-@media (max-width: 1024px) {
-    .hud-grid { grid-template-columns: 1fr; overflow-y: auto; }
+    /* AI ADVISOR BOX */
+    .voice-control-box {
+        position: fixed; bottom: 80px; right: 20px;
+        width: 60px; height: 60px; border-radius: 50%;
+    }
 }
