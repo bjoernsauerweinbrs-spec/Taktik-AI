@@ -814,40 +814,141 @@ function renderTacticBoard() {
 // 11. BIO LAB & STANDARD MODULE (KADER)
 // --------------------------------------------------------------------------
 
-function renderSquadOverview() {
-    const viewport = document.getElementById('content-viewport');
-    let html = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <h2 style="font-family:var(--font-hud); color:white;">ELITE KADER</h2>
-            <button class="btn-save" onclick="openBioLab(-1)">+ NEUER SPIELER</button>
-        </div>
-        <div class="kader-grid">
-    `;
+/* ==========================================================================
+   UPDATE: V15.6 DEEP-DIVE BIO LAB (3 SPALTEN, MAXIMALE TIEFE)
+   Füge dies ganz am Ende deiner Datei ein.
+   ========================================================================== */
+
+function openBioLab(id) {
+    let p = eliteStore.players.find(x => x.id === id);
     
-    eliteStore.players.forEach(p => {
-        const op = p.status.im_training ? 1 : 0.5;
-        const borderCol = p.status.im_kader ? "var(--neon-main)" : "#444";
+    // Neuer Spieler Template (Falls ID -1)
+    if(!p && id === -1) {
+        p = {
+            id: Date.now(), name: "Neuer Spieler", position: "ZM", rating: 60,
+            salary: 2500, contract_exp: 2026, market_value: 50000,
+            status: { im_kader: true, im_training: true, morale: 80 },
+            fifa_stats: { pac: 60, sho: 60, pas: 60, dri: 60, def: 60, phy: 60 },
+            labor_daten: { 
+                waage: { gewicht: 75, kfa: 12, muskel_kg: 35, wasser: 60, viszeral: 5, metabolic: 24 }, 
+                uhr: { ruhepuls: 55, load: 4.5, vo2max: 50 } 
+            }
+        };
+    }
+    
+    // Daten-Sicherheit (Falls Felder bei alten Spielern fehlen)
+    if(!p.labor_daten) p.labor_daten = { waage: {}, uhr: {} };
+    if(!p.labor_daten.waage) p.labor_daten.waage = { gewicht: 75 };
+    if(!p.labor_daten.uhr) p.labor_daten.uhr = { ruhepuls: 60 };
+    if(!p.salary) p.salary = 3000;
+
+    const s = p.fifa_stats; 
+    const l = p.labor_daten;
+    
+    // BMI Berechnung (Live)
+    const bmi = (l.waage.gewicht / (1.80 * 1.80)).toFixed(1); // Annahme 1.80m für Demo
+
+    const ov = document.createElement('div'); 
+    ov.className = 'lab-overlay'; 
+    ov.id = 'active-bio-lab';
+    
+    ov.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:15px; border-bottom:1px solid #333;">
+        <div>
+            <h1 style="font-family:var(--font-hud); color:white; margin:0;">${p.name.toUpperCase()}</h1>
+            <span style="font-size:10px; color:#666;">ID: ${p.id} // DATABASE RECORD</span>
+        </div>
+        <button class="btn-cancel" style="background:#f43f5e; color:white; border:none; padding:10px 20px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('active-bio-lab').remove(); loadModule('kader');">SCHLIESSEN X</button>
+    </div>
+    
+    <div class="lab-grid">
         
-        html += `
-        <div class="fifa-card" style="opacity:${op}; border-color:${borderCol};" onclick="openBioLab(${p.id})">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="card-rating">${p.rating}</div>
-                    <img src="${p.img_url}" class="player-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/21/21104.png'">
-                    <div class="card-info">
-                        <div class="card-name">${p.name}</div>
-                        <div class="card-pos">${p.position}</div>
-                        <div style="text-align:center; font-size:10px; margin-top:5px; color:var(--neon-blue);">LABOR ÖFFNEN</div>
+        <div class="lab-panel" style="border-top: 3px solid var(--neon-blue);">
+            <div class="lab-title">FIFA IDENTITÄT</div>
+            
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                <div style="text-align:center;">
+                    <div style="font-size:10px; color:#aaa;">RATING</div>
+                    <div style="font-size:32px; font-weight:bold; color:var(--neon-main);" id="lab-display-rating">${p.rating}</div>
+                </div>
+                <div style="text-align:right;">
+                    <input class="bio-val" value="${p.name}" style="text-align:right; font-weight:bold;" onchange="updateP(${p.id},'name',this.value)">
+                    <input class="bio-val" value="${p.position}" style="text-align:right; font-size:12px; color:var(--neon-blue);" onchange="updateP(${p.id},'position',this.value)">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <div class="bio-input-group"><span class="bio-label">PAC (TEMPO)</span><input type="number" class="bio-val" value="${s.pac}" onchange="updateStat(${p.id},'pac',this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">SHO (SCHUSS)</span><input type="number" class="bio-val" value="${s.sho}" onchange="updateStat(${p.id},'sho',this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">PAS (PASSEN)</span><input type="number" class="bio-val" value="${s.pas}" onchange="updateStat(${p.id},'pas',this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">DRI (DRIBBLING)</span><input type="number" class="bio-val" value="${s.dri}" onchange="updateStat(${p.id},'dri',this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">DEF (DEFENSIVE)</span><input type="number" class="bio-val" value="${s.def}" onchange="updateStat(${p.id},'def',this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">PHY (PHYSIS)</span><input type="number" class="bio-val" value="${s.phy}" onchange="updateStat(${p.id},'phy',this.value)"></div>
+            </div>
+        </div>
+        
+        <div class="lab-panel" style="border-top: 3px solid #10b981;">
+            <div class="lab-title">MEDIZINISCHE ANALYSE</div>
+            
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <div style="text-align:center; flex:1;">
+                    <div class="scale-display" style="margin-bottom:5px; font-size:24px;">${l.waage.gewicht || 0} <span style="font-size:12px;">KG</span></div>
+                </div>
+                <div style="text-align:center; flex:1; border-left:1px solid #333;">
+                    <div class="scale-display" style="margin-bottom:5px; font-size:24px; color:${bmi < 25 ? '#10b981' : 'orange'}">${bmi}</div>
+                    <span style="font-size:10px; color:#888;">BMI SCORE</span>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="bio-input-group"><span class="bio-label">GEWICHT (KG)</span><input type="number" class="bio-val" value="${l.waage.gewicht || 0}" onchange="updateLab(${p.id},'waage','gewicht',this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">KÖRPERFETT (%)</span><input type="number" class="bio-val" value="${l.waage.kfa || 0}" onchange="updateLab(${p.id},'waage','kfa',this.value)"></div>
+                
+                <div class="bio-input-group"><span class="bio-label">MUSKELMASSE (KG)</span><input type="number" class="bio-val" value="${l.waage.muskel_kg || 0}" onchange="updateLab(${p.id},'waage','muskel_kg',this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">WASSER (%)</span><input type="number" class="bio-val" value="${l.waage.wasser || 0}" onchange="updateLab(${p.id},'waage','wasser',this.value)"></div>
+                
+                <div class="bio-input-group"><span class="bio-label">VISZERALFETT</span><input type="number" class="bio-val" value="${l.waage.viszeral || 0}" onchange="updateLab(${p.id},'waage','viszeral',this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">METABOLIC AGE</span><input type="number" class="bio-val" value="${l.waage.metabolic || 20}" onchange="updateLab(${p.id},'waage','metabolic',this.value)"></div>
+            </div>
+        </div>
+        
+        <div class="lab-panel" style="border-top: 3px solid #f43f5e;">
+            
+            <div class="lab-title">MANAGEMENT</div>
+            <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; margin-bottom:20px;">
+                <span class="bio-label">MONATSGEHALT (€)</span>
+                <input type="number" class="bio-val" value="${p.salary}" style="color:#f43f5e; font-weight:bold;" onchange="updateP(${p.id},'salary',this.value)">
+                
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <div style="flex:1;">
+                        <span class="bio-label">LAUFZEIT</span>
+                        <input type="number" class="bio-val" value="${p.contract_exp||2026}" onchange="updateP(${p.id},'contract_exp',this.value)">
+                    </div>
+                    <div style="flex:1;">
+                        <span class="bio-label">MARKTWERT</span>
+                        <input type="number" class="bio-val" value="${p.market_value||0}" onchange="updateP(${p.id},'market_value',this.value)">
                     </div>
                 </div>
             </div>
-        </div>`;
-    });
+
+            <div class="lab-title" style="color:orange; border-color:orange;">PERFORMANCE TRACKER</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="bio-input-group"><span class="bio-label">RUHEPULS</span><input type="number" class="bio-val" value="${l.uhr.ruhepuls || 55}" onchange="updateLab(${p.id},'uhr','ruhepuls',this.value)"></div>
+                <div class="bio-input-group"><span class="bio-label">VO2 MAX</span><input type="number" class="bio-val" value="${l.uhr.vo2max || 50}" onchange="updateLab(${p.id},'uhr','vo2max',this.value)"></div>
+            </div>
+            <div style="margin-top:10px;">
+                <span class="bio-label">BELASTUNG (LOAD)</span>
+                <input type="range" style="width:100%; accent-color:orange;" min="1" max="10" value="${l.uhr.load || 5}" onchange="this.nextElementSibling.innerText=this.value; updateLab(${p.id},'uhr','load',this.value)">
+                <span style="float:right; color:orange; font-family:monospace;">${l.uhr.load || 5}</span>
+            </div>
+
+        </div>
+    </div>`;
     
-    viewport.innerHTML = html + `</div>`;
+    document.body.appendChild(ov);
 }
 
-// Berechnet Gesamtrating aus Einzelwerten
+// HELFER: RATING BERECHNEN (Wichtig für Spalte 1)
 function calculateFifaRating(s) { 
     return Math.round(( (s.pac||0)+(s.sho||0)+(s.pas||0)+(s.dri||0)+(s.def||0)+(s.phy||0) )/6); 
 }
