@@ -2,188 +2,40 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | NEURAL ELITE ENGINE</title>
-    
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TONI 2.0 | ACCESS PORTAL</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="elite-theme">
+<body class="portal-body">
 
-    <div id="auth-layer">
-        <div class="auth-terminal">
-            <div class="auth-inner">
-                <div class="auth-brand">TONI 2.0</div>
-                <div class="auth-msg">NEURAL CORE V12.0 // PROFESSIONAL FINANCE EDITION</div>
-                <div class="input-wrapper">
-                    <input type="password" id="sys-pass" placeholder="ACCESS CODE" autocomplete="off">
-                    <button onclick="systemBootSequence()">LOGIN</button>
-                </div>
-                <div class="terminal-footer">
-                    <span>STATUS: WAITING FOR USER</span>
-                    <span>SERVER: SECURE CONNECTION</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="portal-background"></div>
 
-    <div id="main-interface" class="hidden">
-        
-        <header class="global-header">
-            <div class="header-left">
-                <div class="logo">RB LEIPZIG <span style="font-size:10px; opacity:0.7;">// NEURAL LAB</span></div>
-                <div class="breadcrumb" id="active-module-display">DASHBOARD // ÜBERSICHT</div>
-            </div>
-            
-            <div class="header-right">
-                <div id="weather-header-widget" class="stat-item" style="border-right: 1px solid #333; padding-right: 15px; margin-right: 15px;">
-                    <span class="label">UMWELT</span>
-                    <span class="value" id="weather-display" style="color: var(--neon-blue);"><i class="fa-solid fa-cloud-sun"></i> --°C</span>
-                </div>
-
-                <button class="sys-btn" onclick="openSysConfig()">
-                    <i class="fa-solid fa-gear"></i> SYSTEM
-                </button>
-                
-                <div class="stat-item">
-                    <span class="label">LIQUIDITÄT</span>
-                    <span class="value val-pos" id="kpi-budget">--</span>
-                </div>
-                <div class="sys-clock" id="clock-display">00:00</div>
-                <button class="live-btn" id="live-match-btn" onclick="alert('Live-Match Mode coming soon')">
-                    <div class="record-dot"></div> LIVE
-                </button>
+    <main id="auth-layer" class="portal-panel">
+        <header class="portal-header">
+            <div class="status-led green"></div>
+            <div class="header-text">
+                <h1>TONI 2.0</h1>
+                <small>NEURAL MANAGEMENT ENGINE</small>
             </div>
         </header>
 
-        <div class="workspace-grid">
-            <aside class="sidebar-left">
-                <div class="sidebar-header">SYSTEM MODULE</div>
-                <div class="nav-accordion">
-                    
-                    <details open>
-                        <summary><i class="fa-solid fa-layer-group"></i> MANAGEMENT</summary>
-                        <div class="nav-content">
-                            <button class="active" onclick="loadModule('kader')">Kader & Status</button>
-                        </div>
-                    </details>
-
-                    <details open>
-                        <summary><i class="fa-solid fa-file-invoice-dollar"></i> FINANZEN</summary>
-                        <div class="nav-content">
-                            <button onclick="loadModule('finance')">Bilanz & Budget</button>
-                        </div>
-                    </details>
-
-                    <details open>
-                        <summary><i class="fa-solid fa-clipboard-check"></i> COACHING ZONE</summary>
-                        <div class="nav-content">
-                            <button onclick="loadModule('tactics')">Taktik Board Pro</button>
-                            <button onclick="loadModule('drills')">Kalender & Orga</button>
-                        </div>
-                    </details>
-
-                    <details open>
-                        <summary><i class="fa-solid fa-microchip"></i> INNOVATION (VR)</summary>
-                        <div class="nav-content">
-                            <button onclick="loadModule('vr-hub')">OCTAGON VR HUB</button>
-                        </div>
-                    </details>
-
-                    <details>
-                        <summary><i class="fa-solid fa-bullhorn"></i> MEDIA</summary>
-                        <div class="nav-content">
-                            <button onclick="loadModule('stadionzeitung')">Presse Center</button>
-                        </div>
-                    </details>
-                </div>
-            </aside>
-
-            <main class="center-stage">
-                <div id="content-viewport"></div>
-                
-                <div id="vr-viewport" class="hidden">
-                    <a-scene embedded loading-screen="dotsColor: #00ff41; backgroundColor: black" renderer="antialias: true; colorManagement: true;">
-                        <a-assets>
-                            <img id="pitch-tex" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/terrain/grasslight-big.jpg" crossorigin="anonymous">
-                        </a-assets>
-
-                        <a-entity id="player-rig" movement-controls="speed: 0.3" position="0 0 10">
-                            <a-camera id="vr-cam" look-controls wasd-controls position="0 1.6 0">
-                                <a-entity position="0 0.5 -1.2">
-                                    <a-plane width="2.2" height="0.6" material="color: black; opacity: 0.8"></a-plane>
-                                    <a-text id="vr-hud-text" value="SYSTEM ONLINE" position="0 0.1 0.01" align="center" width="2" color="#00ff41"></a-text>
-                                </a-entity>
-                            </a-camera>
-                            <a-entity oculus-touch-controls="hand: left"></a-entity>
-                            <a-entity oculus-touch-controls="hand: right"></a-entity>
-                        </a-entity>
-
-                        <a-sky color="#020202"></a-sky>
-                        <a-entity id="pitch-complex">
-                            <a-plane rotation="-90 0 0" width="68" height="105" src="#pitch-tex" repeat="10 15"></a-plane>
-                            <a-plane rotation="-90 0 0" width="68.2" height="105.2" color="white" position="0 0.01 0" material="side: back"></a-plane>
-                            <a-ring color="white" radius-inner="9.1" radius-outer="9.3" rotation="-90 0 0" position="0 0.02 0"></a-ring>
-                            <a-entity position="0 0 -52.5"><a-box position="0 1.22 0" width="7.32" height="2.44" depth="0.1" color="white" material="wireframe:true"></a-box></a-entity>
-                            <a-entity position="0 0 52.5"><a-box position="0 1.22 0" width="7.32" height="2.44" depth="0.1" color="white" material="wireframe:true"></a-box></a-entity>
-                        </a-entity>
-
-                        <a-entity id="match-simulation-layer"></a-entity>
-                        <a-light type="ambient" color="#444"></a-light>
-                        <a-light type="point" position="0 20 0" intensity="1.5" color="#00ff41"></a-light>
-                    </a-scene>
-                    <button class="vr-exit-btn" onclick="exitVRMode()">SESSION BEENDEN</button>
-                </div>
-            </main>
-
-            <aside class="sidebar-right">
-                <div class="toni-visualizer">
-                    <div class="brain-mesh"><i class="fa-solid fa-brain"></i></div>
-                    <div id="ai-status-text" class="neural-link-text">NEURAL LINK: STANDBY</div>
-                </div>
-                <div class="chat-container" id="chat-stream">
-                    <div class="msg ai"><div class="msg-header">TONI</div><div class="msg-body">System bereit. Warte auf Input.</div></div>
-                </div>
-                <div class="chat-input-wrapper">
-                    <textarea id="toni-input" placeholder="Frage an Toni (GPT-4)..."></textarea>
-                    <button class="send-btn" onclick="askToni()">SENDEN</button>
-                </div>
-            </aside>
-        </div>
-    </div>
-
-    <div id="modal-sys-config" class="modal-overlay hidden">
-        <div class="modal-window" style="border-color: var(--neon-main);">
-            <div class="modal-header">
-                <h3>NEURAL LINK CONFIGURATOR</h3>
-                <button onclick="closeModal('modal-sys-config')"><i class="fa-solid fa-times"></i></button>
+        <section class="login-core">
+            <p class="ai-greeting">IDENTITÄT BESTÄTIGEN, TRAINER.</p>
+            <div class="input-wrapper">
+                <input type="password" id="passkey" placeholder="PASSKEY EINGEBEN" autocomplete="off">
+                <div class="input-glow"></div>
             </div>
-            <div class="modal-body">
-                <p style="font-size:11px; color:#aaa; margin-bottom:15px;">API Key wird lokal gespeichert.</p>
-                <div class="form-group">
-                    <label>OPENAI API KEY (sk-...)</label>
-                    <input type="password" id="input-api-key" placeholder="sk-proj-...">
-                </div>
-                <div class="form-group" style="margin-top:10px;">
-                    <label>STATUS</label>
-                    <div id="key-status-display" style="color:var(--neon-alert);">NICHT VERBUNDEN</div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-save" onclick="saveSystemConfig()">VERBINDUNG HERSTELLEN</button>
-                <button class="btn-cancel" onclick="clearSystemConfig()">KEY LÖSCHEN</button>
-            </div>
-        </div>
-    </div>
+            <button id="login-btn" onclick="systemBootSequence()">SYSTEM STARTEN</button>
+        </section>
 
-    <div id="modal-player-editor" class="modal-overlay hidden">...</div>
-    <div id="modal-event-create" class="modal-overlay hidden">...</div>
-    <div id="modal-attendance" class="modal-overlay hidden">...</div>
+        <footer class="portal-footer">
+            <div class="version-tag">V15.8 PRO</div>
+            <div class="system-downloads">
+                <span class="badge">APK</span>
+                <span class="badge">MOBILE</span>
+            </div>
+        </footer>
+    </main>
 
     <script src="script.js"></script>
 </body>
