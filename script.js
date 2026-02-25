@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL ELITE ENGINE CORE (V15.1 - FIXED LOGIN & FULL MERGE)
+   TONI 2.0 | NEURAL ELITE ENGINE CORE (V15.2 - REPAIR & STABILITY)
    ========================================================================== */
 
 // 1. KONFIGURATION & DATENBANK
@@ -40,22 +40,27 @@ const eliteStore = {
 };
 
 /* ==========================================================================
-   2. SYSTEM BOOT (REPARIERT - KEIN PASSWORT MEHR NÖTIG)
+   2. SYSTEM BOOT (NOTFALL-START - KEIN PASSWORT)
    ========================================================================== */
 
 function systemBootSequence() {
-    console.log("TONI 2.0: Security Bypass active...");
-    // Wir erzwingen den Start, egal was im Passwortfeld steht
+    console.log("TONI 2.0: Boot sequence initiated...");
+    
     const auth = document.getElementById('auth-layer');
     const main = document.getElementById('main-interface');
     
-    if(auth) auth.classList.add('hidden'); // Verstecke Login
-    if(main) main.classList.remove('hidden'); // Zeige Interface
+    // Erzwinge Sichtbarkeit des Dashboards
+    if(auth) { auth.style.display = 'none'; auth.classList.add('hidden'); }
+    if(main) { main.style.display = 'block'; main.classList.remove('hidden'); }
     
     initEliteCore();
 }
 
-// Enter-Taste Support für Login
+// Auto-Login beim Laden (optional, falls Button klemmt)
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Loaded. Waiting for user interaction...");
+});
+
 document.addEventListener('keydown', function(event) {
     if (event.key === "Enter") {
         const auth = document.getElementById('auth-layer');
@@ -66,16 +71,16 @@ document.addEventListener('keydown', function(event) {
 });
 
 async function initEliteCore() {
-    console.log("TONI 2.0 V15.1: Initializing Neural CEO Engine...");
+    console.log("TONI 2.0 V15.2: Engine Start...");
     updateClock(); 
     setInterval(updateClock, 1000);
     checkAIConnection();
     
     await syncWithGitHub(); 
 
-    // V15 RESET: Wir brauchen saubere Daten für das CEO-Modul
+    // V15 DATENBANK-CHECK & RESET
     if (eliteStore.players.length === 0 || !eliteStore.players[0].salary) {
-        console.log("V15: Upgrade Database structure...");
+        console.log("V15: Generating Luxury Database...");
         generateLuxurySquad();
         generateDefaultStaff();
     }
@@ -187,9 +192,9 @@ function loadModule(modId) {
     const viewport = document.getElementById('content-viewport');
     const vrViewport = document.getElementById('vr-viewport');
     
-    viewport.classList.remove('hidden');
-    viewport.innerHTML = ""; 
-    vrViewport.classList.add('hidden');
+    if(viewport) viewport.classList.remove('hidden');
+    if(viewport) viewport.innerHTML = ""; 
+    if(vrViewport) vrViewport.classList.add('hidden');
     
     updateKPIs(); 
 
@@ -205,14 +210,14 @@ function loadModule(modId) {
     }
 
     if(modId === 'vr-hub') { 
-        viewport.classList.add('hidden'); 
-        vrViewport.classList.remove('hidden'); 
+        if(viewport) viewport.classList.add('hidden'); 
+        if(vrViewport) vrViewport.classList.remove('hidden'); 
         initVRHub(); 
     }
 }
 
 /* ==========================================================================
-   4. V15: NEURAL ADVISOR (BERATER & INTELLIGENZ)
+   4. NEURAL ADVISOR (BERATER & INTELLIGENZ)
    ========================================================================== */
 
 function renderAdvisorHub() {
@@ -297,7 +302,7 @@ function askToniStrategy() {
 }
 
 /* ==========================================================================
-   5. V15: OFFICE PRIME (VERWALTUNG)
+   5. OFFICE PRIME (VERWALTUNG)
    ========================================================================== */
 
 function renderOfficeHub() {
@@ -478,6 +483,10 @@ function renderTacticBoard() {
         </div>`;
 }
 
+/* ==========================================================================
+   7. KADER & BIO-LAB & GAZETTE & KALENDER (STANDARD)
+   ========================================================================== */
+
 function renderSquadOverview() {
     const viewport = document.getElementById('content-viewport');
     let html = `<div style="display:flex; justify-content:space-between; margin-bottom:20px;"><h2 style="font-family:var(--font-hud); color:white;">ELITE KADER</h2><button class="btn-save" onclick="openBioLab(-1)">+ NEUER SPIELER</button></div><div class="kader-grid">`;
@@ -510,7 +519,7 @@ function renderGazetteCMS() { document.getElementById('content-viewport').innerH
 function renderCalendar() { const v=document.getElementById('content-viewport'); v.innerHTML=`<div class="cal-grid"><div class="cal-header"><h2>WOCHENPLAN</h2></div></div>`; }
 
 function updateKPIs() { 
-    document.getElementById('kpi-budget').innerText = eliteStore.mgmt.liquidAssets.toLocaleString() + " €"; 
+    const el = document.getElementById('kpi-budget'); if(el) el.innerText = eliteStore.mgmt.liquidAssets.toLocaleString() + " €"; 
     const w = document.getElementById('weather-header-widget'); if(w) w.innerHTML = `<i class="fa-solid fa-cloud-sun"></i> ${eliteStore.mgmt.liveData.temp}°C`;
 }
 async function fetchWeatherData() { try{const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=50.8&longitude=9.4&current_weather=true");const d=await r.json();eliteStore.mgmt.liveData.temp=d.current_weather.temperature;updateKPIs();}catch(e){} }
@@ -521,4 +530,6 @@ function updateClock() { document.getElementById('clock-display').innerText = ne
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 function openSysConfig() { document.getElementById('modal-sys-config').classList.remove('hidden'); }
 function saveSystemConfig() { const k=document.getElementById('input-api-key').value; localStorage.setItem('toni_api_key', k); USER_API_KEY=k; closeModal('modal-sys-config'); }
-// END OF FILE
+
+console.log("SYSTEM READY");
+// ENDE DES SCRIPTS
