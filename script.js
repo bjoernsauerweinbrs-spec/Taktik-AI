@@ -1,22 +1,28 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO)
+   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - FULL IMAGE & DATA CONFIG
    ========================================================================== */
 
-// 1. DER ZENTRALE DATEN-TRESOR
 const eliteStore = {
-    config: { passkey: "1234", version: "15.8 PRO" },
+    config: {
+        passkey: "1234",
+        version: "15.8 PRO",
+        // HIER DEIN VEREINSLOGO EINTRAGEN (Link oder Dateiname)
+        clubLogoUrl: "", 
+        isKiActive: false
+    },
     mgmt: { budget: 4850000, morale: 88, activeModule: 'kader' },
     
-    // Finanz-Daten (Pro & Amateur)
     finance: {
         pro: { tvRights: 2500000, sponsoring: 1500000, stadium: 850000 },
         amateur: { members: 55000, gear: -4500, travel: -1200 }
     },
 
-    // Spieler-Datenbank (Inkl. Biometrie & Sensoren)
+    // Spieler-Datenbank mit Bild-Pfaden
     players: [
         { 
             id: 1, name: "NEUER", pos: "TW", type: 'pro',
+            // HIER SPIELERBILD EINTRAGEN (z.B. "img/neuer.png")
+            imgUrl: "", 
             stats: { pac: 50, sho: 40, pas: 91, dri: 60, def: 90, phy: 85 },
             bio: { weight: 92.4, kfa: 11.2, muscle: 48.5, water: 62.1 },
             sensors: { heart: 48, vo2: 60 },
@@ -24,6 +30,7 @@ const eliteStore = {
         },
         { 
             id: 10, name: "KANE", pos: "ST", type: 'pro',
+            imgUrl: "",
             stats: { pac: 69, sho: 93, pas: 84, dri: 83, def: 48, phy: 82 },
             bio: { weight: 86.1, kfa: 12.5, muscle: 47.2, water: 59.8 },
             sensors: { heart: 46, vo2: 58 },
@@ -31,6 +38,7 @@ const eliteStore = {
         },
         { 
             id: 101, name: "LEON", pos: "ST", type: 'youth',
+            imgUrl: "",
             stats: { pac: 70, sho: 60, pas: 65, dri: 75, def: 40, phy: 50 },
             bio: { weight: 34.5, kfa: 9.0, muscle: 14.8, water: 66.0 },
             sensors: { heart: 65, vo2: 52 },
@@ -40,9 +48,16 @@ const eliteStore = {
     ]
 };
 
-// 2. BOOT & INITIALISIERUNG
+// 1. SYSTEM-BOOT & LOGO-CHECK
 function systemBootSequence() {
     const input = document.getElementById('passkey');
+    const logoPortal = document.getElementById('club-logo-portal');
+    
+    // Falls ein Vereinslogo gesetzt ist, im Portal anzeigen
+    if(eliteStore.config.clubLogoUrl !== "") {
+        logoPortal.innerHTML = `<img src="${eliteStore.config.clubLogoUrl}" alt="Club Logo">`;
+    }
+
     if (input.value === eliteStore.config.passkey) {
         document.getElementById('auth-layer').style.display = 'none';
         document.getElementById('main-interface').classList.remove('hidden');
@@ -62,18 +77,18 @@ function initDashboard() {
     }, 1000);
 }
 
-// 3. MODUL-ROUTER (Das Herzstück für Stabilität)
+// 2. MODUL-ROUTER
 function switchModule(modId) {
     const stage = document.getElementById('module-content');
     const title = document.getElementById('active-mod-title');
     eliteStore.mgmt.activeModule = modId;
 
-    // UI-Buttons Reset
     document.querySelectorAll('.side-nav button').forEach(b => b.classList.remove('active'));
-    document.getElementById(`nav-${modId}`).classList.add('active');
+    const activeBtn = document.getElementById(`nav-${modId}`);
+    if(activeBtn) activeBtn.classList.add('active');
+    
     title.innerText = modId.toUpperCase();
 
-    // Dynamisches Rendering
     if (modId === 'kader') renderKader(stage);
     if (modId === 'finance') renderOffice(stage);
     if (modId === 'youth') renderJuniorHub(stage);
@@ -81,18 +96,25 @@ function switchModule(modId) {
     if (modId === 'tactics') renderTactics(stage);
 }
 
-// 4. RENDERING FUNKTIONEN
+// 3. KADER RENDERING (FIFA CARDS)
 function renderKader(target) {
     target.innerHTML = `
         <div class="kader-grid fade-in">
             ${eliteStore.players.filter(p => p.type === 'pro').map(p => `
                 <div class="fifa-card" onclick="openBioLab(${p.id})">
                     <div class="card-inner">
-                        <div class="card-rating">${p.rating}</div>
+                        <div class="card-rating-box">
+                            <span class="val">${p.rating}</span>
+                            <span class="pos">${p.pos}</span>
+                        </div>
+                        <div class="player-img-box">
+                            ${p.imgUrl ? `<img src="${p.imgUrl}" alt="${p.name}">` : `<i class="fa-solid fa-user-ninja"></i>`}
+                        </div>
                         <div class="card-name">${p.name}</div>
                         <div class="card-stats">
                             <span>PAC <b>${p.stats.pac}</b></span><span>SHO <b>${p.stats.sho}</b></span>
                             <span>PAS <b>${p.stats.pas}</b></span><span>DRI <b>${p.stats.dri}</b></span>
+                            <span>DEF <b>${p.stats.def}</b></span><span>PHY <b>${p.stats.phy}</b></span>
                         </div>
                     </div>
                 </div>
@@ -101,7 +123,7 @@ function renderKader(target) {
     `;
 }
 
-// 5. BIO-LAB (DEIN ANALYSEZENTRUM - JETZT VOLL EDITIERBAR)
+// 4. BIO-LAB (ANALYSEZENTRUM - BEARBEITBAR)
 function openBioLab(id) {
     const p = eliteStore.players.find(x => x.id === id);
     const modal = document.getElementById('bio-lab-modal');
@@ -109,21 +131,26 @@ function openBioLab(id) {
     modal.classList.remove('hidden');
 
     container.innerHTML = `
-        <div class="column-header">ANALYSE-MODUS // ${p.name}</div>
+        <div class="column-header">ANALYSE & BILD-SETUP // ${p.name}</div>
         <div class="lab-grid">
+            <div class="office-panel" style="grid-column: span 2;">
+                <h3>SPIELER-BILD (URL)</h3>
+                <input type="text" value="${p.imgUrl}" placeholder="Link zum Spielerbild einfügen..." style="width:100%;" onchange="updatePlayerValue(${p.id}, 'imgUrl', null, this.value)">
+            </div>
+
             <div class="office-panel">
-                <h3>PERFORMANCE STATS</h3>
+                <h3>PERFORMANCE</h3>
                 ${Object.keys(p.stats).map(s => `
                     <div class="lab-row">
                         <span>${s.toUpperCase()}</span>
                         <input type="number" value="${p.stats[s]}" onchange="updatePlayerValue(${p.id}, 'stats', '${s}', this.value)">
                     </div>
                 `).join('')}
-                <div style="margin-top:20px; font-size:24px; color:var(--neon-gold); text-align:center;">GESAMT: <span id="lab-rating">${p.rating}</span></div>
+                <div style="margin-top:20px; font-size:24px; color:var(--neon-gold); text-align:center;">RATING: <span id="lab-rating">${p.rating}</span></div>
             </div>
 
             <div class="office-panel">
-                <h3>BIO-METRIE (WAAGE)</h3>
+                <h3>FETTWAAGE</h3>
                 <div class="lab-row"><span>GEWICHT (KG)</span><input type="number" step="0.1" value="${p.bio.weight}" onchange="updatePlayerValue(${p.id}, 'bio', 'weight', this.value)"></div>
                 <div class="lab-row"><span>KFA (%)</span><input type="number" step="0.1" value="${p.bio.kfa}" onchange="updatePlayerValue(${p.id}, 'bio', 'kfa', this.value)"></div>
                 <div class="lab-row"><span>MUSKEL (KG)</span><input type="number" step="0.1" value="${p.bio.muscle}" onchange="updatePlayerValue(${p.id}, 'bio', 'muscle', this.value)"></div>
@@ -131,35 +158,41 @@ function openBioLab(id) {
             </div>
 
             <div class="office-panel">
-                <h3>SENSOR-DATEN (UHR)</h3>
-                <div class="lab-row"><span>RUHEPULS (BPM)</span><input type="number" value="${p.sensors.heart}" onchange="updatePlayerValue(${p.id}, 'sensors', 'heart', this.value)"></div>
+                <h3>PULSUHR-DATEN</h3>
+                <div class="lab-row"><span>HERZFREQUENZ</span><input type="number" value="${p.sensors.heart}" onchange="updatePlayerValue(${p.id}, 'sensors', 'heart', this.value)"></div>
                 <div class="lab-row"><span>VO2MAX</span><input type="number" value="${p.sensors.vo2}" onchange="updatePlayerValue(${p.id}, 'sensors', 'vo2', this.value)"></div>
             </div>
         </div>
-        <button onclick="closeBioLab()" style="width:100%; margin-top:20px; padding:15px; background:var(--neon-cyan); color:#000; font-family:var(--font-hud); border:none; border-radius:10px; cursor:pointer;">DATEN SYNCHRONISIEREN</button>
+        <button onclick="closeBioLab()" style="width:100%; margin-top:20px; padding:15px; background:var(--neon-cyan); color:#000; font-family:var(--font-hud); border:none; border-radius:10px; cursor:pointer;">ÄNDERUNGEN ÜBERNEHMEN</button>
     `;
 }
 
 function updatePlayerValue(id, category, key, val) {
     const p = eliteStore.players.find(x => x.id === id);
-    p[category][key] = parseFloat(val);
+    
+    if (key === null) {
+        p[category] = val; // Für imgUrl
+    } else {
+        p[category][key] = parseFloat(val);
+    }
 
-    // Falls Stats geändert wurden -> Rating neu berechnen
+    // Rating-Formel
     if (category === 'stats') {
         const s = p.stats;
         const total = (s.pac * 2) + (s.sho * 1.5) + (s.pas * 2) + (s.dri * 1.5) + (s.def * 1) + (s.phy * 2);
         p.rating = Math.round(total / 10);
-        document.getElementById('lab-rating').innerText = p.rating;
+        const labRating = document.getElementById('lab-rating');
+        if(labRating) labRating.innerText = p.rating;
     }
     
-    // UI Refresh im Hintergrund
+    // UI Refresh
     if(eliteStore.mgmt.activeModule === 'kader') renderKader(document.getElementById('module-content'));
     renderQuickList();
 }
 
 function closeBioLab() { document.getElementById('bio-lab-modal').classList.add('hidden'); }
 
-// 6. OFFICE, JUNIOR & MEDIA
+// 5. WEITERE MODULE (OFFICE, YOUTH, MEDIA)
 function renderOffice(target) {
     target.innerHTML = `
         <div class="office-grid fade-in">
@@ -189,14 +222,27 @@ function toggleSticker(i) {
 }
 
 function renderMediaCenter(target) {
-    target.innerHTML = `<div class="office-panel fade-in"><h3>STADIONZEITUNG EDITOR</h3><textarea style="width:100%; height:300px; background:#000; color:var(--neon-cyan); padding:15px; border:1px solid var(--border);" placeholder="Schreibe hier den Spielbericht..."></textarea></div>`;
+    target.innerHTML = `
+        <div class="office-panel fade-in">
+            <h3>STADIONZEITUNG EDITOR</h3>
+            <input type="text" placeholder="ÜBERSCHRIFT" style="width:100%; margin-bottom:15px;">
+            <textarea style="width:100%; height:300px;" placeholder="Spielbericht schreiben..."></textarea>
+            <button class="nav-btn" style="border:1px solid var(--neon-cyan); margin-top:10px;">AUSGABE VERÖFFENTLICHEN</button>
+        </div>
+    `;
 }
 
 function renderTactics(target) {
-    target.innerHTML = `<div class="office-panel fade-in"><h3>TAKTIK-BOARD</h3><p>Toni ist bereit. Aktiviere das Mikrofon für Live-Anweisungen.</p></div>`;
+    target.innerHTML = `
+        <div class="pitch-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <i class="fa-solid fa-chalkboard-user" style="font-size:60px; color:var(--neon-cyan); margin-bottom:20px;"></i>
+            <h3>TAKTIK-BOARD</h3>
+            <p>Toni wartet auf Live-Eingabe via Mikrofon.</p>
+        </div>
+    `;
 }
 
-// 7. HILFSFUNKTIONEN
+// 6. HELFER
 function updateBudget() {
     const total = Object.values(eliteStore.finance.pro).reduce((a,b)=>a+b,0) + Object.values(eliteStore.finance.amateur).reduce((a,b)=>a+b,0);
     document.getElementById('kpi-budget').innerText = total.toLocaleString() + " €";
@@ -210,5 +256,5 @@ let mic = false;
 function toggleMic() {
     mic = !mic;
     document.getElementById('mic-btn').className = mic ? 'mic-active' : 'mic-inactive';
-    document.querySelector('.ai-msg').innerText = mic ? "Toni hört zu. Was ist der Plan?" : "System im Standby.";
+    document.querySelector('.ai-msg').innerText = mic ? "Toni hört zu. Taktik-Modus Klopp aktiviert!" : "System im Standby.";
 }
