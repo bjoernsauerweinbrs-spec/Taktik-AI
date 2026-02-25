@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | NEURAL MANAGEMENT ENGINE</title>
+    <title>TONI 2.0 | CLUB COMMAND</title>
     
     <link rel="stylesheet" href="style.css">
     
@@ -16,10 +16,13 @@
 
     <main id="auth-layer" class="portal-panel">
         <header class="portal-header">
-            <div class="status-led green" id="ki-status-led"></div>
+            <div id="club-logo-portal">
+                <i class="fa-solid fa-shield-halved" id="logo-placeholder"></i>
+            </div>
+            <div class="status-led green"></div>
             <div class="header-text">
                 <h1>TONI 2.0</h1>
-                <small>NEURAL ENGINE V15.8 PRO</small>
+                <small>OFFICIAL CLUB ENGINE</small>
             </div>
         </header>
         
@@ -33,7 +36,7 @@
         </section>
 
         <footer class="portal-footer">
-            <div class="version-tag">SYSTEM READY</div>
+            <div class="version-tag">STABLE BUILD v15.8</div>
             <div class="system-downloads">
                 <span class="badge">XR/VR</span>
                 <span class="badge">MOBILE</span>
@@ -44,7 +47,10 @@
     <div id="main-interface" class="hidden">
         
         <header id="top-bar">
-            <div class="system-title">TONI 2.0 // <span id="active-mod-title">DASHBOARD</span></div>
+            <div class="system-title">
+                <i class="fa-solid fa-shield-halved" style="color:var(--neon-cyan); margin-right:10px;"></i>
+                TONI 2.0 // <span id="active-mod-title">DASHBOARD</span>
+            </div>
             <div id="clock-display">00:00:00</div>
             <div class="kpi-quick-info">
                 <i class="fa-solid fa-wallet"></i> <span id="kpi-budget">0 €</span>
@@ -63,19 +69,17 @@
                     <button id="nav-media" onclick="switchModule('media')"><i class="fa-solid fa-clapperboard"></i> MEDIA CENTER</button>
                 </nav>
                 <div class="column-header">SCHNELLAUSWAHL</div>
-                <div id="quick-squad-list" class="scroll-area">
-                    </div>
+                <div id="quick-squad-list" class="scroll-area"></div>
             </aside>
 
             <main id="stage-center" class="hud-column stage-main">
-                <div id="module-content" class="fade-in">
-                    </div>
+                <div id="module-content" class="fade-in"></div>
             </main>
 
             <aside id="info-right" class="hud-column">
                 <div class="column-header">NEURAL ADVISOR</div>
                 <div id="ai-chat-box" class="scroll-area">
-                    <div class="ai-msg">System initialisiert. Warte auf Befehle, Trainer.</div>
+                    <div class="ai-msg">Willkommen zurück, Coach. Alle Systeme laufen im Optimalbereich.</div>
                 </div>
                 
                 <div class="voice-control-box">
@@ -96,8 +100,7 @@
     </div>
 
     <div id="bio-lab-modal" class="modal-overlay hidden">
-        <div id="modal-container" class="lab-container">
-            </div>
+        <div id="modal-container" class="lab-container"></div>
     </div>
 
     <script src="script.js"></script>
