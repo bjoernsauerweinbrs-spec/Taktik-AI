@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 | ACCESS PORTAL</title>
+    <title>TONI 2.0 | NEURAL MANAGEMENT ENGINE</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="portal-body">
 
@@ -18,7 +19,6 @@
                 <small>NEURAL MANAGEMENT ENGINE</small>
             </div>
         </header>
-
         <section class="login-core">
             <p class="ai-greeting">IDENTITÄT BESTÄTIGEN, TRAINER.</p>
             <div class="input-wrapper">
@@ -27,7 +27,6 @@
             </div>
             <button id="login-btn" onclick="systemBootSequence()">SYSTEM STARTEN</button>
         </section>
-
         <footer class="portal-footer">
             <div class="version-tag">V15.8 PRO</div>
             <div class="system-downloads">
@@ -36,6 +35,47 @@
             </div>
         </footer>
     </main>
+
+    <div id="main-interface" class="hidden">
+        <header id="top-bar">
+            <div class="system-title">TONI 2.0 // CONTROL HUB</div>
+            <div id="clock-display">00:00:00</div>
+            <div class="kpi-quick-info">
+                <i class="fa-solid fa-wallet"></i> <span id="kpi-budget">0 €</span>
+            </div>
+        </header>
+
+        <div class="hud-grid">
+            <aside id="nav-left" class="hud-column">
+                <div class="column-header">NAVIGATION</div>
+                <nav class="side-nav">
+                    <button onclick="switchModule('kader')"><i class="fa-solid fa-users"></i> KADER</button>
+                    <button onclick="switchModule('tactics')"><i class="fa-solid fa-clipboard-list"></i> TAKTIK</button>
+                    <button onclick="switchModule('finance')"><i class="fa-solid fa-chart-line"></i> FINANZEN</button>
+                    <button onclick="switchModule('press')"><i class="fa-solid fa-newspaper"></i> GAZETTE</button>
+                </nav>
+                <div class="column-header">KADER LISTE</div>
+                <div id="quick-squad-list"></div>
+            </aside>
+
+            <main id="stage-center" class="hud-column">
+                <div id="module-content">
+                    </div>
+            </main>
+
+            <aside id="info-right" class="hud-column">
+                <div class="column-header">NEURAL ADVISOR</div>
+                <div id="ai-chat-box">
+                    <p class="ai-msg">Willkommen, Trainer. Ich analysiere die aktuelle Lage...</p>
+                </div>
+                <div class="column-header">LIVE KPI</div>
+                <div id="live-kpi-panel">
+                    <div class="kpi-row"><span>MORAL:</span> <span id="kpi-morale">85%</span></div>
+                    <div class="kpi-row"><span>WETTER:</span> <span id="kpi-weather">18°C</span></div>
+                </div>
+            </aside>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
