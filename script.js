@@ -1,124 +1,147 @@
 /* ==========================================================================
-   TONI 2.0 | BOOT-LOADER & CORE (REPAIR VERSION)
+   TONI 2.0 | NEURAL ELITE ENGINE (V15.8)
+   BLOCK 1 VON 6: SYSTEM CORE, LOGIN & GLOBAL STATE
    ========================================================================== */
 
-// 1. SYSTEM SETTINGS
+// --------------------------------------------------------------------------
+// 1. SYSTEM EINSTELLUNGEN & API
+// --------------------------------------------------------------------------
 let USER_API_KEY = localStorage.getItem('toni_api_key') || "";
 const GITHUB_REPO_URL = "https://raw.githubusercontent.com/bjoernsauerweinbrs-spec/Taktik-AI/refs/heads/main/vereinsdaten.json";
 
-// 2. BOOT-SEQUENZ (DIESE MUSS GANZ OBEN STEHEN)
+// --------------------------------------------------------------------------
+// 2. BOOT-SEQUENZ (LOGIN LOGIK)
+// --------------------------------------------------------------------------
 function systemBootSequence() {
-    console.log("Login-Versuch gestartet...");
+    console.log("TONI 2.0: Boot Sequence Initiated...");
     const auth = document.getElementById('auth-layer');
     const main = document.getElementById('main-interface');
     
-    if(auth) auth.style.display = 'none';
-    if(main) main.style.display = 'block';
+    // Login-Layer ausblenden
+    if(auth) {
+        auth.style.display = 'none';
+        auth.classList.add('hidden');
+    }
     
-    // Falls initEliteCore existiert, starten wir es
+    // Haupt-Interface einblenden
+    if(main) {
+        main.style.display = 'block';
+        main.classList.remove('hidden');
+    }
+    
+    // Core starten
     if (typeof initEliteCore === "function") {
         initEliteCore();
     } else {
-        console.warn("Core-Initialisierung noch nicht geladen.");
+        console.warn("Warte auf Laden der Core-Funktionen...");
     }
 }
 
-// 3. GLOBAL STATE
+// Support für die Enter-Taste im Login-Feld
+document.addEventListener('keydown', function(event) {
+    if (event.key === "Enter") {
+        const auth = document.getElementById('auth-layer');
+        if (auth && !auth.classList.contains('hidden') && auth.style.display !== 'none') {
+            systemBootSequence();
+        }
+    }
+});
+
+// --------------------------------------------------------------------------
+// 3. ZENTRALER SPEICHER (GLOBAL STATE)
+// --------------------------------------------------------------------------
 const eliteStore = {
     players: [], 
-    staff: [], 
+    staff: JSON.parse(localStorage.getItem('toni_staff')) || [
+        { id: 1, role: "Co-Trainer", name: "Hansi M.", salary: 5000, effect: "Taktik +10%", level: 3 },
+        { id: 2, role: "Chef-Physio", name: "Dr. Müller", salary: 8500, effect: "Regeneration +15%", level: 5 }
+    ], 
     calendar: JSON.parse(localStorage.getItem('toni_calendar')) || [],
-    finance: JSON.parse(localStorage.getItem('toni_finance')) || [],
+    finance: JSON.parse(localStorage.getItem('toni_finance')) || [
+        { id: 1, label: "TV-Rechte", value: 4500000, type: "income", cat: "pro" },
+        { id: 2, label: "Hauptsponsor", value: 2500000, type: "income", cat: "pro" },
+        { id: 3, label: "Spielergehälter", value: 0, type: "expense", cat: "pro" }, 
+        { id: 4, label: "Stadionbetrieb", value: -125000, type: "expense", cat: "pro" }
+    ],
     briefcase: {
-        sponsoring: { activeSponsors: ["Telekom"], negotiationStatus: "Stabil" },
-        analysisCenter: { level: 1, nextUpgradeCost: 250000, features: ["Video"] },
-        stadiumPress: { headline: "Willkommen!", status: "Ready" }
+        sponsoring: { activeSponsors: ["Telekom", "Adidas"], negotiationStatus: "Stabil" },
+        analysisCenter: { level: 1, nextUpgradeCost: 250000, features: ["Video-Analyse"] },
+        stadiumPress: { headline: "Willkommen zur neuen Saison!", status: "Druckfertig" }
     },
-    gazette: { headline: "NEWS", lead: "Start...", body: "..." },
-    mgmt: { liquidAssets: 0, infrastructure: { medical: 5 }, liveData: { temp: "--" } },
-    activeModule: 'kader'
-};
-
-// ... Hier geht dein restlicher Code weiter
-
-    // MANAGEMENT & SYSTEM-STATUS
-    mgmt: {
-        liquidAssets: 0,
-        clubReputation: 75, // 0-100
-        infrastructure: { 
-            medical: 5, 
-            analysis: 3,
-            stadium: 4
-        },
+    gazette: { 
+        headline: "TRANSFERS UND TAKTIK", 
+        lead: "Der Neural-Advisor übernimmt die Analyse.", 
+        body: "Mit modernster KI-Technik analysiert der Verein nun jedes Detail..." 
+    },
+    mgmt: { 
+        liquidAssets: 0, 
+        clubReputation: 75,
+        infrastructure: { medical: 5, analysis: 3, stadium: 4 }, 
         liveData: { temp: "--", condition: "Lade...", wind: "--" },
         aiContext: "" 
     },
-
-    activeModule: 'kader' // Start-Modul
+    activeModule: 'kader'
 };
 
-// 3. INITIALISIERUNG (BOOT-LOGIK)
+// --------------------------------------------------------------------------
+// 4. CORE INITIALISIERUNG
+// --------------------------------------------------------------------------
 async function initEliteCore() {
-    console.log("TONI 2.0: Starting High-End Reconstruction (V15.8)...");
+    console.log("TONI 2.0 Core: Loading Systems...");
     
-    // Zeit-Dienste
-    updateClock(); 
-    setInterval(updateClock, 1000);
-    checkAIConnection();
+    // Services starten
+    if (typeof updateClock === "function") {
+        updateClock(); 
+        setInterval(updateClock, 1000);
+    }
+    if (typeof checkAIConnection === "function") checkAIConnection();
     
-    // Daten-Sync
+    // Daten laden
     await syncWithGitHub();
     
-    // Datenbank auf V15.8 Tiefe bringen
+    // Datenbank-Struktur sicherstellen
     upgradeDatabaseToFullDetail();
 
-    // System-Ready
-    fetchWeatherData();
-    injectFullStyles(); // Kommt in Block 2
-    updateFinanceTotals();
+    // UI & Wetter vorbereiten
+    if (typeof fetchWeatherData === "function") fetchWeatherData();
+    if (typeof injectFullStyles === "function") injectFullStyles(); 
+    if (typeof updateFinanceTotals === "function") updateFinanceTotals();
     
-    // Modul laden
-    loadModule(eliteStore.activeModule);
+    // Startmodul laden
+    if (typeof loadModule === "function") {
+        loadModule(eliteStore.activeModule);
+    }
     
-    // Sprachsteuerung & Mikrofon
-    voiceEngine.init();
+    // Voice Engine bereitmachen
+    if (typeof voiceEngine !== "undefined" && typeof voiceEngine.init === "function") {
+        voiceEngine.init();
+    }
 }
 
-// 4. DEEP-DATABASE UPGRADE (Detaillierung der Daten)
+// --------------------------------------------------------------------------
+// 5. DATENBANK MANAGEMENT (DEEP-UPGRADE)
+// --------------------------------------------------------------------------
 function upgradeDatabaseToFullDetail() {
-    // Falls keine Spieler da sind (Erster Start)
     if(eliteStore.players.length === 0) {
         generateHighDetailSquad();
     }
     
-    // Fehlende Felder bei bestehenden Spielern ergänzen
     eliteStore.players.forEach(p => {
-        // V15.8 Finanz-Daten
+        // Sicherstellen, dass alle V15.8 Felder existieren
         if(!p.salary) p.salary = Math.round((p.rating || 60) * 2800);
         if(!p.contract_exp) p.contract_exp = 2026 + Math.floor(Math.random() * 4);
         if(!p.market_value) p.market_value = (p.rating || 60) * 185000;
         
-        // V15.8 Medical-Daten (Bio-Lab Tiefe)
         if(!p.labor_daten) p.labor_daten = { waage: {}, uhr: {} };
-        if(!p.labor_daten.waage.gewicht) p.labor_daten.waage.gewicht = 75 + Math.floor(Math.random() * 10);
-        if(!p.labor_daten.waage.kfa) p.labor_daten.waage.kfa = 8 + Math.floor(Math.random() * 6);
-        if(!p.labor_daten.waage.muskel_kg) p.labor_daten.waage.muskel_kg = 38 + Math.floor(Math.random() * 5);
-        if(!p.labor_daten.waage.wasser) p.labor_daten.waage.wasser = 62 + Math.floor(Math.random() * 5);
-        if(!p.labor_daten.waage.viszeral) p.labor_daten.waage.viszeral = 4 + Math.floor(Math.random() * 3);
-        if(!p.labor_daten.waage.metabolic) p.labor_daten.waage.metabolic = 22 + Math.floor(Math.random() * 5);
+        if(!p.labor_daten.waage.gewicht) p.labor_daten.waage.gewicht = 75;
         
-        // V15.8 Performance-Daten (Smartwatch)
-        if(!p.labor_daten.uhr.ruhepuls) p.labor_daten.uhr.ruhepuls = 48 + Math.floor(Math.random() * 10);
-        if(!p.labor_daten.uhr.load) p.labor_daten.uhr.load = 3.5 + Math.random() * 4;
-        if(!p.labor_daten.uhr.vo2max) p.labor_daten.uhr.vo2max = 52 + Math.floor(Math.random() * 10);
-        
-        // V15.8 Status-Daten
         if(!p.status) p.status = { im_kader: true, im_training: true, morale: 85 };
     });
+    console.log("V15.8: Database Audit Complete.");
 }
 
 function generateHighDetailSquad() {
-    const positions = ["TW", "IV", "IV", "RV", "LV", "ZDM", "ZM", "ZM", "RF", "LF", "ST", "TW", "IV", "ZM", "OM", "ST", "ST", "IV"];
+    const positions = ["TW", "IV", "IV", "RV", "LV", "ZDM", "ZM", "ZM", "RF", "LF", "ST"];
     positions.forEach((pos, i) => {
         eliteStore.players.push({
             id: Date.now() + i, 
@@ -126,7 +149,7 @@ function generateHighDetailSquad() {
             position: pos, 
             rating: 78 + (i%5),
             img_url: `https://cdn-icons-png.flaticon.com/512/21/21104.png`,
-            status: { im_kader: (i < 11), im_training: true, morale: 80 },
+            status: { im_kader: true, im_training: true, morale: 80 },
             fifa_stats: { pac:75, sho:70, pas:78, dri:80, def:65, phy:75 },
             labor_daten: { 
                 waage: { gewicht: 78, kfa: 10, muskel_kg: 40, wasser: 65, viszeral: 5, metabolic: 24 }, 
@@ -139,20 +162,23 @@ function generateHighDetailSquad() {
     });
 }
 
-// 5. DATA SYNC (GITHUB)
+// --------------------------------------------------------------------------
+// 6. DATEN SYNC
+// --------------------------------------------------------------------------
 async function syncWithGitHub() {
     try {
         const response = await fetch(GITHUB_REPO_URL);
-        if (!response.ok) throw new Error("GitHub Verbindung fehlgeschlagen.");
+        if (!response.ok) throw new Error("GitHub Offline");
         const data = await response.json();
         if(data.kader_toni && data.kader_toni.length > 0) {
             eliteStore.players = data.kader_toni;
         }
     } catch (error) {
-        console.warn("Lade Daten aus lokalem Speicher...");
+        console.warn("Lade Daten aus lokalem Backup...");
         const local = localStorage.getItem('toni_players_backup');
         if(local) eliteStore.players = JSON.parse(local);
     }
+}
    /* ==========================================================================
    BLOCK 2 VON 6: DESIGN ENGINE (EXTENDED CSS SUITE)
    ========================================================================== */
@@ -171,6 +197,9 @@ function injectFullStyles() {
             --neon-alert: #f43f5e;
             --font-hud: 'Orbitron', sans-serif;
         }
+
+        /* Hilfsklasse zum Ausblenden (Wichtig für Login) */
+        .hidden { display: none !important; }
 
         .lab-overlay { 
             position: fixed; 
@@ -436,36 +465,40 @@ function loadModule(modId) {
     if(vrViewport) vrViewport.classList.add('hidden');
     
     // Top-KPIs aktualisieren
-    updateKPIs(); 
+    if (typeof updateKPIs === "function") updateKPIs(); 
 
     // Routing Logik
     switch(modId) {
         case 'kader': 
-            renderSquadOverview(); 
+            if (typeof renderSquadOverview === "function") renderSquadOverview(); 
             break;
         case 'status': 
-            renderStatusModule(); 
+            if (typeof renderStatusModule === "function") renderStatusModule(); 
             break;
         case 'analysis': 
-            renderAdvisorHub(); 
+            if (typeof renderAdvisorHub === "function") renderAdvisorHub(); 
             break;
         case 'finance': 
             renderOfficeHub(); 
             break;
         case 'stadionzeitung': 
-            renderGazetteCMS(); 
+            if (typeof renderGazetteCMS === "function") renderGazetteCMS(); 
             break;
         case 'drills': 
-            renderCalendar(); 
+            if (typeof renderCalendar === "function") renderCalendar(); 
             break;
         case 'tactics': 
-            renderTacticBoard(); 
-            setTimeout(() => tacticsCore.init(), 100); 
+            if (typeof renderTacticBoard === "function") {
+                renderTacticBoard(); 
+                setTimeout(() => {
+                    if (typeof tacticsCore !== "undefined") tacticsCore.init();
+                }, 100); 
+            }
             break;
         case 'vr-hub':
             if(viewport) viewport.classList.add('hidden'); 
             if(vrViewport) vrViewport.classList.remove('hidden'); 
-            initVRHub(); 
+            if (typeof initVRHub === "function") initVRHub(); 
             break;
     }
 }
@@ -475,7 +508,8 @@ function loadModule(modId) {
 // --------------------------------------------------------------------------
 function renderOfficeHub() {
     const viewport = document.getElementById('content-viewport');
-    
+    if(!viewport) return;
+
     viewport.innerHTML = `
         <div style="height:100%; display:flex; flex-direction:column;">
             <div class="fin-tabs">
@@ -490,12 +524,13 @@ function renderOfficeHub() {
         </div>
     `;
     
-    // Startet mit der Vertragsübersicht
+    // Startet standardmäßig mit der Vertragsübersicht
     switchOfficeTab('contracts');
 }
 
 function switchOfficeTab(tab, btnElement) {
     const container = document.getElementById('office-content');
+    if(!container) return;
     
     // Tab-Highlighting
     if(btnElement) {
@@ -506,10 +541,10 @@ function switchOfficeTab(tab, btnElement) {
 
     switch(tab) {
         case 'contracts':
-            renderContractMatrix(container);
+            if (typeof renderContractMatrix === "function") renderContractMatrix(container);
             break;
         case 'staff':
-            renderStaffManagement(container);
+            if (typeof renderStaffManagement === "function") renderStaffManagement(container);
             break;
         case 'finance':
             renderEditableBalance(container);
@@ -524,7 +559,6 @@ function switchOfficeTab(tab, btnElement) {
 // 8. FINANZ-LOGIK (DIE BEARBEITBARE BILANZ)
 // --------------------------------------------------------------------------
 
-// A. Die bearbeitbare Tabelle
 function renderEditableBalance(container) {
     let rows = eliteStore.finance.map((item, idx) => `
         <tr>
@@ -564,15 +598,14 @@ function renderEditableBalance(container) {
     `;
 }
 
-// B. Werte in Echtzeit speichern
 function updateFinanceValue(idx, val) {
     const newValue = parseInt(val) || 0;
     eliteStore.finance[idx].value = newValue;
     
     // Alles neu berechnen
-    updateFinanceTotals();
+    if (typeof updateFinanceTotals === "function") updateFinanceTotals();
     
-    // UI Update
+    // UI Update des Gesamtbudgets
     const display = document.getElementById('office-total-budget');
     if(display) {
         display.innerText = eliteStore.mgmt.liquidAssets.toLocaleString() + " €";
@@ -582,7 +615,10 @@ function updateFinanceValue(idx, val) {
     localStorage.setItem('toni_finance', JSON.stringify(eliteStore.finance));
 }
 
-// C. Sponsoring & Aktentasche (Upgrades)
+// --------------------------------------------------------------------------
+// 9. AKTENTASCHE (INFRASTRUKTUR-UPGRADES)
+// --------------------------------------------------------------------------
+
 function renderBriefcaseUpgrades(container) {
     const b = eliteStore.briefcase;
     
@@ -627,7 +663,7 @@ function upgradeInfrastructure() {
     } else {
         alert("Nicht genügend Budget!");
     }
-} 
+}
 /* ==========================================================================
    BLOCK 4 VON 6: SQUAD STATUS, CONTRACT MATRIX & STAFF MANAGEMENT
    ========================================================================== */
@@ -641,6 +677,7 @@ function upgradeInfrastructure() {
  */
 function renderStatusModule() {
     const viewport = document.getElementById('content-viewport');
+    if (!viewport) return;
     
     let html = `
         <div style="margin-bottom:20px;">
@@ -690,7 +727,7 @@ function updatePlayerStatus(id, key, val) {
         p.status[key] = val;
         // Sofortiges Neu-Zeichnen für visuelles Feedback
         renderStatusModule();
-        // Optional: In LocalStorage sichern
+        // In LocalStorage sichern
         localStorage.setItem('toni_players_backup', JSON.stringify(eliteStore.players));
     }
 }
@@ -701,6 +738,7 @@ function updatePlayerStatus(id, key, val) {
 
 // A. Die Vertragsmatrix (Profi-Ansicht)
 function renderContractMatrix(container) {
+    if (!container) return;
     const rows = eliteStore.players.map(p => {
         const salaryAnnual = p.salary * 12;
         const colorClass = p.contract_exp <= 2026 ? 'color:var(--neon-alert);' : '';
@@ -743,6 +781,7 @@ function renderContractMatrix(container) {
 
 // B. Personalverwaltung
 function renderStaffManagement(container) {
+    if (!container) return;
     const rows = eliteStore.staff.map(s => `
         <tr>
             <td style="font-weight:bold; color:var(--neon-blue);">${s.role}</td>
@@ -786,11 +825,13 @@ function negotiate(id) {
     
     if(confirm(text)) {
         p.salary += bonus;
-        updateFinanceTotals();
-        switchOfficeTab('contracts');
-        voiceEngine.speak("Vertrag für " + p.name + " wurde erfolgreich angepasst.");
+        if (typeof updateFinanceTotals === "function") updateFinanceTotals();
+        if (typeof switchOfficeTab === "function") switchOfficeTab('contracts');
+        if (typeof voiceEngine !== "undefined" && voiceEngine.speak) {
+            voiceEngine.speak("Vertrag für " + p.name + " wurde erfolgreich angepasst.");
+        }
     }
-}   
+}
 /* ==========================================================================
    BLOCK 5 VON 6: TACTICS ENGINE (4-4-2 vs 3-4-3) & DEEP-DIVE LABOR
    ========================================================================== */
@@ -806,15 +847,17 @@ const tacticsCore = {
         if(!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
         const stage = document.querySelector('.tactics-stage');
+        
+        // Canvas-Dimensionen an Container anpassen
         this.canvas.width = stage.clientWidth;
         this.canvas.height = stage.clientHeight;
         
-        // Listener für Drag & Drop
+        // Listener für Drag & Drop Interaktion
         this.canvas.addEventListener('mousedown', (e) => this.startAction(e));
         this.canvas.addEventListener('mousemove', (e) => this.moveAction(e));
         this.canvas.addEventListener('mouseup', (e) => this.endAction(e));
         
-        this.resetMatchFormation(); // Startet das geforderte Setup
+        this.resetMatchFormation(); // Initialisiert das 4-4-2 vs 3-4-3 Setup
     },
 
     // Das Herzstück: Toni (4-4-2) vs. Trainer (3-4-3)
@@ -826,7 +869,7 @@ const tacticsCore = {
         this.applyFormation(toniPlayers, '4-4-2', '#ef4444', 'bottom');
         
         // 2. TRAINER-MANNSCHAFT (Oben, Blau, 3-4-3)
-        // Hier simulieren wir 11 Dummy-Gegner für das Taktik-Training
+        // Dummy-Gegner für die taktische Simulation
         const trainerPlayers = Array(11).fill(0).map((_, i) => ({ name: `Trainer-PL ${i+1}`, position: "G" }));
         this.applyFormation(trainerPlayers, '3-4-3', '#3b82f6', 'top');
         
@@ -836,9 +879,8 @@ const tacticsCore = {
     applyFormation: function(squad, formation, color, side) {
         const w = this.canvas.width;
         const h = this.canvas.height;
-        const isTop = (side === 'top');
         
-        // Einfaches Koordinaten-Mapping für Formationen
+        // Koordinaten-Mapping für die Formationen
         let positions = [];
         if(formation === '4-4-2') {
             positions = [
@@ -897,9 +939,10 @@ const tacticsCore = {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
         this.elements.forEach(el => {
-            // Schatten
+            // Schatten-Effekt für Tiefe
             this.ctx.shadowBlur = 10; this.ctx.shadowColor = "black";
-            // Kreis
+            
+            // Spieler-Kreis zeichnen
             this.ctx.beginPath();
             this.ctx.arc(el.x, el.y, el.radius, 0, Math.PI * 2);
             this.ctx.fillStyle = el.color;
@@ -909,11 +952,13 @@ const tacticsCore = {
             this.ctx.stroke();
             this.ctx.shadowBlur = 0;
             
-            // Text
+            // Positions-Kürzel
             this.ctx.fillStyle = "white";
             this.ctx.font = "bold 10px Arial";
             this.ctx.textAlign = "center";
             this.ctx.fillText(el.pos, el.x, el.y + 4);
+            
+            // Name unter dem Kreis
             this.ctx.fillStyle = "rgba(255,255,255,0.7)";
             this.ctx.font = "9px Arial";
             this.ctx.fillText(el.name, el.x, el.y + 28);
@@ -923,18 +968,20 @@ const tacticsCore = {
 
 function renderTacticBoard() {
     const viewport = document.getElementById('content-viewport');
+    if (!viewport) return;
+
     viewport.innerHTML = `
         <div class="tactics-wrapper">
             <aside class="lab-panel" style="padding:15px;">
                 <div class="lab-title">STRATEGIE</div>
-                <button class="tool-btn" onclick="tacticsCore.resetMatchFormation()">RE-SET FORMATION</button>
+                <button class="btn-save" style="width:100%;" onclick="tacticsCore.resetMatchFormation()">RE-SET FORMATION</button>
                 <div style="margin-top:20px;">
-                    <span class="bio-label">TEAM TONI</span>
-                    <div style="color:var(--neon-main); font-weight:bold;">4 - 4 - 2</div>
+                    <span class="bio-label">TEAM TONI (HOME)</span>
+                    <div style="color:var(--neon-main); font-weight:bold; font-size:18px;">4 - 4 - 2</div>
                 </div>
-                <div style="margin-top:10px;">
-                    <span class="bio-label">TEAM TRAINER</span>
-                    <div style="color:var(--neon-blue); font-weight:bold;">3 - 4 - 3</div>
+                <div style="margin-top:15px;">
+                    <span class="bio-label">TEAM TRAINER (AWAY)</span>
+                    <div style="color:var(--neon-blue); font-weight:bold; font-size:18px;">3 - 4 - 3</div>
                 </div>
             </aside>
             <div class="tactics-stage">
@@ -942,7 +989,7 @@ function renderTacticBoard() {
             </div>
             <aside class="lab-panel" style="padding:15px;">
                 <div class="lab-title">ANALYSE</div>
-                <textarea class="fin-inp" style="height:200px; font-size:11px;" placeholder="Taktische Anweisungen hier eingeben..."></textarea>
+                <textarea class="fin-inp" style="height:200px; font-size:11px;" placeholder="Taktische Anweisungen für die KI hier eingeben..."></textarea>
                 <button class="btn-save" style="margin-top:10px; width:100%;">MATCHPLAN SPEICHERN</button>
             </aside>
         </div>
@@ -956,13 +1003,17 @@ function openBioLab(id) {
     let p = eliteStore.players.find(x => x.id === id);
     if(!p && id !== -1) return;
 
-    // Falls neuer Spieler
+    // Falls neuer Spieler angelegt wird
     if(id === -1) {
         p = {
             id: Date.now(), name: "New Elite", position: "ZM", rating: 70,
             fifa_stats: { pac: 70, sho: 70, pas: 70, dri: 70, def: 70, phy: 70 },
-            labor_daten: { waage: { gewicht: 75, kfa: 12, muskel_kg: 35, wasser: 60, viszeral: 5, metabolic: 24 }, uhr: { ruhepuls: 55, load: 4.5, vo2max: 50 } },
-            salary: 5000, contract_exp: 2027, market_value: 1000000, status: { im_kader: true, im_training: true, morale: 80 }
+            labor_daten: { 
+                waage: { gewicht: 75, kfa: 12, muskel_kg: 35, wasser: 60, viszeral: 5, metabolic: 24 }, 
+                uhr: { ruhepuls: 55, load: 4.5, vo2max: 50 } 
+            },
+            salary: 5000, contract_exp: 2027, market_value: 1000000, 
+            status: { im_kader: true, im_training: true, morale: 80 }
         };
         eliteStore.players.push(p);
     }
@@ -972,7 +1023,8 @@ function openBioLab(id) {
     const bmi = (l.waage.gewicht / (1.85 * 1.85)).toFixed(1);
 
     const ov = document.createElement('div'); 
-    ov.className = 'lab-overlay'; ov.id = 'active-bio-lab';
+    ov.className = 'lab-overlay'; 
+    ov.id = 'active-bio-lab';
     
     ov.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:15px; border-bottom:1px solid #333;">
@@ -1031,15 +1083,15 @@ function openBioLab(id) {
                 <div class="bio-input-group"><span class="bio-label">RUHEPULS</span><input type="number" class="bio-val" value="${l.uhr.ruhepuls}" onchange="updateLab(${p.id}, 'uhr', 'ruhepuls', this.value)"></div>
                 <div class="bio-input-group"><span class="bio-label">VO2 MAX</span><input type="number" class="bio-val" value="${l.uhr.vo2max}" onchange="updateLab(${p.id}, 'uhr', 'vo2max', this.value)"></div>
                 <div class="bio-input-group" style="grid-column: span 2;">
-                    <span class="bio-label">DAILY LOAD (1-10)</span>
-                    <input type="range" style="width:100%;" min="1" max="10" step="0.1" value="${l.uhr.load}" onchange="updateLab(${p.id}, 'uhr', 'load', this.value)">
+                    <span class="bio-label">DAILY LOAD (0.0 - 10.0)</span>
+                    <input type="range" style="width:100%; accent-color:orange;" min="1" max="10" step="0.1" value="${l.uhr.load}" onchange="updateLab(${p.id}, 'uhr', 'load', this.value)">
                 </div>
             </div>
         </div>
     </div>
     `;
     document.body.appendChild(ov);
-} 
+}
  /* ==========================================================================
    BLOCK 6 VON 6: SQUAD OVERVIEW, AI VOICE & SYSTEM SERVICES
    ========================================================================== */
@@ -1049,8 +1101,9 @@ function openBioLab(id) {
 // --------------------------------------------------------------------------
 function renderSquadOverview() {
     const viewport = document.getElementById('content-viewport');
+    if (!viewport) return;
     
-    // Header mit Add-Button
+    // Header mit Counter
     let html = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
             <div>
@@ -1062,7 +1115,7 @@ function renderSquadOverview() {
         <div class="kader-grid">
     `;
     
-    // Nur Spieler anzeigen, die "im Kader" sind (Nominiert)
+    // Nur Spieler anzeigen, die "im Kader" sind (Nominiert im Status-Modul)
     const activeSquad = eliteStore.players.filter(p => p.status.im_kader);
     
     activeSquad.forEach(p => {
@@ -1101,10 +1154,9 @@ function renderSquadOverview() {
 }
 
 // --------------------------------------------------------------------------
-// 14. DATA PERSISTENCE HELPERS (UPDATE-LOGIK)
+// 14. DATA PERSISTENCE HELPERS
 // --------------------------------------------------------------------------
 
-// Update für Top-Level Daten
 function updateP(id, key, val) {
     const p = eliteStore.players.find(x => x.id === id);
     if(p) {
@@ -1113,26 +1165,23 @@ function updateP(id, key, val) {
         } else {
             p[key] = parseInt(val) || 0;
         }
-        if(key === 'salary') updateFinanceTotals();
+        if(key === 'salary' && typeof updateFinanceTotals === "function") updateFinanceTotals();
         saveToLocalStorage();
     }
 }
 
-// Update für FIFA Stats & Rating-Berechnung
 function updateStat(id, key, val) {
     const p = eliteStore.players.find(x => x.id === id);
     if(p) {
         p.fifa_stats[key] = parseInt(val) || 0;
         p.rating = calculateFifaRating(p.fifa_stats);
         
-        // Live-Update im Labor-Overlay
         const ratingDisp = document.getElementById('lab-rating');
         if(ratingDisp) ratingDisp.innerText = p.rating;
         saveToLocalStorage();
     }
 }
 
-// Update für Biometrische Labor-Daten
 function updateLab(id, device, key, val) {
     const p = eliteStore.players.find(x => x.id === id);
     if(p && p.labor_daten[device]) {
@@ -1142,6 +1191,7 @@ function updateLab(id, device, key, val) {
 }
 
 function calculateFifaRating(s) {
+    if (!s) return 0;
     const avg = (s.pac + s.sho + s.pas + s.dri + s.def + s.phy) / 6;
     return Math.round(avg);
 }
@@ -1152,7 +1202,7 @@ function saveToLocalStorage() {
 }
 
 // --------------------------------------------------------------------------
-// 15. AI VOICE ENGINE & MIKROFON (AKTIVIERT)
+// 15. AI VOICE ENGINE & MIKROFON
 // --------------------------------------------------------------------------
 const voiceEngine = {
     recognition: null,
@@ -1176,7 +1226,8 @@ const voiceEngine = {
 
             this.recognition.onend = () => {
                 this.isListening = false;
-                document.getElementById('ai-mic-indicator')?.classList.remove('active');
+                const mic = document.getElementById('ai-mic-indicator');
+                if(mic) mic.classList.remove('active');
             };
         }
     },
@@ -1187,18 +1238,17 @@ const voiceEngine = {
         
         this.isListening = true;
         this.recognition.start();
-        document.getElementById('ai-mic-indicator')?.classList.add('active');
+        const mic = document.getElementById('ai-mic-indicator');
+        if(mic) mic.classList.add('active');
         this.speak("Ich höre zu.");
     },
 
     handleCommand: function(cmd) {
         const text = cmd.toLowerCase();
-        // Beispiel-Befehle
         if (text.includes("kader")) loadModule('kader');
         if (text.includes("finanzen") || text.includes("geld")) loadModule('finance');
         if (text.includes("taktik")) loadModule('tactics');
         
-        // Befehl an den Advisor-Chat senden
         const promptInput = document.getElementById('advisor-prompt');
         if(promptInput) {
             promptInput.value = cmd;
@@ -1220,6 +1270,8 @@ const voiceEngine = {
 // --------------------------------------------------------------------------
 function renderGazetteCMS() {
     const viewport = document.getElementById('content-viewport');
+    if (!viewport) return;
+    
     viewport.innerHTML = `
         <div class="lab-panel" style="background:#fff; color:#111; font-family:serif; padding:50px; max-width:800px; margin:0 auto; box-shadow: 20px 20px 0px var(--border-color);">
             <div style="text-align:center; border-bottom:4px double #111; padding-bottom:20px; margin-bottom:20px;">
@@ -1266,5 +1318,4 @@ function updateClock() {
 console.log("=========================================");
 console.log("TONI 2.0 NEURAL ENGINE V15.8 COMPLETED");
 console.log("STATUS: ALL SYSTEMS OPERATIONAL");
-console.log("=========================================");  
-}
+console.log("=========================================");
