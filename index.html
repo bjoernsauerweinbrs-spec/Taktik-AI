@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | ULTIMATE HUB</title>
+    <title>TONI 2.0 | NEURAL MANAGEMENT ENGINE</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -13,19 +13,27 @@
 
     <main id="auth-layer" class="portal-panel">
         <header class="portal-header">
-            <div class="status-led green"></div>
+            <div class="status-led green" id="ki-status-led"></div>
             <div class="header-text">
                 <h1>TONI 2.0</h1>
-                <small>NEURAL ENGINE V15.8</small>
+                <small>NEURAL ENGINE V15.8 PRO</small>
             </div>
         </header>
         <section class="login-core">
-            <p class="ai-greeting">IDENTITÄT BESTÄTIGEN, TRAINER.</p>
+            <p class="ai-greeting" id="ai-voice-text">IDENTITÄT BESTÄTIGEN, TRAINER.</p>
             <div class="input-wrapper">
-                <input type="password" id="passkey" placeholder="PASSKEY" autocomplete="off">
+                <input type="password" id="passkey" placeholder="PASSKEY EINGEBEN" autocomplete="off">
+                <div class="input-glow"></div>
             </div>
             <button id="login-btn" onclick="systemBootSequence()">BOOT SYSTEM</button>
         </section>
+        <footer class="portal-footer">
+            <div class="version-tag">STABLE BUILD</div>
+            <div class="system-downloads">
+                <span class="badge">XR READY</span>
+                <span class="badge">MOBILE</span>
+            </div>
+        </footer>
     </main>
 
     <div id="main-interface" class="hidden">
@@ -34,6 +42,7 @@
             <div id="clock-display">00:00:00</div>
             <div class="kpi-quick-info">
                 <i class="fa-solid fa-wallet"></i> <span id="kpi-budget">0 €</span>
+                <i class="fa-solid fa-vr-cardboard" id="vr-status-icon"></i>
             </div>
         </header>
 
@@ -41,37 +50,45 @@
             <aside id="nav-left" class="hud-column">
                 <div class="column-header">ZENTRALE</div>
                 <nav class="side-nav">
-                    <button onclick="switchModule('kader')"><i class="fa-solid fa-users"></i> KADER</button>
-                    <button onclick="switchModule('tactics')"><i class="fa-solid fa-chalkboard-user"></i> TAKTIK</button>
-                    <button onclick="switchModule('finance')"><i class="fa-solid fa-briefcase"></i> OFFICE</button>
-                    <button onclick="switchModule('youth')"><i class="fa-solid fa-child-reaching"></i> JUNIOR</button>
+                    <button onclick="switchModule('kader')" id="nav-kader"><i class="fa-solid fa-users"></i> KADER / LOCKER</button>
+                    <button onclick="switchModule('tactics')" id="nav-tactics"><i class="fa-solid fa-chalkboard-user"></i> TAKTIK-BOARD</button>
+                    <button onclick="switchModule('finance')" id="nav-finance"><i class="fa-solid fa-briefcase"></i> OFFICE PRIME</button>
+                    <button onclick="switchModule('youth')" id="nav-youth"><i class="fa-solid fa-child-reaching"></i> JUNIOR HERO</button>
+                    <button onclick="switchModule('media')" id="nav-media"><i class="fa-solid fa-clapperboard"></i> MEDIA CENTER</button>
                 </nav>
                 <div class="column-header">SCHNELLAUSWAHL</div>
-                <div id="quick-squad-list" class="scroll-area"></div>
+                <div id="quick-squad-list" class="scroll-area">
+                    </div>
             </aside>
 
             <main id="stage-center" class="hud-column stage-main">
-                <div id="module-content"></div>
+                <div id="module-content" class="fade-in">
+                    </div>
             </main>
 
             <aside id="info-right" class="hud-column">
-                <div class="column-header">NEURAL ADVISOR</div>
+                <div class="column-header">NEURAL ADVISOR (TONI)</div>
                 <div id="ai-chat-box" class="scroll-area">
-                    <div class="ai-msg">System bereit.</div>
+                    <div class="ai-msg">Moin Trainer! Kloppo hier. Das System ist hochgefahren. Was steht heute an?</div>
                 </div>
                 <div class="voice-control-box">
                     <button id="mic-btn" class="mic-inactive" onclick="toggleMic()">
                         <i class="fa-solid fa-microphone"></i>
                     </button>
-                    <span>KI-LIVE TALK</span>
+                    <div class="voice-status">KI-LIVE TALK</div>
                 </div>
                 <div class="column-header">SYSTEM KPI</div>
                 <div id="live-kpi-panel">
                     <div class="kpi-row"><span>MORAL:</span> <b id="kpi-morale">85%</b></div>
+                    <div class="kpi-row"><span>REPUTATION:</span> <b id="kpi-reputation">72/100</b></div>
+                    <div class="kpi-row"><span>ATMOSPHÄRE:</span> <b>STADION-READY</b></div>
                 </div>
             </aside>
         </div>
     </div>
+
+    <div id="bio-lab-modal" class="modal-overlay hidden">
+        </div>
 
     <script src="script.js"></script>
 </body>
