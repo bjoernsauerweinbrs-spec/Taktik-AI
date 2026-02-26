@@ -1,311 +1,275 @@
 /* ==========================================================================
-   TONI 2.0 | THE ULTIMATE DESIGN ENGINE (STADIONZEITUNG & OFFICE UPDATE)
+   TONI 2.0 | MASTER STYLE ENGINE (LUXURY GLASS & NEON)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
 
 :root {
-    --bg-space: #020617;
-    --bg-purple: #1e1b4b;
+    /* -- PALETTE -- */
+    --bg-deep: #050505;
+    --bg-panel: rgba(20, 20, 30, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    
     --neon-cyan: #00f3ff;
-    --neon-pink: #ec4899;
-    --neon-green: #10b981;
-    --neon-gold: #fbbf24;
-    --neon-alert: #f43f5e;
-    --glass: rgba(15, 23, 42, 0.92);
-    --glass-bright: rgba(30, 41, 59, 0.85);
-    --border: rgba(0, 243, 255, 0.25);
+    --neon-green: #0aff60;
+    --neon-gold: #ffd700;
+    --neon-alert: #ff003c;
+    
     --font-hud: 'Orbitron', sans-serif;
     --font-main: 'Rajdhani', sans-serif;
-    --font-mag: 'Playfair Display', serif; /* Exklusiv für die Zeitung */
+    --font-print: 'Playfair Display', serif;
 }
 
-/* 1. GLOBALE BASIS */
+/* 1. GLOBALE STRUKTUR */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 .hidden { display: none !important; }
 
 body {
     height: 100vh; width: 100vw; 
-    background: var(--bg-space); color: #fff;
+    background: var(--bg-deep); color: #fff;
     font-family: var(--font-main); overflow: hidden;
+    background-image: radial-gradient(circle at 50% 10%, #1a1a2e 0%, #000 90%);
 }
 
+/* Portal Background Animation */
 #portal-background {
     position: fixed; inset: 0; z-index: -1;
-    background: radial-gradient(circle at top left, var(--bg-purple) 0%, var(--bg-space) 75%);
-    animation: bgPulse 20s infinite alternate ease-in-out;
+    background: url('https://images.unsplash.com/photo-1516280440614-6697288d5d38?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+    opacity: 0.15; filter: blur(3px);
 }
-@keyframes bgPulse { from { transform: scale(1); } to { transform: scale(1.1); } }
 
-/* 2. PORTAL & CLUB LOGO */
+/* 2. LOGIN PORTAL (GLAS-LOOK) */
 .portal-panel {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 90%; max-width: 420px; background: var(--glass);
-    padding: 40px; border-radius: 25px; border: 1px solid var(--neon-cyan);
-    backdrop-filter: blur(25px); text-align: center;
-    box-shadow: 0 0 60px rgba(0, 243, 255, 0.2);
+    width: 90%; max-width: 400px;
+    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(20px);
+    border: 1px solid var(--neon-cyan); border-radius: 20px;
+    padding: 40px; text-align: center;
+    box-shadow: 0 0 50px rgba(0, 243, 255, 0.15);
 }
 
 #club-logo-portal {
-    width: 100px; height: 100px; margin: 0 auto 20px;
-    background: rgba(0, 243, 255, 0.1);
-    border: 2px solid var(--neon-cyan);
-    border-radius: 50%;
+    width: 80px; height: 80px; margin: 0 auto 20px;
+    border: 2px solid var(--neon-cyan); border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 50px; color: var(--neon-cyan);
+    font-size: 40px; color: var(--neon-cyan);
     box-shadow: 0 0 20px var(--neon-cyan);
-    animation: logoGlow 3s infinite ease-in-out;
-    overflow: hidden;
 }
 
-#club-logo-portal img { width: 80%; height: 80%; object-fit: contain; }
-
-@keyframes logoGlow {
-    0%, 100% { box-shadow: 0 0 20px var(--neon-cyan); transform: scale(1); }
-    50% { box-shadow: 0 0 40px var(--neon-cyan); transform: scale(1.05); }
+.input-wrapper input {
+    width: 100%; background: transparent; border: none;
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+    padding: 15px; color: #fff; text-align: center;
+    font-family: var(--font-hud); letter-spacing: 2px;
+    transition: 0.3s; outline: none;
 }
+.input-wrapper input:focus { border-color: var(--neon-cyan); box-shadow: 0 5px 10px -5px var(--neon-cyan); }
 
-/* 3. DASHBOARD HUD */
-#main-interface { height: 100vh; display: flex; flex-direction: column; animation: fadeIn 0.8s ease; }
+#login-btn {
+    margin-top: 20px; width: 100%; padding: 12px;
+    background: var(--neon-cyan); color: #000; font-weight: bold;
+    border: none; cursor: pointer; font-family: var(--font-hud);
+    clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+    transition: 0.3s;
+}
+#login-btn:hover { background: #fff; box-shadow: 0 0 20px var(--neon-cyan); }
+
+/* 3. HAUPT-INTERFACE (GRID) */
+#main-interface { height: 100vh; display: flex; flex-direction: column; }
+
 #top-bar {
-    height: 65px; background: rgba(0,0,0,0.85); border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between; padding: 0 25px;
-    font-family: var(--font-hud); font-size: 11px;
+    height: 60px; background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+    font-family: var(--font-hud); font-size: 12px;
+}
+.settings-btn { background: none; border: none; color: #666; font-size: 16px; cursor: pointer; margin-left: 10px; transition: 0.3s; }
+.settings-btn:hover { color: var(--neon-cyan); transform: rotate(90deg); }
+
+.hud-grid {
+    flex: 1; display: grid; grid-template-columns: 260px 1fr 300px;
+    gap: 15px; padding: 15px; overflow: hidden;
 }
 
-.hud-grid { flex: 1; display: grid; grid-template-columns: 280px 1fr 320px; gap: 12px; padding: 12px; overflow: hidden; }
-.hud-column { background: var(--glass); border: 1px solid var(--border); border-radius: 18px; display: flex; flex-direction: column; overflow: hidden; }
-.column-header { padding: 14px; background: rgba(0,0,0,0.5); font-family: var(--font-hud); font-size: 10px; color: var(--neon-cyan); }
-.scroll-area { flex: 1; overflow-y: auto; padding: 15px; }
+.hud-column {
+    background: var(--bg-panel); backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border); border-radius: 12px;
+    display: flex; flex-direction: column; overflow: hidden;
+}
 
-/* 4. FIFA CARDS */
-.stage-main { background: radial-gradient(circle at center, #064e3b 0%, #022c22 100%); }
-.kader-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; padding: 25px; justify-items: center; }
+/* Navigation */
+.side-nav button {
+    width: 100%; background: transparent; border: none;
+    padding: 15px; text-align: left; color: #aaa;
+    font-family: var(--font-hud); font-size: 10px;
+    border-left: 2px solid transparent; cursor: pointer; transition: 0.3s;
+}
+.side-nav button:hover, .side-nav button.active {
+    background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), transparent);
+    color: #fff; border-left-color: var(--neon-cyan);
+    text-shadow: 0 0 8px var(--neon-cyan);
+}
+
+/* 4. STAGE (KABINE / INHALT) */
+.stage-main {
+    position: relative;
+    background: radial-gradient(circle at center, #1e1e24 0%, #000 100%);
+    box-shadow: inset 0 0 100px #000;
+}
+
+/* Scrollbars styling */
+.scroll-area, #module-content { flex: 1; overflow-y: auto; padding: 15px; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+/* 5. KADER KARTEN (FIFA STYLE) */
+.kader-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
 
 .fifa-card {
-    width: 150px; height: 215px; background: linear-gradient(135deg, var(--neon-gold) 0%, #b45309 100%);
-    border-radius: 12px; padding: 3px; cursor: pointer; transition: 0.4s;
+    position: relative; height: 200px; width: 100%;
+    background: linear-gradient(145deg, #2b2b2b, #1a1a1a);
+    border: 1px solid #444; border-radius: 10px;
+    cursor: pointer; transition: 0.3s; overflow: hidden;
 }
-.fifa-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px var(--neon-cyan); }
-.card-inner { background: #111; height: 100%; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden; }
+.fifa-card:hover { 
+    transform: translateY(-5px); 
+    border-color: var(--neon-gold); 
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2); 
+}
 
+.card-inner { height: 100%; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+.card-rating-box { 
+    position: absolute; top: 10px; left: 10px; 
+    font-family: var(--font-hud); font-weight: bold; font-size: 20px; color: var(--neon-gold); 
+}
 .player-img-box {
-    width: 100px; height: 110px; margin-top: 5px; position: relative; overflow: hidden;
-    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+    font-size: 60px; color: #333; /* Placeholder icon color */
 }
-.player-img-box img { width: 100%; height: 100%; object-fit: cover; }
-.card-rating-box { position: absolute; top: 10px; left: 10px; font-family: var(--font-hud); color: var(--neon-gold); line-height: 1; }
-.card-rating-box .val { font-size: 24px; font-weight: 700; display: block; }
-.card-name { font-weight: 800; margin: 5px 0; font-size: 14px; text-transform: uppercase; z-index: 2; }
-.card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 9px; width: 100%; z-index: 2; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; }
-
-/* 5. MODALS & UI COMPONENTS */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
-.lab-container { width: 95%; max-width: 950px; background: var(--glass-bright); border: 2px solid var(--neon-cyan); border-radius: 25px; padding: 35px; }
-
-.btn-neon-small {
-    background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
-    padding: 8px 15px; border-radius: 8px; font-family: var(--font-hud); font-size: 10px;
-    cursor: pointer; transition: 0.3s; text-transform: uppercase;
-}
-.btn-neon-small:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 15px var(--neon-cyan); }
-
-/* 6. STADIONZEITUNG STUDIO (MAX LUXUS) */
-#magazine-studio-modal { flex-direction: column; padding-top: 70px; }
-
-.studio-top-bar {
-    position: absolute; top: 0; left: 0; width: 100%; height: 60px;
-    background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--neon-cyan);
-    display: flex; justify-content: space-between; align-items: center; padding: 0 30px;
+.player-img-box img { width: 80%; height: auto; filter: drop-shadow(0 5px 5px #000); }
+.card-name { 
+    font-family: var(--font-hud); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+    margin-top: auto; padding-top: 10px; border-top: 1px solid #333; width: 100%; text-align: center;
 }
 
-#magazine-sheet-container {
-    flex: 1; width: 100%; overflow-y: auto; padding: 50px 0;
-    display: flex; flex-direction: column; align-items: center; gap: 40px;
+/* 6. OFFICE & FORMS (TRANSPARENT INPUTS) */
+.office-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.office-panel {
+    background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+    padding: 20px; border-radius: 10px;
+}
+.office-panel h3 { 
+    color: var(--neon-cyan); font-family: var(--font-hud); font-size: 12px; 
+    margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px; 
 }
 
-/* Simulation eines DIN-A4 Quer Bogens */
-.magazine-sheet-sim {
-    width: 297mm; height: 210mm; background: #fff; color: #333;
-    display: flex; position: relative; border: 1px solid #ccc;
-    box-shadow: 0 10px 50px rgba(0,0,0,0.8);
-    flex-shrink: 0;
+/* High-End Inputs */
+.lab-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; }
+input[type="number"], input[type="text"], select {
+    background: transparent; border: none; border-bottom: 1px solid #444;
+    color: #fff; font-family: var(--font-hud); text-align: right; width: 80px;
+    outline: none; transition: 0.3s;
 }
+input[type="text"] { width: 150px; text-align: left; }
+input:focus { border-bottom-color: var(--neon-cyan); color: var(--neon-cyan); }
 
-/* Die Falz */
-.magazine-sheet-sim::after {
-    content: ""; position: absolute; left: 50%; top: 0; bottom: 0;
-    width: 1px; background: rgba(0,0,0,0.1);
-}
-
-.mag-page-sim {
-    width: 50%; height: 100%; padding: 40px;
-    display: flex; flex-direction: column; font-family: var(--font-mag);
-}
-
-.mag-page-sim small { font-family: var(--font-hud); font-size: 8px; color: #999; margin-bottom: 10px; }
-.mag-page-sim h4 { font-size: 32px; border-bottom: 3px solid #000; margin-bottom: 20px; text-transform: uppercase; }
-
-.mag-content-editable { 
-    flex: 1; font-size: 14px; line-height: 1.6; color: #222; 
-    text-align: justify; outline: none; overflow: hidden;
-}
-
-/* Sponsoren-Footer in der Zeitung */
-.mag-sponsor-footer {
-    margin-top: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;
-    padding-top: 20px; border-top: 1px solid #eee;
-}
-.mag-sponsor-logo {
-    height: 35px; background: #f5f5f5; border: 1px solid #ddd;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: bold; color: #777; font-family: var(--font-hud);
-}
-
-/* 7. MANAGER AKTENTASCHE (OFFICE REFINEMENTS) */
-.office-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
-.office-panel h3 { font-family: var(--font-hud); color: var(--neon-cyan); margin-bottom: 15px; font-size: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-
-/* 8. DRUCK-OPTIMIERUNG (A4 LANDSCAPE) */
-@media print {
-    @page { size: A4 landscape; margin: 0; }
-    body * { visibility: hidden; background: none !important; }
-    #magazine-studio-modal, #magazine-sheet-container, .magazine-sheet-sim, .magazine-sheet-sim * { visibility: visible; }
-    #magazine-studio-modal { position: absolute; left: 0; top: 0; padding: 0; display: block; background: #fff !important; }
-    .studio-top-bar { display: none !important; }
-    #magazine-sheet-container { display: block; padding: 0; overflow: visible; }
-    .magazine-sheet-sim { margin: 0; box-shadow: none; border: none; page-break-after: always; width: 297mm; height: 210mm; }
-}
-
-/* 9. MOBILE & ANIMATIONEN */
-@media (max-width: 1024px) {
-    .hud-grid { grid-template-columns: 1fr; overflow-y: auto; padding-bottom: 80px; }
-    .kader-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .fifa-card { width: 100%; max-width: 160px; }
-}
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-/* ==========================================================================
-   TONI 2.0 | TACTICAL PITCH ENGINE (NAGELSMANN-DESIGN)
-   ========================================================================== */
-
-/* 1. DER SPIELFELD-CONTAINER */
-.tactics-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    gap: 15px;
-    padding: 10px;
-}
-
+/* 7. TAKTIK BOARD (PITCH ENGINE) */
+.tactics-container { height: 100%; display: flex; flex-direction: column; gap: 10px; }
 .pitch-visualization {
-    flex: 1;
-    background: #064e3b; /* Sattes Pitch-Green */
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+    flex: 1; background: #0b3d0b; /* Pitch Green */
+    border: 2px solid rgba(255,255,255,0.1); border-radius: 8px;
+    position: relative; overflow: hidden;
+    box-shadow: inset 0 0 50px #000;
 }
-
-/* 2. DIE LINIEN-MATRIX (SVG-Style via CSS) */
 .pitch-canvas {
-    width: 100%;
-    height: 100%;
-    position: relative;
+    width: 100%; height: 100%; position: relative;
     background-image: 
         linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size: 10% 10%; /* Taktisches Raster */
+    background-size: 10% 10%;
 }
+/* Mittellinie */
+.pitch-canvas::before { content:""; position:absolute; top:50%; left:0; right:0; height:2px; background:rgba(255,255,255,0.2); }
+/* Mittelkreis */
+.pitch-canvas::after { content:""; position:absolute; top:50%; left:50%; width:80px; height:80px; border:2px solid rgba(255,255,255,0.2); border-radius:50%; transform:translate(-50%,-50%); }
 
-/* Spielfeld-Markierungen */
-.pitch-canvas::before {
-    content: "";
-    position: absolute;
-    top: 50%; left: 0; right: 0;
-    height: 2px; background: rgba(255,255,255,0.2); /* Mittellinie */
-}
-
-.pitch-canvas::after {
-    content: "";
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 80px; height: 80px;
-    border: 2px solid rgba(255,255,255,0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%); /* Mittelkreis */
-}
-
-/* 3. DIE PLAYER-MARKER (NEON-PUNKTE) */
 .player-marker {
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    font-family: var(--font-hud);
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    transform: translate(-50%, -50%);
-    z-index: 5;
+    position: absolute; width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: bold; cursor: grab; z-index: 10;
+    font-family: var(--font-hud); transform: translate(-50%, -50%);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.5); border: 2px solid #fff;
 }
+.team-toni { background: var(--neon-cyan); color: #000; }
+.team-opp { background: var(--neon-alert); color: #fff; }
 
-/* Team Toni (Blaues Glühen) */
-.team-toni {
-    background: var(--neon-cyan);
-    color: #000;
-    box-shadow: 0 0 15px var(--neon-cyan);
-    border: 1px solid #fff;
-}
-
-/* Team Gegner (Roter Schatten) */
-.team-opp {
-    background: var(--neon-alert);
-    color: #fff;
-    box-shadow: 0 0 10px var(--neon-alert);
-    opacity: 0.8; /* Dezenter für den Gegner-Schatten */
-}
-
-.player-marker:hover {
-    transform: translate(-50%, -50%) scale(1.3);
-    z-index: 10;
-}
-
-/* 4. ANALYSE-REPORT PANEL */
 .tactics-report-panel {
-    background: rgba(0,0,0,0.6);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 15px;
-    font-family: var(--font-main);
+    background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px;
+    font-size: 12px; border-left: 3px solid var(--neon-gold);
 }
 
-.tactics-report-panel h3 {
-    font-family: var(--font-hud);
-    font-size: 12px;
-    color: var(--neon-gold);
-    margin-bottom: 10px;
+/* 8. VIDEO SUITE (TELESTRATOR) */
+.video-suite-container {
+    width: 90%; height: 90%; background: #111;
+    border: 1px solid #333; display: flex; flex-direction: column;
+    box-shadow: 0 0 100px rgba(0,0,0,0.8);
+}
+.suite-header {
+    height: 50px; background: #222; display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+    border-bottom: 1px solid #333;
+}
+.video-stage {
+    flex: 1; position: relative; background: #000; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+}
+video { max-width: 100%; max-height: 100%; }
+canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+/* Wenn Malen aktiv ist, muss Canvas klickbar sein (wird via JS gesteuert) */
+
+.suite-controls {
+    height: 80px; background: #151515; border-top: 1px solid #333;
+    display: flex; align-items: center; gap: 20px; padding: 0 20px;
+}
+.tool-group { display: flex; gap: 10px; background: #222; padding: 5px; border-radius: 50px; }
+.tool-btn {
+    width: 40px; height: 40px; border-radius: 50%; border: none; background: transparent; color: #aaa; cursor: pointer;
+}
+.tool-btn:hover, .tool-btn.active { background: var(--neon-cyan); color: #000; }
+
+/* 9. PRINT STYLES (MAGAZINE) */
+.magazine-sheet-sim {
+    width: 297mm; height: 210mm; background: #fff; color: #000; margin: 20px auto;
+    display: flex; box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+}
+.mag-page-sim { flex: 1; padding: 40px; border-right: 1px solid #eee; position: relative; }
+.mag-page-sim h4 { font-family: var(--font-print); font-size: 32px; border-bottom: 4px solid #000; margin-bottom: 20px; }
+.mag-content-editable { font-family: serif; font-size: 14px; line-height: 1.5; outline: none; }
+.mag-sponsor-footer { 
+    position: absolute; bottom: 40px; left: 40px; right: 40px; 
+    display: flex; justify-content: space-between; border-top: 1px solid #ccc; padding-top: 10px;
+}
+.mag-sponsor-logo { font-size: 10px; font-weight: bold; color: #555; text-transform: uppercase; }
+
+@media print {
+    @page { size: A4 landscape; margin: 0; }
+    body * { visibility: hidden; }
+    #magazine-sheet-container, #magazine-sheet-container * { visibility: visible; }
+    #magazine-studio-modal { position: absolute; top: 0; left: 0; background: #fff; }
+    .magazine-sheet-sim { box-shadow: none; margin: 0; page-break-after: always; }
 }
 
-.report-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    margin-bottom: 5px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding-bottom: 3px;
+/* 10. HELPER & BUTTONS */
+.btn-neon-small {
+    background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
+    padding: 8px 12px; font-family: var(--font-hud); font-size: 10px; cursor: pointer; transition: 0.3s;
 }
+.btn-neon-small:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 10px var(--neon-cyan); }
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
+    display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);
+}
+.lab-container { width: 600px; background: #1a1a1a; padding: 30px; border: 1px solid #444; border-radius: 10px; }
 
-.tactical-advice {
-    margin-top: 10px;
-    font-size: 12px;
-    line-height: 1.4;
-    color: #ccc;
-    font-style: italic;
+/* Responsive */
+@media (max-width: 1024px) {
+    .hud-grid { grid-template-columns: 1fr; overflow-y: auto; }
 }
