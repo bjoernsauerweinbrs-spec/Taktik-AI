@@ -2,38 +2,31 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | NEURAL NEWS DESK</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <title>TONI 2.0 | NEURAL PRESS AGENCY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
- 
+
     <div id="auth-layer">
         <div class="login-terminal">
             <div class="luxury-logo" style="font-size: 40px; margin-bottom: 20px;">TONI 2.0</div>
-            <p style="font-family: var(--font-ui); color: #444; letter-spacing: 2px;">PRESS BUREAU LOGIN</p>
-            <input type="password" id="passkey" class="auth-input" style="text-align:center;" placeholder="SECRET ACCESS CODE">
-            <button class="btn-main" onclick="bootSystem()" style="margin-top:20px;">SYSTEM INITIALISIEREN</button>
+            <button class="btn-main" onclick="bootSystem()">SYSTEM START</button>
         </div>
     </div>
 
     <div id="app-interface" class="hidden">
         <header id="top-bar">
-            <div class="app-brand"><span class="luxury-logo">TONI 2.0</span></div>
-            <div id="clock-display" style="font-family: var(--font-ui); color:#444; font-size:12px;">00:00:00</div>
-            <div style="display:flex; gap:25px; align-items:center;">
-                <div style="font-family: var(--font-ui); color: var(--neon-gold); font-size: 14px;"><i class="fa-solid fa-vault"></i> <span id="budget-display">0 €</span></div>
-                <button style="color:#222;"><i class="fa-solid fa-gear"></i></button>
+            <div class="luxury-logo">TONI 2.0</div>
+            <div id="clock-display" style="font-family: var(--font-ui); color:#444;">17:10:00</div>
+            <div style="font-family: var(--font-ui); color: var(--neon-gold); font-size: 14px;">
+                <i class="fa-solid fa-vault"></i> <span id="budget-display">4.500.000 €</span>
             </div>
         </header>
 
         <div style="display:flex; height: calc(100vh - 60px);">
             <nav class="nav-sidebar">
-                <div class="nav-group-title">COMMAND</div>
-                <button class="nav-item" onclick="loadModule('tactics')"><i class="fa-solid fa-compass-drafting"></i> TACTICAL CO-PILOT</button>
-                <div class="nav-group-title">INFRASTRUCTURE</div>
                 <button class="nav-item active" onclick="loadModule('press')"><i class="fa-solid fa-newspaper"></i> PRESS BUREAU</button>
                 <button class="nav-item" onclick="loadModule('nlz')"><i class="fa-solid fa-id-card"></i> ACADEMY HUB</button>
             </nav>
@@ -41,27 +34,23 @@
             <main id="stage-content" style="flex:1; overflow:hidden;"></main>
 
             <aside id="tools-sidebar">
-                <div class="nav-group-title">NEURAL REPORTER // LIVE-DESK</div>
+                <div style="padding: 20px; font-size: 10px; color: #444; letter-spacing: 2px;">NEURAL REPORTER // LIVE-DESK</div>
                 <div id="ai-log">
                     <div class="ai-bubble toni">
                         <small>TONI REPORTER</small>
-                        Willkommen in der Redaktion. Sind Sie bereit für das Briefing zur neuen Ausgabe? Ich scanne bereits die Sportportale nach News...
+                        Willkommen in der Redaktion. Drücken Sie den Live-Button, um das Interview per Sprache zu führen, oder nutzen Sie das Textfeld.
                     </div>
                 </div>
                 
-                <div style="padding:20px; border-top:1px solid #222; background:#080808;">
-                    <button id="live-voice-btn" class="live-btn" onclick="toggleVoiceMode()">
-                        <i class="fa-solid fa-microphone-lines"></i> LIVE REPORTER MODE
+                <div style="padding:20px; border-top:1px solid #1a1a1d; background:#080808;">
+                    <button id="live-voice-btn" class="live-btn" onclick="toggleVoiceAI()">
+                        <i class="fa-solid fa-microphone"></i> VOICE REPORTER MODE
                     </button>
                     
-                    <div id="interview-controls" class="hidden" style="margin-top:15px;">
-                        <input type="text" id="ai-chat-input" class="auth-input" style="margin-bottom:10px; background:#000; border-color:#222; font-size:12px;" placeholder="Antworten Sie dem Reporter..." onkeypress="if(event.key==='Enter') processInterviewStep()">
+                    <div id="interview-controls" style="margin-top:15px;">
+                        <input type="text" id="ai-chat-input" style="width:100%; padding:12px; background:#111; border:1px solid #333; color:#fff; margin-bottom:10px;" placeholder="Antworten..." onkeypress="if(event.key==='Enter') processInterviewStep()">
                         <button class="btn-main" onclick="processInterviewStep()">ANTWORT SENDEN</button>
                     </div>
-                    
-                    <button id="btn-start-briefing" class="btn-main" onclick="startAIBriefing()" style="margin-top:10px; border-color:var(--neon-gold); color:var(--neon-gold);">
-                        <i class="fa-solid fa-play"></i> INTERVIEW STARTEN
-                    </button>
                 </div>
             </aside>
         </div>
