@@ -1,27 +1,24 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL OPERATING SYSTEM (V20.0 GIGANTIC)
+   TONI 2.0 | NEURAL OPERATING SYSTEM (V22.0 GOLD SHIMMER)
    ========================================================================== */
 
 :root {
-    /* -- ELITE PALETTE -- */
     --bg-deep: #030305;
     --bg-panel: rgba(15, 15, 25, 0.98);
     --border-gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
     
-    /* -- TECH ACCENTS -- */
     --neon-cyan: #00f3ff;
     --neon-gold: #d4af37;
     --neon-alert: #ff003c;
-    --path-vector: #0aff60; /* Für Laufwege */
-    --pass-vector: #ffd700; /* Für Passwege */
+    --path-vector: #0aff60;
+    --pass-vector: #ffd700;
 
-    /* -- FONTS -- */
     --font-ui: 'Orbitron', sans-serif;
     --font-main: 'Rajdhani', sans-serif;
     --font-paper: 'Playfair Display', serif;
 }
 
-/* 1. GLOBAL RESET & LUXURY CANVAS */
+/* 1. GLOBAL RESET */
 * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
 body {
     height: 100vh; width: 100vw; overflow: hidden;
@@ -30,7 +27,22 @@ body {
 }
 .hidden { display: none !important; }
 
-/* 2. AUTHENTICATION (FINGERPRINT LOOK) */
+/* 2. LUXURY GOLD LOGO (SHIMMER EFFECT) */
+.luxury-logo {
+    font-family: var(--font-ui); font-weight: 900;
+    background: linear-gradient(to right, #bf953f 20%, #fcf6ba 40%, #fcf6ba 60%, #bf953f 80%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: goldShimmer 4s linear infinite;
+    display: inline-block;
+}
+
+@keyframes goldShimmer {
+    to { background-position: 200% center; }
+}
+
+/* 3. AUTHENTICATION */
 #auth-layer {
     position: fixed; inset: 0; z-index: 9999;
     background: #000; display: flex; align-items: center; justify-content: center;
@@ -40,6 +52,12 @@ body {
     border: 1px solid #222; background: rgba(10,10,15,0.9);
     box-shadow: 0 0 100px rgba(0, 243, 255, 0.05);
 }
+.auth-input {
+    width: 100%; padding: 15px; background: #111; border: 1px solid #333;
+    color: #fff; text-align: center; font-family: var(--font-ui); letter-spacing: 3px;
+    margin-bottom: 20px;
+}
+
 .btn-main {
     width: 100%; padding: 15px; background: transparent; border: 1px solid var(--neon-cyan);
     color: var(--neon-cyan); font-family: var(--font-ui); cursor: pointer;
@@ -47,100 +65,89 @@ body {
 }
 .btn-main:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 30px var(--neon-cyan); }
 
-/* 3. TACTICAL CO-PILOT (VECTOR ENGINE) */
-.pitch-container {
-    position: relative; width: 100%; height: 100%;
-    background: #1a3a1a; border: 5px solid #fff;
-    box-shadow: inset 0 0 150px rgba(0,0,0,0.8);
-}
-/* Laufweg-Vektoren */
-.vector-path {
-    stroke: var(--path-vector); stroke-width: 3; stroke-dasharray: 10;
-    animation: flow 2s linear infinite;
-}
-@keyframes flow { to { stroke-dashoffset: -20; } }
-
-/* Ausrüstung (Hütchen, Dummys) */
-.equipment-icon {
-    position: absolute; width: 20px; height: 20px;
-    background: orange; clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    z-index: 50;
+/* 4. NLZ PANINI HUB */
+.nlz-background {
+    background: radial-gradient(circle at center, #1a253d 0%, #050a15 100%);
+    min-height: 100%;
 }
 
-/* 4. NLZ PANINI ECOSYSTEM */
 .panini-album {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 30px; padding: 40px;
 }
+
 .panini-card {
-    height: 300px; background: linear-gradient(145deg, #1d2b4a, #0a1120);
+    height: 340px; background: linear-gradient(145deg, #2b3a5a, #0a1120);
     border: 2px solid #3a4a6f; border-radius: 15px;
     position: relative; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
-    cursor: pointer;
+    cursor: pointer; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
 }
 .panini-card:hover {
-    transform: scale(1.05) rotateY(10deg);
+    transform: translateY(-10px) scale(1.03);
     border-color: var(--neon-gold);
-}
-/* Gold-Prägung Logo */
-.luxury-logo {
-    font-family: var(--font-ui); font-weight: 900;
-    background: var(--border-gold);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 5px rgba(186, 149, 63, 0.3));
+    box-shadow: 0 20px 50px rgba(212, 175, 55, 0.2);
 }
 
-/* 5. PRESS STATION (A4 LANDSCAPE ENGINE) */
-.press-office-workspace {
-    background: #444; height: 100%; overflow-y: auto; padding: 50px;
-    display: flex; flex-direction: column; align-items: center;
+/* Sticker-Slots im Album */
+.sticker-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;
 }
-.magazine-page {
-    background: #fff; width: 297mm; height: 210mm; /* A4 Querformat */
-    margin-bottom: 40px; color: #000; display: grid;
-    grid-template-columns: 1fr 1fr; /* 2 Seiten pro Blatt */
-    box-shadow: 0 0 50px rgba(0,0,0,0.5); position: relative;
+.sticker-slot {
+    aspect-ratio: 1; background: rgba(0,0,0,0.3); border: 1px dashed #444;
+    border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #333; transition: 0.3s;
 }
-/* Falz-Linie */
-.magazine-page::after {
-    content: ""; position: absolute; left: 50%; top: 0; bottom: 0;
-    width: 1px; background: rgba(0,0,0,0.1);
+.sticker-slot.unlocked {
+    background: var(--border-gold); border: 1px solid #fff;
+    color: #000; box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
-.magazine-content {
-    padding: 20mm; font-family: var(--font-paper);
-}
-.magazine-content h1 { font-size: 48px; text-transform: uppercase; border-bottom: 4px solid #000; }
 
-/* 6. MANAGER WORKSPACE (ERP STYLE) */
-.manager-ledger {
-    width: 100%; border-collapse: separate; border-spacing: 0 10px;
+/* 5. TACTICAL ENGINE */
+.pitch-container {
+    position: relative; width: 100%; height: 600px;
+    background: #1e3d1e; border: 5px solid #fff;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
 }
-.manager-ledger tr { background: rgba(255,255,255,0.03); transition: 0.3s; }
-.manager-ledger tr:hover { background: rgba(255,255,255,0.08); }
-.manager-ledger td { padding: 20px; font-family: var(--font-ui); border-top: 1px solid #333; border-bottom: 1px solid #333; }
+.player-dot {
+    position: absolute; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--neon-cyan); color: #000; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #fff; cursor: grab; transform: translate(-50%, -50%);
+    font-family: var(--font-ui); font-size: 11px; z-index: 10;
+}
+.vector-path {
+    stroke-width: 3; stroke-dasharray: 8;
+    animation: flow 2s linear infinite;
+}
+@keyframes flow { to { stroke-dashoffset: -16; } }
 
-/* 7. HUD & NAVIGATION */
+/* 6. MODALS */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+    z-index: 8000; display: flex; align-items: center; justify-content: center;
+}
+.modal-window {
+    background: var(--bg-panel); border: 1px solid #333;
+    box-shadow: 0 0 50px rgba(0,0,0,1);
+}
+
+/* 7. HUD & NAV */
 #top-bar {
     height: 70px; background: #000; border-bottom: 1px solid #222;
     display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
 }
-.nav-sidebar {
-    width: 260px; background: var(--bg-panel); border-right: 1px solid #222;
-}
+.nav-sidebar { width: 260px; background: #080808; border-right: 1px solid #222; }
+.nav-group-title { padding: 25px 30px 10px; font-size: 10px; color: #444; font-family: var(--font-ui); letter-spacing: 2px; }
 .nav-item {
-    padding: 20px 30px; cursor: pointer; transition: 0.3s;
-    font-family: var(--font-ui); font-size: 12px; letter-spacing: 1px;
-    color: #666; border-left: 4px solid transparent;
+    padding: 15px 30px; cursor: pointer; color: #666; font-family: var(--font-ui);
+    font-size: 11px; border-left: 4px solid transparent; transition: 0.3s;
 }
-.nav-item:hover, .nav-item.active {
-    color: #fff; background: rgba(0, 243, 255, 0.05);
-    border-left-color: var(--neon-cyan);
-}
+.nav-item:hover, .nav-item.active { color: #fff; background: rgba(0, 243, 255, 0.03); border-left-color: var(--neon-cyan); }
 
-/* 8. PRINT SETTINGS */
-@media print {
-    body { background: #fff; overflow: visible; }
-    #nav-sidebar, #top-bar, #tools-sidebar, .btn-main { display: none !important; }
-    .magazine-page { box-shadow: none; margin: 0; page-break-after: always; }
+/* 8. PRESS ENGINE */
+.magazine-page {
+    background: #fff; width: 297mm; height: 210mm;
+    margin: 40px auto; color: #000; display: grid; grid-template-columns: 1fr 1fr;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5); position: relative;
 }
+.magazine-content { padding: 20mm; font-family: var(--font-paper); }
