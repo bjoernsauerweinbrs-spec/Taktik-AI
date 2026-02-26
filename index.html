@@ -2,39 +2,25 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 | NEURAL CLUB ENGINE</title>
+    <title>TONI 2.0 | NCOS ULTIMATE</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <div id="auth-layer">
-        <div class="login-terminal">
-            <div class="luxury-logo" style="font-size: 40px; margin-bottom: 20px;">TONI 2.0</div>
-            <p style="font-family: var(--font-ui); color: #444; font-size: 10px;">NEURAL OPERATING SYSTEM</p>
-            <button class="btn-main" onclick="bootSystem()" style="margin-top:20px;">SYSTEM INITIALISIEREN</button>
-        </div>
-    </div>
-
-    <div id="app-interface" class="hidden">
-        <header id="top-bar">
-            <div class="luxury-logo" style="font-size: 20px;">TONI 2.0</div>
-            <div id="clock-display" style="font-family: var(--font-ui); color:#444; font-size: 12px;">00:00:00</div>
-            <div style="font-family: var(--font-ui); color: var(--neon-gold); font-size: 13px;">
-                <i class="fa-solid fa-vault"></i> <span id="budget-display">4.500.000 €</span>
-            </div>
+    <div id="app-interface">
+        <header id="top-bar" style="height:60px; background:#000; display:flex; align-items:center; justify-content:space-between; padding:0 30px; border-bottom:1px solid #111;">
+            <div class="luxury-logo" style="font-size:20px;">TONI 2.0</div>
+            <div id="clock-display" style="font-family:var(--font-ui); color:#444;">18:00:00</div>
+            <div style="font-family:var(--font-ui); color:var(--neon-gold); font-size:12px;">BUDGET: 4.500.000 €</div>
         </header>
 
         <div style="display:flex; height: calc(100vh - 60px);">
             <nav class="nav-sidebar">
-                <div class="nav-group-title">COMMAND & STRATEGY</div>
                 <button class="nav-item" onclick="loadModule('tactics')"><i class="fa-solid fa-compass-drafting"></i> TACTICAL CO-PILOT</button>
                 <button class="nav-item" onclick="loadModule('kader')"><i class="fa-solid fa-shirt"></i> MANNSCHAFTSKABINE</button>
-                <button class="nav-item" onclick="loadModule('office')"><i class="fa-solid fa-chart-line"></i> OFFICE PRIME (ERP)</button>
-                
-                <div class="nav-group-title">INFRASTRUCTURE</div>
-                <button class="nav-item" onclick="loadModule('nlz')"><i class="fa-solid fa-address-card"></i> ACADEMY HUB (NLZ)</button>
+                <button class="nav-item" onclick="loadModule('office')"><i class="fa-solid fa-chart-line"></i> OFFICE PRIME</button>
+                <button class="nav-item" onclick="loadModule('nlz')"><i class="fa-solid fa-id-card"></i> ACADEMY HUB (NLZ)</button>
                 <button class="nav-item active" onclick="loadModule('press')"><i class="fa-solid fa-newspaper"></i> PRESS BUREAU</button>
                 <button class="nav-item" onclick="loadModule('video')"><i class="fa-solid fa-clapperboard"></i> BROADCAST LAB</button>
             </nav>
@@ -42,29 +28,22 @@
             <main id="stage-content" style="flex:1; overflow:hidden;"></main>
 
             <aside id="tools-sidebar">
-                <div class="nav-group-title">AI REPORTER // LIVE-DESK</div>
                 <div id="ai-log">
                     <div class="ai-bubble toni">
                         <small>TONI REPORTER</small><br>
-                        Warten auf Einsatzbefehl. Nutzen Sie den <b>Voice Mode</b> für das Interview.
+                        System bereit. Ich erwarte Ihre Anweisungen für das neue Heft.
                     </div>
                 </div>
-                <div style="padding:20px; border-top:1px solid #1a1a1d; background:#080808;">
-                    <button id="live-voice-btn" class="live-btn" onclick="toggleVoiceAI()">
-                        <i class="fa-solid fa-microphone"></i> VOICE REPORTER MODE
-                    </button>
-                    <div id="interview-controls" class="hidden" style="margin-top:10px;">
-                        <input type="text" id="ai-chat-input" class="auth-input" style="background:#000; margin-bottom:10px; text-align:left;" placeholder="Antwort..." onkeypress="if(event.key==='Enter') processInterviewStep()">
+                <div style="padding:20px; border-top:1px solid #111;">
+                    <button id="live-voice-btn" class="live-btn" onclick="toggleVoiceAI()">VOICE REPORTER MODE</button>
+                    <div id="interview-controls" style="margin-top:10px;">
+                        <input type="text" id="ai-chat-input" style="width:100%; padding:12px; background:#111; border:1px solid #333; color:#fff; margin-bottom:10px;" placeholder="Tippen oder sprechen..." onkeypress="if(event.key==='Enter') processInterviewStep()">
                         <button class="btn-main" onclick="processInterviewStep()">SENDEN</button>
                     </div>
-                    <button id="btn-start-briefing" class="btn-main" onclick="startAIBriefing()" style="margin-top:10px; border-color:var(--neon-gold); color:var(--neon-gold);">
-                        INTERVIEW STARTEN
-                    </button>
                 </div>
             </aside>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
