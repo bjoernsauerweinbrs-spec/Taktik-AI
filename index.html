@@ -2,26 +2,31 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 | LOGIN & SETUP</title>
+    <title>TONI 2.0 | SYSTEM SETUP</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="auth-body">
     <div class="setup-container">
-        <div class="luxury-logo" style="font-size: 38px; display: block; text-align: center; margin-bottom: 30px;">TONI 2.0</div>
+        <div class="luxury-logo" style="font-size: 38px; text-align: center; margin-bottom: 30px; display:block;">TONI 2.0</div>
         
         <div class="config-section">
-            <div class="config-header">LIVE-DATA & AI SETUP</div>
-            <input type="password" id="api-key" class="auth-input" placeholder="FOOTBALL-DATA API KEY">
+            <div class="config-header">LIVE-DATA INTERFACE (API)</div>
+            <p class="help-text">Um echte Tabellenstände von 2026 zu ziehen, benötigen Sie einen Key von <b>football-data.org</b> (Free Plan). Dieser verbindet TONI mit den weltweiten Fussball-Servern.</p>
+            <input type="password" id="api-key" class="auth-input" placeholder="API KEY EINGEBEN">
+        </div>
+
+        <div class="config-section">
+            <div class="config-header">NEURAL CORE (OLLAMA)</div>
+            <p class="help-text">Für die KI-gesteuerten Interviews nutzen wir <b>Ollama</b>. Starten Sie Ollama lokal auf Ihrem Rechner (localhost:11434), damit TONI als Ihr persönlicher Reporter agieren kann.</p>
             <input type="text" id="ollama-url" class="auth-input" value="http://localhost:11434" placeholder="OLLAMA URL">
         </div>
 
         <div class="login-section">
-            <input type="password" id="passcode" class="auth-input" style="text-align:center; letter-spacing:5px;" placeholder="PASSCODE">
-            <button class="btn-main" onclick="saveAndBoot()">SYSTEM STARTEN</button>
+            <input type="password" id="passcode" class="auth-input" style="text-align:center; letter-spacing:5px;" placeholder="SYSTEM PASSCODE">
+            <button class="btn-main" onclick="saveAndBoot()">INITIALISIEREN & STARTEN</button>
         </div>
     </div>
     <script src="script.js"></script>
 </body>
 </html>
- 
