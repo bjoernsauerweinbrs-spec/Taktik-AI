@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -73,7 +73,8 @@
             </aside>
 
             <main id="stage-center" class="hud-column stage-main">
-                <div id="module-content" class="fade-in"></div>
+                <div id="module-content" class="fade-in">
+                    </div>
             </main>
 
             <aside id="info-right" class="hud-column">
@@ -101,6 +102,19 @@
 
     <div id="bio-lab-modal" class="modal-overlay hidden">
         <div id="modal-container" class="lab-container"></div>
+    </div>
+
+    <div id="magazine-studio-modal" class="modal-overlay hidden">
+        <div class="studio-top-bar">
+            <div class="studio-info"><i class="fa-solid fa-print"></i> DIN-A4 QUER // DRUCK-VORSCHAU</div>
+            <div class="studio-actions">
+                <button onclick="addMagazineSheet()" class="btn-neon-small"><i class="fa-solid fa-plus"></i> BOGEN HINZUFÜGEN</button>
+                <button onclick="window.print()" class="btn-neon-small"><i class="fa-solid fa-check"></i> JETZT DRUCKEN</button>
+                <button onclick="document.getElementById('magazine-studio-modal').classList.add('hidden')" class="btn-close-studio">X</button>
+            </div>
+        </div>
+        <div id="magazine-sheet-container">
+            </div>
     </div>
 
     <script src="script.js"></script>
