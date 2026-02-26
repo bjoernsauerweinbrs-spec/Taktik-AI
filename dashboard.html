@@ -10,12 +10,10 @@
 <body>
     <header id="top-bar">
         <div class="luxury-logo" style="font-size:20px;">TONI 2.0</div>
-        
         <div class="status-hub">
             <div class="status-item"><div id="lamp-api" class="lamp"></div> DATA API</div>
             <div class="status-item"><div id="lamp-ollama" class="lamp"></div> NEURAL CORE</div>
         </div>
-
         <div id="clock-display" style="font-family:'Orbitron'; color:#444; font-size:11px;">00:00:00</div>
         <div style="font-family:'Orbitron'; color:var(--neon-gold); font-size:12px;">4.500.000 €</div>
     </header>
@@ -27,18 +25,16 @@
             <button class="nav-item active" onclick="loadModule('press')">PRESS BUREAU</button>
             <button class="nav-item" onclick="loadModule('nlz')">ACADEMY HUB</button>
         </nav>
-
         <main id="stage-content"></main>
-
         <aside id="tools-sidebar">
             <div id="ai-log"></div>
-            <div style="padding:20px; border-top:1px solid #111;">
-                <button id="voice-btn" class="live-btn" onclick="toggleVoiceAI()" style="background:#ff003c; color:#fff; width:100%; padding:12px; margin-bottom:10px; border:none; font-family:'Orbitron'; font-size:10px; cursor:pointer;">VOICE MODE</button>
+            <div class="ai-controls-box">
+                <button id="voice-btn" class="live-btn" onclick="toggleVoiceAI()">VOICE MODE</button>
                 <div id="interview-ui" class="hidden">
-                    <input type="text" id="ai-input" style="width:100%; padding:10px; background:#111; border:1px solid #333; color:#fff; margin-bottom:10px;" placeholder="Antwort...">
-                    <button onclick="processInterview()" style="width:100%; padding:10px; border:1px solid var(--neon-cyan); color:var(--neon-cyan); background:transparent; font-family:'Orbitron'; font-size:10px; cursor:pointer;">SENDEN</button>
+                    <input type="text" id="ai-input" placeholder="Antwort..." onkeypress="if(event.key==='Enter') processInterview()">
+                    <button class="btn-main" onclick="processInterview()">SENDEN</button>
                 </div>
-                <button id="start-btn" onclick="startInterview()" style="width:100%; padding:12px; border:1px solid var(--neon-gold); color:var(--neon-gold); background:transparent; font-family:'Orbitron'; font-size:10px; cursor:pointer;">INTERVIEW STARTEN</button>
+                <button id="start-btn" class="btn-main" onclick="startInterview()">INTERVIEW STARTEN</button>
             </div>
         </aside>
     </div>
