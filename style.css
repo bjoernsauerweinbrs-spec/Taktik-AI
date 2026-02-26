@@ -1,10 +1,10 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL OPERATING SYSTEM (V27.0 - ELITE REPORTER FIX)
+   TONI 2.0 | NEURAL OPERATING SYSTEM (V28.0 - NEWS AGENCY MASTERY)
    ========================================================================== */
 
 :root {
-    --bg-deep: #050505;
-    --bg-agency: #0a0a0c;
+    --bg-deep: #030305;
+    --bg-agency: #08080a;
     --neon-cyan: #00f3ff;
     --neon-gold: #d4af37;
     --border-dark: #1a1a1d;
@@ -14,9 +14,9 @@
     --font-paper: 'Playfair Display', serif;
 }
 
-/* 1. GLOBAL RESET */
+/* 1. GLOBAL & RESET */
 * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-appearance: none; }
-button { background: none; border: none; color: inherit; font: inherit; cursor: pointer; }
+button { background: none; border: none; cursor: pointer; color: inherit; }
 
 body { height: 100vh; width: 100vw; overflow: hidden; background: var(--bg-deep); color: #fff; font-family: var(--font-main); }
 .hidden { display: none !important; }
@@ -25,56 +25,56 @@ body { height: 100vh; width: 100vw; overflow: hidden; background: var(--bg-deep)
 #top-bar { height: 60px; background: #000; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
 .nav-sidebar { width: 220px; background: #000; border-right: 1px solid var(--border-dark); display: flex; flex-direction: column; flex-shrink: 0; }
 .nav-group-title { padding: 25px 25px 5px; font-size: 9px; color: #444; font-family: var(--font-ui); letter-spacing: 2px; text-transform: uppercase; }
-.nav-item { padding: 15px 25px; color: #666; font-family: var(--font-ui); font-size: 10px; background: transparent; text-align: left; transition: 0.3s; border-left: 3px solid transparent; width: 100%; display: block; }
+.nav-item { padding: 15px 25px; color: #666; font-family: var(--font-ui); font-size: 10px; transition: 0.3s; border-left: 3px solid transparent; width: 100%; display: block; text-align: left; }
 .nav-item:hover, .nav-item.active { color: #fff; background: rgba(0, 243, 255, 0.05); border-left-color: var(--neon-cyan); }
 
-/* 3. PRESS AGENCY WORKSPACE */
+/* 3. THE PRESS BUREAU (AGENCY WORKSPACE) */
 .agency-workspace { display: flex; height: 100%; background: var(--bg-agency); width: 100%; overflow: hidden; }
 .agency-tools { width: 260px; background: #000; border-right: 1px solid var(--border-dark); padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; }
-.btn-agency { background: #0a0a0c; border: 1px solid #222; color: #888; padding: 12px; font-family: var(--font-ui); font-size: 9px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; width: 100%; transition: 0.2s; }
-.btn-agency:hover { background: var(--neon-cyan); color: #000; border-color: var(--neon-cyan); }
 
 .magazine-viewport { flex: 1; overflow-y: auto; padding: 40px; background: radial-gradient(circle at center, #151518 0%, #050505 100%); display: flex; flex-direction: column; align-items: center; }
 
-/* DYNAMISCHE ZEITUNGS-SKALIERUNG */
 .magazine-page { 
     background: #fff; width: 95%; max-width: 1000px; aspect-ratio: 297 / 210; 
     display: grid; grid-template-columns: 1fr 1fr; box-shadow: 0 50px 100px rgba(0,0,0,0.9); 
     position: relative; margin-bottom: 50px; color: #000; flex-shrink: 0; 
 }
-.magazine-page::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,0.1); z-index: 10; }
+.magazine-page::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,0.08); z-index: 10; }
 
-.page-half { padding: 8%; color: var(--text-mag); position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.page-half { padding: 10%; color: var(--text-mag); position: relative; display: flex; flex-direction: column; overflow: hidden; }
 
-/* FIX: Schlagzeilen-Anpassung */
+/* Dynamic Headline Scaling */
 .mag-headline { 
-    font-family: var(--font-paper); font-size: clamp(20px, 3.5vw, 44px); 
-    border-bottom: 4px solid #000; padding-bottom: 10px; margin-bottom: 20px; 
-    font-weight: 700; line-height: 1.1; overflow-wrap: break-word; hyphens: auto; 
+    font-family: var(--font-paper); font-size: clamp(22px, 4vw, 50px); 
+    border-bottom: 6px solid #000; padding-bottom: 10px; margin-bottom: 20px; 
+    font-weight: 700; line-height: 0.95; overflow-wrap: break-word; hyphens: auto; 
 }
 
-.mag-article { font-family: var(--font-paper); font-size: clamp(10px, 1.1vw, 13px); line-height: 1.6; column-count: 2; column-gap: 20px; text-align: justify; }
+.mag-article { font-family: var(--font-paper); font-size: clamp(11px, 1.1vw, 14px); line-height: 1.6; column-count: 2; column-gap: 25px; text-align: justify; }
 
-/* 4. PARTNER & LOGO */
-.partner-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px; }
-.partner-box { border: 1px solid #eee; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; background: #fafafa; font-size: 8px; color: #ccc; }
+/* 4. HUD ELEMENTS */
 .luxury-logo { font-family: var(--font-ui); font-weight: 900; background: linear-gradient(to right, #bf953f 20%, #fcf6ba 40%, #fcf6ba 60%, #bf953f 80%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: goldShimmer 4s linear infinite; }
 @keyframes goldShimmer { to { background-position: 200% center; } }
 
-/* 5. TACTICAL & NLZ */
-.pitch-container { position: relative; width: 100%; height: 600px; background: #1a3a1a; border: 5px solid #fff; }
-.panini-album { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 30px; }
-.panini-card { height: 320px; background: linear-gradient(145deg, #1d2b4a, #0a1120); border: 1px solid #334; border-radius: 12px; position: relative; }
+.btn-main { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); font-family: var(--font-ui); cursor: pointer; text-transform: uppercase; letter-spacing: 2px; font-size: 10px; }
+.btn-main:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 20px rgba(0, 243, 255, 0.4); }
 
-/* 6. AI REPORTER PANEL */
-#tools-sidebar { width: 320px; background: #000; border-left: 1px solid var(--border-dark); flex-shrink: 0; display: flex; flex-direction: column; }
-#ai-log { flex: 1; padding: 20px; font-size: 13px; color: #aaa; overflow-y: auto; line-height: 1.6; scroll-behavior: smooth; }
-.ai-bubble { margin-bottom: 15px; padding-left: 10px; border-left: 2px solid #333; }
-.ai-bubble.toni { border-left-color: var(--neon-cyan); }
+.btn-agency { background: #0a0a0c; border: 1px solid #222; color: #888; padding: 12px; font-family: var(--font-ui); font-size: 9px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; width: 100%; }
+.btn-agency:hover { background: var(--neon-cyan); color: #000; }
 
-.auth-input { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: #fff; font-family: var(--font-main); margin-bottom: 10px; }
-.btn-main { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); font-family: var(--font-ui); cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+/* 5. AI REPORTER PANEL (SIDEBAR) */
+#tools-sidebar { width: 340px; background: #000; border-left: 1px solid var(--border-dark); flex-shrink: 0; display: flex; flex-direction: column; }
+#ai-log { flex: 1; padding: 25px; font-size: 13px; color: #aaa; overflow-y: auto; line-height: 1.7; scroll-behavior: smooth; }
 
+.ai-bubble { margin-bottom: 20px; padding: 15px; border-radius: 4px; position: relative; }
+.ai-bubble.toni { background: rgba(0, 243, 255, 0.03); border-left: 3px solid var(--neon-cyan); }
+.ai-bubble.user { background: rgba(255, 255, 255, 0.02); border-right: 3px solid #444; text-align: right; }
+.ai-bubble small { font-family: var(--font-ui); font-size: 8px; color: #555; display: block; margin-bottom: 5px; letter-spacing: 1px; }
+
+.live-btn { background: var(--neon-alert); color: #fff; border: none; padding: 10px; font-family: var(--font-ui); font-size: 9px; width: 100%; margin-top: 10px; animation: pulse 2s infinite; cursor: pointer; }
+@keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; box-shadow: 0 0 15px var(--neon-alert); } 100% { opacity: 0.8; } }
+
+/* 6. PRINT */
 @media print {
     body { background: #fff; }
     .nav-sidebar, .agency-tools, #top-bar, #tools-sidebar { display: none !important; }
