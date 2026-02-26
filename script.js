@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - ELITE PERFORMANCE UPDATE
+   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - TACTICAL ENGINE UPGRADE
    ========================================================================== */
 
 const SAVE_KEY = "TONI20_SYSTEM_DATA";
@@ -17,7 +17,7 @@ let eliteStore = {
             { id: 3, name: "ToniLogic", type: "Lokal", value: 200000, bonus: 20000, roi: 15.0 }
         ],
         infrastructure: {
-            analysisCenter: 1, // Level 1-5 (Beeinflusst Datengenauigkeit)
+            analysisCenter: 1, 
             stadiumExp: 1,
             academy: 1
         }
@@ -27,9 +27,9 @@ let eliteStore = {
         clubName: "FC TONI 2.0",
         sheets: 1,
         pages: [
-            { id: 1, title: "MATCH DAY", content: "ANALYSE: Fokus auf Halbräume. Gegner SV Hennes agiert mit hohem Pressing." },
-            { id: 2, title: "TACTICAL DATA", content: "Heatmap-Vorschau: Überladung der Flügelzonen im 4-4-2 Übergang." },
-            { id: 3, title: "OFFICE REPORT", content: "ROI-Analyse der Sponsoren-Pyramide Q1." },
+            { id: 1, title: "MATCH DAY", content: "ANALYSE: Fokus auf Halbräume. Gegner agiert mit 3er-Kette." },
+            { id: 2, title: "TACTICAL DATA", content: "Schnittstellen-Analyse: Vertikale Passwege im 4-4-2." },
+            { id: 3, title: "OFFICE REPORT", content: "ROI-Analyse der Sponsoren-Pyramide." },
             { id: 4, title: "IMPRESSUM", content: "Toni 2.0 High-End Management Suite." }
         ]
     },
@@ -56,17 +56,9 @@ let eliteStore = {
 function analyzePerformance(player) {
     const aiBox = document.querySelector('.ai-msg');
     let report = `ANALYSE [${player.name}]: `;
-
-    // Belastungs-Korrelation
-    if (player.bio.kfa > 13) {
-        report += `KFA bei ${player.bio.kfa}% kritisch für Explosivität in Umschaltmomenten. `;
-    }
-    if (player.sensors.heart > 55) {
-        report += `Erhöhter Ruhepuls indiziert mangelnde Regenerations-Effizienz. Belastung steuern. `;
-    } else {
-        report += `VO2max (${player.sensors.vo2}) auf Elite-Niveau. Hohe Intensität in Pressing-Phasen möglich. `;
-    }
-
+    if (player.bio.kfa > 13) report += `KFA bei ${player.bio.kfa}% kritisch für Explosivität. `;
+    if (player.sensors.heart > 55) report += `Erhöhter Ruhepuls indiziert mangelnde Regeneration. `;
+    else report += `VO2max (${player.sensors.vo2}) auf Elite-Niveau. Hohe Pressing-Intensität möglich. `;
     aiBox.innerHTML = `<strong>TONI PERF-ADVISOR:</strong> <br>${report}`;
 }
 
@@ -103,7 +95,6 @@ function switchModule(modId) {
     const stage = document.getElementById('module-content');
     const title = document.getElementById('active-mod-title');
     eliteStore.mgmt.activeModule = modId;
-
     document.querySelectorAll('.side-nav button').forEach(b => b.classList.remove('active'));
     const navBtn = document.getElementById(`nav-${modId}`);
     if(navBtn) navBtn.classList.add('active');
@@ -120,7 +111,7 @@ function switchModule(modId) {
 function renderKader(target) {
     target.innerHTML = `
         <div class="kader-grid fade-in">
-            ${eliteStore.players.filter(p => p.type === 'pro').map(p => `
+            ${eliteStore.players.map(p => `
                 <div class="fifa-card" onclick="openBioLab(${p.id})">
                     <div class="card-inner">
                         <div class="card-rating-box"><span class="val">${p.rating}</span><span class="pos">${p.pos}</span></div>
@@ -137,15 +128,13 @@ function renderKader(target) {
     `;
 }
 
-// 4. BIO-LAB (ANALYTISCHE TIEFE)
+// 4. BIO-LAB
 function openBioLab(id) {
     const p = eliteStore.players.find(x => x.id === id);
     const modal = document.getElementById('bio-lab-modal');
     const container = document.getElementById('modal-container');
     modal.classList.remove('hidden');
-
-    analyzePerformance(p); // Sofortige Analyse beim Öffnen
-
+    analyzePerformance(p);
     container.innerHTML = `
         <div class="column-header">PERFORMANCE-HUB // ${p.name}</div>
         <div class="lab-grid">
@@ -155,7 +144,7 @@ function openBioLab(id) {
                 <div class="lab-row"><span>KFA %</span><input type="number" step="0.1" value="${p.bio.kfa}" onchange="updateValue(${p.id}, 'bio', 'kfa', this.value)"></div>
             </div>
             <div class="office-panel">
-                <h3>TELEMETRIE (SENSOR)</h3>
+                <h3>TELEMETRIE</h3>
                 <div class="lab-row"><span>PULS</span><input type="number" value="${p.sensors.heart}" onchange="updateValue(${p.id}, 'sensors', 'heart', this.value)"></div>
                 <div class="lab-row"><span>VO2MAX</span><input type="number" value="${p.sensors.vo2}" onchange="updateValue(${p.id}, 'sensors', 'vo2', this.value)"></div>
             </div>
@@ -168,39 +157,93 @@ function updateValue(id, cat, key, val) {
     const p = eliteStore.players.find(x => x.id === id);
     p[cat][key] = parseFloat(val);
     saveToDisk();
-    analyzePerformance(p); // Live-Re-Analyse bei Datenänderung
+    analyzePerformance(p);
 }
 
 function closeBioLab() { document.getElementById('bio-lab-modal').classList.add('hidden'); }
 
-// 5. OFFICE PRIME (STRATEGISCHES MANAGEMENT)
+// 5. OFFICE PRIME
 function renderOffice(target) {
     target.innerHTML = `
         <div class="office-grid fade-in">
             <div class="office-panel">
-                <h3>STRATEGISCHE PARTNER (ROI)</h3>
-                ${eliteStore.finance.sponsors.map(s => `
-                    <div class="lab-row"><span>${s.name}</span><b>ROI: ${s.roi}%</b></div>
-                `).join('')}
+                <h3>PARTNER (ROI)</h3>
+                ${eliteStore.finance.sponsors.map(s => `<div class="lab-row"><span>${s.name}</span><b>ROI: ${s.roi}%</b></div>`).join('')}
             </div>
             <div class="office-panel">
-                <h3>INFRASTRUKTUR-LEVEL</h3>
+                <h3>INFRASTRUKTUR</h3>
                 <div class="lab-row"><span>ANALYSEZENTRUM</span><b>LVL ${eliteStore.finance.infrastructure.analysisCenter}</b></div>
-            </div>
-            <div class="office-panel" style="grid-column: span 2;">
-                <h3>FINANZ-VORSCHAU</h3>
-                <div class="lab-row"><span>LIQUIDITÄT</span><b>${eliteStore.mgmt.budget.toLocaleString()} €</b></div>
             </div>
         </div>`;
 }
 
-// 6. MEDIA & TACTICS (REDUZIERT AUF PROFESS. CORE)
+// 6. MEDIA CENTER
 function renderMediaCenter(target) {
-    target.innerHTML = `<div class="office-panel fade-in"><h3>STADIONZEITUNG PRO-STUDIO</h3><p>Fokus: Datenbasierte Spielberichte & Taktik-Visualisierungen.</p><button class="btn-neon-small" onclick="openMagazineStudio()">EDITOR ÖFFNEN</button></div>`;
+    target.innerHTML = `<div class="office-panel fade-in"><h3>STADIONZEITUNG PRO-STUDIO</h3><button class="btn-neon-small" onclick="openMagazineStudio()">EDITOR ÖFFNEN</button></div>`;
 }
 
+// 7. TAKTIK-ENGINE (4-4-2 VS 3-4-3 ANALYSE)
 function renderTactics(target) {
-    target.innerHTML = `<div class="office-panel fade-in"><h3>TAKTIK-ENGINE</h3><p>Analyse-Fokus: 4-4-2 Kompaktheit vs. 3-4-3 Transition.</p></div>`;
+    target.innerHTML = `
+        <div class="tactics-container fade-in">
+            <div class="tactics-header">
+                <h3>TAKTIK-COCKPIT: MATRIX-ANALYSE</h3>
+                <div class="tactics-status">FORMATION: 4-4-2 vs 3-4-3 (Gegner)</div>
+            </div>
+            
+            <div class="pitch-visualization">
+                <div class="pitch-canvas" id="tactical-pitch">
+                    <div class="player-marker team-toni" style="top: 85%; left: 50%;">GK</div>
+                    <div class="player-marker team-toni" style="top: 70%; left: 20%;">LB</div>
+                    <div class="player-marker team-toni" style="top: 70%; left: 40%;">CB</div>
+                    <div class="player-marker team-toni" style="top: 70%; left: 60%;">CB</div>
+                    <div class="player-marker team-toni" style="top: 70%; left: 80%;">RB</div>
+                    <div class="player-marker team-toni" style="top: 45%; left: 15%;">LM</div>
+                    <div class="player-marker team-toni" style="top: 45%; left: 40%;">CM</div>
+                    <div class="player-marker team-toni" style="top: 45%; left: 60%;">CM</div>
+                    <div class="player-marker team-toni" style="top: 45%; left: 85%;">RM</div>
+                    <div class="player-marker team-toni" style="top: 20%; left: 45%;">ST</div>
+                    <div class="player-marker team-toni" style="top: 20%; left: 55%;">ST</div>
+
+                    <div class="player-marker team-opp" style="top: 10%; left: 50%;">GK</div>
+                    <div class="player-marker team-opp" style="top: 25%; left: 30%;">CB</div>
+                    <div class="player-marker team-opp" style="top: 25%; left: 50%;">CB</div>
+                    <div class="player-marker team-opp" style="top: 25%; left: 70%;">CB</div>
+                    <div class="player-marker team-opp" style="top: 40%; left: 10%;">LWB</div>
+                    <div class="player-marker team-opp" style="top: 40%; left: 35%;">CM</div>
+                    <div class="player-marker team-opp" style="top: 40%; left: 65%;">CM</div>
+                    <div class="player-marker team-opp" style="top: 40%; left: 90%;">RWB</div>
+                    <div class="player-marker team-opp" style="top: 60%; left: 25%;">LW</div>
+                    <div class="player-marker team-opp" style="top: 60%; left: 50%;">ST</div>
+                    <div class="player-marker team-opp" style="top: 60%; left: 75%;">RW</div>
+                </div>
+            </div>
+
+            <div class="tactics-report-panel">
+                <div class="report-row"><span>SCHNITTSTELLEN:</span> <b style="color:var(--neon-green)">OFFEN</b></div>
+                <div class="report-row"><span>ÜBERLADUNG:</span> <b style="color:var(--neon-gold)">FLÜGEL-ZONE 2 & 8</b></div>
+                <p class="tactical-advice">
+                    <strong>TONI ANALYSE:</strong> Das 3-4-3 des Gegners erzeugt Druck auf unsere Außenverteidiger. 
+                    Empfehlung: Die CMs müssen bei Ballbesitz die Halbräume besetzen, um die 3er-Kette vertikal zu binden. 
+                    Restverteidigung über 4-2 Staffelung sichern.
+                </p>
+            </div>
+        </div>
+    `;
+    
+    // Einfache Drag-Logik Initialisierung (Simulation)
+    initDragAndDrop();
+}
+
+function initDragAndDrop() {
+    const markers = document.querySelectorAll('.player-marker');
+    markers.forEach(m => {
+        m.addEventListener('mousedown', (e) => {
+            m.style.cursor = 'grabbing';
+            // Erweiterte Logik für Koordinaten-Tracking hier möglich
+        });
+        m.addEventListener('mouseup', () => m.style.cursor = 'pointer');
+    });
 }
 
 // 8. HELFER
