@@ -5,7 +5,7 @@
 :root {
     /* -- CORE PALETTE -- */
     --bg-deep: #050505;
-    --panel-bg: rgba(18, 18, 24, 0.96); /* Fast undurchsichtig */
+    --panel-bg: rgba(18, 18, 24, 0.96);
     --border: 1px solid rgba(255, 255, 255, 0.1);
     
     /* -- NEON ACCENTS -- */
