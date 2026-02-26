@@ -2,25 +2,28 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 | NCOS ULTIMATE</title>
+    <title>TONI 2.0 | NCOS PROFESSIONAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div id="app-interface">
-        <header id="top-bar" style="height:60px; background:#000; display:flex; align-items:center; justify-content:space-between; padding:0 30px; border-bottom:1px solid #111;">
-            <div class="luxury-logo" style="font-size:20px;">TONI 2.0</div>
-            <div id="clock-display" style="font-family:var(--font-ui); color:#444;">18:00:00</div>
-            <div style="font-family:var(--font-ui); color:var(--neon-gold); font-size:12px;">BUDGET: 4.500.000 €</div>
+        <header id="top-bar">
+            <div style="font-family: var(--font-ui); font-weight: 900; background: linear-gradient(to right, #bf953f, #fcf6ba); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">TONI 2.0</div>
+            <div id="clock-display" style="font-family: var(--font-ui); color:#444; font-size: 12px;">00:00:00</div>
+            <div style="font-family: var(--font-ui); color: var(--neon-gold); font-size: 13px;">BUDGET: 4.500.000 €</div>
         </header>
 
         <div style="display:flex; height: calc(100vh - 60px);">
             <nav class="nav-sidebar">
+                <div class="nav-group-title">COMMAND</div>
                 <button class="nav-item" onclick="loadModule('tactics')"><i class="fa-solid fa-compass-drafting"></i> TACTICAL CO-PILOT</button>
                 <button class="nav-item" onclick="loadModule('kader')"><i class="fa-solid fa-shirt"></i> MANNSCHAFTSKABINE</button>
                 <button class="nav-item" onclick="loadModule('office')"><i class="fa-solid fa-chart-line"></i> OFFICE PRIME</button>
-                <button class="nav-item" onclick="loadModule('nlz')"><i class="fa-solid fa-id-card"></i> ACADEMY HUB (NLZ)</button>
+                <div class="nav-group-title">INFRASTRUCTURE</div>
+                <button class="nav-item" onclick="loadModule('nlz')"><i class="fa-solid fa-address-card"></i> ACADEMY HUB (NLZ)</button>
                 <button class="nav-item active" onclick="loadModule('press')"><i class="fa-solid fa-newspaper"></i> PRESS BUREAU</button>
                 <button class="nav-item" onclick="loadModule('video')"><i class="fa-solid fa-clapperboard"></i> BROADCAST LAB</button>
             </nav>
@@ -28,22 +31,25 @@
             <main id="stage-content" style="flex:1; overflow:hidden;"></main>
 
             <aside id="tools-sidebar">
+                <div class="nav-group-title">NEURAL REPORTER // LIVE-DESK</div>
                 <div id="ai-log">
                     <div class="ai-bubble toni">
                         <small>TONI REPORTER</small><br>
-                        System bereit. Ich erwarte Ihre Anweisungen für das neue Heft.
+                        Bereit für das Live-Interview. Nennen Sie mir den Verein für die Recherche.
                     </div>
                 </div>
-                <div style="padding:20px; border-top:1px solid #111;">
+                <div style="padding:20px; border-top:1px solid #1a1a1d; background:#080808;">
                     <button id="live-voice-btn" class="live-btn" onclick="toggleVoiceAI()">VOICE REPORTER MODE</button>
-                    <div id="interview-controls" style="margin-top:10px;">
-                        <input type="text" id="ai-chat-input" style="width:100%; padding:12px; background:#111; border:1px solid #333; color:#fff; margin-bottom:10px;" placeholder="Tippen oder sprechen..." onkeypress="if(event.key==='Enter') processInterviewStep()">
+                    <div id="interview-controls" class="hidden" style="margin-top:10px;">
+                        <input type="text" id="ai-chat-input" style="width:100%; padding:12px; background:#000; border:1px solid #222; color:#fff; margin-bottom:10px;" placeholder="Antworten..." onkeypress="if(event.key==='Enter') processInterviewStep()">
                         <button class="btn-main" onclick="processInterviewStep()">SENDEN</button>
                     </div>
+                    <button id="btn-start-briefing" class="btn-main" onclick="startAIBriefing()" style="margin-top:10px; border-color:var(--neon-gold); color:var(--neon-gold);">INTERVIEW STARTEN</button>
                 </div>
             </aside>
         </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
