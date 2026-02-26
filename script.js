@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - TACTICAL ENGINE UPGRADE
+   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - TACTICAL DRAG & PERSISTENCE
    ========================================================================== */
 
 const SAVE_KEY = "TONI20_SYSTEM_DATA";
@@ -16,16 +16,31 @@ let eliteStore = {
             { id: 2, name: "AI-Fit", type: "Ärmel", value: 300000, bonus: 50000, roi: 8.2 },
             { id: 3, name: "ToniLogic", type: "Lokal", value: 200000, bonus: 20000, roi: 15.0 }
         ],
-        infrastructure: {
-            analysisCenter: 1, 
-            stadiumExp: 1,
-            academy: 1
-        }
+        infrastructure: { analysisCenter: 1, stadiumExp: 1, academy: 1 }
+    },
+
+    // Speicherung der Taktik-Positionen (Persistence)
+    tactics: {
+        toni: [
+            { id: 't1', label: 'GK', t: 85, l: 50 }, { id: 't2', label: 'LB', t: 70, l: 20 },
+            { id: 't3', label: 'CB', t: 70, l: 40 }, { id: 't4', label: 'CB', t: 70, l: 60 },
+            { id: 't5', label: 'RB', t: 70, l: 80 }, { id: 't6', label: 'LM', t: 45, l: 15 },
+            { id: 't7', label: 'CM', t: 45, l: 40 }, { id: 't8', label: 'CM', t: 45, l: 60 },
+            { id: 't9', label: 'RM', t: 45, l: 85 }, { id: 't10', label: 'ST', t: 20, l: 45 },
+            { id: 't11', label: 'ST', t: 20, l: 55 }
+        ],
+        opp: [
+            { id: 'o1', label: 'GK', t: 10, l: 50 }, { id: 'o2', label: 'CB', t: 25, l: 30 },
+            { id: 'o3', label: 'CB', t: 25, l: 50 }, { id: 'o4', label: 'CB', t: 25, l: 70 },
+            { id: 'o5', label: 'LWB', t: 40, l: 10 }, { id: 'o6', label: 'CM', t: 40, l: 35 },
+            { id: 'o7', label: 'CM', t: 40, l: 65 }, { id: 'o8', label: 'RWB', t: 40, l: 90 },
+            { id: 'o9', label: 'LW', t: 60, l: 25 }, { id: 'o10', label: 'ST', t: 60, l: 50 },
+            { id: 'o11', label: 'RW', t: 60, l: 75 }
+        ]
     },
 
     magazine: {
-        clubName: "FC TONI 2.0",
-        sheets: 1,
+        clubName: "FC TONI 2.0", sheets: 1,
         pages: [
             { id: 1, title: "MATCH DAY", content: "ANALYSE: Fokus auf Halbräume. Gegner agiert mit 3er-Kette." },
             { id: 2, title: "TACTICAL DATA", content: "Schnittstellen-Analyse: Vertikale Passwege im 4-4-2." },
@@ -39,20 +54,18 @@ let eliteStore = {
             id: 1, name: "NEUER", pos: "TW", type: 'pro', imgUrl: "",
             stats: { pac: 50, sho: 40, pas: 91, dri: 60, def: 90, phy: 85 },
             bio: { weight: 92.4, kfa: 11.2, muscle: 48.5, water: 62.1 },
-            sensors: { heart: 48, vo2: 60 },
-            rating: 89 
+            sensors: { heart: 48, vo2: 60 }, rating: 89 
         },
         { 
             id: 10, name: "KANE", pos: "ST", type: 'pro', imgUrl: "",
             stats: { pac: 69, sho: 93, pas: 84, dri: 83, def: 48, phy: 82 },
             bio: { weight: 86.1, kfa: 12.5, muscle: 47.2, water: 59.8 },
-            sensors: { heart: 46, vo2: 58 },
-            rating: 90 
+            sensors: { heart: 46, vo2: 58 }, rating: 90 
         }
     ]
 };
 
-// --- ELITE ADVISOR LOGIK (NAGELSMANN-MODUS) ---
+// --- ELITE ADVISOR ---
 function analyzePerformance(player) {
     const aiBox = document.querySelector('.ai-msg');
     let report = `ANALYSE [${player.name}]: `;
@@ -66,10 +79,13 @@ function analyzePerformance(player) {
 function saveToDisk() { localStorage.setItem(SAVE_KEY, JSON.stringify(eliteStore)); }
 function loadFromDisk() {
     const savedData = localStorage.getItem(SAVE_KEY);
-    if (savedData) { eliteStore = {...eliteStore, ...JSON.parse(savedData)}; }
+    if (savedData) { 
+        const parsed = JSON.parse(savedData);
+        eliteStore = { ...eliteStore, ...parsed }; 
+    }
 }
 
-// 1. SYSTEM-BOOT
+// 1. BOOT
 function systemBootSequence() {
     loadFromDisk();
     const input = document.getElementById('passkey');
@@ -102,55 +118,36 @@ function switchModule(modId) {
 
     if (modId === 'kader') renderKader(stage);
     if (modId === 'finance') renderOffice(stage);
-    if (modId === 'youth') renderJuniorHub(stage);
     if (modId === 'media') renderMediaCenter(stage);
     if (modId === 'tactics') renderTactics(stage);
 }
 
-// 3. KADER RENDERING
+// 3. KADER & BIO-LAB
 function renderKader(target) {
-    target.innerHTML = `
-        <div class="kader-grid fade-in">
-            ${eliteStore.players.map(p => `
-                <div class="fifa-card" onclick="openBioLab(${p.id})">
-                    <div class="card-inner">
-                        <div class="card-rating-box"><span class="val">${p.rating}</span><span class="pos">${p.pos}</span></div>
-                        <div class="player-img-box">${p.imgUrl ? `<img src="${p.imgUrl}">` : `<i class="fa-solid fa-user-ninja"></i>`}</div>
-                        <div class="card-name">${p.name}</div>
-                        <div class="card-stats">
-                            <span>PAC <b>${p.stats.pac}</b></span><span>SHO <b>${p.stats.sho}</b></span>
-                            <span>PAS <b>${p.stats.pas}</b></span><span>DRI <b>${p.stats.dri}</b></span>
-                        </div>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
+    target.innerHTML = `<div class="kader-grid fade-in">${eliteStore.players.map(p => `
+        <div class="fifa-card" onclick="openBioLab(${p.id})">
+            <div class="card-inner">
+                <div class="card-rating-box"><span class="val">${p.rating}</span></div>
+                <div class="card-name">${p.name}</div>
+            </div>
+        </div>`).join('')}</div>`;
 }
 
-// 4. BIO-LAB
 function openBioLab(id) {
     const p = eliteStore.players.find(x => x.id === id);
     const modal = document.getElementById('bio-lab-modal');
     const container = document.getElementById('modal-container');
     modal.classList.remove('hidden');
     analyzePerformance(p);
-    container.innerHTML = `
-        <div class="column-header">PERFORMANCE-HUB // ${p.name}</div>
+    container.innerHTML = `<div class="column-header">PERFORMANCE-HUB // ${p.name}</div>
         <div class="lab-grid">
-            <div class="office-panel">
-                <h3>PHYSIO-ANALYSE</h3>
+            <div class="office-panel"><h3>PHYSIO</h3>
                 <div class="lab-row"><span>GEWICHT</span><input type="number" step="0.1" value="${p.bio.weight}" onchange="updateValue(${p.id}, 'bio', 'weight', this.value)"></div>
-                <div class="lab-row"><span>KFA %</span><input type="number" step="0.1" value="${p.bio.kfa}" onchange="updateValue(${p.id}, 'bio', 'kfa', this.value)"></div>
             </div>
-            <div class="office-panel">
-                <h3>TELEMETRIE</h3>
+            <div class="office-panel"><h3>TELEMETRIE</h3>
                 <div class="lab-row"><span>PULS</span><input type="number" value="${p.sensors.heart}" onchange="updateValue(${p.id}, 'sensors', 'heart', this.value)"></div>
-                <div class="lab-row"><span>VO2MAX</span><input type="number" value="${p.sensors.vo2}" onchange="updateValue(${p.id}, 'sensors', 'vo2', this.value)"></div>
             </div>
-        </div>
-        <button onclick="closeBioLab()" class="btn-neon-small" style="width:100%; margin-top:20px;">ANALYSE ABSCHLIESSEN</button>
-    `;
+        </div><button onclick="closeBioLab()" class="btn-neon-small" style="width:100%; margin-top:20px;">DONE</button>`;
 }
 
 function updateValue(id, cat, key, val) {
@@ -162,27 +159,20 @@ function updateValue(id, cat, key, val) {
 
 function closeBioLab() { document.getElementById('bio-lab-modal').classList.add('hidden'); }
 
-// 5. OFFICE PRIME
+// 4. OFFICE PRIME
 function renderOffice(target) {
-    target.innerHTML = `
-        <div class="office-grid fade-in">
-            <div class="office-panel">
-                <h3>PARTNER (ROI)</h3>
-                ${eliteStore.finance.sponsors.map(s => `<div class="lab-row"><span>${s.name}</span><b>ROI: ${s.roi}%</b></div>`).join('')}
-            </div>
-            <div class="office-panel">
-                <h3>INFRASTRUKTUR</h3>
-                <div class="lab-row"><span>ANALYSEZENTRUM</span><b>LVL ${eliteStore.finance.infrastructure.analysisCenter}</b></div>
-            </div>
-        </div>`;
+    target.innerHTML = `<div class="office-grid fade-in">
+        <div class="office-panel"><h3>PARTNER (ROI)</h3>${eliteStore.finance.sponsors.map(s => `<div class="lab-row"><span>${s.name}</span><b>${s.roi}%</b></div>`).join('')}</div>
+        <div class="office-panel"><h3>INFRASTRUKTUR</h3><div class="lab-row"><span>ANALYSEZENTRUM</span><b>LVL ${eliteStore.finance.infrastructure.analysisCenter}</b></div></div>
+    </div>`;
 }
 
-// 6. MEDIA CENTER
+// 5. MEDIA CENTER
 function renderMediaCenter(target) {
-    target.innerHTML = `<div class="office-panel fade-in"><h3>STADIONZEITUNG PRO-STUDIO</h3><button class="btn-neon-small" onclick="openMagazineStudio()">EDITOR ÖFFNEN</button></div>`;
+    target.innerHTML = `<div class="office-panel fade-in"><h3>STADIONZEITUNG PRO-STUDIO</h3><button class="btn-neon-small">EDITOR ÖFFNEN</button></div>`;
 }
 
-// 7. TAKTIK-ENGINE (4-4-2 VS 3-4-3 ANALYSE)
+// 6. TAKTIK-ENGINE (INTEGRATED DRAG & DROP)
 function renderTactics(target) {
     target.innerHTML = `
         <div class="tactics-container fade-in">
@@ -190,70 +180,107 @@ function renderTactics(target) {
                 <h3>TAKTIK-COCKPIT: MATRIX-ANALYSE</h3>
                 <div class="tactics-status">FORMATION: 4-4-2 vs 3-4-3 (Gegner)</div>
             </div>
-            
             <div class="pitch-visualization">
                 <div class="pitch-canvas" id="tactical-pitch">
-                    <div class="player-marker team-toni" style="top: 85%; left: 50%;">GK</div>
-                    <div class="player-marker team-toni" style="top: 70%; left: 20%;">LB</div>
-                    <div class="player-marker team-toni" style="top: 70%; left: 40%;">CB</div>
-                    <div class="player-marker team-toni" style="top: 70%; left: 60%;">CB</div>
-                    <div class="player-marker team-toni" style="top: 70%; left: 80%;">RB</div>
-                    <div class="player-marker team-toni" style="top: 45%; left: 15%;">LM</div>
-                    <div class="player-marker team-toni" style="top: 45%; left: 40%;">CM</div>
-                    <div class="player-marker team-toni" style="top: 45%; left: 60%;">CM</div>
-                    <div class="player-marker team-toni" style="top: 45%; left: 85%;">RM</div>
-                    <div class="player-marker team-toni" style="top: 20%; left: 45%;">ST</div>
-                    <div class="player-marker team-toni" style="top: 20%; left: 55%;">ST</div>
-
-                    <div class="player-marker team-opp" style="top: 10%; left: 50%;">GK</div>
-                    <div class="player-marker team-opp" style="top: 25%; left: 30%;">CB</div>
-                    <div class="player-marker team-opp" style="top: 25%; left: 50%;">CB</div>
-                    <div class="player-marker team-opp" style="top: 25%; left: 70%;">CB</div>
-                    <div class="player-marker team-opp" style="top: 40%; left: 10%;">LWB</div>
-                    <div class="player-marker team-opp" style="top: 40%; left: 35%;">CM</div>
-                    <div class="player-marker team-opp" style="top: 40%; left: 65%;">CM</div>
-                    <div class="player-marker team-opp" style="top: 40%; left: 90%;">RWB</div>
-                    <div class="player-marker team-opp" style="top: 60%; left: 25%;">LW</div>
-                    <div class="player-marker team-opp" style="top: 60%; left: 50%;">ST</div>
-                    <div class="player-marker team-opp" style="top: 60%; left: 75%;">RW</div>
+                    ${eliteStore.tactics.toni.map(p => `<div class="player-marker team-toni" id="${p.id}" style="top: ${p.t}%; left: ${p.l}%;">${p.label}</div>`).join('')}
+                    ${eliteStore.tactics.opp.map(p => `<div class="player-marker team-opp" id="${p.id}" style="top: ${p.t}%; left: ${p.l}%;">${p.label}</div>`).join('')}
                 </div>
             </div>
-
             <div class="tactics-report-panel">
-                <div class="report-row"><span>SCHNITTSTELLEN:</span> <b style="color:var(--neon-green)">OFFEN</b></div>
-                <div class="report-row"><span>ÜBERLADUNG:</span> <b style="color:var(--neon-gold)">FLÜGEL-ZONE 2 & 8</b></div>
-                <p class="tactical-advice">
-                    <strong>TONI ANALYSE:</strong> Das 3-4-3 des Gegners erzeugt Druck auf unsere Außenverteidiger. 
-                    Empfehlung: Die CMs müssen bei Ballbesitz die Halbräume besetzen, um die 3er-Kette vertikal zu binden. 
-                    Restverteidigung über 4-2 Staffelung sichern.
-                </p>
+                <div class="report-row"><span>ABSTÄNDE:</span> <b id="tactical-compactness">OPTIMAL</b></div>
+                <p class="tactical-advice" id="toni-tactical-feed"><strong>TONI ANALYSE:</strong> Verschiebe die Spieler, um die defensive Kompaktheit gegen das 3-4-3 zu prüfen.</p>
             </div>
-        </div>
-    `;
-    
-    // Einfache Drag-Logik Initialisierung (Simulation)
+        </div>`;
     initDragAndDrop();
 }
 
 function initDragAndDrop() {
+    const pitch = document.getElementById('tactical-pitch');
     const markers = document.querySelectorAll('.player-marker');
-    markers.forEach(m => {
-        m.addEventListener('mousedown', (e) => {
-            m.style.cursor = 'grabbing';
-            // Erweiterte Logik für Koordinaten-Tracking hier möglich
-        });
-        m.addEventListener('mouseup', () => m.style.cursor = 'pointer');
+    let activeMarker = null;
+
+    markers.forEach(marker => {
+        marker.addEventListener('mousedown', startDrag);
+        marker.addEventListener('touchstart', startDrag, { passive: false });
     });
+
+    function startDrag(e) {
+        e.preventDefault();
+        activeMarker = this;
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', stopDrag);
+    }
+
+    function drag(e) {
+        if (!activeMarker) return;
+        const rect = pitch.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        let l = ((clientX - rect.left) / rect.width) * 100;
+        let t = ((clientY - rect.top) / rect.height) * 100;
+
+        // Bounds check (0-100%)
+        l = Math.max(2, Math.min(98, l));
+        t = Math.max(2, Math.min(98, t));
+
+        activeMarker.style.left = `${l}%`;
+        activeMarker.style.top = `${t}%`;
+
+        updateTacticalPosition(activeMarker.id, t, l);
+    }
+
+    function stopDrag() {
+        if (activeMarker) {
+            activeMarker = null;
+            saveToDisk();
+            evaluateKloppLogic();
+        }
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('mouseup', stopDrag);
+        document.removeEventListener('touchmove', drag);
+        document.removeEventListener('touchend', stopDrag);
+    }
 }
 
-// 8. HELFER
+function updateTacticalPosition(id, t, l) {
+    const toniP = eliteStore.tactics.toni.find(p => p.id === id);
+    const oppP = eliteStore.tactics.opp.find(p => p.id === id);
+    if (toniP) { toniP.t = t; toniP.l = l; }
+    else if (oppP) { oppP.t = t; oppP.l = l; }
+}
+
+function evaluateKloppLogic() {
+    const advice = document.getElementById('toni-tactical-feed');
+    const compactness = document.getElementById('tactical-compactness');
+    // Beispielhafte Analyse: Wenn ST zu weit weg von CM
+    const st = eliteStore.tactics.toni.find(p => p.label === 'ST');
+    const cm = eliteStore.tactics.toni.find(p => p.label === 'CM');
+    
+    const dist = Math.abs(st.t - cm.t);
+    if (dist > 40) {
+        compactness.innerText = "GEFÄHRDET";
+        compactness.style.color = "var(--neon-alert)";
+        advice.innerHTML = "<strong>TONI ANALYSE:</strong> Die vertikale Distanz zwischen Mittelfeld und Sturm ist zu groß. Wir verlieren den Zugriff auf den zweiten Ball.";
+    } else {
+        compactness.innerText = "OPTIMAL";
+        compactness.style.color = "var(--neon-green)";
+        advice.innerHTML = "<strong>TONI ANALYSE:</strong> Gute Kompaktheit. Die Abstände ermöglichen ein effektives Gegenpressing.";
+    }
+}
+
+// 7. HELFER
 function updateBudget() {
     const total = Object.values(eliteStore.finance.pro).reduce((a,b)=>a+b,0) + Object.values(eliteStore.finance.amateur).reduce((a,b)=>a+b,0);
-    document.getElementById('kpi-budget').innerText = total.toLocaleString() + " €";
+    const el = document.getElementById('kpi-budget');
+    if(el) el.innerText = total.toLocaleString() + " €";
 }
 
 function renderQuickList() {
-    document.getElementById('quick-squad-list').innerHTML = eliteStore.players.map(p => `<div class="list-item" onclick="openBioLab(${p.id})"><span>${p.name}</span><b>${p.rating}</b></div>`).join('');
+    const el = document.getElementById('quick-squad-list');
+    if(el) el.innerHTML = eliteStore.players.map(p => `<div class="list-item" onclick="openBioLab(${p.id})"><span>${p.name}</span><b>${p.rating}</b></div>`).join('');
 }
 
 let mic = false;
