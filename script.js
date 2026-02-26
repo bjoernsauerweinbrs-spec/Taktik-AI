@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - CO-TRAINER COMMAND
+   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - FULL EXECUTIVE SUITE
    ========================================================================== */
 
 const SAVE_KEY = "TONI20_SYSTEM_DATA";
@@ -15,9 +15,9 @@ let eliteStore = {
         pro: { tvRights: 2500000, sponsoring: 1500000, stadium: 850000 },
         amateur: { members: 55000, gear: -4500, travel: -1200 },
         sponsors: [
-            { id: 1, name: "Neural Gear", type: "Haupt", value: 1000000, bonus: 200000, roi: 12.5 },
-            { id: 2, name: "AI-Fit", type: "Ärmel", value: 300000, bonus: 50000, roi: 8.2 },
-            { id: 3, name: "ToniLogic", type: "Lokal", value: 200000, bonus: 20000, roi: 15.0 }
+            { id: 1, name: "Neural Gear", type: "Haupt", value: 1000000, logo: "🛡️", roi: 12.5 },
+            { id: 2, name: "AI-Fit", type: "Ärmel", value: 300000, logo: "⚡", roi: 8.2 },
+            { id: 3, name: "ToniLogic", type: "Lokal", value: 200000, logo: "🧠", roi: 15.0 }
         ],
         infrastructure: { analysisCenter: 1, stadiumExp: 1, academy: 1 }
     },
@@ -41,83 +41,23 @@ let eliteStore = {
         ]
     },
 
+    magazine: {
+        clubName: "FC TONI 2.0", sheets: 1,
+        pages: [
+            { id: 1, title: "MATCH DAY", content: "ANALYSE: Fokus auf Halbräume." },
+            { id: 2, title: "DATEN-REPORT", content: "Warten auf Gegner-Sync..." },
+            { id: 3, title: "VORSTAND", content: "ROI-Analyse Sponsoring." },
+            { id: 4, title: "PARTNER", content: "Offizielle Vereinspartner." }
+        ]
+    },
+
     players: [
-        { 
-            id: 1, name: "NEUER", pos: "TW", type: 'pro', imgUrl: "",
-            stats: { pac: 50, sho: 40, pas: 91, dri: 60, def: 90, phy: 85 },
-            bio: { weight: 92.4, kfa: 11.2, muscle: 48.5, water: 62.1 },
-            sensors: { heart: 48, vo2: 60 }, rating: 89 
-        },
-        { 
-            id: 10, name: "KANE", pos: "ST", type: 'pro', imgUrl: "",
-            stats: { pac: 69, sho: 93, pas: 84, dri: 83, def: 48, phy: 82 },
-            bio: { weight: 86.1, kfa: 12.5, muscle: 47.2, water: 59.8 },
-            sensors: { heart: 46, vo2: 58 }, rating: 90 
-        }
+        { id: 1, name: "NEUER", pos: "TW", type: 'pro', imgUrl: "", stats: { pac: 50, sho: 40, pas: 91, dri: 60, def: 90, phy: 85 }, bio: { weight: 92.4, kfa: 11.2, muscle: 48.5, water: 62.1 }, sensors: { heart: 48, vo2: 60 }, rating: 89 },
+        { id: 10, name: "KANE", pos: "ST", type: 'pro', imgUrl: "", stats: { pac: 69, sho: 93, pas: 84, dri: 83, def: 48, phy: 82 }, bio: { weight: 86.1, kfa: 12.5, muscle: 47.2, water: 59.8 }, sensors: { heart: 46, vo2: 58 }, rating: 90 }
     ]
 };
 
-// --- CO-TRAINER INTELLIGENCE: GEGNER-BRIEFING ---
-function startOpponentBriefing(opponentName) {
-    const aiBox = document.querySelector('.ai-msg');
-    
-    // Simulation: Toni zieht Daten aus Fußball.de / Scout-Datenbank
-    const intel = {
-        name: opponentName.toUpperCase(),
-        strengths: "Extremes Umschaltspiel über die Flügel",
-        topPlayers: ["Top-Scorer: Müller (12 Tore)", "Spielgestalter: Kroos (Rating 88)"],
-        tacticalRisk: "Hohe Anfälligkeit bei Pressing in Zone 5"
-    };
-
-    eliteStore.mgmt.opponentIntel = intel;
-    
-    aiBox.innerHTML = `
-        <strong>CO-TRAINER TONI // BRIEFING:</strong><br>
-        Gegner ${intel.name} ist offensivstark (${intel.strengths}). <br>
-        <strong>Top-Gefahr:</strong> ${intel.topPlayers.join(', ')}.<br>
-        Ich bereite die taktische Gegenmaßnahme vor...
-    `;
-
-    setTimeout(() => suggestAnalyticalLineup(), 2000);
-}
-
-// TONIS AUFSTELLUNGS-VORSCHLAG (BASIEREND AUF RATINGS)
-function suggestAnalyticalLineup() {
-    const aiBox = document.querySelector('.ai-msg');
-    
-    // Logik: Wer hat das höchste DEF & PAC Rating für die Defensive?
-    const defenders = [...eliteStore.players].sort((a, b) => b.stats.def - a.stats.def);
-    const speedsters = [...eliteStore.players].sort((a, b) => b.stats.pac - a.stats.pac);
-
-    aiBox.innerHTML += `<br><br><strong>EMPFEHLUNG:</strong> Da der Gegner über die Flügel drückt, schlage ich ${defenders[0].name} als defensiven Anker vor. 
-    Lass mich die Formation auf dem Board anpassen...`;
-
-    // Toni übernimmt das Board (Co-Trainer Autonomie)
-    setTimeout(() => {
-        applyTacticalShift('defensive_compactness');
-    }, 2500);
-}
-
-// TONI VERSCHIEBT SPIELER (HANDS-FREE SIMULATION)
-function applyTacticalShift(mode) {
-    if (mode === 'defensive_compactness') {
-        // Toni rückt die CMs näher an die CBs
-        const cm1 = eliteStore.tactics.toni.find(p => p.id === 't7');
-        const cm2 = eliteStore.tactics.toni.find(p => p.id === 't8');
-        
-        cm1.t = 60; cm1.l = 45;
-        cm2.t = 60; cm2.l = 55;
-
-        saveToDisk();
-        if (eliteStore.mgmt.activeModule === 'tactics') {
-            renderTactics(document.getElementById('module-content'));
-        }
-        
-        document.querySelector('.ai-msg').innerHTML += `<br><br><span style="color:var(--neon-cyan)">[BOARD-UPDATE]: Kompaktheit im Zentrum hergestellt.</span>`;
-    }
-}
-
-// --- CORE SYSTEM FUNKTIONEN ---
+// --- SYSTEM CORE ---
 function saveToDisk() { localStorage.setItem(SAVE_KEY, JSON.stringify(eliteStore)); }
 function loadFromDisk() {
     const savedData = localStorage.getItem(SAVE_KEY);
@@ -144,6 +84,7 @@ function initDashboard() {
     }, 1000);
 }
 
+// --- MODUL ROUTER ---
 function switchModule(modId) {
     const stage = document.getElementById('module-content');
     const title = document.getElementById('active-mod-title');
@@ -157,8 +98,10 @@ function switchModule(modId) {
     if (modId === 'finance') renderOffice(stage);
     if (modId === 'media') renderMediaCenter(stage);
     if (modId === 'tactics') renderTactics(stage);
+    if (modId === 'youth') renderJuniorHub(stage);
 }
 
+// --- KADER & BIO-LAB ---
 function renderKader(target) {
     target.innerHTML = `<div class="kader-grid fade-in">${eliteStore.players.map(p => `
         <div class="fifa-card" onclick="openBioLab(${p.id})">
@@ -174,23 +117,88 @@ function openBioLab(id) {
     const modal = document.getElementById('bio-lab-modal');
     modal.classList.remove('hidden');
     document.getElementById('modal-container').innerHTML = `
-        <div class="column-header">PERFORMANCE-HUB // ${p.name}</div>
+        <div class="column-header">ANALYSE // ${p.name}</div>
         <div class="lab-grid">
-            <div class="office-panel"><h3>PHYSIO</h3>
+            <div class="office-panel"><h3>BIOMETRIE</h3>
                 <div class="lab-row"><span>GEWICHT</span><input type="number" step="0.1" value="${p.bio.weight}" onchange="p.bio.weight=parseFloat(this.value); saveToDisk();"></div>
+                <div class="lab-row"><span>KFA %</span><input type="number" step="0.1" value="${p.bio.kfa}" onchange="p.bio.kfa=parseFloat(this.value); saveToDisk();"></div>
+            </div>
+            <div class="office-panel"><h3>TELEMETRIE</h3>
+                <div class="lab-row"><span>PULS</span><input type="number" value="${p.sensors.heart}" onchange="p.sensors.heart=parseInt(this.value); saveToDisk();"></div>
             </div>
         </div><button onclick="document.getElementById('bio-lab-modal').classList.add('hidden')" class="btn-neon-small" style="width:100%; margin-top:20px;">SYNC</button>`;
 }
 
-// --- TAKTIK-ENGINE (AUTONOMER MODUS) ---
+// --- OFFICE (AKTENTASCHE) ---
+function renderOffice(target) {
+    target.innerHTML = `
+        <div class="office-grid fade-in">
+            <div class="office-panel">
+                <h3>SPONSOREN-MANAGEMENT (ROI)</h3>
+                ${eliteStore.finance.sponsors.map(s => `
+                    <div class="lab-row"><span>${s.name}</span><b>${s.roi}% ROI</b></div>
+                `).join('')}
+            </div>
+            <div class="office-panel">
+                <h3>INFRASTRUKTUR</h3>
+                <div class="lab-row"><span>ANALYSEZENTRUM</span><b>LVL ${eliteStore.finance.infrastructure.analysisCenter}</b></div>
+            </div>
+            <div class="office-panel" style="grid-column: span 2;">
+                <h3>FINANZ-VORSCHAU</h3>
+                ${Object.keys(eliteStore.finance.pro).map(k => `<div class="lab-row"><span>${k.toUpperCase()}</span><input type="number" value="${eliteStore.finance.pro[k]}" onchange="eliteStore.finance.pro['${k}']=parseInt(this.value); saveToDisk(); updateBudget();"></div>`).join('')}
+            </div>
+        </div>`;
+}
+
+// --- MEDIA CENTER (STUDIO) ---
+function renderMediaCenter(target) {
+    target.innerHTML = `
+        <div class="office-panel fade-in" style="text-align:center;">
+            <h3>STADIONZEITUNG PRO-EDITOR</h3>
+            <p>Layout: DIN-A4 Querformat | Bögen: ${eliteStore.magazine.sheets}</p>
+            <div style="margin-top:20px;">
+                <button class="btn-neon-small" onclick="openMagazineStudio()"><i class="fa-solid fa-file-invoice"></i> EDITOR ÖFFNEN</button>
+            </div>
+        </div>`;
+}
+
+function openMagazineStudio() {
+    const modal = document.getElementById('magazine-studio-modal');
+    const container = document.getElementById('magazine-sheet-container');
+    modal.classList.remove('hidden');
+    renderMagSheets(container);
+}
+
+function renderMagSheets(container) {
+    let html = "";
+    for (let i = 0; i < eliteStore.magazine.pages.length; i += 2) {
+        html += `
+            <div class="magazine-sheet-sim">
+                <div class="mag-page-sim">
+                    <small>SEITE ${i+1}</small>
+                    <h4 contenteditable="true" onblur="eliteStore.magazine.pages[${i}].title=this.innerText; saveToDisk();">${eliteStore.magazine.pages[i].title}</h4>
+                    <div class="mag-content-editable" contenteditable="true" onblur="eliteStore.magazine.pages[${i}].content=this.innerText; saveToDisk();">${eliteStore.magazine.pages[i].content}</div>
+                </div>
+                <div class="mag-page-sim">
+                    <small>SEITE ${i+2}</small>
+                    <h4 contenteditable="true" onblur="eliteStore.magazine.pages[${i+1}].title=this.innerText; saveToDisk();">${eliteStore.magazine.pages[i+1].title}</h4>
+                    <div class="mag-content-editable" contenteditable="true" onblur="eliteStore.magazine.pages[${i+1}].content=this.innerText; saveToDisk();">${eliteStore.magazine.pages[i+1].content}</div>
+                    ${(i+2 === eliteStore.magazine.sheets * 4) ? `<div class="mag-sponsor-footer">${eliteStore.finance.sponsors.map(s => `<div class="mag-sponsor-logo"><b>${s.logo}</b> ${s.name}</div>`).join('')}</div>` : ""}
+                </div>
+            </div>`;
+    }
+    container.innerHTML = html;
+}
+
+// --- TAKTIK ENGINE & CO-TRAINER ---
 function renderTactics(target) {
     target.innerHTML = `
         <div class="tactics-container fade-in">
             <div class="tactics-header">
-                <h3>TAKTIK-COCKPIT // CO-TRAINER AKTIV</h3>
+                <h3>TAKTIK-COCKPIT // CO-TRAINER</h3>
                 <div class="input-group" style="margin: 10px 0;">
                     <input type="text" id="opponent-search" placeholder="GEGNER ANALYSIEREN...">
-                    <button class="btn-neon-small" onclick="startOpponentBriefing(document.getElementById('opponent-search').value)">BRIEFING STARTEN</button>
+                    <button class="btn-neon-small" onclick="startOpponentBriefing(document.getElementById('opponent-search').value)">START</button>
                 </div>
             </div>
             <div class="pitch-visualization">
@@ -200,11 +208,27 @@ function renderTactics(target) {
                 </div>
             </div>
             <div class="tactics-report-panel">
-                <div class="report-row"><span>GEGNER:</span> <b>${eliteStore.mgmt.opponentIntel.name || 'UNBEKANNT'}</b></div>
-                <p class="tactical-advice" id="toni-tactical-feed">Warte auf Gegner-Analyse für proaktive Positions-Anpassung.</p>
+                <div class="report-row"><span>GEGNER:</span> <b>${eliteStore.mgmt.opponentIntel.name || 'STANDBY'}</b></div>
+                <p class="tactical-advice" id="toni-tactical-feed">Bereit für Performance-Analyse.</p>
             </div>
         </div>`;
     initDragAndDrop();
+}
+
+function startOpponentBriefing(club) {
+    if(!club) return;
+    const aiBox = document.querySelector('.ai-msg');
+    eliteStore.mgmt.opponentIntel = { name: club.toUpperCase(), strengths: "Zentrumsfokus", tacticalRisk: "Konteranfällig" };
+    aiBox.innerHTML = `<strong>CO-TRAINER:</strong> Analyse für ${club} abgeschlossen. Ich schlage eine kompakte Verschiebung vor.`;
+    setTimeout(() => applyTacticalShift(), 1000);
+}
+
+function applyTacticalShift() {
+    const cm1 = eliteStore.tactics.toni.find(p => p.id === 't7');
+    const cm2 = eliteStore.tactics.toni.find(p => p.id === 't8');
+    cm1.t = 60; cm2.t = 60; // Toni verschiebt CMs tiefer
+    saveToDisk();
+    renderTactics(document.getElementById('module-content'));
 }
 
 function initDragAndDrop() {
@@ -212,42 +236,22 @@ function initDragAndDrop() {
     const markers = document.querySelectorAll('.player-marker');
     let activeMarker = null;
 
-    markers.forEach(marker => {
-        marker.addEventListener('mousedown', startDrag);
-        marker.addEventListener('touchstart', startDrag, { passive: false });
+    markers.forEach(m => {
+        m.addEventListener('mousedown', (e) => { activeMarker = m; });
+        m.addEventListener('touchstart', (e) => { activeMarker = m; }, { passive: false });
     });
 
-    function startDrag(e) {
-        e.preventDefault();
-        activeMarker = this;
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('mouseup', stopDrag);
-        document.addEventListener('touchmove', drag, { passive: false });
-        document.addEventListener('touchend', stopDrag);
-    }
-
-    function drag(e) {
+    document.addEventListener('mousemove', (e) => {
         if (!activeMarker) return;
         const rect = pitch.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        let l = ((clientX - rect.left) / rect.width) * 100;
-        let t = ((clientY - rect.top) / rect.height) * 100;
-        l = Math.max(2, Math.min(98, l));
-        t = Math.max(2, Math.min(98, t));
-        activeMarker.style.left = `${l}%`;
-        activeMarker.style.top = `${t}%`;
+        let l = ((e.clientX - rect.left) / rect.width) * 100;
+        let t = ((e.clientY - rect.top) / rect.height) * 100;
+        activeMarker.style.left = `${Math.max(2, Math.min(98, l))}%`;
+        activeMarker.style.top = `${Math.max(2, Math.min(98, t))}%`;
         updateTacticalPosition(activeMarker.id, t, l);
-    }
+    });
 
-    function stopDrag() {
-        activeMarker = null;
-        saveToDisk();
-        document.removeEventListener('mousemove', drag);
-        document.removeEventListener('mouseup', stopDrag);
-        document.removeEventListener('touchmove', drag);
-        document.removeEventListener('touchend', stopDrag);
-    }
+    document.addEventListener('mouseup', () => { activeMarker = null; saveToDisk(); });
 }
 
 function updateTacticalPosition(id, t, l) {
@@ -255,6 +259,12 @@ function updateTacticalPosition(id, t, l) {
     if (p) { p.t = t; p.l = l; }
 }
 
+// --- JUNIOR HUB ---
+function renderJuniorHub(target) {
+    target.innerHTML = `<div class="office-panel fade-in"><h3>JUNIOR HERO HUB</h3><p>Sticker-System aktiv.</p></div>`;
+}
+
+// --- HELFER ---
 function updateBudget() {
     const total = Object.values(eliteStore.finance.pro).reduce((a,b)=>a+b,0);
     const el = document.getElementById('kpi-budget');
@@ -266,17 +276,8 @@ function renderQuickList() {
     if(el) el.innerHTML = eliteStore.players.map(p => `<div class="list-item" onclick="openBioLab(${p.id})"><span>${p.name}</span><b>${p.rating}</b></div>`).join('');
 }
 
-let mic = false;
 function toggleMic() {
-    mic = !mic;
-    document.getElementById('mic-btn').className = mic ? 'mic-active' : 'mic-inactive';
-    document.querySelector('.ai-msg').innerText = mic ? "Co-Trainer Toni hört zu. Befehl zur Gegner-Analyse erwartet." : "System im Standby.";
-}
-
-function renderOffice(target) {
-    target.innerHTML = `<div class="office-panel fade-in"><h3>STRATEGISCHE PARTNER</h3><p>ROI-Management aktiv.</p></div>`;
-}
-
-function renderMediaCenter(target) {
-    target.innerHTML = `<div class="office-panel fade-in"><h3>STADIONZEITUNG STUDIO</h3><p>Druck-Engine bereit.</p></div>`;
+    const mic = document.getElementById('mic-btn');
+    mic.classList.toggle('mic-active');
+    document.querySelector('.ai-msg').innerText = "Toni hört zu...";
 }
