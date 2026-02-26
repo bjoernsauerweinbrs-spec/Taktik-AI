@@ -1,173 +1,255 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL LOGIC CORE V17.1 (ULTIMATE STABLE)
+   TONI 3.0 | NEURAL LOGIC CORE - LUXURY EDITION
    ========================================================================== */
 
-const STORE_KEY = "TONI_V17_DATA";
+// --- 1. STATE & PERSISTENCE ENGINE ---
+class NeuralCore {
+    constructor(storageKey) {
+        this.storageKey = storageKey;
+        this.state = this._load();
+        this.observers = [];
+    }
 
-// --- 1. DATENBANK (INIT) ---
-let CORE = {
-    config: { apiKey: "" },
-    budget: 0,
-    
-    players: [
-        { id: 1, name: "NEUER", pos: "TW", rating: 89, img: "user-ninja", bio: { weight: 92, fat: 11, status: "Fit" } },
-        { id: 2, name: "KANE", pos: "ST", rating: 90, img: "crosshairs", bio: { weight: 86, fat: 12, status: "Fit" } },
-        { id: 3, name: "MUSIALA", pos: "ZM", rating: 86, img: "bolt", bio: { weight: 72, fat: 8, status: "Fit" } },
-        { id: 4, name: "KIMMICH", pos: "CDM", rating: 88, img: "shield-halved", bio: { weight: 75, fat: 9, status: "Fatigue" } }
-    ],
-
-    finance: [
-        { desc: "TV-Rechte Bundesliga", val: 2500000, type: "in" },
-        { desc: "Sponsoring: Neural Gear", val: 1500000, type: "in" },
-        { desc: "Reisekosten London", val: 12500, type: "out" },
-        { desc: "Medizinische Abteilung", val: 4500, type: "out" }
-    ],
-
-    tactics: [
-        { id: 1, label: "TW", x: 50, y: 90 },
-        { id: 2, label: "IV", x: 35, y: 75 }, { id: 3, label: "IV", x: 65, y: 75 },
-        { id: 4, label: "LV", x: 10, y: 65 }, { id: 5, label: "RV", x: 90, y: 65 },
-        { id: 6, label: "ZM", x: 40, y: 50 }, { id: 7, label: "ZM", x: 60, y: 50 },
-        { id: 8, label: "LM", x: 15, y: 35 }, { id: 9, label: "RM", x: 85, y: 35 },
-        { id: 10, label: "ZOM", x: 50, y: 35 }, { id: 11, label: "ST", x: 50, y: 15 }
-    ]
-};
-
-// --- 2. SYSTEM START ---
-function bootSystem() {
-    const btn = document.querySelector('.btn-main');
-    if(btn) btn.innerText = "LADE MODULE...";
-    
-    setTimeout(() => {
-        const auth = document.getElementById('auth-layer');
-        const app = document.getElementById('app-interface');
-        if(auth && app) {
-            auth.classList.add('hidden');
-            app.classList.remove('hidden');
-            initDashboard();
+    _load() {
+        try {
+            const savedData = localStorage.getItem(this.storageKey);
+            if (savedData) {
+                return JSON.parse(savedData);
+            }
+        } catch (e) {
+            console.error("Fehler beim Laden der Daten aus dem LocalStorage:", e);
         }
-    }, 800);
+        return this._getInitialState(); // Fallback zu Standarddaten
+    }
+
+    _getInitialState() {
+        return {
+            config: { apiKey: "" },
+            players: [
+                { id: 1, name: "NEUER", pos: "TW", rating: 89, img: "user-ninja", bio: { weight: 92, fat: 11, status: "Fit" } },
+                { id: 2, name: "KANE", pos: "ST", rating: 90, img: "crosshairs", bio: { weight: 86, fat: 12, status: "Fit" } },
+                { id: 3, name: "MUSIALA", pos: "ZM", rating: 86, img: "bolt", bio: { weight: 72, fat: 8, status: "Fit" } },
+                { id: 4, name: "KIMMICH", pos: "CDM", rating: 88, img: "shield-halved", bio: { weight: 75, fat: 9, status: "Fatigue" } }
+            ],
+            finance: [
+                { id: Date.now() + 1, desc: "TV-Rechte Bundesliga", val: 2500000, type: "in" },
+                { id: Date.now() + 2, desc: "Sponsoring: Neural Gear", val: 1500000, type: "in" }
+            ],
+            tactics: {
+                "4-2-3-1": [
+                    { id: 1, label: "TW", x: 50, y: 90 }, { id: 2, label: "IV", x: 35, y: 75 },
+                    { id: 3, label: "IV", x: 65, y: 75 }, { id: 4, label: "LV", x: 10, y: 65 },
+                    { id: 5, label: "RV", x: 90, y: 65 }, { id: 6, label: "DM", x: 40, y: 60 },
+                    { id: 7, label: "DM", x: 60, y: 60 }, { id: 8, label: "LM", x: 20, y: 35 },
+                    { id: 9, label: "RM", x: 80, y: 35 }, { id: 10, label: "OM", x: 50, y: 40 },
+                    { id: 11, label: "ST", x: 50, y: 20 }
+                ]
+            },
+            activeFormation: "4-2-3-1"
+        };
+    }
+
+    commit(mutationFn) {
+        mutationFn(this.state);
+        try {
+            localStorage.setItem(this.storageKey, JSON.stringify(this.state));
+        } catch (e) {
+            console.error("Fehler beim Speichern der Daten im LocalStorage:", e);
+        }
+        this.notifyObservers();
+    }
+
+    addObserver(observerFn) { this.observers.push(observerFn); }
+    notifyObservers() { this.observers.forEach(observer => observer(this.state)); }
+
+    // --- ACTIONS (Beispiele für saubere Zustandsänderungen) ---
+    addFinanceEntry(desc, val, type) {
+        this.commit(state => {
+            state.finance.unshift({ id: Date.now(), desc, val, type });
+        });
+    }
+
+    updatePlayerPosition(playerId, newX, newY) {
+        this.commit(state => {
+            const formation = state.tactics[state.activeFormation];
+            const player = formation.find(p => p.id === playerId);
+            if (player) {
+                player.x = newX;
+                player.y = newY;
+            }
+        });
+    }
+
+    saveApiKey(key) {
+        this.commit(state => {
+            state.config.apiKey = key;
+        });
+    }
 }
 
-function initDashboard() {
-    updateBudget();
-    loadModule('tactics'); 
+// --- 2. GLOBAL APP INSTANCE ---
+const ToniDB = new NeuralCore("TONI_V3_LUXURY_DATA");
+
+// --- 3. INITIALIZATION & BOOT SEQUENCE ---
+document.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('TONI_AUTH') === 'true') {
+        bootSystem();
+    } else {
+        document.getElementById('btn-boot').addEventListener('click', () => bootSystem(true));
+    }
+});
+
+function bootSystem(isInitialBoot = false) {
+    const authLayer = document.getElementById('auth-layer');
+    const appInterface = document.getElementById('app-interface');
+
+    if (isInitialBoot) {
+        const btn = document.getElementById('btn-boot');
+        btn.innerText = "LADE MODULE...";
+        btn.disabled = true;
+
+        authLayer.style.opacity = '0';
+        setTimeout(() => {
+            authLayer.classList.add('hidden');
+            appInterface.classList.remove('hidden');
+            sessionStorage.setItem('TONI_AUTH', 'true');
+            finishInitialization();
+        }, 500);
+    } else {
+        authLayer.classList.add('hidden');
+        appInterface.classList.remove('hidden');
+        finishInitialization();
+    }
+}
+
+function finishInitialization() {
+    initEventListeners();
+    ToniDB.addObserver(renderUI); // UI an den Daten-Core binden
+    renderUI(ToniDB.state); // Erster Render-Vorgang
+    navigateTo('tactics'); // Standard-Modul laden
+    setInterval(updateClock, 1000);
+}
+
+// --- 4. EVENT LISTENERS ---
+function initEventListeners() {
+    // Navigation
+    document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => navigateTo(btn.dataset.module));
+    });
+
+    // Modals
+    document.getElementById('btn-toggle-settings').addEventListener('click', () => toggleModal('modal-settings', true));
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', () => toggleModal(btn.dataset.modalId, false));
+    });
+
+    // Settings
+    document.getElementById('btn-save-settings').addEventListener('click', () => {
+        const apiKey = document.getElementById('api-key').value;
+        ToniDB.saveApiKey(apiKey);
+        toggleModal('modal-settings', false);
+    });
+
+    // Media / Video
+    document.getElementById('btn-load-video').addEventListener('click', () => document.getElementById('vid-up').click());
+    document.getElementById('vid-up').addEventListener('change', (e) => loadVideo(e.target));
+    document.querySelector('.news-img-placeholder').addEventListener('click', () => {
+        toggleModal('modal-video', true);
+        initVideoCanvas();
+    });
     
-    setInterval(() => {
-        const clock = document.getElementById('clock');
-        if(clock) clock.innerText = new Date().toLocaleTimeString('de-DE').slice(0,5);
-    }, 1000);
+    // AI Tools
+    document.getElementById('mic-btn').addEventListener('click', (e) => e.currentTarget.classList.toggle('active'));
 }
 
-// --- 3. NAVIGATION ---
-function loadModule(name) {
-    const stage = document.getElementById('stage-content');
-    if(!stage) return;
-
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    const activeBtn = document.getElementById('nav-' + name);
-    if(activeBtn) activeBtn.classList.add('active');
-
-    document.getElementById('active-mod-name').innerText = "// " + name.toUpperCase();
-
-    if (name === 'kader') renderKader(stage);
-    if (name === 'tactics') renderTactics(stage);
-    if (name === 'office') renderOffice(stage);
-    if (name === 'media') renderMedia(stage);
-    if (name === 'youth') stage.innerHTML = "<h2 style='text-align:center; color:#555; margin-top:50px;'>JUGEND AKADEMIE (Wartung)</h2>";
+// --- 5. UI & NAVIGATION ---
+function navigateTo(moduleName) {
+    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.module === moduleName));
+    document.getElementById('active-mod-name').innerText = `// ${moduleName.toUpperCase()}`;
+    document.querySelectorAll('.stage-module').forEach(module => module.classList.toggle('active', module.id === `module-${moduleName}`));
 }
 
-// --- 4. MODULE: KADER ---
-function renderKader(target) {
+function updateClock() {
+    document.getElementById('clock').innerText = new Date().toLocaleTimeString('de-DE').slice(0, 5);
+}
+
+function toggleModal(modalId, show) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.toggle('hidden',!show);
+    }
+}
+
+// --- 6. CENTRAL RENDER FUNCTION ---
+function renderUI(state) {
+    updateBudget(state.finance);
+    renderKader(state.players);
+    renderTactics(state.tactics[state.activeFormation]);
+    renderOffice(state.finance);
+    renderMedia();
+    renderYouth();
+}
+
+// --- 7. MODULE RENDERERS ---
+function updateBudget(financeData) {
+    const el = document.getElementById('budget-display');
+    const newTotal = financeData.reduce((acc, f) => acc + (f.type === 'in'? f.val : -f.val), 0);
+    const oldTotal = parseFloat(el.dataset.value || 0);
+
+    if (newTotal!== oldTotal) {
+        el.innerText = newTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+        el.dataset.value = newTotal;
+        
+        el.style.color = newTotal > oldTotal? 'var(--neon-green)' : 'var(--neon-alert)';
+        setTimeout(() => el.style.color = 'var(--neon-green)', 1000);
+    }
+}
+
+function renderKader(players) {
+    const target = document.getElementById('module-kader');
+    target.innerHTML = `<div class="roster-grid"></div>`;
+    const grid = target.querySelector('.roster-grid');
+
+    players.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        card.innerHTML = `
+            <div class="pc-rating">${p.rating}</div>
+            <div class="pc-pos">${p.pos}</div>
+            <div class="pc-face"><i class="fa-solid fa-${p.img}"></i></div>
+            <div class="pc-name">${p.name}</div>
+        `;
+        card.addEventListener('click', () => openBio(p.id));
+        grid.appendChild(card);
+    });
+}
+
+function renderTactics(formation) {
+    const target = document.getElementById('module-tactics');
+    let playersHtml = formation.map(p => `
+        <div class="tactic-player" id="pl-${p.id}" style="left:${p.x}%; top:${p.y}%;" data-id="${p.id}">
+            ${p.label}
+        </div>
+    `).join('');
+
     target.innerHTML = `
-        <div class="roster-grid">
-            ${CORE.players.map(p => `
-                <div class="player-card" onclick="openBio(${p.id})">
-                    <div class="pc-rating">${p.rating}</div>
-                    <div class="pc-pos">${p.pos}</div>
-                    <div class="pc-face"><i class="fa-solid fa-${p.img}"></i></div>
-                    <div class="pc-name">${p.name}</div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-function openBio(id) {
-    const p = CORE.players.find(x => x.id === id);
-    const modal = document.getElementById('modal-bio');
-    const content = document.getElementById('bio-content');
-    
-    content.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
-            <h2 style="font-family:'Orbitron'; color:#fff;">${p.name} <span style="color:#00f3ff; font-size:14px;">// BIO-DATEN</span></h2>
-            <div style="font-size:30px; color:#ffd700;">${p.rating}</div>
-        </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px; margin-top:20px;">
-            <div>
-                <h4 style="color:#666; margin-bottom:10px;">PHYSIK</h4>
-                <div style="margin-bottom:10px;">Gewicht: <input type="number" value="${p.bio.weight}" style="background:#111; color:#fff; border:1px solid #333; width:60px;"> kg</div>
-                <div style="margin-bottom:10px;">Körperfett: <input type="number" value="${p.bio.fat}" style="background:#111; color:#fff; border:1px solid #333; width:60px;"> %</div>
-            </div>
-            <div>
-                <h4 style="color:#666; margin-bottom:10px;">STATUS</h4>
-                <div style="color:${p.bio.status === 'Fit' ? '#0aff60' : '#ff003c'}">${p.bio.status.toUpperCase()}</div>
-            </div>
-        </div>
-        <button class="btn-main" style="margin-top:20px;" onclick="closeModals()">SCHLIESSEN</button>
-    `;
-    modal.classList.remove('hidden');
-}
-
-// --- 5. MODULE: TAKTIK ---
-function renderTactics(target) {
-    target.innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-            <h3 style="font-family:'Orbitron'">TAKTIK BOARD PRO</h3>
-            <button class="btn-main" style="width:auto; padding:5px 15px; font-size:10px;" onclick="resetTactics()">RESET</button>
-        </div>
         <div class="pitch-wrapper">
             <div class="pitch-surface" id="pitch-area">
                 <div class="pitch-line line-mid"></div><div class="pitch-border circle-mid"></div>
                 <div class="pitch-border box-16-top"></div><div class="pitch-border box-5-top"></div><div class="goal-net-top"></div>
                 <div class="pitch-border box-16-bot"></div><div class="pitch-border box-5-bot"></div><div class="goal-net-bot"></div>
-                ${CORE.tactics.map(t => `
-                    <div class="tactic-player" id="pl-${t.id}" style="left:${t.x}%; top:${t.y}%;" onmousedown="dragStart(event, ${t.id})">
-                        ${t.label}
-                    </div>
-                `).join('')}
+                ${playersHtml}
             </div>
         </div>
     `;
+    
+    target.querySelectorAll('.tactic-player').forEach(p => {
+        p.addEventListener('mousedown', (e) => dragStart(e, parseInt(p.dataset.id)));
+    });
 }
 
-function dragStart(e, id) {
-    const el = document.getElementById('pl-' + id);
-    const container = document.getElementById('pitch-area');
-    
-    function move(evt) {
-        const rect = container.getBoundingClientRect();
-        let x = ((evt.clientX - rect.left) / rect.width) * 100;
-        let y = ((evt.clientY - rect.top) / rect.height) * 100;
-        x = Math.max(0, Math.min(100, x));
-        y = Math.max(0, Math.min(100, y));
-        el.style.left = x + '%';
-        el.style.top = y + '%';
-    }
-    
-    function stop() {
-        document.removeEventListener('mousemove', move);
-        document.removeEventListener('mouseup', stop);
-    }
-    document.addEventListener('mousemove', move);
-    document.addEventListener('mouseup', stop);
-}
-
-function resetTactics() { loadModule('tactics'); }
-
-// --- 6. MODULE: OFFICE ---
-function renderOffice(target) {
-    updateBudget();
+function renderOffice(financeData) {
+    const target = document.getElementById('module-office');
     target.innerHTML = `
         <div style="display:grid; grid-template-columns: 1fr 300px; gap:20px;">
             <div>
@@ -175,11 +257,11 @@ function renderOffice(target) {
                 <table class="finance-table">
                     <thead><tr><th>BESCHREIBUNG</th><th>TYP</th><th>BETRAG</th></tr></thead>
                     <tbody>
-                        ${CORE.finance.map(f => `
+                        ${financeData.map(f => `
                             <tr>
                                 <td>${f.desc}</td>
-                                <td style="color:${f.type==='in' ? '#0aff60' : '#ff003c'}">${f.type.toUpperCase()}</td>
-                                <td>${f.val.toLocaleString()} €</td>
+                                <td style="color:${f.type==='in'? '#0aff60' : '#ff003c'}">${f.type.toUpperCase()}</td>
+                                <td>${f.val.toLocaleString('de-DE')} €</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -190,33 +272,22 @@ function renderOffice(target) {
                 <input id="fin-desc" placeholder="Beschreibung" class="auth-input" style="font-size:12px; margin-bottom:10px;">
                 <input id="fin-val" type="number" placeholder="Betrag" class="auth-input" style="font-size:12px; margin-bottom:10px;">
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-main" onclick="addFinance('in')">EINNAHME</button>
-                    <button class="btn-main" style="background:#ff003c;" onclick="addFinance('out')">AUSGABE</button>
+                    <button class="btn-main" id="btn-add-in">EINNAHME</button>
+                    <button class="btn-main" id="btn-add-out" style="background:#ff003c;">AUSGABE</button>
                 </div>
             </div>
-        </div>
-    `;
+        </div>`;
+        
+    document.getElementById('btn-add-in').addEventListener('click', () => addFinance('in'));
+    document.getElementById('btn-add-out').addEventListener('click', () => addFinance('out'));
 }
 
-function addFinance(type) {
-    const d = document.getElementById('fin-desc').value;
-    const v = parseFloat(document.getElementById('fin-val').value);
-    if(d && v) {
-        CORE.finance.push({ desc: d, val: v, type: type });
-        loadModule('office');
-    }
+function renderYouth() {
+    document.getElementById('module-youth').innerHTML = "<h2 style='text-align:center; color:#555; margin-top:50px;'>JUGEND AKADEMIE (Wartung)</h2>";
 }
 
-function updateBudget() {
-    let total = 0;
-    CORE.finance.forEach(f => total += (f.type === 'in' ? f.val : -f.val));
-    CORE.budget = total;
-    const el = document.getElementById('budget-display');
-    if(el) el.innerText = total.toLocaleString() + " €";
-}
-
-// --- 7. MODULE: MEDIA ---
-function renderMedia(target) {
+function renderMedia() {
+    const target = document.getElementById('module-media');
     target.innerHTML = `
         <div class="newspaper-workspace">
             <div class="newspaper-sheet">
@@ -225,28 +296,91 @@ function renderMedia(target) {
                     <p contenteditable="true">Donnerstag, 26. Februar 2026 | Nr. 102</p>
                 </div>
                 <div class="news-headline" contenteditable="true">MEISTERSCHAFT IN SICHT!</div>
-                <div class="news-img-placeholder" onclick="document.getElementById('modal-video').classList.remove('hidden'); initVideoCanvas();">
+                <div class="news-img-placeholder">
                     <i class="fa-solid fa-image"></i>&nbsp; BILD ODER VIDEO-SNAPSHOT EINFÜGEN
                 </div>
                 <div class="news-columns" contenteditable="true">
                     Dies ist ein bearbeitbarer Text. Klicke hier, um den Spielbericht zu schreiben. 
-                    Die Mannschaft hat gestern eine überragende Leistung gezeigt. 
-                    Taktisch perfekt eingestellt vom Trainerteam.
-                    <br><br>
-                    Besonders die Defensive stand stabil und ließ keine Chancen zu.
+                    Die Mannschaft hat gestern eine überragende Leistung gezeigt.
                 </div>
             </div>
         </div>
         <div style="text-align:center; padding:20px;">
-            <button class="btn-main" style="width:auto; padding: 10px 30px;" onclick="window.print()">DRUCKEN / PDF</button>
-        </div>
-    `;
+            <button class="btn-main" id="btn-print" style="width:auto; padding: 10px 30px;">DRUCKEN / PDF</button>
+        </div>`;
+    document.getElementById('btn-print').addEventListener('click', () => window.print());
 }
 
-// --- 8. VIDEO & HELPER ---
+// --- 8. MODULE-SPECIFIC LOGIC ---
+function openBio(id) {
+    const p = ToniDB.state.players.find(x => x.id === id);
+    if (!p) return;
+
+    const contentWrapper = document.getElementById('bio-content-wrapper');
+    contentWrapper.innerHTML = `
+        <button class="modal-close" data-modal-id="modal-bio">×</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
+            <h2 style="font-family:'Orbitron'; color:#fff;">${p.name} <span style="color:#00f3ff; font-size:14px;">// BIO-DATEN</span></h2>
+            <div style="font-size:30px; color:#ffd700;">${p.rating}</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px; margin-top:20px;">
+            <div>
+                <h4 style="color:#666; margin-bottom:10px;">PHYSIK</h4>
+                <div style="margin-bottom:10px;">Gewicht: <input type="number" value="${p.bio.weight}" style="background:#111; color:#fff; border:1px solid #333; width:60px;"> kg</div>
+                <div>Körperfett: <input type="number" value="${p.bio.fat}" style="background:#111; color:#fff; border:1px solid #333; width:60px;"> %</div>
+            </div>
+            <div>
+                <h4 style="color:#666; margin-bottom:10px;">STATUS</h4>
+                <div style="color:${p.bio.status === 'Fit'? '#0aff60' : '#ff003c'}">${p.bio.status.toUpperCase()}</div>
+            </div>
+        </div>`;
+    contentWrapper.querySelector('.modal-close').addEventListener('click', () => toggleModal('modal-bio', false));
+    toggleModal('modal-bio', true);
+}
+
+function dragStart(e, id) {
+    e.preventDefault();
+    const el = document.getElementById('pl-' + id);
+    const container = document.getElementById('pitch-area');
+    
+    function move(evt) {
+        const rect = container.getBoundingClientRect();
+        let x = ((evt.clientX - rect.left) / rect.width) * 100;
+        let y = ((evt.clientY - rect.top) / rect.height) * 100;
+        x = Math.max(2, Math.min(98, x));
+        y = Math.max(2, Math.min(98, y));
+        el.style.left = x + '%';
+        el.style.top = y + '%';
+    }
+    
+    function stop(evt) {
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', stop);
+        const rect = container.getBoundingClientRect();
+        let finalX = ((evt.clientX - rect.left) / rect.width) * 100;
+        let finalY = ((evt.clientY - rect.top) / rect.height) * 100;
+        finalX = Math.max(2, Math.min(98, finalX));
+        finalY = Math.max(2, Math.min(98, finalY));
+        ToniDB.updatePlayerPosition(id, finalX, finalY);
+    }
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', stop);
+}
+
+function addFinance(type) {
+    const descEl = document.getElementById('fin-desc');
+    const valEl = document.getElementById('fin-val');
+    const v = parseFloat(valEl.value);
+    if (descEl.value && v > 0) {
+        ToniDB.addFinanceEntry(descEl.value, v, type);
+        descEl.value = '';
+        valEl.value = '';
+    }
+}
+
 function loadVideo(input) {
     const v = document.getElementById('video-player');
-    if(input.files[0]) {
+    if (input.files && input.files[0]) {
         v.src = URL.createObjectURL(input.files[0]);
         v.play();
     }
@@ -254,22 +388,11 @@ function loadVideo(input) {
 
 function initVideoCanvas() {
     const c = document.getElementById('video-canvas');
-    const v = document.getElementById('video-player');
-    const container = v.parentElement;
-    c.width = container.clientWidth;
-    c.height = container.clientHeight;
     const ctx = c.getContext('2d');
-    ctx.strokeStyle = "#00f3ff"; ctx.lineWidth = 4;
+    ctx.strokeStyle = "#00f3ff"; ctx.lineWidth = 4; ctx.lineCap = "round";
     let paint = false;
     c.onmousedown = (e) => { paint = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
-    c.onmousemove = (e) => { if(paint) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
+    c.onmousemove = (e) => { if (paint) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
     c.onmouseup = () => paint = false;
+    c.onmouseleave = () => paint = false;
 }
-
-function closeModals() {
-    document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.add('hidden'));
-}
-
-function toggleSettings() { document.getElementById('modal-settings').classList.remove('hidden'); }
-function saveSettings() { CORE.config.apiKey = document.getElementById('api-key').value; closeModals(); }
-function toggleMic() { document.getElementById('mic-btn').classList.toggle('active'); }
