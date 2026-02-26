@@ -1,167 +1,157 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL CORE ENGINE (V16.5 FINAL)
+   TONI 2.0 | NEURAL LOGIC CORE V17.0
    ========================================================================== */
 
-const SAVE_KEY = "TONI_DATA_V16";
+const STORE_KEY = "TONI_V17_DATA";
 
-// --- 1. DATENBANK (Der Speicher) ---
-let DB = {
+// --- 1. DATENBANK (INIT) ---
+let CORE = {
     config: { apiKey: "" },
-    budget: 0, // Wird live berechnet
+    budget: 0,
     
-    // SPIELER
+    // KADER DATEN
     players: [
-        { 
-            id: 1, name: "NEUER", pos: "TW", rating: 89, 
-            stats: { reflex: 90, hechten: 88, kicken: 91, pos: 85 },
-            bio: { weight: 92.5, fat: 11.0, muscle: 48.0, heart: 45 }
-        },
-        { 
-            id: 9, name: "KANE", pos: "ST", rating: 90, 
-            stats: { pace: 70, shoot: 93, pass: 85, drib: 82 },
-            bio: { weight: 86.0, fat: 12.5, muscle: 46.5, heart: 48 }
-        },
-        { 
-            id: 42, name: "MUSIALA", pos: "ZM", rating: 86, 
-            stats: { pace: 88, shoot: 80, pass: 85, drib: 94 },
-            bio: { weight: 72.0, fat: 8.5, muscle: 44.0, heart: 50 }
-        }
+        { id: 1, name: "NEUER", pos: "TW", rating: 89, img: "user-ninja", bio: { weight: 92, fat: 11, status: "Fit" } },
+        { id: 2, name: "KANE", pos: "ST", rating: 90, img: "crosshairs", bio: { weight: 86, fat: 12, status: "Fit" } },
+        { id: 3, name: "MUSIALA", pos: "ZM", rating: 86, img: "bolt", bio: { weight: 72, fat: 8, status: "Fit" } },
+        { id: 4, name: "KIMMICH", pos: "CDM", rating: 88, img: "shield-halved", bio: { weight: 75, fat: 9, status: "Fatigue" } }
     ],
 
     // FINANZEN
     finance: [
-        { id: 1, txt: "Sponsoring: Neural Gear", val: 1500000, type: "income" },
-        { id: 2, txt: "TV-Rechte: Bundesliga", val: 2500000, type: "income" },
-        { id: 3, txt: "Reisekosten: London", val: 12500, type: "expense" },
-        { id: 4, txt: "Medizinische Ausrüstung", val: 4500, type: "expense" }
+        { desc: "TV-Rechte Bundesliga", val: 2500000, type: "in" },
+        { desc: "Sponsoring: Neural Gear", val: 1500000, type: "in" },
+        { desc: "Reisekosten London", val: 12500, type: "out" },
+        { desc: "Medizinische Abteilung", val: 4500, type: "out" }
     ],
 
-    // TAKTIK (Positionen in %)
+    // TAKTIK (Positionen für 4-2-3-1)
     tactics: [
         { id: 1, label: "TW", x: 50, y: 90 },
-        { id: 2, label: "IV", x: 35, y: 75 }, { id: 3, label: "IV", x: 65, y: 75 },
-        { id: 4, label: "LV", x: 15, y: 70 }, { id: 5, label: "RV", x: 85, y: 70 },
-        { id: 6, label: "ZM", x: 40, y: 50 }, { id: 7, label: "ZM", x: 60, y: 50 },
-        { id: 8, label: "LM", x: 10, y: 40 }, { id: 9, label: "RM", x: 90, y: 40 },
-        { id: 10, label: "ST", x: 40, y: 20 }, { id: 11, label: "ST", x: 60, y: 20 }
-    ],
-
-    // JUGEND STICKER (true = eingeklebt)
-    stickers: [true, true, false, false, false, false, false, false, false, false, false, false]
+        { id: 2, label: "IV", x: 35, y: 75 },
+        { id: 3, label: "IV", x: 65, y: 75 },
+        { id: 4, label: "LV", x: 10, y: 65 },
+        { id: 5, label: "RV", x: 90, y: 65 },
+        { id: 6, label: "ZM", x: 40, y: 50 },
+        { id: 7, label: "ZM", x: 60, y: 50 },
+        { id: 8, label: "LM", x: 15, y: 35 },
+        { id: 9, label: "RM", x: 85, y: 35 },
+        { id: 10, label: "ZOM", x: 50, y: 35 },
+        { id: 11, label: "ST", x: 50, y: 15 }
+    ]
 };
 
 // --- 2. SYSTEM START ---
 function bootSystem() {
-    // Verstecke Login, zeige Interface
-    document.getElementById('auth-layer').classList.add('hidden');
-    document.getElementById('main-interface').classList.remove('hidden');
+    // Animation simulieren
+    const btn = document.querySelector('.btn-main');
+    btn.innerText = "LADE MODULE...";
     
-    // Starte erstes Modul
-    updateBudgetDisplay();
-    loadModule('kader');
+    setTimeout(() => {
+        document.getElementById('auth-layer').classList.add('hidden');
+        document.getElementById('app-interface').classList.remove('hidden');
+        initDashboard();
+    }, 800);
+}
+
+function initDashboard() {
+    updateBudget();
+    loadModule('tactics'); // Startseite
     
-    // Starte Uhr
+    // Uhrzeit
     setInterval(() => {
-        document.getElementById('clock-display').innerText = new Date().toLocaleTimeString('de-DE').slice(0,5);
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString('de-DE').slice(0,5);
     }, 1000);
 }
 
-// --- 3. MODUL MANAGER (Seitenwechsel) ---
+// --- 3. NAVIGATION ---
 function loadModule(name) {
-    const stage = document.getElementById('content-stage');
+    const stage = document.getElementById('stage-content');
     
-    // UI Update (Titel & Active State)
-    document.getElementById('active-module-title').innerText = name.toUpperCase();
-    document.querySelectorAll('#sidebar button').forEach(b => b.classList.remove('active'));
-    const navBtn = document.getElementById('nav-' + name);
-    if(navBtn) navBtn.classList.add('active');
+    // UI Update
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    // Versuch Button zu finden (generisch)
+    const btn = document.querySelector(`button[onclick="loadModule('${name}')"]`);
+    if(btn) btn.classList.add('active');
 
-    // Inhalt rendern
+    document.getElementById('active-mod-name').innerText = "// " + name.toUpperCase();
+
+    // Router
     if (name === 'kader') renderKader(stage);
     if (name === 'tactics') renderTactics(stage);
     if (name === 'office') renderOffice(stage);
-    if (name === 'youth') renderYouth(stage);
     if (name === 'media') renderMedia(stage);
+    if (name === 'youth') stage.innerHTML = "<h2 style='text-align:center; color:#555;'>JUGEND AKADEMIE (Wartung)</h2>";
 }
 
-// --- 4. KADER & MODAL ---
+// --- 4. MODULE: KADER ---
 function renderKader(target) {
     target.innerHTML = `
-        <div class="card-grid fade-in">
-            ${DB.players.map(p => `
-                <div class="fifa-card" onclick="openPlayerModal(${p.id})">
-                    <div class="card-rating">${p.rating}</div>
-                    <div class="card-icon"><i class="fa-solid fa-user-ninja"></i></div>
-                    <div class="card-name">${p.name}</div>
+        <div class="roster-grid fade-in">
+            ${CORE.players.map(p => `
+                <div class="player-card" onclick="openBio(${p.id})">
+                    <div class="pc-rating">${p.rating}</div>
+                    <div class="pc-pos">${p.pos}</div>
+                    <div class="pc-face"><i class="fa-solid fa-${p.img}"></i></div>
+                    <div class="pc-name">${p.name}</div>
                 </div>
             `).join('')}
         </div>
     `;
 }
 
-function openPlayerModal(id) {
-    const p = DB.players.find(x => x.id === id);
-    const modal = document.getElementById('modal-player');
-    const content = document.getElementById('player-modal-content');
+function openBio(id) {
+    const p = CORE.players.find(x => x.id === id);
+    const modal = document.getElementById('modal-bio');
+    const content = document.getElementById('bio-content');
     
-    document.getElementById('player-modal-title').innerText = p.name + " // AKTE";
-    
-    // Hier füllen wir das Modal mit HTML (damit es nicht leer ist)
     content.innerHTML = `
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
+            <h2 style="font-family:'Orbitron'; color:#fff;">${p.name} <span style="color:#00f3ff; font-size:14px;">// BIO-DATEN</span></h2>
+            <div style="font-size:30px; color:#ffd700;">${p.rating}</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px; margin-top:20px;">
             <div>
-                <h4 style="color:#00f3ff; margin-bottom:10px;">LEISTUNGSDATEN</h4>
-                ${Object.keys(p.stats).map(key => `
-                    <div style="margin-bottom:10px;">
-                        <span style="color:#888; font-size:12px;">${key.toUpperCase()}</span>
-                        <input type="number" value="${p.stats[key]}" onchange="updatePlayerStat(${id}, 'stats', '${key}', this.value)">
-                    </div>
-                `).join('')}
+                <h4 style="color:#666; margin-bottom:10px;">PHYSIK</h4>
+                <div style="margin-bottom:10px;">Gewicht: <input type="number" value="${p.bio.weight}" style="background:#111; color:#fff; border:1px solid #333; width:60px;"> kg</div>
+                <div style="margin-bottom:10px;">Körperfett: <input type="number" value="${p.bio.fat}" style="background:#111; color:#fff; border:1px solid #333; width:60px;"> %</div>
             </div>
             <div>
-                <h4 style="color:#ffd700; margin-bottom:10px;">BIO-METRIK</h4>
-                <div style="margin-bottom:10px;">GEWICHT (KG)<input type="number" value="${p.bio.weight}" onchange="updatePlayerStat(${id}, 'bio', 'weight', this.value)"></div>
-                <div style="margin-bottom:10px;">FETT (%)<input type="number" value="${p.bio.fat}" onchange="updatePlayerStat(${id}, 'bio', 'fat', this.value)"></div>
-                <div style="margin-bottom:10px;">MUSKEL (%)<input type="number" value="${p.bio.muscle}" onchange="updatePlayerStat(${id}, 'bio', 'muscle', this.value)"></div>
-                <div style="margin-bottom:10px;">RUHEPULS<input type="number" value="${p.bio.heart}" onchange="updatePlayerStat(${id}, 'bio', 'heart', this.value)"></div>
+                <h4 style="color:#666; margin-bottom:10px;">STATUS</h4>
+                <div style="color:${p.bio.status === 'Fit' ? '#0aff60' : '#ff003c'}">${p.bio.status.toUpperCase()}</div>
             </div>
         </div>
+        <button class="btn-main" style="margin-top:20px;" onclick="closeModals()">SPEICHERN & SCHLIESSEN</button>
     `;
-    
     modal.classList.remove('hidden');
 }
 
-function updatePlayerStat(id, category, key, val) {
-    const p = DB.players.find(x => x.id === id);
-    p[category][key] = parseFloat(val);
-}
-
-// --- 5. TAKTIK BOARD (Mit Linien & Drag) ---
+// --- 5. MODULE: TAKTIK (GEOMETRY UPDATE) ---
 function renderTactics(target) {
     target.innerHTML = `
-        <div class="tactics-wrapper fade-in">
-            <div class="pitch" id="pitch-area">
-                <div class="pitch-line mid-line"></div>
-                <div class="pitch-border mid-circle"></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+            <h3 style="font-family:'Orbitron'">TAKTIK BOARD PRO</h3>
+            <button class="btn-main" style="width:auto; padding:5px 15px; font-size:10px;" onclick="resetTactics()">RESET</button>
+        </div>
+        
+        <div class="pitch-wrapper">
+            <div class="pitch-surface" id="pitch-area">
+                <div class="pitch-line line-mid"></div><div class="pitch-border circle-mid"></div>
                 
-                <div class="pitch-border box-16-top"></div><div class="pitch-border box-5-top"></div><div class="goal-top"></div>
-                <div class="pitch-border box-16-bot"></div><div class="pitch-border box-5-bot"></div><div class="goal-bot"></div>
-
-                ${DB.tactics.map(t => `
-                    <div class="player-dot team-home" id="pl-${t.id}" style="left:${t.x}%; top:${t.y}%;" onmousedown="initDrag(event, ${t.id})">
+                <div class="pitch-border box-16-top"></div><div class="pitch-border box-5-top"></div>
+                <div class="goal-net-top"></div> <div class="pitch-border box-16-bot"></div><div class="pitch-border box-5-bot"></div>
+                <div class="goal-net-bot"></div> ${CORE.tactics.map(t => `
+                    <div class="tactic-player" id="pl-${t.id}" style="left:${t.x}%; top:${t.y}%;" onmousedown="dragStart(event, ${t.id})">
                         ${t.label}
                     </div>
                 `).join('')}
             </div>
-            <div style="text-align:center; padding:10px;">
-                <small style="color:#888;">SPIELER VERSCHIEBBAR (DRAG & DROP)</small>
-            </div>
         </div>
+        <div style="text-align:center; margin-top:10px; color:#555; font-size:10px;">DRAG & DROP AKTIVIERT</div>
     `;
 }
 
-// Drag & Drop Logik
-function initDrag(e, id) {
+function dragStart(e, id) {
     const el = document.getElementById('pl-' + id);
     const container = document.getElementById('pitch-area');
     
@@ -170,181 +160,101 @@ function initDrag(e, id) {
         let x = ((evt.clientX - rect.left) / rect.width) * 100;
         let y = ((evt.clientY - rect.top) / rect.height) * 100;
         
-        // Begrenzung 0-100%
+        // Limits
         x = Math.max(0, Math.min(100, x));
         y = Math.max(0, Math.min(100, y));
 
         el.style.left = x + '%';
         el.style.top = y + '%';
     }
-
+    
     function stop() {
         document.removeEventListener('mousemove', move);
         document.removeEventListener('mouseup', stop);
-        // Speichern der Position könnte hier erfolgen
+        // Hier könnte man speichern: CORE.tactics[id].x = x...
     }
-
+    
     document.addEventListener('mousemove', move);
     document.addEventListener('mouseup', stop);
 }
 
-// --- 6. OFFICE MANAGER ---
-function renderOffice(target) {
-    updateBudgetDisplay();
-    target.innerHTML = `
-        <div class="fade-in">
-            <h3 style="color:#00f3ff; margin-bottom:20px;">FINANZ ZENTRALE</h3>
-            
-            <div style="background:rgba(255,255,255,0.05); padding:15px; margin-bottom:20px; display:flex; gap:10px;">
-                <input id="fin-txt" placeholder="Beschreibung (z.B. Neuer Sponsor)" style="flex:2;">
-                <input id="fin-val" type="number" placeholder="Betrag" style="width:150px;">
-                <select id="fin-type" style="width:150px;">
-                    <option value="income">EINNAHME (+)</option>
-                    <option value="expense">AUSGABE (-)</option>
-                </select>
-                <button class="btn-neon" onclick="addTransaction()">BUCHEN</button>
-            </div>
+function resetTactics() {
+    loadModule('tactics'); // Simpler Reset auf Standardwerte
+}
 
-            <table class="ledger-table">
-                <thead><tr><th>BESCHREIBUNG</th><th>TYP</th><th>BETRAG</th><th>AKTION</th></tr></thead>
-                <tbody>
-                    ${DB.finance.map((f, index) => `
-                        <tr>
-                            <td>${f.txt}</td>
-                            <td style="color:${f.type === 'income' ? '#0aff60' : '#ff003c'}">${f.type.toUpperCase()}</td>
-                            <td>${f.val.toLocaleString()} €</td>
-                            <td><button style="color:red; background:none; border:none; cursor:pointer;" onclick="deleteTransaction(${index})">X</button></td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
+// --- 6. MODULE: OFFICE ---
+function renderOffice(target) {
+    updateBudget();
+    target.innerHTML = `
+        <div style="display:grid; grid-template-columns: 1fr 300px; gap:20px;">
+            <div>
+                <h3 style="font-family:'Orbitron'; color:#00f3ff; margin-bottom:20px;">FINANZ ÜBERSICHT</h3>
+                <table class="finance-table">
+                    <thead><tr><th>BESCHREIBUNG</th><th>TYP</th><th>BETRAG</th></tr></thead>
+                    <tbody>
+                        ${CORE.finance.map(f => `
+                            <tr>
+                                <td>${f.desc}</td>
+                                <td style="color:${f.type==='in' ? '#0aff60' : '#ff003c'}">${f.type.toUpperCase()}</td>
+                                <td>${f.val.toLocaleString()} €</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div style="background:rgba(255,255,255,0.02); padding:20px; border:1px solid #333;">
+                <h4 style="margin-bottom:15px;">NEUE BUCHUNG</h4>
+                <input id="fin-desc" placeholder="Beschreibung" style="margin-bottom:10px; background:#222; border:1px solid #444; color:#fff; padding:8px; width:100%;">
+                <input id="fin-val" type="number" placeholder="Betrag" style="margin-bottom:10px; background:#222; border:1px solid #444; color:#fff; padding:8px; width:100%;">
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-main" onclick="addFinance('in')">EINNAHME</button>
+                    <button class="btn-main" style="background:#ff003c; color:#fff;" onclick="addFinance('out')">AUSGABE</button>
+                </div>
+            </div>
         </div>
     `;
 }
 
-function addTransaction() {
-    const txt = document.getElementById('fin-txt').value;
-    const val = parseFloat(document.getElementById('fin-val').value);
-    const type = document.getElementById('fin-type').value;
-
-    if(txt && val) {
-        DB.finance.push({ txt, val, type });
-        loadModule('office'); // Refresh
+function addFinance(type) {
+    const d = document.getElementById('fin-desc').value;
+    const v = parseFloat(document.getElementById('fin-val').value);
+    
+    if(d && v) {
+        CORE.finance.push({ desc: d, val: v, type: type });
+        loadModule('office');
     }
 }
 
-function deleteTransaction(index) {
-    DB.finance.splice(index, 1);
-    loadModule('office');
-}
-
-function updateBudgetDisplay() {
-    let sum = 0;
-    DB.finance.forEach(f => {
-        if(f.type === 'income') sum += parseFloat(f.val);
-        else sum -= parseFloat(f.val);
+function updateBudget() {
+    let total = 0;
+    CORE.finance.forEach(f => {
+        if(f.type === 'in') total += f.val;
+        else total -= f.val;
     });
-    DB.budget = sum;
-    const el = document.getElementById('header-budget');
-    if(el) el.innerText = sum.toLocaleString() + " €";
+    CORE.budget = total;
+    const el = document.getElementById('budget-display');
+    if(el) el.innerText = total.toLocaleString() + " €";
 }
 
-// --- 7. JUGEND (STICKER) ---
-function renderYouth(target) {
-    target.innerHTML = `
-        <div class="fade-in">
-            <h3 style="color:#ffd700; margin-bottom:10px;">U19 TALENT ALBUM</h3>
-            <div class="sticker-grid">
-                ${DB.stickers.map((s, i) => `
-                    <div class="sticker ${s ? 'unlocked' : ''}" onclick="toggleSticker(${i})">
-                        ${s ? '<i class="fa-solid fa-star"></i>' : (i+1)}
-                    </div>
-                `).join('')}
-            </div>
-            <p style="margin-top:20px; font-size:12px; color:#666;">* Klicke auf ein Feld, um Sticker einzukleben.</p>
-        </div>
-    `;
-}
-
-function toggleSticker(index) {
-    DB.stickers[index] = !DB.stickers[index];
-    loadModule('youth');
-}
-
-// --- 8. VIDEO SUITE & MEDIA ---
+// --- 7. MODULE: MEDIA (ZEITUNG) ---
 function renderMedia(target) {
     target.innerHTML = `
-        <div style="text-align:center; padding-top:50px;" class="fade-in">
-            <h3 style="margin-bottom:20px;">MEDIA CENTER</h3>
-            <button class="btn-neon" style="font-size:18px; padding:20px 40px;" onclick="openVideoModal()">
-                <i class="fa-solid fa-play-circle"></i> VIDEO ANALYSE STARTEN
-            </button>
-            <div style="margin-top:40px; border-top:1px solid #333; padding-top:20px;">
-                <h4>PRESSE MAPPE</h4>
-                <p style="color:#666;">Stadionzeitung Layout V1.2 aktiv</p>
-                <button class="btn-neon" onclick="window.print()">DRUCKEN (PDF)</button>
-            </div>
-        </div>
-    `;
-}
+        <div class="newspaper-workspace">
+            <div class="newspaper-sheet">
+                <div class="news-header">
+                    <h1 style="font-size:60px; margin:0;">TONI SPORT</h1>
+                    <p contenteditable="true">Donnerstag, 26. Februar 2026 | Nr. 102</p>
+                </div>
 
-function openVideoModal() {
-    document.getElementById('modal-video').classList.remove('hidden');
-    initCanvas();
-}
+                <div class="news-headline" contenteditable="true">MEISTERSCHAFT IN SICHT!</div>
+                
+                <div class="news-img-placeholder" onclick="document.getElementById('modal-video').classList.remove('hidden'); initVideoCanvas();">
+                    <i class="fa-solid fa-image"></i>&nbsp; BILD ODER VIDEO-SNAPSHOT EINFÜGEN
+                </div>
 
-function loadVideoFile(input) {
-    const video = document.getElementById('main-video-player');
-    video.src = URL.createObjectURL(input.files[0]);
-    document.getElementById('video-status-text').innerText = "Video geladen. Bereit.";
-}
-
-// Canvas Painting (Telestrator)
-function initCanvas() {
-    const canvas = document.getElementById('telestrator-canvas');
-    const container = document.querySelector('.video-container');
-    
-    // Größe anpassen
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
-    
-    const ctx = canvas.getContext('2d');
-    ctx.strokeStyle = "#00f3ff"; // Neon Cyan
-    ctx.lineWidth = 4;
-    
-    let painting = false;
-
-    canvas.onmousedown = (e) => {
-        painting = true;
-        ctx.beginPath();
-        ctx.moveTo(e.offsetX, e.offsetY);
-    };
-    
-    canvas.onmousemove = (e) => {
-        if(painting) {
-            ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.stroke();
-        }
-    };
-    
-    canvas.onmouseup = () => painting = false;
-}
-
-// --- HELFER & SETTINGS ---
-function closeModals() {
-    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
-}
-function toggleSettings() {
-    document.getElementById('modal-settings').classList.remove('hidden');
-}
-function saveSettings() {
-    DB.config.apiKey = document.getElementById('api-key-input').value;
-    closeModals();
-    alert("Einstellungen gespeichert.");
-}
-function toggleMic() {
-    const btn = document.getElementById('mic-btn');
-    btn.classList.toggle('active');
-    const txt = document.querySelector('.ai-msg');
-    txt.innerText = btn.classList.contains('active') ? "Toni hört zu..." : "System bereit.";
-}
+                <div class="news-columns" contenteditable="true">
+                    Dies ist ein bearbeitbarer Text. Klicke hier, um den Spielbericht zu schreiben. 
+                    Die Mannschaft hat gestern eine überragende Leistung gezeigt. 
+                    Taktisch perfekt eingestellt vom Trainerteam.
+                    <br><br>
+                    Besonders
