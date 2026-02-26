@@ -1,150 +1,146 @@
 /* ==========================================================================
-   TONI 3.0 | STYLE ENGINE V4.0 (NLZ MODULE)
+   TONI 2.0 | NEURAL OPERATING SYSTEM (V20.0 GIGANTIC)
    ========================================================================== */
 
-/*... Alle bisherigen Stile von V3.2 bleiben unverändert... */
-:root, *, body,.hidden, @keyframes, #auth-layer, #app-interface, #status-bar,.main-grid, #nav-sidebar, #tools-sidebar, #stage-container,.stage-module,.roster-grid,.finance-table,.pitch-wrapper,.newspaper-workspace,.modal-backdrop, @media print {
-    /* ALL PREVIOUS STYLES FROM THE LAST WORKING VERSION GO HERE */
-}
-/* Füge einfach die neuen Stile am Ende hinzu */
+:root {
+    /* -- ELITE PALETTE -- */
+    --bg-deep: #030305;
+    --bg-panel: rgba(15, 15, 25, 0.98);
+    --border-gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+    
+    /* -- TECH ACCENTS -- */
+    --neon-cyan: #00f3ff;
+    --neon-gold: #d4af37;
+    --neon-alert: #ff003c;
+    --path-vector: #0aff60; /* Für Laufwege */
+    --pass-vector: #ffd700; /* Für Passwege */
 
-/* 11. NLZ MODULE STYLES (NEU) */
-.youth-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 15px;
-}
-
-.youth-tabs {
-    display: flex;
-    gap: 5px;
+    /* -- FONTS -- */
+    --font-ui: 'Orbitron', sans-serif;
+    --font-main: 'Rajdhani', sans-serif;
+    --font-paper: 'Playfair Display', serif;
 }
 
-.tab-btn {
-    background: #222;
-    border: 1px solid #444;
-    color: #888;
-    padding: 8px 15px;
-    cursor: pointer;
-    font-family: var(--font-ui);
-    font-size: 11px;
-    transition: all 0.2s ease;
+/* 1. GLOBAL RESET & LUXURY CANVAS */
+* { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+body {
+    height: 100vh; width: 100vw; overflow: hidden;
+    background: var(--bg-deep); color: #fff;
+    font-family: var(--font-main);
+}
+.hidden { display: none !important; }
+
+/* 2. AUTHENTICATION (FINGERPRINT LOOK) */
+#auth-layer {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #000; display: flex; align-items: center; justify-content: center;
+}
+.login-terminal {
+    width: 450px; padding: 50px; text-align: center;
+    border: 1px solid #222; background: rgba(10,10,15,0.9);
+    box-shadow: 0 0 100px rgba(0, 243, 255, 0.05);
+}
+.btn-main {
+    width: 100%; padding: 15px; background: transparent; border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan); font-family: var(--font-ui); cursor: pointer;
+    text-transform: uppercase; letter-spacing: 2px; transition: 0.4s;
+}
+.btn-main:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 30px var(--neon-cyan); }
+
+/* 3. TACTICAL CO-PILOT (VECTOR ENGINE) */
+.pitch-container {
+    position: relative; width: 100%; height: 100%;
+    background: #1a3a1a; border: 5px solid #fff;
+    box-shadow: inset 0 0 150px rgba(0,0,0,0.8);
+}
+/* Laufweg-Vektoren */
+.vector-path {
+    stroke: var(--path-vector); stroke-width: 3; stroke-dasharray: 10;
+    animation: flow 2s linear infinite;
+}
+@keyframes flow { to { stroke-dashoffset: -20; } }
+
+/* Ausrüstung (Hütchen, Dummys) */
+.equipment-icon {
+    position: absolute; width: 20px; height: 20px;
+    background: orange; clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    z-index: 50;
 }
 
-.tab-btn:hover {
-    background: #333;
-    color: #fff;
+/* 4. NLZ PANINI ECOSYSTEM */
+.panini-album {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 30px; padding: 40px;
 }
-
-.tab-btn.active {
-    background: var(--neon-cyan);
-    border-color: var(--neon-cyan);
-    color: #000;
-    box-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
-}
-
-.youth-player-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-}
-
 .panini-card {
-    background: linear-gradient(45deg, #1d2b4a, #111a2f);
-    border: 1px solid #4a5a7f;
-    border-radius: 12px;
-    padding: 15px;
+    height: 300px; background: linear-gradient(145deg, #1d2b4a, #0a1120);
+    border: 2px solid #3a4a6f; border-radius: 15px;
+    position: relative; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
     cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
 }
-
 .panini-card:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    border-color: var(--neon-cyan);
+    transform: scale(1.05) rotateY(10deg);
+    border-color: var(--neon-gold);
+}
+/* Gold-Prägung Logo */
+.luxury-logo {
+    font-family: var(--font-ui); font-weight: 900;
+    background: var(--border-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 5px rgba(186, 149, 63, 0.3));
 }
 
-.panini-card-header {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 15px;
+/* 5. PRESS STATION (A4 LANDSCAPE ENGINE) */
+.press-office-workspace {
+    background: #444; height: 100%; overflow-y: auto; padding: 50px;
+    display: flex; flex-direction: column; align-items: center;
+}
+.magazine-page {
+    background: #fff; width: 297mm; height: 210mm; /* A4 Querformat */
+    margin-bottom: 40px; color: #000; display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 Seiten pro Blatt */
+    box-shadow: 0 0 50px rgba(0,0,0,0.5); position: relative;
+}
+/* Falz-Linie */
+.magazine-page::after {
+    content: ""; position: absolute; left: 50%; top: 0; bottom: 0;
+    width: 1px; background: rgba(0,0,0,0.1);
+}
+.magazine-content {
+    padding: 20mm; font-family: var(--font-paper);
+}
+.magazine-content h1 { font-size: 48px; text-transform: uppercase; border-bottom: 4px solid #000; }
+
+/* 6. MANAGER WORKSPACE (ERP STYLE) */
+.manager-ledger {
+    width: 100%; border-collapse: separate; border-spacing: 0 10px;
+}
+.manager-ledger tr { background: rgba(255,255,255,0.03); transition: 0.3s; }
+.manager-ledger tr:hover { background: rgba(255,255,255,0.08); }
+.manager-ledger td { padding: 20px; font-family: var(--font-ui); border-top: 1px solid #333; border-bottom: 1px solid #333; }
+
+/* 7. HUD & NAVIGATION */
+#top-bar {
+    height: 70px; background: #000; border-bottom: 1px solid #222;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
+}
+.nav-sidebar {
+    width: 260px; background: var(--bg-panel); border-right: 1px solid #222;
+}
+.nav-item {
+    padding: 20px 30px; cursor: pointer; transition: 0.3s;
+    font-family: var(--font-ui); font-size: 12px; letter-spacing: 1px;
+    color: #666; border-left: 4px solid transparent;
+}
+.nav-item:hover, .nav-item.active {
+    color: #fff; background: rgba(0, 243, 255, 0.05);
+    border-left-color: var(--neon-cyan);
 }
 
-.panini-card-face {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: #111;
-    border: 2px solid var(--neon-gold);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    color: #555;
-}
-
-.panini-card-name {
-    font-family: var(--font-ui);
-    font-size: 16px;
-    line-height: 1.2;
-}
-.panini-card-pos {
-    font-size: 12px;
-    color: #888;
-}
-
-.panini-card-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5px 15px;
-    font-size: 12px;
-}
-.panini-card-stats span {
-    color: #888;
-}
-.panini-card-stats strong {
-    font-family: var(--font-ui);
-    color: #fff;
-    float: right;
-}
-
-/* YOUTH PLAYER DETAIL MODAL */
-.youth-modal-grid {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 30px;
-}
-
-.youth-modal-sidebar.panini-card-face {
-    width: 150px;
-    height: 150px;
-    margin: 0 auto 20px;
-    font-size: 70px;
-}
-
-.youth-modal-form-group {
-    margin-bottom: 20px;
-}
-
-.youth-modal-form-group label {
-    display: block;
-    font-family: var(--font-ui);
-    color: #888;
-    font-size: 11px;
-    margin-bottom: 5px;
-}
-
-.youth-modal-input,.youth-modal-select {
-    width: 100%;
-    padding: 10px;
-    background: #111;
-    border: 1px solid #444;
-    color: #fff;
-    border-radius: 4px;
+/* 8. PRINT SETTINGS */
+@media print {
+    body { background: #fff; overflow: visible; }
+    #nav-sidebar, #top-bar, #tools-sidebar, .btn-main { display: none !important; }
+    .magazine-page { box-shadow: none; margin: 0; page-break-after: always; }
 }
