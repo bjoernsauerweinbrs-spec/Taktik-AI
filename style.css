@@ -1,11 +1,11 @@
 /* ==========================================================================
-   TONI 2.0 | MASTER STYLE ENGINE (V16.3 ULTIMATE)
+   TONI 2.0 | MASTER STYLE ENGINE (V16.5 FINAL)
    ========================================================================== */
 
 :root {
     /* -- PALETTE -- */
     --bg-deep: #050505;
-    --bg-panel: rgba(20, 20, 35, 0.85); /* Dunkles Glas */
+    --bg-panel: rgba(20, 20, 35, 0.95); /* Fast undurchsichtig für Lesbarkeit */
     --neon-cyan: #00f3ff;
     --neon-green: #0aff60;
     --neon-gold: #ffd700;
@@ -27,32 +27,36 @@ body {
     background-image: radial-gradient(circle at 50% 10%, #1a1a2e 0%, #000 90%);
 }
 
-#portal-background {
-    position: fixed; inset: 0; z-index: -1;
-    background: url('https://images.unsplash.com/photo-1516280440614-6697288d5d38?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
-    opacity: 0.1; filter: blur(3px); pointer-events: none;
+/* 2. LOGIN SCREEN */
+#auth-layer {
+    position: fixed; inset: 0; z-index: 5000;
+    background: #000;
+    display: flex; align-items: center; justify-content: center;
 }
 
-/* 2. LOGIN (GLAS) */
-.portal-panel {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+.login-box {
     width: 350px; padding: 40px; text-align: center;
-    background: rgba(0,0,0,0.8); border: 1px solid var(--neon-cyan);
-    box-shadow: 0 0 40px rgba(0, 243, 255, 0.15); border-radius: 12px;
+    border: 1px solid var(--neon-cyan);
+    box-shadow: 0 0 50px rgba(0, 243, 255, 0.2);
+    border-radius: 12px; background: rgba(10,10,10,0.9);
 }
 
-.input-wrapper input {
-    width: 100%; padding: 10px; margin-top: 20px;
-    background: transparent; border: none; border-bottom: 2px solid #555;
-    color: #fff; text-align: center; font-family: var(--font-hud); letter-spacing: 2px;
-}
-.input-wrapper input:focus { border-color: var(--neon-cyan); }
+.login-box h1 { font-family: var(--font-hud); color: #fff; margin: 10px 0; }
+.login-box p { color: var(--neon-cyan); font-size: 12px; letter-spacing: 2px; margin-bottom: 30px; }
 
-#login-btn {
-    width: 100%; margin-top: 20px; padding: 12px;
-    background: var(--neon-cyan); border: none; font-weight: bold; cursor: pointer;
-    font-family: var(--font-hud); clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+.input-group input {
+    width: 100%; padding: 12px; margin-bottom: 20px;
+    background: transparent; border: none; border-bottom: 2px solid #333;
+    color: #fff; text-align: center; font-family: var(--font-hud); font-size: 16px;
 }
+.input-group input:focus { border-color: var(--neon-cyan); }
+
+#btn-login {
+    width: 100%; padding: 12px; background: var(--neon-cyan); border: none;
+    font-weight: bold; cursor: pointer; font-family: var(--font-hud);
+    transition: 0.3s;
+}
+#btn-login:hover { box-shadow: 0 0 20px var(--neon-cyan); }
 
 /* 3. LAYOUT (GRID) */
 #main-interface { height: 100vh; display: flex; flex-direction: column; }
@@ -61,140 +65,190 @@ body {
     height: 60px; background: #080808; border-bottom: 1px solid #333;
     display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
 }
-.settings-btn { background: none; border: none; color: #666; font-size: 18px; cursor: pointer; transition: 0.3s; }
-.settings-btn:hover { color: var(--neon-cyan); transform: rotate(90deg); }
+.brand { color: #fff; font-family: var(--font-hud); font-size: 14px; }
+#active-module-title { color: var(--neon-cyan); }
 
-.hud-grid {
-    flex: 1; display: grid; grid-template-columns: 260px 1fr 300px;
-    gap: 15px; padding: 15px; overflow: hidden;
+.actions-right { display: flex; gap: 20px; align-items: center; }
+.budget-display { font-family: var(--font-hud); color: var(--neon-green); font-size: 14px; }
+.settings-btn { background: none; border: none; color: #666; font-size: 18px; cursor: pointer; }
+.settings-btn:hover { color: #fff; transform: rotate(90deg); transition: 0.5s; }
+
+.app-grid {
+    flex: 1; display: grid; grid-template-columns: 220px 1fr 280px;
+    gap: 0; overflow: hidden;
 }
-
-.hud-column {
-    background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
-    display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(10px);
-}
-
-.column-header {
-    padding: 12px; background: rgba(255,255,255,0.03); color: var(--neon-cyan);
-    font-family: var(--font-hud); font-size: 11px; border-bottom: 1px solid #333; letter-spacing: 1px;
-}
-
-.scroll-area, #module-content { flex: 1; overflow-y: auto; padding: 20px; }
 
 /* 4. NAVIGATION */
-.side-nav button {
-    width: 100%; padding: 15px; background: transparent; border: none;
+#sidebar { background: rgba(10,10,15,0.9); border-right: 1px solid #333; display: flex; flex-direction: column; }
+.nav-section { padding: 15px; font-size: 10px; color: #555; font-family: var(--font-hud); letter-spacing: 1px; }
+
+#sidebar button {
+    width: 100%; padding: 15px 20px; background: transparent; border: none;
     color: #aaa; text-align: left; font-family: var(--font-hud); font-size: 11px;
     border-left: 3px solid transparent; cursor: pointer; transition: 0.2s;
 }
-.side-nav button:hover, .side-nav button.active {
+#sidebar button:hover, #sidebar button.active {
     background: linear-gradient(90deg, rgba(0,243,255,0.1), transparent);
     color: #fff; border-left-color: var(--neon-cyan);
 }
 
-/* 5. KADER (FIFA STYLE) */
-.kader-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+/* 5. MAIN STAGE */
+#content-stage { 
+    position: relative; overflow-y: auto; padding: 20px; 
+    background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+}
+
+/* 6. AI SIDEBAR */
+#ai-sidebar { background: rgba(10,10,15,0.9); border-left: 1px solid #333; display: flex; flex-direction: column; }
+.ai-header { padding: 15px; color: var(--neon-cyan); font-family: var(--font-hud); border-bottom: 1px solid #333; font-size: 12px; }
+.scroll-box { flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; color: #ddd; line-height: 1.4; }
+.voice-box { padding: 15px; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+
+#mic-btn { background: #333; color: #fff; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+#mic-btn.active { background: var(--neon-alert); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+.kpi-box { padding: 15px; border-top: 1px solid #333; }
+.kpi-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
+.val-high { color: var(--neon-green); }
+
+/* 7. KADER KARTEN (FIFA) */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
 
 .fifa-card {
-    height: 210px; background: linear-gradient(145deg, #2a2a2a, #151515);
-    border: 1px solid #444; border-radius: 6px; position: relative;
+    height: 240px; background: linear-gradient(145deg, #2b2b2b, #151515);
+    border: 1px solid #444; border-radius: 8px; position: relative;
     cursor: pointer; transition: 0.3s; overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
-.fifa-card:hover { border-color: var(--neon-gold); transform: translateY(-4px); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+.fifa-card:hover { border-color: var(--neon-gold); transform: translateY(-5px); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); }
 
-.card-rating-box {
-    position: absolute; top: 10px; left: 10px;
-    font-family: var(--font-hud); font-size: 24px; font-weight: bold; color: var(--neon-gold);
+.card-rating {
+    position: absolute; top: 15px; left: 15px;
+    font-family: var(--font-hud); font-size: 28px; font-weight: bold; color: var(--neon-gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+.card-icon {
+    height: 160px; display: flex; align-items: center; justify-content: center;
+    font-size: 60px; color: #333;
 }
 .card-name {
-    position: absolute; bottom: 0; width: 100%; padding: 8px;
-    text-align: center; background: rgba(0,0,0,0.8); font-family: var(--font-hud); font-size: 12px;
+    position: absolute; bottom: 0; width: 100%; padding: 10px;
+    text-align: center; background: rgba(0,0,0,0.8); 
+    font-family: var(--font-hud); font-size: 14px; letter-spacing: 1px; color: #fff;
 }
 
-/* 6. OFFICE (MANAGER TABELLEN) */
-.office-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-.office-panel { background: rgba(0,0,0,0.3); padding: 15px; border: 1px solid #444; border-radius: 6px; }
+/* 8. TAKTIK BOARD (High Fidelity) */
+.tactics-wrapper { height: 100%; display: flex; flex-direction: column; }
 
-.ledger-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
-.ledger-table th { text-align: left; border-bottom: 2px solid #555; padding: 8px; color: var(--neon-cyan); }
-.ledger-table td { border-bottom: 1px solid #333; padding: 8px; }
-
-input, select { 
-    background: transparent; border: none; border-bottom: 1px solid #555; 
-    color: #fff; padding: 5px; font-family: var(--font-hud); transition: 0.3s;
-}
-input:focus, select:focus { border-color: var(--neon-cyan); color: var(--neon-cyan); }
-
-/* 7. TAKTIK (DAS FELD MIT TOREN) */
-.tactics-container { height: 100%; display: flex; flex-direction: column; }
-.pitch-visualization {
-    flex: 1; margin: 10px; background: #2e8b57; /* RASEN GRÜN */
-    border: 3px solid #fff; position: relative; overflow: hidden;
-    box-shadow: inset 0 0 100px rgba(0,0,0,0.6);
-}
-.pitch-canvas { width: 100%; height: 100%; position: relative; }
-
-/* Linien */
-.pitch-canvas::before { content:""; position:absolute; top:50%; left:0; right:0; height:2px; background:rgba(255,255,255,0.6); }
-.pitch-canvas::after { content:""; position:absolute; top:50%; left:50%; width:100px; height:100px; border:2px solid rgba(255,255,255,0.6); border-radius:50%; transform:translate(-50%,-50%); }
-
-/* 16er (Strafraum) */
-.pitch-box-top { position: absolute; top:0; left:50%; transform:translateX(-50%); width:60%; height:16%; border:2px solid #fff; border-top:none; background: rgba(255,255,255,0.05); }
-.pitch-box-bottom { position: absolute; bottom:0; left:50%; transform:translateX(-50%); width:60%; height:16%; border:2px solid #fff; border-bottom:none; background: rgba(255,255,255,0.05); }
-
-/* 5er (Torraum) */
-.pitch-small-box-top { position: absolute; top:0; left:50%; transform:translateX(-50%); width:30%; height:6%; border:2px solid #fff; border-top:none; }
-.pitch-small-box-bottom { position: absolute; bottom:0; left:50%; transform:translateX(-50%); width:30%; height:6%; border:2px solid #fff; border-bottom:none; }
-
-/* TORE (NETZE) */
-.pitch-goal-top { 
-    position: absolute; top:-12px; left:50%; transform:translateX(-50%); width:18%; height:12px; 
-    border:2px solid #fff; background: repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 4px); opacity: 0.7;
-}
-.pitch-goal-bottom { 
-    position: absolute; bottom:-12px; left:50%; transform:translateX(-50%); width:18%; height:12px; 
-    border:2px solid #fff; background: repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 4px); opacity: 0.7;
+.pitch {
+    flex: 1; margin: 10px; 
+    background: #2e8b57; /* RASEN */
+    border: 4px solid #fff; position: relative; overflow: hidden;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.7);
 }
 
-/* Marker */
-.player-marker {
-    position: absolute; width: 32px; height: 32px; border-radius: 50%;
+/* Alle Linien weiß und sichtbar */
+.pitch-line { position: absolute; background: rgba(255,255,255,0.8); }
+.pitch-border { position: absolute; border: 2px solid rgba(255,255,255,0.8); }
+
+/* Mittellinie */
+.mid-line { top: 50%; left: 0; width: 100%; height: 2px; }
+.mid-circle { 
+    top: 50%; left: 50%; width: 120px; height: 120px; 
+    border-radius: 50%; transform: translate(-50%, -50%); 
+}
+
+/* Strafraum (16er) */
+.box-16-top { top: 0; left: 50%; width: 60%; height: 16%; transform: translateX(-50%); border-top: none; background: rgba(255,255,255,0.05); }
+.box-16-bot { bottom: 0; left: 50%; width: 60%; height: 16%; transform: translateX(-50%); border-bottom: none; background: rgba(255,255,255,0.05); }
+
+/* Torraum (5er) */
+.box-5-top { top: 0; left: 50%; width: 30%; height: 6%; transform: translateX(-50%); border-top: none; }
+.box-5-bot { bottom: 0; left: 50%; width: 30%; height: 6%; transform: translateX(-50%); border-bottom: none; }
+
+/* Tore (Netz-Optik) */
+.goal-top { 
+    top: -15px; left: 50%; width: 18%; height: 15px; transform: translateX(-50%); 
+    border: 2px solid #fff; 
+    background: repeating-linear-gradient(45deg, #ddd 0, #ddd 1px, transparent 0, transparent 4px);
+}
+.goal-bot { 
+    bottom: -15px; left: 50%; width: 18%; height: 15px; transform: translateX(-50%); 
+    border: 2px solid #fff; 
+    background: repeating-linear-gradient(45deg, #ddd 0, #ddd 1px, transparent 0, transparent 4px);
+}
+
+/* Spieler Marker */
+.player-dot {
+    position: absolute; width: 34px; height: 34px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: bold; border: 2px solid #fff; z-index: 10;
+    font-size: 11px; font-weight: bold; border: 2px solid #fff; z-index: 100;
     cursor: grab; transform: translate(-50%, -50%);
-    font-family: var(--font-hud); box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    font-family: var(--font-hud); box-shadow: 0 3px 10px rgba(0,0,0,0.5);
 }
-.team-toni { background: var(--neon-cyan); color: #000; }
-.team-opp { background: var(--neon-alert); color: #fff; }
+.team-home { background: var(--neon-cyan); color: #000; }
+.team-away { background: var(--neon-alert); color: #fff; }
 
-/* 8. VIDEO SUITE */
-.video-suite-container {
-    width: 90%; height: 90%; background: #000; display: flex; flex-direction: column; border: 1px solid #333;
+/* 9. MODALS & FORMS */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.modal-window {
+    background: #111; border: 1px solid var(--neon-cyan); 
+    display: flex; flex-direction: column; overflow: hidden;
     box-shadow: 0 0 50px rgba(0,0,0,0.8);
 }
-.video-stage { flex: 1; position: relative; background: #111; display: flex; justify-content: center; }
-video { max-width: 100%; max-height: 100%; }
-canvas { position: absolute; top:0; left:0; width:100%; height:100%; cursor: crosshair; }
-.suite-controls { padding: 15px; background: #151515; border-top: 1px solid #333; display: flex; align-items: center; gap: 15px; }
+.modal-window.large { width: 800px; height: 80%; }
+.modal-window.small { width: 400px; padding: 20px; }
+.modal-window.fullscreen-dark { width: 95%; height: 95%; background: #000; border-color: #333; }
 
-/* 9. STICKER ALBUM */
+.modal-header {
+    padding: 15px; background: #0a0a0a; border-bottom: 1px solid #333;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header h3 { color: var(--neon-cyan); font-family: var(--font-hud); }
+.modal-header button { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+
+.modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+
+/* Form Elements */
+input, select { 
+    background: #222; border: 1px solid #444; color: #fff; padding: 8px; 
+    font-family: var(--font-hud); width: 100%; margin-bottom: 10px;
+}
+input:focus { border-color: var(--neon-cyan); }
+
+.btn-neon {
+    border: 1px solid var(--neon-cyan); color: var(--neon-cyan); background: transparent; 
+    padding: 10px 20px; cursor: pointer; text-transform: uppercase; font-size: 12px; font-weight: bold;
+}
+.btn-neon:hover { background: var(--neon-cyan); color: #000; }
+.btn-full { width: 100%; padding: 10px; background: var(--neon-cyan); border: none; font-weight: bold; cursor: pointer; margin-top: 10px;}
+
+/* 10. OFFICE & STICKER */
+.ledger-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.ledger-table th { text-align: left; color: #888; border-bottom: 2px solid #444; padding: 10px; }
+.ledger-table td { border-bottom: 1px solid #333; padding: 10px; }
+
 .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .sticker {
-    height: 90px; background: #111; border: 1px dashed #555;
-    display: flex; align-items: center; justify-content: center; cursor: pointer; color: #444;
+    height: 100px; background: #0a0a0a; border: 1px dashed #444;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; color: #333;
 }
 .sticker.unlocked { 
     background: linear-gradient(45deg, #ffd700, #b8860b); color: #000; 
-    border: 2px solid #fff; font-weight: bold; font-size: 20px; box-shadow: 0 0 10px #ffd700;
+    border: 2px solid #fff; font-weight: bold; font-size: 24px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
 }
 
-/* 10. MODALS */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-.lab-container { width: 800px; max-height: 90vh; overflow-y: auto; background: #111; border: 1px solid var(--neon-cyan); padding: 30px; }
-
-.btn-neon-small {
-    border: 1px solid var(--neon-cyan); color: var(--neon-cyan); background: transparent; 
-    padding: 6px 12px; cursor: pointer; text-transform: uppercase; font-size: 11px;
+/* 11. VIDEO CANVAS */
+.video-container { 
+    flex: 1; position: relative; background: #050505; 
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
-.btn-neon-small:hover { background: var(--neon-cyan); color: #000; }
-.btn-close-studio { background: transparent; border: none; color: #fff; font-size: 16px; cursor: pointer; }
+video { max-width: 100%; max-height: 100%; }
+canvas { position: absolute; top:0; left:0; width:100%; height:100%; cursor: crosshair; }
+.video-controls { padding: 15px; background: #111; border-top: 1px solid #333; display: flex; align-items: center; gap: 20px; }
