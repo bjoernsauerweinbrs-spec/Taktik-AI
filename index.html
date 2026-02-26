@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TONI 2.0 | CLUB COMMAND</title>
     
-    <link rel="stylesheet" href="style.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="portal-body">
 
@@ -17,42 +17,32 @@
     <main id="auth-layer" class="portal-panel">
         <header class="portal-header">
             <div id="club-logo-portal">
-                <i class="fa-solid fa-shield-halved" id="logo-placeholder"></i>
+                <i class="fa-solid fa-shield-halved"></i>
             </div>
-            <div class="status-led green"></div>
             <div class="header-text">
                 <h1>TONI 2.0</h1>
                 <small>OFFICIAL CLUB ENGINE</small>
             </div>
         </header>
         
-        <section class="login-core">
-            <p class="ai-greeting">IDENTITÄT BESTÄTIGEN, TRAINER.</p>
-            <div class="input-wrapper">
-                <input type="password" id="passkey" placeholder="PASSKEY EINGEBEN" autocomplete="off">
-                <div class="input-glow"></div>
-            </div>
-            <button id="login-btn" onclick="systemBootSequence()">BOOT SYSTEM</button>
-        </section>
-
-        <footer class="portal-footer">
-            <div class="version-tag">STABLE BUILD v16.0 PRO</div>
-            <div class="system-downloads">
-                <span class="badge">XR/VR READY</span>
-            </div>
-        </footer>
+        <div class="input-wrapper">
+            <input type="password" id="passkey" placeholder="PASSKEY EINGEBEN" autocomplete="off">
+        </div>
+        <button id="login-btn" onclick="systemBootSequence()">BOOT SYSTEM</button>
     </main>
 
     <div id="main-interface" class="hidden">
         
         <header id="top-bar">
             <div class="system-title">
-                <i class="fa-solid fa-shield-halved" style="color:var(--neon-cyan); margin-right:10px;"></i>
+                <i class="fa-solid fa-microchip" style="color:var(--neon-cyan)"></i> 
                 TONI 2.0 // <span id="active-mod-title">DASHBOARD</span>
             </div>
-            <div class="top-bar-center">
-                <div id="clock-display">00:00:00</div>
-                <button onclick="toggleSettings()" class="settings-btn"><i class="fa-solid fa-gear"></i></button>
+            <div class="top-bar-right">
+                <span id="clock-display">00:00:00</span>
+                <button onclick="toggleSettings()" class="settings-btn" title="Konfiguration">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
             </div>
             <div class="kpi-quick-info">
                 <i class="fa-solid fa-wallet"></i> <span id="kpi-budget">0 €</span>
@@ -106,67 +96,48 @@
         <div id="modal-container" class="lab-container"></div>
     </div>
 
-    <div id="magazine-studio-modal" class="modal-overlay hidden">
-        <div class="studio-top-bar">
-            <div class="studio-info"><i class="fa-solid fa-print"></i> DIN-A4 QUER // DRUCK-VORSCHAU</div>
-            <div class="studio-actions">
-                <button onclick="addMagazineSheet()" class="btn-neon-small"><i class="fa-solid fa-plus"></i> BOGEN HINZUFÜGEN</button>
-                <button onclick="window.print()" class="btn-neon-small"><i class="fa-solid fa-check"></i> JETZT DRUCKEN</button>
-                <button onclick="document.getElementById('magazine-studio-modal').classList.add('hidden')" class="btn-close-studio">X</button>
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="lab-container settings-box">
+            <h3>SYSTEM KONFIGURATION</h3>
+            <div class="lab-row">
+                <span>KI API KEY (OpenAI/Ollama)</span>
+                <input type="password" id="api-key-input" placeholder="sk-...">
+            </div>
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button onclick="saveSettings()" class="btn-neon-small" style="flex:1;">SPEICHERN</button>
+                <button onclick="toggleSettings()" class="btn-close-studio">ABBRECHEN</button>
             </div>
         </div>
-        <div id="magazine-sheet-container">
-            </div>
     </div>
 
     <div id="video-suite-modal" class="modal-overlay hidden">
         <div class="video-suite-container">
             <div class="suite-header">
-                <h3><i class="fa-solid fa-video"></i> TONI VIDEO ANALYTICS</h3>
-                <button onclick="closeVideoSuite()" class="btn-close-studio">SCHLIESSEN</button>
+                <h3><i class="fa-solid fa-video"></i> VIDEO ANALYTICS</h3>
+                <button onclick="closeVideoSuite()" class="btn-close-studio">X</button>
             </div>
             <div class="video-stage">
                 <video id="analysis-video" controls>
                     <source src="" type="video/mp4">
-                    Kein Video geladen.
                 </video>
                 <canvas id="telestrator-canvas"></canvas> </div>
             <div class="suite-controls">
                 <button class="btn-neon-small" onclick="document.getElementById('video-upload').click()">VIDEO LADEN</button>
                 <input type="file" id="video-upload" accept="video/*" class="hidden" onchange="loadVideoFile(this)">
-                
-                <div class="tool-group">
-                    <button class="tool-btn active" onclick="setTool('pen')"><i class="fa-solid fa-pen"></i></button>
-                    <button class="tool-btn" onclick="setTool('arrow')"><i class="fa-solid fa-arrow-right"></i></button>
-                    <button class="tool-btn" onclick="clearCanvas()"><i class="fa-solid fa-trash"></i></button>
-                </div>
-                
-                <div class="ai-video-feedback">
-                    <small>KI-ANALYSE:</small>
-                    <span id="video-ai-text">Warte auf Videomaterial...</span>
-                </div>
+                <div id="video-ai-text" style="margin-left:15px; font-size:12px; color:#aaa;">Kein Video geladen.</div>
             </div>
         </div>
     </div>
 
-    <div id="settings-modal" class="modal-overlay hidden">
-        <div class="lab-container settings-box">
-            <h3>SYSTEM KONFIGURATION</h3>
-            <div class="lab-row">
-                <span>KI-MODELL</span>
-                <select id="ai-model-select">
-                    <option value="simulation">TONI SIMULATION (OFFLINE)</option>
-                    <option value="ollama">OLLAMA (LOKAL)</option>
-                    <option value="openai">OPENAI API (CLOUD)</option>
-                </select>
+    <div id="magazine-studio-modal" class="modal-overlay hidden">
+        <div class="studio-top-bar">
+            <div class="studio-info">DRUCK-VORSCHAU</div>
+            <div class="studio-actions">
+                <button onclick="window.print()" class="btn-neon-small">DRUCKEN</button>
+                <button onclick="document.getElementById('magazine-studio-modal').classList.add('hidden')" class="btn-close-studio">X</button>
             </div>
-            <div class="lab-row">
-                <span>API KEY / URL</span>
-                <input type="password" id="api-key-input" placeholder="sk-... oder http://localhost:11434">
-            </div>
-            <button onclick="saveSettings()" class="btn-neon-small" style="width:100%; margin-top:20px;">SPEICHERN & NEUSTART</button>
-            <button onclick="toggleSettings()" class="btn-close-studio" style="margin-top:10px;">ABBRECHEN</button>
         </div>
+        <div id="magazine-sheet-container"></div>
     </div>
 
     <script src="script.js"></script>
