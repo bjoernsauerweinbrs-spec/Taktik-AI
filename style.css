@@ -1,134 +1,260 @@
 /* ==========================================================================
-   TONI 2.0 | MASTER STYLE ENGINE (V16.1 FIX)
+   TONI 2.0 | MASTER STYLE ENGINE (V16.2 ULTIMATE)
    ========================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
 
 :root {
+    /* -- HIGH END PALETTE -- */
     --bg-deep: #050505;
-    --bg-panel: rgba(20, 20, 30, 0.85);
+    --bg-panel: rgba(20, 20, 30, 0.75); /* Dunkles Glas */
+    --glass-border: rgba(255, 255, 255, 0.15);
+    
     --neon-cyan: #00f3ff;
     --neon-green: #0aff60;
     --neon-gold: #ffd700;
     --neon-alert: #ff003c;
-    --font-hud: 'Orbitron', sans-serif;
-    --font-main: 'Rajdhani', sans-serif;
+    
+    --font-hud: 'Orbitron', sans-serif; /* Für Daten & Überschriften */
+    --font-main: 'Rajdhani', sans-serif; /* Für Fließtext */
+    --font-print: 'Playfair Display', serif; /* Für die Zeitung */
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* 1. GLOBALE STRUKTUR & RESET */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 .hidden { display: none !important; }
 
 body {
     height: 100vh; width: 100vw; 
     background: var(--bg-deep); color: #fff;
     font-family: var(--font-main); overflow: hidden;
+    /* Dynamischer Hintergrund (simuliert Stadion bei Nacht) */
     background-image: radial-gradient(circle at 50% 10%, #1a1a2e 0%, #000 90%);
 }
 
-/* --- GLAS & LAYOUT --- */
-#main-interface { height: 100vh; display: flex; flex-direction: column; }
-#top-bar {
-    height: 60px; background: rgba(0,0,0,0.9); border-bottom: 1px solid #333;
-    display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+#portal-background {
+    position: fixed; inset: 0; z-index: -1;
+    background: url('https://images.unsplash.com/photo-1516280440614-6697288d5d38?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+    opacity: 0.1; filter: blur(4px); pointer-events: none;
 }
-.settings-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
+
+/* 2. LAYOUT GRID (DASHBOARD) */
+#main-interface { height: 100vh; display: flex; flex-direction: column; }
+
+#top-bar {
+    height: 60px; background: rgba(0,0,0,0.85); 
+    border-bottom: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: space-between; 
+    padding: 0 20px; font-family: var(--font-hud);
+}
+
+.settings-btn { 
+    background: none; border: none; color: #666; font-size: 18px; 
+    cursor: pointer; margin-left: 15px; transition: 0.3s; 
+}
+.settings-btn:hover { color: var(--neon-cyan); transform: rotate(90deg); }
 
 .hud-grid {
-    flex: 1; display: grid; grid-template-columns: 260px 1fr 300px;
+    flex: 1; display: grid; 
+    grid-template-columns: 260px 1fr 300px; /* Links - Mitte - Rechts */
     gap: 15px; padding: 15px; overflow: hidden;
 }
+
 .hud-column {
-    background: var(--bg-panel); backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
-    display: flex; flex-direction: column; overflow: hidden;
+    background: var(--bg-panel); 
+    backdrop-filter: blur(12px); /* Der Glas-Effekt */
+    border: 1px solid var(--glass-border); 
+    border-radius: 12px;
+    display: flex; flex-direction: column; 
+    overflow: hidden; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* --- TAKTIK PITCH (REALISMUS UPDATE) --- */
+.column-header {
+    padding: 15px; border-bottom: 1px solid var(--glass-border);
+    font-family: var(--font-hud); font-size: 12px; letter-spacing: 1px;
+    color: var(--neon-cyan); background: rgba(0,0,0,0.2);
+}
+
+/* 3. NAVIGATION (HOVER EFFECTS) */
+.side-nav button {
+    width: 100%; background: transparent; border: none;
+    padding: 15px 20px; text-align: left; color: #ccc;
+    font-family: var(--font-hud); font-size: 11px;
+    border-left: 3px solid transparent; cursor: pointer; transition: 0.2s;
+}
+.side-nav button:hover, .side-nav button.active {
+    background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), transparent);
+    color: #fff; border-left-color: var(--neon-cyan);
+    text-shadow: 0 0 8px var(--neon-cyan);
+}
+
+/* 4. CONTENT STAGE (DAS ZENTRUM) */
+.stage-main {
+    position: relative;
+    /* Ein leichter 3D-Look für die "Kabine" */
+    background: radial-gradient(circle at center, #23232a 0%, #0e0e11 100%);
+    box-shadow: inset 0 0 100px #000;
+}
+#module-content { flex: 1; overflow-y: auto; padding: 20px; }
+
+/* 5. KADER: FIFA KARTEN STYLE */
+.kader-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+
+.fifa-card {
+    position: relative; height: 220px; width: 100%;
+    background: linear-gradient(145deg, #2b2b2b, #1a1a1a);
+    border: 1px solid #444; border-radius: 8px;
+    cursor: pointer; transition: 0.3s; overflow: hidden;
+}
+.fifa-card:hover { 
+    transform: translateY(-5px); 
+    border-color: var(--neon-gold); 
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.15); 
+}
+.card-rating-box { 
+    position: absolute; top: 10px; left: 10px; 
+    font-family: var(--font-hud); font-weight: bold; font-size: 24px; color: var(--neon-gold); 
+}
+.card-name { 
+    position: absolute; bottom: 0; width: 100%; padding: 10px;
+    text-align: center; background: rgba(0,0,0,0.8);
+    font-family: var(--font-hud); font-size: 14px; letter-spacing: 1px;
+}
+
+/* 6. OFFICE PRIME: MANAGER TABELLEN & INPUTS */
+.office-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+.office-panel {
+    background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);
+    padding: 20px; border-radius: 8px;
+}
+.office-panel h3 { margin-bottom: 15px; color: var(--neon-cyan); font-family: var(--font-hud); font-size: 14px; }
+
+/* Professionelle Tabellen */
+.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
+.ledger-table th { text-align: left; border-bottom: 2px solid #444; padding: 8px; color: #888; font-family: var(--font-hud); }
+.ledger-table td { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px; }
+.transaction-input-row { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; }
+
+/* High-End Eingabefelder */
+input, select {
+    background: transparent; border: none; border-bottom: 1px solid #555;
+    color: #fff; font-family: var(--font-hud); padding: 8px; outline: none; transition: 0.3s;
+}
+input:focus, select:focus { border-bottom-color: var(--neon-cyan); color: var(--neon-cyan); }
+input[type="number"] { text-align: right; }
+
+/* 7. TAKTIK BOARD: REALISTISCHES SPIELFELD */
 .tactics-container { height: 100%; display: flex; flex-direction: column; }
 .pitch-visualization {
-    flex: 1; background: #2e8b57; /* Rasen */
-    position: relative; margin: 10px; border: 2px solid #fff;
-    overflow: hidden;
+    flex: 1; 
+    background: #2e8b57; /* Klassisches Rasengrün */
+    margin: 10px 0;
+    border: 4px solid #fff; /* Außenlinie */
+    position: relative; overflow: hidden;
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.6);
 }
 
-/* Linien via CSS */
 .pitch-canvas { width: 100%; height: 100%; position: relative; }
 
 /* Mittellinie */
-.pitch-canvas::before { 
-    content:""; position:absolute; top:50%; left:0; right:0; height:2px; background:rgba(255,255,255,0.6); 
-}
+.pitch-canvas::before { content:""; position:absolute; top:50%; left:0; right:0; height:2px; background:rgba(255,255,255,0.7); }
 /* Mittelkreis */
-.pitch-canvas::after { 
-    content:""; position:absolute; top:50%; left:50%; width:80px; height:80px; 
-    border:2px solid rgba(255,255,255,0.6); border-radius:50%; transform:translate(-50%,-50%); 
-}
+.pitch-canvas::after { content:""; position:absolute; top:50%; left:50%; width:100px; height:100px; border:2px solid rgba(255,255,255,0.7); border-radius:50%; transform:translate(-50%,-50%); }
 
-/* 16m Räume (Oben & Unten) */
+/* Strafraum (16er) - Oben & Unten */
 .pitch-box-top {
     position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-    width: 60%; height: 16%; border: 2px solid rgba(255,255,255,0.6); border-top: none;
+    width: 60%; height: 16%; border: 2px solid #fff; border-top: none; background: rgba(255,255,255,0.05);
 }
 .pitch-box-bottom {
     position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 60%; height: 16%; border: 2px solid rgba(255,255,255,0.6); border-bottom: none;
+    width: 60%; height: 16%; border: 2px solid #fff; border-bottom: none; background: rgba(255,255,255,0.05);
 }
 
-/* 5m Räume */
+/* Torraum (5er) */
 .pitch-small-box-top {
     position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-    width: 30%; height: 6%; border: 2px solid rgba(255,255,255,0.6); border-top: none;
+    width: 30%; height: 6%; border: 2px solid #fff; border-top: none;
 }
 .pitch-small-box-bottom {
     position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 30%; height: 6%; border: 2px solid rgba(255,255,255,0.6); border-bottom: none;
+    width: 30%; height: 6%; border: 2px solid #fff; border-bottom: none;
 }
 
-/* Tore */
+/* Tore (Netze) */
 .pitch-goal-top {
-    position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
-    width: 15%; height: 5px; border: 2px solid #fff; background: rgba(255,255,255,0.3);
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    width: 18%; height: 10px; border: 2px solid #fff; background: repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%);
 }
 .pitch-goal-bottom {
-    position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
-    width: 15%; height: 5px; border: 2px solid #fff; background: rgba(255,255,255,0.3);
+    position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+    width: 18%; height: 10px; border: 2px solid #fff; background: repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%);
 }
 
+/* Spieler Marker */
 .player-marker {
-    position: absolute; width: 30px; height: 30px; border-radius: 50%;
+    position: absolute; width: 32px; height: 32px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: bold; cursor: grab; z-index: 10;
+    font-size: 10px; font-weight: bold; cursor: grab; z-index: 100;
     font-family: var(--font-hud); border: 2px solid #fff;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%); /* Zentrierung */
+    transition: box-shadow 0.2s;
 }
-.team-toni { background: var(--neon-cyan); color: #000; box-shadow: 0 0 10px var(--neon-cyan); }
-.team-opp { background: var(--neon-alert); color: #fff; box-shadow: 0 0 10px var(--neon-alert); }
+.team-toni { background: var(--neon-cyan); color: #000; box-shadow: 0 0 15px var(--neon-cyan); }
+.team-opp { background: var(--neon-alert); color: #fff; box-shadow: 0 0 15px var(--neon-alert); }
+.player-marker:active { cursor: grabbing; transform: translate(-50%, -50%) scale(1.2); }
 
-/* --- OFFICE TABLES --- */
-.ledger-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-.ledger-table th { text-align: left; color: var(--neon-cyan); border-bottom: 1px solid #444; padding: 5px; }
-.ledger-table td { padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.amount-pos { color: var(--neon-green); }
-.amount-neg { color: var(--neon-alert); }
-
-/* --- INPUTS & BUTTONS --- */
-input, select { 
-    background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; padding: 5px; 
-    font-family: var(--font-hud); outline: none; 
+/* 8. VIDEO SUITE (TELESTRATOR CANVAS) */
+.video-suite-container {
+    width: 90%; height: 90%; background: #000; 
+    border: 1px solid #333; display: flex; flex-direction: column;
+    box-shadow: 0 0 100px rgba(0,0,0,0.8);
 }
+.video-stage {
+    flex: 1; position: relative; background: #111;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+video { max-width: 100%; max-height: 100%; display: block; }
+canvas { 
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+    pointer-events: auto; /* Wichtig für das Zeichnen */
+    cursor: crosshair;
+}
+
+/* 9. JUNIOR HUB (STICKER) */
+.sticker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
+.sticker {
+    height: 100px; border: 1px dashed #555; background: #1a1a1a;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-hud); color: #444; cursor: pointer; transition: 0.3s;
+}
+.sticker.unlocked {
+    background: linear-gradient(45deg, var(--neon-gold), #b8860b);
+    color: #000; border: 2px solid #fff; box-shadow: 0 0 15px var(--neon-gold);
+    font-size: 20px; font-weight: bold;
+}
+
+/* 10. MODALS & BUTTONS */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+}
+.lab-container { 
+    width: 800px; max-height: 90vh; overflow-y: auto; 
+    background: #111; padding: 30px; border: 1px solid var(--neon-cyan); 
+    box-shadow: 0 0 50px rgba(0, 243, 255, 0.2);
+}
+
 .btn-neon-small {
     background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
-    padding: 5px 10px; cursor: pointer; font-size: 11px; margin-top: 5px;
+    padding: 8px 16px; font-family: var(--font-hud); font-size: 11px; cursor: pointer; transition: 0.3s;
+    text-transform: uppercase; letter-spacing: 1px;
 }
-.btn-neon-small:hover { background: var(--neon-cyan); color: #000; }
+.btn-neon-small:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 20px var(--neon-cyan); }
+.btn-close-studio { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 16px; }
 
-/* Modal & Helper */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; display: flex; justify-content: center; align-items: center; }
-.lab-container { width: 800px; max-height: 90vh; overflow-y: auto; background: #111; padding: 20px; border: 1px solid #333; }
-.lab-grid-full { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
-
-/* Video */
-.video-suite-container { width: 95%; height: 90%; background: #000; display: flex; flex-direction: column; }
-.video-stage { flex: 1; position: relative; display: flex; justify-content: center; background: #111; }
-video { max-height: 100%; max-width: 100%; }
-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .hud-grid { grid-template-columns: 1fr; overflow-y: auto; }
+}
