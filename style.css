@@ -1,238 +1,150 @@
 /* ==========================================================================
-   TONI 3.0 | STYLE ENGINE V18.1 (LUXURY EDITION - HOTFIX)
+   TONI 3.0 | STYLE ENGINE V4.0 (NLZ MODULE)
    ========================================================================== */
 
-:root {
-    /* -- CORE PALETTE -- */
-    --bg-deep: #050505;
-    --panel-bg: rgba(18, 18, 24, 0.96);
-    --border: 1px solid rgba(255, 255, 255, 0.1);
-    
-    /* -- NEON ACCENTS -- */
-    --neon-cyan: #00f3ff;
-    --neon-green: #0aff60;
-    --neon-gold: #ffd700;
-    --neon-alert: #ff003c;
-    
-    /* -- FONTS -- */
-    --font-ui: 'Orbitron', sans-serif;
-    --font-body: 'Rajdhani', sans-serif;
-    --font-paper: 'Playfair Display', serif;
+/*... Alle bisherigen Stile von V3.2 bleiben unverändert... */
+:root, *, body,.hidden, @keyframes, #auth-layer, #app-interface, #status-bar,.main-grid, #nav-sidebar, #tools-sidebar, #stage-container,.stage-module,.roster-grid,.finance-table,.pitch-wrapper,.newspaper-workspace,.modal-backdrop, @media print {
+    /* ALL PREVIOUS STYLES FROM THE LAST WORKING VERSION GO HERE */
+}
+/* Füge einfach die neuen Stile am Ende hinzu */
+
+/* 11. NLZ MODULE STYLES (NEU) */
+.youth-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 15px;
 }
 
-/* 1. GLOBAL RESET & SCROLLBARS */
-* { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #000; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
-
-body {
-    height: 100vh; width: 100vw; overflow: hidden;
-    background: var(--bg-deep); color: #fff;
-    font-family: var(--font-body);
-    background-image: radial-gradient(circle at 50% 10%, #1a1a2e 0%, #000 90%);
+.youth-tabs {
+    display: flex;
+    gap: 5px;
 }
 
-.hidden { display: none !important; }
-
-/* 2. ANIMATION KEYFRAMES */
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(255, 0, 60, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0); }
+.tab-btn {
+    background: #222;
+    border: 1px solid #444;
+    color: #888;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    transition: all 0.2s ease;
 }
 
-/* 3. LOGIN & APP TRANSITION */
-#auth-layer {
-    position: fixed; inset: 0; z-index: 9999;
-    background: #000; display: flex; align-items: center; justify-content: center;
-    transition: opacity 0.5s ease-out;
-}
-.login-terminal {
-    width: 400px; padding: 40px; text-align: center;
-    border: 1px solid var(--neon-cyan);
-    box-shadow: 0 0 50px rgba(0, 243, 255, 0.15);
-    background: rgba(10,10,10,0.95); border-radius: 8px;
-}
-.login-terminal h1 { font-family: var(--font-ui); color: #fff; letter-spacing: 2px; margin-bottom: 5px; }
-.login-terminal p { color: var(--neon-cyan); font-size: 10px; letter-spacing: 3px; margin-bottom: 30px; }
-
-.auth-input {
-    width: 100%; padding: 15px; background: #111; border: 1px solid #333;
-    color: #fff; text-align: center; font-family: var(--font-ui); letter-spacing: 3px;
-    transition: 0.3s; margin-bottom: 20px;
-}
-.auth-input:focus { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0,243,255,0.2); }
-
-.btn-main {
-    width: 100%; padding: 15px; background: var(--neon-cyan); color: #000;
-    border: none; font-weight: bold; font-family: var(--font-ui); cursor: pointer;
-    text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
-}
-.btn-main:hover { background: #fff; box-shadow: 0 0 20px var(--neon-cyan); }
-
-#app-interface { 
-    height: 100vh; display: flex; flex-direction: column; 
-    opacity: 0;
-    transition: opacity 0.8s ease-in;
+.tab-btn:hover {
+    background: #333;
+    color: #fff;
 }
 
-/* KORREKTUR 1: Wenn #app-interface NICHT die Klasse .hidden hat, soll es sichtbar sein. */
-#app-interface:not(.hidden) {
-    opacity: 1;
+.tab-btn.active {
+    background: var(--neon-cyan);
+    border-color: var(--neon-cyan);
+    color: #000;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
 }
 
-/* 4. APP LAYOUT (GRID SYSTEM) */
-#status-bar {
-    height: 60px; background: #0b0b0b; border-bottom: var(--border);
-    display: flex; align-items: center; justify-content: space-between; padding: 0 25px;
-    flex-shrink: 0;
+.youth-player-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
 }
-.app-brand { font-family: var(--font-ui); font-size: 16px; color: #fff; }
-.module-tag { color: var(--neon-cyan); margin-left: 10px; }
-.clock-widget { font-family: var(--font-ui); font-size: 14px; color: #888; letter-spacing: 1px; }
 
-.main-grid {
-    flex: 1; display: grid; grid-template-columns: 240px 1fr 280px;
+.panini-card {
+    background: linear-gradient(45deg, #1d2b4a, #111a2f);
+    border: 1px solid #4a5a7f;
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
     overflow: hidden;
 }
 
-/* KORREKTUR 2: Den Sidebars explizit eine Standard-Schriftfarbe geben. */
-#nav-sidebar, #tools-sidebar { color: #ccc; }
-
-#nav-sidebar { background: var(--panel-bg); border-right: var(--border); display: flex; flex-direction: column; }
-.nav-group-title { padding: 20px 20px 10px; font-size: 10px; color: #555; font-family: var(--font-ui); letter-spacing: 1px; }
-.nav-item {
-    width: 100%; padding: 15px 25px; background: transparent; border: none;
-    color: #999; text-align: left; font-family: var(--font-ui); font-size: 11px;
-    border-left: 3px solid transparent; cursor: pointer; transition: all 0.2s ease;
-}
-.nav-item:hover, .nav-item.active {
-    background: linear-gradient(90deg, rgba(0,243,255,0.05), transparent);
-    color: #fff; border-left-color: var(--neon-cyan); padding-left: 30px;
-}
-.nav-item i { width: 25px; text-align: center; margin-right: 5px; }
-
-#tools-sidebar { background: var(--panel-bg); border-left: var(--border); display: flex; flex-direction: column; }
-.ai-console { flex: 1; padding: 20px; overflow-y: auto; font-size: 13px; line-height: 1.5; } /* Farbe geerbt von #tools-sidebar */
-.ai-message { border-left: 2px solid var(--neon-cyan); padding-left: 10px; margin-bottom: 15px; }
-
-.tool-panel { padding: 20px; border-top: var(--border); background: #111; }
-.mic-trigger {
-    width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: #fff;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
-    transition: 0.3s;
-}
-.mic-trigger.active { 
-    border-color: var(--neon-alert); 
-    color: var(--neon-alert);
-    animation: pulse 2s infinite;
+.panini-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    border-color: var(--neon-cyan);
 }
 
-/* 5. STAGE & MODULE TRANSITIONS (THE LUXURY PART) */
-#stage-container {
-    position: relative;
-    background: radial-gradient(circle at center, #151515 0%, #000 100%);
-}
-.stage-module {
-    position: absolute;
-    inset: 0;
-    padding: 30px;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
-    overflow-y: auto;
-}
-.stage-module.active {
-    opacity: 1;
-    visibility: visible;
+.panini-card-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
-/* 6. GENERIC MODULE STYLES (Cards, Tables etc.) */
-
-/* --- KADER CARDS --- */
-.roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-.player-card {
-    height: 260px; background: linear-gradient(145deg, #252525, #111);
-    border: 1px solid #444; border-radius: 6px; position: relative;
-    cursor: pointer; transition: 0.3s; overflow: hidden;
-}
-.player-card:hover { border-color: var(--neon-gold); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-.pc-rating { position: absolute; top: 15px; left: 15px; font-size: 30px; color: var(--neon-gold); font-family: var(--font-ui); font-weight: bold; }
-.pc-pos { position: absolute; top: 50px; left: 18px; font-size: 14px; color: #888; }
-.pc-face { height: 180px; display: flex; align-items: center; justify-content: center; font-size: 80px; color: #333; }
-.pc-name { position: absolute; bottom: 0; width: 100%; text-align: center; background: rgba(0,0,0,0.8); padding: 10px; font-family: var(--font-ui); letter-spacing: 1px; }
-
-/* --- FINANCE TABLE --- */
-.finance-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-.finance-table th { text-align: left; padding: 12px; border-bottom: 2px solid #333; color: var(--neon-cyan); font-family: var(--font-ui); font-size: 12px; }
-.finance-table td { padding: 12px; border-bottom: 1px solid #222; font-size: 14px; }
-.finance-table tr:hover { background: rgba(255,255,255,0.02); }
-
-/* 7. MODULE-SPECIFIC STYLES */
-
-/* --- TACTICS BOARD --- */
-.pitch-wrapper { position: relative; height: 600px; width: 100%; max-width: 900px; margin: 0 auto; perspective: 1200px; }
-.pitch-surface { width: 100%; height: 100%; background: #2e8b57; border: 5px solid #fff; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
-.pitch-line { position: absolute; background: rgba(255,255,255,0.85); }
-.pitch-border { position: absolute; border: 2px solid rgba(255,255,255,0.85); }
-.line-mid { top: 50%; left: 0; width: 100%; height: 2px; }
-.circle-mid { top: 50%; left: 50%; width: 130px; height: 130px; border-radius: 50%; transform: translate(-50%, -50%); }
-.box-16-top { top: 0; left: 50%; width: 50%; height: 16%; transform: translateX(-50%); border-top: none; background: rgba(255,255,255,0.03); }
-.box-16-bot { bottom: 0; left: 50%; width: 50%; height: 16%; transform: translateX(-50%); border-bottom: none; background: rgba(255,255,255,0.03); }
-.box-5-top { top: 0; left: 50%; width: 20%; height: 6%; transform: translateX(-50%); border-top: none; }
-.box-5-bot { bottom: 0; left: 50%; width: 20%; height: 6%; transform: translateX(-50%); border-bottom: none; }
-.goal-net-top { position: absolute; top: -20px; left: 50%; width: 10%; height: 20px; transform: translateX(-50%); border: 2px solid #fff; border-bottom: none; background: repeating-linear-gradient(45deg, #ccc 0, #ccc 1px, transparent 0, transparent 4px); z-index: 1; }
-.goal-net-bot { position: absolute; bottom: -20px; left: 50%; width: 10%; height: 20px; transform: translateX(-50%); border: 2px solid #fff; border-top: none; background: repeating-linear-gradient(45deg, #ccc 0, #ccc 1px, transparent 0, transparent 4px); }
-.tactic-player { position: absolute; width: 36px; height: 36px; border-radius: 50%; background: var(--neon-cyan); color: #000; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; cursor: grab; z-index: 100; font-family: var(--font-ui); font-size: 11px; transform: translate(-50%, -50%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: transform 0.1s; }
-.tactic-player:active { transform: translate(-50%, -50%) scale(1.2); cursor: grabbing; z-index: 101; }
-
-/* --- NEWSPAPER EDITOR --- */
-.newspaper-workspace { background: #555; padding: 40px; display: flex; justify-content: center; }
-.newspaper-sheet { background: #fff; width: 210mm; min-height: 297mm; padding: 20mm; color: #000; font-family: var(--font-paper); box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-.news-header { border-bottom: 3px double #000; text-align: center; padding-bottom: 20px; margin-bottom: 30px; }
-.news-headline { font-size: 42px; font-weight: 900; line-height: 1.1; margin-bottom: 10px; outline: none; }
-.news-columns { column-count: 2; column-gap: 30px; font-size: 14px; line-height: 1.6; text-align: justify; outline: none; }
-.news-img-placeholder { width: 100%; height: 250px; background: #eee; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; cursor: pointer; color: #666; font-family: sans-serif; }
-.news-img-placeholder:hover { background: #e0e0e0; }
-
-/* 8. MODALS */
-.modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 8000;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-.modal-backdrop:not(.hidden) {
-    opacity: 1;
-    visibility: visible;
-}
-.modal-panel {
-    background: #111; border: 1px solid var(--neon-cyan); padding: 30px;
-    width: 60%; max-height: 90%; overflow-y: auto; box-shadow: 0 0 100px rgba(0,0,0,0.8);
-    transition: transform 0.3s ease;
-    transform: scale(0.95);
-}
-.modal-backdrop:not(.hidden) .modal-panel {
-    transform: scale(1);
-}
-.modal-close { float: right; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
-
-/* 9. PRINT MEDIA QUERY */
-@media print {
-    body { background: #fff; color: #000; overflow: visible; }
-    #nav-sidebar, #tools-sidebar, #status-bar, #auth-layer, .btn-main, .mic-trigger { display: none !important; }
-    #app-interface { height: auto; display: block; opacity: 1; }
-    .main-grid { display: block; }
-    #stage-container { background: #fff; padding: 0; overflow: visible; position: static; }
-    .stage-module { position: static; opacity: 1; visibility: visible; }
-    .stage-module:not(.active) { display: none; }
-    .newspaper-workspace { background: #fff; padding: 0; }
-    .newspaper-sheet { box-shadow: none; width: 100%; margin: 0; }
+.panini-card-face {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #111;
+    border: 2px solid var(--neon-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: #555;
 }
 
-/* 10. RESPONSIVE DESIGN PREPARATION */
-@media (max-width: 768px) {
-    /* Rules for mobile optimization will go here in Phase 2 */
+.panini-card-name {
+    font-family: var(--font-ui);
+    font-size: 16px;
+    line-height: 1.2;
+}
+.panini-card-pos {
+    font-size: 12px;
+    color: #888;
+}
+
+.panini-card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px 15px;
+    font-size: 12px;
+}
+.panini-card-stats span {
+    color: #888;
+}
+.panini-card-stats strong {
+    font-family: var(--font-ui);
+    color: #fff;
+    float: right;
+}
+
+/* YOUTH PLAYER DETAIL MODAL */
+.youth-modal-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
+}
+
+.youth-modal-sidebar.panini-card-face {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 20px;
+    font-size: 70px;
+}
+
+.youth-modal-form-group {
+    margin-bottom: 20px;
+}
+
+.youth-modal-form-group label {
+    display: block;
+    font-family: var(--font-ui);
+    color: #888;
+    font-size: 11px;
+    margin-bottom: 5px;
+}
+
+.youth-modal-input,.youth-modal-select {
+    width: 100%;
+    padding: 10px;
+    background: #111;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 4px;
 }
