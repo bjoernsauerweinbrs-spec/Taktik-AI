@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TONI 3.0 | STYLE ENGINE V18.0 (LUXURY EDITION)
+   TONI 3.0 | STYLE ENGINE V18.1 (LUXURY EDITION - HOTFIX)
    ========================================================================== */
 
 :root {
@@ -77,6 +77,8 @@ body {
     opacity: 0;
     transition: opacity 0.8s ease-in;
 }
+
+/* KORREKTUR 1: Wenn #app-interface NICHT die Klasse .hidden hat, soll es sichtbar sein. */
 #app-interface:not(.hidden) {
     opacity: 1;
 }
@@ -96,6 +98,9 @@ body {
     overflow: hidden;
 }
 
+/* KORREKTUR 2: Den Sidebars explizit eine Standard-Schriftfarbe geben. */
+#nav-sidebar, #tools-sidebar { color: #ccc; }
+
 #nav-sidebar { background: var(--panel-bg); border-right: var(--border); display: flex; flex-direction: column; }
 .nav-group-title { padding: 20px 20px 10px; font-size: 10px; color: #555; font-family: var(--font-ui); letter-spacing: 1px; }
 .nav-item {
@@ -110,7 +115,7 @@ body {
 .nav-item i { width: 25px; text-align: center; margin-right: 5px; }
 
 #tools-sidebar { background: var(--panel-bg); border-left: var(--border); display: flex; flex-direction: column; }
-.ai-console { flex: 1; padding: 20px; overflow-y: auto; font-size: 13px; line-height: 1.5; color: #ccc; }
+.ai-console { flex: 1; padding: 20px; overflow-y: auto; font-size: 13px; line-height: 1.5; } /* Farbe geerbt von #tools-sidebar */
 .ai-message { border-left: 2px solid var(--neon-cyan); padding-left: 10px; margin-bottom: 15px; }
 
 .tool-panel { padding: 20px; border-top: var(--border); background: #111; }
