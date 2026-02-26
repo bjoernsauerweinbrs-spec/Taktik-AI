@@ -13,7 +13,7 @@
     --font-main: 'Rajdhani', sans-serif;
     --font-paper: 'Playfair Display', serif;
 }
-
+ 
 /* 1. GLOBAL & RESET */
 * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-appearance: none; }
 button { background: none; border: none; cursor: pointer; color: inherit; }
