@@ -5,139 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TONI 2.0 | CLUB COMMAND</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="portal-body">
+<body>
 
-    <div id="portal-background"></div>
-
-    <main id="auth-layer" class="portal-panel">
-        <header class="portal-header">
-            <div id="club-logo-portal">
-                <i class="fa-solid fa-shield-halved"></i>
-            </div>
-            <div class="header-text">
-                <h1>TONI 2.0</h1>
-                <small>OFFICIAL CLUB ENGINE</small>
-            </div>
-        </header>
-        
-        <div class="input-wrapper">
-            <input type="password" id="passkey" placeholder="PASSKEY EINGEBEN" autocomplete="off">
+    <main id="auth-layer">
+        <div class="login-box">
+            <i class="fa-solid fa-shield-halved" style="font-size: 50px; color: #00f3ff; margin-bottom: 20px;"></i>
+            <h1>TONI 2.0</h1>
+            <input type="password" id="passkey" placeholder="PASSKEY (Egal)">
+            <button onclick="bootSystem()">SYSTEM STARTEN</button>
         </div>
-        <button id="login-btn" onclick="systemBootSequence()">BOOT SYSTEM</button>
     </main>
 
     <div id="main-interface" class="hidden">
         
-        <header id="top-bar">
-            <div class="system-title">
-                <i class="fa-solid fa-microchip" style="color:var(--neon-cyan)"></i> 
-                TONI 2.0 // <span id="active-mod-title">DASHBOARD</span>
-            </div>
-            <div class="top-bar-right">
-                <span id="clock-display">00:00:00</span>
-                <button onclick="toggleSettings()" class="settings-btn" title="Konfiguration">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
-            </div>
-            <div class="kpi-quick-info">
-                <i class="fa-solid fa-wallet"></i> <span id="kpi-budget">0 €</span>
+        <header>
+            <div class="logo">TONI 2.0 // <span id="active-module">DASHBOARD</span></div>
+            <div class="status-bar">
+                <span id="clock">00:00</span> | BUDGET: <span id="budget-display">0 €</span>
+                <button onclick="toggleSettings()"><i class="fa-solid fa-gear"></i></button>
             </div>
         </header>
 
-        <div class="hud-grid">
-            
-            <aside id="nav-left" class="hud-column">
-                <div class="column-header">ZENTRALE</div>
-                <nav class="side-nav">
-                    <button id="nav-kader" onclick="switchModule('kader')"><i class="fa-solid fa-users"></i> KADER / LOCKER</button>
-                    <button id="nav-tactics" onclick="switchModule('tactics')"><i class="fa-solid fa-chalkboard-user"></i> TAKTIK-BOARD</button>
-                    <button id="nav-finance" onclick="switchModule('finance')"><i class="fa-solid fa-briefcase"></i> OFFICE PRIME</button>
-                    <button id="nav-youth" onclick="switchModule('youth')"><i class="fa-solid fa-child-reaching"></i> JUNIOR HERO</button>
-                    <button id="nav-media" onclick="switchModule('media')"><i class="fa-solid fa-clapperboard"></i> MEDIA & VIDEO</button>
-                </nav>
-                <div class="column-header">SCHNELLAUSWAHL</div>
-                <div id="quick-squad-list" class="scroll-area"></div>
-            </aside>
+        <div class="grid-container">
+            <nav>
+                <button onclick="loadModule('kader')"><i class="fa-solid fa-users"></i> KADER</button>
+                <button onclick="loadModule('tactics')"><i class="fa-solid fa-chess-board"></i> TAKTIK</button>
+                <button onclick="loadModule('office')"><i class="fa-solid fa-briefcase"></i> OFFICE</button>
+                <button onclick="loadModule('youth')"><i class="fa-solid fa-child"></i> JUGEND</button>
+                <button onclick="loadModule('media')"><i class="fa-solid fa-video"></i> VIDEO & PRESSE</button>
+            </nav>
 
-            <main id="stage-center" class="hud-column stage-main">
-                <div id="module-content" class="fade-in">
-                    </div>
-            </main>
+            <main id="content-stage"></main>
 
-            <aside id="info-right" class="hud-column">
-                <div class="column-header">NEURAL ADVISOR</div>
-                <div id="ai-chat-box" class="scroll-area">
-                    <div class="ai-msg">Willkommen zurück, Coach. Alle Systeme laufen im Optimalbereich.</div>
-                </div>
-                
-                <div class="voice-control-box">
-                    <button id="mic-btn" class="mic-inactive" onclick="toggleMic()">
-                        <i class="fa-solid fa-microphone"></i>
-                    </button>
-                    <div class="voice-status">KI-LIVE TALK</div>
-                </div>
-
-                <div class="column-header">SYSTEM KPI</div>
-                <div id="live-kpi-panel">
-                    <div class="kpi-row"><span>MORAL:</span> <b id="kpi-morale">85%</b></div>
-                    <div class="kpi-row"><span>REPUTATION:</span> <b id="kpi-reputation">72/100</b></div>
-                    <div class="kpi-row"><span>ATMOSPHÄRE:</span> <b>STADION-READY</b></div>
+            <aside>
+                <div class="ai-box">
+                    <h4><i class="fa-solid fa-robot"></i> TONI AI</h4>
+                    <p id="ai-message">System bereit. Warte auf Eingabe.</p>
                 </div>
             </aside>
         </div>
     </div>
 
-    <div id="bio-lab-modal" class="modal-overlay hidden">
-        <div id="modal-container" class="lab-container"></div>
+    <div id="modal-player" class="modal hidden">
+        <div class="modal-content" id="modal-player-content">
+            </div>
     </div>
 
-    <div id="settings-modal" class="modal-overlay hidden">
-        <div class="lab-container settings-box">
-            <h3>SYSTEM KONFIGURATION</h3>
-            <div class="lab-row">
-                <span>KI API KEY (OpenAI/Ollama)</span>
-                <input type="password" id="api-key-input" placeholder="sk-...">
+    <div id="modal-video" class="modal hidden">
+        <div class="modal-content video-content">
+            <div class="modal-header">
+                <h3>VIDEO ANALYSE</h3>
+                <button onclick="closeModals()">X</button>
             </div>
-            <div style="margin-top:20px; display:flex; gap:10px;">
-                <button onclick="saveSettings()" class="btn-neon-small" style="flex:1;">SPEICHERN</button>
-                <button onclick="toggleSettings()" class="btn-close-studio">ABBRECHEN</button>
+            <div class="video-wrapper">
+                <video id="video-player" controls></video>
+                <canvas id="drawing-canvas"></canvas>
+            </div>
+            <div class="controls">
+                <input type="file" accept="video/*" onchange="loadVideo(this)">
+                <small>Video laden & Malen möglich</small>
             </div>
         </div>
     </div>
 
-    <div id="video-suite-modal" class="modal-overlay hidden">
-        <div class="video-suite-container">
-            <div class="suite-header">
-                <h3><i class="fa-solid fa-video"></i> VIDEO ANALYTICS</h3>
-                <button onclick="closeVideoSuite()" class="btn-close-studio">X</button>
-            </div>
-            <div class="video-stage">
-                <video id="analysis-video" controls>
-                    <source src="" type="video/mp4">
-                </video>
-                <canvas id="telestrator-canvas"></canvas> </div>
-            <div class="suite-controls">
-                <button class="btn-neon-small" onclick="document.getElementById('video-upload').click()">VIDEO LADEN</button>
-                <input type="file" id="video-upload" accept="video/*" class="hidden" onchange="loadVideoFile(this)">
-                <div id="video-ai-text" style="margin-left:15px; font-size:12px; color:#aaa;">Kein Video geladen.</div>
-            </div>
+    <div id="modal-settings" class="modal hidden">
+        <div class="modal-content small-box">
+            <h3>EINSTELLUNGEN</h3>
+            <input type="text" placeholder="API KEY (Ollama/OpenAI)">
+            <button onclick="closeModals()">SPEICHERN</button>
         </div>
-    </div>
-
-    <div id="magazine-studio-modal" class="modal-overlay hidden">
-        <div class="studio-top-bar">
-            <div class="studio-info">DRUCK-VORSCHAU</div>
-            <div class="studio-actions">
-                <button onclick="window.print()" class="btn-neon-small">DRUCKEN</button>
-                <button onclick="document.getElementById('magazine-studio-modal').classList.add('hidden')" class="btn-close-studio">X</button>
-            </div>
-        </div>
-        <div id="magazine-sheet-container"></div>
     </div>
 
     <script src="script.js"></script>
