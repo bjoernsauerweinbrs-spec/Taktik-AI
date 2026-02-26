@@ -1,27 +1,20 @@
 /* ==========================================================================
-   TONI 2.0 | MASTER STYLE ENGINE (LUXURY GLASS & NEON)
+   TONI 2.0 | MASTER STYLE ENGINE (V16.1 FIX)
    ========================================================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
 
 :root {
-    /* -- PALETTE -- */
     --bg-deep: #050505;
-    --bg-panel: rgba(20, 20, 30, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    
+    --bg-panel: rgba(20, 20, 30, 0.85);
     --neon-cyan: #00f3ff;
     --neon-green: #0aff60;
     --neon-gold: #ffd700;
     --neon-alert: #ff003c;
-    
     --font-hud: 'Orbitron', sans-serif;
     --font-main: 'Rajdhani', sans-serif;
-    --font-print: 'Playfair Display', serif;
 }
 
-/* 1. GLOBALE STRUKTUR */
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 .hidden { display: none !important; }
 
 body {
@@ -31,245 +24,111 @@ body {
     background-image: radial-gradient(circle at 50% 10%, #1a1a2e 0%, #000 90%);
 }
 
-/* Portal Background Animation */
-#portal-background {
-    position: fixed; inset: 0; z-index: -1;
-    background: url('https://images.unsplash.com/photo-1516280440614-6697288d5d38?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
-    opacity: 0.15; filter: blur(3px);
-}
-
-/* 2. LOGIN PORTAL (GLAS-LOOK) */
-.portal-panel {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 90%; max-width: 400px;
-    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(20px);
-    border: 1px solid var(--neon-cyan); border-radius: 20px;
-    padding: 40px; text-align: center;
-    box-shadow: 0 0 50px rgba(0, 243, 255, 0.15);
-}
-
-#club-logo-portal {
-    width: 80px; height: 80px; margin: 0 auto 20px;
-    border: 2px solid var(--neon-cyan); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 40px; color: var(--neon-cyan);
-    box-shadow: 0 0 20px var(--neon-cyan);
-}
-
-.input-wrapper input {
-    width: 100%; background: transparent; border: none;
-    border-bottom: 2px solid rgba(255,255,255,0.2);
-    padding: 15px; color: #fff; text-align: center;
-    font-family: var(--font-hud); letter-spacing: 2px;
-    transition: 0.3s; outline: none;
-}
-.input-wrapper input:focus { border-color: var(--neon-cyan); box-shadow: 0 5px 10px -5px var(--neon-cyan); }
-
-#login-btn {
-    margin-top: 20px; width: 100%; padding: 12px;
-    background: var(--neon-cyan); color: #000; font-weight: bold;
-    border: none; cursor: pointer; font-family: var(--font-hud);
-    clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
-    transition: 0.3s;
-}
-#login-btn:hover { background: #fff; box-shadow: 0 0 20px var(--neon-cyan); }
-
-/* 3. HAUPT-INTERFACE (GRID) */
+/* --- GLAS & LAYOUT --- */
 #main-interface { height: 100vh; display: flex; flex-direction: column; }
-
 #top-bar {
-    height: 60px; background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--glass-border);
+    height: 60px; background: rgba(0,0,0,0.9); border-bottom: 1px solid #333;
     display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
-    font-family: var(--font-hud); font-size: 12px;
 }
-.settings-btn { background: none; border: none; color: #666; font-size: 16px; cursor: pointer; margin-left: 10px; transition: 0.3s; }
-.settings-btn:hover { color: var(--neon-cyan); transform: rotate(90deg); }
+.settings-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
 
 .hud-grid {
     flex: 1; display: grid; grid-template-columns: 260px 1fr 300px;
     gap: 15px; padding: 15px; overflow: hidden;
 }
-
 .hud-column {
-    background: var(--bg-panel); backdrop-filter: blur(15px);
-    border: 1px solid var(--glass-border); border-radius: 12px;
+    background: var(--bg-panel); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
     display: flex; flex-direction: column; overflow: hidden;
 }
 
-/* Navigation */
-.side-nav button {
-    width: 100%; background: transparent; border: none;
-    padding: 15px; text-align: left; color: #aaa;
-    font-family: var(--font-hud); font-size: 10px;
-    border-left: 2px solid transparent; cursor: pointer; transition: 0.3s;
-}
-.side-nav button:hover, .side-nav button.active {
-    background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), transparent);
-    color: #fff; border-left-color: var(--neon-cyan);
-    text-shadow: 0 0 8px var(--neon-cyan);
-}
-
-/* 4. STAGE (KABINE / INHALT) */
-.stage-main {
-    position: relative;
-    background: radial-gradient(circle at center, #1e1e24 0%, #000 100%);
-    box-shadow: inset 0 0 100px #000;
-}
-
-/* Scrollbars styling */
-.scroll-area, #module-content { flex: 1; overflow-y: auto; padding: 15px; }
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-
-/* 5. KADER KARTEN (FIFA STYLE) */
-.kader-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-
-.fifa-card {
-    position: relative; height: 200px; width: 100%;
-    background: linear-gradient(145deg, #2b2b2b, #1a1a1a);
-    border: 1px solid #444; border-radius: 10px;
-    cursor: pointer; transition: 0.3s; overflow: hidden;
-}
-.fifa-card:hover { 
-    transform: translateY(-5px); 
-    border-color: var(--neon-gold); 
-    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2); 
-}
-
-.card-inner { height: 100%; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-.card-rating-box { 
-    position: absolute; top: 10px; left: 10px; 
-    font-family: var(--font-hud); font-weight: bold; font-size: 20px; color: var(--neon-gold); 
-}
-.player-img-box {
-    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
-    font-size: 60px; color: #333; /* Placeholder icon color */
-}
-.player-img-box img { width: 80%; height: auto; filter: drop-shadow(0 5px 5px #000); }
-.card-name { 
-    font-family: var(--font-hud); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
-    margin-top: auto; padding-top: 10px; border-top: 1px solid #333; width: 100%; text-align: center;
-}
-
-/* 6. OFFICE & FORMS (TRANSPARENT INPUTS) */
-.office-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.office-panel {
-    background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
-    padding: 20px; border-radius: 10px;
-}
-.office-panel h3 { 
-    color: var(--neon-cyan); font-family: var(--font-hud); font-size: 12px; 
-    margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px; 
-}
-
-/* High-End Inputs */
-.lab-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; }
-input[type="number"], input[type="text"], select {
-    background: transparent; border: none; border-bottom: 1px solid #444;
-    color: #fff; font-family: var(--font-hud); text-align: right; width: 80px;
-    outline: none; transition: 0.3s;
-}
-input[type="text"] { width: 150px; text-align: left; }
-input:focus { border-bottom-color: var(--neon-cyan); color: var(--neon-cyan); }
-
-/* 7. TAKTIK BOARD (PITCH ENGINE) */
-.tactics-container { height: 100%; display: flex; flex-direction: column; gap: 10px; }
+/* --- TAKTIK PITCH (REALISMUS UPDATE) --- */
+.tactics-container { height: 100%; display: flex; flex-direction: column; }
 .pitch-visualization {
-    flex: 1; background: #0b3d0b; /* Pitch Green */
-    border: 2px solid rgba(255,255,255,0.1); border-radius: 8px;
-    position: relative; overflow: hidden;
-    box-shadow: inset 0 0 50px #000;
+    flex: 1; background: #2e8b57; /* Rasen */
+    position: relative; margin: 10px; border: 2px solid #fff;
+    overflow: hidden;
 }
-.pitch-canvas {
-    width: 100%; height: 100%; position: relative;
-    background-image: 
-        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size: 10% 10%;
-}
+
+/* Linien via CSS */
+.pitch-canvas { width: 100%; height: 100%; position: relative; }
+
 /* Mittellinie */
-.pitch-canvas::before { content:""; position:absolute; top:50%; left:0; right:0; height:2px; background:rgba(255,255,255,0.2); }
+.pitch-canvas::before { 
+    content:""; position:absolute; top:50%; left:0; right:0; height:2px; background:rgba(255,255,255,0.6); 
+}
 /* Mittelkreis */
-.pitch-canvas::after { content:""; position:absolute; top:50%; left:50%; width:80px; height:80px; border:2px solid rgba(255,255,255,0.2); border-radius:50%; transform:translate(-50%,-50%); }
+.pitch-canvas::after { 
+    content:""; position:absolute; top:50%; left:50%; width:80px; height:80px; 
+    border:2px solid rgba(255,255,255,0.6); border-radius:50%; transform:translate(-50%,-50%); 
+}
+
+/* 16m Räume (Oben & Unten) */
+.pitch-box-top {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 60%; height: 16%; border: 2px solid rgba(255,255,255,0.6); border-top: none;
+}
+.pitch-box-bottom {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 60%; height: 16%; border: 2px solid rgba(255,255,255,0.6); border-bottom: none;
+}
+
+/* 5m Räume */
+.pitch-small-box-top {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 30%; height: 6%; border: 2px solid rgba(255,255,255,0.6); border-top: none;
+}
+.pitch-small-box-bottom {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 30%; height: 6%; border: 2px solid rgba(255,255,255,0.6); border-bottom: none;
+}
+
+/* Tore */
+.pitch-goal-top {
+    position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+    width: 15%; height: 5px; border: 2px solid #fff; background: rgba(255,255,255,0.3);
+}
+.pitch-goal-bottom {
+    position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+    width: 15%; height: 5px; border: 2px solid #fff; background: rgba(255,255,255,0.3);
+}
 
 .player-marker {
-    position: absolute; width: 28px; height: 28px; border-radius: 50%;
+    position: absolute; width: 30px; height: 30px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 9px; font-weight: bold; cursor: grab; z-index: 10;
-    font-family: var(--font-hud); transform: translate(-50%, -50%);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.5); border: 2px solid #fff;
+    font-size: 10px; font-weight: bold; cursor: grab; z-index: 10;
+    font-family: var(--font-hud); border: 2px solid #fff;
+    transform: translate(-50%, -50%);
 }
-.team-toni { background: var(--neon-cyan); color: #000; }
-.team-opp { background: var(--neon-alert); color: #fff; }
+.team-toni { background: var(--neon-cyan); color: #000; box-shadow: 0 0 10px var(--neon-cyan); }
+.team-opp { background: var(--neon-alert); color: #fff; box-shadow: 0 0 10px var(--neon-alert); }
 
-.tactics-report-panel {
-    background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px;
-    font-size: 12px; border-left: 3px solid var(--neon-gold);
-}
+/* --- OFFICE TABLES --- */
+.ledger-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+.ledger-table th { text-align: left; color: var(--neon-cyan); border-bottom: 1px solid #444; padding: 5px; }
+.ledger-table td { padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.amount-pos { color: var(--neon-green); }
+.amount-neg { color: var(--neon-alert); }
 
-/* 8. VIDEO SUITE (TELESTRATOR) */
-.video-suite-container {
-    width: 90%; height: 90%; background: #111;
-    border: 1px solid #333; display: flex; flex-direction: column;
-    box-shadow: 0 0 100px rgba(0,0,0,0.8);
+/* --- INPUTS & BUTTONS --- */
+input, select { 
+    background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; padding: 5px; 
+    font-family: var(--font-hud); outline: none; 
 }
-.suite-header {
-    height: 50px; background: #222; display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
-    border-bottom: 1px solid #333;
-}
-.video-stage {
-    flex: 1; position: relative; background: #000; overflow: hidden;
-    display: flex; align-items: center; justify-content: center;
-}
-video { max-width: 100%; max-height: 100%; }
-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-/* Wenn Malen aktiv ist, muss Canvas klickbar sein (wird via JS gesteuert) */
-
-.suite-controls {
-    height: 80px; background: #151515; border-top: 1px solid #333;
-    display: flex; align-items: center; gap: 20px; padding: 0 20px;
-}
-.tool-group { display: flex; gap: 10px; background: #222; padding: 5px; border-radius: 50px; }
-.tool-btn {
-    width: 40px; height: 40px; border-radius: 50%; border: none; background: transparent; color: #aaa; cursor: pointer;
-}
-.tool-btn:hover, .tool-btn.active { background: var(--neon-cyan); color: #000; }
-
-/* 9. PRINT STYLES (MAGAZINE) */
-.magazine-sheet-sim {
-    width: 297mm; height: 210mm; background: #fff; color: #000; margin: 20px auto;
-    display: flex; box-shadow: 0 10px 50px rgba(0,0,0,0.5);
-}
-.mag-page-sim { flex: 1; padding: 40px; border-right: 1px solid #eee; position: relative; }
-.mag-page-sim h4 { font-family: var(--font-print); font-size: 32px; border-bottom: 4px solid #000; margin-bottom: 20px; }
-.mag-content-editable { font-family: serif; font-size: 14px; line-height: 1.5; outline: none; }
-.mag-sponsor-footer { 
-    position: absolute; bottom: 40px; left: 40px; right: 40px; 
-    display: flex; justify-content: space-between; border-top: 1px solid #ccc; padding-top: 10px;
-}
-.mag-sponsor-logo { font-size: 10px; font-weight: bold; color: #555; text-transform: uppercase; }
-
-@media print {
-    @page { size: A4 landscape; margin: 0; }
-    body * { visibility: hidden; }
-    #magazine-sheet-container, #magazine-sheet-container * { visibility: visible; }
-    #magazine-studio-modal { position: absolute; top: 0; left: 0; background: #fff; }
-    .magazine-sheet-sim { box-shadow: none; margin: 0; page-break-after: always; }
-}
-
-/* 10. HELPER & BUTTONS */
 .btn-neon-small {
     background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
-    padding: 8px 12px; font-family: var(--font-hud); font-size: 10px; cursor: pointer; transition: 0.3s;
+    padding: 5px 10px; cursor: pointer; font-size: 11px; margin-top: 5px;
 }
-.btn-neon-small:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 10px var(--neon-cyan); }
-.modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
-    display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);
-}
-.lab-container { width: 600px; background: #1a1a1a; padding: 30px; border: 1px solid #444; border-radius: 10px; }
+.btn-neon-small:hover { background: var(--neon-cyan); color: #000; }
 
-/* Responsive */
-@media (max-width: 1024px) {
-    .hud-grid { grid-template-columns: 1fr; overflow-y: auto; }
-}
+/* Modal & Helper */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; display: flex; justify-content: center; align-items: center; }
+.lab-container { width: 800px; max-height: 90vh; overflow-y: auto; background: #111; padding: 20px; border: 1px solid #333; }
+.lab-grid-full { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
+
+/* Video */
+.video-suite-container { width: 95%; height: 90%; background: #000; display: flex; flex-direction: column; }
+.video-stage { flex: 1; position: relative; display: flex; justify-content: center; background: #111; }
+video { max-height: 100%; max-width: 100%; }
+canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
