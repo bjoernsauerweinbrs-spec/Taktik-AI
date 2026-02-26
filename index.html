@@ -3,100 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 3.0 | LUXURY EDITION</title>
+    <title>TONI 2.0 | NEURAL CLUB ENGINE</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- === AUTHENTICATION LAYER === -->
     <div id="auth-layer">
-        <!--... unverändert... -->
         <div class="login-terminal">
-            <i class="fa-solid fa-fingerprint" style="font-size: 40px; color: #00f3ff; margin-bottom: 20px;"></i>
-            <h1>TONI 3.0</h1>
-            <p>NEURAL CLUB MANAGEMENT</p>
-            <input type="password" id="passkey" class="auth-input" placeholder="ACCESS CODE" autocomplete="off">
-            <button type="button" class="btn-main" id="btn-boot">INITIALISIEREN</button>
+            <div class="luxury-logo" style="font-size: 40px; margin-bottom: 20px;">TONI 2.0</div>
+            <p>NEURAL OPERATING SYSTEM</p>
+            <input type="password" id="passkey" class="auth-input" placeholder="BIOMETRIC CODE" autocomplete="off">
+            <button class="btn-main" onclick="bootSystem()">INITIALISIEREN</button>
         </div>
     </div>
 
-    <!-- === MAIN APPLICATION INTERFACE === -->
     <div id="app-interface" class="hidden">
-        <!--... Status Bar, Nav-Sidebar, Stage-Container, Tools-Sidebar bleiben unverändert... -->
-        <header id="status-bar">
+        
+        <header id="top-bar">
             <div class="app-brand">
-                <i class="fa-solid fa-microchip" style="color:#00f3ff;"></i> TONI 3.0 <span class="module-tag" id="active-mod-name">// DASHBOARD</span>
+                <span class="luxury-logo">TONI 2.0</span> 
+                <span id="active-mod-name" style="color:var(--neon-cyan); margin-left:15px; font-family:var(--font-ui); font-size:12px;">// DASHBOARD</span>
             </div>
             
-            <div class="clock-widget">
-                <i class="fa-regular fa-clock"></i> <span id="clock">00:00</span>
-            </div>
+            <div class="clock-widget" id="clock-display">00:00:00</div>
 
-            <div style="display:flex; gap:15px; align-items:center;">
-                <div style="font-family: 'Orbitron'; color: #0aff60; font-size: 14px; transition: color 0.5s ease;">
-                    <i class="fa-solid fa-wallet"></i> <span id="budget-display" data-value="0">0 €</span>
+            <div style="display:flex; gap:25px; align-items:center;">
+                <div style="font-family: var(--font-ui); color: var(--neon-gold); font-size: 14px;">
+                    <i class="fa-solid fa-vault"></i> <span id="budget-display">0 €</span>
                 </div>
-                <button id="btn-toggle-settings" style="background:none; border:none; color:#666; cursor:pointer; font-size:18px;">
+                <button onclick="toggleSettings()" style="background:none; border:none; color:#444; cursor:pointer; font-size:18px;">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
         </header>
 
-        <div class="main-grid">
+        <div style="display:flex; height: calc(100vh - 70px);">
             
-            <nav id="nav-sidebar">
-                <div class="nav-group-title">MANAGEMENT</div>
-                <button class="nav-item" data-module="kader" id="nav-kader"><i class="fa-solid fa-users"></i> PROFI KADER</button>
-                <button class="nav-item" data-module="tactics" id="nav-tactics"><i class="fa-solid fa-chess-board"></i> TAKTIK BOARD</button>
-                <button class="nav-item" data-module="office" id="nav-office"><i class="fa-solid fa-briefcase"></i> OFFICE PRIME</button>
+            <nav class="nav-sidebar">
+                <div class="nav-group-title">COMMAND</div>
+                <button class="nav-item active" onclick="loadModule('tactics')"><i class="fa-solid fa-compass-drafting"></i> TACTICAL CO-PILOT</button>
+                <button class="nav-item" onclick="loadModule('manager')"><i class="fa-solid fa-chart-line"></i> FINANCIAL ENGINE</button>
                 
-                <div class="nav-group-title">AKADEMIE & MEDIA</div>
-                <button class="nav-item" data-module="youth" id="nav-youth"><i class="fa-solid fa-graduation-cap"></i> JUGEND ZENTRUM</button>
-                <button class="nav-item" data-module="media" id="nav-media"><i class="fa-solid fa-newspaper"></i> ZEITUNG & VIDEO</button>
+                <div class="nav-group-title">INFRASTRUCTURE</div>
+                <button class="nav-item" onclick="loadModule('nlz')"><i class="fa-solid fa-address-card"></i> ACADEMY HUB (NLZ)</button>
+                <button class="nav-item" onclick="loadModule('press')"><i class="fa-solid fa-print"></i> PRESS STATION</button>
+                <button class="nav-item" onclick="loadModule('video')"><i class="fa-solid fa-clapperboard"></i> BROADCAST LAB</button>
             </nav>
 
-            <main id="stage-container">
-                <div class="stage-module" id="module-kader"></div>
-                <div class="stage-module" id="module-tactics"></div>
-                <div class="stage-module" id="module-office"></div>
-                <div class="stage-module" id="module-youth"></div>
-                <div class="stage-module" id="module-media"></div>
-            </main>
+            <main id="stage-content" style="flex:1; overflow-y:auto;">
+                </main>
 
-            <aside id="tools-sidebar">
+            <aside id="tools-sidebar" style="width:300px; border-left:1px solid #222; display:flex; flex-direction:column;">
                 <div class="nav-group-title">NEURAL ADVISOR</div>
-                <div class="ai-console" id="ai-log">
-                    <div class="ai-message">System bereit.<br>Warte auf Input.</div>
+                <div id="ai-log" style="flex:1; padding:20px; font-size:13px; color:#aaa; overflow-y:auto;">
+                    <div class="ai-message">System online. Erwarte taktische Parameter...</div>
                 </div>
                 
-                <div class="tool-panel">
-                    <!--... unverändert... -->
+                <div style="padding:20px; border-top:1px solid #222; background:#080808;">
+                    <button class="mic-trigger" id="mic-btn" onclick="toggleMic()">
+                        <i class="fa-solid fa-microphone"></i> KI-KOMMUNIKATION
+                    </button>
+                    <div style="margin-top:15px;">
+                        <small style="color:#444; font-family:var(--font-ui); font-size:9px;">SYSTEM STATUS</small>
+                        <div style="height:4px; width:100%; background:#222; margin-top:5px; border-radius:2px;">
+                            <div style="width:92%; height:100%; background:var(--neon-cyan); border-radius:2px;"></div>
+                        </div>
+                    </div>
                 </div>
             </aside>
         </div>
     </div>
 
-    <!-- === MODALS === -->
-    <div id="modal-bio" class="modal-backdrop hidden"> <!-- Wiederverwendet für Profi-Bio -->
-        <div class="modal-panel" id="bio-content-wrapper" style="width: 800px;"></div>
-    </div>
-    
-    <!-- ** NEU: Ein dediziertes, größeres Modal für die Jugendspieler-Verwaltung ** -->
-    <div id="modal-youth-player" class="modal-backdrop hidden">
-        <div class="modal-panel" style="width: 900px; max-width: 95%;">
-            <div id="youth-player-content-wrapper"></div>
+    <div id="modal-bio" class="modal-overlay hidden">
+        <div class="modal-window" style="width: 900px; max-height: 90vh;">
+            <div id="bio-content-inner"></div>
         </div>
     </div>
 
-    <div id="modal-video" class="modal-backdrop hidden">
-        <!--... unverändert... -->
-    </div>
-    <div id="modal-settings" class="modal-backdrop hidden">
-        <!--... unverändert... -->
+    <div id="modal-settings" class="modal-overlay hidden">
+        <div class="modal-window" style="width: 450px; padding:30px;">
+            <h3 style="font-family:var(--font-ui); margin-bottom:20px;">SYSTEM KONFIGURATION</h3>
+            <div style="margin-bottom:15px;">
+                <label style="font-size:10px; color:#666;">NEURAL API KEY</label>
+                <input type="password" id="api-key" class="auth-input" style="text-align:left; padding:10px; margin-top:5px;">
+            </div>
+            <button class="btn-main" onclick="saveSettings()">UPDATE CORE</button>
+            <button class="btn-main" style="margin-top:10px; border-color:#444; color:#666;" onclick="toggleSettings()">ABBRECHEN</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
