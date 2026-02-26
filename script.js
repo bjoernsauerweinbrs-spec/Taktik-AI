@@ -1,70 +1,60 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL LOGIC CORE V20.0 (GIGANTIC EDITION)
+   TONI 2.0 | NEURAL LOGIC CORE V21.0 (NLZ MASTERY & TALENT ENGINE)
    ========================================================================== */
 
-const STORAGE_KEY = "TONI_NCOS_V20";
+const STORAGE_KEY = "TONI_NCOS_V21";
 
 // --- 1. CORE DATA ARCHITECTURE ---
 let NCOS = {
     state: {
         budget: 4500000,
-        activeModule: 'tactics',
+        activeModule: 'nlz',
         isMicActive: false
     },
-    config: { apiKey: "" },
     
-    // Taktik-Daten (Vektoren & Equipment)
-    tactics: {
-        players: [
-            { id: 1, label: "TW", x: 50, y: 92, team: 'home' },
-            { id: 2, label: "IV", x: 35, y: 78, team: 'home' },
-            { id: 3, label: "IV", x: 65, y: 78, team: 'home' },
-            { id: 4, label: "ST", x: 50, y: 15, team: 'home' }
-        ],
-        vectors: [
-            { fromX: 50, fromY: 50, toX: 50, toY: 15, type: 'run' }, // Laufweg
-            { fromX: 35, fromY: 78, toX: 50, toY: 50, type: 'pass' }  // Passweg
-        ],
-        equipment: [
-            { type: 'cone', x: 45, y: 45 }, { type: 'cone', x: 55, y: 45 }
-        ]
-    },
-
-    // NLZ (Panini-System)
+    // NLZ DATA (Struktur für Panini-Karten & Jahrgänge)
     academy: {
         players: [
-            { id: 101, name: "Lukas Weber", rating: 68, age: "U15", dev: "+4", stickers: [true, true, false], aiReview: "Herausragende Übersicht, körperlich in der Wachstumsphase." },
-            { id: 102, name: "Finn Maier", rating: 72, age: "U17", dev: "+2", stickers: [true, false, false], aiReview: "Abschlussstark, Fokus auf defensives Umschaltspiel nötig." }
+            { 
+                id: 101, name: "Julian Weber", birthDate: "2011-05-15", position: "ST", 
+                stats: { pac: 75, sho: 68, pas: 62, dri: 71, def: 34, phy: 60 }, 
+                promotedTo: null, // Wenn null, dann Standard nach Alter
+                stickers: [true, true, false], 
+                aiReview: "Technisch versiert, Fokus auf Physis-Aufbau." 
+            },
+            { 
+                id: 102, name: "Leon Kraft", birthDate: "2009-09-22", position: "IV", 
+                stats: { pac: 62, sho: 45, pas: 58, dri: 51, def: 78, phy: 75 }, 
+                promotedTo: "U19", // Beispiel: Ein Talent wurde hochgezogen
+                stickers: [true, false, false], 
+                aiReview: "Körperlich bereits auf Senior-Niveau. Taktik-Schulung nötig." 
+            }
         ]
     },
 
-    // Finanz-Ledger (ERP)
     finance: [
-        { id: 1, date: "26.02.", desc: "Sponsoring: Neural Gear", val: 1500000, cat: "Income" },
-        { id: 2, date: "26.02.", desc: "Logistik: Stadion-Catering", val: -4500, cat: "Expense" },
-        { id: 3, date: "25.02.", desc: "Transfer-Erlös: Verkauf U19", val: 250000, cat: "Income" }
+        { id: 1, date: "26.02.", desc: "Sponsoring: Neural Gear", val: 1500000, cat: "Income" }
     ],
 
-    // Press-Station (Magazin)
-    press: {
-        title: "OFFICIAL MATCHDAY",
-        issue: "Nr. 14 / Saison 2026",
-        pages: 4 // Standard: 4-8-12
+    tactics: {
+        players: [{ id: 1, label: "TW", x: 50, y: 92, team: 'home' }],
+        vectors: [],
+        equipment: []
     }
 };
 
-// --- 2. BOOT & INITIALIZATION ---
+// --- 2. SYSTEM START ---
 function bootSystem() {
     const btn = document.querySelector('.btn-main');
-    btn.innerText = "SYNCHRONISIERE NEURAL CORES...";
+    btn.innerText = "INITIALISIERE TALENT-DATENBANK...";
     
     setTimeout(() => {
         document.getElementById('auth-layer').classList.add('hidden');
         document.getElementById('app-interface').classList.remove('hidden');
         initClock();
-        loadModule('tactics');
+        loadModule('nlz');
         updateGlobalHUD();
-    }, 1200);
+    }, 1000);
 }
 
 function initClock() {
@@ -78,212 +68,181 @@ function loadModule(name) {
     const stage = document.getElementById('stage-content');
     NCOS.state.activeModule = name;
     
-    // Update Sidebar
     document.querySelectorAll('.nav-item').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('onclick').includes(name));
     });
     
     document.getElementById('active-mod-name').innerText = "// " + name.toUpperCase();
 
-    // Render Logic
+    if (name === 'nlz') renderNLZ(stage);
     if (name === 'tactics') renderTactics(stage);
     if (name === 'manager') renderManager(stage);
-    if (name === 'nlz') renderNLZ(stage);
     if (name === 'press') renderPress(stage);
-    if (name === 'video') renderVideo(stage);
 }
 
-// --- 4. TACTICAL CO-PILOT (VECTOR ENGINE) ---
-function renderTactics(target) {
-    target.innerHTML = `
-        <div style="padding:20px; height:100%; display:flex; flex-direction:column;">
-            <div style="margin-bottom:15px; display:flex; justify-content:space-between;">
-                <h2 style="font-family:var(--font-ui)">TACTICAL VECTOR ENGINE V1.0</h2>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-main" style="width:auto; padding:5px 15px;" onclick="addEquipment()">+ HÜTCHEN</button>
-                    <button class="btn-main" style="width:auto; padding:5px 15px; border-color:var(--neon-gold);" onclick="generateAIScheme()">AI PLANNING</button>
-                </div>
-            </div>
-            <div class="pitch-container" id="pitch-main">
-                <svg id="vector-layer" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:5;">
-                    </svg>
-                ${NCOS.tactics.players.map(p => `
-                    <div class="player-dot team-home" style="left:${p.x}%; top:${p.y}%;" onmousedown="initDrag(event, ${p.id})">
-                        ${p.label}
-                    </div>
-                `).join('')}
-                ${NCOS.tactics.equipment.map(e => `
-                    <div class="equipment-icon" style="left:${e.x}%; top:${e.y}%;"></div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-    drawVectors();
-}
-
-function drawVectors() {
-    const svg = document.getElementById('vector-layer');
-    if(!svg) return;
-    svg.innerHTML = NCOS.tactics.vectors.map(v => `
-        <line x1="${v.fromX}%" y1="${v.fromY}%" x2="${v.toX}%" y2="${v.toY}%" 
-              class="vector-path" 
-              style="stroke:${v.type === 'run' ? 'var(--path-vector)' : 'var(--pass-vector)'}" />
-        <circle cx="${v.toX}%" cy="${v.toY}%" r="4" fill="white" />
-    `).join('');
-}
-
-// --- 5. MANAGER ERP ENGINE ---
-function renderManager(target) {
-    target.innerHTML = `
-        <div style="padding:40px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-                <h1 style="font-family:var(--font-ui)">FINANCIAL OPERATING SYSTEM</h1>
-                <button class="btn-main" style="width:auto; padding:10px 30px;" onclick="generateAILetter()">KI-VERTRAG ERSTELLEN</button>
-            </div>
-            <table class="manager-ledger">
-                <thead><tr><th>DATUM</th><th>TRANSAKTION</th><th>KATEGORIE</th><th>BETRAG</th></tr></thead>
-                <tbody>
-                    ${NCOS.finance.map(f => `
-                        <tr>
-                            <td>${f.date}</td>
-                            <td>${f.desc}</td>
-                            <td><span style="color:#666; font-size:10px;">${f.cat.toUpperCase()}</span></td>
-                            <td style="color:${f.val > 0 ? 'var(--neon-cyan)' : 'var(--neon-alert)'}">${f.val.toLocaleString()} €</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
-// --- 6. NLZ ACADEMY HUB (PANINI) ---
+// --- 4. NLZ ACADEMY HUB (FIFA-CARDS & PROMOTION) ---
 function renderNLZ(target) {
     target.innerHTML = `
         <div style="padding:40px;">
-            <div style="text-align:center; margin-bottom:40px;">
-                <div class="luxury-logo" style="font-size:32px;">TONI 2.0 ERINNERUNGSALBUM</div>
-                <p style="color:#666; font-family:var(--font-ui); font-size:10px; letter-spacing:3px;">NACHWUCHSLEISTUNGSZENTRUM OFFICIAL</p>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
+                <div class="luxury-logo" style="font-size:32px;">TONI 2.0 // NLZ STICKER-ALBUM</div>
+                <button class="btn-main" style="width:auto; padding:10px 30px;" onclick="openAddPlayerModal()">+ SPIELER REGISTRIEREN</button>
             </div>
+            
             <div class="panini-album">
-                ${NCOS.academy.players.map(p => `
-                    <div class="panini-card" onclick="openPlayerDev(${p.id})">
+                ${NCOS.academy.players.map(p => {
+                    const ageGroup = calculateAgeGroup(p.birthDate, p.promotedTo);
+                    const ovr = calculateOVR(p.stats);
+                    return `
+                    <div class="panini-card" onclick="editYouthPlayer(${p.id})">
                         <div style="padding:20px;">
-                            <div style="display:flex; justify-content:space-between;">
-                                <span style="font-family:var(--font-ui); color:var(--neon-gold);">${p.age}</span>
-                                <span style="color:var(--path-vector)">${p.dev}</span>
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <div>
+                                    <div style="font-family:var(--font-ui); color:var(--neon-gold); font-size:24px;">${ovr}</div>
+                                    <div style="font-size:10px; color:#888;">${p.position}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-family:var(--font-ui); color:var(--neon-cyan); font-size:14px;">${ageGroup}</div>
+                                    ${p.promotedTo ? '<div style="font-size:8px; color:var(--neon-gold);">PROMOTED</div>' : ''}
+                                </div>
                             </div>
-                            <div style="text-align:center; margin:20px 0;">
-                                <i class="fa-solid fa-user-graduate" style="font-size:50px; color:#222;"></i>
+                            
+                            <div style="text-align:center; margin:15px 0;">
+                                <i class="fa-solid fa-user-graduate" style="font-size:60px; color:#1a253d;"></i>
                             </div>
-                            <div style="text-align:center; font-family:var(--font-ui); margin-bottom:15px;">${p.name}</div>
-                            <div style="font-size:10px; color:#555; background:rgba(0,0,0,0.3); padding:10px; border-radius:5px;">
-                                KI-EVOLUTION: <br> ${p.aiReview}
+                            
+                            <div style="text-align:center; font-family:var(--font-ui); margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px;">${p.name}</div>
+                            
+                            <div class="panini-stats" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; font-size:10px; font-family:var(--font-ui);">
+                                <span>PAC <strong>${p.stats.pac}</strong></span> <span>DRI <strong>${p.stats.dri}</strong></span>
+                                <span>SHO <strong>${p.stats.sho}</strong></span> <span>DEF <strong>${p.stats.def}</strong></span>
+                                <span>PAS <strong>${p.stats.pas}</strong></span> <span>PHY <strong>${p.stats.phy}</strong></span>
                             </div>
                         </div>
                     </div>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
         </div>
     `;
 }
 
-// --- 7. PRESS STATION (A4 ENGINE) ---
-function renderPress(target) {
-    target.innerHTML = `
-        <div class="press-office-workspace">
-            <div style="width:297mm; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
-                <div style="color:#fff; font-family:var(--font-ui);">MAGAZIN EDITOR // SEITEN: ${NCOS.press.pages}</div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-main" style="width:auto; padding:5px 20px;" onclick="addPressPages()">+ 4 SEITEN</button>
-                    <button class="btn-main" style="width:auto; padding:5px 20px; border-color:white; color:white;" onclick="window.print()">JETZT DRUCKEN</button>
-                </div>
-            </div>
-            <div class="magazine-page">
-                <div class="magazine-content" style="border-right:1px solid #eee;">
-                    <div class="luxury-logo" style="font-size:40px; margin-bottom:50px;">TONI 2.0</div>
-                    <h1 contenteditable="true">HEIMSPIEL</h1>
-                    <p style="margin-top:20px; font-size:18px;" contenteditable="true">Gegen den Rivalen geht es heute um alles. Die KI analysiert den Gegner...</p>
-                </div>
-                <div class="magazine-content">
-                    <h2 style="font-size:30px; border-bottom:2px solid #000;" contenteditable="true">DIE ANALYSE</h2>
-                    <div style="height:200px; background:#f0f0f0; margin:20px 0; display:flex; align-items:center; justify-content:center; color:#ccc;">
-                        [PLATZHALTER: KI-HEATMAP]
-                    </div>
-                    <p contenteditable="true">Unsere Mannschaft ist bereit. Die Taktik wurde im Broadcast Lab verfeinert.</p>
-                </div>
-            </div>
-        </div>
-    `;
+// --- 5. TALENT-LOGIK (ALTER & OVR) ---
+function calculateAgeGroup(birthDate, promotedTo) {
+    if (promotedTo) return promotedTo; // Manuelle Beförderung sticht Alter
+    const birthYear = new Date(birthDate).getFullYear();
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - birthYear;
+    
+    if (age <= 11) return "U11";
+    if (age <= 13) return "U13";
+    if (age <= 15) return "U15";
+    if (age <= 17) return "U17";
+    return "U19";
 }
 
-// --- 8. AI BROADCAST LAB ---
-function renderVideo(target) {
-    target.innerHTML = `
-        <div style="padding:40px; height:100%; display:flex; flex-direction:column;">
-            <div style="display:flex; gap:20px; flex:1;">
-                <div style="flex:2; background:#000; border:1px solid #222; position:relative;">
-                    <video id="broadcast-video" style="width:100%; height:100%; object-fit:contain;"></video>
-                    <canvas id="telestrator" style="position:absolute; inset:0; width:100%; height:100%; cursor:crosshair;"></canvas>
-                </div>
-                <div style="flex:1; background:var(--bg-panel); border:1px solid #222; padding:20px;">
-                    <h4 style="font-family:var(--font-ui); margin-bottom:15px;">KI-VIDEO ANALYSE</h4>
-                    <div id="ai-video-log" style="font-size:12px; color:#666;">
-                        Warte auf Szenen-Upload...
-                    </div>
-                    <button class="btn-main" style="margin-top:20px;" onclick="document.getElementById('vid-load').click()">LADE SZENE</button>
-                    <input type="file" id="vid-load" hidden onchange="loadBroadcast(this)">
-                </div>
-            </div>
-        </div>
-    `;
-    initTelestrator();
+function calculateOVR(stats) {
+    const values = Object.values(stats);
+    return Math.round(values.reduce((a, b) => a + b) / values.length);
 }
 
-// --- UTILS & HELPERS ---
+// --- 6. SPIELER-EDITOR (MODAL) ---
+function openAddPlayerModal() {
+    const modal = document.getElementById('modal-bio');
+    const inner = document.getElementById('bio-content-inner');
+    
+    inner.innerHTML = `
+        <div style="padding:40px; background:var(--bg-panel); border:1px solid var(--neon-cyan);">
+            <h2 style="font-family:var(--font-ui); margin-bottom:30px;">NEUES TALENT REGISTRIEREN</h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                <input id="p-name" class="auth-input" style="text-align:left;" placeholder="NAME">
+                <input id="p-birth" type="date" class="auth-input" style="text-align:left;" placeholder="GEBURTSDATUM">
+                <select id="p-pos" class="auth-input" style="text-align:left;">
+                    <option value="TW">TW</option><option value="IV">IV</option><option value="ZM">ZM</option><option value="ST">ST</option>
+                </select>
+            </div>
+            <button class="btn-main" style="margin-top:30px;" onclick="saveNewPlayer()">IN DEN KADER AUFNEHMEN</button>
+            <button class="btn-main" style="margin-top:10px; border-color:#444;" onclick="toggleModal('modal-bio', false)">ABBRECHEN</button>
+        </div>
+    `;
+    toggleModal('modal-bio', true);
+}
+
+function editYouthPlayer(id) {
+    const p = NCOS.academy.players.find(x => x.id === id);
+    const modal = document.getElementById('modal-bio');
+    const inner = document.getElementById('bio-content-inner');
+    
+    inner.innerHTML = `
+        <div style="padding:40px; background:var(--bg-panel); border:1px solid var(--neon-gold);">
+            <h2 style="font-family:var(--font-ui); margin-bottom:10px;">AKTE: ${p.name}</h2>
+            <p style="font-size:10px; color:#666; margin-bottom:30px;">GEBOREN: ${p.birthDate}</p>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:40px;">
+                <div>
+                    <h4 style="font-family:var(--font-ui); font-size:12px; margin-bottom:15px; color:var(--neon-cyan);">FIFA-WERTE</h4>
+                    ${Object.keys(p.stats).map(stat => `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <label style="text-transform:uppercase;">${stat}</label>
+                            <input type="number" id="stat-${stat}" value="${p.stats[stat]}" style="width:60px; background:#000; border:1px solid #333; color:white; text-align:center;">
+                        </div>
+                    `).join('')}
+                </div>
+                <div>
+                    <h4 style="font-family:var(--font-ui); font-size:12px; margin-bottom:15px; color:var(--neon-gold);">PROMOTION</h4>
+                    <label style="font-size:10px; color:#666;">MANUELLE ALTERSGRUPPE (HOCHZIEHEN)</label>
+                    <select id="p-promote" class="auth-input" style="text-align:left; margin-top:5px;">
+                        <option value="" ${!p.promotedTo ? 'selected' : ''}>STANDARD (Nach Alter)</option>
+                        <option value="U17" ${p.promotedTo === 'U17' ? 'selected' : ''}>U17 (Förderkader)</option>
+                        <option value="U19" ${p.promotedTo === 'U19' ? 'selected' : ''}>U19 (Leistungskader)</option>
+                        <option value="PRO" ${p.promotedTo === 'PRO' ? 'selected' : ''}>PROFI-KADER</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="btn-main" style="margin-top:30px;" onclick="updatePlayer(${p.id})">WERTE SYNCHRONISIEREN</button>
+            <button class="btn-main" style="margin-top:10px; border-color:#444;" onclick="toggleModal('modal-bio', false)">SCHLIESSEN</button>
+        </div>
+    `;
+    toggleModal('modal-bio', true);
+}
+
+// --- 7. CORE ENGINE FUNCTIONS ---
+function saveNewPlayer() {
+    const name = document.getElementById('p-name').value;
+    const birth = document.getElementById('p-birth').value;
+    const pos = document.getElementById('p-pos').value;
+    
+    if (name && birth) {
+        NCOS.academy.players.push({
+            id: Date.now(), name, birthDate: birth, position: pos,
+            stats: { pac: 50, sho: 50, pas: 50, dri: 50, def: 50, phy: 50 },
+            promotedTo: null, stickers: [], aiReview: "Neu im System."
+        });
+        toggleModal('modal-bio', false);
+        loadModule('nlz');
+    }
+}
+
+function updatePlayer(id) {
+    const p = NCOS.academy.players.find(x => x.id === id);
+    Object.keys(p.stats).forEach(stat => {
+        p.stats[stat] = parseInt(document.getElementById('stat-' + stat).value);
+    });
+    p.promotedTo = document.getElementById('p-promote').value || null;
+    toggleModal('modal-bio', false);
+    loadModule('nlz');
+}
+
 function updateGlobalHUD() {
     document.getElementById('budget-display').innerText = NCOS.state.budget.toLocaleString() + " €";
 }
 
-function toggleMic() {
-    NCOS.state.isMicActive = !NCOS.state.isMicActive;
-    const btn = document.getElementById('mic-btn');
-    btn.classList.toggle('active', NCOS.state.isMicActive);
-    const log = document.getElementById('ai-log');
-    if(NCOS.state.isMicActive) {
-        log.innerHTML = `<div class="ai-message" style="color:var(--neon-cyan)">Höre zu... Analysiere Trainings-Parameter...</div>`;
-    }
+function toggleModal(id, show) {
+    document.getElementById(id).classList.toggle('hidden', !show);
 }
 
-function initDrag(e, id) {
-    // Drag Logik hier einfügen (wie in V17)
-}
-
-function addPressPages() {
-    NCOS.press.pages += 4;
-    loadModule('press');
-}
-
-function generateAIScheme() {
-    alert("KI berechnet optimale Laufwege basierend auf Gegner-Recherche...");
-    NCOS.tactics.vectors.push({ fromX: 10, fromY: 65, toX: 50, toY: 50, type: 'run' });
-    drawVectors();
-}
-
-// Canvas Painting für Video
-function initTelestrator() {
-    const c = document.getElementById('telestrator');
-    if(!c) return;
-    const ctx = c.getContext('2d');
-    ctx.strokeStyle = '#00f3ff'; ctx.lineWidth = 3;
-    let paint = false;
-    c.onmousedown = (e) => { paint = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
-    c.onmousemove = (e) => { if(paint) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
-    c.onmouseup = () => paint = false;
-}
-
-function loadBroadcast(input) {
-    const v = document.getElementById('broadcast-video');
-    v.src = URL.createObjectURL(input.files[0]);
-    v.play();
-}
+// Platzhalter für andere Module
+function renderTactics(target) { target.innerHTML = `<div style="padding:40px;"><h2>TACTICAL BOARD ACTIVE</h2><p>Vektor-Ebene geladen.</p></div>`; }
+function renderManager(target) { target.innerHTML = `<div style="padding:40px;"><h2>MANAGER OFFICE</h2><p>Finanz-System aktiv.</p></div>`; }
+function renderPress(target) { target.innerHTML = `<div style="padding:40px;"><h2>PRESS STATION</h2><p>Layout: A4 Landscape.</p></div>`; }
