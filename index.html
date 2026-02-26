@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | ULTIMATE EDITION</title>
+    <title>TONI 3.0 | LUXURY EDITION</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,22 +12,24 @@
 </head>
 <body>
 
+    <!-- === AUTHENTICATION LAYER === -->
     <div id="auth-layer">
         <div class="login-terminal">
             <i class="fa-solid fa-fingerprint" style="font-size: 40px; color: #00f3ff; margin-bottom: 20px;"></i>
-            <h1>TONI 2.0</h1>
+            <h1>TONI 3.0</h1>
             <p>NEURAL CLUB MANAGEMENT</p>
             
             <input type="password" id="passkey" class="auth-input" placeholder="ACCESS CODE" autocomplete="off">
-            <button type="button" class="btn-main" onclick="bootSystem()">INITIALISIEREN</button>
+            <button type="button" class="btn-main" id="btn-boot">INITIALISIEREN</button>
         </div>
     </div>
 
+    <!-- === MAIN APPLICATION INTERFACE === -->
     <div id="app-interface" class="hidden">
         
         <header id="status-bar">
             <div class="app-brand">
-                <i class="fa-solid fa-microchip" style="color:#00f3ff;"></i> TONI 2.0 <span class="module-tag" id="active-mod-name">// DASHBOARD</span>
+                <i class="fa-solid fa-microchip" style="color:#00f3ff;"></i> TONI 3.0 <span class="module-tag" id="active-mod-name">// DASHBOARD</span>
             </div>
             
             <div class="clock-widget">
@@ -35,10 +37,10 @@
             </div>
 
             <div style="display:flex; gap:15px; align-items:center;">
-                <div style="font-family: 'Orbitron'; color: #0aff60; font-size: 14px;">
-                    <i class="fa-solid fa-wallet"></i> <span id="budget-display">0 €</span>
+                <div style="font-family: 'Orbitron'; color: #0aff60; font-size: 14px; transition: color 0.5s ease;">
+                    <i class="fa-solid fa-wallet"></i> <span id="budget-display" data-value="0">0 €</span>
                 </div>
-                <button onclick="toggleSettings()" style="background:none; border:none; color:#666; cursor:pointer; font-size:18px;">
+                <button id="btn-toggle-settings" style="background:none; border:none; color:#666; cursor:pointer; font-size:18px;">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
@@ -48,17 +50,23 @@
             
             <nav id="nav-sidebar">
                 <div class="nav-group-title">MANAGEMENT</div>
-                <button class="nav-item" id="nav-kader" onclick="loadModule('kader')"><i class="fa-solid fa-users"></i> PROFI KADER</button>
-                <button class="nav-item" id="nav-tactics" onclick="loadModule('tactics')"><i class="fa-solid fa-chess-board"></i> TAKTIK BOARD</button>
-                <button class="nav-item" id="nav-office" onclick="loadModule('office')"><i class="fa-solid fa-briefcase"></i> OFFICE PRIME</button>
+                <button class="nav-item" data-module="kader" id="nav-kader"><i class="fa-solid fa-users"></i> PROFI KADER</button>
+                <button class="nav-item" data-module="tactics" id="nav-tactics"><i class="fa-solid fa-chess-board"></i> TAKTIK BOARD</button>
+                <button class="nav-item" data-module="office" id="nav-office"><i class="fa-solid fa-briefcase"></i> OFFICE PRIME</button>
                 
                 <div class="nav-group-title">AKADEMIE & MEDIA</div>
-                <button class="nav-item" id="nav-youth" onclick="loadModule('youth')"><i class="fa-solid fa-graduation-cap"></i> JUGEND ZENTRUM</button>
-                <button class="nav-item" id="nav-media" onclick="loadModule('media')"><i class="fa-solid fa-newspaper"></i> ZEITUNG & VIDEO</button>
+                <button class="nav-item" data-module="youth" id="nav-youth"><i class="fa-solid fa-graduation-cap"></i> JUGEND ZENTRUM</button>
+                <button class="nav-item" data-module="media" id="nav-media"><i class="fa-solid fa-newspaper"></i> ZEITUNG & VIDEO</button>
             </nav>
 
-            <main id="stage-content">
-                </main>
+            <main id="stage-container">
+                <!-- Jeder Modul bekommt einen eigenen Layer für sanfte Übergänge -->
+                <div class="stage-module" id="module-kader"></div>
+                <div class="stage-module" id="module-tactics"></div>
+                <div class="stage-module" id="module-office"></div>
+                <div class="stage-module" id="module-youth"></div>
+                <div class="stage-module" id="module-media"></div>
+            </main>
 
             <aside id="tools-sidebar">
                 <div class="nav-group-title">NEURAL ADVISOR</div>
@@ -67,7 +75,7 @@
                 </div>
                 
                 <div class="tool-panel">
-                    <button class="mic-trigger" id="mic-btn" onclick="toggleMic()">
+                    <button class="mic-trigger" id="mic-btn">
                         <i class="fa-solid fa-microphone"></i> SPRACHEINGABE
                     </button>
                     <div style="margin-top:20px; border-top:1px solid #333; padding-top:10px;">
@@ -84,10 +92,10 @@
         </div>
     </div>
 
+    <!-- === MODALS === -->
     <div id="modal-bio" class="modal-backdrop hidden">
-        <div class="modal-panel" style="width: 800px;">
-            <button class="modal-close" onclick="closeModals()">×</button>
-            <div id="bio-content"></div>
+        <div class="modal-panel" id="bio-content-wrapper" style="width: 800px;">
+            <!-- Inhalt wird dynamisch geladen -->
         </div>
     </div>
 
@@ -95,15 +103,15 @@
         <div class="modal-panel" style="width: 95%; height: 95%; background:#000;">
             <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                 <h3 style="color:#00f3ff; font-family:'Orbitron'">VIDEO ANALYSE</h3>
-                <button class="modal-close" onclick="closeModals()">×</button>
+                <button class="modal-close" data-modal-id="modal-video">×</button>
             </div>
             <div style="position:relative; height:80%; display:flex; justify-content:center; background:#111; overflow:hidden;">
                 <video id="video-player" controls style="max-height:100%; max-width:100%;"></video>
                 <canvas id="video-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; cursor:crosshair;"></canvas>
             </div>
             <div style="margin-top:10px; display:flex; gap:20px; align-items:center;">
-                <button class="btn-main" style="width:auto; padding: 5px 15px;" onclick="document.getElementById('vid-up').click()">VIDEO LADEN</button>
-                <input type="file" id="vid-up" hidden accept="video/*" onchange="loadVideo(this)">
+                <button class="btn-main" id="btn-load-video" style="width:auto; padding: 5px 15px;">VIDEO LADEN</button>
+                <input type="file" id="vid-up" hidden accept="video/*">
                 <small style="color:#666;">Zeichnen aktiv: Linke Maustaste</small>
             </div>
         </div>
@@ -115,8 +123,8 @@
             <label style="font-size:12px; color:#888;">API KEY (OpenAI / Ollama)</label>
             <input type="password" id="api-key" class="auth-input" style="text-align:left; margin-top:5px;" placeholder="sk-...">
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn-main" onclick="saveSettings()">SPEICHERN</button>
-                <button class="btn-main" style="background:#333; color:#fff;" onclick="closeModals()">ABBRUCH</button>
+                <button class="btn-main" id="btn-save-settings">SPEICHERN</button>
+                <button class="btn-main modal-close" data-modal-id="modal-settings" style="background:#333; color:#fff;">ABBRUCH</button>
             </div>
         </div>
     </div>
