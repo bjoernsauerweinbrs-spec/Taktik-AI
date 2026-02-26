@@ -4,7 +4,7 @@
     --neon-gold: #d4af37;
     --border: #1a1a1d;
 }
-
+ 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: var(--bg-deep); color: #fff; font-family: 'Rajdhani', sans-serif; overflow: hidden; }
 
