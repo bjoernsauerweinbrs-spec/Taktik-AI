@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TONI 2.0 | NEURAL PRESS AGENCY</title>
-    
+    <title>TONI 2.0 | NEURAL CLUB ENGINE</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,91 +13,52 @@
     <div id="auth-layer">
         <div class="login-terminal">
             <div class="luxury-logo" style="font-size: 40px; margin-bottom: 20px;">TONI 2.0</div>
-            <p style="font-family: var(--font-ui); letter-spacing: 2px; color: #444;">AGENCY ACCESS REQUIRED</p>
-            <input type="password" id="passkey" class="auth-input" placeholder="BIOMETRIC CODE" autocomplete="off">
-            <button class="btn-main" onclick="bootSystem()">INITIALISIEREN</button>
+            <p style="font-family: var(--font-ui); color: #444;">AGENCY ACCESS</p>
+            <input type="password" id="passkey" class="auth-input" placeholder="ACCESS CODE" autocomplete="off">
+            <button class="btn-main" onclick="bootSystem()" style="margin-top:20px;">INITIALISIEREN</button>
         </div>
     </div>
 
     <div id="app-interface" class="hidden">
-        
         <header id="top-bar">
-            <div class="app-brand">
-                <span class="luxury-logo">TONI 2.0</span> 
-                <span id="active-mod-name" style="color:var(--neon-cyan); margin-left:15px; font-family:var(--font-ui); font-size:10px; letter-spacing: 2px;">// COMMAND CENTER</span>
-            </div>
-            
+            <div class="app-brand"><span class="luxury-logo">TONI 2.0</span></div>
             <div id="clock-display">00:00:00</div>
-
             <div style="display:flex; gap:25px; align-items:center;">
-                <div style="font-family: var(--font-ui); color: var(--neon-gold); font-size: 14px;">
-                    <i class="fa-solid fa-vault"></i> <span id="budget-display">0 €</span>
-                </div>
-                <button onclick="toggleSettings()" style="background:none; border:none; color:#444; cursor:pointer; font-size:18px;">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
+                <div style="font-family: var(--font-ui); color: var(--neon-gold); font-size: 14px;"><i class="fa-solid fa-vault"></i> <span id="budget-display">0 €</span></div>
+                <button onclick="toggleSettings()" style="color:#444;"><i class="fa-solid fa-gear"></i></button>
             </div>
         </header>
 
-        <div style="display:flex; height: calc(100vh - 70px);">
-            
+        <div style="display:flex; height: calc(100vh - 60px);">
             <nav class="nav-sidebar">
                 <div class="nav-group-title">COMMAND</div>
                 <button class="nav-item active" onclick="loadModule('tactics')"><i class="fa-solid fa-compass-drafting"></i> TACTICAL CO-PILOT</button>
                 <button class="nav-item" onclick="loadModule('manager')"><i class="fa-solid fa-chart-line"></i> FINANCIAL ENGINE</button>
-                
                 <div class="nav-group-title">INFRASTRUCTURE</div>
                 <button class="nav-item" onclick="loadModule('nlz')"><i class="fa-solid fa-address-card"></i> ACADEMY HUB (NLZ)</button>
                 <button class="nav-item" onclick="loadModule('press')"><i class="fa-solid fa-newspaper"></i> PRESS BUREAU</button>
-                <button class="nav-item" onclick="loadModule('video')"><i class="fa-solid fa-clapperboard"></i> BROADCAST LAB</button>
             </nav>
 
-            <main id="stage-content" style="flex:1; overflow:hidden;">
-                </main>
+            <main id="stage-content" style="flex:1; overflow:hidden;"></main>
 
-            <aside id="tools-sidebar" style="width:300px; border-left:1px solid #222; display:flex; flex-direction:column; background: #050505;">
-                <div class="nav-group-title">NEURAL ADVISOR</div>
-                <div id="ai-log" style="flex:1; padding:20px; font-size:12px; color:#666; overflow-y:auto; font-family: var(--font-main);">
-                    <div class="ai-message">Press Bureau online. Erwarte Redaktions-Briefing...</div>
+            <aside id="tools-sidebar">
+                <div class="nav-group-title">AI REPORTER // LIVE-DESK</div>
+                <div id="ai-log" style="flex:1; padding:20px; font-size:13px; color:#aaa; overflow-y:auto; line-height: 1.6;">
+                    <div class="ai-message">System online. <br><br>Klicken Sie unten auf "Briefing starten", um die Recherche für die neue Stadionzeitung zu beginnen.</div>
                 </div>
-                
                 <div style="padding:20px; border-top:1px solid #222; background:#080808;">
-                    <button class="mic-trigger" id="mic-btn" onclick="toggleMic()" style="width:100%; padding:12px; background:transparent; border:1px solid #333; color:#fff; cursor:pointer; font-family: var(--font-ui); font-size: 10px;">
-                        <i class="fa-solid fa-microphone"></i> KI-INTERVIEW STARTEN
-                    </button>
+                    <div id="interview-controls" class="hidden">
+                        <input type="text" id="ai-chat-input" class="auth-input" style="text-align:left; font-size:12px; margin-bottom:10px; padding:10px;" placeholder="Antwort eingeben...">
+                        <button class="btn-main" onclick="processInterviewStep()" style="font-size:10px; padding:10px;">SENDEN</button>
+                    </div>
+                    <button id="btn-start-briefing" class="btn-main" onclick="startAIBriefing()"><i class="fa-solid fa-play"></i> BRIEFING STARTEN</button>
                 </div>
             </aside>
         </div>
     </div>
 
-    <div id="modal-bio" class="modal-overlay hidden">
-        <div class="modal-window" style="width: 900px; max-height: 90vh; overflow-y: auto;">
-            <div id="bio-content-inner"></div>
-        </div>
-    </div>
-
-    <div id="modal-ai-editor" class="modal-overlay hidden">
-        <div class="modal-window" style="width: 600px; padding:40px;">
-            <h2 class="luxury-logo" style="font-size: 24px; margin-bottom: 20px;">AI NEWS DESK</h2>
-            <div id="ai-editor-content">
-                <textarea id="ai-prompt" class="auth-input" style="text-align:left; height:150px;" placeholder="Beschreibe die Schlagzeile oder das Interview-Thema..."></textarea>
-                <button class="btn-main" onclick="generateNewsContent()">TEXT GENERIEREN</button>
-            </div>
-            <button class="btn-main" style="margin-top:10px; border-color:#333; color:#666;" onclick="toggleModal('modal-ai-editor', false)">ABBRECHEN</button>
-        </div>
-    </div>
-
-    <div id="modal-settings" class="modal-overlay hidden">
-        <div class="modal-window" style="width: 450px; padding:30px;">
-            <h3 style="font-family:var(--font-ui); margin-bottom:20px;">SYSTEM SETTINGS</h3>
-            <div style="margin-bottom:15px;">
-                <label style="font-size:10px; color:#666;">NEURAL API KEY</label>
-                <input type="password" id="api-key" class="auth-input" style="text-align:left; padding:10px; margin-top:5px;">
-            </div>
-            <button class="btn-main" onclick="saveSettings()">CORE UPDATE</button>
-            <button class="btn-main" style="margin-top:10px; border-color:#444; color:#666;" onclick="toggleSettings()">SCHLIESSEN</button>
-        </div>
-    </div>
+    <div id="modal-bio" class="modal-overlay hidden"><div class="modal-window" style="width: 900px; max-height: 90vh;"><div id="bio-content-inner"></div></div></div>
+    <div id="modal-settings" class="modal-overlay hidden"><div class="modal-window" style="width: 400px; padding:30px;"><button class="btn-main" onclick="toggleModal('modal-settings', false)">SCHLIESSEN</button></div></div>
 
     <script src="script.js"></script>
 </body>
