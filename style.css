@@ -1,43 +1,62 @@
+/* TONI 2.0 | ELITE UI V36.0 */
 :root {
     --bg-deep: #020204;
     --neon-cyan: #00f3ff;
     --neon-gold: #d4af37;
     --border: #1a1a1d;
+    --glass: rgba(255, 255, 255, 0.03);
+    --font-ui: 'Orbitron', sans-serif;
+    --font-mag: 'Playfair Display', serif;
 }
- 
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: var(--bg-deep); color: #fff; font-family: 'Rajdhani', sans-serif; overflow: hidden; }
+body { background: var(--bg-deep); color: #fff; font-family: 'Rajdhani', sans-serif; overflow: hidden; height: 100vh; }
 
-/* AUTH / LOGIN PAGE */
-.auth-body { display: flex; align-items: center; justify-content: center; height: 100vh; }
-.setup-container { width: 450px; padding: 40px; background: #000; border: 1px solid var(--border); }
-.config-section { margin-bottom: 20px; border-bottom: 1px solid #111; padding-bottom: 20px; }
-.config-header { font-family: 'Orbitron'; font-size: 10px; color: var(--neon-cyan); margin-bottom: 10px; }
+/* AUTH PAGE STYLE */
+.auth-body { display: flex; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle, #0a0a0c 0%, #000 100%); }
+.setup-container { width: 500px; padding: 40px; background: #000; border: 1px solid var(--border); box-shadow: 0 0 80px rgba(0, 243, 255, 0.05); }
+.config-header { font-family: var(--font-ui); font-size: 10px; color: var(--neon-cyan); letter-spacing: 2px; margin-bottom: 10px; }
+.help-text { font-size: 11px; color: #555; line-height: 1.4; margin-bottom: 15px; }
 
-/* DASHBOARD HUD */
+/* DASHBOARD LAYOUT */
 #top-bar { height: 60px; background: #000; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
 .main-layout { display: flex; height: calc(100vh - 60px); }
 
-/* SIDEBAR */
-.nav-sidebar { width: 240px; background: #000; border-right: 1px solid var(--border); }
-.nav-group-title { padding: 20px 25px 5px; font-size: 9px; color: #444; font-family: 'Orbitron'; letter-spacing: 2px; }
-.nav-item { padding: 15px 25px; color: #666; font-family: 'Orbitron'; font-size: 10px; border-left: 3px solid transparent; cursor: pointer; display: block; width: 100%; text-align: left; }
+/* SIDEBAR NAVIGATION */
+.nav-sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); flex-shrink: 0; }
+.nav-group-title { padding: 25px 25px 10px; font-size: 9px; color: #333; font-family: var(--font-ui); letter-spacing: 2px; text-transform: uppercase; }
+.nav-item { padding: 15px 25px; color: #666; font-family: var(--font-ui); font-size: 10px; border-left: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 15px; width: 100%; text-align: left; transition: 0.3s; }
 .nav-item.active { color: #fff; background: rgba(0, 243, 255, 0.05); border-left-color: var(--neon-cyan); }
 
-/* MAGAZINE VIEWPORT */
-#stage-content { flex: 1; background: #0a0a0c; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 40px; }
-.magazine-page { background: #fff; width: 850px; min-height: 600px; display: grid; grid-template-columns: 1fr 1fr; color: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.5); margin-bottom: 30px; }
-.page-half { padding: 40px; border-right: 1px solid #eee; }
-.mag-headline { font-family: 'Playfair Display'; font-size: 32px; font-weight: 900; border-bottom: 4px solid #000; margin-bottom: 15px; }
+/* NEWSPAPER WORKSPACE (PROFESSIONAL SCALING) */
+#stage-content { flex: 1; background: #0a0a0c; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 60px 40px; scroll-behavior: smooth; }
+.magazine-page { 
+    background: #fff; width: 297mm; min-height: 210mm; display: grid; grid-template-columns: 1fr 1fr; 
+    color: #000; box-shadow: 0 40px 100px rgba(0,0,0,0.8); margin-bottom: 60px; flex-shrink: 0;
+    transform: scale(0.65); transform-origin: top center; /* Ermöglicht Ansicht ohne Scroll-Wahnsinn */
+}
+.page-half { padding: 15mm; border-right: 1px solid #eee; display: flex; flex-direction: column; position: relative; }
+.mag-headline { font-family: var(--font-mag); font-size: 52px; font-weight: 900; border-bottom: 8px solid #000; padding-bottom: 10px; margin-bottom: 20px; line-height: 0.95; }
+.mag-article { font-family: var(--font-mag); font-size: 15px; line-height: 1.6; column-count: 2; column-gap: 25px; text-align: justify; }
 
-/* TOOLS SIDEBAR */
-#tools-sidebar { width: 320px; background: #000; border-left: 1px solid var(--border); display: flex; flex-direction: column; }
-#ai-log { flex: 1; padding: 20px; overflow-y: auto; font-size: 13px; color: #aaa; }
-.ai-bubble { margin-bottom: 15px; padding: 12px; border-left: 2px solid var(--neon-cyan); background: rgba(255,255,255,0.02); }
+/* AI REPORTER */
+#tools-sidebar { width: 340px; background: #000; border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+#ai-log { flex: 1; padding: 25px; overflow-y: auto; font-size: 13px; color: #888; line-height: 1.7; }
+.ai-bubble { margin-bottom: 15px; padding: 15px; border-left: 3px solid var(--neon-cyan); background: var(--glass); }
 
-/* UI ELEMENTS */
+/* BUTTONS & INPUTS */
 .auth-input { width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 10px; font-family: 'Rajdhani'; }
-.btn-main { width: 100%; padding: 12px; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); font-family: 'Orbitron'; font-size: 10px; cursor: pointer; background: transparent; }
-.live-btn { width: 100%; padding: 12px; background: #ff003c; color: #fff; border: none; font-family: 'Orbitron'; font-size: 10px; margin-bottom: 10px; cursor: pointer; }
-.luxury-logo { font-family: 'Orbitron'; font-weight: 900; background: linear-gradient(to right, #bf953f, #fcf6ba); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.btn-main { width: 100%; padding: 14px; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); font-family: var(--font-ui); font-size: 10px; cursor: pointer; background: transparent; letter-spacing: 2px; transition: 0.3s; }
+.btn-main:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 20px var(--neon-cyan); }
+.live-btn { width: 100%; padding: 12px; background: #ff003c; color: #fff; border: none; font-family: var(--font-ui); font-size: 10px; margin-bottom: 10px; cursor: pointer; border-radius: 4px; }
+.live-btn.active { background: #0aff60; color: #000; box-shadow: 0 0 15px #0aff60; }
+
+.luxury-logo { font-family: var(--font-ui); font-weight: 900; background: linear-gradient(to right, #bf953f, #fcf6ba); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .hidden { display: none !important; }
+
+@media print {
+    body { background: #fff; overflow: visible; height: auto; }
+    #top-bar, .nav-sidebar, #tools-sidebar { display: none !important; }
+    #stage-content { padding: 0; background: #fff; }
+    .magazine-page { transform: none; box-shadow: none; width: 297mm; height: 210mm; margin: 0; page-break-after: always; }
+}
