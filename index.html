@@ -2,86 +2,25 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TONI 2.0 | SYSTEM SETUP & LOGIN</title>
+    <title>TONI 2.0 | LOGIN & SETUP</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { --neon-cyan: #00f3ff; --neon-gold: #d4af37; }
-        body { margin: 0; background: #020204; color: #fff; font-family: 'Rajdhani', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow-x: hidden; }
-        
-        .setup-container { width: 500px; padding: 40px; background: #000; border: 1px solid #1a1a1d; box-shadow: 0 0 100px rgba(0, 243, 255, 0.05); }
-        .logo { font-family: 'Orbitron'; font-weight: 900; background: linear-gradient(to right, #bf953f, #fcf6ba, #bf953f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 38px; text-align: center; margin-bottom: 30px; }
-        
-        .config-section { margin-bottom: 25px; padding: 15px; border: 1px solid #111; background: #050505; }
-        .config-header { font-family: 'Orbitron'; font-size: 10px; color: var(--neon-cyan); letter-spacing: 2px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        
-        .help-text { font-size: 11px; color: #555; line-height: 1.4; margin-bottom: 10px; }
-        .help-text b { color: #888; }
-        
-        .input-field { width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #fff; font-family: 'Rajdhani'; margin-bottom: 10px; }
-        .input-field:focus { border-color: var(--neon-cyan); }
-        
-        .btn-boot { width: 100%; padding: 15px; background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); font-family: 'Orbitron'; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.4s; }
-        .btn-boot:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 20px var(--neon-cyan); }
-        
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #333; display: inline-block; }
-        .status-online { background: #0aff60; box-shadow: 0 0 10px #0aff60; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-
+<body class="auth-body">
     <div class="setup-container">
-        <div class="logo">TONI 2.0</div>
-
+        <div class="luxury-logo" style="font-size: 38px; display: block; text-align: center; margin-bottom: 30px;">TONI 2.0</div>
+        
         <div class="config-section">
-            <div class="config-header">
-                <i class="fa-solid fa-tower-broadcast"></i> LIVE-DATA INTERFACE
-            </div>
-            <div class="help-text">
-                <b>Anleitung:</b> Besuchen Sie <u>football-data.org</u>, registrieren Sie sich für den "Free Plan". Kopieren Sie den <b>API-Token</b> aus Ihrem Dashboard hierher. Damit zieht TONI echte Tabellen und Spielpläne.
-            </div>
-            <input type="password" id="api-key" class="input-field" placeholder="API KEY (X-Auth-Token)">
+            <div class="config-header">LIVE-DATA & AI SETUP</div>
+            <input type="password" id="api-key" class="auth-input" placeholder="FOOTBALL-DATA API KEY">
+            <input type="text" id="ollama-url" class="auth-input" value="http://localhost:11434" placeholder="OLLAMA URL">
         </div>
 
-        <div class="config-section">
-            <div class="config-header">
-                <i class="fa-solid fa-microchip"></i> NEURAL CORE (OLLAMA)
-            </div>
-            <div class="help-text">
-                <b>Anleitung:</b> Starten Sie Ollama lokal auf Ihrem Rechner. Stellen Sie sicher, dass der Server unter <b>localhost:11434</b> erreichbar ist. TONI nutzt dies für die intelligente Interview-Analyse.
-            </div>
-            <input type="text" id="ollama-url" class="input-field" value="http://localhost:11434" placeholder="OLLAMA URL">
-        </div>
-
-        <div style="margin-top: 30px;">
-            <input type="password" id="passcode" class="input-field" style="text-align:center; font-family:'Orbitron'; letter-spacing:5px;" placeholder="SYSTEM PASSCODE">
-            <button class="btn-boot" onclick="saveAndBoot()">SYSTEM STARTEN</button>
+        <div class="login-section">
+            <input type="password" id="passcode" class="auth-input" style="text-align:center; letter-spacing:5px;" placeholder="PASSCODE">
+            <button class="btn-main" onclick="saveAndBoot()">SYSTEM STARTEN</button>
         </div>
     </div>
-
-    <script>
-        // Vorhandene Daten laden
-        window.onload = () => {
-            document.getElementById('api-key').value = localStorage.getItem('TONI_API_KEY') || "";
-            document.getElementById('ollama-url').value = localStorage.getItem('TONI_OLLAMA_URL') || "http://localhost:11434";
-        };
-
-        function saveAndBoot() {
-            const apiKey = document.getElementById('api-key').value;
-            const ollamaUrl = document.getElementById('ollama-url').value;
-            const passcode = document.getElementById('passcode').value;
-
-            // Keys im Browser speichern
-            localStorage.setItem('TONI_API_KEY', apiKey);
-            localStorage.setItem('TONI_OLLAMA_URL', ollamaUrl);
-
-            // Simpler Passcode Check für den Moment
-            if(passcode === "2026") {
-                window.location.href = "dashboard.html";
-            } else {
-                alert("ACCESS DENIED: Ungültiger Passcode.");
-            }
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
