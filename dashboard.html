@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>TONI 2.0 | NCOS DASHBOARD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="ncos.css">
+</head>
+<body>
+
+    <div id="app-interface">
+        <header id="top-bar">
+            <div class="luxury-logo" style="font-size:20px;">TONI 2.0</div>
+            <div id="clock-display">00:00:00</div>
+            <div id="budget-display">4.500.000 €</div>
+        </header>
+
+        <div class="main-layout">
+            <nav class="nav-sidebar">
+                <div class="nav-group-title">STRATEGY</div>
+                <button class="nav-item" onclick="loadModule('tactics')"><i class="fa-solid fa-compass-drafting"></i> TACTICAL CO-PILOT</button>
+                <button class="nav-item" onclick="loadModule('kader')"><i class="fa-solid fa-shirt"></i> MANNSCHAFTSKABINE</button>
+                <button class="nav-item" onclick="loadModule('office')"><i class="fa-solid fa-chart-line"></i> OFFICE PRIME</button>
+                
+                <div class="nav-group-title">INFRASTRUCTURE</div>
+                <button class="nav-item" onclick="loadModule('nlz')"><i class="fa-solid fa-address-card"></i> ACADEMY HUB (NLZ)</button>
+                <button class="nav-item active" onclick="loadModule('press')"><i class="fa-solid fa-newspaper"></i> PRESS BUREAU</button>
+                <button class="nav-item" onclick="loadModule('video')"><i class="fa-solid fa-clapperboard"></i> BROADCAST LAB</button>
+            </nav>
+
+            <main id="stage-content"></main>
+
+            <aside id="tools-sidebar">
+                <div class="nav-group-title">NEURAL REPORTER // LIVE-DESK</div>
+                <div id="ai-log">
+                    <div class="ai-bubble toni">
+                        <small>TONI REPORTER</small><br>
+                        Guten Tag, Coach. Das Press Bureau ist bereit für die Recherche.
+                    </div>
+                </div>
+                <div class="ai-controls-box">
+                    <button id="live-voice-btn" class="live-btn" onclick="toggleVoiceAI()">
+                        <i class="fa-solid fa-microphone"></i> VOICE REPORTER MODE
+                    </button>
+                    <div id="interview-controls" class="hidden">
+                        <input type="text" id="ai-chat-input" placeholder="Antwort..." onkeypress="if(event.key==='Enter') processInterviewStep()">
+                        <button class="btn-main" onclick="processInterviewStep()">SENDEN</button>
+                    </div>
+                    <button id="btn-start-briefing" class="btn-main" onclick="startAIBriefing()">INTERVIEW STARTEN</button>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="ncos.js"></script>
+</body>
+</html>
