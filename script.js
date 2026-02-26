@@ -1,172 +1,148 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL LOGIC CORE V28.0 (INVESTIGATIVE AI REPORTER)
+   TONI 2.0 | NEURAL LOGIC CORE V29.0 (TRUE VOICE & DYNAMIC STATE)
    ========================================================================== */
 
-const STORAGE_KEY = "TONI_NCOS_V28_ELITE";
+const STORAGE_KEY = "TONI_NCOS_V29";
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang = 'de-DE';
+recognition.interimResults = false;
 
 let NCOS = {
     state: { budget: 4500000, activeModule: 'press' },
-    academy: { players: [{ id: 101, name: "Julian Weber", stats: { pac: 75, sho: 68, pas: 62, dri: 71, def: 34, phy: 60 } }] },
     press: {
-        title: "MATCHDAY: SC BORUSSIA DORTMUND", // Standardwert nach User-Input Fix
+        title: "MATCHDAY: SC BORUSSIA DORTMUND", 
         issue: "NR. 01 / FEBRUAR 2026",
         pageCount: 4,
         mainSponsor: "COCA COLA",
         editorial: "Warten auf Redaktionsschluss...",
         spotlight: "Analyse wird generiert...",
-        nextOpponent: "Bayern München", // Simuliertes Recherche-Ergebnis
+        nextOpponent: "FC Bayern München",
         tablePos: "2. Platz"
     }
 };
 
-let interviewStep = 0;
 let isVoiceActive = false;
+let interviewStep = 0;
 
-// --- BOOT ---
-function bootSystem() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if(saved) NCOS = JSON.parse(saved);
-    document.getElementById('auth-layer').classList.add('hidden');
-    document.getElementById('app-interface').classList.remove('hidden');
-    updateGlobalHUD();
-    loadModule(NCOS.state.activeModule);
-    setInterval(() => { document.getElementById('clock-display').innerText = new Date().toLocaleTimeString('de-DE'); }, 1000);
+// --- 1. SPRACHAUSGABE (TTS) ---
+function speak(text) {
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = 'de-DE';
+    msg.pitch = 1;
+    msg.rate = 1;
+    window.speechSynthesis.speak(msg);
 }
 
-// --- MODULE ROUTER ---
-function loadModule(name) {
-    const stage = document.getElementById('stage-content');
-    NCOS.state.activeModule = name;
-    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.toggle('active', btn.getAttribute('onclick').includes(name)));
-    
-    if (name === 'press') renderPressAgency(stage);
-    else stage.innerHTML = `<div style="padding:40px;"><h2>MODUL ${name.toUpperCase()}</h2></div>`;
-}
+// --- 2. SPRACHEINGABE (STT) ---
+recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    document.getElementById('ai-chat-input').value = transcript;
+    processInterviewStep();
+};
 
-// --- PRESS AGENCY (FULL RENDERER) ---
-function renderPressAgency(target) {
-    let pagesHTML = `
-        <div class="agency-workspace">
-            <div class="agency-tools">
-                <div class="tool-section">
-                    <span class="tool-label">PAGE MANAGEMENT</span>
-                    <button class="btn-agency" onclick="addPages()"><i class="fa-solid fa-plus"></i> +4 SEITEN</button>
-                    <button class="btn-agency" onclick="window.print()"><i class="fa-solid fa-print"></i> DRUCKAUFTRAG</button>
-                </div>
-                <div class="tool-section" style="margin-top:auto;">
-                    <p style="font-size:9px; color:#444;">AGENCY STATUS: ONLINE</p>
-                </div>
-            </div>
-            <div class="magazine-viewport">
-                <div class="magazine-page">
-                    <div class="page-half">
-                        <div class="luxury-logo" style="font-size: 40px; margin-bottom: 20px;">TONI 2.0</div>
-                        <h1 class="mag-headline" contenteditable="true" onblur="NCOS.press.title=this.innerText; saveData();">${NCOS.press.title}</h1>
-                        <p style="font-family:var(--font-ui); color:#888; letter-spacing:2px;">${NCOS.press.issue}</p>
-                    </div>
-                    <div class="page-half">
-                        <h2 class="mag-headline" style="font-size:24px;">REPORTER'S DESK</h2>
-                        <div class="mag-article" contenteditable="true" onblur="NCOS.press.editorial=this.innerText; saveData();">
-                            ${NCOS.press.editorial}
-                        </div>
-                    </div>
-                </div>`;
-
-    // Dynamische Zwischenseiten (8, 12...)
-    for (let i = 4; i < NCOS.press.pageCount; i += 2) {
-        pagesHTML += `
-            <div class="magazine-page">
-                <div class="page-half">
-                    <h2 class="mag-headline" style="font-size:24px;">LIVE INSIGHTS</h2>
-                    <div class="mag-article" contenteditable="true">Exklusive Einblicke aus der Kabine...</div>
-                </div>
-                <div class="page-half">
-                    <h2 class="mag-headline" style="font-size:24px;">GEGNER-CHECK</h2>
-                    <p><b>Aktueller Tabellenplatz:</b> ${NCOS.press.tablePos}</p>
-                    <p><b>Nächster Gegner:</b> ${NCOS.press.nextOpponent}</p>
-                    <div style="background:#f4f4f4; height:150px; margin-top:10px; border:1px dashed #ccc;"></div>
-                </div>
-            </div>`;
+function toggleVoiceAI() {
+    isVoiceActive = !isVoiceActive;
+    const btn = document.getElementById('live-voice-btn');
+    if (isVoiceActive) {
+        btn.classList.add('active');
+        btn.innerHTML = '<i class="fa-solid fa-ear-listen"></i> REPORTER HÖRT ZU...';
+        recognition.start();
+    } else {
+        btn.classList.remove('active');
+        btn.innerHTML = '<i class="fa-solid fa-microphone"></i> VOICE REPORTER MODE';
+        recognition.stop();
     }
-
-    // Letztes Blatt (Spotlight & Partner)
-    pagesHTML += `
-                <div class="magazine-page">
-                    <div class="page-half">
-                        <h2 class="mag-headline" style="font-size:24px;">SPOTLIGHT</h2>
-                        <div class="mag-article" contenteditable="true" onblur="NCOS.press.spotlight=this.innerText; saveData();">
-                            ${NCOS.press.spotlight}
-                        </div>
-                    </div>
-                    <div class="page-half" style="background:#fff;">
-                        <h2 class="mag-headline" style="font-size:24px; border-bottom:1px solid #000;">PARTNER</h2>
-                        <div style="text-align:center; padding:15px; border:2px solid var(--neon-gold); margin-bottom:15px;">
-                            <div class="luxury-logo" style="font-size:18px;">${NCOS.press.mainSponsor}</div>
-                            <div style="font-size:7px; margin-top:3px;">PREMIUM SPONSOR</div>
-                        </div>
-                        <div class="partner-grid">
-                            <div class="partner-box">LOGO 1</div><div class="partner-box">LOGO 2</div>
-                            <div class="partner-box">LOGO 3</div><div class="partner-box">LOGO 4</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>`;
-    target.innerHTML = pagesHTML;
 }
 
-// --- INVESTIGATIVE AI REPORTER ---
-function startAIBriefing() {
-    interviewStep = 1;
-    document.getElementById('btn-start-briefing').classList.add('hidden');
-    document.getElementById('interview-controls').classList.remove('hidden');
-    addAIMessage("TONI", "Coach, wir brauchen Schlagzeilen. Welchen <b>Verein</b> nehmen wir heute ins Visier? Ich bereite die Live-Recherche vor.");
-}
-
+// --- 3. DYNAMISCHES INTERVIEW (REPORTER PERSONA) ---
 function processInterviewStep() {
     const input = document.getElementById('ai-chat-input');
     const val = input.value; if(!val) return;
     addAIMessage("USER", val); input.value = "";
 
     setTimeout(() => {
-        if (interviewStep === 1) {
+        if (interviewStep === 0) {
             NCOS.press.title = `MATCHDAY: ${val.toUpperCase()}`;
-            addAIMessage("TONI", `Recherchiere Daten für <b>${val}</b>... Zugriff auf Fussball.de erfolgreich. Ihr seid momentan auf dem ${NCOS.press.tablePos}. <br><br>Ganz unter uns: Wie steht es um die <b>physische Verfassung</b> nach der intensiven Trainingswoche?`);
-            interviewStep = 2;
+            const reply = `Verstanden. Ich recherchiere die Daten für ${val} im Jahr 2026... Zugriff auf Fussball.de bestätigt. Ihr seid aktuell auf dem ${NCOS.press.tablePos}. Wie bewerten Sie die Moral der Truppe vor dem Topspiel?`;
+            addAIMessage("TONI", reply);
+            speak(reply);
+            interviewStep = 1;
         } 
+        else if (interviewStep === 1) {
+            NCOS.press.editorial = `Exklusiv-Interview aus dem Newsroom: Der Trainer zeigt sich zuversichtlich. Zur Moral der Mannschaft sagt er: "${val}". Das wird ein heißer Tanz!`;
+            const reply = "Das klingt nach Kampfgeist! Wer ist heute unser Hauptsponsor, den wir auf die Rückseite bringen?";
+            addAIMessage("TONI", reply);
+            speak(reply);
+            interviewStep = 2;
+        }
         else if (interviewStep === 2) {
-            addAIMessage("TONI", `Spannend. Ich notiere: <i>"${val}"</i>. Wer ist heute unser <b>'Man of the Hour'</b>? Ich brauche Daten für die Spotlight-Analyse.`);
-            interviewStep = 3;
+            NCOS.press.mainSponsor = val.toUpperCase();
+            const reply = `Eingetragen. ${val} wird prominent platziert. Das Heft ist nun im Satz. Werfen Sie einen Blick auf die Druckvorschau!`;
+            addAIMessage("TONI", reply);
+            speak(reply);
+            finalizeMagazine();
         }
-        else if (interviewStep === 3) {
-            addAIMessage("TONI", `Exzellente Wahl. Ich ziehe die Statistiken für ${val} und baue das Layout... Fertig. Werfen Sie einen Blick auf das Deckblatt.`);
-            finalizeAgencyWork();
-        }
-    }, 1200);
+        if(isVoiceActive) recognition.start(); // Hört nach Antwort wieder zu
+    }, 1000);
 }
 
-function finalizeAgencyWork() {
-    NCOS.press.editorial = "Exklusives Interview aus dem Newsroom. Wir sprachen über die aktuelle Verfassung und die Ambitionen für das kommende Spiel.";
-    NCOS.press.spotlight = "Die KI hat die Laufwege und die Effizienz analysiert. Unser Star zeigt eine aufsteigende Formkurve.";
-    saveData();
+function finalizeMagazine() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(NCOS));
     loadModule('press');
 }
 
-// --- HELPERS ---
-function toggleVoiceMode() {
-    isVoiceActive = !isVoiceActive;
-    const btn = document.getElementById('live-voice-btn');
-    btn.style.background = isVoiceActive ? "var(--path-vector)" : "var(--neon-alert)";
-    btn.innerHTML = isVoiceActive ? '<i class="fa-solid fa-ear-listen"></i> REPORTER HÖRT ZU...' : '<i class="fa-solid fa-microphone-lines"></i> LIVE REPORTER MODE';
-    if(isVoiceActive) startAIBriefing();
+// --- 4. RENDERER (FIXED STATE BINDING) ---
+function renderPressAgency(target) {
+    target.innerHTML = `
+        <div class="agency-workspace">
+            <div class="agency-tools">
+                <button class="btn-agency" onclick="addPages()"><i class="fa-solid fa-plus"></i> +4 SEITEN</button>
+                <button class="btn-agency" onclick="window.print()"><i class="fa-solid fa-print"></i> DRUCKAUFTRAG</button>
+            </div>
+            <div class="magazine-viewport">
+                <div class="magazine-page">
+                    <div class="page-half">
+                        <div class="luxury-logo" style="font-size: 30px;">TONI 2.0</div>
+                        <h1 class="mag-headline">${NCOS.press.title}</h1>
+                        <p style="font-family:var(--font-ui); color:#888;">${NCOS.press.issue}</p>
+                    </div>
+                    <div class="page-half">
+                        <h2 class="mag-headline" style="font-size:24px;">REPORTER'S DESK</h2>
+                        <div class="mag-article">${NCOS.press.editorial}</div>
+                    </div>
+                </div>
+                <div class="magazine-page">
+                    <div class="page-half">
+                        <h2 class="mag-headline" style="font-size:24px;">SPOTLIGHT</h2>
+                        <div class="mag-article">${NCOS.press.spotlight}</div>
+                    </div>
+                    <div class="page-half" style="background:#fff;">
+                        <h2 class="mag-headline" style="font-size:24px; border-bottom:1px solid #000;">OUR PARTNERS</h2>
+                        <div style="text-align:center; padding:15px; border:2px solid var(--neon-gold); margin-bottom:15px;">
+                            <div class="luxury-logo" style="font-size:18px;">${NCOS.press.mainSponsor}</div>
+                            <div style="font-size:7px; color:#000;">PREMIUM PARTNER 2026</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
+// SYSTEM FUNCTIONS
+function bootSystem() {
+    document.getElementById('auth-layer').classList.add('hidden');
+    document.getElementById('app-interface').classList.remove('hidden');
+    loadModule('press');
+}
+function loadModule(name) {
+    const stage = document.getElementById('stage-content');
+    if (name === 'press') renderPressAgency(stage);
+    else stage.innerHTML = `<div style="padding:40px;"><h2>MODUL ${name.toUpperCase()}</h2></div>`;
+}
 function addAIMessage(sender, text) {
     const log = document.getElementById('ai-log');
-    log.innerHTML += `<div class="ai-bubble ${sender==='TONI'?'toni':'user'}"><small>${sender}</small>${text}</div>`;
+    log.innerHTML += `<div class="ai-bubble ${sender==='TONI'?'toni':''}"><small>${sender}</small><br>${text}</div>`;
     log.scrollTop = log.scrollHeight;
 }
-
-function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(NCOS)); }
-function updateGlobalHUD() { document.getElementById('budget-display').innerText = NCOS.state.budget.toLocaleString() + " €"; }
 function addPages() { NCOS.press.pageCount += 4; loadModule('press'); }
