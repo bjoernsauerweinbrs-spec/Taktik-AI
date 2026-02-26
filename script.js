@@ -1,11 +1,11 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - FULL EXECUTIVE SUITE
+   TONI 2.0 | NEURAL CORE ENGINE (V16.0 ULTIMATE) - ALL SYSTEMS GO
    ========================================================================== */
 
 const SAVE_KEY = "TONI20_SYSTEM_DATA";
 
 let eliteStore = {
-    config: { passkey: "1234", version: "15.8 PRO", clubLogoUrl: "" },
+    config: { passkey: "1234", version: "16.0 ULTIMATE", clubLogoUrl: "" },
     mgmt: { 
         budget: 4850000, morale: 88, activeModule: 'kader',
         opponentIntel: { name: "", strengths: "", topPlayers: [], tacticalRisk: "" }
@@ -52,8 +52,27 @@ let eliteStore = {
     },
 
     players: [
-        { id: 1, name: "NEUER", pos: "TW", type: 'pro', imgUrl: "", stats: { pac: 50, sho: 40, pas: 91, dri: 60, def: 90, phy: 85 }, bio: { weight: 92.4, kfa: 11.2, muscle: 48.5, water: 62.1 }, sensors: { heart: 48, vo2: 60 }, rating: 89 },
-        { id: 10, name: "KANE", pos: "ST", type: 'pro', imgUrl: "", stats: { pac: 69, sho: 93, pas: 84, dri: 83, def: 48, phy: 82 }, bio: { weight: 86.1, kfa: 12.5, muscle: 47.2, water: 59.8 }, sensors: { heart: 46, vo2: 58 }, rating: 90 }
+        { 
+            id: 1, name: "NEUER", pos: "TW", type: 'pro', imgUrl: "", 
+            stats: { pac: 50, sho: 40, pas: 91, dri: 60, def: 90, phy: 85 }, 
+            bio: { weight: 92.4, kfa: 11.2, muscle: 48.5, water: 62.1 }, 
+            sensors: { heart: 48, vo2: 60 }, rating: 89 
+        },
+        { 
+            id: 10, name: "KANE", pos: "ST", type: 'pro', imgUrl: "", 
+            stats: { pac: 69, sho: 93, pas: 84, dri: 83, def: 48, phy: 82 }, 
+            bio: { weight: 86.1, kfa: 12.5, muscle: 47.2, water: 59.8 }, 
+            sensors: { heart: 46, vo2: 58 }, rating: 90 
+        },
+        // WICHTIG: Der Jugendspieler für das Album
+        { 
+            id: 101, name: "LEON", pos: "ST", type: 'youth', imgUrl: "",
+            stats: { pac: 70, sho: 60, pas: 65, dri: 75, def: 40, phy: 50 },
+            bio: { weight: 34.5, kfa: 9.0, muscle: 14.8, water: 66.0 },
+            sensors: { heart: 65, vo2: 52 },
+            stickers: [true, true, false, false, false, false, false, false, false, false, false, false],
+            rating: 65 
+        }
     ]
 };
 
@@ -103,7 +122,7 @@ function switchModule(modId) {
 
 // --- KADER & BIO-LAB ---
 function renderKader(target) {
-    target.innerHTML = `<div class="kader-grid fade-in">${eliteStore.players.map(p => `
+    target.innerHTML = `<div class="kader-grid fade-in">${eliteStore.players.filter(p => p.type === 'pro').map(p => `
         <div class="fifa-card" onclick="openBioLab(${p.id})">
             <div class="card-inner">
                 <div class="card-rating-box"><span class="val">${p.rating}</span></div>
@@ -233,6 +252,7 @@ function applyTacticalShift() {
 
 function initDragAndDrop() {
     const pitch = document.getElementById('tactical-pitch');
+    if (!pitch) return;
     const markers = document.querySelectorAll('.player-marker');
     let activeMarker = null;
 
@@ -259,9 +279,34 @@ function updateTacticalPosition(id, t, l) {
     if (p) { p.t = t; p.l = l; }
 }
 
-// --- JUNIOR HUB ---
+// --- JUNIOR HERO HUB (WIEDERHERGESTELLT) ---
 function renderJuniorHub(target) {
-    target.innerHTML = `<div class="office-panel fade-in"><h3>JUNIOR HERO HUB</h3><p>Sticker-System aktiv.</p></div>`;
+    const kid = eliteStore.players.find(p => p.type === 'youth');
+    if (!kid) { target.innerHTML = "Kein Jugendspieler gefunden."; return; }
+    
+    target.innerHTML = `
+        <div class="office-panel fade-in">
+            <h3>PANINI ALBUM // ${kid.name}</h3>
+            <div class="sticker-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:20px;">
+                ${kid.stickers.map((s, i) => `
+                    <div class="sticker ${s ? 'unlocked' : ''}" 
+                         style="height:60px; background:${s ? 'var(--neon-gold)' : '#333'}; border:1px solid #555; display:flex; align-items:center; justify-content:center; cursor:pointer;"
+                         onclick="toggleSticker(${i})">
+                        ${s ? '★' : i+1}
+                    </div>
+                `).join('')}
+            </div>
+            <p style="margin-top:15px; font-size:10px;">* Klicke auf ein Feld, um Sticker einzukleben.</p>
+        </div>`;
+}
+
+function toggleSticker(i) {
+    const kid = eliteStore.players.find(p => p.type === 'youth');
+    if (kid) {
+        kid.stickers[i] = !kid.stickers[i];
+        saveToDisk();
+        renderJuniorHub(document.getElementById('module-content'));
+    }
 }
 
 // --- HELFER ---
