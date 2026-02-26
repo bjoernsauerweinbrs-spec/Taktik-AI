@@ -19,7 +19,7 @@
             <p>NEURAL CLUB MANAGEMENT</p>
             
             <input type="password" id="passkey" class="auth-input" placeholder="ACCESS CODE" autocomplete="off">
-            <button class="btn-main" onclick="bootSystem()">INITIALISIEREN</button>
+            <button type="button" class="btn-main" onclick="bootSystem()">INITIALISIEREN</button>
         </div>
     </div>
 
@@ -48,13 +48,13 @@
             
             <nav id="nav-sidebar">
                 <div class="nav-group-title">MANAGEMENT</div>
-                <button class="nav-item" onclick="loadModule('kader')"><i class="fa-solid fa-users"></i> PROFI KADER</button>
-                <button class="nav-item" onclick="loadModule('tactics')"><i class="fa-solid fa-chess-board"></i> TAKTIK BOARD</button>
-                <button class="nav-item" onclick="loadModule('office')"><i class="fa-solid fa-briefcase"></i> OFFICE PRIME</button>
+                <button class="nav-item" id="nav-kader" onclick="loadModule('kader')"><i class="fa-solid fa-users"></i> PROFI KADER</button>
+                <button class="nav-item" id="nav-tactics" onclick="loadModule('tactics')"><i class="fa-solid fa-chess-board"></i> TAKTIK BOARD</button>
+                <button class="nav-item" id="nav-office" onclick="loadModule('office')"><i class="fa-solid fa-briefcase"></i> OFFICE PRIME</button>
                 
                 <div class="nav-group-title">AKADEMIE & MEDIA</div>
-                <button class="nav-item" onclick="loadModule('youth')"><i class="fa-solid fa-graduation-cap"></i> JUGEND ZENTRUM</button>
-                <button class="nav-item" onclick="loadModule('media')"><i class="fa-solid fa-newspaper"></i> ZEITUNG & VIDEO</button>
+                <button class="nav-item" id="nav-youth" onclick="loadModule('youth')"><i class="fa-solid fa-graduation-cap"></i> JUGEND ZENTRUM</button>
+                <button class="nav-item" id="nav-media" onclick="loadModule('media')"><i class="fa-solid fa-newspaper"></i> ZEITUNG & VIDEO</button>
             </nav>
 
             <main id="stage-content">
@@ -81,7 +81,6 @@
                     </div>
                 </div>
             </aside>
-
         </div>
     </div>
 
@@ -93,17 +92,17 @@
     </div>
 
     <div id="modal-video" class="modal-backdrop hidden">
-        <div class="modal-panel" style="width: 90%; height: 90%; background:#000;">
+        <div class="modal-panel" style="width: 95%; height: 95%; background:#000;">
             <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                 <h3 style="color:#00f3ff; font-family:'Orbitron'">VIDEO ANALYSE</h3>
                 <button class="modal-close" onclick="closeModals()">×</button>
             </div>
-            <div style="position:relative; height:80%; display:flex; justify-content:center; background:#111;">
+            <div style="position:relative; height:80%; display:flex; justify-content:center; background:#111; overflow:hidden;">
                 <video id="video-player" controls style="max-height:100%; max-width:100%;"></video>
                 <canvas id="video-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; cursor:crosshair;"></canvas>
             </div>
             <div style="margin-top:10px; display:flex; gap:20px; align-items:center;">
-                <button class="btn-main" style="width:auto;" onclick="document.getElementById('vid-up').click()">LADEN</button>
+                <button class="btn-main" style="width:auto; padding: 5px 15px;" onclick="document.getElementById('vid-up').click()">VIDEO LADEN</button>
                 <input type="file" id="vid-up" hidden accept="video/*" onchange="loadVideo(this)">
                 <small style="color:#666;">Zeichnen aktiv: Linke Maustaste</small>
             </div>
