@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TONI 3.0 | NEURAL LOGIC CORE V3.1 (STABLE RENDER FIX)
+   TONI 3.0 | NEURAL LOGIC CORE V3.2 (FINAL STABILITY FIX)
    ========================================================================== */
 
 // --- 1. STATE & PERSISTENCE ENGINE ---
@@ -13,9 +13,7 @@ class NeuralCore {
     _load() {
         try {
             const savedData = localStorage.getItem(this.storageKey);
-            if (savedData) {
-                return JSON.parse(savedData);
-            }
+            if (savedData) { return JSON.parse(savedData); }
         } catch (e) {
             console.error("Fehler beim Laden der Daten aus dem LocalStorage:", e);
         }
@@ -62,34 +60,14 @@ class NeuralCore {
     addObserver(observerFn) { this.observers.push(observerFn); }
     notifyObservers() { this.observers.forEach(observer => observer(this.state)); }
 
-    addFinanceEntry(desc, val, type) {
-        this.commit(state => {
-            state.finance.unshift({ id: Date.now(), desc, val, type });
-        });
-    }
-
-    updatePlayerPosition(playerId, newX, newY) {
-        this.commit(state => {
-            const formation = state.tactics[state.activeFormation];
-            const player = formation.find(p => p.id === playerId);
-            if (player) {
-                player.x = newX;
-                player.y = newY;
-            }
-        });
-    }
-
-    saveApiKey(key) {
-        this.commit(state => {
-            state.config.apiKey = key;
-        });
-    }
+    addFinanceEntry(desc, val, type) { this.commit(state => { state.finance.unshift({ id: Date.now(), desc, val, type }); }); }
+    updatePlayerPosition(playerId, newX, newY) { this.commit(state => { const p = state.tactics[state.activeFormation].find(p => p.id === playerId); if (p) { p.x = newX; p.y = newY; } }); }
+    saveApiKey(key) { this.commit(state => { state.config.apiKey = key; }); }
+    resetTactics() { this.commit(state => { state.tactics[state.activeFormation] = this._getInitialState().tactics[state.activeFormation]; }); }
 }
 
-// --- 2. GLOBAL APP INSTANCE ---
 const ToniDB = new NeuralCore("TONI_V3_LUXURY_DATA");
 
-// --- 3. INITIALIZATION & BOOT SEQUENCE ---
 document.addEventListener('DOMContentLoaded', () => {
     if (sessionStorage.getItem('TONI_AUTH') === 'true') {
         bootSystem();
@@ -101,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function bootSystem(isInitialBoot = false) {
     const authLayer = document.getElementById('auth-layer');
     const appInterface = document.getElementById('app-interface');
-
     if (isInitialBoot) {
         const btn = document.getElementById('btn-boot');
         btn.innerText = "LADE MODULE...";
@@ -123,58 +100,36 @@ function bootSystem(isInitialBoot = false) {
 function finishInitialization() {
     initEventListeners();
     ToniDB.addObserver(renderUI);
-    renderUI(ToniDB.state); // Führt jetzt den ersten Render aus, BEVOR der Fehler auftreten kann.
+    renderUI(ToniDB.state);
     navigateTo('tactics');
     setInterval(updateClock, 1000);
 }
 
-// --- 4. EVENT LISTENERS ---
 function initEventListeners() {
-    // Navigation
-    document.querySelectorAll('.nav-item').forEach(btn => {
-        btn.addEventListener('click', () => navigateTo(btn.dataset.module));
+    document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => navigateTo(btn.dataset.module)));
+    document.getElementById('btn-toggle-settings').addEventListener('click', () => {
+        document.getElementById('api-key').value = ToniDB.state.config.apiKey;
+        toggleModal('modal-settings', true);
     });
-
-    // Modals (globale Steuerung)
-    document.getElementById('btn-toggle-settings').addEventListener('click', () => toggleModal('modal-settings', true));
-    document.querySelectorAll('.modal-close').forEach(btn => {
-        btn.addEventListener('click', () => toggleModal(btn.dataset.modalId, false));
-    });
-
-    // Settings Modal
+    document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', () => toggleModal(btn.dataset.modalId, false)));
     document.getElementById('btn-save-settings').addEventListener('click', () => {
-        const apiKey = document.getElementById('api-key').value;
-        ToniDB.saveApiKey(apiKey);
+        ToniDB.saveApiKey(document.getElementById('api-key').value);
         toggleModal('modal-settings', false);
     });
-    
-    // AI Tools
     document.getElementById('mic-btn').addEventListener('click', (e) => e.currentTarget.classList.toggle('active'));
-
-    // Video Modal (kann hier bleiben, da das Modal immer im DOM ist)
     document.getElementById('btn-load-video').addEventListener('click', () => document.getElementById('vid-up').click());
     document.getElementById('vid-up').addEventListener('change', (e) => loadVideo(e.target));
 }
 
-// --- 5. UI & NAVIGATION ---
 function navigateTo(moduleName) {
     document.querySelectorAll('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.module === moduleName));
     document.getElementById('active-mod-name').innerText = `// ${moduleName.toUpperCase()}`;
     document.querySelectorAll('.stage-module').forEach(module => module.classList.toggle('active', module.id === `module-${moduleName}`));
 }
 
-function updateClock() {
-    document.getElementById('clock').innerText = new Date().toLocaleTimeString('de-DE').slice(0, 5);
-}
+function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString('de-DE').slice(0, 5); }
+function toggleModal(modalId, show) { const modal = document.getElementById(modalId); if (modal) { modal.classList.toggle('hidden',!show); } }
 
-function toggleModal(modalId, show) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.toggle('hidden',!show);
-    }
-}
-
-// --- 6. CENTRAL RENDER FUNCTION ---
 function renderUI(state) {
     updateBudget(state.finance);
     renderKader(state.players);
@@ -184,34 +139,20 @@ function renderUI(state) {
     renderYouth();
 }
 
-// --- 7. MODULE RENDERERS ---
 function updateBudget(financeData) {
     const el = document.getElementById('budget-display');
     const newTotal = financeData.reduce((acc, f) => acc + (f.type === 'in'? f.val : -f.val), 0);
-    const oldTotal = parseFloat(el.dataset.value || 0);
-
-    if (newTotal!== oldTotal) {
-        el.innerText = newTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-        el.dataset.value = newTotal;
-        el.style.color = newTotal > oldTotal? 'var(--neon-green)' : 'var(--neon-alert)';
-        setTimeout(() => el.style.color = 'var(--neon-green)', 1000);
-    }
+    el.innerText = newTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
 }
 
 function renderKader(players) {
     const target = document.getElementById('module-kader');
     target.innerHTML = `<div class="roster-grid"></div>`;
     const grid = target.querySelector('.roster-grid');
-
     players.forEach(p => {
         const card = document.createElement('div');
         card.className = 'player-card';
-        card.innerHTML = `
-            <div class="pc-rating">${p.rating}</div>
-            <div class="pc-pos">${p.pos}</div>
-            <div class="pc-face"><i class="fa-solid fa-${p.img}"></i></div>
-            <div class="pc-name">${p.name}</div>
-        `;
+        card.innerHTML = `<div class="pc-rating">${p.rating}</div><div class="pc-pos">${p.pos}</div><div class="pc-face"><i class="fa-solid fa-${p.img}"></i></div><div class="pc-name">${p.name}</div>`;
         card.addEventListener('click', () => openBio(p.id));
         grid.appendChild(card);
     });
@@ -219,6 +160,7 @@ function renderKader(players) {
 
 function renderTactics(formation) {
     const target = document.getElementById('module-tactics');
+    // ** KORREKTUR: Der Reset-Button wird hier im HTML hinzugefügt. **
     target.innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
              <h3 style="font-family:'Orbitron'">TAKTIK BOARD PRO</h3>
@@ -229,21 +171,17 @@ function renderTactics(formation) {
                 <div class="pitch-line line-mid"></div><div class="pitch-border circle-mid"></div>
                 <div class="pitch-border box-16-top"></div><div class="pitch-border box-5-top"></div><div class="goal-net-top"></div>
                 <div class="pitch-border box-16-bot"></div><div class="pitch-border box-5-bot"></div><div class="goal-net-bot"></div>
-                ${formation.map(p => `
-                    <div class="tactic-player" id="pl-${p.id}" style="left:${p.x}%; top:${p.y}%;" data-id="${p.id}">${p.label}</div>
-                `).join('')}
+                ${formation.map(p => `<div class="tactic-player" id="pl-${p.id}" style="left:${p.x}%; top:${p.y}%;" data-id="${p.id}">${p.label}</div>`).join('')}
             </div>
         </div>`;
     
-    target.querySelectorAll('.tactic-player').forEach(p => {
-        p.addEventListener('mousedown', (e) => dragStart(e, parseInt(p.dataset.id)));
-    });
-    // KORREKTUR: Der Event-Listener für den Reset-Button wird hier gebunden.
-    target.querySelector('#btn-reset-tactics').addEventListener('click', () => renderTactics(ToniDB._getInitialState().tactics[ToniDB.state.activeFormation]));
+    target.querySelectorAll('.tactic-player').forEach(p => p.addEventListener('mousedown', (e) => dragStart(e, parseInt(p.dataset.id))));
+    target.querySelector('#btn-reset-tactics').addEventListener('click', () => ToniDB.resetTactics());
 }
 
 function renderOffice(financeData) {
     const target = document.getElementById('module-office');
+    target.innerHTML = `... (Der lange HTML-String für Office bleibt gleich)...`; // Gekürzt für Lesbarkeit
     target.innerHTML = `
         <div style="display:grid; grid-template-columns: 1fr 300px; gap:20px;">
             <div>
@@ -251,12 +189,7 @@ function renderOffice(financeData) {
                 <table class="finance-table">
                     <thead><tr><th>BESCHREIBUNG</th><th>TYP</th><th>BETRAG</th></tr></thead>
                     <tbody>
-                        ${financeData.map(f => `
-                            <tr>
-                                <td>${f.desc}</td>
-                                <td style="color:${f.type === 'in'? '#0aff60' : '#ff003c'}">${f.type.toUpperCase()}</td>
-                                <td>${f.val.toLocaleString('de-DE')} €</td>
-                            </tr>`).join('')}
+                        ${financeData.map(f => `<tr><td>${f.desc}</td><td style="color:${f.type === 'in'? '#0aff60' : '#ff003c'}">${f.type.toUpperCase()}</td><td>${f.val.toLocaleString('de-DE')} €</td></tr>`).join('')}
                     </tbody>
                 </table>
             </div>
@@ -270,8 +203,6 @@ function renderOffice(financeData) {
                 </div>
             </div>
         </div>`;
-        
-    // KORREKTUR: Die Event-Listener werden hier gebunden, nachdem die Buttons existieren.
     document.getElementById('btn-add-in').addEventListener('click', () => addFinance('in'));
     document.getElementById('btn-add-out').addEventListener('click', () => addFinance('out'));
 }
@@ -282,48 +213,36 @@ function renderYouth() {
 
 function renderMedia() {
     const target = document.getElementById('module-media');
+    target.innerHTML = `... (Der lange HTML-String für Media bleibt gleich)...`; // Gekürzt für Lesbarkeit
     target.innerHTML = `
         <div class="newspaper-workspace">
             <div class="newspaper-sheet">
-                <div class="news-header">
-                    <h1 style="font-size:60px; margin:0;">TONI SPORT</h1>
-                    <p contenteditable="true">Donnerstag, 26. Februar 2026 | Nr. 102</p>
-                </div>
+                <div class="news-header"><h1 style="font-size:60px; margin:0;">TONI SPORT</h1><p contenteditable="true">Donnerstag, 26. Februar 2026 | Nr. 102</p></div>
                 <div class="news-headline" contenteditable="true">MEISTERSCHAFT IN SICHT!</div>
-                <div class="news-img-placeholder">
-                    <i class="fa-solid fa-image"></i>&nbsp; BILD ODER VIDEO-SNAPSHOT EINFÜGEN
-                </div>
-                <div class="news-columns" contenteditable="true">
-                    Dies ist ein bearbeitbarer Text. Klicke hier, um den Spielbericht zu schreiben. 
-                    Die Mannschaft hat gestern eine überragende Leistung gezeigt.
-                </div>
+                <div class="news-img-placeholder"><i class="fa-solid fa-image"></i>&nbsp; BILD ODER VIDEO-SNAPSHOT EINFÜGEN</div>
+                <div class="news-columns" contenteditable="true">Dies ist ein bearbeitbarer Text...</div>
             </div>
         </div>
-        <div style="text-align:center; padding:20px;">
-            <button class="btn-main" id="btn-print" style="width:auto; padding: 10px 30px;">DRUCKEN / PDF</button>
-        </div>`;
-    // KORREKTUR: Die Event-Listener werden hier gebunden.
+        <div style="text-align:center; padding:20px;"><button class="btn-main" id="btn-print" style="width:auto; padding: 10px 30px;">DRUCKEN / PDF</button></div>`;
     target.querySelector('#btn-print').addEventListener('click', () => window.print());
-    target.querySelector('.news-img-placeholder').addEventListener('click', () => {
-        toggleModal('modal-video', true);
-        initVideoCanvas();
-    });
+    target.querySelector('.news-img-placeholder').addEventListener('click', () => { toggleModal('modal-video', true); initVideoCanvas(); });
 }
 
-// --- 8. MODULE-SPECIFIC LOGIC ---
 function openBio(id) {
     const p = ToniDB.state.players.find(x => x.id === id);
     if (!p) return;
-
     const contentWrapper = document.getElementById('bio-content-wrapper');
+    // ** KORREKTUR: Der Schließen-Button wird hier im HTML hinzugefügt. **
     contentWrapper.innerHTML = `
         <button class="modal-close" data-modal-id="modal-bio">×</button>
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
             <h2 style="font-family:'Orbitron'; color:#fff;">${p.name} <span style="color:#00f3ff; font-size:14px;">// BIO-DATEN</span></h2>
             <div style="font-size:30px; color:#ffd700;">${p.rating}</div>
         </div>
-       ... (restlicher Inhalt)...
-        `;
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px; margin-top:20px;">
+            <div><h4 style="color:#666; margin-bottom:10px;">PHYSIK</h4><div style="margin-bottom:10px;">Gewicht: ${p.bio.weight} kg</div><div>Körperfett: ${p.bio.fat} %</div></div>
+            <div><h4 style="color:#666; margin-bottom:10px;">STATUS</h4><div style="color:${p.bio.status === 'Fit'? '#0aff60' : '#ff003c'}">${p.bio.status.toUpperCase()}</div></div>
+        </div>`;
     contentWrapper.querySelector('.modal-close').addEventListener('click', () => toggleModal('modal-bio', false));
     toggleModal('modal-bio', true);
 }
@@ -332,26 +251,20 @@ function dragStart(e, id) {
     e.preventDefault();
     const el = document.getElementById('pl-' + id);
     const container = document.getElementById('pitch-area');
-    
     function move(evt) {
         const rect = container.getBoundingClientRect();
         let x = ((evt.clientX - rect.left) / rect.width) * 100;
         let y = ((evt.clientY - rect.top) / rect.height) * 100;
-        x = Math.max(2, Math.min(98, x));
-        y = Math.max(2, Math.min(98, y));
-        el.style.left = x + '%';
-        el.style.top = y + '%';
+        el.style.left = `${Math.max(2, Math.min(98, x))}%`;
+        el.style.top = `${Math.max(2, Math.min(98, y))}%`;
     }
-    
     function stop(evt) {
         document.removeEventListener('mousemove', move);
         document.removeEventListener('mouseup', stop);
         const rect = container.getBoundingClientRect();
         let finalX = ((evt.clientX - rect.left) / rect.width) * 100;
         let finalY = ((evt.clientY - rect.top) / rect.height) * 100;
-        finalX = Math.max(2, Math.min(98, finalX));
-        finalY = Math.max(2, Math.min(98, finalY));
-        ToniDB.updatePlayerPosition(id, finalX, finalY);
+        ToniDB.updatePlayerPosition(id, Math.max(2, Math.min(98, finalX)), Math.max(2, Math.min(98, finalY)));
     }
     document.addEventListener('mousemove', move);
     document.addEventListener('mouseup', stop);
@@ -363,28 +276,20 @@ function addFinance(type) {
     const v = parseFloat(valEl.value);
     if (descEl.value && v > 0) {
         ToniDB.addFinanceEntry(descEl.value, v, type);
-        descEl.value = '';
-        valEl.value = '';
+        descEl.value = ''; valEl.value = '';
     }
 }
 
 function loadVideo(input) {
     const v = document.getElementById('video-player');
-    if (input.files && input.files[0]) {
-        const videoUrl = URL.createObjectURL(input.files[0]);
-        v.src = videoUrl;
-        v.play();
-    }
+    if (input.files && input.files[0]) { v.src = URL.createObjectURL(input.files[0]); v.play(); }
 }
 
 function initVideoCanvas() {
     const c = document.getElementById('video-canvas');
     const ctx = c.getContext('2d');
     const container = c.parentElement;
-    
-    c.width = container.clientWidth;
-    c.height = container.clientHeight;
-
+    c.width = container.clientWidth; c.height = container.clientHeight;
     ctx.strokeStyle = "#00f3ff"; ctx.lineWidth = 4; ctx.lineCap = "round";
     let paint = false;
     c.onmousedown = (e) => { paint = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
