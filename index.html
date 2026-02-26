@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -36,10 +36,9 @@
         </section>
 
         <footer class="portal-footer">
-            <div class="version-tag">STABLE BUILD v15.8</div>
+            <div class="version-tag">STABLE BUILD v16.0 PRO</div>
             <div class="system-downloads">
-                <span class="badge">XR/VR</span>
-                <span class="badge">MOBILE</span>
+                <span class="badge">XR/VR READY</span>
             </div>
         </footer>
     </main>
@@ -51,7 +50,10 @@
                 <i class="fa-solid fa-shield-halved" style="color:var(--neon-cyan); margin-right:10px;"></i>
                 TONI 2.0 // <span id="active-mod-title">DASHBOARD</span>
             </div>
-            <div id="clock-display">00:00:00</div>
+            <div class="top-bar-center">
+                <div id="clock-display">00:00:00</div>
+                <button onclick="toggleSettings()" class="settings-btn"><i class="fa-solid fa-gear"></i></button>
+            </div>
             <div class="kpi-quick-info">
                 <i class="fa-solid fa-wallet"></i> <span id="kpi-budget">0 €</span>
             </div>
@@ -66,7 +68,7 @@
                     <button id="nav-tactics" onclick="switchModule('tactics')"><i class="fa-solid fa-chalkboard-user"></i> TAKTIK-BOARD</button>
                     <button id="nav-finance" onclick="switchModule('finance')"><i class="fa-solid fa-briefcase"></i> OFFICE PRIME</button>
                     <button id="nav-youth" onclick="switchModule('youth')"><i class="fa-solid fa-child-reaching"></i> JUNIOR HERO</button>
-                    <button id="nav-media" onclick="switchModule('media')"><i class="fa-solid fa-clapperboard"></i> MEDIA CENTER</button>
+                    <button id="nav-media" onclick="switchModule('media')"><i class="fa-solid fa-clapperboard"></i> MEDIA & VIDEO</button>
                 </nav>
                 <div class="column-header">SCHNELLAUSWAHL</div>
                 <div id="quick-squad-list" class="scroll-area"></div>
@@ -115,6 +117,56 @@
         </div>
         <div id="magazine-sheet-container">
             </div>
+    </div>
+
+    <div id="video-suite-modal" class="modal-overlay hidden">
+        <div class="video-suite-container">
+            <div class="suite-header">
+                <h3><i class="fa-solid fa-video"></i> TONI VIDEO ANALYTICS</h3>
+                <button onclick="closeVideoSuite()" class="btn-close-studio">SCHLIESSEN</button>
+            </div>
+            <div class="video-stage">
+                <video id="analysis-video" controls>
+                    <source src="" type="video/mp4">
+                    Kein Video geladen.
+                </video>
+                <canvas id="telestrator-canvas"></canvas> </div>
+            <div class="suite-controls">
+                <button class="btn-neon-small" onclick="document.getElementById('video-upload').click()">VIDEO LADEN</button>
+                <input type="file" id="video-upload" accept="video/*" class="hidden" onchange="loadVideoFile(this)">
+                
+                <div class="tool-group">
+                    <button class="tool-btn active" onclick="setTool('pen')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="tool-btn" onclick="setTool('arrow')"><i class="fa-solid fa-arrow-right"></i></button>
+                    <button class="tool-btn" onclick="clearCanvas()"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                
+                <div class="ai-video-feedback">
+                    <small>KI-ANALYSE:</small>
+                    <span id="video-ai-text">Warte auf Videomaterial...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="lab-container settings-box">
+            <h3>SYSTEM KONFIGURATION</h3>
+            <div class="lab-row">
+                <span>KI-MODELL</span>
+                <select id="ai-model-select">
+                    <option value="simulation">TONI SIMULATION (OFFLINE)</option>
+                    <option value="ollama">OLLAMA (LOKAL)</option>
+                    <option value="openai">OPENAI API (CLOUD)</option>
+                </select>
+            </div>
+            <div class="lab-row">
+                <span>API KEY / URL</span>
+                <input type="password" id="api-key-input" placeholder="sk-... oder http://localhost:11434">
+            </div>
+            <button onclick="saveSettings()" class="btn-neon-small" style="width:100%; margin-top:20px;">SPEICHERN & NEUSTART</button>
+            <button onclick="toggleSettings()" class="btn-close-studio" style="margin-top:10px;">ABBRECHEN</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
