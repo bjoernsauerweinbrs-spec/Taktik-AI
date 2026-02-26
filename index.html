@@ -9,12 +9,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
- 
+
     <div id="auth-layer">
         <div class="login-terminal">
             <div class="luxury-logo" style="font-size: 40px; margin-bottom: 20px;">TONI 2.0</div>
             <p style="font-family: var(--font-ui); color: #444;">AGENCY ACCESS</p>
-            <input type="password" id="passkey" class="auth-input" placeholder="ACCESS CODE" autocomplete="off">
+            <input type="password" id="passkey" class="auth-input" placeholder="ACCESS CODE">
             <button class="btn-main" onclick="bootSystem()" style="margin-top:20px;">INITIALISIEREN</button>
         </div>
     </div>
@@ -22,7 +22,7 @@
     <div id="app-interface" class="hidden">
         <header id="top-bar">
             <div class="app-brand"><span class="luxury-logo">TONI 2.0</span></div>
-            <div id="clock-display">00:00:00</div>
+            <div id="clock-display" style="font-family: var(--font-ui); color:#444;">00:00:00</div>
             <div style="display:flex; gap:25px; align-items:center;">
                 <div style="font-family: var(--font-ui); color: var(--neon-gold); font-size: 14px;"><i class="fa-solid fa-vault"></i> <span id="budget-display">0 €</span></div>
                 <button onclick="toggleSettings()" style="color:#444;"><i class="fa-solid fa-gear"></i></button>
@@ -43,13 +43,16 @@
 
             <aside id="tools-sidebar">
                 <div class="nav-group-title">AI REPORTER // LIVE-DESK</div>
-                <div id="ai-log" style="flex:1; padding:20px; font-size:13px; color:#aaa; overflow-y:auto; line-height: 1.6;">
-                    <div class="ai-message">System online. <br><br>Klicken Sie unten auf "Briefing starten", um die Recherche für die neue Stadionzeitung zu beginnen.</div>
+                <div id="ai-log">
+                    <div class="ai-bubble toni">
+                        <small>TONI</small><br>
+                        Bereit für die Redaktionssitzung? Starten wir das Briefing für die neue Ausgabe.
+                    </div>
                 </div>
                 <div style="padding:20px; border-top:1px solid #222; background:#080808;">
                     <div id="interview-controls" class="hidden">
-                        <input type="text" id="ai-chat-input" class="auth-input" style="text-align:left; font-size:12px; margin-bottom:10px; padding:10px;" placeholder="Antwort eingeben...">
-                        <button class="btn-main" onclick="processInterviewStep()" style="font-size:10px; padding:10px;">SENDEN</button>
+                        <input type="text" id="ai-chat-input" class="auth-input" placeholder="Ihre Antwort..." onkeypress="if(event.key==='Enter') processInterviewStep()">
+                        <button class="btn-main" onclick="processInterviewStep()" style="font-size:10px;">ANTWORT SENDEN</button>
                     </div>
                     <button id="btn-start-briefing" class="btn-main" onclick="startAIBriefing()"><i class="fa-solid fa-play"></i> BRIEFING STARTEN</button>
                 </div>
@@ -57,9 +60,8 @@
         </div>
     </div>
 
-    <div id="modal-bio" class="modal-overlay hidden"><div class="modal-window" style="width: 900px; max-height: 90vh;"><div id="bio-content-inner"></div></div></div>
-    <div id="modal-settings" class="modal-overlay hidden"><div class="modal-window" style="width: 400px; padding:30px;"><button class="btn-main" onclick="toggleModal('modal-settings', false)">SCHLIESSEN</button></div></div>
-
+    <div id="modal-bio" class="modal-overlay hidden"><div class="modal-window" style="width: 800px; padding:40px;"><div id="bio-content-inner"></div></div></div>
+    
     <script src="script.js"></script>
 </body>
 </html>
