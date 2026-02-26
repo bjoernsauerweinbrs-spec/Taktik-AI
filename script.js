@@ -1,8 +1,10 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - FULL CONFIG
+   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - MEMORY CORE INTEGRATED
    ========================================================================== */
 
-const eliteStore = {
+const SAVE_KEY = "TONI20_SYSTEM_DATA";
+
+let eliteStore = {
     config: { passkey: "1234", version: "15.8 PRO", clubLogoUrl: "" },
     mgmt: { budget: 4850000, morale: 88, activeModule: 'kader' },
     
@@ -37,8 +39,24 @@ const eliteStore = {
     ]
 };
 
+// --- MEMORY CORE FUNKTIONEN ---
+
+function saveToDisk() {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(eliteStore));
+    console.log("System-Daten gesichert.");
+}
+
+function loadFromDisk() {
+    const savedData = localStorage.getItem(SAVE_KEY);
+    if (savedData) {
+        eliteStore = JSON.parse(savedData);
+        console.log("System-Daten erfolgreich geladen.");
+    }
+}
+
 // 1. SYSTEM-BOOT
 function systemBootSequence() {
+    loadFromDisk(); // Daten vor dem Login laden
     const input = document.getElementById('passkey');
     if (input.value === eliteStore.config.passkey) {
         document.getElementById('auth-layer').style.display = 'none';
@@ -103,7 +121,7 @@ function renderKader(target) {
     `;
 }
 
-// 4. BIO-LAB (DEINE ANFRAGE: FETTWAAGE & PULSUHR EDITIERBAR)
+// 4. BIO-LAB (EDITIERBAR)
 function openBioLab(id) {
     const p = eliteStore.players.find(x => x.id === id);
     const modal = document.getElementById('bio-lab-modal');
@@ -150,6 +168,7 @@ function updateValue(id, cat, key, val) {
         p.rating = Math.round(total / 10);
         document.getElementById('lab-rating').innerText = p.rating;
     }
+    saveToDisk(); // Speichern bei jeder Änderung
     renderKader(document.getElementById('module-content'));
     renderQuickList();
 }
@@ -158,7 +177,24 @@ function closeBioLab() { document.getElementById('bio-lab-modal').classList.add(
 
 // 5. WEITERE MODULE
 function renderOffice(target) {
-    target.innerHTML = `<div class="office-grid fade-in"><div class="office-panel"><h3>FINANZEN</h3>${Object.keys(eliteStore.finance.pro).map(k => `<div class="lab-row"><span>${k.toUpperCase()}</span><input type="number" value="${eliteStore.finance.pro[k]}" onchange="eliteStore.finance.pro['${k}']=parseInt(this.value); updateBudget();"></div>`).join('')}</div></div>`;
+    target.innerHTML = `
+        <div class="office-grid fade-in">
+            <div class="office-panel">
+                <h3>FINANZEN</h3>
+                ${Object.keys(eliteStore.finance.pro).map(k => `
+                    <div class="lab-row">
+                        <span>${k.toUpperCase()}</span>
+                        <input type="number" value="${eliteStore.finance.pro[k]}" onchange="updateFinance('${k}', this.value)">
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+}
+
+function updateFinance(key, val) {
+    eliteStore.finance.pro[key] = parseInt(val);
+    saveToDisk();
+    updateBudget();
 }
 
 function renderJuniorHub(target) {
@@ -169,6 +205,7 @@ function renderJuniorHub(target) {
 function toggleSticker(i) {
     const kid = eliteStore.players.find(p => p.type === 'youth');
     kid.stickers[i] = !kid.stickers[i];
+    saveToDisk();
     renderJuniorHub(document.getElementById('module-content'));
 }
 
@@ -183,11 +220,15 @@ function renderTactics(target) {
 // 6. HELFER
 function updateBudget() {
     const total = Object.values(eliteStore.finance.pro).reduce((a,b)=>a+b,0) + Object.values(eliteStore.finance.amateur).reduce((a,b)=>a+b,0);
-    document.getElementById('kpi-budget').innerText = total.toLocaleString() + " €";
+    const budgetEl = document.getElementById('kpi-budget');
+    if(budgetEl) budgetEl.innerText = total.toLocaleString() + " €";
 }
 
 function renderQuickList() {
-    document.getElementById('quick-squad-list').innerHTML = eliteStore.players.map(p => `<div class="list-item" onclick="openBioLab(${p.id})"><span>${p.name}</span><b>${p.rating}</b></div>`).join('');
+    const listEl = document.getElementById('quick-squad-list');
+    if(listEl) {
+        listEl.innerHTML = eliteStore.players.map(p => `<div class="list-item" onclick="openBioLab(${p.id})"><span>${p.name}</span><b>${p.rating}</b></div>`).join('');
+    }
 }
 
 let mic = false;
