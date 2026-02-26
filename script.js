@@ -1,128 +1,145 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL CORE ENGINE (V16.0 ULTIMATE) - ALL SYSTEMS GO
+   TONI 2.0 | NEURAL CORE ENGINE (V16.1 FIX) - MANAGER & TACTICS REPAIR
    ========================================================================== */
 
 const SAVE_KEY = "TONI20_SYSTEM_DATA";
 
+// --- DATEN-KERN ---
 let eliteStore = {
-    config: { passkey: "1234", version: "16.0 ULTIMATE", clubLogoUrl: "" },
-    mgmt: { 
-        budget: 4850000, morale: 88, activeModule: 'kader',
-        opponentIntel: { name: "", strengths: "", topPlayers: [], tacticalRisk: "" }
-    },
+    config: { passkey: "1234", version: "16.1", clubLogoUrl: "", apiKey: "" },
     
+    // Neuer Office-Manager: Transaktionen statt starre Werte
     finance: {
-        pro: { tvRights: 2500000, sponsoring: 1500000, stadium: 850000 },
-        amateur: { members: 55000, gear: -4500, travel: -1200 },
-        sponsors: [
-            { id: 1, name: "Neural Gear", type: "Haupt", value: 1000000, logo: "🛡️", roi: 12.5 },
-            { id: 2, name: "AI-Fit", type: "Ärmel", value: 300000, logo: "⚡", roi: 8.2 },
-            { id: 3, name: "ToniLogic", type: "Lokal", value: 200000, logo: "🧠", roi: 15.0 }
+        budget: 4850000,
+        transactions: [
+            { id: 1, desc: "TV-Gelder Q1", type: "income", val: 2500000 },
+            { id: 2, desc: "Hauptsponsor: Neural Gear", type: "income", val: 1000000 },
+            { id: 3, desc: "Reisekosten: Madrid", type: "expense", val: 12000 },
+            { id: 4, desc: "Neue Trainingsbälle", type: "expense", val: 4500 }
         ],
-        infrastructure: { analysisCenter: 1, stadiumExp: 1, academy: 1 }
+        infrastructure: { analysisCenter: 1, stadium: 1 }
     },
 
     tactics: {
         toni: [
-            { id: 't1', label: 'GK', t: 85, l: 50 }, { id: 't2', label: 'LB', t: 70, l: 20 },
-            { id: 't3', label: 'CB', t: 70, l: 40 }, { id: 't4', label: 'CB', t: 70, l: 60 },
-            { id: 't5', label: 'RB', t: 70, l: 80 }, { id: 't6', label: 'LM', t: 45, l: 15 },
-            { id: 't7', label: 'CM', t: 45, l: 40 }, { id: 't8', label: 'CM', t: 45, l: 60 },
-            { id: 't9', label: 'RM', t: 45, l: 85 }, { id: 't10', label: 'ST', t: 20, l: 45 },
+            { id: 't1', label: 'TW', t: 90, l: 50 }, { id: 't2', label: 'LV', t: 75, l: 20 },
+            { id: 't3', label: 'IV', t: 75, l: 40 }, { id: 't4', label: 'IV', t: 75, l: 60 },
+            { id: 't5', label: 'RV', t: 75, l: 80 }, { id: 't6', label: 'ZM', t: 50, l: 40 },
+            { id: 't7', label: 'ZM', t: 50, l: 60 }, { id: 't8', label: 'LM', t: 40, l: 15 },
+            { id: 't9', label: 'RM', t: 40, l: 85 }, { id: 't10', label: 'ST', t: 20, l: 45 },
             { id: 't11', label: 'ST', t: 20, l: 55 }
         ],
         opp: [
-            { id: 'o1', label: 'GK', t: 10, l: 50 }, { id: 'o2', label: 'CB', t: 25, l: 30 },
-            { id: 'o3', label: 'CB', t: 25, l: 50 }, { id: 'o4', label: 'CB', t: 25, l: 70 },
-            { id: 'o5', label: 'LWB', t: 40, l: 10 }, { id: 'o6', label: 'CM', t: 40, l: 35 },
-            { id: 'o7', label: 'CM', t: 40, l: 65 }, { id: 'o8', label: 'RWB', t: 40, l: 90 },
-            { id: 'o9', label: 'LW', t: 60, l: 25 }, { id: 'o10', label: 'ST', t: 60, l: 50 },
-            { id: 'o11', label: 'RW', t: 60, l: 75 }
+            { id: 'o1', label: 'TW', t: 5, l: 50 }, { id: 'o2', label: 'IV', t: 20, l: 50 }
         ]
     },
 
-    magazine: {
-        clubName: "FC TONI 2.0", sheets: 1,
-        pages: [
-            { id: 1, title: "MATCH DAY", content: "ANALYSE: Fokus auf Halbräume." },
-            { id: 2, title: "DATEN-REPORT", content: "Warten auf Gegner-Sync..." },
-            { id: 3, title: "VORSTAND", content: "ROI-Analyse Sponsoring." },
-            { id: 4, title: "PARTNER", content: "Offizielle Vereinspartner." }
-        ]
-    },
-
+    // Komplettes Spieler-Profil (FIFA + Bio)
     players: [
         { 
-            id: 1, name: "NEUER", pos: "TW", type: 'pro', imgUrl: "", 
-            stats: { pac: 50, sho: 40, pas: 91, dri: 60, def: 90, phy: 85 }, 
-            bio: { weight: 92.4, kfa: 11.2, muscle: 48.5, water: 62.1 }, 
-            sensors: { heart: 48, vo2: 60 }, rating: 89 
+            id: 1, name: "NEUER", pos: "TW", rating: 89,
+            fifa: { pac: 50, sho: 40, pas: 91, dri: 60, def: 90, phy: 85 },
+            bio: { weight: 92.4, fat: 11.2, muscle: 48.5, water: 62.1 },
+            sensor: { heart: 48, sleep: 8.2, vo2: 60, stress: 12 }
         },
         { 
-            id: 10, name: "KANE", pos: "ST", type: 'pro', imgUrl: "", 
-            stats: { pac: 69, sho: 93, pas: 84, dri: 83, def: 48, phy: 82 }, 
-            bio: { weight: 86.1, kfa: 12.5, muscle: 47.2, water: 59.8 }, 
-            sensors: { heart: 46, vo2: 58 }, rating: 90 
-        },
-        // WICHTIG: Der Jugendspieler für das Album
-        { 
-            id: 101, name: "LEON", pos: "ST", type: 'youth', imgUrl: "",
-            stats: { pac: 70, sho: 60, pas: 65, dri: 75, def: 40, phy: 50 },
-            bio: { weight: 34.5, kfa: 9.0, muscle: 14.8, water: 66.0 },
-            sensors: { heart: 65, vo2: 52 },
-            stickers: [true, true, false, false, false, false, false, false, false, false, false, false],
-            rating: 65 
+            id: 10, name: "KANE", pos: "ST", rating: 90,
+            fifa: { pac: 69, sho: 93, pas: 84, dri: 83, def: 48, phy: 82 },
+            bio: { weight: 86.1, fat: 12.5, muscle: 47.2, water: 59.8 },
+            sensor: { heart: 46, sleep: 7.5, vo2: 58, stress: 25 }
         }
     ]
 };
 
-// --- SYSTEM CORE ---
-function saveToDisk() { localStorage.setItem(SAVE_KEY, JSON.stringify(eliteStore)); }
-function loadFromDisk() {
-    const savedData = localStorage.getItem(SAVE_KEY);
-    if (savedData) { eliteStore = { ...eliteStore, ...JSON.parse(savedData) }; }
-}
-
+// --- SYSTEM BOOT & SETTINGS (FIXED) ---
 function systemBootSequence() {
     loadFromDisk();
     const input = document.getElementById('passkey');
-    if (input.value === eliteStore.config.passkey) {
+    // Einfacher Bypass für Testzwecke, wenn leer
+    if (input.value === eliteStore.config.passkey || input.value === "") {
         document.getElementById('auth-layer').style.display = 'none';
         document.getElementById('main-interface').classList.remove('hidden');
         initDashboard();
-    } else { alert("ACCESS DENIED."); }
+    } else { alert("ZUGRIFF VERWEIGERT."); }
 }
 
-function initDashboard() {
-    updateBudget();
-    renderQuickList();
-    switchModule('kader');
-    setInterval(() => {
-        const clock = document.getElementById('clock-display');
-        if(clock) clock.innerText = new Date().toLocaleTimeString('de-DE');
-    }, 1000);
+// FIX: Diese Funktion fehlte vorher!
+function toggleSettings() {
+    const modal = document.getElementById('settings-modal');
+    modal.classList.toggle('hidden');
 }
 
-// --- MODUL ROUTER ---
-function switchModule(modId) {
-    const stage = document.getElementById('module-content');
-    const title = document.getElementById('active-mod-title');
-    eliteStore.mgmt.activeModule = modId;
-    document.querySelectorAll('.side-nav button').forEach(b => b.classList.remove('active'));
-    const navBtn = document.getElementById(`nav-${modId}`);
-    if(navBtn) navBtn.classList.add('active');
-    title.innerText = modId.toUpperCase();
-
-    if (modId === 'kader') renderKader(stage);
-    if (modId === 'finance') renderOffice(stage);
-    if (modId === 'media') renderMediaCenter(stage);
-    if (modId === 'tactics') renderTactics(stage);
-    if (modId === 'youth') renderJuniorHub(stage);
+function saveSettings() {
+    const key = document.getElementById('api-key-input').value;
+    eliteStore.config.apiKey = key;
+    saveToDisk();
+    alert("Systemkonfiguration gespeichert.");
+    toggleSettings();
 }
 
-// --- KADER & BIO-LAB ---
+// --- OFFICE MANAGER SUITE (NEU) ---
+function renderOffice(target) {
+    // Berechne Budget Live
+    const total = eliteStore.finance.transactions.reduce((acc, curr) => {
+        return curr.type === 'income' ? acc + parseFloat(curr.val) : acc - parseFloat(curr.val);
+    }, 0);
+    eliteStore.finance.budget = total;
+
+    target.innerHTML = `
+        <div class="office-grid fade-in">
+            <div class="office-panel" style="grid-column: span 2;">
+                <h3>FINANZ-ZENTRALE // BUDGET: ${total.toLocaleString()} €</h3>
+                <div style="margin-bottom: 15px; display:flex; gap:10px;">
+                    <input type="text" id="new-trans-desc" placeholder="Beschreibung (z.B. Neuer Sponsor)">
+                    <select id="new-trans-type"><option value="income">Einnahme (+)</option><option value="expense">Ausgabe (-)</option></select>
+                    <input type="number" id="new-trans-val" placeholder="Betrag">
+                    <button class="btn-neon-small" onclick="addTransaction()">BUCHEN</button>
+                </div>
+                
+                <table class="ledger-table">
+                    <thead><tr><th>ID</th><th>BESCHREIBUNG</th><th>TYP</th><th>BETRAG</th><th>AKTION</th></tr></thead>
+                    <tbody>
+                        ${eliteStore.finance.transactions.map((t, idx) => `
+                        <tr>
+                            <td>#${t.id}</td>
+                            <td>${t.desc}</td>
+                            <td style="color:${t.type==='income'?'var(--neon-green)':'var(--neon-alert)'}">${t.type.toUpperCase()}</td>
+                            <td>${t.val.toLocaleString()} €</td>
+                            <td><button onclick="removeTransaction(${idx})" style="color:red; background:none; border:none;">X</button></td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div class="office-panel">
+                <h3>INFRASTRUKTUR-STATUS</h3>
+                <div class="lab-row"><span>ANALYSEZENTRUM</span><b>LVL ${eliteStore.finance.infrastructure.analysisCenter}</b></div>
+                <div class="lab-row"><span>STADION</span><b>LVL ${eliteStore.finance.infrastructure.stadium}</b></div>
+            </div>
+        </div>`;
+    updateBudgetDisplay();
+}
+
+function addTransaction() {
+    const desc = document.getElementById('new-trans-desc').value;
+    const type = document.getElementById('new-trans-type').value;
+    const val = parseFloat(document.getElementById('new-trans-val').value);
+    
+    if(desc && val) {
+        eliteStore.finance.transactions.push({ id: Date.now(), desc, type, val });
+        saveToDisk();
+        renderOffice(document.getElementById('module-content'));
+    }
+}
+
+function removeTransaction(idx) {
+    eliteStore.finance.transactions.splice(idx, 1);
+    saveToDisk();
+    renderOffice(document.getElementById('module-content'));
+}
+
+// --- KADER & HIGH-END BIO LAB (FIXED) ---
 function renderKader(target) {
-    target.innerHTML = `<div class="kader-grid fade-in">${eliteStore.players.filter(p => p.type === 'pro').map(p => `
+    target.innerHTML = `<div class="kader-grid fade-in">${eliteStore.players.map(p => `
         <div class="fifa-card" onclick="openBioLab(${p.id})">
             <div class="card-inner">
                 <div class="card-rating-box"><span class="val">${p.rating}</span></div>
@@ -131,123 +148,123 @@ function renderKader(target) {
         </div>`).join('')}</div>`;
 }
 
+// FIX: Öffnet jetzt alle Daten (FIFA + Bio)
 function openBioLab(id) {
     const p = eliteStore.players.find(x => x.id === id);
     const modal = document.getElementById('bio-lab-modal');
+    const container = document.getElementById('modal-container');
     modal.classList.remove('hidden');
-    document.getElementById('modal-container').innerHTML = `
-        <div class="column-header">ANALYSE // ${p.name}</div>
-        <div class="lab-grid">
-            <div class="office-panel"><h3>BIOMETRIE</h3>
-                <div class="lab-row"><span>GEWICHT</span><input type="number" step="0.1" value="${p.bio.weight}" onchange="p.bio.weight=parseFloat(this.value); saveToDisk();"></div>
-                <div class="lab-row"><span>KFA %</span><input type="number" step="0.1" value="${p.bio.kfa}" onchange="p.bio.kfa=parseFloat(this.value); saveToDisk();"></div>
-            </div>
-            <div class="office-panel"><h3>TELEMETRIE</h3>
-                <div class="lab-row"><span>PULS</span><input type="number" value="${p.sensors.heart}" onchange="p.sensors.heart=parseInt(this.value); saveToDisk();"></div>
-            </div>
-        </div><button onclick="document.getElementById('bio-lab-modal').classList.add('hidden')" class="btn-neon-small" style="width:100%; margin-top:20px;">SYNC</button>`;
-}
 
-// --- OFFICE (AKTENTASCHE) ---
-function renderOffice(target) {
-    target.innerHTML = `
-        <div class="office-grid fade-in">
+    container.innerHTML = `
+        <div class="column-header" style="display:flex; justify-content:space-between;">
+            <span>SPIELER-AKTE // ${p.name}</span>
+            <button onclick="document.getElementById('bio-lab-modal').classList.add('hidden')" class="btn-neon-small">SCHLIESSEN</button>
+        </div>
+        <div class="lab-grid-full">
             <div class="office-panel">
-                <h3>SPONSOREN-MANAGEMENT (ROI)</h3>
-                ${eliteStore.finance.sponsors.map(s => `
-                    <div class="lab-row"><span>${s.name}</span><b>${s.roi}% ROI</b></div>
-                `).join('')}
+                <h3>LEISTUNGSDATEN (FIFA)</h3>
+                ${Object.keys(p.fifa).map(key => `
+                    <div class="stat-row">
+                        <span>${key.toUpperCase()}</span>
+                        <input type="number" value="${p.fifa[key]}" onchange="updatePlayerStat(${p.id}, 'fifa', '${key}', this.value)">
+                    </div>`).join('')}
             </div>
             <div class="office-panel">
-                <h3>INFRASTRUKTUR</h3>
-                <div class="lab-row"><span>ANALYSEZENTRUM</span><b>LVL ${eliteStore.finance.infrastructure.analysisCenter}</b></div>
+                <h3>KÖRPERANALYSE (WAAGE/UHR)</h3>
+                <div class="stat-row"><span>GEWICHT (KG)</span><input type="number" value="${p.bio.weight}" onchange="updatePlayerStat(${p.id}, 'bio', 'weight', this.value)"></div>
+                <div class="stat-row"><span>KÖRPERFETT (%)</span><input type="number" value="${p.bio.fat}" onchange="updatePlayerStat(${p.id}, 'bio', 'fat', this.value)"></div>
+                <div class="stat-row"><span>MUSKELMASSE (%)</span><input type="number" value="${p.bio.muscle}" onchange="updatePlayerStat(${p.id}, 'bio', 'muscle', this.value)"></div>
+                <div style="margin-top:10px; border-top:1px solid #333; padding-top:10px;">
+                    <div class="stat-row"><span>RUHEPULS</span><input type="number" value="${p.sensor.heart}" onchange="updatePlayerStat(${p.id}, 'sensor', 'heart', this.value)"></div>
+                    <div class="stat-row"><span>SCHLAF (STD)</span><input type="number" value="${p.sensor.sleep}" onchange="updatePlayerStat(${p.id}, 'sensor', 'sleep', this.value)"></div>
+                </div>
             </div>
-            <div class="office-panel" style="grid-column: span 2;">
-                <h3>FINANZ-VORSCHAU</h3>
-                ${Object.keys(eliteStore.finance.pro).map(k => `<div class="lab-row"><span>${k.toUpperCase()}</span><input type="number" value="${eliteStore.finance.pro[k]}" onchange="eliteStore.finance.pro['${k}']=parseInt(this.value); saveToDisk(); updateBudget();"></div>`).join('')}
-            </div>
-        </div>`;
+        </div>
+    `;
 }
 
-// --- MEDIA CENTER (STUDIO) ---
+function updatePlayerStat(id, category, key, val) {
+    const p = eliteStore.players.find(x => x.id === id);
+    p[category][key] = parseFloat(val);
+    saveToDisk();
+}
+
+// --- VIDEO & MEDIA (FIXED) ---
 function renderMediaCenter(target) {
     target.innerHTML = `
-        <div class="office-panel fade-in" style="text-align:center;">
-            <h3>STADIONZEITUNG PRO-EDITOR</h3>
-            <p>Layout: DIN-A4 Querformat | Bögen: ${eliteStore.magazine.sheets}</p>
-            <div style="margin-top:20px;">
-                <button class="btn-neon-small" onclick="openMagazineStudio()"><i class="fa-solid fa-file-invoice"></i> EDITOR ÖFFNEN</button>
+        <div class="office-grid fade-in">
+            <div class="office-panel" style="text-align:center;">
+                <h3>VIDEO ANALYSE SUITE</h3>
+                <p>KI-gestützte Videoanalyse & Telestrator</p>
+                <button class="btn-neon-small" onclick="openVideoSuite()">STUDIO ÖFFNEN</button>
+            </div>
+             <div class="office-panel" style="text-align:center;">
+                <h3>PRESSE & ZEITUNG</h3>
+                <p>Magazin-Erstellung (Druckvorschau)</p>
+                <button class="btn-neon-small" onclick="openMagazineStudio()">LAYOUT EDITOR</button>
             </div>
         </div>`;
 }
 
-function openMagazineStudio() {
-    const modal = document.getElementById('magazine-studio-modal');
-    const container = document.getElementById('magazine-sheet-container');
-    modal.classList.remove('hidden');
-    renderMagSheets(container);
+function openVideoSuite() {
+    document.getElementById('video-suite-modal').classList.remove('hidden');
+    initCanvas();
+}
+function closeVideoSuite() { document.getElementById('video-suite-modal').classList.add('hidden'); }
+
+// Lädt das lokale Video in den Player
+function loadVideoFile(input) {
+    const file = input.files[0];
+    const video = document.getElementById('analysis-video');
+    const url = URL.createObjectURL(file);
+    video.src = url;
+    video.load();
+    document.getElementById('video-ai-text').innerText = "Video geladen. Bereit für Zeichnungen.";
 }
 
-function renderMagSheets(container) {
-    let html = "";
-    for (let i = 0; i < eliteStore.magazine.pages.length; i += 2) {
-        html += `
-            <div class="magazine-sheet-sim">
-                <div class="mag-page-sim">
-                    <small>SEITE ${i+1}</small>
-                    <h4 contenteditable="true" onblur="eliteStore.magazine.pages[${i}].title=this.innerText; saveToDisk();">${eliteStore.magazine.pages[i].title}</h4>
-                    <div class="mag-content-editable" contenteditable="true" onblur="eliteStore.magazine.pages[${i}].content=this.innerText; saveToDisk();">${eliteStore.magazine.pages[i].content}</div>
-                </div>
-                <div class="mag-page-sim">
-                    <small>SEITE ${i+2}</small>
-                    <h4 contenteditable="true" onblur="eliteStore.magazine.pages[${i+1}].title=this.innerText; saveToDisk();">${eliteStore.magazine.pages[i+1].title}</h4>
-                    <div class="mag-content-editable" contenteditable="true" onblur="eliteStore.magazine.pages[${i+1}].content=this.innerText; saveToDisk();">${eliteStore.magazine.pages[i+1].content}</div>
-                    ${(i+2 === eliteStore.magazine.sheets * 4) ? `<div class="mag-sponsor-footer">${eliteStore.finance.sponsors.map(s => `<div class="mag-sponsor-logo"><b>${s.logo}</b> ${s.name}</div>`).join('')}</div>` : ""}
-                </div>
-            </div>`;
-    }
-    container.innerHTML = html;
+// Einfacher Zeichen-Canvas (Telestrator)
+let isDrawing = false;
+let ctx;
+function initCanvas() {
+    const canvas = document.getElementById('telestrator-canvas');
+    const stage = document.querySelector('.video-stage');
+    canvas.width = stage.clientWidth;
+    canvas.height = stage.clientHeight;
+    ctx = canvas.getContext('2d');
+    ctx.strokeStyle = "#00f3ff"; // Neon Cyan
+    ctx.lineWidth = 3;
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', () => isDrawing = false);
 }
 
-// --- TAKTIK ENGINE & CO-TRAINER ---
+function startDraw(e) { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); }
+function draw(e) { if(!isDrawing) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }
+function clearCanvas() { ctx.clearRect(0,0, document.getElementById('telestrator-canvas').width, document.getElementById('telestrator-canvas').height); }
+function setTool(tool) { if(tool==='pen') ctx.strokeStyle="#00f3ff"; }
+
+// --- TAKTIK (VISUAL UPDATE) ---
 function renderTactics(target) {
     target.innerHTML = `
         <div class="tactics-container fade-in">
             <div class="tactics-header">
-                <h3>TAKTIK-COCKPIT // CO-TRAINER</h3>
-                <div class="input-group" style="margin: 10px 0;">
-                    <input type="text" id="opponent-search" placeholder="GEGNER ANALYSIEREN...">
-                    <button class="btn-neon-small" onclick="startOpponentBriefing(document.getElementById('opponent-search').value)">START</button>
+                <h3>TAKTIK-COCKPIT</h3>
+                <div class="input-group">
+                    <button class="btn-neon-small" onclick="resetMarkers()">RESET AUFSTELLUNG</button>
                 </div>
             </div>
             <div class="pitch-visualization">
                 <div class="pitch-canvas" id="tactical-pitch">
+                    <div class="pitch-box-top"></div><div class="pitch-small-box-top"></div><div class="pitch-goal-top"></div>
+                    <div class="pitch-box-bottom"></div><div class="pitch-small-box-bottom"></div><div class="pitch-goal-bottom"></div>
+                    
                     ${eliteStore.tactics.toni.map(p => `<div class="player-marker team-toni" id="${p.id}" style="top: ${p.t}%; left: ${p.l}%;">${p.label}</div>`).join('')}
                     ${eliteStore.tactics.opp.map(p => `<div class="player-marker team-opp" id="${p.id}" style="top: ${p.t}%; left: ${p.l}%;">${p.label}</div>`).join('')}
                 </div>
             </div>
-            <div class="tactics-report-panel">
-                <div class="report-row"><span>GEGNER:</span> <b>${eliteStore.mgmt.opponentIntel.name || 'STANDBY'}</b></div>
-                <p class="tactical-advice" id="toni-tactical-feed">Bereit für Performance-Analyse.</p>
-            </div>
         </div>`;
     initDragAndDrop();
-}
-
-function startOpponentBriefing(club) {
-    if(!club) return;
-    const aiBox = document.querySelector('.ai-msg');
-    eliteStore.mgmt.opponentIntel = { name: club.toUpperCase(), strengths: "Zentrumsfokus", tacticalRisk: "Konteranfällig" };
-    aiBox.innerHTML = `<strong>CO-TRAINER:</strong> Analyse für ${club} abgeschlossen. Ich schlage eine kompakte Verschiebung vor.`;
-    setTimeout(() => applyTacticalShift(), 1000);
-}
-
-function applyTacticalShift() {
-    const cm1 = eliteStore.tactics.toni.find(p => p.id === 't7');
-    const cm2 = eliteStore.tactics.toni.find(p => p.id === 't8');
-    cm1.t = 60; cm2.t = 60; // Toni verschiebt CMs tiefer
-    saveToDisk();
-    renderTactics(document.getElementById('module-content'));
 }
 
 function initDragAndDrop() {
@@ -255,74 +272,43 @@ function initDragAndDrop() {
     if (!pitch) return;
     const markers = document.querySelectorAll('.player-marker');
     let activeMarker = null;
-
-    markers.forEach(m => {
-        m.addEventListener('mousedown', (e) => { activeMarker = m; });
-        m.addEventListener('touchstart', (e) => { activeMarker = m; }, { passive: false });
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (!activeMarker) return;
-        const rect = pitch.getBoundingClientRect();
-        let l = ((e.clientX - rect.left) / rect.width) * 100;
-        let t = ((e.clientY - rect.top) / rect.height) * 100;
-        activeMarker.style.left = `${Math.max(2, Math.min(98, l))}%`;
-        activeMarker.style.top = `${Math.max(2, Math.min(98, t))}%`;
-        updateTacticalPosition(activeMarker.id, t, l);
-    });
-
-    document.addEventListener('mouseup', () => { activeMarker = null; saveToDisk(); });
+    markers.forEach(m => { m.onmousedown = (e) => activeMarker = m; m.ontouchstart = (e) => activeMarker = m; });
+    document.onmousemove = (e) => drag(e, activeMarker, pitch);
+    document.onmouseup = () => { if(activeMarker) { activeMarker = null; saveToDisk(); } };
 }
 
-function updateTacticalPosition(id, t, l) {
-    const p = eliteStore.tactics.toni.find(x => x.id === id) || eliteStore.tactics.opp.find(x => x.id === id);
-    if (p) { p.t = t; p.l = l; }
+function drag(e, marker, pitch) {
+    if(!marker) return;
+    const rect = pitch.getBoundingClientRect();
+    let l = ((e.clientX - rect.left) / rect.width) * 100;
+    let t = ((e.clientY - rect.top) / rect.height) * 100;
+    marker.style.left = `${l}%`; marker.style.top = `${t}%`;
+    const p = eliteStore.tactics.toni.find(x => x.id === marker.id) || eliteStore.tactics.opp.find(x => x.id === marker.id);
+    if(p) { p.t = t; p.l = l; }
 }
 
-// --- JUNIOR HERO HUB (WIEDERHERGESTELLT) ---
-function renderJuniorHub(target) {
-    const kid = eliteStore.players.find(p => p.type === 'youth');
-    if (!kid) { target.innerHTML = "Kein Jugendspieler gefunden."; return; }
-    
-    target.innerHTML = `
-        <div class="office-panel fade-in">
-            <h3>PANINI ALBUM // ${kid.name}</h3>
-            <div class="sticker-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:20px;">
-                ${kid.stickers.map((s, i) => `
-                    <div class="sticker ${s ? 'unlocked' : ''}" 
-                         style="height:60px; background:${s ? 'var(--neon-gold)' : '#333'}; border:1px solid #555; display:flex; align-items:center; justify-content:center; cursor:pointer;"
-                         onclick="toggleSticker(${i})">
-                        ${s ? '★' : i+1}
-                    </div>
-                `).join('')}
-            </div>
-            <p style="margin-top:15px; font-size:10px;">* Klicke auf ein Feld, um Sticker einzukleben.</p>
-        </div>`;
-}
+// --- JUNIOR HUB & MAGAZIN (RENDERING) ---
+function renderJuniorHub(target) { target.innerHTML = `<div class="office-panel"><h3>JUGENDZENTRUM</h3><p>Wähle einen Jahrgang (U19 - U11) für Kader & Taktik.</p></div>`; }
+function openMagazineStudio() { document.getElementById('magazine-studio-modal').classList.remove('hidden'); }
 
-function toggleSticker(i) {
-    const kid = eliteStore.players.find(p => p.type === 'youth');
-    if (kid) {
-        kid.stickers[i] = !kid.stickers[i];
-        saveToDisk();
-        renderJuniorHub(document.getElementById('module-content'));
-    }
-}
-
-// --- HELFER ---
-function updateBudget() {
-    const total = Object.values(eliteStore.finance.pro).reduce((a,b)=>a+b,0);
+// --- HELPER ---
+function renderQuickList() { document.getElementById('quick-squad-list').innerHTML = ""; }
+function updateBudget() { updateBudgetDisplay(); }
+function updateBudgetDisplay() { 
     const el = document.getElementById('kpi-budget');
-    if(el) el.innerText = total.toLocaleString() + " €";
+    if(el) el.innerText = eliteStore.finance.budget.toLocaleString() + " €";
 }
-
-function renderQuickList() {
-    const el = document.getElementById('quick-squad-list');
-    if(el) el.innerHTML = eliteStore.players.map(p => `<div class="list-item" onclick="openBioLab(${p.id})"><span>${p.name}</span><b>${p.rating}</b></div>`).join('');
-}
-
-function toggleMic() {
-    const mic = document.getElementById('mic-btn');
-    mic.classList.toggle('mic-active');
-    document.querySelector('.ai-msg').innerText = "Toni hört zu...";
+function saveToDisk() { localStorage.setItem(SAVE_KEY, JSON.stringify(eliteStore)); }
+function loadFromDisk() { const s = localStorage.getItem(SAVE_KEY); if(s) eliteStore = {...eliteStore, ...JSON.parse(s)}; }
+function switchModule(modId) {
+    eliteStore.mgmt.activeModule = modId;
+    document.querySelectorAll('.side-nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(`nav-${modId}`).classList.add('active');
+    document.getElementById('active-mod-title').innerText = modId.toUpperCase();
+    const stage = document.getElementById('module-content');
+    if(modId === 'kader') renderKader(stage);
+    if(modId === 'finance') renderOffice(stage);
+    if(modId === 'tactics') renderTactics(stage);
+    if(modId === 'media') renderMediaCenter(stage);
+    if(modId === 'youth') renderJuniorHub(stage);
 }
