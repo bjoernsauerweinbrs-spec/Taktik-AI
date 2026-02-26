@@ -2,49 +2,124 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TONI 2.0 | CLUB ENGINE ULTIMATE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TONI 2.0 | ULTIMATE EDITION</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="auth-layer">
-        <div class="login-box">
+        <div class="login-terminal">
+            <i class="fa-solid fa-fingerprint" style="font-size: 40px; color: #00f3ff; margin-bottom: 20px;"></i>
             <h1>TONI 2.0</h1>
-            <p>CLUB MANAGEMENT SUITE</p>
-            <button onclick="bootSystem()">SYSTEM STARTEN</button>
+            <p>NEURAL CLUB MANAGEMENT</p>
+            
+            <input type="password" id="passkey" class="auth-input" placeholder="ACCESS CODE" autocomplete="off">
+            <button class="btn-main" onclick="bootSystem()">INITIALISIEREN</button>
         </div>
     </div>
 
-    <div id="main-interface" class="hidden">
-        <header>
-            <div class="brand">TONI 2.0 // <span id="active-mod">DASHBOARD</span></div>
-            <div class="status"><span id="clock">00:00</span></div>
+    <div id="app-interface" class="hidden">
+        
+        <header id="status-bar">
+            <div class="app-brand">
+                <i class="fa-solid fa-microchip" style="color:#00f3ff;"></i> TONI 2.0 <span class="module-tag" id="active-mod-name">// DASHBOARD</span>
+            </div>
+            
+            <div class="clock-widget">
+                <i class="fa-regular fa-clock"></i> <span id="clock">00:00</span>
+            </div>
+
+            <div style="display:flex; gap:15px; align-items:center;">
+                <div style="font-family: 'Orbitron'; color: #0aff60; font-size: 14px;">
+                    <i class="fa-solid fa-wallet"></i> <span id="budget-display">0 €</span>
+                </div>
+                <button onclick="toggleSettings()" style="background:none; border:none; color:#666; cursor:pointer; font-size:18px;">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
         </header>
 
-        <div class="app-grid">
-            <nav>
-                <button onclick="loadModule('kader')"><i class="fa-solid fa-users"></i> PROFIS</button>
-                <button onclick="loadModule('tactics')"><i class="fa-solid fa-chess-board"></i> TAKTIK ZENTRALE</button>
-                <button onclick="loadModule('office')"><i class="fa-solid fa-building"></i> OFFICE</button>
-                <button onclick="loadModule('youth')"><i class="fa-solid fa-graduation-cap"></i> AKADEMIE (U19-U9)</button>
-                <button onclick="loadModule('media')"><i class="fa-solid fa-newspaper"></i> PRESSE & ZEITUNG</button>
+        <div class="main-grid">
+            
+            <nav id="nav-sidebar">
+                <div class="nav-group-title">MANAGEMENT</div>
+                <button class="nav-item" onclick="loadModule('kader')"><i class="fa-solid fa-users"></i> PROFI KADER</button>
+                <button class="nav-item" onclick="loadModule('tactics')"><i class="fa-solid fa-chess-board"></i> TAKTIK BOARD</button>
+                <button class="nav-item" onclick="loadModule('office')"><i class="fa-solid fa-briefcase"></i> OFFICE PRIME</button>
+                
+                <div class="nav-group-title">AKADEMIE & MEDIA</div>
+                <button class="nav-item" onclick="loadModule('youth')"><i class="fa-solid fa-graduation-cap"></i> JUGEND ZENTRUM</button>
+                <button class="nav-item" onclick="loadModule('media')"><i class="fa-solid fa-newspaper"></i> ZEITUNG & VIDEO</button>
             </nav>
 
-            <main id="stage"></main>
+            <main id="stage-content">
+                </main>
 
-            <aside>
-                <div class="ai-header">TONI AI</div>
-                <div id="ai-msg">Bereit zur Analyse.</div>
-                <button id="mic-btn" onclick="toggleMic()">🎤 REC</button>
+            <aside id="tools-sidebar">
+                <div class="nav-group-title">NEURAL ADVISOR</div>
+                <div class="ai-console" id="ai-log">
+                    <div class="ai-message">System bereit.<br>Warte auf Input.</div>
+                </div>
+                
+                <div class="tool-panel">
+                    <button class="mic-trigger" id="mic-btn" onclick="toggleMic()">
+                        <i class="fa-solid fa-microphone"></i> SPRACHEINGABE
+                    </button>
+                    <div style="margin-top:20px; border-top:1px solid #333; padding-top:10px;">
+                        <small style="color:#666; font-family:'Orbitron';">TEAM STATUS</small>
+                        <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:12px;">
+                            <span>Fitness</span> <span style="color:#0aff60">94%</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:12px;">
+                            <span>Moral</span> <span style="color:#ffd700">High</span>
+                        </div>
+                    </div>
+                </div>
             </aside>
+
         </div>
     </div>
 
-    <div id="modal-overlay" class="hidden">
-        <div id="modal-content"></div>
+    <div id="modal-bio" class="modal-backdrop hidden">
+        <div class="modal-panel" style="width: 800px;">
+            <button class="modal-close" onclick="closeModals()">×</button>
+            <div id="bio-content"></div>
+        </div>
+    </div>
+
+    <div id="modal-video" class="modal-backdrop hidden">
+        <div class="modal-panel" style="width: 90%; height: 90%; background:#000;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <h3 style="color:#00f3ff; font-family:'Orbitron'">VIDEO ANALYSE</h3>
+                <button class="modal-close" onclick="closeModals()">×</button>
+            </div>
+            <div style="position:relative; height:80%; display:flex; justify-content:center; background:#111;">
+                <video id="video-player" controls style="max-height:100%; max-width:100%;"></video>
+                <canvas id="video-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; cursor:crosshair;"></canvas>
+            </div>
+            <div style="margin-top:10px; display:flex; gap:20px; align-items:center;">
+                <button class="btn-main" style="width:auto;" onclick="document.getElementById('vid-up').click()">LADEN</button>
+                <input type="file" id="vid-up" hidden accept="video/*" onchange="loadVideo(this)">
+                <small style="color:#666;">Zeichnen aktiv: Linke Maustaste</small>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-settings" class="modal-backdrop hidden">
+        <div class="modal-panel" style="width: 400px;">
+            <h3 style="color:#fff; font-family:'Orbitron'; margin-bottom:20px;">SYSTEM SETTINGS</h3>
+            <label style="font-size:12px; color:#888;">API KEY (OpenAI / Ollama)</label>
+            <input type="password" id="api-key" class="auth-input" style="text-align:left; margin-top:5px;" placeholder="sk-...">
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn-main" onclick="saveSettings()">SPEICHERN</button>
+                <button class="btn-main" style="background:#333; color:#fff;" onclick="closeModals()">ABBRUCH</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
