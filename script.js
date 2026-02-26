@@ -1,12 +1,15 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - TACTICAL DRAG & PERSISTENCE
+   TONI 2.0 | NEURAL CORE ENGINE (V15.8 PRO) - CO-TRAINER COMMAND
    ========================================================================== */
 
 const SAVE_KEY = "TONI20_SYSTEM_DATA";
 
 let eliteStore = {
     config: { passkey: "1234", version: "15.8 PRO", clubLogoUrl: "" },
-    mgmt: { budget: 4850000, morale: 88, activeModule: 'kader' },
+    mgmt: { 
+        budget: 4850000, morale: 88, activeModule: 'kader',
+        opponentIntel: { name: "", strengths: "", topPlayers: [], tacticalRisk: "" }
+    },
     
     finance: {
         pro: { tvRights: 2500000, sponsoring: 1500000, stadium: 850000 },
@@ -19,7 +22,6 @@ let eliteStore = {
         infrastructure: { analysisCenter: 1, stadiumExp: 1, academy: 1 }
     },
 
-    // Speicherung der Taktik-Positionen (Persistence)
     tactics: {
         toni: [
             { id: 't1', label: 'GK', t: 85, l: 50 }, { id: 't2', label: 'LB', t: 70, l: 20 },
@@ -39,16 +41,6 @@ let eliteStore = {
         ]
     },
 
-    magazine: {
-        clubName: "FC TONI 2.0", sheets: 1,
-        pages: [
-            { id: 1, title: "MATCH DAY", content: "ANALYSE: Fokus auf Halbräume. Gegner agiert mit 3er-Kette." },
-            { id: 2, title: "TACTICAL DATA", content: "Schnittstellen-Analyse: Vertikale Passwege im 4-4-2." },
-            { id: 3, title: "OFFICE REPORT", content: "ROI-Analyse der Sponsoren-Pyramide." },
-            { id: 4, title: "IMPRESSUM", content: "Toni 2.0 High-End Management Suite." }
-        ]
-    },
-
     players: [
         { 
             id: 1, name: "NEUER", pos: "TW", type: 'pro', imgUrl: "",
@@ -65,27 +57,73 @@ let eliteStore = {
     ]
 };
 
-// --- ELITE ADVISOR ---
-function analyzePerformance(player) {
+// --- CO-TRAINER INTELLIGENCE: GEGNER-BRIEFING ---
+function startOpponentBriefing(opponentName) {
     const aiBox = document.querySelector('.ai-msg');
-    let report = `ANALYSE [${player.name}]: `;
-    if (player.bio.kfa > 13) report += `KFA bei ${player.bio.kfa}% kritisch für Explosivität. `;
-    if (player.sensors.heart > 55) report += `Erhöhter Ruhepuls indiziert mangelnde Regeneration. `;
-    else report += `VO2max (${player.sensors.vo2}) auf Elite-Niveau. Hohe Pressing-Intensität möglich. `;
-    aiBox.innerHTML = `<strong>TONI PERF-ADVISOR:</strong> <br>${report}`;
+    
+    // Simulation: Toni zieht Daten aus Fußball.de / Scout-Datenbank
+    const intel = {
+        name: opponentName.toUpperCase(),
+        strengths: "Extremes Umschaltspiel über die Flügel",
+        topPlayers: ["Top-Scorer: Müller (12 Tore)", "Spielgestalter: Kroos (Rating 88)"],
+        tacticalRisk: "Hohe Anfälligkeit bei Pressing in Zone 5"
+    };
+
+    eliteStore.mgmt.opponentIntel = intel;
+    
+    aiBox.innerHTML = `
+        <strong>CO-TRAINER TONI // BRIEFING:</strong><br>
+        Gegner ${intel.name} ist offensivstark (${intel.strengths}). <br>
+        <strong>Top-Gefahr:</strong> ${intel.topPlayers.join(', ')}.<br>
+        Ich bereite die taktische Gegenmaßnahme vor...
+    `;
+
+    setTimeout(() => suggestAnalyticalLineup(), 2000);
 }
 
-// --- MEMORY CORE ---
-function saveToDisk() { localStorage.setItem(SAVE_KEY, JSON.stringify(eliteStore)); }
-function loadFromDisk() {
-    const savedData = localStorage.getItem(SAVE_KEY);
-    if (savedData) { 
-        const parsed = JSON.parse(savedData);
-        eliteStore = { ...eliteStore, ...parsed }; 
+// TONIS AUFSTELLUNGS-VORSCHLAG (BASIEREND AUF RATINGS)
+function suggestAnalyticalLineup() {
+    const aiBox = document.querySelector('.ai-msg');
+    
+    // Logik: Wer hat das höchste DEF & PAC Rating für die Defensive?
+    const defenders = [...eliteStore.players].sort((a, b) => b.stats.def - a.stats.def);
+    const speedsters = [...eliteStore.players].sort((a, b) => b.stats.pac - a.stats.pac);
+
+    aiBox.innerHTML += `<br><br><strong>EMPFEHLUNG:</strong> Da der Gegner über die Flügel drückt, schlage ich ${defenders[0].name} als defensiven Anker vor. 
+    Lass mich die Formation auf dem Board anpassen...`;
+
+    // Toni übernimmt das Board (Co-Trainer Autonomie)
+    setTimeout(() => {
+        applyTacticalShift('defensive_compactness');
+    }, 2500);
+}
+
+// TONI VERSCHIEBT SPIELER (HANDS-FREE SIMULATION)
+function applyTacticalShift(mode) {
+    if (mode === 'defensive_compactness') {
+        // Toni rückt die CMs näher an die CBs
+        const cm1 = eliteStore.tactics.toni.find(p => p.id === 't7');
+        const cm2 = eliteStore.tactics.toni.find(p => p.id === 't8');
+        
+        cm1.t = 60; cm1.l = 45;
+        cm2.t = 60; cm2.l = 55;
+
+        saveToDisk();
+        if (eliteStore.mgmt.activeModule === 'tactics') {
+            renderTactics(document.getElementById('module-content'));
+        }
+        
+        document.querySelector('.ai-msg').innerHTML += `<br><br><span style="color:var(--neon-cyan)">[BOARD-UPDATE]: Kompaktheit im Zentrum hergestellt.</span>`;
     }
 }
 
-// 1. BOOT
+// --- CORE SYSTEM FUNKTIONEN ---
+function saveToDisk() { localStorage.setItem(SAVE_KEY, JSON.stringify(eliteStore)); }
+function loadFromDisk() {
+    const savedData = localStorage.getItem(SAVE_KEY);
+    if (savedData) { eliteStore = { ...eliteStore, ...JSON.parse(savedData) }; }
+}
+
 function systemBootSequence() {
     loadFromDisk();
     const input = document.getElementById('passkey');
@@ -106,7 +144,6 @@ function initDashboard() {
     }, 1000);
 }
 
-// 2. MODUL-ROUTER
 function switchModule(modId) {
     const stage = document.getElementById('module-content');
     const title = document.getElementById('active-mod-title');
@@ -122,7 +159,6 @@ function switchModule(modId) {
     if (modId === 'tactics') renderTactics(stage);
 }
 
-// 3. KADER & BIO-LAB
 function renderKader(target) {
     target.innerHTML = `<div class="kader-grid fade-in">${eliteStore.players.map(p => `
         <div class="fifa-card" onclick="openBioLab(${p.id})">
@@ -136,49 +172,26 @@ function renderKader(target) {
 function openBioLab(id) {
     const p = eliteStore.players.find(x => x.id === id);
     const modal = document.getElementById('bio-lab-modal');
-    const container = document.getElementById('modal-container');
     modal.classList.remove('hidden');
-    analyzePerformance(p);
-    container.innerHTML = `<div class="column-header">PERFORMANCE-HUB // ${p.name}</div>
+    document.getElementById('modal-container').innerHTML = `
+        <div class="column-header">PERFORMANCE-HUB // ${p.name}</div>
         <div class="lab-grid">
             <div class="office-panel"><h3>PHYSIO</h3>
-                <div class="lab-row"><span>GEWICHT</span><input type="number" step="0.1" value="${p.bio.weight}" onchange="updateValue(${p.id}, 'bio', 'weight', this.value)"></div>
+                <div class="lab-row"><span>GEWICHT</span><input type="number" step="0.1" value="${p.bio.weight}" onchange="p.bio.weight=parseFloat(this.value); saveToDisk();"></div>
             </div>
-            <div class="office-panel"><h3>TELEMETRIE</h3>
-                <div class="lab-row"><span>PULS</span><input type="number" value="${p.sensors.heart}" onchange="updateValue(${p.id}, 'sensors', 'heart', this.value)"></div>
-            </div>
-        </div><button onclick="closeBioLab()" class="btn-neon-small" style="width:100%; margin-top:20px;">DONE</button>`;
+        </div><button onclick="document.getElementById('bio-lab-modal').classList.add('hidden')" class="btn-neon-small" style="width:100%; margin-top:20px;">SYNC</button>`;
 }
 
-function updateValue(id, cat, key, val) {
-    const p = eliteStore.players.find(x => x.id === id);
-    p[cat][key] = parseFloat(val);
-    saveToDisk();
-    analyzePerformance(p);
-}
-
-function closeBioLab() { document.getElementById('bio-lab-modal').classList.add('hidden'); }
-
-// 4. OFFICE PRIME
-function renderOffice(target) {
-    target.innerHTML = `<div class="office-grid fade-in">
-        <div class="office-panel"><h3>PARTNER (ROI)</h3>${eliteStore.finance.sponsors.map(s => `<div class="lab-row"><span>${s.name}</span><b>${s.roi}%</b></div>`).join('')}</div>
-        <div class="office-panel"><h3>INFRASTRUKTUR</h3><div class="lab-row"><span>ANALYSEZENTRUM</span><b>LVL ${eliteStore.finance.infrastructure.analysisCenter}</b></div></div>
-    </div>`;
-}
-
-// 5. MEDIA CENTER
-function renderMediaCenter(target) {
-    target.innerHTML = `<div class="office-panel fade-in"><h3>STADIONZEITUNG PRO-STUDIO</h3><button class="btn-neon-small">EDITOR ÖFFNEN</button></div>`;
-}
-
-// 6. TAKTIK-ENGINE (INTEGRATED DRAG & DROP)
+// --- TAKTIK-ENGINE (AUTONOMER MODUS) ---
 function renderTactics(target) {
     target.innerHTML = `
         <div class="tactics-container fade-in">
             <div class="tactics-header">
-                <h3>TAKTIK-COCKPIT: MATRIX-ANALYSE</h3>
-                <div class="tactics-status">FORMATION: 4-4-2 vs 3-4-3 (Gegner)</div>
+                <h3>TAKTIK-COCKPIT // CO-TRAINER AKTIV</h3>
+                <div class="input-group" style="margin: 10px 0;">
+                    <input type="text" id="opponent-search" placeholder="GEGNER ANALYSIEREN...">
+                    <button class="btn-neon-small" onclick="startOpponentBriefing(document.getElementById('opponent-search').value)">BRIEFING STARTEN</button>
+                </div>
             </div>
             <div class="pitch-visualization">
                 <div class="pitch-canvas" id="tactical-pitch">
@@ -187,8 +200,8 @@ function renderTactics(target) {
                 </div>
             </div>
             <div class="tactics-report-panel">
-                <div class="report-row"><span>ABSTÄNDE:</span> <b id="tactical-compactness">OPTIMAL</b></div>
-                <p class="tactical-advice" id="toni-tactical-feed"><strong>TONI ANALYSE:</strong> Verschiebe die Spieler, um die defensive Kompaktheit gegen das 3-4-3 zu prüfen.</p>
+                <div class="report-row"><span>GEGNER:</span> <b>${eliteStore.mgmt.opponentIntel.name || 'UNBEKANNT'}</b></div>
+                <p class="tactical-advice" id="toni-tactical-feed">Warte auf Gegner-Analyse für proaktive Positions-Anpassung.</p>
             </div>
         </div>`;
     initDragAndDrop();
@@ -218,26 +231,18 @@ function initDragAndDrop() {
         const rect = pitch.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
         let l = ((clientX - rect.left) / rect.width) * 100;
         let t = ((clientY - rect.top) / rect.height) * 100;
-
-        // Bounds check (0-100%)
         l = Math.max(2, Math.min(98, l));
         t = Math.max(2, Math.min(98, t));
-
         activeMarker.style.left = `${l}%`;
         activeMarker.style.top = `${t}%`;
-
         updateTacticalPosition(activeMarker.id, t, l);
     }
 
     function stopDrag() {
-        if (activeMarker) {
-            activeMarker = null;
-            saveToDisk();
-            evaluateKloppLogic();
-        }
+        activeMarker = null;
+        saveToDisk();
         document.removeEventListener('mousemove', drag);
         document.removeEventListener('mouseup', stopDrag);
         document.removeEventListener('touchmove', drag);
@@ -246,34 +251,12 @@ function initDragAndDrop() {
 }
 
 function updateTacticalPosition(id, t, l) {
-    const toniP = eliteStore.tactics.toni.find(p => p.id === id);
-    const oppP = eliteStore.tactics.opp.find(p => p.id === id);
-    if (toniP) { toniP.t = t; toniP.l = l; }
-    else if (oppP) { oppP.t = t; oppP.l = l; }
+    const p = eliteStore.tactics.toni.find(x => x.id === id) || eliteStore.tactics.opp.find(x => x.id === id);
+    if (p) { p.t = t; p.l = l; }
 }
 
-function evaluateKloppLogic() {
-    const advice = document.getElementById('toni-tactical-feed');
-    const compactness = document.getElementById('tactical-compactness');
-    // Beispielhafte Analyse: Wenn ST zu weit weg von CM
-    const st = eliteStore.tactics.toni.find(p => p.label === 'ST');
-    const cm = eliteStore.tactics.toni.find(p => p.label === 'CM');
-    
-    const dist = Math.abs(st.t - cm.t);
-    if (dist > 40) {
-        compactness.innerText = "GEFÄHRDET";
-        compactness.style.color = "var(--neon-alert)";
-        advice.innerHTML = "<strong>TONI ANALYSE:</strong> Die vertikale Distanz zwischen Mittelfeld und Sturm ist zu groß. Wir verlieren den Zugriff auf den zweiten Ball.";
-    } else {
-        compactness.innerText = "OPTIMAL";
-        compactness.style.color = "var(--neon-green)";
-        advice.innerHTML = "<strong>TONI ANALYSE:</strong> Gute Kompaktheit. Die Abstände ermöglichen ein effektives Gegenpressing.";
-    }
-}
-
-// 7. HELFER
 function updateBudget() {
-    const total = Object.values(eliteStore.finance.pro).reduce((a,b)=>a+b,0) + Object.values(eliteStore.finance.amateur).reduce((a,b)=>a+b,0);
+    const total = Object.values(eliteStore.finance.pro).reduce((a,b)=>a+b,0);
     const el = document.getElementById('kpi-budget');
     if(el) el.innerText = total.toLocaleString() + " €";
 }
@@ -287,5 +270,13 @@ let mic = false;
 function toggleMic() {
     mic = !mic;
     document.getElementById('mic-btn').className = mic ? 'mic-active' : 'mic-inactive';
-    document.querySelector('.ai-msg').innerText = mic ? "Toni im Live-Analyse-Modus. Warte auf taktische Parameter." : "System im Standby.";
+    document.querySelector('.ai-msg').innerText = mic ? "Co-Trainer Toni hört zu. Befehl zur Gegner-Analyse erwartet." : "System im Standby.";
+}
+
+function renderOffice(target) {
+    target.innerHTML = `<div class="office-panel fade-in"><h3>STRATEGISCHE PARTNER</h3><p>ROI-Management aktiv.</p></div>`;
+}
+
+function renderMediaCenter(target) {
+    target.innerHTML = `<div class="office-panel fade-in"><h3>STADIONZEITUNG STUDIO</h3><p>Druck-Engine bereit.</p></div>`;
 }
