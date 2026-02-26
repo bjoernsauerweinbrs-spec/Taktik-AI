@@ -1,153 +1,87 @@
 /* ==========================================================================
-   TONI 2.0 | NEURAL OPERATING SYSTEM (V23.0 FULL STACK ELITE)
+   TONI 2.0 | NEURAL OPERATING SYSTEM (V23.1 - REPAIR & SCALE FIX)
    ========================================================================== */
 
 :root {
-    /* -- ELITE PALETTE -- */
     --bg-deep: #030305;
-    --bg-panel: rgba(15, 15, 25, 0.98);
-    --panel-dark: #0a0a0c;
-    --border-gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-    
-    /* -- ACCENTS -- */
+    --bg-panel: rgba(10, 10, 15, 0.98);
+    --panel-dark: #08080a;
     --neon-cyan: #00f3ff;
     --neon-gold: #d4af37;
     --neon-alert: #ff003c;
-    --path-vector: #0aff60;
-    --pass-vector: #ffd700;
     --text-mag: #1a1a1a;
-
-    /* -- FONTS -- */
     --font-ui: 'Orbitron', sans-serif;
     --font-main: 'Rajdhani', sans-serif;
     --font-paper: 'Playfair Display', serif;
 }
 
-/* 1. GLOBAL UI & LUXURY CANVAS */
+/* 1. GLOBAL UI */
 * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-body {
-    height: 100vh; width: 100vw; overflow: hidden;
-    background: var(--bg-deep); color: #fff;
-    font-family: var(--font-main);
-}
+body { height: 100vh; width: 100vw; overflow: hidden; background: var(--bg-deep); color: #fff; font-family: var(--font-main); }
 .hidden { display: none !important; }
 
-/* 2. AUTHENTICATION & LUXURY LOGO (GOLD SHIMMER) */
-#auth-layer {
-    position: fixed; inset: 0; z-index: 9999;
-    background: #000; display: flex; align-items: center; justify-content: center;
-}
-.login-terminal {
-    width: 450px; padding: 50px; text-align: center;
-    border: 1px solid #222; background: rgba(10,10,15,0.9);
-    box-shadow: 0 0 100px rgba(0, 243, 255, 0.05);
-}
-.auth-input {
-    width: 100%; padding: 15px; background: #111; border: 1px solid #333;
-    color: #fff; text-align: center; font-family: var(--font-ui); letter-spacing: 3px;
-    margin-bottom: 20px;
-}
-.luxury-logo {
-    font-family: var(--font-ui); font-weight: 900;
-    background: linear-gradient(to right, #bf953f 20%, #fcf6ba 40%, #fcf6ba 60%, #bf953f 80%);
-    background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    animation: goldShimmer 4s linear infinite; display: inline-block;
-}
+/* 2. AUTHENTICATION */
+#auth-layer { position: fixed; inset: 0; z-index: 9999; background: #000; display: flex; align-items: center; justify-content: center; }
+.login-terminal { width: 450px; padding: 50px; text-align: center; border: 1px solid #222; background: rgba(5,5,10,0.95); box-shadow: 0 0 100px rgba(0, 243, 255, 0.05); }
+.luxury-logo { font-family: var(--font-ui); font-weight: 900; background: linear-gradient(to right, #bf953f 20%, #fcf6ba 40%, #fcf6ba 60%, #bf953f 80%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: goldShimmer 4s linear infinite; display: inline-block; }
 @keyframes goldShimmer { to { background-position: 200% center; } }
 
-.btn-main {
-    width: 100%; padding: 15px; background: transparent; border: 1px solid var(--neon-cyan);
-    color: var(--neon-cyan); font-family: var(--font-ui); cursor: pointer;
-    text-transform: uppercase; letter-spacing: 2px; transition: 0.4s;
-}
-.btn-main:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 30px var(--neon-cyan); }
+/* 3. NAVIGATION (FIXED BLOCK STYLE) */
+#top-bar { height: 60px; background: #000; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
+.nav-sidebar { width: 220px; background: #050505; border-right: 1px solid #1a1a1a; display: flex; flex-direction: column; }
+.nav-group-title { padding: 20px 25px 5px; font-size: 9px; color: #444; font-family: var(--font-ui); letter-spacing: 2px; text-transform: uppercase; }
 
-/* 3. NAVIGATION & HUD */
-#top-bar {
-    height: 70px; background: #000; border-bottom: 1px solid #222;
-    display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
-}
-.nav-sidebar { width: 260px; background: var(--panel-dark); border-right: 1px solid #222; }
-.nav-group-title { padding: 25px 30px 10px; font-size: 10px; color: #444; font-family: var(--font-ui); letter-spacing: 2px; }
 .nav-item {
-    padding: 15px 30px; cursor: pointer; color: #666; font-family: var(--font-ui);
-    font-size: 11px; border-left: 4px solid transparent; transition: 0.3s;
+    padding: 12px 25px; cursor: pointer; color: #666; font-family: var(--font-ui); font-size: 10px;
+    border: none; background: transparent; text-align: left; transition: 0.3s; width: 100%;
 }
-.nav-item:hover, .nav-item.active { color: #fff; background: rgba(0, 243, 255, 0.03); border-left-color: var(--neon-cyan); }
+.nav-item:hover, .nav-item.active { color: #fff; background: rgba(0, 243, 255, 0.05); border-left: 3px solid var(--neon-cyan); }
+.nav-item i { width: 20px; margin-right: 10px; color: inherit; }
 
-/* 4. TACTICAL VECTOR ENGINE */
-.pitch-container {
-    position: relative; width: 100%; height: 600px;
-    background: #1e3d1e; border: 5px solid #fff;
-    box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
-}
-.player-dot {
-    position: absolute; width: 34px; height: 34px; border-radius: 50%;
-    background: var(--neon-cyan); color: #000; font-weight: bold;
-    display: flex; align-items: center; justify-content: center;
-    border: 2px solid #fff; cursor: grab; transform: translate(-50%, -50%);
-    font-family: var(--font-ui); font-size: 11px; z-index: 10;
-}
-.vector-path { stroke-width: 3; stroke-dasharray: 8; animation: flow 2s linear infinite; }
-@keyframes flow { to { stroke-dashoffset: -16; } }
-
-/* 5. NLZ PANINI HUB */
-.nlz-background { background: radial-gradient(circle at center, #1a253d 0%, #050a15 100%); min-height: 100%; }
-.panini-album { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 30px; padding: 40px; }
-.panini-card {
-    height: 340px; background: linear-gradient(145deg, #2b3a5a, #0a1120);
-    border: 2px solid #3a4a6f; border-radius: 15px;
-    position: relative; transition: 0.5s; cursor: pointer;
-}
-.panini-card:hover { transform: translateY(-10px); border-color: var(--neon-gold); }
-.sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-.sticker-slot {
-    aspect-ratio: 1; background: rgba(0,0,0,0.3); border: 1px dashed #444;
-    border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px;
-}
-.sticker-slot.unlocked { background: var(--border-gold); border: 1px solid #fff; color: #000; }
-
-/* 6. PRESS AGENCY WORKSPACE */
-.agency-workspace { display: flex; height: 100%; background: #111; }
-.agency-tools {
-    width: 320px; background: var(--panel-dark); border-right: 1px solid #222;
-    display: flex; flex-direction: column; padding: 25px;
-}
-.tool-label { font-family: var(--font-ui); font-size: 10px; color: #444; letter-spacing: 2px; margin-bottom: 10px; display: block; }
+/* 4. PRESS AGENCY WORKSPACE (SCALING FIX) */
+.agency-workspace { display: flex; height: 100%; background: #000; width: 100%; }
+.agency-tools { width: 260px; background: var(--panel-dark); border-right: 1px solid #222; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; }
+.tool-label { font-family: var(--font-ui); font-size: 9px; color: #333; letter-spacing: 1px; margin-bottom: 10px; display: block; }
 
 .magazine-viewport {
-    flex: 1; overflow-y: auto; padding: 60px; background: radial-gradient(circle, #222 0%, #050505 100%);
+    flex: 1; overflow-y: auto; padding: 40px; background: #111;
     display: flex; flex-direction: column; align-items: center;
 }
+
+/* Skaliert das Magazin, damit es auf kleine Bildschirme passt */
 .magazine-page {
     background: #fff; width: 297mm; height: 210mm; box-shadow: 0 40px 100px rgba(0,0,0,0.8);
-    display: grid; grid-template-columns: 1fr 1fr; position: relative; margin-bottom: 80px;
+    display: grid; grid-template-columns: 1fr 1fr; position: relative; margin-bottom: 50px;
+    transform: scale(0.65); transform-origin: top center; /* WICHTIG: Verkleinert die Ansicht für den Monitor */
 }
+
+/* Falz */
 .magazine-page::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,0.05); z-index: 10; }
 
-.page-half { padding: 25mm; color: var(--text-mag); display: flex; flex-direction: column; position: relative; }
-.mag-headline { font-family: var(--font-paper); font-size: 54px; font-weight: 700; line-height: 0.95; margin-bottom: 20px; border-bottom: 8px solid #000; padding-bottom: 15px; }
-.mag-article { font-family: var(--font-paper); font-size: 13px; line-height: 1.6; column-count: 2; column-gap: 30px; text-align: justify; }
+.page-half { padding: 20mm; color: var(--text-mag); display: flex; flex-direction: column; overflow: hidden; }
+.mag-headline { font-family: var(--font-paper); font-size: 48px; font-weight: 700; line-height: 1; margin-bottom: 15px; border-bottom: 6px solid #000; padding-bottom: 10px; }
+.mag-article { font-family: var(--font-paper); font-size: 14px; line-height: 1.5; column-count: 2; column-gap: 20px; text-align: justify; }
 
 .btn-agency {
-    background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px;
-    font-family: var(--font-ui); font-size: 10px; cursor: pointer; width: 100%; margin-bottom: 10px;
-    display: flex; align-items: center; gap: 10px;
+    background: #111; border: 1px solid #222; color: #888; padding: 10px;
+    font-family: var(--font-ui); font-size: 9px; cursor: pointer; width: 100%; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px; transition: 0.2s;
 }
-.btn-agency:hover { background: var(--neon-cyan); color: #000; }
+.btn-agency:hover { background: #fff; color: #000; border-color: #fff; }
 
-/* 7. MODALS & HUD */
-.modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-    z-index: 8000; display: flex; align-items: center; justify-content: center;
-}
-.modal-window { background: var(--bg-panel); border: 1px solid #333; box-shadow: 0 0 50px rgba(0,0,0,1); }
-#clock-display { font-family: var(--font-ui); color: #666; font-size: 14px; letter-spacing: 2px; }
+/* 5. TACTICAL & NLZ (RE-FIXED) */
+.pitch-container { position: relative; width: 100%; height: 600px; background: #1e3d1e; border: 5px solid #fff; box-shadow: inset 0 0 100px rgba(0,0,0,0.8); }
+.player-dot { position: absolute; width: 34px; height: 34px; border-radius: 50%; background: var(--neon-cyan); color: #000; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; cursor: grab; transform: translate(-50%, -50%); font-family: var(--font-ui); font-size: 11px; z-index: 10; }
+.panini-album { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 30px; }
+.panini-card { height: 320px; background: linear-gradient(145deg, #1d2b4a, #0a1120); border: 2px solid #3a4a6f; border-radius: 12px; position: relative; transition: 0.4s; cursor: pointer; }
 
-/* 8. PRINT SETTINGS */
+/* 6. HUD & SYSTEM */
+#clock-display { font-family: var(--font-ui); color: #444; font-size: 13px; letter-spacing: 1px; }
+.btn-main { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); font-family: var(--font-ui); cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+
 @media print {
     body { background: #fff; }
-    .nav-sidebar, .agency-tools, #top-bar, .btn-agency, .btn-main { display: none !important; }
+    #nav-sidebar, .agency-tools, #top-bar, .btn-agency, #tools-sidebar { display: none !important; }
     .magazine-viewport { padding: 0; background: #fff; overflow: visible; }
-    .magazine-page { margin: 0; box-shadow: none; width: 297mm; height: 210mm; page-break-after: always; }
+    .magazine-page { margin: 0; box-shadow: none; transform: none !important; }
 }
